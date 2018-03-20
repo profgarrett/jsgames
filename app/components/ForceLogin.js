@@ -1,0 +1,27 @@
+import React from 'react';
+import PropTypes from 'prop-types';
+import { get_cookie } from './Misc';
+
+
+// Force any pages containing this one to log in first.
+export default class ForceLogin extends React.Component {
+
+	render() {
+		const divStyle = { 
+			position: 'fixed',
+			right: '2px',
+			bottom: '2px',
+			color: 'lightgray'
+		};
+		const username = get_cookie('x-access-token-username');
+
+		if(username===null) {
+			this.context.router.history.push('/login/');
+		}
+
+		return <div style={ divStyle}>{ username }</div>;
+	}
+}
+ForceLogin.contextTypes = {
+	router: PropTypes.object.isRequired
+};
