@@ -7,6 +7,7 @@ import { get_cookie } from './Misc';
 export default class ForceLogin extends React.Component {
 
 	render() {
+		const that = this;
 		const divStyle = { 
 			position: 'fixed',
 			right: '2px',
@@ -19,7 +20,7 @@ export default class ForceLogin extends React.Component {
 			this.context.router.history.push('/login/');
 		}
 
-		return <div style={ divStyle}>{ username }</div>;
+		return <div onClick={ ()=> that.context.router.history.push('/logout/') } style={ divStyle}>{ username }</div>;
 	}
 }
 ForceLogin.contextTypes = {

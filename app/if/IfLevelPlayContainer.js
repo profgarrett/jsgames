@@ -146,7 +146,7 @@ export default class IfLevelPlayContainer extends React.Component {
 			.catch( error => {
 				this.setState({ 
 					level: null,
-					message: 'Error: ' + error._error,
+					message: 'Error: ' + error.message,
 					isLoading: false
 				});
 			});

@@ -1,5 +1,3 @@
-const DEBUG = true;
-
 /*
 	Schema is a class for building models.
 	It's shared on both client and server sides.

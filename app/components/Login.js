@@ -1,10 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Row, Col, FormControl, FormGroup, ControlLabel, Button } from 'react-bootstrap';
-import { Message, Loading, get_cookie } from './../components/Misc'
-import { Link } from 'react-router-dom';
-import { LinkContainer } from 'react-router-bootstrap';
-
+import { Message, Loading, get_cookie } from './../components/Misc';
 
 import 'url-search-params-polyfill';
 
@@ -28,12 +25,22 @@ export default class Login extends React.Component {
 		this.onSubmit = this.onSubmit.bind(this);
 		this.onUsernameChange = this.onUsernameChange.bind(this);
 		this.onPasswordChange = this.onPasswordChange.bind(this);
+		
+		// Update to avoid showing URL params (as long as we're not locally developing).
+		const clean_uri = location.protocol + '//' + location.host + location.pathname;
+		window.history.replaceState({}, document.title, clean_uri);
+
+		// If a token was passed, update message.
+		if(this.state.token !== '') {
+			this.state.isLoading = true;
+			this.state.message = 'Logging you in';
+		}
+
 	}
 
 
-	componentDidMount() {
+	componentWillMount() {
 		const username = get_cookie('x-access-token-username');
-		const clean_uri = location.protocol + '//' + location.host + location.pathname;
 
 		// Test to see if we're already logged in, and if it's as the current user.
 		// Don't bother submitted, just move to the next page.
@@ -45,19 +52,11 @@ export default class Login extends React.Component {
 
 		// If a token was passed, go ahead and submit results.
 		if(this.state.token !== '') {
-			this.setState( {
-				isLoading: true,
-				message: 'Logging you in'
-			});
 			this._trigger(this.state.username, this.state.password, this.state.token);
-		}
-
-		// Update to avoid showing URL params (as long as we're not locally developing).
-		if(location.host !== 'localhost:8080') {
-			window.history.replaceState({}, document.title, clean_uri);
 		}
 	}
 	
+
 	// Log into the server.
 	onSubmit(e) {
 		e.preventDefault();
@@ -84,17 +83,21 @@ export default class Login extends React.Component {
 				},
 				body: JSON.stringify({ username, password, token })
 			})
+			.then( response => {
+				if(response.status === 403 || response.status === 401) {
+					throw Error('Invalid username or password');
+				}
+				return response;
+			})
 			.then( response => response.json() )
 			.then( json => {
 				var that = this;
 				if(json._error) throw new Error(json._error); 
 
 				this.setState({ message: 'Success logging in!', messageStyle: 'success', isLoading: false});
-				console.log(json);
 				setTimeout( () => {
 					that.context.router.history.push(this.state.url);
-				}, location.host === 'localhost:8080' ? 1000 : 0);
-
+				}, location.host === 'localhost:8080' ? 1000 : 0);  // add a short delay if on dev.
 
 			})
 			.catch( error => {

@@ -205,7 +205,7 @@ class IfLevelSchema extends Schema {
 			pages: { type: 'Array', initialize: (aJ) => isDef(aJ) ? a(aJ).map(j => new IfPageSchema(j) ) : [] },
 			history: { type: 'Array', initialize: (aJ) => isDef(aJ) ? a(aJ).map(j => new IfPageSchema(j) ) : [] },
 
-			score: { type: 'Score', initialize: (s) => new Score(s) },
+			score: { type: 'Score', initialize: (s) => new Score(a(s)) },
 			
 			updated: { type: 'Date', initialize: (dt) => isDef(dt) ? new Date(dt) : Date() },
 			created: { type: 'Date', initialize: (dt) => isDef(dt) ? new Date(dt) : Date() }

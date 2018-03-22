@@ -1,3 +1,5 @@
+import 'babel-polyfill'; // IE11 compatability.
+// updated
 import React from 'react';
 //import ReactDOM from 'react-dom';
 import PropTypes from 'prop-types';

@@ -1,6 +1,7 @@
 /**
 	Node main event loop
 */
+const DEBUG_DELAY = 250;
 const express = require('express');
 const path = require('path');
 const bodyParser = require('body-parser');
@@ -20,6 +21,11 @@ const mysql = require('promise-mysql');
 const { sql01 } = require('./../sql/sql01.js');
 const { sql02 } = require('./../sql/sql02.js');
 
+var fs = require('fs');
+var util = require('util');
+var logFile = fs.createWriteStream('log.txt', { flags: 'a' });
+var logStdout = process.stdout;
+
 
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -28,7 +34,7 @@ const { sql02 } = require('./../sql/sql02.js');
 const app = express();
 
 // Load bugsnag if it is defined in secret.js.
-if(typeof BUGSNAG_API !== undefined && BUGSNAG_API.length > 0) {
+if(!DEBUG && typeof BUGSNAG_API !== undefined && BUGSNAG_API.length > 0) {
 	bugsnag.register(BUGSNAG_API);
 	app.use(bugsnag.requestHandler);
 	app.use(bugsnag.errorHandler);
@@ -39,6 +45,15 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 
+
+// If we're not debugging, throw all errors to log file.
+if (!DEBUG) {
+	console.log = function () {
+		logFile.write(util.format.apply(null, arguments) + '\n');
+		logStdout.write(util.format.apply(null, arguments) + '\n');
+	};
+	console.error = console.log;
+}
 
 
 // Log requests and arguments to the console for easier debugging.
@@ -57,7 +72,7 @@ if(DEBUG)
 // Slow down responses in debug mode.
 if(DEBUG) 
 	app.use(
-		(req, res, next) => setTimeout(() => next(), 500)
+		(req, res, next) => setTimeout(() => next(), DEBUG_DELAY)
 	);
 
 
@@ -188,7 +203,7 @@ async function get_version() {
 		// since version table isn't created, assume 0 version.
 		if(e.code === 'ER_NO_SUCH_TABLE') return 0; 
 		// actual error.
-		return { 'sqlMessage': e.sqlMessage, 'e': e.errno, 'code': e.code };
+		throw new Error( e.sqlMessage );
 	});
 	
 	if(typeof result === 'number') {
@@ -201,7 +216,7 @@ async function get_version() {
 }
 
 // Update SQL schema to latest.  Safe to re-run.
-app.get('/api/sql/', async (req, res) => {
+app.get('/api/sql/', async (req, res, next) => {
 	
 	let old_version = await get_version();
 
@@ -212,6 +227,7 @@ app.get('/api/sql/', async (req, res) => {
 		await update_version( sql02, req, res);
 	}
 	res.json({ 'old_version': old_version, 'new_version': 2 });
+	next('success');
 });
 
 
@@ -319,6 +335,10 @@ app.get('/api/ifgame/level/:id', is_logged_in_user, async (req, res, next) => {
 		let iflevels = await get_mysql_connection().then( conn => {
 			return conn.query(sql, [_id, username]);
 		});
+		if(iflevels.length === 0) {
+			return res.sendStatus(404);
+		}
+		iflevels = iflevels[0];
 
 		res.json(strip_secrets(iflevels));
 
@@ -439,7 +459,7 @@ app.post('/api/logout', (req, res) => {
 	res.clearCookie('x-access-token-username');
 	res.json({ 'logout': true });
 });
-app.get('/logout', (req, res) => {
+app.get('/api/logout', (req, res) => {
 	res.clearCookie('x-access-token');
 	res.clearCookie('x-access-token-refreshed');
 	res.clearCookie('x-access-token-username');
@@ -536,17 +556,30 @@ app.post('/api/login/', async (req, res, next) => {
 //  Final Express
 ////////////////////////////////////////////////////////////////////////
 
+/*
 app.get('/', (req, res) => {
 	res.sendFile(path.resolve('jsgames/build/index.html'));
 });
-app.get('/index.html', (req, res) => {
-	res.sendFile(path.resolve('jsgames/build/index.html'));
+*/
+app.get('/version', (req, res) => {
+	res.json({ version: 1});
 });
+
+
+// Sample endpoint to generate an error.
+app.get('/error', (req, res) => {
+	throw new Error('test');
+});
+
+
 app.get('/transformed.js', (req, res) => {
 	res.sendFile(path.resolve('jsgames/build/transformed.js'));
 });
 app.get('/transformed.js.map', (req, res) => {
 	res.sendFile(path.resolve('jsgames/build/transformed.js.map'));
+});
+app.get('*', (req, res) => {
+	res.sendFile(path.resolve('jsgames/build/index.html'));
 });
 
 
@@ -562,5 +595,5 @@ app.get('*', (req, res) => {
 */
 
 app.listen(DEBUG ? 3000 : 80, function(){
-	console.log('app started on port ' + (DEBUG ? 3000 : 80) );
+	console.log('app started ' + (DEBUG ? 3000 : 80) + ' - ' + (new Date()).toString() );
 });

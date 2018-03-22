@@ -122,13 +122,13 @@ const if_tests = [
 		title: 'if: Get one',
 		url: ()=> '/api/ifgame/level/'+test_ifgame_json._id,
 		options: { method: 'GET' },
-		test_response: (response, json) => response.status === 200 && json.length===1 && json[0].code === 'test'
+		test_response: (response, json) => response.status === 200 && json.code === 'test'
 	},
 	{
 		title: 'if: Get one that does not exist',
 		url: '/api/ifgame/level/zzzzzzzz',
 		options: { method: 'GET' },
-		test_response: (response, json) => response.status === 200 && json.length===0
+		test_response: (response, json) => response.status === 404
 	},
 	{
 		title: 'if: Update',

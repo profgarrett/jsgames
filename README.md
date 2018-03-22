@@ -17,8 +17,7 @@ Load code
 git clone http://github.com/profgarrett/jsgames
 ```
 
-
-Create a secret.js file in the root folder. Update to your settings. You will need your own Bugsnag API.  If it's blank, then bugsnag will not handle any errors.  DEBUG can be set to true/false in order to enable debugging and local development.
+Create a secret.js file in the root folder. Update to your settings. You will need your own Bugsnag API.  If it's blank, then bugsnag will not handle any errors.  DEBUG can be set to true/false in order to enable debugging and local development. All local bugs are pushed to a log.txt file by default.
 ```
 module.exports = {
 	ADMIN_USERNAME: '',
@@ -33,26 +32,21 @@ module.exports = {
 };
 ```
 
-You will also need to create your own tutorial files.  Place them in \server\tutorials.
+You will also need to create your own tutorial files.  Place them in \server\tutorials. You can also get them by emailing Nathan.
 
+The react application is contained the build folder.  The backend is handled by the node application in the server/app.js file.  
 
-### Configuration
-
-Alias to the build folder in the root.  This contains the react deployed application and htaccess file.
+I find it easiest to create an alias to the build folder and the app.js file.
 ```
-mkdir public
 ln -s jsgames/build/ public/
 ln -s jsgames/server/app.js app.js
 ```
 
-Make sure the build folder is up to date.
-```
-npm run build
-```
+
 
 ### Dreamhost
 
-If deploying to Dreamhost, then you may need to take some additional steps to configure node. See latest at https://help.dreamhost.com/hc/en-us/articles/217185397-Node-js-overview
+Depending on the server, you may need to take further actions.  If deploying to Dreamhost, then you may need to take some additional steps to configure node. See latest at https://help.dreamhost.com/hc/en-us/articles/217185397-Node-js-overview
 
 Install NVM
 ```
@@ -72,6 +66,15 @@ https://help.dreamhost.com/hc/en-us/articles/115004415628-Node-js-installing-pac
 
 Make sure that the .htaccess file points to the correct version of node. You can check this by ssh into the server, and running which node.
 
+After updating on Dreamhost, be sure to reload passenger.  SSH into the server, and then run the following.
+```
+npm update
+git pull
+touch tmp/restart
+```
+
+I use a custom .htaccess file on the server. Look in the build folder.  This file forces https, as well as helps passenger use the correct node version.
+
 ## Developing
 
 For local development, use the following commands.
@@ -81,20 +84,23 @@ npm run startnode
 npm run startreact
 ```
 
-You can update the server.js file to use debug settings.
+After updating, be sure the build folder is up to date.
 ```
-const DEBUG = true;
+npm run build
 ```
 
 Deploy to server by running
 ```
-npm run deploy  
+npm run deploy  # rebuilds the build directory
 ```
+
 
 
 ## Author
 
-Nathan Garrett
+Nathan Garrett, profgarrett@gmail.com
+
+
 
 ## License
 
