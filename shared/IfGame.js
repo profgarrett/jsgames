@@ -41,7 +41,6 @@ class IfPageSchema extends Schema {
 			// Set by this.parse()
 			correct: { type: 'Boolean', initialize: (b) => isDef(b) ? b : null },
 
-
 			// Do the results need to be correct to save the results?
 			correct_required: { type: 'Boolean', initialize: (b) => isDef(b) ? b : false }
 		};
@@ -50,9 +49,11 @@ class IfPageSchema extends Schema {
 	// If items have a function called updateUserFields, then run it on it one with the correct json.
 	// Assumes unmodified array order.
 	updateUserFields(json) {
-		if(json.type !== this.type ) 
-			throw new Error('Invalid type '+json.type+' provided  to ' + this.type + '.updateUserFields');
-		
+		if(json.type !== this.type ) {
+			console.log(json);
+			throw new Error('Invalid type '+json.type+' provided to ' + this.type + '.updateUserFields');
+		}
+
 		this.client_f = json.client_f;
 		//this.client_test_results = json.client_test_results;
 		
@@ -186,11 +187,19 @@ class IfLevelSchema extends Schema {
 	get schema() {
 		// clean-up functions
 
-		// Ensure that all returned functions are arrays.
+		// Ensure that any given strings (from JSON.stringify) are parsed into their actual objects.
 		const a = unknown => typeof unknown === 'string' ? JSON.parse(unknown) : unknown;
 		
 		// Convert 0/1 to true/false.
 		const b = unknown => unknown === 0 ? false : (unknown === 1 ? true : unknown);
+
+		// Convert from UTC int into a date.
+		const from_int_dt = unknown => {
+			if(typeof unknown === 'string') {
+				throw new Error('Invalid type ' + typeof unknown + ' "'+unknown+'" used in IfLevelSchema');
+			}
+			return new Date(unknown);
+		};
 
 		return {
 			_id: { type: 'String', initialize: (s) => isDef(s) ? s : null },
@@ -207,14 +216,16 @@ class IfLevelSchema extends Schema {
 
 			score: { type: 'Score', initialize: (s) => new Score(a(s)) },
 			
-			updated: { type: 'Date', initialize: (dt) => isDef(dt) ? new Date(dt) : Date() },
-			created: { type: 'Date', initialize: (dt) => isDef(dt) ? new Date(dt) : Date() }
+			updated: { type: 'Date', initialize: (dt) => isDef(dt) ? from_int_dt(dt) : Date() }, 
+			created: { type: 'Date', initialize: (dt) => isDef(dt) ? from_int_dt(dt) : Date() }
 		};
 	}
 
 	updateUserFields(json) {
-		if(json.type !== this.type ) 
-			throw new Error('Invalid type '+json.type+' provided  to ' + this.type + '.updateUserFields');
+		if(json.type !== this.type ) {
+			console.log(json);
+			throw new Error('Invalid type '+json.type+' provided to ' + this.type + '.updateUserFields');
+		}
 
 		this.pages.map( (p, index) => p.updateUserFields(json.pages[index]) );
 

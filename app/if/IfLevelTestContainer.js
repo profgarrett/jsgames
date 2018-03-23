@@ -6,7 +6,7 @@ import IfLevelTest from './IfLevelTest';
 import { PageHeader, Row, Col, Button } from 'react-bootstrap';
 import { Message, Loading } from './../components/Misc';
 
-
+import { IfLevelSchema, IfLevels } from './../../shared/IfGame';
 
 // We need to have this token passed in the URL in order to properly test the user creation process.
 // Must match value given in secret.js on the server.
@@ -94,7 +94,7 @@ const login_tests = [
 
 
 // Global variable for tracking last updated.
-let if_game_test_updated;
+let if_game_test_updated_client_f = '=not(false);';
 
 const if_tests = [
 	{
@@ -125,20 +125,30 @@ const if_tests = [
 		test_response: (response, json) => response.status === 200 && json.code === 'test'
 	},
 	{
+		title: 'if: Get one - test date format returned int',
+		url: ()=> '/api/ifgame/level/'+test_ifgame_json._id,
+		options: { method: 'GET' },
+		test_response: (response, json) => response.status === 200 && typeof json.updated === 'number' && typeof json.created === 'number'
+	},	{
 		title: 'if: Get one that does not exist',
 		url: '/api/ifgame/level/zzzzzzzz',
 		options: { method: 'GET' },
-		test_response: (response, json) => response.status === 404
+		test_response: (response) => response.status === 404
 	},
 	{
 		title: 'if: Update',
 		url: ()=> '/api/ifgame/level/'+test_ifgame_json._id,
 		options: { method: 'POST' },
 		body: ()=> { 
-			if_game_test_updated = test_ifgame_json.updated;
-			return JSON.stringify(test_ifgame_json);
+			// 
+			let ifgame = IfLevelSchema(test_ifgame_json);
+			ifgame.client_f = if_game_test_updated_client_f;
+
+			let updated_json = test_ifgame_json.toJson();
+			
+			return updated_json;
 		},
-		test_response: (response, json) => response.status === 200 && json.updated !== if_game_test_updated
+		test_response: (response, json) => response.status === 200 && json.client_f !== if_game_test_updated_client_f
 	},
 	{
 		title: 'if: Delete',

@@ -40,16 +40,28 @@ class Schema {
 	// Convert the object a JSON object, taking only valid properties.
 	toJson() {
 		let schema = this.schema;
-		let json = {};
+		let json = {
+			type: this.type
+		};
 
 		for(const key of Object.keys(schema)) {
-			json[key] = this[key];
+			if(this[key] instanceof Date) {
+				json[key] = this[key].getTime(); // convert date to UTC int value.
+			} else {
+				json[key] = this[key];
+			}
 		}		
 
 		return json;
 	}
 
+	// Convert to a string for use as a body in a JSON post request.
+	toJsonString() {
+		let json = this.toJson();
+		return JSON.stringify(json);
+	}
 
+	// Update all fields.
 	updateFields(json, filter='') {
 		let schema = this.schema;
 

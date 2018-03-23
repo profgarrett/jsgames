@@ -6,7 +6,6 @@ import 'url-search-params-polyfill'; // yeah for IE!
 import { BrowserRouter, Switch, Route } from 'react-router-dom';
 
 //  Old browser compatability.
-//import 'whatwg-fetch'; // ajax support.
 import Promise from 'promise-polyfill';
 if (!window.Promise) { window.Promise = Promise; }
 

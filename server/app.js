@@ -165,16 +165,24 @@ app.post('/api/chartgame/level/:id', (req, res) => {
 ////////////////////////////////////////////////////////////////////////
 
 
+/**
+	Initialize MYSQL with credentials from secret.js.
+
+	Options:
+		timezone: 
+			This sets all server date/times to UTC.  The client always sends date in UTC int format.
+			Without this setting, if MYSQL has a different date/time zone it'll convert the input.  
+*/
 function get_mysql_connection() {
 	
 	let conn = mysql.createConnection({
 		host: MYSQL_HOST,
 		user: MYSQL_USER,
 		password: MYSQL_PASSWORD,
-		database: MYSQL_DATABASE
+		database: MYSQL_DATABASE,
+		timezone: '+0000'
 	});
 
-	//conn.connect();
 	return conn;
 }
 
@@ -184,7 +192,7 @@ function get_mysql_connection() {
 async function update_version(sqls) {
 	for(let i=0; i<sqls.length; i++) {
 		await get_mysql_connection().then( conn => {
-			console.log({'i':i, 'sql': sqls[i] });
+			//console.log({'i':i, 'sql': sqls[i] });
 			return conn.query(sqls[i]);
 		});
 	}
@@ -275,6 +283,74 @@ const strip_secrets = function(input) {
 	return new_json;
 };
 
+/**
+	Mysql is irritating with date handling.
+		When inserting a new object, then date is string format.
+		When updating, a date object. 
+	This function deals with both and returns a UTC int
+
+	@dt_or_string
+*/
+const from_mysql_to_utc = dt_or_string => {
+	if(dt_or_string instanceof Date) {
+		//console.log('from_mysql_to_utc: ' + dt_or_string.toString() + ' (dt)' );
+		return to_utc(dt_or_string);
+	}
+	let dt = new Date(dt_or_string);
+
+	//console.log('from_mysql_to_utc: ' + dt_or_string + ' (string) --> ' + dt.toString() );
+	return to_utc(dt);
+};
+
+// Convert a utc int value into a textual format usable for inserting into mysql
+const from_utc_to_myql = (i) => {
+	//console.assert(typeof i !== 'object' && typeof i === 'number');
+	let dt = new Date(i);
+
+	// pull out the T and replace with a space.
+	let mysql = dt.toISOString().slice(0, 19).replace('T', ' ');
+
+	//console.log('from_utc_to_myql: '+dt.toString() + ' --> '+ mysql);
+	return mysql;
+};
+
+// Convert a date to a UTC int value (milliseconds from epoch)
+// Used prior to sending any dates to client.
+const to_utc = (dt) => {
+	if(!(dt instanceof Date)) {
+		throw new Error(dt + ' is not an instance of date, but instead ' + typeof dt);
+	}
+	let int = Date.UTC(dt.getUTCFullYear(), dt.getUTCMonth(), dt.getUTCDate(), 
+			dt.getUTCHours(), dt.getUTCMinutes(), dt.getUTCSeconds());
+	
+	//console.log('to_utc: '+dt.toString() + ' --> '+ int);
+
+	return int;
+};
+
+// Convenience function for cleaning up and preparing a level for returning.
+// Includes both removing secrets, as well as converting dates to UTC format.
+// @level_or_levels can deal with being either an array or a single item.
+const return_level_or_levels_prepared_for_transmit = level_or_levels => {
+	// Do not accept IfLevels. Instead, need json.
+	if(level_or_levels instanceof IfLevelModel) {
+		throw new Error('Should submit json instead of IfLevel');
+	}
+
+	// If an array, recursively prepare.
+	if(level_or_levels instanceof Array) {
+		return level_or_levels.map( l=> return_level_or_levels_prepared_for_transmit(l));
+	}
+
+	// Not an array.  Clean.
+	let clean_level = strip_secrets(level_or_levels);
+
+	clean_level.updated = from_mysql_to_utc(clean_level.updated); 
+	clean_level.created = from_mysql_to_utc(clean_level.created); 
+
+	//console.log('return ' + clean_level.updated + ', ' + clean_level.created);
+	return clean_level;
+};
 
 
 // Create a new level for the currently logged in user with the given type.
@@ -282,9 +358,7 @@ app.post('/api/ifgame/new_level_by_code/:code', is_logged_in_user, async (req, r
 	try {
 		const code = req.params.code;
 		const level = IfLevelModelFactory.create(code);
-
-		// create a f function to turn a datestring into a mysql string.
-		const t = dt => (new Date(dt)).toISOString().slice(0, 19).replace('T', ' ');
+		const now = from_utc_to_myql(to_utc(new Date()));
 
 		const username = get_username_or_null(req);
 		const insert_sql = `INSERT INTO iflevels (username, code, title, description, completed, 
@@ -294,11 +368,12 @@ app.post('/api/ifgame/new_level_by_code/:code', is_logged_in_user, async (req, r
 		let insert_results = await get_mysql_connection().then( conn => {
 			return conn.query(insert_sql, [level.username, level.code, level.title, level.description,
 				level.completed ? 1 : 0, JSON.stringify(level.pages), JSON.stringify(level.history), 
-				t(level.created), t(level.updated), JSON.stringify(level.score) ]);
+				now, now, JSON.stringify(level.score) ]);
 		});
 
 		level._id = insert_results.insertId;
-		res.json(strip_secrets(level));
+
+		res.json(return_level_or_levels_prepared_for_transmit(level.toJson()));
 	} catch (e) {
 		next(e);
 	}
@@ -312,13 +387,13 @@ app.get('/api/ifgame/levels/byCode/:code', is_logged_in_user, async (req, res, n
 		const sql = 'SELECT * FROM iflevels WHERE username = ? AND (code = ? OR ? = "all")';
 		const code = req.params.code;
 		const username = get_username_or_null(req);
-		
+
 		let iflevels = await get_mysql_connection().then( conn => {
 			return conn.query(sql, [username, code, code]);
 		});
 
-		res.json(strip_secrets(iflevels));
-
+		// Remove secret fields and transmit.
+		res.json(return_level_or_levels_prepared_for_transmit(iflevels));
 	} catch (e) {
 		next(e);
 	}
@@ -335,13 +410,12 @@ app.get('/api/ifgame/level/:id', is_logged_in_user, async (req, res, next) => {
 		let iflevels = await get_mysql_connection().then( conn => {
 			return conn.query(sql, [_id, username]);
 		});
+
 		if(iflevels.length === 0) {
 			return res.sendStatus(404);
 		}
-		iflevels = iflevels[0];
 
-		res.json(strip_secrets(iflevels));
-
+		res.json(return_level_or_levels_prepared_for_transmit(iflevels[0]));
 	} catch (e) {
 		next(e);
 	}
@@ -363,8 +437,6 @@ app.delete('/api/ifgame/level/:id', is_logged_in_user, async (req, res, next) =>
 			return conn.query(sql, [_id]);
 		});
 
-		console.log(delete_results);
-
 		res.json({success: (delete_results.affectedRows === 1)});
 
 	} catch (e) {
@@ -382,9 +454,6 @@ app.post('/api/ifgame/level/:id', is_logged_in_user, async (req, res, next) => {
 		const sql_update = `UPDATE iflevels SET completed = ?, pages = ?, history = ?, 
 			updated = ?, score = ? WHERE _id = ? AND username = ?`;
 
-		// create a f function to turn a datestring into a mysql string.
-		const t = () => (new Date()).toISOString().slice(0, 19).replace('T', ' ');
-
 		let select_results = await get_mysql_connection().then( conn => {
 			return conn.query(sql_select, [_id, username]);
 		});
@@ -392,22 +461,27 @@ app.post('/api/ifgame/level/:id', is_logged_in_user, async (req, res, next) => {
 		let iflevel = new IfLevelModel(select_results[0]);
 
 		iflevel.updateUserFields(req.body);
+		iflevel.updated = new Date();
 		IfLevelModelFactory.update(iflevel);
 
 		let update_results = await get_mysql_connection().then( conn => {
-			return conn.query(sql_update, [iflevel.completed ? 1 : 0, 
-				JSON.stringify(iflevel.pages), JSON.stringify(iflevel.history), 
-				t(), JSON.stringify(iflevel.score), 
-				iflevel._id, iflevel.username]);
+			return conn.query(sql_update, [
+					iflevel.completed ? 1 : 0, 
+					JSON.stringify(iflevel.pages), 
+					JSON.stringify(iflevel.history), 
+					from_utc_to_myql(to_utc(iflevel.updated)), 
+					JSON.stringify(iflevel.score), 
+					iflevel._id, 
+					iflevel.username
+				]);
 		});
 
+		// Ensure exactly 1 item was updated.
 		if(update_results.changedRows !== 1) {
 			return res.sendStatus(500);
 		}
-		//console.log(update_results);
 
-		return res.json(strip_secrets(iflevel.toJson()));
-		
+		res.json(return_level_or_levels_prepared_for_transmit(iflevel.toJson()));
 	} catch (e) {
 		next(e);
 	}

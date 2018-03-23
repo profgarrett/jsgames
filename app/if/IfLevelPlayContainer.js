@@ -94,7 +94,7 @@ export default class IfLevelPlayContainer extends React.Component {
 					'Accept': 'application/json',
 					'Content-Type': 'application/json'
 				},
-				body: JSON.stringify(level)
+				body: level.toJsonString()
 			})
 			.then( response => response.json() )
 			.then( json => {
