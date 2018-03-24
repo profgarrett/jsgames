@@ -23,6 +23,7 @@
     "bcrypt": "^1.0.3",
     "body-parser": "^1.18.2",
     "bugsnag": "^2.3.1",
+    "compression": "^1.7.2",
     "cookie-parser": "^1.4.3",
     "cross-fetch": "^1.1.1",
     "d3": "^4.13.0",
@@ -44,6 +45,7 @@
     "react-router-dom": "^4.2.2",
     "react-router-redux": "^4.0.8",
     "redux-logger": "^3.0.6",
+    "serve-static": "^1.13.2",
     "url-search-params-polyfill": "^2.0.3",
     "whatwg-fetch": "^2.0.3"
   },

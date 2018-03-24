@@ -26189,6 +26189,16 @@ var ExcelTable = function (_React$Component) {
 	_createClass(ExcelTable, [{
 		key: '_render_field',
 
+		/*
+  constructor(props) {
+  	super(props);
+  		// Save a reference to page.  When props update, reset to this.
+  	// Used to know if we need to refocus on the input box.
+  	this.state = { 
+  		page: null
+  	};
+  }
+  */
 
 		// Build out the input box.
 		value: function _render_field(page) {
@@ -26231,6 +26241,15 @@ var ExcelTable = function (_React$Component) {
 		key: 'componentDidMount',
 		value: function componentDidMount() {
 			// If there is an input field, then set its focus.
+			if (this.props.editable) {
+				var node = document.getElementById('ExcelTableRenderFieldInput');
+				node.focus();
+				//this.client_fInput.focus();
+			}
+		}
+	}, {
+		key: 'componentDidUpdate',
+		value: function componentDidUpdate() {
 			if (this.props.editable) {
 				var node = document.getElementById('ExcelTableRenderFieldInput');
 				node.focus();
@@ -26367,7 +26386,7 @@ var ExcelTable = function (_React$Component) {
 						{ className: 'bg-info', style: tdStyle },
 						clean_tf(page.solution_test_results[i].result)
 					);
-					if (page.correct === true) {} else {
+					if (page.correct === false) {
 						fieldSolution = _react2.default.createElement(
 							'td',
 							{ className: 'bg-info', style: tdStyle },

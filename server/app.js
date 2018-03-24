@@ -5,6 +5,7 @@ const DEBUG_DELAY = 250;
 const express = require('express');
 const path = require('path');
 const bodyParser = require('body-parser');
+const compression = require('compression');
 const bcrypt = require('bcrypt');
 const cookieParser = require('cookie-parser');
 const bugsnag = require('bugsnag');
@@ -33,6 +34,23 @@ var logStdout = process.stdout;
 /////////////////////////////////////////////////////////////////////////////////////////
 const app = express();
 
+
+// Note: Compression only applies on this app.  You won't see it hit
+// when developing with webpack, as that doesn't use this layer. When 
+// deployed, and react is using the transformed.js file, then this works.
+app.use(compression({filter: shouldCompress}));
+
+function shouldCompress (req, res) {
+  if (req.headers['x-no-compression']) {
+    // don't compress responses with this request header
+    return false;
+  }
+
+  // fallback to standard filter function
+  return compression.filter(req, res);
+}
+
+
 // Load bugsnag if it is defined in secret.js.
 if(!DEBUG && typeof BUGSNAG_API !== undefined && BUGSNAG_API.length > 0) {
 	bugsnag.register(BUGSNAG_API);
@@ -44,6 +62,17 @@ if(!DEBUG && typeof BUGSNAG_API !== undefined && BUGSNAG_API.length > 0) {
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
+
+
+// Force responses to not be cached. Since we don't server actual files, and just API requests,
+// and those update, if a browser caches a response they may not stale/incorrect data later.
+// @Thanks to https://stackoverflow.com/questions/20429592/no-cache-in-a-nodejs-server
+function nocache(req, res, next) {
+	//res.header('Cache-Control', 'private, no-cache, no-store, must-revalidate');
+	//res.header('Expires', '-1');
+	//res.header('Pragma', 'no-cache');
+	next();
+}
 
 
 // If we're not debugging, throw all errors to log file.
@@ -354,7 +383,7 @@ const return_level_or_levels_prepared_for_transmit = level_or_levels => {
 
 
 // Create a new level for the currently logged in user with the given type.
-app.post('/api/ifgame/new_level_by_code/:code', is_logged_in_user, async (req, res, next) => {
+app.post('/api/ifgame/new_level_by_code/:code', is_logged_in_user, nocache, async (req, res, next) => {
 	try {
 		const code = req.params.code;
 		const level = IfLevelModelFactory.create(code);
@@ -382,7 +411,7 @@ app.post('/api/ifgame/new_level_by_code/:code', is_logged_in_user, async (req, r
 
 // List objects owned by the logged in user.
 // :type may be 'all', or limited to a single code.
-app.get('/api/ifgame/levels/byCode/:code', is_logged_in_user, async (req, res, next) => {
+app.get('/api/ifgame/levels/byCode/:code', is_logged_in_user, nocache, async (req, res, next) => {
 	try {
 		const sql = 'SELECT * FROM iflevels WHERE username = ? AND (code = ? OR ? = "all")';
 		const code = req.params.code;
@@ -401,7 +430,7 @@ app.get('/api/ifgame/levels/byCode/:code', is_logged_in_user, async (req, res, n
 
 
 // Select object, provide it is owned by the logged in user.
-app.get('/api/ifgame/level/:id', is_logged_in_user, async (req, res, next) => {
+app.get('/api/ifgame/level/:id', is_logged_in_user, nocache, async (req, res, next) => {
 	try {
 		const sql = 'SELECT * FROM iflevels WHERE _id = ? AND username = ?';
 		const _id = req.params.id;
@@ -423,7 +452,7 @@ app.get('/api/ifgame/level/:id', is_logged_in_user, async (req, res, next) => {
 
 
 // Delete One.  Only used for testing purposes.  Hard-coded for test user.
-app.delete('/api/ifgame/level/:id', is_logged_in_user, async (req, res, next) => {
+app.delete('/api/ifgame/level/:id', is_logged_in_user, nocache, async (req, res, next) => {
 	try {
 		const sql = 'DELETE FROM iflevels WHERE username = "test" AND _id = ?';
 		const _id = req.params.id;
@@ -446,7 +475,7 @@ app.delete('/api/ifgame/level/:id', is_logged_in_user, async (req, res, next) =>
 
 
 // Update One
-app.post('/api/ifgame/level/:id', is_logged_in_user, async (req, res, next) => {
+app.post('/api/ifgame/level/:id', is_logged_in_user, nocache, async (req, res, next) => {
 	try {
 		const username = get_username_or_null(req);
 		const _id = req.params.id;
@@ -570,7 +599,7 @@ app.post('/api/login_clear_test_user/', async (req, res, next) => {
 	Creating a user requires a passed token, which much match the value given in secret.js
 	Without this token, no users can be created.
 */
-app.post('/api/login/', async (req, res, next) => {
+app.post('/api/login/', nocache, async (req, res, next) => {
 	try {
 		let token = req.body.token;
 		let password = req.body.password;
@@ -635,38 +664,36 @@ app.get('/', (req, res) => {
 	res.sendFile(path.resolve('jsgames/build/index.html'));
 });
 */
-app.get('/version', (req, res) => {
+app.get('/version', nocache, (req, res) => {
 	res.json({ version: 1});
 });
 
 
 // Sample endpoint to generate an error.
-app.get('/error', (req, res) => {
+app.get('/error', nocache, (req, res) => {
 	throw new Error('test');
 });
 
 
+// Build files. Note that the paths don't work on :3000 when developing,
+// but they do work when deployed due to passenger on dreamhost using that folder.
+app.get('/favicon.ico', (req, res) => {
+	res.sendFile(path.resolve('jsgames/build/favicon.ico'));
+});
 app.get('/transformed.js', (req, res) => {
 	res.sendFile(path.resolve('jsgames/build/transformed.js'));
 });
 app.get('/transformed.js.map', (req, res) => {
 	res.sendFile(path.resolve('jsgames/build/transformed.js.map'));
 });
+
+// Default case that returns the general index page.
+// Needed for when client is on a subpage and refreshes the page to return the react app.
+// SHould be last.
 app.get('*', (req, res) => {
 	res.sendFile(path.resolve('jsgames/build/index.html'));
 });
 
-
-// Default case that returns the general index page.
-// Needed for when client is on a subpage and refreshes the page to return the react app.
-// Ensure that this is last.
-// @Todo: Test with node/server.js frontpage.  Currently handled via react-web-dev.
-/*
-app.get('*', (req, res) => {
-	//res.sendFile(path.resolve('app/index.html'));
-	res.sendStatus(404);
-});
-*/
 
 app.listen(DEBUG ? 3000 : 80, function(){
 	console.log('app started ' + (DEBUG ? 3000 : 80) + ' - ' + (new Date()).toString() );

@@ -6,6 +6,18 @@ import { HtmlSpan, OkGlyphicon, SuccessGlyphicon, FailureGlyphicon } from './../
 
 // This is a standard table for showing excel stuff.
 export default class ExcelTable extends React.Component {
+	/*
+	constructor(props) {
+		super(props);
+
+		// Save a reference to page.  When props update, reset to this.
+		// Used to know if we need to refocus on the input box.
+		this.state = { 
+			page: null
+		};
+	}
+	*/
+
 
 	// Build out the input box.
 	_render_field(page) {
@@ -46,6 +58,13 @@ export default class ExcelTable extends React.Component {
 			//this.client_fInput.focus();
 		}
 	}
+	componentDidUpdate() {
+		if(this.props.editable) {
+			let node = document.getElementById('ExcelTableRenderFieldInput');
+			node.focus();
+			//this.client_fInput.focus();
+		}	
+	}
 
 	// Build out the table 
 	render() {
@@ -79,6 +98,7 @@ export default class ExcelTable extends React.Component {
 			}
 			return tf; // string result.
 		};
+
 
 		// Helper function to increment the a1, b2, ... references to a2, b2.
 		const increment_row = 
@@ -137,8 +157,7 @@ export default class ExcelTable extends React.Component {
 			// Solution column
 			if(page.solution_test_results !== null && page.solution_test_results.length > 0) {
 				fieldSolution = <td className='bg-info' style={tdStyle}>{ clean_tf(page.solution_test_results[i].result) }</td>;
-				if(page.correct === true) {
-				} else {
+				if(page.correct === false) {
 					fieldSolution = <td className='bg-info' style={tdStyle}>{ clean_tf(page.solution_test_results[i].result) }</td>;
 				}
 			}
@@ -158,7 +177,7 @@ export default class ExcelTable extends React.Component {
 		// If we have solutions, include a page header.
 		let thSolutionResult = null;
 		if( page.solution_test_results !== null && page.solution_test_results.length > 0) {
-			thSolutionResult = <th style={headerStyle}>Correct Result</th>
+			thSolutionResult = <th style={headerStyle}>Correct Result</th>;
 		}
 
 
