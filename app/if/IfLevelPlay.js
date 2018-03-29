@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { Panel, Button, Table } from 'react-bootstrap';
 import { HtmlDiv, SuccessGlyphicon, FailureGlyphicon, ProgressGlyphicon } from './../components/Misc'
 import ExcelTable from './ExcelTable';
+import Parsons from './Parsons';
 
 
 export default class IfLevelPlay extends React.Component {
@@ -21,43 +22,8 @@ export default class IfLevelPlay extends React.Component {
 
 
 	// Tell owner that the value of the user's input has changed.
-	handleChange(e) {
-		this.props.onChange(e.target.value);
-	}
-
-
-	// Ensure a reasonable length for the solution.
-	/*
-	getValidationState() {
-		const page = this.props.level.pages[this.props.selected_page_index];
-		const length = page.client_f == null ? '' : page.client_f.length;
-		if(length > 100) return 'error';
-
-		// Check to see if (a) we have a solution, and if (b) our solution is correct.
-		if(typeof page.solution_test_results.length !== 0) {
-			console.log(page.correct);
-			console.assert(page.correct !== 'null', 'IfLevelPlay.getValidationState: Null page.correct w solution_test_results');
-			if(!page.correct) return 'error';
-		}
-
-		return null;
-	}
-	*/
-
-
-	// Show the score with nice glyps
-	_render_score(score) {
-		let s = score;
-
-
-		// Use formulas with i to generate unique keys upon completion.
-		let results = s.toArray(
-				i => <SuccessGlyphicon key={'iflevelplayrenderscore'+i} />, 
-				i => <FailureGlyphicon key={'iflevelplayrenderscore'+i} />);
-
-		results.push( i=> <ProgressGlyphicon key={'iflevelplayrenderscore'+i} /> ); 
-
-		return results.map( (result, i) => result(i) );
+	handleChange(new_value) {
+		this.props.onChange(new_value);
 	}
 
 
@@ -85,11 +51,27 @@ export default class IfLevelPlay extends React.Component {
 			paddingLeft: 15
 		};
 
+		// Use formulas with i to generate unique keys upon completion.
+		let results = this.props.level.get_score_as_array(
+				i => <SuccessGlyphicon key={'iflevelplayrenderscore'+i} />, 
+				i => <FailureGlyphicon key={'iflevelplayrenderscore'+i} />,
+				i=> <ProgressGlyphicon key={'iflevelplayrenderscore'+i} /> ); 
+
+
+		let problem;
+		if(page.type === 'IfPageFormulaSchema') {
+			problem = <ExcelTable page={page} editable={true} handleChange={this.handleChange} />;
+		} else if(page.type === 'IfPageParsonsSchema') {
+			problem = <Parsons page={page} editable={true} handleChange={this.handleChange} />;
+		} else {
+			throw new Error('Invalid type in IfLevelPlay '+page.type);
+		}
+
 		return (
 			<div>
 				<form name='c' onSubmit={this.handleSubmit}>
 					{ lead }
-					<ExcelTable page={page} editable={true} handleChange={this.handleChange} />
+					{ problem }
 					<Panel >
 						<Table style={{ margin: 0}} >
 							<tbody>
@@ -98,7 +80,7 @@ export default class IfLevelPlay extends React.Component {
 									<span>Results</span>
 								</td>
 								<td style={leftTdStyle}>
-									{ this._render_score(this.props.level.score) }
+									{ results.map( (r,i) => r(i) ) }
 								</td>
 								<td style={rightTdStyle}>
 									<Button bsStyle='link' href={'/ifgame/'+this.props.level.code } >Exit</Button>

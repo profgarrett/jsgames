@@ -44,6 +44,20 @@ ln -s jsgames/server/app.js app.js
 
 
 
+### Updating
+
+After updating, visit page to update SQL schema.
+```
+http://hosthame/api/sql
+```
+
+Then, run tests. Replace x with the code used to create users on your system.
+```
+http://hostname/ifgame/test/?USER_CREATION_SECRET=x
+```
+
+
+
 ### Dreamhost
 
 Depending on the server, you may need to take further actions.  If deploying to Dreamhost, then you may need to take some additional steps to configure node. See latest at https://help.dreamhost.com/hc/en-us/articles/217185397-Node-js-overview
@@ -84,16 +98,10 @@ npm run startnode
 npm run startreact
 ```
 
-After updating, be sure the build folder is up to date.
+After updating, and before submitting, be sure the build folder is up to date. Use deploy.sh and build.sh files to automate as needed.
 ```
 npm run build
 ```
-
-Deploy to server by running
-```
-npm run deploy  # rebuilds the build directory
-```
-
 
 
 ## Author

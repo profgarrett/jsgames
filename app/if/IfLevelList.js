@@ -46,7 +46,7 @@ export default class IfLevelList extends React.Component {
 								<Link to={'/ifgame/level/'+g._id+'/score'}>
 									{g.title}, completed&nbsp;
 									<PrettyDate date={ g.created } />.  
-									Score {g.score.correct} of {g.score.attempted}
+									Score {g.get_score_correct()} of {g.get_score_attempted()}
 								</Link>
 							</li>
 							)

@@ -37,20 +37,39 @@ class Schema {
 		throw Error('Inheriting classes must implement schema');
 	}
 
-	// Convert the object a JSON object, taking only valid properties.
-	toJson() {
+	/*
+		Convert the object a JSON object, taking only valid properties.
+
+		Will take an option new_values dictionary that replaces existing values.
+
+		Note that dates will be converted into UTC int values.  Date init from json
+		will properly handle int initialize values.
+	*/
+	toJson(new_values_json) {
 		let schema = this.schema;
 		let json = {
 			type: this.type
 		};
 
+		// Copy all properties to the new item.
 		for(const key of Object.keys(schema)) {
 			if(this[key] instanceof Date) {
 				json[key] = this[key].getTime(); // convert date to UTC int value.
 			} else {
 				json[key] = this[key];
 			}
-		}		
+		}
+
+		// Copy any new_values provided.
+		if(typeof new_values_json !== 'undefined') {
+			for(const key of Object.keys(new_values_json)) {
+				if(new_values_json[key] instanceof Date) {
+					json[key] = new_values_json[key].getTime(); // convert date to UTC int value.
+				} else {
+					json[key] = new_values_json[key];
+				}
+			}
+		}
 
 		return json;
 	}
@@ -72,27 +91,6 @@ class Schema {
 		}
 
 		return this; // allow method chaining.  Note that this doesn't return a new copy, but the initial one.
-	}
-
-	/**
-		Create a clone of this item, updating fields as given in JSON
-	*/
-	clone( json={} ) {
-		let schema = this.schema;
-		//const clone = Object.assign( {}, this);
-		//Object.setPrototypeOf( clone, this.prototype );
-		const clone = Object.assign(Object.create(this), this);
-
-		// Validate json object entries to match against schema.
-		// Allow 'type' key without a matching field schema definition.
-		for(const key of Object.keys(json)) {
-			if(typeof schema[key] === 'undefined' && key !== 'type' ) {
-				throw new Error('Invalid key "' + key + '" in ' + this['type']);
-			}
-			clone[key] = json[key];
-		}
-
-		return clone;
 	}
 } 
 

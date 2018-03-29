@@ -1,7 +1,9 @@
+// @flow
+
 /**
 	Node main event loop
 */
-const DEBUG_DELAY = 250;
+const DEBUG_DELAY = 350;
 const express = require('express');
 const path = require('path');
 const bodyParser = require('body-parser');
@@ -21,6 +23,7 @@ const mysql = require('promise-mysql');
 
 const { sql01 } = require('./../sql/sql01.js');
 const { sql02 } = require('./../sql/sql02.js');
+const { sql03 } = require('./../sql/sql03.js');
 
 var fs = require('fs');
 var util = require('util');
@@ -40,7 +43,7 @@ const app = express();
 // deployed, and react is using the transformed.js file, then this works.
 app.use(compression({filter: shouldCompress}));
 
-function shouldCompress (req, res) {
+function shouldCompress (req, res): boolean {
   if (req.headers['x-no-compression']) {
     // don't compress responses with this request header
     return false;
@@ -101,7 +104,7 @@ if(DEBUG)
 // Slow down responses in debug mode.
 if(DEBUG) 
 	app.use(
-		(req, res, next) => setTimeout(() => next(), DEBUG_DELAY)
+		(req, res, next): mixed => setTimeout((): mixed => next(), DEBUG_DELAY)
 	);
 
 
@@ -235,7 +238,9 @@ async function get_version() {
 	const sql = 'select max(idversion) as idversion from schema_version';
 
 	let result = await get_mysql_connection().then( conn => {
-		return conn.query(sql);
+		let r = conn.query(sql);
+		conn.end();
+		return r;
 	}).catch( e => {
 		// since version table isn't created, assume 0 version.
 		if(e.code === 'ER_NO_SUCH_TABLE') return 0; 
@@ -263,7 +268,10 @@ app.get('/api/sql/', async (req, res, next) => {
 	if(old_version < 2 ) {
 		await update_version( sql02, req, res);
 	}
-	res.json({ 'old_version': old_version, 'new_version': 2 });
+	if(old_version < 3 ) {
+		await update_version( sql03, req, res);
+	}
+	res.json({ 'old_version': old_version, 'new_version': 3 });
 	next('success');
 });
 
@@ -288,6 +296,9 @@ const strip_secrets = function(input) {
 
 	// if is null, then return null.  Don't convert a null value in an array into an object.
 	if(input === null) return input;
+
+	// Return basic items, which may be contained in arrays.
+	if(typeof input === 'string' || typeof input === 'number' || typeof input === 'boolean') return input;
 
 	// if an array, recurse.
 	if( Array.isArray(input)) {
@@ -391,13 +402,15 @@ app.post('/api/ifgame/new_level_by_code/:code', is_logged_in_user, nocache, asyn
 
 		const username = get_username_or_null(req);
 		const insert_sql = `INSERT INTO iflevels (username, code, title, description, completed, 
-			pages, history, created, updated, score) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+			pages, history, created, updated) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`;
 		level.username = username;
 
 		let insert_results = await get_mysql_connection().then( conn => {
-			return conn.query(insert_sql, [level.username, level.code, level.title, level.description,
+			let r = conn.query(insert_sql, [level.username, level.code, level.title, level.description,
 				level.completed ? 1 : 0, JSON.stringify(level.pages), JSON.stringify(level.history), 
-				now, now, JSON.stringify(level.score) ]);
+				now, now ]);
+			conn.end();
+			return r;
 		});
 
 		level._id = insert_results.insertId;
@@ -418,8 +431,13 @@ app.get('/api/ifgame/levels/byCode/:code', is_logged_in_user, nocache, async (re
 		const username = get_username_or_null(req);
 
 		let iflevels = await get_mysql_connection().then( conn => {
-			return conn.query(sql, [username, code, code]);
+			let r = conn.query(sql, [username, code, code]);
+			conn.end();
+			return r;
 		});
+
+		// Convert into models, and then back to JSON.
+		iflevels = iflevels.map( l => (new IfLevelModel(l)).toJson() );
 
 		// Remove secret fields and transmit.
 		res.json(return_level_or_levels_prepared_for_transmit(iflevels));
@@ -436,26 +454,32 @@ app.get('/api/ifgame/level/:id', is_logged_in_user, nocache, async (req, res, ne
 		const _id = req.params.id;
 		const username = get_username_or_null(req);
 
-		let iflevels = await get_mysql_connection().then( conn => {
-			return conn.query(sql, [_id, username]);
+		let select_results = await get_mysql_connection().then( conn => {
+			let r = conn.query(sql, [_id, username]);
+			conn.end();
+			return r;
 		});
 
-		if(iflevels.length === 0) {
+		if(select_results.length === 0) {
 			return res.sendStatus(404);
 		}
-
-		res.json(return_level_or_levels_prepared_for_transmit(iflevels[0]));
+		
+		let iflevel = new IfLevelModel(select_results[0]); // initialize from sql
+		
+		res.json(return_level_or_levels_prepared_for_transmit(iflevel.toJson()));
 	} catch (e) {
 		next(e);
 	}
 });
 
 
-// Delete One.  Only used for testing purposes.  Hard-coded for test user.
+/** Delete
+	This end-point is only used for testing purposes.  Hard-coded for test user and *all*  test pages.
+*/
 app.delete('/api/ifgame/level/:id', is_logged_in_user, nocache, async (req, res, next) => {
 	try {
-		const sql = 'DELETE FROM iflevels WHERE username = "test" AND _id = ?';
-		const _id = req.params.id;
+		const sql = 'DELETE FROM iflevels WHERE username = "test" '; // AND _id = ?
+		//const _id = req.params.id;
 		const username = get_username_or_null(req);
 
 		if(username !== 'test') {
@@ -463,10 +487,12 @@ app.delete('/api/ifgame/level/:id', is_logged_in_user, nocache, async (req, res,
 		}
 
 		let delete_results = await get_mysql_connection().then( conn => {
-			return conn.query(sql, [_id]);
+			let r = conn.query(sql); //, [_id]);
+			conn.end();
+			return r;
 		});
 
-		res.json({success: (delete_results.affectedRows === 1)});
+		res.json({success: (delete_results.affectedRows >= 1)});
 
 	} catch (e) {
 		next(e);
@@ -481,28 +507,40 @@ app.post('/api/ifgame/level/:id', is_logged_in_user, nocache, async (req, res, n
 		const _id = req.params.id;
 		const sql_select = 'SELECT * FROM iflevels WHERE _id = ? AND username = ?';
 		const sql_update = `UPDATE iflevels SET completed = ?, pages = ?, history = ?, 
-			updated = ?, score = ? WHERE _id = ? AND username = ?`;
+			updated = ? WHERE _id = ? AND username = ?`;
 
 		let select_results = await get_mysql_connection().then( conn => {
-			return conn.query(sql_select, [_id, username]);
+			let r = conn.query(sql_select, [_id, username]);
+			conn.end();
+			return r;
 		});
 
-		let iflevel = new IfLevelModel(select_results[0]);
+		// Return 404 if no results match.
+		if(select_results.length === 0) return res.sendStatus(404);
 
-		iflevel.updateUserFields(req.body);
-		iflevel.updated = new Date();
-		IfLevelModelFactory.update(iflevel);
+		// Ensure that this level isn't completed.
+		if(select_results[0].completed) throw new res.sendStatus(401);
+
+		// update.
+		let iflevel = new IfLevelModel(select_results[0]); // initialize from sql
+		console.log(iflevel.pages[iflevel.pages.length-1].correct);
+		iflevel.updateUserFields(req.body); // update client_f and history
+		console.log(iflevel.pages[iflevel.pages.length-1].correct);
+
+		IfLevelModelFactory.addPageOrMarkAsComplete(iflevel); 
+		console.log(iflevel.pages[iflevel.pages.length-1].correct);
 
 		let update_results = await get_mysql_connection().then( conn => {
-			return conn.query(sql_update, [
+			let r = conn.query(sql_update, [
 					iflevel.completed ? 1 : 0, 
 					JSON.stringify(iflevel.pages), 
 					JSON.stringify(iflevel.history), 
 					from_utc_to_myql(to_utc(iflevel.updated)), 
-					JSON.stringify(iflevel.score), 
 					iflevel._id, 
 					iflevel.username
 				]);
+			conn.end();
+			return r;
 		});
 
 		// Ensure exactly 1 item was updated.
@@ -583,7 +621,9 @@ app.post('/api/login_clear_test_user/', async (req, res, next) => {
 		const sql = 'DELETE FROM users WHERE username = "test"';
 
 		let results = await get_mysql_connection().then( conn => {
-			return conn.query(sql);
+			let r = conn.query(sql);
+			conn.end();
+			return r;
 		});
 
 		return res.json({ success: true, affectedRows: results.affectedRows});
@@ -608,7 +648,9 @@ app.post('/api/login/', nocache, async (req, res, next) => {
 		const select_sql = 'SELECT * FROM users WHERE username = ?';
 
 		let select_results = await get_mysql_connection().then( conn => {
-			return conn.query(select_sql, [user.username]);
+			let r = conn.query(select_sql, [user.username]);
+			conn.end();
+			return r;
 		});
 
 		// test the db for presense of user.  If not found, create given proper perms.
@@ -622,7 +664,9 @@ app.post('/api/login/', nocache, async (req, res, next) => {
 				// Yes, create user and log in.
 				const insert_sql = 'INSERT INTO users (username, hashed_password) VALUES (?, ?)';
 				let insert_results = await get_mysql_connection().then( conn => {
-					return conn.query(insert_sql, [user.username, user.hashed_password]);
+					let r = conn.query(insert_sql, [user.username, user.hashed_password]);
+					conn.end();
+					return r;
 				});
 				
 				if(insert_results.affectedRows !== 1) throw new Error(500);
@@ -670,7 +714,7 @@ app.get('/version', nocache, (req, res) => {
 
 
 // Sample endpoint to generate an error.
-app.get('/error', nocache, (req, res) => {
+app.get('/error', nocache, () => {
 	throw new Error('test');
 });
 

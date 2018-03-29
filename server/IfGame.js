@@ -1,7 +1,6 @@
-const { IfLevelSchema,
-		IfPageSchema } = require('./../shared/IfGame');
+const { IfLevelSchema } = require('./../shared/IfGame');
 
-//const { DataFactory } = require('./DataFactory');
+const { DataFactory } = require('./DataFactory');
 
 const { test } = require('./tutorials/test');
 const { tutorial } = require('./tutorials/tutorial');
@@ -11,93 +10,129 @@ const { sum } = require('./tutorials/sum');
 const { if1 } = require('./tutorials/if1');
 const { if2 } = require('./tutorials/if2');
 
-//  Converts the client-side js class for schema into a server-side model
-// The model includes additional code for evaluating success/failure.
-function buildModel(schemaClass) {
-	return schemaClass;
-}
+// Use model term instead of schema to clarify server v. client, and to add room 
+// for later adding server-side functionality.
+const IfLevelModel = IfLevelSchema;
 
-// Create exportable models.
 module.exports = {
-	IfLevelModel: buildModel(IfLevelSchema),
-	IfPageModel: buildModel(IfPageSchema)
+	IfLevelModel: IfLevelModel
 };
 
+// Are the arrays similar or different?
+const arrayDifferent = (a1, a2) => {
+	if(a1.length !== a2.length) return true;
 
-/*
-	Pages can be one of the following:
-		Tutorial: Students must successfully complete before continuing. 
-		Knowledge Transfer: Students may submit incorrect.
+	for(let i=0; i<a1.length; i++) {
+		if(a1[i] !== a2[i]) return true;
+	}
 
-	Run repeatedly after every level update on every page.
-*/			
-const setPageAsTutorial = page => {
-	page.correct_required = true;
-	page.solution_test_results_visible = true;
-	page.solution_f_visible = (page.correct !== null);
+	return false;
 };
-const setPageAsTest = page => {
-	page.correct_required = false;
-	page.solution_test_results_visible = (page.correct !== null);
-	page.solution_f_visible = false;
-};
+
 
 
 const baseifgame = {
+	/*
+		Setup json obj according to _type.
+			tutorial: Students must successfully complete before continuing. 
+			test: Students may submit incorrect.
+	*/
+	_initialize_from_code: function(json) {
+		
+		if(json.type === 'IfPageParsonsSchema') {
+
+			// Randomize the list until it's not the same order as the solution.
+			do {
+				json.potential_items = DataFactory.randomizeList(json.solution_items);
+			} while (!arrayDifferent( json.potential_items, json.solution_items ));
+
+			// Set flags as needed based off of the code.
+			if(json.code === 'tutorial') {
+				json.correct_required = true;
+			} else if(json.code === 'test') {
+				json.correct_required = false;
+			} else {
+				throw new Error('Invalid formula code '+json.code+' in baseifgame');
+			}
+
+		} else if(json.type === 'IfPageFormulaSchema') {
+			if(json.code === 'tutorial') {
+				json.correct_required = true;
+				json.solution_test_results_visible = true;
+				json.solution_f_visible = true;
+			} else if(json.code === 'test') {
+				json.correct_required = false;
+				json.solution_test_results_visible = false;
+				json.solution_f_visible = false;
+			} else {
+				throw new Error('Invalid formula code '+json.code+' in baseifgame');
+			}
+		} else {
+			throw new Error('Invalid page type '+json.type+' in baseifgame');
+		}
+		return json;
+	},
+
 
 	// Make a new level.
 	create: function() {
-		let level = new (module.exports.IfLevelModel)({
+		let level = new IfLevelModel({
 			title: this.title,
 			code: this.code,
 			description: this.description,
-			completed: false 
+			completed: false,
+			pages: [ this._initialize_from_code(this.pages[0]) ],
+			history: [ { created: new Date(), title: 'created' } ]
 		});
-		this.update(level);
+
+		// Force completed to null showing that the user hasn't yet attempted to answer.
+		level.pages[0].completed = null;
 
 		return level;
 	},
 
-	// Add a new level or mark an item as completed.  Safe to run multiple times.
-	update: function(level) {
-		console.assert(level.title === this.title, 'server.ifgame.test.update.leveltitlecheck');
-		console.assert(!level.completed, 'server.ifgame.test.update.completenotfalse');
+	/*
+		Updates a valid and self-consistent object by creating additional pages.
+		Also handles all updates to .completed on both page and level.
+		
+		@todo Currently relies upon having same exact length between template and levels. Allow dynamic length.
+	*/
+	addPageOrMarkAsComplete: function(level) {
+		let last_page = level.pages[level.pages.length-1];
+		if(last_page.completed) throw new Error('IfGame.addPageOrMarkAsComplete.lastpage_already_completed');
 
-		let page;
 
-		// Update all pages parsing, then update score and run the_after_update functions.
-		level.pages.map( p => p.parse() );
-		level.score.refresh(level);
-		level.pages.map( (p,i) => this.pages[i]._after_update.map( f => f(p) ) );
-
-		// Check to see if we should add a new page.
-		if(level.pages.length >= this.pages.length) {
-			level.completed = true;
-		} else {
-			// Create the new page based on the template in this file.
-			let obj = this._remove_after_update(this.pages[level.pages.length]);
-			page = new module.exports.IfPageModel(obj);
-			level.pages.push(page);
-
-			// Note that parse must happen prior to _after_update functions, since those may depend
-			//		upon the client_f value and .correct being set.
-			page.parse();
-
-			// Run _after_update functions on the newly-created page.
-			this.pages[level.pages.length-1]._after_update.map( f => f(page) );
-
+		// Test to see if the last page needs to be correct to continue.
+		// Note that the last page may not have been answered by the user yet.
+		if( last_page.correct_required && !last_page.correct ) {
+			// Don't add a new level until it is correct.
+			level.history = [...level.history, { created: new Date(), title: 'addPageOrMarkAsComplete_notCorrectTutorialPage'}];
+			return level;
 		}
 
-	},
+		// Are we done with tutorial?
+		if(level.pages.length >= this.pages.length) {
+			// Yes. Set level and pages to completed so no further updates are allowed.
+			last_page.completed = true;
+			level.completed = true;
+			level.history = [...level.history, { created: new Date(), title: 'addPageOrMarkAsComplete_setCompleteTrue'}];
+		} else {
+			// No. Add a new page.
 
-	_remove_after_update: function(obj) {
-		let obj2 = Object.assign({}, obj);
-		delete obj2._after_update;
-		return obj2;
+			// Update last page so no more updates are allowed.
+			last_page.completed = true;
+
+			// Create new page and add to level.
+			let new_page_json = this._initialize_from_code(this.pages[level.pages.length]);
+			let new_page = level.get_new_page(new_page_json);
+			level.pages.push(new_page);
+
+			level.history = [...level.history, { created: new Date(), title: 'addPageOrMarkAsComplete_addPage'}];
+		}
+
+		return level;
 	}
 };
-
-
 
 
 const IfLevelModelFactory = {
@@ -113,21 +148,20 @@ const IfLevelModelFactory = {
 		text: { ...baseifgame, ...text}
 	},
 
+	// Create and return a new level of the given code.
 	create: function(code) {
-		console.assert(this.levels[code], 'Invalid type '+code+' passed to IfLevelModelFactory.create');
+		if(typeof this.levels[code] === 'undefined') throw new Error('Invalid type '+code+' passed to IfLevelModelFactory.create');
+
 		return this.levels[code].create();
 	},
 
-	// Function used to update test levels.
-	update: function(level) {
+	// Check the submission.
+	addPageOrMarkAsComplete: function(level) {
+		if(typeof this.levels[level.code] === 'undefined') throw new Error('Invalid type '+level.code+' passed to IfLevelModelFactory.processSubmission');
 
-		//let levels = this.levels.filter( l => l.title === level.title );
+		return this.levels[level.code].addPageOrMarkAsComplete(level);
+	},
 
-		if(!this.levels[level.code]) {
-			console.assert(false, 'Unknown level '+level.code+' passed to IfLevelModelFactory.update');
-		} else {
-			return this.levels[level.code].update(level);
-		}
-	}
 };
 module.exports.IfLevelModelFactory = IfLevelModelFactory;
+

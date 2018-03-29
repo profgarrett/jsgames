@@ -42,7 +42,7 @@ export default class ExcelTable extends React.Component {
 					autoComplete='off'
 					value={page.client_f==null ? '' : page.client_f }
 					placeholder='Enter a formula'
-					onChange={this.props.handleChange}
+					onChange={ (e) => this.props.handleChange({ client_f: e.target.value}) }
 				/>
 				{ helpblock }		
 			</div>
@@ -54,14 +54,14 @@ export default class ExcelTable extends React.Component {
 		// If there is an input field, then set its focus.
 		if(this.props.editable) {
 			let node = document.getElementById('ExcelTableRenderFieldInput');
-			node.focus();
+			if(node) node.focus();
 			//this.client_fInput.focus();
 		}
 	}
 	componentDidUpdate() {
 		if(this.props.editable) {
 			let node = document.getElementById('ExcelTableRenderFieldInput');
-			node.focus();
+			if(node) node.focus();
 			//this.client_fInput.focus();
 		}	
 	}
@@ -99,6 +99,16 @@ export default class ExcelTable extends React.Component {
 			return tf; // string result.
 		};
 
+		// Helper function to turn dates into strings.
+		const clean_if_date = dt => {
+			if(dt instanceof Date) {
+				return dt.toLocaleDateString('en-US', { });
+			} else {
+				return dt;
+			}
+		};
+
+		const clean = input => clean_tf(clean_if_date(input));
 
 		// Helper function to increment the a1, b2, ... references to a2, b2.
 		const increment_row = 
@@ -115,6 +125,8 @@ export default class ExcelTable extends React.Component {
 
 		for (let i=0; i<page.tests.length; i++) {
 			// Set local varbiables and parse.
+
+			//console.log()
 
 			// Render the input field or formula.
 			if(i===0) {
@@ -140,25 +152,25 @@ export default class ExcelTable extends React.Component {
 
 			} else if (page.solution_test_results.length === 0 ) {
 				// Good value result, but we don't know the result
-				fieldResult = <td style={tdStyle}>{ clean_tf(page.client_test_results[i].result) }</td>;
+				fieldResult = <td style={tdStyle}>{ clean(page.client_test_results[i].result) }</td>;
 
 			} else if (page.solution_test_results.length !== null) {
 				// Good value results, and we know if it should be true or false.
 
 				if(	page.client_test_results[i].result === page.solution_test_results[i].result) {
 					// Render the field with a checkbox showing success.
-					fieldResult = <td style={tdStyle}>{ clean_tf(page.client_test_results[i].result) }<OkGlyphicon /></td>;
+					fieldResult = <td style={tdStyle}>{ clean(page.client_test_results[i].result) }<OkGlyphicon /></td>;
 				} else {
 					// Render normally
-					fieldResult = <td style={tdStyle}>{ clean_tf(page.client_test_results[i].result) }</td>;
+					fieldResult = <td style={tdStyle}>{ clean(page.client_test_results[i].result) }</td>;
 				}
 			}
 
 			// Solution column
 			if(page.solution_test_results !== null && page.solution_test_results.length > 0) {
-				fieldSolution = <td className='bg-info' style={tdStyle}>{ clean_tf(page.solution_test_results[i].result) }</td>;
+				fieldSolution = <td className='bg-info' style={tdStyle}>{ clean(page.solution_test_results[i].result) }</td>;
 				if(page.correct === false) {
-					fieldSolution = <td className='bg-info' style={tdStyle}>{ clean_tf(page.solution_test_results[i].result) }</td>;
+					fieldSolution = <td className='bg-info' style={tdStyle}>{ clean(page.solution_test_results[i].result) }</td>;
 				}
 			}
 
@@ -173,6 +185,7 @@ export default class ExcelTable extends React.Component {
 				</tr>
 			);
 		}
+
 
 		// If we have solutions, include a page header.
 		let thSolutionResult = null;

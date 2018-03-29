@@ -1,5 +1,4 @@
 const { Schema } = require('./Schema');
-const { Score } = require('./Score');
 
 let isDef = function(v) {
 	return typeof v !== 'undefined';

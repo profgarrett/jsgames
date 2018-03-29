@@ -66,6 +66,18 @@ const DataFactory = {
 			result.push({ a: DataFactory.randB(0, 10), b: DataFactory.randOf(['red', 'blue', 'yellow', 'green']) });
 		return result;
 	},
+
+	// Randomize a given array in place.
+	// Slightly modified version of that given 
+	// in an answer at https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array
+	randomizeList: (old_array) => {
+		let array = old_array.slice(0);
+		for (let i = array.length - 1; i > 0; i--) {
+			let j = Math.floor(Math.random() * (i + 1));
+			[array[i], array[j]] = [array[j], array[i]];
+		}
+		return array;
+	},
 	
 	/*
 		Returns a number of random data points in an array with labels

@@ -16,6 +16,37 @@ import Promise from 'promise-polyfill';
 if (!window.Promise) { window.Promise = Promise; }
 
 
+/*
+	This wraps problematic compoments that throw errors.
+	It keeps the whole react app from getting hosed by an error
+*/
+export class ErrorBoundary extends React.Component {
+	constructor(props) {
+		super(props);
+		this.state = { hasError: false, error: false, info: false };
+	}
+
+	componentDidCatch(error, info) {
+		// Display fallback UI
+		this.setState({ hasError: true, error: error, info: info });
+		// You can also log the error to an error reporting service
+		//logErrorToMyService(error, info);
+	}
+
+	render() {
+		if (this.state.hasError) {
+			console.log(this.state.error);
+			console.log(this.state.info);
+			return <h1>Something went wrong.</h1>;
+		}
+		return this.props.children;
+	}
+}
+ErrorBoundary.propTypes = {
+	children: PropTypes.any
+};
+
+
 // This is a standard Glyph for showing success.
 export class OkGlyphicon extends React.Component {
 	render() {
@@ -157,13 +188,14 @@ export class PageNotFound extends React.Component {
 
 export class Menu extends React.Component {
 	render() {
+		return <span />;
+		/*
+		Disabled menu to make it easier to embed.
 		let styles = {
 			marginTop: 0,
 			visible: false,
 			hidden: true
 		};
-
-		return <span />;
 
 		return (
 			<Row style={styles}>
@@ -188,6 +220,7 @@ export class Menu extends React.Component {
 				</Col>
 			</Row>
 		);
+		*/
 	}
 }
 

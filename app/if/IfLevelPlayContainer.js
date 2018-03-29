@@ -3,8 +3,8 @@ import PropTypes from 'prop-types';
 import { Breadcrumb, Col, Row } from 'react-bootstrap';
 
 import IfLevelPlay from './IfLevelPlay';
-import { Message, Loading } from './../components/Misc';
-import { IfLevelSchema, IfLevels } from './../../shared/IfGame';
+import { ErrorBoundary, Message, Loading } from './../components/Misc';
+import { IfLevelSchema } from './../../shared/IfGame';
 
 import ForceLogin from './../components/ForceLogin';
 
@@ -26,16 +26,23 @@ export default class IfLevelPlayContainer extends React.Component {
 	}
 
 	// Get an update of the user's input.
-	onChange(client_f) {
+	// Changes is passed a json object with the updated values.
+	onChange(json) {
 		const i = this.state.selected_page_index;
+		let new_history_item = { created: new Date(), ...json };
+		let history = [...this.state.level.pages[i].history, new_history_item];
 
-		// Update level by replacing expired objects.
-		let new_level = this.state.level.clone(); // clone level object
-		let new_page = this.state.level.pages[i].clone( { client_f }); // clone page and update result
-		new_page.parse(); // update this.correct.
-		new_level.pages[i] = new_page;  // replace old page with new cloned page.
+		// Create a fresh page.
+		let page_json = { ...this.state.level.pages[i].toJson()};
+		let page = this.state.level.get_new_page(page_json);
 
-		this.setState({ level: new_level });
+		// Update fresh page with new values.
+		page.updateUserFields({ ...page_json, ...json, history  });
+		
+		let level = new IfLevelSchema(this.state.level.toJson());
+		level.pages[i] = page;
+
+		this.setState({ level });
 	}
 
 	// Update the current page and send to the server for an update.
@@ -47,42 +54,26 @@ export default class IfLevelPlayContainer extends React.Component {
 		
 		console.assert(typeof this !== 'undefined', 'Invalid this passed');
 
-		// Validate.  
-		if (current_page.client_f === null) {
-			// Don't continue until all numbers on the current page are filled in.
-			this.setState({
-				message: 'Please fill in a formula before submitting',
-				messageStyle: 'danger'
-			});
-			return;
-		} else if (current_page.correct === false) {
+		// Validate.  Note that some pages will allow local validation, but others require posting
+		// to the server.  This check is prior to submission to the server.
+		if (current_page.correct === false) {
 			// Don't continue if we page.correct is false (null is ok)
 			this.setState({
-				message: 'You must submit the correct answer before continuing',
+				message: 'You must submit the correct answer before continuing.',
 				messageStyle: 'warning'
 			});
 			return;
-		} else {
-			// Continue!
-			if(this.state.message != '') {
-				this.setState({
-					message:'',
-					messageStyle: ''
-				});
-			}
 		}
 
 		// Make sure that we don't already have a future page loaded in front of the current page.
 		if( current_page_i < this.state.level.pages.length-1 ) {
 			throw new Error('current_page_i < this.state.level.pages.length-1 in IfLevelPlayContainer.onSubmit');
-		} 
-
-
-		// We are on the last page.  
+		}
 
 		// Show loading status.
 		this.setState({ 
 			message: 'Saving',
+			messageStyle: '',
 			isLoading: true
 		});
 
@@ -102,16 +93,17 @@ export default class IfLevelPlayContainer extends React.Component {
 				return new IfLevelSchema(json);
 			})
 			.then( ifLevel => {
-
-				if(ifLevel.completed)
+				if(ifLevel.completed) {
 					this.context.router.history.push('/ifgame/level/'+ifLevel._id+'/score');
-				else
+				} else {
 					this.setState({ 
-						selected_page_index: current_page_i+1,
+						selected_page_index: ifLevel.pages.length-1,
 						level: ifLevel,
-						message: '',
+						message: ifLevel.pages[ifLevel.pages.length-1].correct === false ? 'You must submit the correct answer before continuing' : '',
+						messageStyle: ifLevel.pages[ifLevel.pages.length-1].correct === false ? 'warning' : '',
 						isLoading: false
 					});
+				}
 			})
 			.catch( error => {
 				this.setState({ 
@@ -170,12 +162,14 @@ export default class IfLevelPlayContainer extends React.Component {
 
 					<Message message={this.state.message} style={this.state.messageStyle} />
 					<Loading loading={this.state.isLoading } />
+					<ErrorBoundary>
 					{ this.state.level ? <IfLevelPlay 
 							level={this.state.level} 
 							selected_page_index={this.state.selected_page_index }
 							onSubmit={this.onSubmit}
 							onChange={this.onChange}
 						/> : '' }
+					</ErrorBoundary>
 				</Col>
 			</Row>
 		);

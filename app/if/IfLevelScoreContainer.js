@@ -1,7 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Row, Col, Breadcrumb, Button } from 'react-bootstrap';
+import { Row, Col, Breadcrumb, Button  } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
+
 
 import IfLevelScore from './IfLevelScore';
 import { Message, Loading } from './../components/Misc';
@@ -35,7 +36,6 @@ export default class IfLevelScoreContainer extends React.Component {
 			})
 			.then( response => response.json() )
 			.then( json => new IfLevelSchema(json) )
-			.then( ifLevel => ifLevel.parse() )
 			.then( ifLevel => {
 				this.setState({
 					level: ifLevel,

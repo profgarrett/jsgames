@@ -1,12 +1,11 @@
 import React from 'react';
-import PropTypes from 'prop-types';
+import { PageHeader, Row, Col } from 'react-bootstrap';
 
 import IfLevelTest from './IfLevelTest';
-
-import { PageHeader, Row, Col, Button } from 'react-bootstrap';
 import { Message, Loading } from './../components/Misc';
+import { IfLevelSchema } from './../../shared/IfGame';
 
-import { IfLevelSchema, IfLevels } from './../../shared/IfGame';
+//if(typeof IfLevelSchema === 'undefined') throw new Error('blah!');
 
 // We need to have this token passed in the URL in order to properly test the user creation process.
 // Must match value given in secret.js on the server.
@@ -24,12 +23,7 @@ const default_fetch_options = {
 	}
 };
 
-const test_password = 'p'+Math.random(10000000, 99999999);
-
-let test_ifgame_json; // used as a temp variable for if_tests.
-
-
-
+const login_password = 'p'+Math.random(10000000, 99999999);
 
 const login_tests = [
 	{
@@ -54,14 +48,14 @@ const login_tests = [
 		title: 'Login: create user - invalid token',
 		url: '/api/login/',
 		options: { method: 'POST' },
-		body: { username: 'test', password: test_password, token: 'invalid' },
+		body: { username: 'test', password: login_password, token: 'invalid' },
 		test_response: (response) => response.status === 403
 	},
 	{
 		title: 'Login: create user - valid token',
 		url: '/api/login/',
 		options: { method: 'POST' },
-		body: { username: 'test', password: test_password, token: USER_CREATION_SECRET },
+		body: { username: 'test', password: login_password, token: USER_CREATION_SECRET },
 		test_response: (response, json) => json.logged_in === true
 	},
 	{
@@ -87,14 +81,16 @@ const login_tests = [
 		title: 'Login: login as newly created user - good password & good token',
 		url: '/api/login/',
 		options: { method: 'POST' },
-		body: { username: 'test', password: test_password, token: USER_CREATION_SECRET },
+		body: { username: 'test', password: login_password, token: USER_CREATION_SECRET },
 		test_response: (response, json) => json.logged_in === true
 	}
 ];
 
 
-// Global variable for tracking last updated.
-let if_game_test_updated_client_f = '=not(false);';
+// These are used as the solutions for the test level.
+let if_game_json = null;
+let if_game_test_client_f_correct = '=true';
+let if_game_test_client_f_incorrect = '=false';
 
 const if_tests = [
 	{
@@ -102,7 +98,7 @@ const if_tests = [
 		url: '/api/ifgame/new_level_by_code/test',
 		options: { method: 'POST' },
 		test_response: (response, json) => {
-			test_ifgame_json = json;
+			if_game_json = json;
 			return response.status === 200 && json.type === 'IfLevelSchema' && json.username === 'test';
 		}
 	},
@@ -120,13 +116,13 @@ const if_tests = [
 	},
 	{
 		title: 'if: Get one',
-		url: ()=> '/api/ifgame/level/'+test_ifgame_json._id,
+		url: ()=> '/api/ifgame/level/'+if_game_json._id,
 		options: { method: 'GET' },
 		test_response: (response, json) => response.status === 200 && json.code === 'test'
 	},
 	{
 		title: 'if: Get one - test date format returned int',
-		url: ()=> '/api/ifgame/level/'+test_ifgame_json._id,
+		url: ()=> '/api/ifgame/level/'+if_game_json._id,
 		options: { method: 'GET' },
 		test_response: (response, json) => response.status === 200 && typeof json.updated === 'number' && typeof json.created === 'number'
 	},	{
@@ -137,22 +133,85 @@ const if_tests = [
 	},
 	{
 		title: 'if: Update',
-		url: ()=> '/api/ifgame/level/'+test_ifgame_json._id,
+		url: ()=> '/api/ifgame/level/'+if_game_json._id,
 		options: { method: 'POST' },
 		body: ()=> { 
-			// 
-			let ifgame = IfLevelSchema(test_ifgame_json);
-			ifgame.client_f = if_game_test_updated_client_f;
-
-			let updated_json = test_ifgame_json.toJson();
-			
-			return updated_json;
+			let ifgame = new IfLevelSchema(if_game_json);
+			ifgame.pages[ifgame.pages.length-1].client_f = if_game_test_client_f_correct;
+			return ifgame.toJson();
 		},
-		test_response: (response, json) => response.status === 200 && json.client_f !== if_game_test_updated_client_f
+		test_response: (response, json) => {
+			if_game_json = json;
+			return (response.status === 200 && 
+				json.pages.length === 2 &&
+				json.pages[0].client_f === if_game_test_client_f_correct);
+		}
+	},
+	{
+		title: 'if: Update, confirm tutorial can not update completed item',
+		url: ()=> '/api/ifgame/level/'+if_game_json._id,
+		options: { method: 'POST' },
+		body: ()=> { 
+			let ifgame = new IfLevelSchema(if_game_json);
+			ifgame.pages[0].client_f = if_game_test_client_f_incorrect;
+			return ifgame.toJson();
+		},
+		test_response: response => response.status === 500 
+	},
+	{
+		title: 'if: Test incorrect answer of client_f (no new page)',
+		url: ()=> '/api/ifgame/level/'+if_game_json._id,
+		options: { method: 'POST' },
+		body: ()=> { 
+			let ifgame = new IfLevelSchema(if_game_json);
+			ifgame.pages[1].client_f = if_game_test_client_f_incorrect;
+			return ifgame.toJson();
+		},
+		test_response: (response, json) => {
+			if_game_json = json;
+			return (response.status === 200 && 
+				!json.pages[json.pages.length-1].correct &&
+				json.pages.length === if_game_json.pages.length
+			);
+		}
+	},
+	{
+		title: 'if: Successfull update of tutorial page',
+		url: ()=> '/api/ifgame/level/'+if_game_json._id,
+		options: { method: 'POST' },
+		body: ()=> { 
+			let ifgame = new IfLevelSchema(if_game_json);
+			ifgame.pages[1].client_f = if_game_test_client_f_correct;
+			return ifgame.toJson();
+		},
+		test_response: (response, json) => {
+			if_game_json = json;
+			return (
+				response.status === 200 && 
+				json.pages[1].client_f === if_game_test_client_f_correct &&
+				json.pages[1].correct
+			);
+		}
+	},
+	{
+		title: 'if: Successfull BAD solution for test page (test score)',
+		url: ()=> '/api/ifgame/level/'+if_game_json._id,
+		options: { method: 'POST' },
+		body: ()=> { 
+			let ifgame = new IfLevelSchema(if_game_json);
+			ifgame.pages[2].client_f = if_game_test_client_f_incorrect;
+			return ifgame.toJson();
+		},
+		test_response: (response, json) => 
+				response.status === 200 && 
+				json.pages.length === 3 &&
+				json.pages[2].client_f === if_game_test_client_f_incorrect &&
+				json.pages[2].correct === false &&
+				json.pages[0].correct && json.pages[1].correct && json.pages[2].correct === false
 	},
 	{
 		title: 'if: Delete',
-		url: ()=> '/api/ifgame/level/'+test_ifgame_json._id,
+		url: ()=> '/api/ifgame/level/'+if_game_json._id,
 		options: { method: 'DELETE' },
 		test_response: (response, json) => response.status === 200 && json.success
 	}
@@ -201,7 +260,7 @@ export default class IfLevelListContainer extends React.Component {
 			// Create request & send. Handled body & url being functions.
 			options = { ...default_fetch_options, ...tests[i].options };
 			if(tests[i].body) {
-				options.body = typeof tests[i].body ==='function' ? tests[i].body() : JSON.stringify(tests[i].body);
+				options.body = typeof tests[i].body ==='function' ? JSON.stringify(tests[i].body()) : JSON.stringify(tests[i].body);
 			}
 			url = typeof tests[i].url === 'function' ? tests[i].url() : tests[i].url;
 
@@ -230,7 +289,7 @@ export default class IfLevelListContainer extends React.Component {
 			}
 		}
 
-		this.setState({ message: 'Completed tests!'});
+		//this.setState({ message: 'Completed tests!'});
 	}
 
 
