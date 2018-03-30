@@ -1,33 +1,40 @@
+// @flow
 import React from 'react';
-import PropTypes from 'prop-types';
+import type { Node } from 'react';
+//import PropTypes from 'prop-types';
 import { Panel, Button, Table } from 'react-bootstrap';
-import { HtmlDiv, SuccessGlyphicon, FailureGlyphicon, ProgressGlyphicon } from './../components/Misc'
+import { HtmlDiv, SuccessGlyphicon, FailureGlyphicon, ProgressGlyphicon } from './../components/Misc';
 import ExcelTable from './ExcelTable';
 import Parsons from './Parsons';
 
+import type { LevelType } from './IfTypes';
 
-export default class IfLevelPlay extends React.Component {
-	constructor(props) {
+
+type PropsType = {
+	level: LevelType,
+	selected_page_index: number,
+	onChange: (string) => void,
+	onSubmit: (void) => void
+};
+
+
+export default class IfLevelPlay extends React.Component<PropsType> {
+	constructor(props: any) {
 		super(props);
-		this.handleChange = this.handleChange.bind(this);
-		this.handleSubmit = this.handleSubmit.bind(this);
+		(this: any).handleChange = this.handleChange.bind(this);
+		(this: any).handleSubmit = this.handleSubmit.bind(this);
 	}
 
+	handleChange(new_value: string) {
+		this.props.onChange(new_value);	
+	} 
 
-	// Signal to the container that this page has been finished.
-	handleSubmit(e) {
+	handleSubmit(e: SyntheticEvent<HTMLButtonElement>) {
 		e.preventDefault();
 		this.props.onSubmit();
 	}
 
-
-	// Tell owner that the value of the user's input has changed.
-	handleChange(new_value) {
-		this.props.onChange(new_value);
-	}
-
-
-	render() {
+	render(): Node {
 		console.assert(this.props.selected_page_index < this.props.level.pages.length, 
 			'Page '+this.props.selected_page_index+' is not valid in IfLevelPlay');
 
@@ -53,9 +60,13 @@ export default class IfLevelPlay extends React.Component {
 
 		// Use formulas with i to generate unique keys upon completion.
 		let results = this.props.level.get_score_as_array(
-				i => <SuccessGlyphicon key={'iflevelplayrenderscore'+i} />, 
-				i => <FailureGlyphicon key={'iflevelplayrenderscore'+i} />,
-				i=> <ProgressGlyphicon key={'iflevelplayrenderscore'+i} /> ); 
+				(i: number): any => <SuccessGlyphicon key={'iflevelplayrenderscore'+i} />, 
+				(i: number): any => <FailureGlyphicon key={'iflevelplayrenderscore'+i} />,
+				(i: number): any => <ProgressGlyphicon key={'iflevelplayrenderscore'+i} /> ); 
+
+		// Make sure that last item is always a progress glyph.
+		results.pop();
+		results.push( (i: number): any => <ProgressGlyphicon key={'iflevelplayrenderscore'+i} />);
 
 
 		let problem;
@@ -80,7 +91,7 @@ export default class IfLevelPlay extends React.Component {
 									<span>Results</span>
 								</td>
 								<td style={leftTdStyle}>
-									{ results.map( (r,i) => r(i) ) }
+									{ results.map( (r: any,i: number): any => r(i) ) }
 								</td>
 								<td style={rightTdStyle}>
 									<Button bsStyle='link' href={'/ifgame/'+this.props.level.code } >Exit</Button>
@@ -96,9 +107,3 @@ export default class IfLevelPlay extends React.Component {
 		);
 	}
 }
-IfLevelPlay.propTypes = {
-	level: PropTypes.object.isRequired,
-	selected_page_index: PropTypes.number.isRequired,
-	onChange: PropTypes.func.isRequired,
-	onSubmit: PropTypes.func.isRequired
-};

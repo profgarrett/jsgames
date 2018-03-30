@@ -3,7 +3,7 @@
 /**
 	Node main event loop
 */
-const DEBUG_DELAY = 350;
+const DEBUG_DELAY = 0;
 const express = require('express');
 const path = require('path');
 const bodyParser = require('body-parser');
@@ -30,6 +30,8 @@ var util = require('util');
 var logFile = fs.createWriteStream('log.txt', { flags: 'a' });
 var logStdout = process.stdout;
 
+import type { $Request, $Response, NextFunction } from 'express';
+// import type { Connection } from 'mysql';
 
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -43,7 +45,8 @@ const app = express();
 // deployed, and react is using the transformed.js file, then this works.
 app.use(compression({filter: shouldCompress}));
 
-function shouldCompress (req, res): boolean {
+
+function shouldCompress (req: $Request, res: $Response): boolean {
   if (req.headers['x-no-compression']) {
     // don't compress responses with this request header
     return false;
@@ -70,28 +73,27 @@ app.use(cookieParser());
 // Force responses to not be cached. Since we don't server actual files, and just API requests,
 // and those update, if a browser caches a response they may not stale/incorrect data later.
 // @Thanks to https://stackoverflow.com/questions/20429592/no-cache-in-a-nodejs-server
-function nocache(req, res, next) {
-	//res.header('Cache-Control', 'private, no-cache, no-store, must-revalidate');
-	//res.header('Expires', '-1');
-	//res.header('Pragma', 'no-cache');
+function nocache(req: $Request, res: $Response, next: NextFunction) {
+	res.header('Cache-Control', 'private, no-cache, no-store, must-revalidate');
+	res.header('Expires', '-1');
+	res.header('Pragma', 'no-cache');
 	next();
 }
 
 
 // If we're not debugging, throw all errors to log file.
-if (!DEBUG) {
-	console.log = function () {
+/*
+const log_error = DEBUG ? console.log : function (arg?: any) {
+		arg;
 		logFile.write(util.format.apply(null, arguments) + '\n');
 		logStdout.write(util.format.apply(null, arguments) + '\n');
-	};
-	console.error = console.log;
-}
-
+};
+*/
 
 // Log requests and arguments to the console for easier debugging.
 if(DEBUG)
 	app.use(
-		(req, res, next) => {
+		(req: $Request, res: $Response, next: NextFunction) => {
 			let keys = Object.keys(req.params);
 
 			if(req.url !== '/favicon.ico') {
@@ -104,10 +106,8 @@ if(DEBUG)
 // Slow down responses in debug mode.
 if(DEBUG) 
 	app.use(
-		(req, res, next): mixed => setTimeout((): mixed => next(), DEBUG_DELAY)
+		(req: $Request, res: $Response, next: NextFunction): mixed => setTimeout((): mixed => next(), DEBUG_DELAY)
 	);
-
-
 
 
 ////////////////////////////////////////////////////////////////////////
@@ -205,7 +205,19 @@ app.post('/api/chartgame/level/:id', (req, res) => {
 			This sets all server date/times to UTC.  The client always sends date in UTC int format.
 			Without this setting, if MYSQL has a different date/time zone it'll convert the input.  
 */
-function get_mysql_connection() {
+
+// Create a new flow definition for MYSQL, as we are using a version providing Promises.
+declare type ConnectionT = {
+	then: Function,
+	query: Function,
+	end: Function
+};
+declare type MysqlErrorT = {
+	code: string,
+	sqlMessage: string
+};
+
+function get_mysql_connection(): ConnectionT {
 	
 	let conn = mysql.createConnection({
 		host: MYSQL_HOST,
@@ -218,13 +230,21 @@ function get_mysql_connection() {
 	return conn;
 }
 
+async function run_mysql_query(sql: string, values?: Array<any>): Object {
+	let results = await get_mysql_connection().then( (conn: ConnectionT): Array<Object> => {
+		let r = conn.query(sql, values);
+		conn.end();
+		return r;
+	});
+	return results;
+}
+
 /* Run the array of sql commands.
 	@arg sql
 */
-async function update_version(sqls) {
+async function update_version(sqls: Array<string>): Promise<void> {
 	for(let i=0; i<sqls.length; i++) {
-		await get_mysql_connection().then( conn => {
-			//console.log({'i':i, 'sql': sqls[i] });
+		await get_mysql_connection().then( (conn: ConnectionT): mixed => {
 			return conn.query(sqls[i]);
 		});
 	}
@@ -234,45 +254,42 @@ async function update_version(sqls) {
 	What is the current version of the DB?
 	Looks at schema_version table.
 */
-async function get_version() {
+async function get_version(): Promise<any> {
 	const sql = 'select max(idversion) as idversion from schema_version';
 
-	let result = await get_mysql_connection().then( conn => {
-		let r = conn.query(sql);
-		conn.end();
-		return r;
-	}).catch( e => {
-		// since version table isn't created, assume 0 version.
-		if(e.code === 'ER_NO_SUCH_TABLE') return 0; 
-		// actual error.
-		throw new Error( e.sqlMessage );
-	});
-	
-	if(typeof result === 'number') {
-		return result;
-	} else if(typeof result === 'string') {
-		return result;
-	} else {
+	try {
+		let result = await run_mysql_query(sql);
 		return result[0].idversion;
 	}
+	catch( e) {
+		// since version table isn't created, assume 0 version.
+		if(e.code === 'ER_NO_SUCH_TABLE') return 0; 
+		throw new Error(e.code);
+	}
+
 }
 
-// Update SQL schema to latest.  Safe to re-run.
-app.get('/api/sql/', async (req, res, next) => {
-	
-	let old_version = await get_version();
 
-	if(old_version < 1) {
-		await update_version( sql01, req, res);
+// Update SQL schema to latest.  Safe to re-run.
+app.get('/api/sql/', 
+	async (req: $Request, res: $Response, next: NextFunction): Promise<any> => {
+	
+	try {
+		let old_version = await get_version();
+
+		if(old_version < 1) {
+			await update_version( sql01 );
+		}
+		if(old_version < 2 ) {
+			await update_version( sql02 );
+		}
+		if(old_version < 3 ) {
+			await update_version( sql03 );
+		}
+		res.json({ 'old_version': old_version, 'new_version': 3 });
+	} catch(e ){
+		return next(e);
 	}
-	if(old_version < 2 ) {
-		await update_version( sql02, req, res);
-	}
-	if(old_version < 3 ) {
-		await update_version( sql03, req, res);
-	}
-	res.json({ 'old_version': old_version, 'new_version': 3 });
-	next('success');
 });
 
 
@@ -292,7 +309,7 @@ app.get('/api/sql/', async (req, res, next) => {
 	Test: 
 		strip_secrets([{ x: 1, 'solution_show': 2, 'solution_show_visible': true, 'solution_hide': 2, 'solution_hide_visible': false }])
 */
-const strip_secrets = function(input) {
+const strip_secrets = function(input: Object): Object {
 
 	// if is null, then return null.  Don't convert a null value in an array into an object.
 	if(input === null) return input;
@@ -331,7 +348,7 @@ const strip_secrets = function(input) {
 
 	@dt_or_string
 */
-const from_mysql_to_utc = dt_or_string => {
+const from_mysql_to_utc = (dt_or_string: Date | string): number => {
 	if(dt_or_string instanceof Date) {
 		//console.log('from_mysql_to_utc: ' + dt_or_string.toString() + ' (dt)' );
 		return to_utc(dt_or_string);
@@ -343,7 +360,7 @@ const from_mysql_to_utc = dt_or_string => {
 };
 
 // Convert a utc int value into a textual format usable for inserting into mysql
-const from_utc_to_myql = (i) => {
+const from_utc_to_myql = (i: number): string => {
 	//console.assert(typeof i !== 'object' && typeof i === 'number');
 	let dt = new Date(i);
 
@@ -356,7 +373,7 @@ const from_utc_to_myql = (i) => {
 
 // Convert a date to a UTC int value (milliseconds from epoch)
 // Used prior to sending any dates to client.
-const to_utc = (dt) => {
+const to_utc = (dt: Date): number => {
 	if(!(dt instanceof Date)) {
 		throw new Error(dt + ' is not an instance of date, but instead ' + typeof dt);
 	}
@@ -371,76 +388,71 @@ const to_utc = (dt) => {
 // Convenience function for cleaning up and preparing a level for returning.
 // Includes both removing secrets, as well as converting dates to UTC format.
 // @level_or_levels can deal with being either an array or a single item.
-const return_level_or_levels_prepared_for_transmit = level_or_levels => {
+const return_level_prepared_for_transmit = (level: Object): Object => {
 	// Do not accept IfLevels. Instead, need json.
-	if(level_or_levels instanceof IfLevelModel) {
+	if(level instanceof IfLevelModel) {
 		throw new Error('Should submit json instead of IfLevel');
 	}
 
-	// If an array, recursively prepare.
-	if(level_or_levels instanceof Array) {
-		return level_or_levels.map( l=> return_level_or_levels_prepared_for_transmit(l));
-	}
-
-	// Not an array.  Clean.
-	let clean_level = strip_secrets(level_or_levels);
+	let clean_level = strip_secrets(level);
 
 	clean_level.updated = from_mysql_to_utc(clean_level.updated); 
 	clean_level.created = from_mysql_to_utc(clean_level.created); 
 
-	//console.log('return ' + clean_level.updated + ', ' + clean_level.created);
 	return clean_level;
 };
 
 
+
 // Create a new level for the currently logged in user with the given type.
-app.post('/api/ifgame/new_level_by_code/:code', is_logged_in_user, nocache, async (req, res, next) => {
+app.post('/api/ifgame/new_level_by_code/:code', 
+	nocache, require_logged_in_user,
+	async (req: $Request, res: $Response, next: NextFunction): Promise<any> => {
 	try {
 		const code = req.params.code;
 		const level = IfLevelModelFactory.create(code);
 		const now = from_utc_to_myql(to_utc(new Date()));
 
-		const username = get_username_or_null(req);
+		const username = get_username_or_emptystring(req);
 		const insert_sql = `INSERT INTO iflevels (username, code, title, description, completed, 
 			pages, history, created, updated) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`;
 		level.username = username;
 
-		let insert_results = await get_mysql_connection().then( conn => {
-			let r = conn.query(insert_sql, [level.username, level.code, level.title, level.description,
-				level.completed ? 1 : 0, JSON.stringify(level.pages), JSON.stringify(level.history), 
-				now, now ]);
-			conn.end();
-			return r;
-		});
+		const values = [level.username, level.code, level.title, level.description,
+				level.completed ? 1 : 0, 
+				JSON.stringify(level.pages), JSON.stringify(level.history), 
+				now, now ];
+
+		let insert_results = await run_mysql_query(insert_sql, values);
 
 		level._id = insert_results.insertId;
 
-		res.json(return_level_or_levels_prepared_for_transmit(level.toJson()));
+		res.json(return_level_prepared_for_transmit(level.toJson()));
 	} catch (e) {
 		next(e);
 	}
 });
 
 
+
 // List objects owned by the logged in user.
 // :type may be 'all', or limited to a single code.
-app.get('/api/ifgame/levels/byCode/:code', is_logged_in_user, nocache, async (req, res, next) => {
+app.get('/api/ifgame/levels/byCode/:code', 
+	nocache, require_logged_in_user,
+	async (req: $Request, res: $Response, next: NextFunction): Promise<any> => {
 	try {
 		const sql = 'SELECT * FROM iflevels WHERE username = ? AND (code = ? OR ? = "all")';
 		const code = req.params.code;
-		const username = get_username_or_null(req);
+		const username = get_username_or_emptystring(req);
 
-		let iflevels = await get_mysql_connection().then( conn => {
-			let r = conn.query(sql, [username, code, code]);
-			conn.end();
-			return r;
-		});
+		let iflevels = await run_mysql_query(sql, [username, code, code]);
 
 		// Convert into models, and then back to JSON.
-		iflevels = iflevels.map( l => (new IfLevelModel(l)).toJson() );
+		iflevels = iflevels.map( (l: Object): Object => (new IfLevelModel(l)).toJson() );
 
 		// Remove secret fields and transmit.
-		res.json(return_level_or_levels_prepared_for_transmit(iflevels));
+		iflevels = iflevels.map( (l: Object): Object => return_level_prepared_for_transmit(l));
+		res.json(iflevels);
 	} catch (e) {
 		next(e);
 	}
@@ -448,25 +460,20 @@ app.get('/api/ifgame/levels/byCode/:code', is_logged_in_user, nocache, async (re
 
 
 // Select object, provide it is owned by the logged in user.
-app.get('/api/ifgame/level/:id', is_logged_in_user, nocache, async (req, res, next) => {
+app.get('/api/ifgame/level/:id', nocache, require_logged_in_user,
+	async (req: $Request, res: $Response, next: NextFunction): Promise<any> => {
 	try {
 		const sql = 'SELECT * FROM iflevels WHERE _id = ? AND username = ?';
 		const _id = req.params.id;
-		const username = get_username_or_null(req);
+		const username = get_username_or_emptystring(req);
 
-		let select_results = await get_mysql_connection().then( conn => {
-			let r = conn.query(sql, [_id, username]);
-			conn.end();
-			return r;
-		});
+		let select_results = await run_mysql_query(sql, [_id, username]);
 
-		if(select_results.length === 0) {
-			return res.sendStatus(404);
-		}
+		if(select_results.length === 0) return res.sendStatus(404);
 		
 		let iflevel = new IfLevelModel(select_results[0]); // initialize from sql
 		
-		res.json(return_level_or_levels_prepared_for_transmit(iflevel.toJson()));
+		res.json(return_level_prepared_for_transmit(iflevel.toJson()));
 	} catch (e) {
 		next(e);
 	}
@@ -476,21 +483,18 @@ app.get('/api/ifgame/level/:id', is_logged_in_user, nocache, async (req, res, ne
 /** Delete
 	This end-point is only used for testing purposes.  Hard-coded for test user and *all*  test pages.
 */
-app.delete('/api/ifgame/level/:id', is_logged_in_user, nocache, async (req, res, next) => {
+app.delete('/api/ifgame/level/:id', 
+	nocache, require_logged_in_user,
+	async (req: $Request, res: $Response, next: NextFunction): Promise<any> => {
 	try {
 		const sql = 'DELETE FROM iflevels WHERE username = "test" '; // AND _id = ?
-		//const _id = req.params.id;
-		const username = get_username_or_null(req);
+		const username = get_username_or_emptystring(req);
 
 		if(username !== 'test') {
 			return res.sendStatus(401); // unauthorized.
 		}
 
-		let delete_results = await get_mysql_connection().then( conn => {
-			let r = conn.query(sql); //, [_id]);
-			conn.end();
-			return r;
-		});
+		let delete_results = await run_mysql_query(sql); //, [_id]);
 
 		res.json({success: (delete_results.affectedRows >= 1)});
 
@@ -501,19 +505,17 @@ app.delete('/api/ifgame/level/:id', is_logged_in_user, nocache, async (req, res,
 
 
 // Update One
-app.post('/api/ifgame/level/:id', is_logged_in_user, nocache, async (req, res, next) => {
+app.post('/api/ifgame/level/:id', 
+	nocache, require_logged_in_user,
+	async (req: $Request, res: $Response, next: NextFunction): Promise<any> => {
 	try {
-		const username = get_username_or_null(req);
+		const username = get_username_or_emptystring(req);
 		const _id = req.params.id;
 		const sql_select = 'SELECT * FROM iflevels WHERE _id = ? AND username = ?';
 		const sql_update = `UPDATE iflevels SET completed = ?, pages = ?, history = ?, 
 			updated = ? WHERE _id = ? AND username = ?`;
 
-		let select_results = await get_mysql_connection().then( conn => {
-			let r = conn.query(sql_select, [_id, username]);
-			conn.end();
-			return r;
-		});
+		let select_results = await run_mysql_query(sql_select, [_id, username]);
 
 		// Return 404 if no results match.
 		if(select_results.length === 0) return res.sendStatus(404);
@@ -523,32 +525,23 @@ app.post('/api/ifgame/level/:id', is_logged_in_user, nocache, async (req, res, n
 
 		// update.
 		let iflevel = new IfLevelModel(select_results[0]); // initialize from sql
-		console.log(iflevel.pages[iflevel.pages.length-1].correct);
 		iflevel.updateUserFields(req.body); // update client_f and history
-		console.log(iflevel.pages[iflevel.pages.length-1].correct);
 
 		IfLevelModelFactory.addPageOrMarkAsComplete(iflevel); 
-		console.log(iflevel.pages[iflevel.pages.length-1].correct);
 
-		let update_results = await get_mysql_connection().then( conn => {
-			let r = conn.query(sql_update, [
-					iflevel.completed ? 1 : 0, 
+		let values = [iflevel.completed ? 1 : 0, 
 					JSON.stringify(iflevel.pages), 
 					JSON.stringify(iflevel.history), 
 					from_utc_to_myql(to_utc(iflevel.updated)), 
 					iflevel._id, 
-					iflevel.username
-				]);
-			conn.end();
-			return r;
-		});
+					iflevel.username];
+
+		let update_results = await run_mysql_query(sql_update, values);
 
 		// Ensure exactly 1 item was updated.
-		if(update_results.changedRows !== 1) {
-			return res.sendStatus(500);
-		}
+		if(update_results.changedRows !== 1) return res.sendStatus(500);
 
-		res.json(return_level_or_levels_prepared_for_transmit(iflevel.toJson()));
+		res.json(return_level_prepared_for_transmit(iflevel.toJson()));
 	} catch (e) {
 		next(e);
 	}
@@ -564,43 +557,49 @@ app.post('/api/ifgame/level/:id', is_logged_in_user, nocache, async (req, res, n
 
 
 // Find the current username.
-function get_username_or_null(req) {
+function get_username_or_emptystring(req: $Request): string {
 	const  token = req.cookies['x-access-token'];
-	if (!token) return null;
+	if (!token) return '';
 
-	const result = jwt.verify(token, JWT_AUTH_SECRET);
+	let result = jwt.verify(token, JWT_AUTH_SECRET);
+	result = (result: any); // cast to fix flow issue converting mixed -> object.
+	result = (result: { username: string});
 
-	return (result.username ? result.username : null);
+	if(typeof result.username === 'string') return result.username;
+	return '';
 }
 
-// If the current request doesn't have a logged in user, assert a failure & return error.
-function is_logged_in_user(req, res, next) {
-	const username = get_username_or_null(req);
-	//console.log({ username });
+/**
+	Middleware requiring the user to be logged in.
 
+	Fails with 401 error if not logged in.
+*/
+function require_logged_in_user(req: $Request, res: $Response, next: NextFunction): any {
+	const username = get_username_or_emptystring(req);
+	
 	// Refresh login token
-	if(username !== null) {
+	if(username !== '') {
 		const token = jwt.sign({ username: username }, JWT_AUTH_SECRET, { expiresIn: 864000 });
 		const last = (new Date()).toString().replace(/ /g, '_').replace('(', '').replace(')', '').replace(/:/g,'_').replace(/-/g, '_');
 		res.cookie('x-access-token', token);
 		res.cookie('x-access-token-username', username);
 		res.cookie('x-access-token-refreshed', last);
 		return next();
-	}
+	} 
 
 	// username is null.  Send invalid request.
-	res.sendStatus(401);
+	return res.sendStatus(401);
 }
 
 
 // Log out.
-app.post('/api/logout', (req, res) => {
+app.post('/api/logout', (req: $Request, res: $Response) => {
 	res.clearCookie('x-access-token');
 	res.clearCookie('x-access-token-refreshed');
 	res.clearCookie('x-access-token-username');
 	res.json({ 'logout': true });
 });
-app.get('/api/logout', (req, res) => {
+app.get('/api/logout', (req: $Request, res: $Response) => {
 	res.clearCookie('x-access-token');
 	res.clearCookie('x-access-token-refreshed');
 	res.clearCookie('x-access-token-username');
@@ -610,22 +609,21 @@ app.get('/api/logout', (req, res) => {
 
 
 // Simple end-point to test if the user is logged in or not.
-app.get('/api/login/', is_logged_in_user, (req, res) => {
-	res.json({ 'login': true });
+app.get('/api/login/', (req: $Request, res: $Response) => {
+	let u: string = get_username_or_emptystring(req);
+
+	res.json({ 'logged_in': u!=='', username: u });
 });
 
 
 // Delete the test user
-app.post('/api/login_clear_test_user/', async (req, res, next) => {
+app.post('/api/login_clear_test_user/', 
+	nocache,
+	async (req: $Request, res: $Response, next: NextFunction): Promise<any> => {
 	try {
 		const sql = 'DELETE FROM users WHERE username = "test"';
 
-		let results = await get_mysql_connection().then( conn => {
-			let r = conn.query(sql);
-			conn.end();
-			return r;
-		});
-
+		let results = await run_mysql_query(sql);
 		return res.json({ success: true, affectedRows: results.affectedRows});
 		
 	} catch (e) {
@@ -639,19 +637,24 @@ app.post('/api/login_clear_test_user/', async (req, res, next) => {
 	Creating a user requires a passed token, which much match the value given in secret.js
 	Without this token, no users can be created.
 */
-app.post('/api/login/', nocache, async (req, res, next) => {
+app.post('/api/login/', 
+	nocache, 
+	async (req: $Request, res: $Response, next: NextFunction): Promise<any> => {
 	try {
-		let token = req.body.token;
-		let password = req.body.password;
+		//
+		let body = (req.body: any); // cast to fix flow issue converting mixed -> object.
+		body = (body: { 
+				username: string, token: string, 
+				username: string, password: string 
+			});
+
+		let token = body.token;
+		let password = body.password;
 		let hashed_password = bcrypt.hashSync(password, 8);
-		let user = { username: req.body.username, hashed_password: hashed_password };
+		let user = { username: body.username, hashed_password: hashed_password };
 		const select_sql = 'SELECT * FROM users WHERE username = ?';
 
-		let select_results = await get_mysql_connection().then( conn => {
-			let r = conn.query(select_sql, [user.username]);
-			conn.end();
-			return r;
-		});
+		let select_results = await run_mysql_query(select_sql, [user.username]);
 
 		// test the db for presense of user.  If not found, create given proper perms.
 		if(select_results.length === 0) {
@@ -663,11 +666,7 @@ app.post('/api/login/', nocache, async (req, res, next) => {
 			} else {
 				// Yes, create user and log in.
 				const insert_sql = 'INSERT INTO users (username, hashed_password) VALUES (?, ?)';
-				let insert_results = await get_mysql_connection().then( conn => {
-					let r = conn.query(insert_sql, [user.username, user.hashed_password]);
-					conn.end();
-					return r;
-				});
+				let insert_results = await run_mysql_query(insert_sql, [user.username, user.hashed_password]);
 				
 				if(insert_results.affectedRows !== 1) throw new Error(500);
 			}
@@ -708,34 +707,41 @@ app.get('/', (req, res) => {
 	res.sendFile(path.resolve('jsgames/build/index.html'));
 });
 */
-app.get('/version', nocache, (req, res) => {
+app.get('/api/version', nocache, (req: $Request, res: $Response) => {
 	res.json({ version: 1});
 });
 
-
 // Sample endpoint to generate an error.
-app.get('/error', nocache, () => {
+app.get('/api/error', nocache, () => {
 	throw new Error('test');
 });
 
+const build_path = (filename: string): string => {
+	if(DEBUG) 
+		return path.join(__dirname, '../build/'+filename);
+	else
+		return path.join(__dirname, 'jsgames/build/'+filename);
+};
 
 // Build files. Note that the paths don't work on :3000 when developing,
 // but they do work when deployed due to passenger on dreamhost using that folder.
-app.get('/favicon.ico', (req, res) => {
-	res.sendFile(path.resolve('jsgames/build/favicon.ico'));
+app.get('/favicon.ico', (req: $Request, res: $Response) => {
+	res.sendFile(build_path('favicon.ico'));
 });
-app.get('/transformed.js', (req, res) => {
-	res.sendFile(path.resolve('jsgames/build/transformed.js'));
+app.get('/transformed.js', (req: $Request, res: $Response) => {
+	res.sendFile(build_path('transformed.js'));
 });
-app.get('/transformed.js.map', (req, res) => {
-	res.sendFile(path.resolve('jsgames/build/transformed.js.map'));
+app.get('/transformed.js.map', (req: $Request, res: $Response) => {
+	res.sendFile(build_path('transformed.js.map'));
 });
+
 
 // Default case that returns the general index page.
 // Needed for when client is on a subpage and refreshes the page to return the react app.
 // SHould be last.
-app.get('*', (req, res) => {
-	res.sendFile(path.resolve('jsgames/build/index.html'));
+app.get('*', (req: $Request, res: $Response) => {
+	// If on local, don't add jsgames. On server, code is in subfolder.
+	res.sendFile(build_path('index.html'));
 });
 
 

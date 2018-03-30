@@ -104,6 +104,12 @@ npm run build
 ```
 
 
+If installing new library through npm or yarn, use flow-typed to install the type defs.
+```
+flow-typed install
+```
+
+
 ## Author
 
 Nathan Garrett, profgarrett@gmail.com

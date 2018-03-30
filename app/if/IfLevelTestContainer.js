@@ -36,7 +36,7 @@ const login_tests = [
 		title: 'Login: check status as guest',
 		url: '/api/login',
 		options: { method: 'GET' },
-		test_response: (response) => response.status === 401
+		test_response: (response, json) => json.logged_in === false
 	},
 	{
 		title: 'Login: Delete test user',
@@ -62,7 +62,7 @@ const login_tests = [
 		title: 'Login: check status as logged in user',
 		url: '/api/login',
 		options: { method: 'GET' },
-		test_response: (response, json) => response.status !== 401 && json.login === true
+		test_response: (response, json) => response.status !== 401 && json.logged_in === true
 	},
 	{
 		title: 'Login: logout valid user',
@@ -194,7 +194,7 @@ const if_tests = [
 		}
 	},
 	{
-		title: 'if: Successfull BAD solution for test page (test score)',
+		title: 'if: Successfull bad solution for test page (test score)',
 		url: ()=> '/api/ifgame/level/'+if_game_json._id,
 		options: { method: 'POST' },
 		body: ()=> { 
@@ -204,7 +204,7 @@ const if_tests = [
 		},
 		test_response: (response, json) => 
 				response.status === 200 && 
-				json.pages.length === 3 &&
+				json.pages.length === 4 &&
 				json.pages[2].client_f === if_game_test_client_f_incorrect &&
 				json.pages[2].correct === false &&
 				json.pages[0].correct && json.pages[1].correct && json.pages[2].correct === false
