@@ -1,0 +1,9 @@
+# Forces passenger to use correct node version.
+# See https://help.dreamhost.com/hc/en-us/articles/215769578-Passenger-overview
+PassengerNodejs /home/profgarrett/.nvm/versions/node/v9.4.0/bin/node
+
+
+# Forced SSL (redirecting http to https)
+# RewriteEngine on
+# RewriteCond %{SERVER_PORT} !^443$
+# RewriteRule ^/(.*) https://%{HTTP_HOST}/$1 [NC,R=301,L] 

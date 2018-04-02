@@ -42,7 +42,7 @@ ln -s jsgames/build/ public/
 ln -s jsgames/server/app.js app.js
 ```
 
-
+If you're having trouble getting npm packages to update, npm-install-missing is very useful.
 
 ### Updating
 
