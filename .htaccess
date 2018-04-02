@@ -3,6 +3,7 @@
 PassengerNodejs /home/profgarrett/.nvm/versions/node/v9.4.0/bin/node
 
 
+# SetEnv _PASSENGER_NODE_CONTROL_SERVER 1
 # Forced SSL (redirecting http to https)
 # RewriteEngine on
 # RewriteCond %{SERVER_PORT} !^443$

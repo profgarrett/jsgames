@@ -10,7 +10,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "lint": "eslint.js",
-    "build": "webpack --config webpack.build.config.js --display-error-details",
+    "build": "webpack --display-error-details | flow-remove-types src -d build",
     "startflow": "./node_modules/flow-bin/flow-osx-v0.69.0/flow",
     "startreact": "webpack-dev-server --hot --inline --watch --watch-poll",
     "startnode": "nodemon server/app.js --watch server --watch shared --exec babel-node --presets babel-preset-env",
@@ -79,5 +79,6 @@
     "webpack-dev-server": "^3.1.1"
   },
   "devDependencies": {
+    "flow-remove-types": "^1.2.3"
   }
 }

@@ -7,7 +7,7 @@ var HTMLWebpackPluginConfig = new HTMLWebpackPlugin({
 });
 
 module.exports = {
-	entry: ['babel-polyfill', __dirname + '/app/index.js'],
+	entry: ['babel-polyfill', __dirname + '/src/app/index.js'],
 	module: {
 		loaders: [
 			{
@@ -23,7 +23,7 @@ module.exports = {
 	},
 	output: {
 		filename: 'transformed.js',
-		path:   __dirname + '/build'
+		path:   __dirname + '/build/public'
 	},
 	plugins: [HTMLWebpackPluginConfig],
 	devtool: 'source-map',
