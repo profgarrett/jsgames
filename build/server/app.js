@@ -12,8 +12,10 @@ const bcrypt = require('bcrypt');
 const cookieParser = require('cookie-parser');
 const bugsnag = require('bugsnag');
 
-const { USER_CREATION_SECRET, JWT_AUTH_SECRET, BUGSNAG_API, DEBUG,
-	MYSQL_HOST, MYSQL_USER, MYSQL_PASSWORD, MYSQL_DATABASE } = require('./../secret.js'); 
+const {USER_CREATION_SECRET, JWT_AUTH_SECRET, BUGSNAG_API, DEBUG,
+		MYSQL_HOST, MYSQL_USER, MYSQL_PASSWORD, MYSQL_DATABASE 
+		} = require('./secret.js'); 
+
 
 const { IfLevelModelFactory, IfLevelModel } = require('./IfGame');
 
@@ -21,14 +23,14 @@ const jwt = require('jsonwebtoken');
 
 const mysql = require('promise-mysql');
 
-const { sql01 } = require('./../sql/sql01.js');
-const { sql02 } = require('./../sql/sql02.js');
-const { sql03 } = require('./../sql/sql03.js');
+const { sql01 } = require('./../../sql/sql01.js');
+const { sql02 } = require('./../../sql/sql02.js');
+const { sql03 } = require('./../../sql/sql03.js');
 
 var fs = require('fs');
 var util = require('util');
 var logFile = fs.createWriteStream('log.txt', { flags: 'a' });
-var logStdout = process.stdout;
+//var logStdout = process.stdout;
 
                                                                  
 // import type { Connection } from 'mysql';
@@ -57,12 +59,15 @@ function shouldCompress (req          , res           )          {
 }
 
 
+// Disable DEBUG as bugsnag doesn't work with passenger.
+// 	Possibly due to STDOUT issue.
 // Load bugsnag if it is defined in secret.js.
-if(!DEBUG && typeof BUGSNAG_API !== undefined && BUGSNAG_API.length > 0) {
+if(false /*!DEBUG && typeof BUGSNAG_API !== undefined && BUGSNAG_API.length > 0*/) {
 	bugsnag.register(BUGSNAG_API);
 	app.use(bugsnag.requestHandler);
 	app.use(bugsnag.errorHandler);
 }
+
 
 // Set parsing for application/x-www-form-urlencoded
 app.use(bodyParser.json());
@@ -82,13 +87,11 @@ function nocache(req          , res           , next              ) {
 
 
 // If we're not debugging, throw all errors to log file.
-/*
-const log_error = DEBUG ? console.log : function (arg?: any) {
+const log_error = DEBUG ? console.log : function (arg      ) {
 		arg;
 		logFile.write(util.format.apply(null, arguments) + '\n');
-		logStdout.write(util.format.apply(null, arguments) + '\n');
+		//ogStdout.write(util.format.apply(null, arguments) + '\n');
 };
-*/
 
 // Log requests and arguments to the console for easier debugging.
 if(DEBUG)
@@ -288,6 +291,7 @@ app.get('/api/sql/',
 		}
 		res.json({ 'old_version': old_version, 'new_version': 3 });
 	} catch(e ){
+		log_error(e);
 		return next(e);
 	}
 });
@@ -429,6 +433,7 @@ app.post('/api/ifgame/new_level_by_code/:code',
 
 		res.json(return_level_prepared_for_transmit(level.toJson()));
 	} catch (e) {
+		log_error(e);
 		next(e);
 	}
 });
@@ -454,6 +459,7 @@ app.get('/api/ifgame/levels/byCode/:code',
 		iflevels = iflevels.map( (l        )         => return_level_prepared_for_transmit(l));
 		res.json(iflevels);
 	} catch (e) {
+		log_error(e);
 		next(e);
 	}
 });
@@ -475,6 +481,7 @@ app.get('/api/ifgame/level/:id', nocache, require_logged_in_user,
 		
 		res.json(return_level_prepared_for_transmit(iflevel.toJson()));
 	} catch (e) {
+		log_error(e);
 		next(e);
 	}
 });
@@ -499,6 +506,7 @@ app.delete('/api/ifgame/level/:id',
 		res.json({success: (delete_results.affectedRows >= 1)});
 
 	} catch (e) {
+		log_error(e);
 		next(e);
 	}
 });
@@ -543,6 +551,7 @@ app.post('/api/ifgame/level/:id',
 
 		res.json(return_level_prepared_for_transmit(iflevel.toJson()));
 	} catch (e) {
+		log_error(e);
 		next(e);
 	}
 
@@ -627,6 +636,7 @@ app.post('/api/login_clear_test_user/',
 		return res.json({ success: true, affectedRows: results.affectedRows});
 		
 	} catch (e) {
+		log_error(e);
 		next(e);
 	}
 });
@@ -693,6 +703,7 @@ app.post('/api/login/',
 		return res.json({ username: user.username, logged_in: true });
 	}
 	catch (e) {
+		log_error(e);
 		next(e);
 	}
 });
@@ -708,20 +719,32 @@ app.get('/', (req, res) => {
 });
 */
 app.get('/api/version', nocache, (req          , res           ) => {
-	res.json({ version: 1});
+	res.json({ version: 1.0, 
+		environment: process.env.NODE_ENV, 
+		debug: DEBUG 
+	});
 });
 
 // Sample endpoint to generate an error.
-app.get('/api/error', nocache, () => {
-	throw new Error('test');
+app.get('/api/error', nocache, 
+	(req          , res           , next              ) => {
+
+	try {
+		throw new Error('test');
+	} catch (e) {
+		log_error(e);
+		next(e);
+	}
 });
+
 
 const build_path = (filename        )         => {
 	if(DEBUG) 
-		return path.join(__dirname, '../build/'+filename);
+		return path.join(__dirname, '../../build/public/'+filename);
 	else
-		return path.join(__dirname, 'jsgames/build/'+filename);
+		return path.join(__dirname, '../public/'+filename);
 };
+///home/profgarrett/excel.fun/jsgames/build/server/index.html
 
 // Build files. Note that the paths don't work on :3000 when developing,
 // but they do work when deployed due to passenger on dreamhost using that folder.
@@ -741,10 +764,23 @@ app.get('/transformed.js.map', (req          , res           ) => {
 // SHould be last.
 app.get('*', (req          , res           ) => {
 	// If on local, don't add jsgames. On server, code is in subfolder.
+	log_error( build_path('index.html'));
 	res.sendFile(build_path('index.html'));
 });
 
+//app.use(function (err, req, res, next) {
+  // handle error
+
+//});
+
+process.on('uncaughtException', function (er) {
+  log_error(er);
+  process.exit(1);
+});
 
 app.listen(DEBUG ? 3000 : 80, function(){
-	console.log('app started ' + (DEBUG ? 3000 : 80) + ' - ' + (new Date()).toString() );
+	if(DEBUG) 
+		console.log('app started ' + (DEBUG ? 3000 : 80) + ' - ' + (new Date()).toString() );
 });
+
+
