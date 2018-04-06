@@ -1,23 +1,4 @@
-
-
-/**
-	Creates data for use in simulation.
-	
-	Returns: {
-		data: 
-			[1, 2, 3]  
-			or  
-			[{ 'x': [1,2,3], 'y': [1,2,3]}]
-		questions: [
-			{ 	text: 'What is the biggest number?',
-				answer: 3
-			},
-			...
-		]
-	}
-}
-*/
-
+// @flow
 
 const NAMES = {
 	first: [ 'John', 'Sarah', 'Bill', 'Amos', 'Armine', 'Zack', 'Maria', 'Ayoub', 'Thomas', 'James',
@@ -28,18 +9,36 @@ const NAMES = {
 
 const DataFactory = {
 
-	randB: (from, to) => {
-		return Math.floor(Math.random()*(to-from+1)+from);
+	// Return a date before or after today by a certain range.
+	// @seed is optional.
+	randDate(plus_or_minus_days: number = 0, seed?: number): Date {
+		let d = new Date();
+		let offset = DataFactory.randB(-plus_or_minus_days, plus_or_minus_days, seed);
+		d.setDate(d.getDate() + offset);
+		return d;
 	},
 
-	randOf: (a) => {
-		let i = Math.floor(Math.random() * a.length);
+	// Return a random integer between the two given numbers.
+	// @seed is optional.
+	randB: (from: number, to: number, seed?: number): number => {
+		return Math.floor(
+			(typeof seed === 'undefined' ? Math.random() : seed )
+			* (to-from+1)+from
+		);
+	},
+
+	// Return one of the given array.
+	// @seed is optional.
+	randOf: (a: Array<string>, seed?: number ): any => {
+		let i = Math.floor( 
+					(typeof seed === 'undefined' ?  Math.random() : seed )
+					* a.length);
 		return a[i];
 	},
 
-	randNumbers: (rows, cols=3, max_n=10)=>{
+	randNumbers: (rows: number, cols: number = 3, max_n: number = 10): Array<number> =>{
 		const alpha = 'abcdefghijklmnopqrstuvwxyz';
-		let results = [];
+		let results = Array();
 		let result = {};
 
 		for(let i=0; i<rows; i++) {
@@ -52,7 +51,19 @@ const DataFactory = {
 		return results;
 	},
 
-	randPeople: (rows) => {
+	randDates: (rows: number, columns: number = 1, 
+				options: Object={ a_range: 600, b_range: 600, c_range: 600}): Array<Object> => {
+		let results = [];
+		for(let i=0; i<rows; i++) {
+			results.push({ a: DataFactory.randDate( -1*DataFactory.randB(0,options.a_range) ) });	
+			// ugly/lazy hack
+			if(columns > 1) results[results.length-1]['b'] = DataFactory.randDate( -1*DataFactory.randB(0,options.b_range) );
+			if(columns > 2) results[results.length-1]['c'] = DataFactory.randDate( -1*DataFactory.randB(0,options.c_range) );
+		}
+		return results;
+	},
+
+	randPeople: (rows: number): Array<Object> => {
 		let results = [];
 		for(let i=0; i<rows; i++) {
 			results.push({ 'a': DataFactory.randOf(NAMES.first), 'b': DataFactory.randOf(NAMES.last) });
@@ -60,7 +71,7 @@ const DataFactory = {
 		return results;
 	},
 
-	randNumbersAndColors: (rows) => {
+	randNumbersAndColors: (rows: number): Array<Object> => {
 		let result = [];
 		for(let i=0; i<rows; i++)
 			result.push({ a: DataFactory.randB(0, 10), b: DataFactory.randOf(['red', 'blue', 'yellow', 'green']) });
@@ -70,42 +81,16 @@ const DataFactory = {
 	// Randomize a given array in place.
 	// Slightly modified version of that given 
 	// in an answer at https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array
-	randomizeList: (old_array) => {
+	// May be identical to original list.
+	randomizeList: (old_array: Array<any>): Array<any> => {
 		let array = old_array.slice(0);
 		for (let i = array.length - 1; i > 0; i--) {
 			let j = Math.floor(Math.random() * (i + 1));
 			[array[i], array[j]] = [array[j], array[i]];
 		}
 		return array;
-	},
-	
-	/*
-		Returns a number of random data points in an array with labels
-
-		[
-			{ value: 1, label: 'asdf'},
-			...
-		]
-
-	*/
-	random_sequence: (props) => {
-		let data = [], i,
-			n = props.n ? props.n : 5,
-			max = props.max ? props.max : 100,
-			min = props.min ? props.min : 0,
-			title = props.titles ? i => props.titles[i] : i => i;
-
-
-		for(i=0; i<n; i++) {
-			data.push( {
-				value: Math.floor(Math.random()*(max-min)) + min,
-				title: title(i)
-			});
-
-		}
-
-		return data;
 	}
+	
 
 };
 module.exports.DataFactory = DataFactory;

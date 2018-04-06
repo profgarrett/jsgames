@@ -114,91 +114,8 @@ if(DEBUG)
 
 
 ////////////////////////////////////////////////////////////////////////
-//  Chart Game
-////////////////////////////////////////////////////////////////////////
-
-/*
-// Create
-app.post('/api/chartgame/level', (req, res) => {
-	let level = CgLevelModelFactory.createTest();
-	let _db = null;
-
-	MongoClient.connect(url) //, {native_parser:true}, function(err, mongo) {
-		.then( conn => _db = conn.db('jsgames') )
-		.then( db => db.collection('chartlevels').insert( level.toJson() ) )
-		.then( mongoresult => {
-			let id = mongoresult.insertedIds[0];
-			return _db.collection('chartlevels').findOne({ _id: new ObjectId(id) });
-		})
-		.then( mongoresult => res.json(mongoresult) )
-		.catch( err => log_error(err, res) );
-});
-
-// List
-app.get('/api/chartgame/level/', (req, res) => {
-
-	MongoClient.connect(url) 
-		.then( conn => conn.db('jsgames').collection('chartlevels').find() )
-		.then( q => q.toArray() )
-		.then( mongoresult => res.json(mongoresult) )
-		.catch( err => log_error(err, res) );
-});
-
-// Select One
-app.get('/api/chartgame/level/:id', (req, res) => {
-
-	MongoClient.connect(url)
-		.then( conn => conn.db('jsgames') )
-		.then( db => db.collection('chartlevels').findOne({ _id: new ObjectId(req.params.id) }) )
-		.then( mongoresult => res.json(mongoresult) )
-		.catch( err => log_error(err, res) );
-});
-
-// Delete One
-app.delete('/api/chartgame/level/:id', (req, res) => {
-
-	MongoClient.connect(url)
-		.then( conn => conn.db('jsgames') )
-		.then( db => db.collection('chartlevels').remove({ _id: new ObjectId(req.params.id) }) )
-		.then( mongoresult => res.json(mongoresult) )
-		.catch( err => log_error(err, res) );
-});
-
-// Update One
-app.post('/api/chartgame/level/:id', (req, res) => {
-	let _db = null,
-		_level_model = null;
-	
-	MongoClient.connect(url)
-		.then( conn => _db = conn.db('jsgames') )
-		.then( db => db.collection('chartlevels').findOne({ _id: new ObjectId(req.params.id) }) )
-		.then( json => {
-			if(json === null) throw Error('404');
-			_level_model = new CgLevelModel(json);
-
-			// Update user fields and (potentially) add a new page.
-			_level_model.updateUserFields(req.body);
-			CgLevelModelFactory.updateTest(_level_model);
-
-			return _level_model.toJson();
-		})
-		.then( json => _db.collection('chartlevels').update({_id: new ObjectId(req.params.id) }, json) )
-		.then( mongoresult => {
-			if(mongoresult.result.ok === 1) {
-				return res.json(_level_model);
-			} else {
-				throw Error('500');
-			}
-		})
-		.catch( err => log_error(err, res) );
-});
-
-*/
-
-////////////////////////////////////////////////////////////////////////
 //  DB setup and maintenance
 ////////////////////////////////////////////////////////////////////////
-
 
 /**
 	Initialize MYSQL with credentials from secret.js.
@@ -419,13 +336,14 @@ app.post('/api/ifgame/new_level_by_code/:code',
 
 		const username = get_username_or_emptystring(req);
 		const insert_sql = `INSERT INTO iflevels (username, code, title, description, completed, 
-			pages, history, created, updated) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+			pages, history, created, updated, seed) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
 		level.username = username;
 
 		const values = [level.username, level.code, level.title, level.description,
 				level.completed ? 1 : 0, 
 				JSON.stringify(level.pages), JSON.stringify(level.history), 
-				now, now ];
+				now, now,
+				level.seed ];
 
 		let insert_results = await run_mysql_query(insert_sql, values);
 

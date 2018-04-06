@@ -16,8 +16,8 @@
     "build5": "./deploy.sh",
     "build": "build1 | build2 | build3",
     "startflow": "./node_modules/flow-bin/flow-osx-v0.69.0/flow",
-    "startreact": "webpack-dev-server --hot --inline --watch --watch-poll",
-    "startnode": "nodemon src/server/app.js --watch src --exec babel-node --presets babel-preset-env",
+    "startreact": "webpack-dev-server --hot --inline --watch",
+    "startnode": "nodemon src/server/app.js --watch src --exec babel-node --presets babel-preset-env --inspect",
     "startsublime": "open /Applications/Sublime\\ Text.app/Contents/SharedSupport/bin/subl"
   },
   "author": "",

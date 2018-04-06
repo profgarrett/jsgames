@@ -1,14 +1,10 @@
 import 'babel-polyfill'; // IE11 compatability.
-// updated
 import React from 'react';
-//import ReactDOM from 'react-dom';
 import PropTypes from 'prop-types';
-import { Table, Row, Col, Navbar, Nav, NavDropdown, NavItem, MenuItem, HelpBlock, FormControl, Span, Label, Alert } from 'react-bootstrap';
-import { Link } from 'react-router-dom';
-import { LinkContainer } from 'react-router-bootstrap';
-
-
-import { Glyphicon } from 'react-bootstrap';
+import { Row, Col, Alert } from 'react-bootstrap';
+import { OverlayTrigger, Tooltip, Glyphicon } from 'react-bootstrap';
+//import { Link } from 'react-router-dom';
+//import { LinkContainer } from 'react-router-bootstrap';
 
 //  Old browser compatability.
 import 'whatwg-fetch'; // ajax support.
@@ -47,29 +43,46 @@ ErrorBoundary.propTypes = {
 };
 
 
-// This is a standard Glyph for showing success.
-export class OkGlyphicon extends React.Component {
+const glyph = (message, glyph, color='black', font_size=24) => {
+	let style = {
+		fontSize: font_size,
+		color: color,
+		paddingLeft: 2
+	};
+	let id = 'glyph'+Math.random()*999999999999999;
+	let tooltip = <Tooltip id={id}>{ message }</Tooltip>;
+
+	// Note that tooltop must be after the overlay trigger to avoid occuluding it. Prevents tooltip from firing.
+	return (<span>
+			<OverlayTrigger placement='top' overlay={tooltip}>
+				<Glyphicon style={ style } glyph={ glyph } />
+			</OverlayTrigger>
+			{ tooltip }
+		</span>);
+};
+
+
+// Used as an inline checkmark.
+export class SmallOkGlyphicon extends React.Component {
 	render() {
-		let styleYes = {
-			//fontSize: 24,
-			color: '#3c763d',
-			paddingLeft: 2
-		};
-		return <Glyphicon style={ styleYes } glyph='ok'/>;
+		return glyph('Ok', 'ok', '#3c763d', '12');
 	}
 }
 
 
 
 // This is a standard Glyph for showing success.
-export class SuccessGlyphicon extends React.Component {
+export class CompletedGlyphicon extends React.Component {
 	render() {
-		let styleYes = {
-			fontSize: 24,
-			color: '#3c763d',
-			paddingRight: 2
-		};
-		return <Glyphicon style={ styleYes } glyph='ok-circle'/>;
+		return glyph('Completed', 'check');
+	}
+}
+
+
+// This is a standard Glyph for showing success.
+export class CorrectGlyphicon extends React.Component {
+	render() {
+		return glyph('Correct', 'ok-circle', '#3c763d');
 	}
 }
 
@@ -77,26 +90,16 @@ export class SuccessGlyphicon extends React.Component {
 // This is a standard Glyph for showing progress.
 export class ProgressGlyphicon extends React.Component {
 	render() {
-		let styleYes = {
-			fontSize: 24,
-			paddingRight: 2,
-			color: 'black'
-		};
-		return <Glyphicon style={ styleYes } glyph='question-sign'/>;
+		return glyph('In progress', 'question-sign');
 	}
 }
 
 
 // This is a standard Glyph for showing success.
-export class FailureGlyphicon extends React.Component {
+export class IncorrectGlyphicon extends React.Component {
 
 	render() {
-		let styleNo = {
-			fontSize: 24,
-			paddingRight: 2,
-			color: 'rgb(199, 37, 78)'
-		};
-		return <Glyphicon style={ styleNo } glyph='remove-circle' />;
+		return glyph('Incorrect', 'remove-circle', 'rgb(199, 37, 78)');
 	}
 
 }

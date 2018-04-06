@@ -3,6 +3,24 @@ const { Schema } = require('./Schema');
 var FormulaParser = require('hot-formula-parser').Parser;
 
 
+/** 
+	This const is used to provide a list of available tutorials.
+	Used on both client and server.
+
+	Code value must match the filename in server/tutorial/...js
+*/
+const IfLevels = [
+	{ code: 'tutorial', label: 'Website Introduction', description: 'Learn about this website by completing this tutorial.' },
+	{ code: 'dates', label: 'Date Functions', description: 'Learn about date functions.' },
+	{ code: 'math', label: 'Math operations', description: 'Create formulas with math symbols.' },
+/*	{ code: 'sum', label: 'Sum function', description: 'Learn how to use the SUM function.' },
+	{ code: 'text', label: 'Text functions', description: 'Learn a number of useful text functions' },
+	{ code: 'if1', label: 'IF Conditions', description: 'Learn how to create IF conditions' },
+	{ code: 'if2', label: 'IF Function', description: 'Learn how to use the IF function' }
+*/
+];
+
+
 // Are the arrays similar or different?
 const arrayDifferent = (a1, a2) => {
 	// If any nulls, then return true (as a null is an unitialized user submitted answer)
@@ -17,23 +35,6 @@ const arrayDifferent = (a1, a2) => {
 	return false;
 };
 
-/** 
-	This const is used to provide a list of available tutorials.
-	Used on both client and server.
-
-	Code value must match the filename in server/tutorial/...js
-*/
-const IfLevels = [
-	{ code: 'tutorial', label: 'Website Introduction', description: 'Learn about this website.' },
-	{ code: 'math', label: 'Math operations', description: 'Create formulas with math symbols.' },
-	{ code: 'sum', label: 'Sum function', description: 'Learn how to use the SUM function.' },
-	{ code: 'text', label: 'Text functions', description: 'Learn a number of useful text functions' },
-	{ code: 'if1', label: 'IF Conditions', description: 'Learn how to create IF conditions' },
-	{ code: 'if2', label: 'IF Function', description: 'Learn how to use the IF function' }
-];
-
-
-
 // Convenience function for initializing schema.
 let isDef = function(v) {
 	return typeof v !== 'undefined';
@@ -41,10 +42,152 @@ let isDef = function(v) {
 let isArray = function(u) {
 	return (u instanceof Array);
 };
+
 // Force boolean, not truthy or falsy.
+// Allow null values.
 const bool = function(unknown) {
+	if(unknown === null) return null;
 	return unknown ? true : false;
 };
+
+
+/**
+	noObjects checks to make sure that the passed array doesn't contain any objects other than strings or numbers.
+*/
+const noObjectsInArray = (i_array) => {
+	if(!(i_array instanceof Array)) throw new Error('noObjects can only be passed arrays.');
+	i_array.map( v => {
+		if(!(typeof v === 'string' || typeof v === 'number')) throw new Error('Invalid object passed to IfPageParsonsSchema._def_items');
+	});
+	return i_array;
+};
+
+
+
+// Go through the given obj or array, recursively matching items that look like a date
+// back to the date() object. Works when dates are in '1981-12-20T04:00:14.000Z format, 
+// not Unix seconds mode.  Needed, as some objects are dynamic, such as tests containing dates.
+function revive_dates_recursively(obj) {
+	var datePattern = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
+
+	if(obj instanceof Array ) {
+		return obj.map( o => revive_dates_recursively(o) );
+	}
+
+	if(typeof obj === 'object' ) {
+		for(let name in obj) {
+			if(obj.hasOwnProperty(name)) {
+				obj[name] = revive_dates_recursively(obj[name]);
+			}
+		}
+		return obj;
+	}
+
+	if(typeof obj === 'string') {
+		if(datePattern.test(obj)) {
+			return new Date(obj);
+		}
+	}
+	return obj;
+}
+
+
+// Return fields in common for all Pages.
+function common_schema() {
+
+	return {
+		code: { type: 'String', initialize: (s) => isDef(s) ? s : null },
+		description: { type: 'String', initialize: (s) => isDef(s) ? s : null },
+		helpblock: { type: 'String', initialize: (s) => isDef(s) ? s : null },
+
+		history: { type: 'Array', initialize: (a) => isDef(a) && isArray(a) ? revive_dates_recursively(a) : [] },  /*defHistory*/
+
+		correct: { type: 'Boolean', initialize: (b) => isDef(b) ? bool(b) : null },
+
+		// Do the results need to be correct to save the results?
+		correct_required: { type: 'Boolean', initialize: (b) => isDef(b) ? bool(b) : false },
+
+		// After a page is completed, set TRUE so that no more updates are allowed.
+		// This is done by code in server/ifGame, as the client doesn't know what the conditions are.
+		completed: { type: 'Boolean', initialize: (b) => isDef(b) ? bool(b) : false }
+	};
+}
+
+
+/*
+	A page holds a single choice question.
+
+	It can have an correct choice, or allow any input.
+*/
+class IfPageChoiceSchema extends Schema {
+
+	constructor(json) {
+		super(json); // set passed fields.
+		this.updateCorrect();
+	}
+
+	get schema() {
+		let inherit = common_schema();
+
+		return {
+			...inherit,
+			client: { type: 'String', initialize: (s) => isDef(s) ? s : null },
+			client_items: { type: 'Array', initialize: (a) => isDef(a) && isArray(a) ? noObjectsInArray(a) : [] },
+			solution: { type: 'String', initialize: (s) => isDef(s) ? s : null },
+
+		};
+	}
+
+	// Has the user provided input?
+	client_has_answered() {
+		return this.client !== null;
+	}
+
+	/*
+		Update any fields for which user has permissions.
+		
+		Safe to re-run, with the exception that upon changing client_items, will
+		reset this.correct (since we don't know its status).  Will re-run updateCorrect() in 
+		case this is on the server and we're updating the object.
+
+		Run upon initial obj creation.
+	*/
+	updateUserFields(json) {
+		if(typeof json === 'undefined') throw new Error('IfGames.updateUserFields(json) is null');
+		if(json.type !== this.type ) throw new Error('Invalid type '+json.type+' in ' + this.type + '.updateUserFields');
+
+		// don't allow updates to finished items. Note that completed isn't set internally by this obj,
+		// but instead is set by the server code with knowledge of each tutorial's rules.
+		if(this.completed) return this;
+
+		if(this.client !== json.client ){
+			this.client = json.client;
+			this.correct = null; // we no longer know if the solution is correct.
+			this.history = json.history;
+		}
+
+		return this.updateCorrect();
+	}
+
+	/* 
+		Update correct *if* a solution is provided.
+	*/
+	updateCorrect() {
+		if(this.completed) return; // do not update completed items.
+
+		if(this.client === null) return; // no client submission.
+
+		// Don't set if there is no available solution
+		// Can be either from being on the client w/o (which won't get solutions)
+		//		or being on the client or server with no correct answer.
+		if(this.solution === null) return;
+
+		// We have a solution and a client submission. set.
+		this.correct = (this.client.trim().toLowerCase() === this.solution.trim().toLowerCase());
+	}
+}
+
+
 
 
 /*
@@ -61,56 +204,26 @@ class IfPageParsonsSchema extends Schema {
 		this.updateCorrect();
 	}
 
-
-	/**
-		Ensure that history created values are actually set as dates (instead of strings)
-		This happens when flushing a date obj to JSON, putting over the network, and recomposing obj.
-	*/
-	_defHistory(h_array) {
-		return h_array.map( h => { 
-			if(typeof h.created === 'string') h.created = new Date(h.created); 
-			return h; 
-		});
-	}
-
-
-	/**
-		Check to make sure that objects in _items are strings or ints. No objects!
-	*/
-	_def_items(i_array) {
-		if(!(i_array instanceof Array)) throw new Error('Invalid non-array passed to IfPageParsonsSchema._def_items');
-		i_array.map( v => {
-			if(!(typeof v === 'string' || typeof v === 'number')) throw new Error('Invalid object passed to IfPageParsonsSchema._def_items');
-		});
-		return i_array;
-	}
-
-
 	get schema() {
+		let inherit = common_schema();
 
 		return {
-			code: { type: 'String', initialize: (s) => isDef(s) ? s : null },
-
-			description: { type: 'String', initialize: (s) => isDef(s) ? s : null },
+			...inherit,
 			helpblock: { type: 'String', initialize: (s) => isDef(s) ? s : null },
-			history: { type: 'Array', initialize: (a) => isDef(a) && isArray(a) ? this._defHistory(a) : [] },
 
-			potential_items: { type: 'Array', initialize: (a) => isDef(a) && isArray(a) ? this._def_items(a) : [] },
-			solution_items: { type: 'Array', initialize: (a) => isDef(a) && isArray(a) ? this._def_items(a) : [] },
-			client_items: { type: 'Array', initialize: (a) => isDef(a) && isArray(a) ? this._def_items(a) : null }, 
-				// client_items is set to null to show user hasn't submitted anything yet.
+			potential_items: { type: 'Array', initialize: (a) => isDef(a) && isArray(a) ? noObjectsInArray(a) : [] },
+			solution_items: { type: 'Array', initialize: (a) => isDef(a) && isArray(a) ? noObjectsInArray(a) : [] },
+			client_items: { type: 'Array', initialize: (a) => isDef(a) && isArray(a) ? noObjectsInArray(a) : null }, 
+			// client_items is set to null to show user hasn't submitted anything yet.
 
-			correct: { type: 'Boolean', initialize: (b) => isDef(b) ? bool(b) : null },
-
-			// Do the results need to be correct to save the results?
-			correct_required: { type: 'Boolean', initialize: (b) => isDef(b) ? bool(b) : false },
-
-			// After a page is completed, set TRUE so that no more updates are allowed.
-			// This is done by code in server/ifGame, as the client doesn't know what the conditions are.
-			completed: { type: 'Boolean', initialize: (b) => isDef(b) ? bool(b) : false }
 		};
 	}
 
+
+	// Has the user provided input?
+	client_has_answered() {
+		return this.client_items !== null && this.client_items.length > 1;
+	}
 
 	/*
 		Update any fields for which user has permissions.
@@ -188,49 +301,39 @@ class IfPageFormulaSchema extends Schema {
 		this.updateCorrect();
 	}
 
-	/**
-		Ensure that history created values are actually set as dates (instead of strings)
-		This happens when flushing a date obj to JSON, putting over the network, and recomposing obj.
-	*/
-	_defHistory(h_array) {
-		return h_array.map( h => { 
-			if(typeof h.created === 'string') h.created = new Date(h.created); 
-			return h; 
-		});
-	}
 
 	get schema() {
+		let inherit = common_schema();
 
 		return {
-			code: { type: 'String', initialize: (s) => isDef(s) ? s : null },
-
-			description: { type: 'String', initialize: (s) => isDef(s) ? s : null },
-			helpblock: { type: 'String', initialize: (s) => isDef(s) ? s : null },
-			history: { type: 'Array', initialize: (a) => isDef(a) && isArray(a) ? this._defHistory(a) : [] },
+			...inherit,
 
 			// Used by this.parse to test client_f against solution_f.
-			tests: { type: 'Array', initialize: (a) => isDef(a) && isArray(a) ? a : [] },
-
+			tests: { type: 'Array', initialize: (a) => isDef(a) && isArray(a) ? revive_dates_recursively(a) : [] },
+			column_titles: { type: 'Array', initialize: (a) => isDef(a) && isArray(a) ? noObjectsInArray(a) : [] },
+			column_formats: { type: 'Array', initialize: (a) => isDef(a) && isArray(a) ? noObjectsInArray(a) : [] },
+			
 			client_f: { type: 'Javascript', initialize: (s) => isDef(s) ? s : null },
+			client_f_format: { type: 'String', initialize: (s) => isDef(s) ? s : '' },
 			client_test_results: { type: 'Array', initialize: (a) => isDef(a) && isArray(a) ? a : [] },
 
 			solution_f: { type: 'Javascript', initialize: (s) => isDef(s) ? s : null },
+			solution_f_match: { type: 'Function', initialize: (f) => isDef(f) ? f : null },
 			solution_test_results: { type: 'Array', initialize: (a) => isDef(a) && isArray(a) ? a : [] },
 
 			// Should we show students the results of the solutions, or the solutions themselves?
 			solution_f_visible: { type: 'Boolean', initialize: (s) => isDef(s) ? bool(s) : false },
 			solution_test_results_visible: { type: 'Boolean', initialize: (s) => isDef(s) ? s : false },
 
-			correct: { type: 'Boolean', initialize: (b) => isDef(b) ? bool(b) : null },
-
-			// Do the results need to be correct to save the results?
-			correct_required: { type: 'Boolean', initialize: (b) => isDef(b) ? bool(b) : false },
-
-			// After a page is completed, set TRUE so that no more updates are allowed.
-			// This is done by code in server/ifGame, as the client doesn't know what the conditions are.
-			completed: { type: 'Boolean', initialize: (b) => isDef(b) ? bool(b) : false }
 		};
 	}
+
+
+	// Has the user provided input?
+	client_has_answered() {
+		return this.client_f !== null && this.client_f.length > 1;
+	}
+
 
 	// Update any fields for which user has permissions.
 	// Save to re-run.  Can also run upon initial obj creation.
@@ -294,10 +397,17 @@ class IfPageFormulaSchema extends Schema {
 			//console.log({ 'c': this.client_test_results[i].result, 's': this.solution_test_results[i].result });
 			this.correct = (this.client_test_results[i].result == this.solution_test_results[i].result);
 		}
+		if(!this.correct) return;
 
 		// Check to make sure that there are no errors. If any errors, fail.
 		if(this.correct) {
 			this.correct = (0 === this.client_test_results.filter( t => t.error !== null ).length);
+		}
+		if(!this.correct) return;
+
+		// Check to see if we are given a solution_match function.
+		if(typeof this.solution_f_match === 'function') {
+			this.correct = this.solution_f_match(this.client_f);
 		}
 	}
 
@@ -417,6 +527,10 @@ class IfLevelSchema extends Schema {
 			_id: { type: 'String', initialize: (s) => isDef(s) ? s : null },
 			username: { type: 'String', initialize: (s) => isDef(s) ? s : null },
 
+			// The seed value is used to initialize random behavior for pages.
+			// Delcaring it in the level allows for predictable behavior as pages are generated.
+			seed: { type: 'number', initialize: (dbl) => isDef(dbl) ? dbl : Math.random() },
+
 			code: { type: 'String', initialize: (s) => isDef(s) ? s : null },
 			title: { type: 'String', initialize: (s) => isDef(s) ? s : null },
 			description: { type: 'String', initialize: (s) => isDef(s) ? s : null },
@@ -436,32 +550,41 @@ class IfLevelSchema extends Schema {
 
 	/*
 		Build score from any page implementing 'score' (or items[1..].score)
-		Anything other than TRUE or FALSE will be stored as null (in progress).
+		Anything other than TRUE or FALSE will be stored as null.  Null means either
+		that it doesn't get scored, of if in the last place, that it's in progress.
 	
 		Return the results as an array of whatever is passed.
 	*/
-	get_score_as_array(y=1, n=0, unknown) {
+	get_score_as_array(y=1, n=0, unscored, last_in_progress) {
 		// Make sure that true/false/null are the only allowed options.
 		this.pages.map( p => {
 			if(p.correct !== true && p.correct !== false && p.correct !== null) 
 				throw new Error('score.refresh.if.p.correct.isnottrueorfalseornull');
 			});
 
-		return this.pages.map( p => { 
+		let results = this.pages.map( p => { 
 			if(p.correct === true) return y;
 			if(p.correct === false) return n;
-			return unknown;
+			if(p.correct === null) return unscored;
 		});
+
+		// If the last item is null, change to last_in_progress
+		if(results.length > 0 && results[results.length-1].correct === null ) {
+			results.pop();
+			results.push(last_in_progress);
+		}
+
+		return results;
 	}
 
 	get_score_correct() {
-		return this.get_score_as_array(1,0,0).reduce( (accum, i) => accum + i, 0);
+		return this.get_score_as_array(1,0,0,0).reduce( (accum, i) => accum + i, 0);
 	}
 	get_score_attempted() {
-		return this.get_score_as_array(1,1,0).reduce( (accum, i) => accum + i, 0);
+		return this.get_score_as_array(1,1,0,0).reduce( (accum, i) => accum + i, 0);
 	}
 	get_score_incorrect() {
-		return this.get_score_as_array(1,0,0).reduce( (accum, i) => accum + i, 0);
+		return this.get_score_as_array(1,0,0,0).reduce( (accum, i) => accum + i, 0);
 	}
 	get_score_streak() {
 		throw new Error('not implemented');
@@ -485,12 +608,12 @@ class IfLevelSchema extends Schema {
 		Must be passed valid JSON object with type variable
 	*/
 	get_new_page(json) {
-		//console.log(json);  /// DEBUG
-
 		if(json.type === 'IfPageParsonsSchema') {
 			return new IfPageParsonsSchema(json);
 		} else if (json.type === 'IfPageFormulaSchema') {
 			return new IfPageFormulaSchema(json);
+		} else if (json.type === 'IfPageChoiceSchema') {
+			return new IfPageChoiceSchema(json);
 		} else {
 			throw new Error('Invalid get_new_page(type) param of ' + json.type);
 		}

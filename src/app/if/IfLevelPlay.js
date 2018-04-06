@@ -3,8 +3,9 @@ import React from 'react';
 import type { Node } from 'react';
 //import PropTypes from 'prop-types';
 import { Panel, Button, Table } from 'react-bootstrap';
-import { HtmlDiv, SuccessGlyphicon, FailureGlyphicon, ProgressGlyphicon } from './../components/Misc';
+import { HtmlDiv, IncorrectGlyphicon, CorrectGlyphicon, CompletedGlyphicon, ProgressGlyphicon } from './../components/Misc';
 import ExcelTable from './ExcelTable';
+import Choice from './Choice';
 import Parsons from './Parsons';
 
 import type { LevelType } from './IfTypes';
@@ -16,9 +17,10 @@ type PropsType = {
 	onChange: (string) => void,
 	onSubmit: (void) => void
 };
+type StateType = {};
 
+export default class IfLevelPlay extends React.Component<PropsType, StateType> {
 
-export default class IfLevelPlay extends React.Component<PropsType> {
 	constructor(props: any) {
 		super(props);
 		(this: any).handleChange = this.handleChange.bind(this);
@@ -26,7 +28,7 @@ export default class IfLevelPlay extends React.Component<PropsType> {
 	}
 
 	handleChange(new_value: string) {
-		this.props.onChange(new_value);	
+		this.props.onChange(new_value);
 	} 
 
 	handleSubmit(e: SyntheticEvent<HTMLButtonElement>) {
@@ -60,8 +62,9 @@ export default class IfLevelPlay extends React.Component<PropsType> {
 
 		// Use formulas with i to generate unique keys upon completion.
 		let results = this.props.level.get_score_as_array(
-				(i: number): any => <SuccessGlyphicon key={'iflevelplayrenderscore'+i} />, 
-				(i: number): any => <FailureGlyphicon key={'iflevelplayrenderscore'+i} />,
+				(i: number): any => <CorrectGlyphicon key={'iflevelplayrenderscore'+i} />, 
+				(i: number): any => <IncorrectGlyphicon key={'iflevelplayrenderscore'+i} />,
+				(i: number): any => <CorrectGlyphicon key={'iflevelplayrenderscore'+i} />,
 				(i: number): any => <ProgressGlyphicon key={'iflevelplayrenderscore'+i} /> ); 
 
 		// Make sure that last item is always a progress glyph.
@@ -74,6 +77,8 @@ export default class IfLevelPlay extends React.Component<PropsType> {
 			problem = <ExcelTable page={page} editable={true} handleChange={this.handleChange} />;
 		} else if(page.type === 'IfPageParsonsSchema') {
 			problem = <Parsons page={page} editable={true} handleChange={this.handleChange} />;
+		} else if(page.type === 'IfPageChoiceSchema') {
+			problem = <Choice page={page} editable={true} handleChange={this.handleChange} />;
 		} else {
 			throw new Error('Invalid type in IfLevelPlay '+page.type);
 		}

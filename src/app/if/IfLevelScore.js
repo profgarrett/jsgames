@@ -9,8 +9,9 @@ import Slider from 'rc-slider';
 
 import { IfPageSchema } from './../../shared/IfGame';
 import { Panel, Well } from 'react-bootstrap';
-import { HtmlDiv, SuccessGlyphicon, FailureGlyphicon } from './../components/Misc';
+import { HtmlDiv, CompletedGlyphicon, IncorrectGlyphicon, CorrectGlyphicon } from './../components/Misc';
 import ExcelTable from './ExcelTable';
+import Choice from './Choice';
 import Parsons from './Parsons';
 
 
@@ -99,27 +100,30 @@ class IfLevelScorePage extends React.Component {
 						<Panel.Collapse >
 							<Panel.Body>
 								<HistorySlider page={page_at} handleChange={this.setHistory} />
-								<ExcelTable page={page_at} editable={false} />;
+								<ExcelTable page={page_at} editable={false} />
 							</Panel.Body>
 						</Panel.Collapse>
 					</Panel>
 			);
 
 		} else if(page_at.type === 'IfPageParsonsSchema') {
-			// Show solution only if the user was wrong.
-			problem = (
-				<div>
-					<Parsons page={page_at} editable={false} show_solution={!page_final.correct} />
-					<HistorySlider page={page_at} handleChange={this.setHistory} />
-				</div>
-			);
+			problem = (<div>
+					<Parsons page={page_at} editable={false} show_solution={page_final.correct === false} />
+				</div>);
+
+		} else if(page_at.type === 'IfPageChoiceSchema') {
+			// Show range of choice only if the user was wrong.  If no right answer,
+			// then correct will be null.
+			problem = (<div>
+					<Choice page={page_at} editable={false} show_solution={page_final.correct === false} />
+				</div>);
 
 		} else {
 			throw new Error('Invalid type in IfLevelScore '+page_at.type);
 		}
 
 		return (
-			<Panel key={i} bsStyle={ page_final.correct ? 'success' : 'danger' } >
+			<Panel key={i} bsStyle={ page_final.correct===null ? 'info' : (page_final.correct ? 'success' : 'danger' ) } >
 				<Panel.Heading >
 					Page {i+1}
 				</Panel.Heading>
@@ -149,14 +153,15 @@ export default class IfLevelScore extends React.Component {
 
 		// Use formulas with i to generate unique keys upon completion.
 		const results = level.get_score_as_array(
-				i => <SuccessGlyphicon key={'iflevelscorerenderscore'+i} />, 
-				i => <FailureGlyphicon key={'iflevelscorerenderscore'+i} />);
+				i => <CorrectGlyphicon key={'iflevelscorerenderscore'+i} />, 
+				i => <IncorrectGlyphicon key={'iflevelscorerenderscore'+i} />,
+				i => <CorrectGlyphicon key={'iflevelscorerenderscore'+i} />);
 
 		return (
 			<div>
 				<Well>
 					<div style={{ textAlign: 'center' }}>
-						<h3>You earned { level.get_score_correct() } of { level.get_score_attempted() }</h3>
+						<h3>You successfully completed { level.get_score_correct() } of { level.get_score_attempted() }</h3>
 						{ results.map( (result, i) => result(i) ) }
 					</div>
 				</Well>
