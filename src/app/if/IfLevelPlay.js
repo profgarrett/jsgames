@@ -3,12 +3,13 @@ import React from 'react';
 import type { Node } from 'react';
 //import PropTypes from 'prop-types';
 import { Panel, Button, Table } from 'react-bootstrap';
-import { HtmlDiv, IncorrectGlyphicon, CorrectGlyphicon, CompletedGlyphicon, ProgressGlyphicon } from './../components/Misc';
+import { HtmlDiv, IncorrectGlyphicon, CorrectGlyphicon, ProgressGlyphicon } from './../components/Misc';
 import ExcelTable from './ExcelTable';
+import Text from './Text';
 import Choice from './Choice';
 import Parsons from './Parsons';
 
-import type { LevelType } from './IfTypes';
+import type { LevelType, ChoicePageType } from './IfTypes';
 
 
 type PropsType = {
@@ -78,7 +79,9 @@ export default class IfLevelPlay extends React.Component<PropsType, StateType> {
 		} else if(page.type === 'IfPageParsonsSchema') {
 			problem = <Parsons page={page} editable={true} handleChange={this.handleChange} />;
 		} else if(page.type === 'IfPageChoiceSchema') {
-			problem = <Choice page={page} editable={true} handleChange={this.handleChange} />;
+			problem = <Choice page={page} editable={true} showSolution={false} handleChange={this.handleChange} />;
+		} else if(page.type === 'IfPageTextSchema') {
+			problem = <Text page={page} editable={true} handleChange={this.handleChange} />;
 		} else {
 			throw new Error('Invalid type in IfLevelPlay '+page.type);
 		}

@@ -1,4 +1,5 @@
 // @flow
+var seedrandom = require('seedrandom');
 
 const NAMES = {
 	first: [ 'John', 'Sarah', 'Bill', 'Amos', 'Armine', 'Zack', 'Maria', 'Ayoub', 'Thomas', 'James',
@@ -82,10 +83,12 @@ const DataFactory = {
 	// Slightly modified version of that given 
 	// in an answer at https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array
 	// May be identical to original list.
-	randomizeList: (old_array: Array<any>): Array<any> => {
+	randomizeList: (old_array: Array<any>, seed?: number): Array<any> => {
 		let array = old_array.slice(0);
+		const r = typeof seed !== 'undefined' ? seedrandom(seed) : Math.random;
+
 		for (let i = array.length - 1; i > 0; i--) {
-			let j = Math.floor(Math.random() * (i + 1));
+			let j = Math.floor(r() * (i + 1));
 			[array[i], array[j]] = [array[j], array[i]];
 		}
 		return array;

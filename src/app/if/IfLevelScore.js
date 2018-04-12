@@ -13,6 +13,8 @@ import { HtmlDiv, CompletedGlyphicon, IncorrectGlyphicon, CorrectGlyphicon } fro
 import ExcelTable from './ExcelTable';
 import Choice from './Choice';
 import Parsons from './Parsons';
+import Text from './Text';
+
 
 
 // Allows moving forward/backwards through history of a single page.
@@ -105,6 +107,11 @@ class IfLevelScorePage extends React.Component {
 						</Panel.Collapse>
 					</Panel>
 			);
+
+		} else if(page_at.type === 'IfPageTextSchema') {
+			problem = (<div>
+					<Text page={page_at} editable={false} />
+				</div>);
 
 		} else if(page_at.type === 'IfPageParsonsSchema') {
 			problem = (<div>

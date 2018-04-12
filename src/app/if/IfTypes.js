@@ -19,7 +19,8 @@ export type LevelType = {
 	history: Array<Object>,
 
 	get_score_as_array: (any, any, any, any) => Array<Object>,
-	get_new_page: (Object) => Object
+	get_new_page: (Object) => Object,
+	toJson: () => Object
 };
 
 
@@ -35,6 +36,23 @@ export type PageType = {
 	completed: boolean,
 
 	history: Array<Object>
+};
+
+
+export type TextPageType = {
+
+	// Copy from PageType
+	type: string,
+
+	code: string,
+	description: string,
+
+	correct: boolean,
+	correct_required: boolean,
+	completed: boolean,
+	// End Copy
+
+	client_read: boolean
 };
 
 
@@ -56,6 +74,7 @@ export type ChoicePageType = {
 	solution: string
 
 };
+
 
 
 export type ParsonsPageType = {
@@ -105,4 +124,22 @@ export type FormulaPageType = {
 	solution_test_results: Array<Object>,
 	solution_f_visible: boolean,
 	solution_test_results_visible: boolean
+};
+
+
+
+
+/**
+	Generator are used to create pages.
+
+	They are smart functions that will create new pages in a deterministic fashion.
+	This means that given the same input, they will also provide the same output.
+
+	Any random behavior requires a seed value given by the level.
+*/
+
+export type GenType = {
+	gen: Function,
+	until: ?Function,
+	pages: Array<GenType> | Array<Object>
 };

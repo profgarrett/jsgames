@@ -9,8 +9,8 @@ import type { ChoicePageType } from './IfTypes';
 type PropsType = {
 	page: ChoicePageType,
 	editable: boolean,
-	handleChange: (Object) => void,
-	show_solution: boolean
+	handleChange: (Any) => void,
+	showSolution: boolean
 };
 
 
@@ -36,7 +36,7 @@ export default class Choice extends React.Component<PropsType> {
 			let style = 'info';
 			if(page.correct !== null) style = page.correct ? 'success' : 'warning';
 
-			if(this.props.show_solution) {
+			if(this.props.showSolution) {
 				// Give full list.
 				return (
 					<ListGroup>

@@ -114,6 +114,73 @@ function common_schema() {
 }
 
 
+
+
+/*
+	This pages displays information to the user.
+*/
+class IfPageTextSchema extends Schema {
+
+	constructor(json) {
+		super(json); // set passed fields.
+		this.updateCorrect();
+	}
+
+	get schema() {
+		let inherit = common_schema();
+
+		return {
+			...inherit,
+			client_read: { type: 'Boolean', initialize: (s) => isDef(s) ? bool(s) : false }
+		};
+	}
+
+	// Has the user provided input?
+	client_has_answered() {
+		return this.client_read;
+	}
+
+	/*
+		Update any fields for which user has permissions.
+		
+		Safe to re-run, with the exception that upon changing client_items, will
+		reset this.correct (since we don't know its status).  Will re-run updateCorrect() in 
+		case this is on the server and we're updating the object.
+
+		Run upon initial obj creation.
+	*/
+	updateUserFields(json) {
+		if(typeof json === 'undefined') throw new Error('IfGames.updateUserFields(json) is null');
+		if(json.type !== this.type ) throw new Error('Invalid type '+json.type+' in ' + this.type + '.updateUserFields');
+
+		// don't allow updates to finished items. Note that completed isn't set internally by this obj,
+		// but instead is set by the server code with knowledge of each tutorial's rules.
+		if(this.completed) return this;
+
+		if(this.client_read !== json.client_read ){
+			this.client_read = json.client_read;
+			this.history = json.history;
+		}
+
+		return this.updateCorrect();
+	}
+
+	/* 
+		Update correct *if* a solution is provided.
+	*/
+	updateCorrect() {
+		if(this.completed) return; // do not update completed items.
+
+		if(!this.client_read) return; // no client submission.
+
+		this.correct = true;
+	}
+}
+
+
+
+
+
 /*
 	A page holds a single choice question.
 
@@ -608,15 +675,20 @@ class IfLevelSchema extends Schema {
 		Must be passed valid JSON object with type variable
 	*/
 	get_new_page(json) {
-		if(json.type === 'IfPageParsonsSchema') {
+		//return new json.type(json);
+		
+		if(json.type === IfPageParsonsSchema || json.type === 'IfPageParsonsSchema') {
 			return new IfPageParsonsSchema(json);
-		} else if (json.type === 'IfPageFormulaSchema') {
+		} else if (json.type === IfPageFormulaSchema || json.type === 'IfPageFormulaSchema') {
 			return new IfPageFormulaSchema(json);
-		} else if (json.type === 'IfPageChoiceSchema') {
+		} else if (json.type === IfPageChoiceSchema || json.type === 'IfPageChoiceSchema') {
 			return new IfPageChoiceSchema(json);
+		} else if (json.type === IfPageTextSchema || json.type === 'IfPageTextSchema') {
+			return new IfPageTextSchema(json);
 		} else {
 			throw new Error('Invalid get_new_page(type) param of ' + json.type);
 		}
+		
 
 	}
 
@@ -645,6 +717,10 @@ class IfLevelSchema extends Schema {
 
 module.exports = {
 	IfLevels,
-	IfLevelSchema
+	IfLevelSchema,
+	IfPageTextSchema,
+	IfPageChoiceSchema,
+	IfPageFormulaSchema,
+	IfPageParsonsSchema
 };
 

@@ -548,10 +548,12 @@ app.post('/api/login_clear_test_user/',
 	nocache,
 	async (req: $Request, res: $Response, next: NextFunction): Promise<any> => {
 	try {
-		const sql = 'DELETE FROM users WHERE username = "test"';
+		const sql1 = 'DELETE FROM iflevels WHERE username = "test"';
+		const sql2 = 'DELETE FROM users WHERE username = "test"';
 
-		let results = await run_mysql_query(sql);
-		return res.json({ success: true, affectedRows: results.affectedRows});
+		let results1 = await run_mysql_query(sql1);
+		let results2 = await run_mysql_query(sql2);
+		return res.json({ success: true, affectedRows: results2.affectedRows});
 		
 	} catch (e) {
 		log_error(e);

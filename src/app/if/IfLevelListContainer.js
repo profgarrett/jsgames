@@ -32,10 +32,8 @@ export default class IfLevelListContainer extends React.Component {
 		fetch('/api/ifgame/levels/byCode/'+code, {
 				credentials: 'include'
 			})
-			.then( res => { console.log(res); return res; })
 			.then( response => response.json() )
 			.then( json => {
-				console.log(json);
 				let ifLevels = json.map( j => new IfLevelSchema(j) );
 				this.setState({
 					levels: ifLevels,

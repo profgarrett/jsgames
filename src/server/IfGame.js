@@ -1,8 +1,9 @@
 // @flow
-const { IfLevelSchema } = require('./../shared/IfGame');
+const { IfLevelSchema, IfPageTextSchema, IfPageParsonsSchema, IfPageChoiceSchema, IfPageFormulaSchema  } = require('./../shared/IfGame');
 const { DataFactory } = require('./DataFactory');
 
 const { test } = require('./tutorials/test');
+const { test_gens } = require('./tutorials/test_gens');
 const { tutorial } = require('./tutorials/tutorial');
 const { math } = require('./tutorials/math');
 const { text } = require('./tutorials/text');
@@ -67,8 +68,11 @@ const baseifgame = {
 			delete json.versions;
 		}
 
+
 		// Type-specific setup
-		if(json.type === 'IfPageParsonsSchema') {
+		if( json.type === IfPageTextSchema ) {
+			// No custom code needed.
+		}else if(json.type === IfPageParsonsSchema) {
 
 			// Randomize the list until it's not the same order as the solution.
 			do {
@@ -84,10 +88,10 @@ const baseifgame = {
 				throw new Error('Invalid formula code '+json.code+' in baseifgame');
 			}
 
-		} else if(json.type === 'IfPageChoiceSchema') {
+		} else if(json.type === IfPageChoiceSchema) {
 			// No custom code needed for this type.
 
-		} else if(json.type === 'IfPageFormulaSchema') {
+		} else if(json.type === IfPageFormulaSchema) {
 			if(json.code === 'tutorial') {
 				json.correct_required = true;
 				json.solution_test_results_visible = true;
@@ -113,57 +117,72 @@ const baseifgame = {
 			code: this.code,
 			description: this.description,
 			completed: false,
-			pages: [ this._initialize_json(this.pages[0]) ],
+			pages: [],
 			history: [ { created: new Date(), title: 'created' } ]
 		});
 
 		// Force completed to null showing that the user hasn't yet attempted to answer.
-		level.pages[0].completed = null;
+		//level.pages[0].completed = null;
 
 		return level;
 	},
 
-	/*
-		Updates a valid and self-consistent object by creating additional pages.
-		Also handles all updates to .completed on both page and level.
-		
-		@todo Currently relies upon having same exact length between template and levels. Allow dynamic length.
-	*/
+
 	addPageOrMarkAsComplete: function(level: LevelType): LevelType {
-		let last_page = level.pages[level.pages.length-1];
-		if(last_page.completed) throw new Error('IfGame.addPageOrMarkAsComplete.lastpage_already_completed');
+		if(level.completed)
+			throw new Error('IfGame.addPageOrMarkAsComplete.LevelAlreadyCompleted');
+
+		// Test to see if we've finished completing the requirements for the last page.
+		if(level.pages.length > 0) {
+			const last_page = level.pages[level.pages.length-1];
+
+			// The last page should never be completed.  Only this code marks a page as
+			// completed.  If completed, then a new page is added at the tail end.
+			// If no more, then the entire level should be marked as completed.
+			if(last_page.completed) 
+				throw new Error('IfGame.addPageOrMarkAsComplete.lastpage_already_completed');
 
 
-		// Test to see if the last page needs to be correct to continue.
-		// Note that the last page may not have been answered by the user yet.
-		if( last_page.correct_required && !last_page.correct ) {
-			// Don't add a new level until it is correct.
-			level.history = [...level.history, { created: new Date(), title: 'addPageOrMarkAsComplete_notCorrectTutorialPage'}];
-			return level;
+			// Test to see if the last page needs to be correct to continue.
+			// Note that the last page may not have been answered by the user yet.
+			if( last_page.correct_required && !last_page.correct ) {
+				// Don't add a new level until it is correct.
+				level.history = [...level.history, { created: new Date(), title: 'addPageOrMarkAsComplete_notCorrectTutorialPage'}];
+				return level;
+			}
+
 		}
 
-		// Are we done with tutorial?
-		if(level.pages.length >= this.pages.length) {
-			// Yes. Set level and pages to completed so no further updates are allowed.
-			last_page.completed = true;
-			level.completed = true;
-			level.history = [...level.history, { created: new Date(), title: 'addPageOrMarkAsComplete_setCompleteTrue'}];
-		} else {
-			// No. Add a new page.
+		// Create a new array of pages that can be modified.
+		// Put in reverse order to simplify pop() operation.  Modified by gen function.
+		const pages = level.pages.slice().reverse();
 
-			// Update last page so no more updates are allowed.
-			last_page.completed = true;
+		// Run the code that recursively returns new page json.
+		const new_page_json = this.gen.gen(level.seed, pages, this.gen);
 
-			// Create new page and add to level.
-			let new_page_json = this._initialize_json(this.pages[level.pages.length]);
-			let new_page = level.get_new_page(new_page_json);
+		// Check result of gen function.
+		if(new_page_json !== null) {
+			// Since a non-null result was given, we should add a new page.
+
+			// If a last page, mark as completed.
+			if(level.pages.length > 0) 
+				level.pages[level.pages.length-1].completed = true;
+
+			// setup new page 
+			const initialized_json = this._initialize_json(new_page_json);
+			const new_page = level.get_new_page(initialized_json);
 			level.pages.push(new_page);
 
 			level.history = [...level.history, { created: new Date(), title: 'addPageOrMarkAsComplete_addPage'}];
-		}
 
+		} else {
+			// Since a null result was given, we are at the end of the tutorial.
+			level.completed = true;
+			level.history = [...level.history, { created: new Date(), title: 'addPageOrMarkAsComplete_setLevelCompleteTrue'}];
+		}
 		return level;
 	}
+
 };
 
 
@@ -178,14 +197,16 @@ const IfLevelModelFactory = {
 		if1: { ...baseifgame, ...if1},
 		if2: { ...baseifgame, ...if2},
 		sum: { ...baseifgame, ...sum},
-		text: { ...baseifgame, ...text}
+		text: { ...baseifgame, ...text},
+		test_gens: { ...baseifgame, ...test_gens }
 	},
 
 	// Create and return a new level of the given code.
 	create: function(code: string): LevelType {
 		if(typeof this.levels[code] === 'undefined') throw new Error('Invalid type '+code+' passed to IfLevelModelFactory.create');
 
-		return this.levels[code].create();
+		let level = this.levels[code].create();
+		return this.levels[code].addPageOrMarkAsComplete(level);
 	},
 
 	// Check the submission.
