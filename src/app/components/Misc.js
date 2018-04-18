@@ -43,22 +43,15 @@ ErrorBoundary.propTypes = {
 };
 
 
+
 const glyph = (message, glyph, color='black', font_size=24) => {
 	let style = {
 		fontSize: font_size,
 		color: color,
 		paddingLeft: 2
 	};
-	let id = 'glyph'+Math.random()*999999999999999;
-	let tooltip = <Tooltip id={id}>{ message }</Tooltip>;
 
-	// Note that tooltop must be after the overlay trigger to avoid occuluding it. Prevents tooltip from firing.
-	return (<span>
-			<OverlayTrigger placement='top' overlay={tooltip}>
-				<Glyphicon style={ style } glyph={ glyph } />
-			</OverlayTrigger>
-			{ tooltip }
-		</span>);
+	return (<Glyphicon style={ style } glyph={ glyph } />);
 };
 
 
@@ -77,32 +70,72 @@ export class CompletedGlyphicon extends React.Component {
 		return glyph('Completed', 'check');
 	}
 }
+export function completed_glyphicon() {
+	return glyph('Completed', 'check');
+}
 
 
-// This is a standard Glyph for showing success.
 export class CorrectGlyphicon extends React.Component {
 	render() {
-		return glyph('Correct', 'ok-circle', '#3c763d');
+		return glyph('Completed', 'check');
 	}
+}
+export function correct_glyphicon() {
+	return glyph('Correct', 'ok-circle', '#3c763d');
 }
 
 
 // This is a standard Glyph for showing progress.
 export class ProgressGlyphicon extends React.Component {
 	render() {
-		return glyph('In progress', 'question-sign');
+		return glyph('In progress', 'pencil');
 	}
 }
+export function progress_glyphicon() {
+		return glyph('In progress', 'pencil');
+}
+
 
 
 // This is a standard Glyph for showing success.
 export class IncorrectGlyphicon extends React.Component {
-
 	render() {
 		return glyph('Incorrect', 'remove-circle', 'rgb(199, 37, 78)');
 	}
-
 }
+export function incorrect_glyphicon() {
+	return glyph('Incorrect', 'remove-circle', 'rgb(199, 37, 78)');
+}
+
+
+
+// Returns a div that will set contents to the passed HTML.
+export class UnbrokenSpan extends React.Component {
+
+	render() {
+		// Use dangerouslySetInnerHtml so that the description can use html characters.
+		return <span style={{color: '#2f6f9f'}} dangerouslySetInnerHTML={ { '__html': this.props.html } }></span>;
+	}
+}
+UnbrokenSpan.propTypes = {
+	html: PropTypes.string.isRequired
+};
+
+
+
+// Returns a div that will set contents to the passed HTML.
+export class BlueSpan extends React.Component {
+
+	render() {
+		// Use dangerouslySetInnerHtml so that the description can use html characters.
+		return <span style={{color: '#2f6f9f'}} dangerouslySetInnerHTML={ { '__html': this.props.html } }></span>;
+	}
+}
+BlueSpan.propTypes = {
+	html: PropTypes.string.isRequired
+};
+
+
 
 
 // Returns a div that will set contents to the passed HTML.

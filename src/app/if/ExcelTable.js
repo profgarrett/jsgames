@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Table, HelpBlock, FormControl } from 'react-bootstrap';
-import { HtmlSpan, SmallOkGlyphicon } from './../components/Misc';
+import { HtmlSpan, SmallOkGlyphicon, BlueSpan } from './../components/Misc';
 
 
 
@@ -32,6 +32,7 @@ const transform_if_date = dt => {
 // Very flexible with input format, guessing how to respond. 
 const format = (input, format) => {
 	if(input ===null) return null;
+	let result = '';
 
 	// Undefined format.  Guess!
 	if(typeof format === 'undefined' || format === null || format === '') {
@@ -49,8 +50,10 @@ const format = (input, format) => {
 		}
 	}
 
-	if(format === 'text') {
+	if(format === 'text' || format === 'c') {
+		// Text
 		return input;
+
 	} else if( format === 'shortdate' ) {
 		// A column can be formatted as a shortdate, but not yet have a date (such as a partial formula)
 		// If a Date instance, return. Otherwise, just give the item.
@@ -59,15 +62,25 @@ const format = (input, format) => {
 		} else {
 			return input;
 		}
+
 	} else if( format === ',' ) {
-		//return (Math.round(input*100)/100).toLocalString();
+		// Decimal
 		return input.toLocaleString('en-US', {style:'decimal'});
+
+	} else if( format === '$.') {
+		// Currency with decimals.
+		return (Math.round(input*100)/100).toLocaleString('en-US', 
+			{style:'currency', currency: 'usd'});
+
 	} else if( format === '$') {
-		//return (input instanceof Date) ? input : '$'+(Math.round(input*100)/100).toFixed(2).toLocalString();
-		return input.toLocaleString('en-US', {style:'currency', currency: 'usd'});
+		// Return a clean currency with no decimals.
+		return Math.round(input).toLocaleString('en-US', 
+			{style:'currency', minimumFractionDigits: 0, currency: 'usd'});
+
 	} else if(format === '%') {
+		// Percent.
 		return input.toLocaleString('en-US', {style:'percent'});
-		//return (input instanceof Date) ? input : (Math.round(input*100)).toLocalString()+'%';
+
 	} else {
 		throw Error('Invalid format type '+format+' in ExcelTable');
 	}
@@ -78,6 +91,8 @@ const is_text_format = (format) => {
 };
 
 const clean = (input, format_type) => format_tf(transform_if_date(format(input, format_type)));
+
+
 
 
 // This is a standard table for showing excel stuff.
@@ -176,7 +191,7 @@ export default class ExcelTable extends React.Component {
 		let style = null;
 		let test = null;
 
-		// Do for loop onces per row
+		// Create each of the rows in the table.
 		for (let i=0; i<tests.length ; i++) {
 
 			// set fieldFormula, based on if this is readonly or the first row.
@@ -262,9 +277,17 @@ export default class ExcelTable extends React.Component {
 		let thHeaders;
 		if(tests.length > 0 ){
 			if( page.column_titles.length > 0 ){
-				thHeaders = columns.map( (c,i) => <th style={headerStyle} key={c}>{c.toUpperCase()}<br/><span style={{color: 'gray'}}>{page.column_titles[i]}</span></th> );
+				thHeaders = columns.map( (c,i) => 
+					<th style={headerStyle} key={c}>
+						{c.toUpperCase()}
+						<br/>
+						<BlueSpan html={page.column_titles[i]} />
+					</th> );
 			} else {
-				thHeaders = columns.map( c => <th style={headerStyle} key={c}>{c.toUpperCase()}</th> );
+				thHeaders = columns.map( c => 
+					<th style={headerStyle} key={c}>
+						{c.toUpperCase()}
+					</th> );
 			}
 		}
 

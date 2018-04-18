@@ -36,6 +36,7 @@ export type PageType = {
 	completed: boolean,
 
 	history: Array<Object>
+	toJson: function
 };
 
 
@@ -50,6 +51,9 @@ export type TextPageType = {
 	correct: boolean,
 	correct_required: boolean,
 	completed: boolean,
+	
+	history: Array<Object>
+	toJson: function
 	// End Copy
 
 	client_read: boolean
@@ -67,6 +71,9 @@ export type ChoicePageType = {
 	correct: boolean,
 	correct_required: boolean,
 	completed: boolean,
+	
+	history: Array<Object>
+	toJson: function
 	// End Copy
 
 	client: string,
@@ -88,6 +95,9 @@ export type ParsonsPageType = {
 	correct: boolean,
 	correct_required: boolean,
 	completed: boolean,
+	
+	history: Array<Object>
+	toJson: function
 	// End Copy
 
 	helpblock: string,
@@ -107,6 +117,9 @@ export type FormulaPageType = {
 	correct: boolean,
 	correct_required: boolean,
 	completed: boolean,
+	
+	history: Array<Object>
+	toJson: function
 	// End Copy
 
 	helpblock: string,
@@ -141,5 +154,13 @@ export type FormulaPageType = {
 export type GenType = {
 	gen: Function,
 	until: ?Function,
-	pages: Array<GenType> | Array<Object>
+	pages: Array<PageType | GenType>
 };
+
+export type AdaptiveGenType = {
+	gen: Function,
+	until: Function,
+	tutorial_gen: GenType,
+	test_gen: GenType
+};
+

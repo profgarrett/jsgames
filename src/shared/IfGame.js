@@ -10,10 +10,15 @@ var FormulaParser = require('hot-formula-parser').Parser;
 	Code value must match the filename in server/tutorial/...js
 */
 const IfLevels = [
-	{ code: 'tutorial', label: 'Website Introduction', description: 'Learn about this website by completing this tutorial.' },
+	{ code: 'tutorial', label: 'Website Introduction', description: 'Learn how to complete tutorials.' },
+	{ code: 'math1', label: 'Math 1', description: 'Create basic arithmetic formulas.' },
+	{ code: 'math2', label: 'Math 2', description: 'Create advanced arithmetic formulas.' },
+	{ code: 'math3', label: 'Math 3', description: 'Solve complicated problems with arithmetic.' }
+
+/*
 	{ code: 'dates', label: 'Date Functions', description: 'Learn about date functions.' },
-	{ code: 'math', label: 'Math operations', description: 'Create formulas with math symbols.' },
-/*	{ code: 'sum', label: 'Sum function', description: 'Learn how to use the SUM function.' },
+
+	{ code: 'sum', label: 'Sum function', description: 'Learn how to use the SUM function.' },
 	{ code: 'text', label: 'Text functions', description: 'Learn a number of useful text functions' },
 	{ code: 'if1', label: 'IF Conditions', description: 'Learn how to create IF conditions' },
 	{ code: 'if2', label: 'IF Function', description: 'Learn how to use the IF function' }
@@ -96,12 +101,20 @@ function revive_dates_recursively(obj) {
 function common_schema() {
 
 	return {
+		// Short-cut code used to help initialize code in server ifgame create page code.
 		code: { type: 'String', initialize: (s) => isDef(s) ? s : null },
+
+		// Description gives high-level conceptual overview. Useful for reviews.
 		description: { type: 'String', initialize: (s) => isDef(s) ? s : null },
+		// Instructions are specific to the given task.  
+		instruction: { type: 'String', initialize: (s) => isDef(s) ? s : null },
+		// Helpblock is given with more specific guidelines. Optional for completion.
 		helpblock: { type: 'String', initialize: (s) => isDef(s) ? s : null },
 
+		// An array of objects with changes.
 		history: { type: 'Array', initialize: (a) => isDef(a) && isArray(a) ? revive_dates_recursively(a) : [] },  /*defHistory*/
 
+		// Is this correct?  True/False/Null.
 		correct: { type: 'Boolean', initialize: (b) => isDef(b) ? bool(b) : null },
 
 		// Do the results need to be correct to save the results?
@@ -175,16 +188,20 @@ class IfPageTextSchema extends Schema {
 
 		this.correct = true;
 	}
+
+	// Return a nicely formatted view of the client's input. 
+	toString() {
+		return '';
+	}
 }
-
-
 
 
 
 /*
 	A page holds a single choice question.
 
-	It can have an correct choice, or allow any input.
+	It can have either a correct choice or a range of choices.
+	If a range of choices, then soution should be a wildcard ? or *.
 */
 class IfPageChoiceSchema extends Schema {
 
@@ -200,7 +217,8 @@ class IfPageChoiceSchema extends Schema {
 			...inherit,
 			client: { type: 'String', initialize: (s) => isDef(s) ? s : null },
 			client_items: { type: 'Array', initialize: (a) => isDef(a) && isArray(a) ? noObjectsInArray(a) : [] },
-			solution: { type: 'String', initialize: (s) => isDef(s) ? s : null },
+			// Default solution to ?, which means that any answer is acceptable.
+			solution: { type: 'String', initialize: (s) => isDef(s) ? s : '?' },
 
 		};
 	}
@@ -250,8 +268,18 @@ class IfPageChoiceSchema extends Schema {
 		if(this.solution === null) return;
 
 		// We have a solution and a client submission. set.
-		this.correct = (this.client.trim().toLowerCase() === this.solution.trim().toLowerCase());
+		if(this.solution === '?' || this.solution === '*') {
+			this.correct = true;			
+		} else {
+			this.correct = (this.client.trim().toLowerCase() === this.solution.trim().toLowerCase());
+		}
 	}
+
+	// Return a nicely formatted view of the client's input. 
+	toString() {
+		return this.client;
+	}
+
 }
 
 
@@ -346,7 +374,11 @@ class IfPageParsonsSchema extends Schema {
 		return this;
 	}
 
-
+	// Return a nicely formatted view of the client's input. 
+	toString() {
+		let items = this.client_items.slice().reverse();
+		return items.reduce( (accum, item) => item+(accum.length>0 ? ', ': '')+accum, '');
+	}
 
 }
 
@@ -449,9 +481,16 @@ class IfPageFormulaSchema extends Schema {
 	// Refresh the this.correct variable. Relies upon client test results being run.
 	// If solution tests aren't run (or available), sets correct to null.
 	updateCorrect() {
+
+		// Checks to see if we are set to complete.  If so, do not update.
+		// Happens when the server provides us a json with .completed set.
+		if(this.completed) return;
+
 		// Check to see if we can provide a solution.
 		// Solutions are not always available, in which case is correct set to null.
-		if(this.solution_test_results.length !== this.tests.length || this.client_f === null || this.client_f.length < 1) {
+		if(this.solution_test_results.length !== this.tests.length || 
+				this.client_f === null ||
+				this.client_f.length < 1) {
 			this.correct = null;
 			return;
 		}
@@ -563,6 +602,12 @@ class IfPageFormulaSchema extends Schema {
 		return res;
 	}
 
+
+
+	// Return a nicely formatted view of the client's input. 
+	toString() {
+		return this.client_f;
+	}
 }
 
 
@@ -622,17 +667,45 @@ class IfLevelSchema extends Schema {
 	
 		Return the results as an array of whatever is passed.
 	*/
-	get_score_as_array(y=1, n=0, unscored, last_in_progress) {
+	get_score_as_array(y=1, n=0, unscored_but_completed, last_in_progress) {
 		// Make sure that true/false/null are the only allowed options.
+		let pages = this.pages;
+
+		// Run some checks to validate correctness.
+		pages.map( p => {
+			if(p.correct !== true && p.correct !== false && p.correct !== null) 
+				throw new Error('score.refresh.if.p.correct.isnottrueorfalseornull');
+			});
+
+		if(pages.length > 0) {
+			// Make sure that the last page is correctly null or not.
+			if(this.completed) {
+				// Last page check
+				if(pages[pages.length-1].correct === null)
+					throw new Error('IfGame.Shared.Level.get_score_as_array found completed last null');
+			} else {
+				if(pages[pages.length-1].correct !== null)
+					throw new Error('IfGame.Shared.Level.get_score_as_array found uncompleted last not null');
+			}
+
+			// Make sure that all completed pages are either true or false.
+			if(pages.filter(p => p.completed).map( p => {
+				if(!(p.correct === true || p.correct === false))
+					throw new Error('IfGame.Shared.Level.get_score_as_array found null in completed.');
+			}));
+		}
+
 		this.pages.map( p => {
 			if(p.correct !== true && p.correct !== false && p.correct !== null) 
 				throw new Error('score.refresh.if.p.correct.isnottrueorfalseornull');
 			});
 
+
+		// Map
 		let results = this.pages.map( p => { 
-			if(p.correct === true) return y;
-			if(p.correct === false) return n;
-			if(p.correct === null) return unscored;
+			if(!p.correct_required && p.correct) return y;
+			if(!p.correct_required && !p.correct) return n;
+			if(p.correct_required) return unscored_but_completed;
 		});
 
 		// If the last item is null, change to last_in_progress

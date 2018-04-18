@@ -5,7 +5,7 @@ const { DataFactory } = require('./DataFactory');
 const { test } = require('./tutorials/test');
 const { test_gens } = require('./tutorials/test_gens');
 const { tutorial } = require('./tutorials/tutorial');
-const { math } = require('./tutorials/math');
+const { math1, math2, math3 } = require('./tutorials/math');
 const { text } = require('./tutorials/text');
 const { sum } = require('./tutorials/sum');
 const { if1 } = require('./tutorials/if1');
@@ -55,7 +55,8 @@ const baseifgame = {
 						// If not, then just assign.  
 
 						// See if starting with ..., which means to append.
-						if(version[item].substr(0,3) === '...') {
+						if(typeof version[item] === 'string' && 
+								version[item].substr(0,3) === '...') {
 							json[item] = json[item] + version[item].substr(3);
 						} else {
 							json[item] = version[item];
@@ -71,8 +72,15 @@ const baseifgame = {
 
 		// Type-specific setup
 		if( json.type === IfPageTextSchema ) {
-			// No custom code needed.
-		}else if(json.type === IfPageParsonsSchema) {
+			// Mark that correct is required for all.
+			// Ensures that we get a completed, not correct, when showing result.
+			json.correct_required = true;
+
+			// Default instruction text.
+			if(typeof json.instruction === 'undefined') 
+				json.instruction = 'Click the <code>Continue</code> button.';
+
+		} else if(json.type === IfPageParsonsSchema) {
 
 			// Randomize the list until it's not the same order as the solution.
 			do {
@@ -88,10 +96,19 @@ const baseifgame = {
 				throw new Error('Invalid formula code '+json.code+' in baseifgame');
 			}
 
+
 		} else if(json.type === IfPageChoiceSchema) {
-			// No custom code needed for this type.
+			// Mark that correct is required for all. This is needed to help keep track of 
+			// submission.  If any solution is ok, then solution should be ? or *.
+			json.correct_required = true;
+
+			// Default instruction text.
+			if(typeof json.instruction === 'undefined') 
+				json.instruction = 'Select an item';
+
 
 		} else if(json.type === IfPageFormulaSchema) {
+			// Setup the major important fields based off of type.
 			if(json.code === 'tutorial') {
 				json.correct_required = true;
 				json.solution_test_results_visible = true;
@@ -106,6 +123,13 @@ const baseifgame = {
 		} else {
 			throw new Error('Invalid page type '+json.type+' in baseifgame');
 		}
+
+		// Require description and instructions.
+		if( typeof json.description === 'undefined' || json.description === null ||
+			typeof json.instruction === 'undefined' || json.instruction === null) 
+			throw new Error('IfGameServerInitializeJson.NullDescriptionOrInstructions');
+
+
 		return json;
 	},
 
@@ -160,13 +184,14 @@ const baseifgame = {
 		// Run the code that recursively returns new page json.
 		const new_page_json = this.gen.gen(level.seed, pages, this.gen);
 
+		// Mark the previous page as completed.
+		if(level.pages.length > 0) 
+			level.pages[level.pages.length-1].completed = true;
+
 		// Check result of gen function.
 		if(new_page_json !== null) {
 			// Since a non-null result was given, we should add a new page.
 
-			// If a last page, mark as completed.
-			if(level.pages.length > 0) 
-				level.pages[level.pages.length-1].completed = true;
 
 			// setup new page 
 			const initialized_json = this._initialize_json(new_page_json);
@@ -193,7 +218,9 @@ const IfLevelModelFactory = {
 		test: { ...baseifgame, ...test },
 		tutorial: { ...baseifgame, ...tutorial },
 		dates: { ...baseifgame, ...dates},
-		math: { ...baseifgame, ...math}, 
+		math1: { ...baseifgame, ...math1},
+		math2: { ...baseifgame, ...math2},
+		math3: { ...baseifgame, ...math3},
 		if1: { ...baseifgame, ...if1},
 		if2: { ...baseifgame, ...if2},
 		sum: { ...baseifgame, ...sum},

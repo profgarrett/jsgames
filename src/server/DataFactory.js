@@ -19,6 +19,16 @@ const DataFactory = {
 		return d;
 	},
 
+	// Return a random percentage (2 decimals) between the two given numbers.
+	// @seed is optional.
+	randPercent: (from: number, to: number, seed?: number): number => {
+		return Math.floor(
+			(typeof seed === 'undefined' ? Math.random() : seed )
+			* ((to*100)-(from*100)+1)+(from*100)
+		)/100;
+	},
+
+
 	// Return a random integer between the two given numbers.
 	// @seed is optional.
 	randB: (from: number, to: number, seed?: number): number => {
@@ -30,14 +40,14 @@ const DataFactory = {
 
 	// Return one of the given array.
 	// @seed is optional.
-	randOf: (a: Array<string>, seed?: number ): any => {
+	randOf: (a: Array<string | number>, seed?: number ): any => {
 		let i = Math.floor( 
 					(typeof seed === 'undefined' ?  Math.random() : seed )
 					* a.length);
 		return a[i];
 	},
 
-	randNumbers: (rows: number, cols: number = 3, max_n: number = 10): Array<number> =>{
+	randNumbers: (rows: number, cols: number = 3, max_n: number = 10, seed?: number): Array<number> =>{
 		const alpha = 'abcdefghijklmnopqrstuvwxyz';
 		let results = Array();
 		let result = {};
@@ -45,7 +55,7 @@ const DataFactory = {
 		for(let i=0; i<rows; i++) {
 			result = {};
 			for(let j=0; j<cols; j++)  {
-				result[ alpha.substr(j,1) ] = DataFactory.randB(0, max_n);
+				result[ alpha.substr(j,1) ] = DataFactory.randB(0, max_n, seed);
 			}
 			results.push(result);
 		}
@@ -62,6 +72,10 @@ const DataFactory = {
 			if(columns > 2) results[results.length-1]['c'] = DataFactory.randDate( -1*DataFactory.randB(0,options.c_range) );
 		}
 		return results;
+	},
+
+	randName: (seed?: number): string => {
+		return DataFactory.randOf(NAMES.first, seed);
 	},
 
 	randPeople: (rows: number): Array<Object> => {

@@ -3,7 +3,6 @@ import React from 'react';
 import type { Node } from 'react';
 
 import type { TextPageType } from './IfTypes';
-import { HtmlDiv } from './../components/Misc';
 
 type PropsType = {
 	page: TextPageType,
@@ -18,23 +17,21 @@ type PropsType = {
 export default class Text extends React.Component<PropsType> {
 	constructor(props: any) {
 		super(props);
+		(this: any).state = {};
 	}
 
-	componentDidMount() {
-		if(!this.props.page.client_read) {
-			this.props.handleChange({ client_read: true });	
+	// After props are updated, send a signal to show that it's been read.
+	static getDerivedStateFromProps(nextProps: PropsType /*, prevState*/): any {
+		if(!nextProps.page.client_read) {
+			nextProps.handleChange({ client_read: true });	
 		}
+		return {};
 	}
 
 	// Build out the table 
 	// Doesn't need to actually return anything, as the description will be shown 
 	// by the containing object.
 	render(): Node {
-		//const page = this.props.page;
-
-		// Use dangerouslySetInnerHtml so that the description can use html characters.
-		//let desc = <HtmlDiv className='lead1' html={ page.description } />;
-
 		return '';
 
 	}
