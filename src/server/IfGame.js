@@ -35,15 +35,31 @@ const arrayDifferent = (a1: Array<any>, a2: Array<any>): boolean => {
 const baseifgame = {
 	/* 
 		Setup page json prior to using it to create a new properly typed class object.
+
+		Seed parameter is used to generate stable random sequences.
 	*/
-	_initialize_json: function(original_json: Object): Object {
+	_initialize_json: function(seed: number, page_count: number, original_json: Object): Object {
 		let json = {...original_json};
+		let version_i: number = 0;
+		let version: object = {};
+		let randomly_sorted_versions: Array<Object> = [];
 
 		// Initialize different versions of the page based on the levels seed object.
 		// Relies upon versions being set to an array of objects or functions.
 		if(json.versions instanceof Array) {
 			// Pick a version.
-			let version: Object = DataFactory.randOf(json.versions, this.seed);
+
+			if(json.versions.length < 1) 
+				throw new Error('baseifgame._initialize_json.json.versions.length=0');
+
+			// We want a randomly-generated sequence of versions. That way,
+			//  the user doesn't get the same item multiple times w/o first
+			//  going through all of the other items.
+			// 
+			randomly_sorted_versions = DataFactory.randomizeList(json.versions, seed);
+			// Find ith item for this run.
+			version_i = page_count % json.versions.length;
+			version = randomly_sorted_versions[version_i];
 
 			// Initialize contained objects.
 			for(let item in version) {
@@ -194,7 +210,7 @@ const baseifgame = {
 			// Since a non-null result was given, we should add a new page.
 
 			// setup new page 
-			const initialized_json = this._initialize_json(new_page_json);
+			const initialized_json = this._initialize_json(level.seed, level.pages.length, new_page_json);
 			const new_page = level.get_new_page(initialized_json);
 			level.pages.push(new_page);
 
