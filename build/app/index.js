@@ -28,12 +28,6 @@ const bugsnagClient = bugsnag({
   autoCaptureSessions: true,
   releaseStage: window.location.hostname === 'localhost' ? 'development' : 'production',
   notifyReleaseStages: [ 'development', 'production' ]
-/*
-  beforeSend: function (report) {
-    if (report.errorClass === 'Error' && report.severity === 'warning') {
-      report.updateMetaData('example', { thing: 'one' })
-    }
-  } */
 });
 
 const ErrorBoundary = bugsnagClient.use(createPlugin(React));

@@ -478,13 +478,22 @@ const if_tests = [
 		title: 'if: List',
 		url: '/api/ifgame/levels/byCode/test',
 		options: { method: 'GET' },
-		test_response: (response, json) => response.status === 200 && json.length > 0
+		test_response: (response, json) => {
+			return response.status === 200 && json.length > 0;
+		}
 	},
 	{
 		title: 'if: Get one',
 		url: ()=> '/api/ifgame/level/'+if_game_json._id,
 		options: { method: 'GET' },
-		test_response: (response, json) => response.status === 200 && json.code === 'test'
+		test_response: (response, json) => {
+			if_game_json = json;
+			return (response.status === 200 &&
+				json.code === 'test' &&
+				json.type === 'IfLevelSchema' &&
+				json.pages.length === 1 &&
+				json.pages[0].type === 'IfPageFormulaSchema');
+		}
 	},
 	{
 		title: 'if: Get one - test date format returned int',
@@ -546,6 +555,7 @@ const if_tests = [
 		url: ()=> '/api/ifgame/level/'+if_game_json._id,
 		options: { method: 'POST' },
 		body: ()=> { 
+
 			let ifgame = new IfLevelSchema(if_game_json);
 			ifgame.pages[1].client_f = if_game_test_client_f_correct;
 			return ifgame.toJson();

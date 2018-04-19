@@ -139,6 +139,10 @@ class IfPageTextSchema extends Schema {
 		this.updateCorrect();
 	}
 
+	get type() {
+		return 'IfPageTextSchema';
+	}
+
 	get schema() {
 		let inherit = common_schema();
 
@@ -147,6 +151,7 @@ class IfPageTextSchema extends Schema {
 			client_read: { type: 'Boolean', initialize: (s) => isDef(s) ? bool(s) : false }
 		};
 	}
+
 
 	// Has the user provided input?
 	client_has_answered() {
@@ -208,6 +213,10 @@ class IfPageChoiceSchema extends Schema {
 	constructor(json) {
 		super(json); // set passed fields.
 		this.updateCorrect();
+	}
+
+	get type() {
+		return 'IfPageChoiceSchema';
 	}
 
 	get schema() {
@@ -299,6 +308,10 @@ class IfPageParsonsSchema extends Schema {
 		this.updateCorrect();
 	}
 
+	get type() {
+		return 'IfPageParsonsSchema';
+	}
+
 	get schema() {
 		let inherit = common_schema();
 
@@ -368,7 +381,6 @@ class IfPageParsonsSchema extends Schema {
 
 		// Check individual answers
 		for(let i=0; i<this.solution_items.length && this.correct; i++) {
-			//console.log({ 'c': this.client_test_results[i].result, 's': this.solution_test_results[i].result });
 			this.correct = (this.client_items[i] == this.solution_items[i]);
 		}
 		return this;
@@ -400,6 +412,9 @@ class IfPageFormulaSchema extends Schema {
 		this.updateCorrect();
 	}
 
+	get type() {
+		return 'IfPageFormulaSchema';
+	}
 
 	get schema() {
 		let inherit = common_schema();
@@ -500,7 +515,6 @@ class IfPageFormulaSchema extends Schema {
 
 		// Check individual answers
 		for(let i=0; i<this.client_test_results.length && this.correct; i++) {
-			//console.log({ 'c': this.client_test_results[i].result, 's': this.solution_test_results[i].result });
 			this.correct = (this.client_test_results[i].result == this.solution_test_results[i].result);
 		}
 		if(!this.correct) return;
@@ -617,6 +631,9 @@ class IfPageFormulaSchema extends Schema {
 */
 class IfLevelSchema extends Schema {
 
+	get type() {
+		return 'IfLevelSchema';
+	}
 
 	get schema() {
 		// clean-up functions
@@ -750,13 +767,13 @@ class IfLevelSchema extends Schema {
 	get_new_page(json) {
 		//return new json.type(json);
 		
-		if(json.type === IfPageParsonsSchema || json.type === 'IfPageParsonsSchema') {
+		if(json.type === 'IfPageParsonsSchema') {
 			return new IfPageParsonsSchema(json);
-		} else if (json.type === IfPageFormulaSchema || json.type === 'IfPageFormulaSchema') {
+		} else if (json.type === 'IfPageFormulaSchema') {
 			return new IfPageFormulaSchema(json);
-		} else if (json.type === IfPageChoiceSchema || json.type === 'IfPageChoiceSchema') {
+		} else if (json.type === 'IfPageChoiceSchema') {
 			return new IfPageChoiceSchema(json);
-		} else if (json.type === IfPageTextSchema || json.type === 'IfPageTextSchema') {
+		} else if (json.type === 'IfPageTextSchema') {
 			return new IfPageTextSchema(json);
 		} else {
 			throw new Error('Invalid get_new_page(type) param of ' + json.type);

@@ -7,14 +7,16 @@ class Schema {
 	/**
 		Initialize model, using any JSON properties as pre-load the this value
 		
-		Automatically adds a type field for the record-type.
+		Checks to make sure that the type field matches the json.type value.
 		@arg json: Data loaded from server.
 	*/
 	constructor( json={} ) {
 		let schema = this.schema;
 		//let methods = this.methods;
 
-		this['type'] = this.constructor.name;
+		if(this.type !== json.type) {
+			throw Error('Schema.constructor: json.type ('+json.type+') !== '+this.type);
+		}
 
 		// Validate json object entries to match against schema.
 		// Allow 'type' key without a matching field schema definition.
@@ -32,6 +34,9 @@ class Schema {
 		}
 	}
 
+	get type() {
+		throw Error('Inheriting classes must implement type');
+	}
 
 	get schema() {
 		throw Error('Inheriting classes must implement schema');
@@ -48,24 +53,43 @@ class Schema {
 	toJson(new_values_json) {
 		let schema = this.schema;
 		let json = {
-			type: this.type
+			type: this.type // make sure that we pick up the type, which is coded as getter.
 		};
 
 		// Copy all properties to the new item.
 		for(const key of Object.keys(schema)) {
 			if(this[key] instanceof Date) {
-				json[key] = this[key].getTime(); // convert date to UTC int value.
+				// convert date to UTC int value.
+				json[key] = this[key].getTime(); 
+				
+			} else if(this[key] instanceof Array) {
+				// If a contained array of objects have toJson function, use them
+				json[key] = this[key].map( 
+						i => (typeof i.toJson === 'function') ? i.toJson() : i 
+						);
 			} else {
+				// Normal conversion.
 				json[key] = this[key];
 			}
+
+			
 		}
 
 		// Copy any new_values provided.
 		if(typeof new_values_json !== 'undefined') {
 			for(const key of Object.keys(new_values_json)) {
 				if(new_values_json[key] instanceof Date) {
-					json[key] = new_values_json[key].getTime(); // convert date to UTC int value.
+					// convert date to UTC int value.
+					json[key] = new_values_json[key].getTime(); 
+
+				} else if(new_values_json[key] instanceof Array) {
+					// If a contained array of objects have toJson function, use them.
+					json[key] = new_values_json[key].map( 
+							i => (typeof i.toJson === 'function') ? i.toJson() : i 
+							);
+
 				} else {
+					// Normal conversion
 					json[key] = new_values_json[key];
 				}
 			}

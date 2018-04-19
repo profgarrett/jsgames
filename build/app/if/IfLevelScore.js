@@ -1,23 +1,34 @@
+//      
 import React from 'react';
-import PropTypes from 'prop-types';
-//import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
+import { Panel, Popover, OverlayTrigger, Well } from 'react-bootstrap';
 
 import 'rc-slider/assets/index.css';
 import 'rc-tooltip/assets/bootstrap.css';
 import Slider from 'rc-slider';
-//import Tooltip from 'rc-slider';
 
-import { IfPageSchema } from './../../shared/IfGame';
-import { Panel, Well } from 'react-bootstrap';
-import { HtmlDiv, SuccessGlyphicon, FailureGlyphicon } from './../components/Misc';
+//import { IfPageSchema } from './../../shared/IfGame';
+import { HtmlDiv, incorrect_glyphicon, correct_glyphicon, completed_glyphicon } from './../components/Misc';
+
 import ExcelTable from './ExcelTable';
+import Choice from './Choice';
 import Parsons from './Parsons';
+import Text from './Text';
 
+                                                     
+                                  
+
+
+
+                         
+                
+                               
+  
+                    
 
 // Allows moving forward/backwards through history of a single page.
-class HistorySlider extends React.Component {
+class HistorySlider extends React.Component                              {
 
-	render() {
+	render()       {
 		const page = this.props.page;
 		const style = { marginBottom:5, margin: 5};
 
@@ -25,11 +36,11 @@ class HistorySlider extends React.Component {
 
 		const first = page.history[0].created.getTime();
 		const last = page.history[page.history.length-1].created.getTime();
-		let i = 0;
 
 		// Convert history to an obj keyed by index.
-		const marks = page.history.reduce( (marks,obj) => {
-			marks[i] = ''; // obj.created.toLocaleTimeString();
+		let i = 0;
+		const marks = page.history.reduce( (marks         /*, history_item: Object*/)      => {
+			marks[i] = ''; // history_item.created.toLocaleTimeString();
 			i++;
 			return marks;
 		}, {});
@@ -42,24 +53,30 @@ class HistorySlider extends React.Component {
 		);
 	}
 }
-HistorySlider.propTypes = {
-	page: PropTypes.object.isRequired,
-	handleChange: PropTypes.func
-}; 
 
 
 
-class IfLevelScorePage extends React.Component {
-	constructor(props) {
+                       
+                  
+                
+          
+  
+                       
+               
+  
+
+
+class IfLevelScorePage extends React.Component                                 {
+	constructor(props     ) {
 		super(props);
 		this.state = {
 			page: this.props.page // state records which history event (if any) we are viewing 
 		};
-		this.setHistory = this.setHistory.bind(this);
+		(this     ).setHistory = this.setHistory.bind(this);
 	}
 	
 	// Update this.state to show different versions of the current page.
-	setHistory(history_i) {
+	setHistory(history_i        ) {
 		const history = this.props.page.history[history_i];
 		const json = { ...this.props.page.toJson(), ...history };
 
@@ -71,7 +88,7 @@ class IfLevelScorePage extends React.Component {
 		this.setState({ page });
 	}
 
-	render() {
+	render()       {
 		const i = this.props.i;
 		let page_final = this.props.page;
 		let page_at = this.state.page;
@@ -99,27 +116,35 @@ class IfLevelScorePage extends React.Component {
 						<Panel.Collapse >
 							<Panel.Body>
 								<HistorySlider page={page_at} handleChange={this.setHistory} />
-								<ExcelTable page={page_at} editable={false} />;
+								<ExcelTable page={page_at} editable={false} />
 							</Panel.Body>
 						</Panel.Collapse>
 					</Panel>
 			);
 
+		} else if(page_at.type === 'IfPageTextSchema') {
+			problem = (<div>
+					<Text page={page_at} editable={false} />
+				</div>);
+
 		} else if(page_at.type === 'IfPageParsonsSchema') {
-			// Show solution only if the user was wrong.
-			problem = (
-				<div>
-					<Parsons page={page_at} editable={false} show_solution={!page_final.correct} />
-					<HistorySlider page={page_at} handleChange={this.setHistory} />
-				</div>
-			);
+			problem = (<div>
+					<Parsons page={page_at} editable={false} show_solution={page_final.correct === false} />
+				</div>);
+
+		} else if(page_at.type === 'IfPageChoiceSchema') {
+			// Show range of choice only if the user was wrong.  If no right answer,
+			// then correct will be null.
+			problem = (<div>
+					<Choice page={page_at} editable={false} show_solution={page_final.correct === false} />
+				</div>);
 
 		} else {
 			throw new Error('Invalid type in IfLevelScore '+page_at.type);
 		}
 
 		return (
-			<Panel key={i} bsStyle={ page_final.correct ? 'success' : 'danger' } >
+			<Panel key={i} bsStyle={ page_final.correct===null ? 'info' : (page_final.correct ? 'success' : 'danger' ) } >
 				<Panel.Heading >
 					Page {i+1}
 				</Panel.Heading>
@@ -132,32 +157,34 @@ class IfLevelScorePage extends React.Component {
 		);
 	}
 }
-IfLevelScorePage.propTypes = {
-	level: PropTypes.object.isRequired,
-	page: PropTypes.object.isRequired,
-	i: PropTypes.number.isRequired
-};
 
 
+                       
+                 
+  
 
-export default class IfLevelScore extends React.Component {
+export default class IfLevelScore extends React.Component                            {
 
-	render() {
+	render()       {
 		const level = this.props.level;
-		
 		if(!level) return <div></div>;
 
+		const title_completed = 'You completed ' + 
+				(level.pages.length - level.get_score_attempted())
+				+ ' tutorial pages';
+		const quiz_completed = level.get_score_attempted() > 0 ? 
+				', and earned ' + level.get_score_correct() + 
+				' of ' + level.get_score_attempted() + ' on the quizzes' : '';
+
 		// Use formulas with i to generate unique keys upon completion.
-		const results = level.get_score_as_array(
-				i => <SuccessGlyphicon key={'iflevelscorerenderscore'+i} />, 
-				i => <FailureGlyphicon key={'iflevelscorerenderscore'+i} />);
+		const results = build_score(level.pages);
 
 		return (
 			<div>
 				<Well>
 					<div style={{ textAlign: 'center' }}>
-						<h3>You earned { level.get_score_correct() } of { level.get_score_attempted() }</h3>
-						{ results.map( (result, i) => result(i) ) }
+						<h3>{ title_completed}{quiz_completed}</h3>
+						{ results }
 					</div>
 				</Well>
 				{ level.pages.map( (p,i) => <IfLevelScorePage level={level} page={p} i={i} key={i} /> ) }
@@ -165,6 +192,53 @@ export default class IfLevelScore extends React.Component {
 		);
 	}
 }
-IfLevelScore.propTypes = {
-	level: PropTypes.object.isRequired
-};
+
+
+const build_score = (pages                 )      => pages.map( (p          , i        )      => {
+	let g = null;
+	let title = '';
+	let html = '';
+
+	// Build the glyph to use for display.
+	if(!p.completed) {
+		throw new Error('Can not view score for uncompleted');
+	}
+
+	// Finished
+	if(p.correct_required) {
+		// Tutorial page.
+		title = 'Completed';
+		html = p.description + 
+			(p.toString().length > 0 ?
+				'<br/><div class="well well-sm">'+ p.toString()+'</div>' :
+				'');
+		g = completed_glyphicon();
+	} else {
+		// Graded page
+		if(p.correct) {
+			title = 'Correct answer';
+			html = p.description + '<br/><div style={background} class="well well-sm">'+p.toString()+'</div>';
+			g = correct_glyphicon();
+		} else {
+			title = 'Incorrect answer';
+			html = p.description + '<br/><div class="well well-sm">'+p.toString()+'</div>';
+			g = incorrect_glyphicon();
+		}
+	}
+	
+	const pop = (
+		<Popover title={title} id={'iflevelplayrenderscore_id_'+i}>
+			<HtmlDiv html={html} />
+		</Popover>
+	);
+
+	return (
+		<span key={'iflevelplayrenderscore'+i}>
+			<OverlayTrigger trigger={['hover','focus']} placement='top' overlay={pop}>
+				{g}
+			</OverlayTrigger>
+		</span>
+	);
+
+});
+

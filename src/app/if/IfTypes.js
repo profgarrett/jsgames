@@ -5,6 +5,7 @@ export type LevelType = {
 	_id: string,
 	code: string,
 	username: string,
+	type: string,
 
 	seed: number,
 
@@ -35,8 +36,8 @@ export type PageType = {
 	correct_required: boolean,
 	completed: boolean,
 
-	history: Array<Object>
-	toJson: function
+	history: Array<Object>,
+	toJson: Function
 };
 
 
@@ -52,8 +53,8 @@ export type TextPageType = {
 	correct_required: boolean,
 	completed: boolean,
 	
-	history: Array<Object>
-	toJson: function
+	history: Array<Object>,
+	toJson: Function,
 	// End Copy
 
 	client_read: boolean
@@ -72,8 +73,8 @@ export type ChoicePageType = {
 	correct_required: boolean,
 	completed: boolean,
 	
-	history: Array<Object>
-	toJson: function
+	history: Array<Object>,
+	toJson: Function,
 	// End Copy
 
 	client: string,
@@ -96,8 +97,8 @@ export type ParsonsPageType = {
 	correct_required: boolean,
 	completed: boolean,
 	
-	history: Array<Object>
-	toJson: function
+	history: Array<Object>,
+	toJson: Function,
 	// End Copy
 
 	helpblock: string,
@@ -118,8 +119,8 @@ export type FormulaPageType = {
 	correct_required: boolean,
 	completed: boolean,
 	
-	history: Array<Object>
-	toJson: function
+	history: Array<Object>,
+	toJson: Function,
 	// End Copy
 
 	helpblock: string,

@@ -33,9 +33,9 @@ const make_draggables = (a, clickToMove, listId )=> a.map(
 							provided.draggableProps.style
 						)}
 					>
-					<div className='list-group-item' onDoubleClick={ () => clickToMove(index, listId) }>
-						{item.content}
-					</div>
+					<div className='list-group-item' 
+							onDoubleClick={ () => clickToMove(index, listId) }
+							dangerouslySetInnerHTML={ { '__html': item.content } } />
 					</div>
 					{provided.placeholder}
 				</div>

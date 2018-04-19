@@ -65,6 +65,15 @@ export default class IfLevelPlayContainer extends React.Component {
 			return;
 		}
 
+		// Make sure that the user has submitted something
+		if(!current_page.client_has_answered()) {
+			this.setState({
+				message: 'You must provide an answer before continuing.',
+				messageStyle: 'warning'
+			});
+			return;
+		}
+
 		// Make sure that we don't already have a future page loaded in front of the current page.
 		if( current_page_i < this.state.level.pages.length-1 ) {
 			throw new Error('current_page_i < this.state.level.pages.length-1 in IfLevelPlayContainer.onSubmit');

@@ -62,7 +62,7 @@ function shouldCompress (req          , res           )          {
 // Disable DEBUG as bugsnag doesn't work with passenger.
 // 	Possibly due to STDOUT issue.
 // Load bugsnag if it is defined in secret.js.
-if(false /*!DEBUG && typeof BUGSNAG_API !== undefined && BUGSNAG_API.length > 0*/) {
+if(!DEBUG && typeof BUGSNAG_API !== undefined && BUGSNAG_API.length > 0) {
 	bugsnag.register(BUGSNAG_API);
 	app.use(bugsnag.requestHandler);
 	app.use(bugsnag.errorHandler);
@@ -114,91 +114,8 @@ if(DEBUG)
 
 
 ////////////////////////////////////////////////////////////////////////
-//  Chart Game
-////////////////////////////////////////////////////////////////////////
-
-/*
-// Create
-app.post('/api/chartgame/level', (req, res) => {
-	let level = CgLevelModelFactory.createTest();
-	let _db = null;
-
-	MongoClient.connect(url) //, {native_parser:true}, function(err, mongo) {
-		.then( conn => _db = conn.db('jsgames') )
-		.then( db => db.collection('chartlevels').insert( level.toJson() ) )
-		.then( mongoresult => {
-			let id = mongoresult.insertedIds[0];
-			return _db.collection('chartlevels').findOne({ _id: new ObjectId(id) });
-		})
-		.then( mongoresult => res.json(mongoresult) )
-		.catch( err => log_error(err, res) );
-});
-
-// List
-app.get('/api/chartgame/level/', (req, res) => {
-
-	MongoClient.connect(url) 
-		.then( conn => conn.db('jsgames').collection('chartlevels').find() )
-		.then( q => q.toArray() )
-		.then( mongoresult => res.json(mongoresult) )
-		.catch( err => log_error(err, res) );
-});
-
-// Select One
-app.get('/api/chartgame/level/:id', (req, res) => {
-
-	MongoClient.connect(url)
-		.then( conn => conn.db('jsgames') )
-		.then( db => db.collection('chartlevels').findOne({ _id: new ObjectId(req.params.id) }) )
-		.then( mongoresult => res.json(mongoresult) )
-		.catch( err => log_error(err, res) );
-});
-
-// Delete One
-app.delete('/api/chartgame/level/:id', (req, res) => {
-
-	MongoClient.connect(url)
-		.then( conn => conn.db('jsgames') )
-		.then( db => db.collection('chartlevels').remove({ _id: new ObjectId(req.params.id) }) )
-		.then( mongoresult => res.json(mongoresult) )
-		.catch( err => log_error(err, res) );
-});
-
-// Update One
-app.post('/api/chartgame/level/:id', (req, res) => {
-	let _db = null,
-		_level_model = null;
-	
-	MongoClient.connect(url)
-		.then( conn => _db = conn.db('jsgames') )
-		.then( db => db.collection('chartlevels').findOne({ _id: new ObjectId(req.params.id) }) )
-		.then( json => {
-			if(json === null) throw Error('404');
-			_level_model = new CgLevelModel(json);
-
-			// Update user fields and (potentially) add a new page.
-			_level_model.updateUserFields(req.body);
-			CgLevelModelFactory.updateTest(_level_model);
-
-			return _level_model.toJson();
-		})
-		.then( json => _db.collection('chartlevels').update({_id: new ObjectId(req.params.id) }, json) )
-		.then( mongoresult => {
-			if(mongoresult.result.ok === 1) {
-				return res.json(_level_model);
-			} else {
-				throw Error('500');
-			}
-		})
-		.catch( err => log_error(err, res) );
-});
-
-*/
-
-////////////////////////////////////////////////////////////////////////
 //  DB setup and maintenance
 ////////////////////////////////////////////////////////////////////////
-
 
 /**
 	Initialize MYSQL with credentials from secret.js.
@@ -354,24 +271,20 @@ const strip_secrets = function(input        )         {
 */
 const from_mysql_to_utc = (dt_or_string               )         => {
 	if(dt_or_string instanceof Date) {
-		//console.log('from_mysql_to_utc: ' + dt_or_string.toString() + ' (dt)' );
 		return to_utc(dt_or_string);
 	}
 	let dt = new Date(dt_or_string);
 
-	//console.log('from_mysql_to_utc: ' + dt_or_string + ' (string) --> ' + dt.toString() );
 	return to_utc(dt);
 };
 
 // Convert a utc int value into a textual format usable for inserting into mysql
 const from_utc_to_myql = (i        )         => {
-	//console.assert(typeof i !== 'object' && typeof i === 'number');
 	let dt = new Date(i);
 
 	// pull out the T and replace with a space.
 	let mysql = dt.toISOString().slice(0, 19).replace('T', ' ');
 
-	//console.log('from_utc_to_myql: '+dt.toString() + ' --> '+ mysql);
 	return mysql;
 };
 
@@ -384,8 +297,6 @@ const to_utc = (dt      )         => {
 	let int = Date.UTC(dt.getUTCFullYear(), dt.getUTCMonth(), dt.getUTCDate(), 
 			dt.getUTCHours(), dt.getUTCMinutes(), dt.getUTCSeconds());
 	
-	//console.log('to_utc: '+dt.toString() + ' --> '+ int);
-
 	return int;
 };
 
@@ -418,14 +329,19 @@ app.post('/api/ifgame/new_level_by_code/:code',
 		const now = from_utc_to_myql(to_utc(new Date()));
 
 		const username = get_username_or_emptystring(req);
-		const insert_sql = `INSERT INTO iflevels (username, code, title, description, completed, 
-			pages, history, created, updated) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+		const insert_sql = `INSERT INTO iflevels (type, username, code, title, description, completed, 
+			pages, history, created, updated, seed) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
 		level.username = username;
 
-		const values = [level.username, level.code, level.title, level.description,
+					
+		// Note: Must use toJson on pages, as that needs some extra care
+		// before being stringified.
+		const values = [level.type, level.username, level.code, level.title, level.description,
 				level.completed ? 1 : 0, 
-				JSON.stringify(level.pages), JSON.stringify(level.history), 
-				now, now ];
+				JSON.stringify(level.pages.map( (p         )         => p.toJson() )), 
+				JSON.stringify(level.history), 
+				now, now,
+				level.seed ];
 
 		let insert_results = await run_mysql_query(insert_sql, values);
 
@@ -537,8 +453,9 @@ app.post('/api/ifgame/level/:id',
 
 		IfLevelModelFactory.addPageOrMarkAsComplete(iflevel); 
 
+		// Note: Use pages.toJson() to make sure that type is included.
 		let values = [iflevel.completed ? 1 : 0, 
-					JSON.stringify(iflevel.pages), 
+					JSON.stringify(iflevel.pages.map( (p         )         => p.toJson() )), 
 					JSON.stringify(iflevel.history), 
 					from_utc_to_myql(to_utc(iflevel.updated)), 
 					iflevel._id, 
@@ -630,10 +547,12 @@ app.post('/api/login_clear_test_user/',
 	nocache,
 	async (req          , res           , next              )               => {
 	try {
-		const sql = 'DELETE FROM users WHERE username = "test"';
+		const sql1 = 'DELETE FROM iflevels WHERE username = "test"';
+		const sql2 = 'DELETE FROM users WHERE username = "test"';
 
-		let results = await run_mysql_query(sql);
-		return res.json({ success: true, affectedRows: results.affectedRows});
+		let results1 = await run_mysql_query(sql1);
+		let results2 = await run_mysql_query(sql2);
+		return res.json({ success: true, affectedRows: results2.affectedRows});
 		
 	} catch (e) {
 		log_error(e);

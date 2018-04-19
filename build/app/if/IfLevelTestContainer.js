@@ -5,7 +5,7 @@ import IfLevelTest from './IfLevelTest';
 import { Message, Loading } from './../components/Misc';
 import { IfLevelSchema } from './../../shared/IfGame';
 
-//if(typeof IfLevelSchema === 'undefined') throw new Error('blah!');
+if(typeof IfLevelSchema === 'undefined') throw new Error('blah!');
 
 // We need to have this token passed in the URL in order to properly test the user creation process.
 // Must match value given in secret.js on the server.
@@ -22,6 +22,12 @@ const default_fetch_options = {
 		'Content-Type': 'application/json'
 	}
 };
+
+
+
+////////////////////////////////////////////////////////////////////
+// Login Tests
+////////////////////////////////////////////////////////////////////
 
 const login_password = 'p'+Math.random(10000000, 99999999);
 
@@ -87,6 +93,366 @@ const login_tests = [
 ];
 
 
+
+
+////////////////////////////////////////////////////////////////////
+// Gen Tests
+////////////////////////////////////////////////////////////////////
+
+
+// These are used to test the adaptive code using the test_gens files.
+let gen_level = {};
+let gen_page_count = 0;
+
+const gen_tests = [
+	{
+		title: 'Gens: Create test level',
+		url: '/api/ifgame/new_level_by_code/test_gens',
+		options: { method: 'POST' },
+		test_response: (response, json) => {
+			gen_level = new IfLevelSchema(json);
+			return response.status === 200 && json.type === 'IfLevelSchema' && json.username === 'test';
+		}
+	},
+	{
+		title: 'Gens: LinearGen1 page 1 tutorial, failed attempt to add bad level',
+		url: ()=> '/api/ifgame/level/'+gen_level._id,
+		options: { method: 'POST' },
+		body: ()=> { 
+			let last_page = gen_level.pages[gen_level.pages.length-1];
+			last_page.client_f = 'bad';
+			gen_page_count = gen_level.pages.length; // update page_no before save.
+			return gen_level.toJson();
+		},
+		test_response: (response, json) => {
+			gen_level = new IfLevelSchema(json);
+			return (response.status === 200 && 
+					json.pages.length === gen_page_count &&
+					json.pages[gen_page_count-1].description === 'LinearGen1_tutorial' && 
+					json.type === 'IfLevelSchema' && 
+					json.username === 'test');
+		}
+	},
+	{
+		title: 'Gens: LinearGen1 page 1 tutorial, good add level',
+		url: ()=> '/api/ifgame/level/'+gen_level._id,
+		options: { method: 'POST' },
+		body: ()=> { 
+			let last_page = gen_level.pages[gen_level.pages.length-1];
+			last_page.client_f = '=a1';
+			gen_page_count = gen_level.pages.length; // update page_no before save.
+			return gen_level.toJson();
+		},
+		test_response: (response, json) => {
+			gen_level = new IfLevelSchema(json);
+			gen_page_count++;
+			return (response.status === 200 && 
+					json.pages.length === gen_page_count &&
+					json.pages[gen_page_count-1].description !== 'LinearGen1_tutorial' && 
+					json.type === 'IfLevelSchema' && 
+					json.username === 'test');
+		}
+	},
+	{
+		title: 'Gens: LinearGen1 page 2 test, bad add level',
+		url: ()=> '/api/ifgame/level/'+gen_level._id,
+		options: { method: 'POST' },
+		body: ()=> { 
+			let last_page = gen_level.pages[gen_level.pages.length-1];
+			last_page.client_f = 'bad';
+			gen_page_count = gen_level.pages.length; // update page_no before save.
+			return gen_level.toJson();
+		},
+		test_response: (response, json) => {
+			gen_level = new IfLevelSchema(json);
+			gen_page_count++;
+			return (response.status === 200 && 
+					json.pages.length === gen_page_count &&
+					json.pages[gen_page_count-1].description !== 'LinearGen2' && 
+					json.type === 'IfLevelSchema' && 
+					json.username === 'test');
+		}
+	},
+	{
+		title: 'Gens: UntilGen - Make sure that wrong tutorial answers add a new page & repeat 1',
+		url: ()=> '/api/ifgame/level/'+gen_level._id,
+		options: { method: 'POST' },
+		body: ()=> { 
+			let last_page = gen_level.pages[gen_level.pages.length-1];
+			last_page.client_f = 'bad';
+			gen_page_count = gen_level.pages.length; // update page_no before save.
+			return gen_level.toJson();
+		},
+		test_response: (response, json) => {
+			gen_level = new IfLevelSchema(json);
+			return (response.status === 200 && 
+				json.pages.length === 1+gen_page_count &&
+				json.pages[gen_page_count-1].description === 'UntilGen1' &&
+				json.pages[gen_page_count-1].client_f === 'bad' &&
+				json.pages[gen_page_count].description === 'UntilGen1' &&
+				json.pages[gen_page_count].client_f === null);
+		}
+	},
+	{
+		title: 'Gens: UntilGen - Make sure that wrong tutorial answers add a new page & repeat 2',
+		url: ()=> '/api/ifgame/level/'+gen_level._id,
+		options: { method: 'POST' },
+		body: ()=> { 
+			let last_page = gen_level.pages[gen_level.pages.length-1];
+			last_page.client_f = 'bad';
+			gen_page_count = gen_level.pages.length; // update page_no before save.
+			return gen_level.toJson();
+		},
+		test_response: (response, json) => {
+			gen_level = new IfLevelSchema(json);
+			return (response.status === 200 && 
+				json.pages.length === 1+gen_page_count &&
+				json.pages[gen_page_count-1].description === 'UntilGen1' &&
+				json.pages[gen_page_count-1].client_f === 'bad' &&
+				json.pages[gen_page_count].description === 'UntilGen1' &&
+				json.pages[gen_page_count].client_f === null);
+		}
+	},
+	{
+		title: 'Gens: UntilGen - Make sure that right tutorial answers do continue',
+		url: ()=> '/api/ifgame/level/'+gen_level._id,
+		options: { method: 'POST' },
+		body: ()=> { 
+			let last_page = gen_level.pages[gen_level.pages.length-1];
+			last_page.client_f = '=a1';
+			gen_page_count = gen_level.pages.length; // update page_no before save.
+			return gen_level.toJson();
+		},
+		test_response: (response, json) => {
+			gen_level = new IfLevelSchema(json);
+			return (response.status === 200 && 
+				json.pages.length === 1+gen_page_count &&
+				json.pages[gen_page_count-1].description === 'UntilGen1' &&
+				json.pages[gen_page_count-1].client_f === '=a1' &&
+				json.pages[gen_page_count].description !== 'UntilGen1');
+		}
+	},
+	{
+		title: 'Gens: Shuffle 1 (a, b, or c)',
+		url: ()=> '/api/ifgame/level/'+gen_level._id,
+		options: { method: 'POST' },
+		body: ()=> { 
+			let last_page = gen_level.pages[gen_level.pages.length-1];
+			last_page.client_f = '=a1';
+			gen_page_count = gen_level.pages.length; // update page_no before save.
+			return gen_level.toJson();
+		},
+		test_response: (response, json) => {
+			gen_level = new IfLevelSchema(json);
+			return (response.status === 200 && 
+				json.pages.length === 1+gen_page_count &&
+				json.pages[json.pages.length-1].description.substr(0, 7) === 'Shuffle');
+		}
+	},
+	{
+		title: 'Gens: Shuffle 1 (a, b, or c)',
+		url: ()=> '/api/ifgame/level/'+gen_level._id,
+		options: { method: 'POST' },
+		body: ()=> { 
+			let last_page = gen_level.pages[gen_level.pages.length-1];
+			last_page.client_f = '=a1';
+			gen_page_count = gen_level.pages.length; // update page_no before save.
+			return gen_level.toJson();
+		},
+		test_response: (response, json) => {
+			gen_level = new IfLevelSchema(json);
+			return (response.status === 200 && 
+				json.pages.length === 1+gen_page_count &&
+				json.pages[json.pages.length-1].description.substr(0, 7) === 'Shuffle');
+		}
+	},
+	{
+		title: 'Gens: Shuffle 1 (a, b, or c)',
+		url: ()=> '/api/ifgame/level/'+gen_level._id,
+		options: { method: 'POST' },
+		body: ()=> { 
+			let last_page = gen_level.pages[gen_level.pages.length-1];
+			last_page.client_f = '=a1';
+			gen_page_count = gen_level.pages.length; // update page_no before save.
+			return gen_level.toJson();
+		},
+		test_response: (response, json) => {
+			gen_level = new IfLevelSchema(json);
+			
+			// Ensure that we have all 3 shuffles.
+			let p = [json.pages[json.pages.length-2], json.pages[json.pages.length-3], json.pages[json.pages.length-4]];
+			p = p.filter( p=> p.description.substr(0, 7) === 'Shuffle' );
+
+			let r = (response.status === 200 && 
+				json.pages.length === gen_page_count + 1 &&
+				p.length === 3);
+
+			return r;
+		}
+	},
+	{
+		title: 'Gens: Adaptive 1 - submit bad test 1',
+		url: ()=> '/api/ifgame/level/'+gen_level._id,
+		options: { method: 'POST' },
+		body: ()=> { 
+			let last_page = gen_level.pages[gen_level.pages.length-1];
+			last_page.client_items = [2,1];
+			gen_page_count = gen_level.pages.length; // update page_no before save.
+			return gen_level.toJson();
+		},
+		test_response: (response, json) => {
+			gen_level = new IfLevelSchema(json);
+
+			// Ensure that it was added correctly.
+			let r = (response.status === 200 && 
+				json.pages.length === gen_page_count + 1 &&
+				// failed test.
+				json.pages[json.pages.length-2].description === 'AdaptiveTest' &&
+				json.pages[json.pages.length-2].correct === false &&
+				// last page is not yet complete/submitted.
+				json.pages[json.pages.length-1].description === 'AdaptiveTutorial');
+
+			return r;
+		}
+	},
+	{
+		title: 'Gens: Adaptive 1 - submit good tutorial 1',
+		url: ()=> '/api/ifgame/level/'+gen_level._id,
+		options: { method: 'POST' },
+		body: ()=> { 
+			let last_page = gen_level.pages[gen_level.pages.length-1];
+			last_page.client_items = [1,2];
+			gen_page_count = gen_level.pages.length; // update page_no before save.
+			return gen_level.toJson();
+		},
+		test_response: (response, json) => {
+			gen_level = new IfLevelSchema(json);
+
+			// Ensure that it was added correctly.
+			let r = (response.status === 200 && 
+				json.pages.length === gen_page_count + 1 &&
+				// passed tutorial.
+				json.pages[json.pages.length-2].description === 'AdaptiveTutorial' &&
+				json.pages[json.pages.length-2].correct === true &&
+				// last page is successful.
+				json.pages[json.pages.length-1].description === 'AdaptiveTest'
+
+				);
+
+			return r;
+		}
+	},
+	{
+		title: 'Gens: Adaptive 1 - submit bad test 2',
+		url: ()=> '/api/ifgame/level/'+gen_level._id,
+		options: { method: 'POST' },
+		body: ()=> { 
+			let last_page = gen_level.pages[gen_level.pages.length-1];
+			last_page.client_items = [2,1];
+			gen_page_count = gen_level.pages.length; // update page_no before save.
+			return gen_level.toJson();
+		},
+		test_response: (response, json) => {
+			gen_level = new IfLevelSchema(json);
+
+			// Ensure that it was added correctly.
+			let r = (response.status === 200 && 
+				json.pages.length === gen_page_count + 1 &&
+				// failed test.
+				json.pages[json.pages.length-2].description === 'AdaptiveTest' &&
+				json.pages[json.pages.length-2].correct === false 
+				);
+
+			return r;
+		}
+	},
+	{
+		title: 'Gens: Adaptive 1 - submit bad tutorial 2.1',
+		url: ()=> '/api/ifgame/level/'+gen_level._id,
+		options: { method: 'POST' },
+		body: ()=> { 
+			let last_page = gen_level.pages[gen_level.pages.length-1];
+			last_page.client_items = [2,1];
+			gen_page_count = gen_level.pages.length; // update page_no before save.
+			return gen_level.toJson();
+		},
+		test_response: (response, json) => {
+			gen_level = new IfLevelSchema(json);
+
+			// Ensure that it was added correctly.
+			let r = (response.status === 200 && 
+				json.pages.length === gen_page_count &&
+				// failed tutorial, repeat last page again.
+				json.pages[json.pages.length-1].description === 'AdaptiveTutorial' &&
+				json.pages[json.pages.length-1].correct === false 
+				);
+
+			return r;
+		}
+	},
+	{
+		title: 'Gens: Adaptive 1 - submit bad tutorial 2.2',
+		url: ()=> '/api/ifgame/level/'+gen_level._id,
+		options: { method: 'POST' },
+		body: ()=> { 
+			let last_page = gen_level.pages[gen_level.pages.length-1];
+			last_page.client_items = [1,2];
+			gen_page_count = gen_level.pages.length; // update page_no before save.
+			return gen_level.toJson();
+		},
+		test_response: (response, json) => {
+			gen_level = new IfLevelSchema(json);
+
+			// Ensure that it was added correctly.
+			let r = (response.status === 200 && 
+				json.pages.length === gen_page_count + 1 &&
+				// passed tutorial.
+				json.pages[json.pages.length-2].description === 'AdaptiveTutorial' &&
+				json.pages[json.pages.length-2].correct === true &&
+				// last page is successful.
+				json.pages[json.pages.length-1].description === 'AdaptiveTest'
+
+				);
+
+			return r;
+		}
+	},
+	{
+		title: 'Gens: Adaptive 1 - submit good test 2',
+		url: ()=> '/api/ifgame/level/'+gen_level._id,
+		options: { method: 'POST' },
+		body: ()=> { 
+			let last_page = gen_level.pages[gen_level.pages.length-1];
+			last_page.client_items = [1,2];
+			gen_page_count = gen_level.pages.length; // update page_no before save.
+			return gen_level.toJson();
+		},
+		test_response: (response, json) => {
+			gen_level = new IfLevelSchema(json);
+
+			// Ensure that it was added correctly.
+			let r = (response.status === 200 && 
+				json.pages.length === gen_page_count + 1 &&
+				// passed test.
+				json.pages[json.pages.length-2].description === 'AdaptiveTest' &&
+				json.pages[json.pages.length-2].correct === true 
+				);
+
+			return r;
+		}
+	},
+
+];
+
+
+
+
+
+////////////////////////////////////////////////////////////////////
+// If Tests
+////////////////////////////////////////////////////////////////////
+
+
 // These are used as the solutions for the test level.
 let if_game_json = null;
 let if_game_test_client_f_correct = '=true';
@@ -112,13 +478,22 @@ const if_tests = [
 		title: 'if: List',
 		url: '/api/ifgame/levels/byCode/test',
 		options: { method: 'GET' },
-		test_response: (response, json) => response.status === 200 && json.length > 0
+		test_response: (response, json) => {
+			return response.status === 200 && json.length > 0;
+		}
 	},
 	{
 		title: 'if: Get one',
 		url: ()=> '/api/ifgame/level/'+if_game_json._id,
 		options: { method: 'GET' },
-		test_response: (response, json) => response.status === 200 && json.code === 'test'
+		test_response: (response, json) => {
+			if_game_json = json;
+			return (response.status === 200 &&
+				json.code === 'test' &&
+				json.type === 'IfLevelSchema' &&
+				json.pages.length === 1 &&
+				json.pages[0].type === 'IfPageFormulaSchema');
+		}
 	},
 	{
 		title: 'if: Get one - test date format returned int',
@@ -180,6 +555,7 @@ const if_tests = [
 		url: ()=> '/api/ifgame/level/'+if_game_json._id,
 		options: { method: 'POST' },
 		body: ()=> { 
+
 			let ifgame = new IfLevelSchema(if_game_json);
 			ifgame.pages[1].client_f = if_game_test_client_f_correct;
 			return ifgame.toJson();
@@ -218,12 +594,16 @@ const if_tests = [
 ];
 
 
+
+
+
+
 export default class IfLevelListContainer extends React.Component {
 
 	constructor(props) {
 		super(props);
 
-		const tests = [ ...login_tests, ...if_tests];
+		const tests = [ ...login_tests, ...if_tests, ...gen_tests  ];
 
 		this.state = { 
 			message: 'Preparing to test',

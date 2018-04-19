@@ -62,7 +62,7 @@ function shouldCompress (req: $Request, res: $Response): boolean {
 // Disable DEBUG as bugsnag doesn't work with passenger.
 // 	Possibly due to STDOUT issue.
 // Load bugsnag if it is defined in secret.js.
-if(false /*!DEBUG && typeof BUGSNAG_API !== undefined && BUGSNAG_API.length > 0*/) {
+if(!DEBUG && typeof BUGSNAG_API !== undefined && BUGSNAG_API.length > 0) {
 	bugsnag.register(BUGSNAG_API);
 	app.use(bugsnag.requestHandler);
 	app.use(bugsnag.errorHandler);
@@ -271,24 +271,20 @@ const strip_secrets = function(input: Object): Object {
 */
 const from_mysql_to_utc = (dt_or_string: Date | string): number => {
 	if(dt_or_string instanceof Date) {
-		//console.log('from_mysql_to_utc: ' + dt_or_string.toString() + ' (dt)' );
 		return to_utc(dt_or_string);
 	}
 	let dt = new Date(dt_or_string);
 
-	//console.log('from_mysql_to_utc: ' + dt_or_string + ' (string) --> ' + dt.toString() );
 	return to_utc(dt);
 };
 
 // Convert a utc int value into a textual format usable for inserting into mysql
 const from_utc_to_myql = (i: number): string => {
-	//console.assert(typeof i !== 'object' && typeof i === 'number');
 	let dt = new Date(i);
 
 	// pull out the T and replace with a space.
 	let mysql = dt.toISOString().slice(0, 19).replace('T', ' ');
 
-	//console.log('from_utc_to_myql: '+dt.toString() + ' --> '+ mysql);
 	return mysql;
 };
 
@@ -301,8 +297,6 @@ const to_utc = (dt: Date): number => {
 	let int = Date.UTC(dt.getUTCFullYear(), dt.getUTCMonth(), dt.getUTCDate(), 
 			dt.getUTCHours(), dt.getUTCMinutes(), dt.getUTCSeconds());
 	
-	//console.log('to_utc: '+dt.toString() + ' --> '+ int);
-
 	return int;
 };
 
@@ -335,13 +329,17 @@ app.post('/api/ifgame/new_level_by_code/:code',
 		const now = from_utc_to_myql(to_utc(new Date()));
 
 		const username = get_username_or_emptystring(req);
-		const insert_sql = `INSERT INTO iflevels (username, code, title, description, completed, 
-			pages, history, created, updated, seed) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+		const insert_sql = `INSERT INTO iflevels (type, username, code, title, description, completed, 
+			pages, history, created, updated, seed) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
 		level.username = username;
 
-		const values = [level.username, level.code, level.title, level.description,
+					
+		// Note: Must use toJson on pages, as that needs some extra care
+		// before being stringified.
+		const values = [level.type, level.username, level.code, level.title, level.description,
 				level.completed ? 1 : 0, 
-				JSON.stringify(level.pages), JSON.stringify(level.history), 
+				JSON.stringify(level.pages.map( (p: Object ): Object => p.toJson() )), 
+				JSON.stringify(level.history), 
 				now, now,
 				level.seed ];
 
@@ -455,8 +453,9 @@ app.post('/api/ifgame/level/:id',
 
 		IfLevelModelFactory.addPageOrMarkAsComplete(iflevel); 
 
+		// Note: Use pages.toJson() to make sure that type is included.
 		let values = [iflevel.completed ? 1 : 0, 
-					JSON.stringify(iflevel.pages), 
+					JSON.stringify(iflevel.pages.map( (p: Object ): Object => p.toJson() )), 
 					JSON.stringify(iflevel.history), 
 					from_utc_to_myql(to_utc(iflevel.updated)), 
 					iflevel._id, 

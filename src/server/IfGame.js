@@ -71,7 +71,7 @@ const baseifgame = {
 
 
 		// Type-specific setup
-		if( json.type === IfPageTextSchema ) {
+		if( json.type === 'IfPageTextSchema' ) {
 			// Mark that correct is required for all.
 			// Ensures that we get a completed, not correct, when showing result.
 			json.correct_required = true;
@@ -80,7 +80,7 @@ const baseifgame = {
 			if(typeof json.instruction === 'undefined') 
 				json.instruction = 'Click the <code>Continue</code> button.';
 
-		} else if(json.type === IfPageParsonsSchema) {
+		} else if(json.type === 'IfPageParsonsSchema') {
 
 			// Randomize the list until it's not the same order as the solution.
 			do {
@@ -97,7 +97,7 @@ const baseifgame = {
 			}
 
 
-		} else if(json.type === IfPageChoiceSchema) {
+		} else if(json.type === 'IfPageChoiceSchema') {
 			// Mark that correct is required for all. This is needed to help keep track of 
 			// submission.  If any solution is ok, then solution should be ? or *.
 			json.correct_required = true;
@@ -107,7 +107,7 @@ const baseifgame = {
 				json.instruction = 'Select an item';
 
 
-		} else if(json.type === IfPageFormulaSchema) {
+		} else if(json.type === 'IfPageFormulaSchema') {
 			// Setup the major important fields based off of type.
 			if(json.code === 'tutorial') {
 				json.correct_required = true;
@@ -137,6 +137,7 @@ const baseifgame = {
 	// Make a new level.
 	create: function(): LevelType {
 		let level = new IfLevelModel({
+			type: 'IfLevelSchema',
 			title: this.title,
 			code: this.code,
 			description: this.description,
@@ -191,7 +192,6 @@ const baseifgame = {
 		// Check result of gen function.
 		if(new_page_json !== null) {
 			// Since a non-null result was given, we should add a new page.
-
 
 			// setup new page 
 			const initialized_json = this._initialize_json(new_page_json);
