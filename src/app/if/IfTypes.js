@@ -21,7 +21,8 @@ export type LevelType = {
 
 	get_score_as_array: (any, any, any, any) => Array<Object>,
 	get_new_page: (Object) => Object,
-	toJson: () => Object
+	toJson: () => Object,
+	toJsonString: () => string
 };
 
 
@@ -31,13 +32,19 @@ export type PageType = {
 
 	code: string,
 	description: string,
+	instruction: string,
+	feedback: Array<string>,
+	solution_feedback: Array<Function>,
 
 	correct: boolean,
 	correct_required: boolean,
 	completed: boolean,
 
+	+get_feedback: () => ?string,
+	+client_has_answered: () => boolean,
+	updateUserFields: (Object) => void,
 	history: Array<Object>,
-	toJson: Function
+	+toJson: Function
 };
 
 
@@ -48,13 +55,19 @@ export type TextPageType = {
 
 	code: string,
 	description: string,
+	instruction: string,
+	feedback: Array<string>,
+	solution_feedback: Array<Function>,
 
 	correct: boolean,
 	correct_required: boolean,
 	completed: boolean,
 	
+	+client_has_answered: () => boolean,	
+	+get_feedback: () => ?string,
+	updateUserFields: (Object) => void,
 	history: Array<Object>,
-	toJson: Function,
+	+toJson: Function,
 	// End Copy
 
 	client_read: boolean
@@ -68,11 +81,17 @@ export type ChoicePageType = {
 
 	code: string,
 	description: string,
+	instruction: string,
+	feedback: Array<string>,
+	solution_feedback: Array<Function>,
 
 	correct: boolean,
 	correct_required: boolean,
 	completed: boolean,
 	
+	client_has_answered: () => boolean,	
+	get_feedback: () => ?string,
+	updateUserFields: (Object) => void,
 	history: Array<Object>,
 	toJson: Function,
 	// End Copy
@@ -92,11 +111,17 @@ export type ParsonsPageType = {
 
 	code: string,
 	description: string,
+	instruction: string,
+	feedback: Array<string>,
+	solution_feedback: Array<Function>,
 
 	correct: boolean,
 	correct_required: boolean,
 	completed: boolean,
 	
+	client_has_answered: () => boolean,	
+	get_feedback: () => ?string,
+	updateUserFields: (Object) => void,
 	history: Array<Object>,
 	toJson: Function,
 	// End Copy
@@ -114,11 +139,17 @@ export type FormulaPageType = {
 
 	code: string,
 	description: string,
+	instruction: string,
+	feedback: Array<string>,
+	solution_feedback: Array<Function>,
 
 	correct: boolean,
 	correct_required: boolean,
 	completed: boolean,
-	
+
+	client_has_answered: () => boolean,	
+	get_feedback: () => ?string,
+	updateUserFields: (Object) => void,
 	history: Array<Object>,
 	toJson: Function,
 	// End Copy

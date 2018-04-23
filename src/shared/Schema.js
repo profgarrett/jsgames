@@ -64,9 +64,19 @@ class Schema {
 				
 			} else if(this[key] instanceof Array) {
 				// If a contained array of objects have toJson function, use them
+
+				// Make sure that we don't have functions in an array.
+				this[key].map( i => {
+					if(typeof i === 'function') 
+						throw new Error('Schema.toJson can not encode functions in arrays');
+				});
+
 				json[key] = this[key].map( 
 						i => (typeof i.toJson === 'function') ? i.toJson() : i 
 						);
+
+			} else if(typeof this[key] === 'function') {
+				throw new Error('Schema.toJson can not encode functions');
 			} else {
 				// Normal conversion.
 				json[key] = this[key];

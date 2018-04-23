@@ -12,7 +12,7 @@ const { if1 } = require('./tutorials/if1');
 const { if2 } = require('./tutorials/if2');
 const { dates } = require('./tutorials/dates');
 
-import type { LevelType } from './../app/if/IfTypes';
+import type { LevelType, PageType } from './../app/if/IfTypes';
 
 // Use model term instead of schema to clarify server v. client, and to add room 
 // for later adding server-side functionality.
@@ -31,7 +31,6 @@ const arrayDifferent = (a1: Array<any>, a2: Array<any>): boolean => {
 };
 
 
-
 const baseifgame = {
 	/* 
 		Setup page json prior to using it to create a new properly typed class object.
@@ -41,7 +40,7 @@ const baseifgame = {
 	_initialize_json: function(seed: number, page_count: number, original_json: Object): Object {
 		let json = {...original_json};
 		let version_i: number = 0;
-		let version: object = {};
+		let version: Object = {};
 		let randomly_sorted_versions: Array<Object> = [];
 
 		// Initialize different versions of the page based on the levels seed object.
@@ -183,6 +182,10 @@ const baseifgame = {
 			if(last_page.completed) 
 				throw new Error('IfGame.addPageOrMarkAsComplete.lastpage_already_completed');
 
+			// Update the feedback on the prior solution.
+			if(last_page.client_has_answered()) {
+				last_page.feedback = last_page.get_feedback();
+			}
 
 			// Test to see if the last page needs to be correct to continue.
 			// Note that the last page may not have been answered by the user yet.
