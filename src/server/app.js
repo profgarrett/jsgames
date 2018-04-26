@@ -3,7 +3,7 @@
 /**
 	Node main event loop
 */
-const DEBUG_DELAY = 0;
+const DEBUG_DELAY = 1000;
 const express = require('express');
 const path = require('path');
 const bodyParser = require('body-parser');

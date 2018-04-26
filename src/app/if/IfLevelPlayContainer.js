@@ -132,7 +132,7 @@ export default class IfLevelPlayContainer extends React.Component<PropsType, Sta
 
 		// Show loading status.
 		this.setState({ 
-			message: 'Saving',
+			message: '',
 			messageStyle: '',
 			show_feedback_on: current_page_i, // remember what page to show feedback on.
 			show_feedback: false, // set to true after we get back the results from the server

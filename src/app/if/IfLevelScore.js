@@ -116,7 +116,7 @@ class IfLevelScorePage extends React.Component<ScorePropsType, ScoreStateType> {
 						<Panel.Collapse >
 							<Panel.Body>
 								<HistorySlider page={page_at} handleChange={this.setHistory} />
-								<ExcelTable page={page_at} editable={false} />
+								<ExcelTable page={page_at} readonly={true} editable={false} />
 							</Panel.Body>
 						</Panel.Collapse>
 					</Panel>

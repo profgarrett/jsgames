@@ -135,7 +135,8 @@ export default class ExcelTable extends React.Component {
 					ref={(input) => { this.client_fInput = input; }}
 					type='text'
 					autoComplete='off'
-					value={page.client_f==null ? '' : page.client_f }
+					value={ page.client_f==null ? '' : page.client_f }
+					disabled={ !this.props.readonly }
 					placeholder='Enter a formula'
 					onChange={ (e) => this.props.handleChange({ client_f: e.target.value}) }
 				/>
@@ -317,6 +318,7 @@ export default class ExcelTable extends React.Component {
 ExcelTable.propTypes = {
 	page: PropTypes.object.isRequired,
 	editable: PropTypes.bool.isRequired,
+	readonly: PropTypes.bool.isRequired,
 	handleChange: PropTypes.func
 };
 

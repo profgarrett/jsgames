@@ -194,8 +194,6 @@ export default class IfLevelPlay extends React.Component            {
 		// If this is a tutorial and they go it wrong, set continue text to try again.
 		const next = page.code === 'tutorial' && !page.correct ? 'try again' : 'continue';
 
-		console.log(page);
-
 		// If no feedback, then don't create large element.
 		if(typeof page.client_feedback === 'undefined' || 
 				page.client_feedback === null ||

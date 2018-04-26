@@ -145,14 +145,28 @@ export default class IfLevelPlay extends React.Component<PropsType> {
 	// Render problem
 	_render_page_problem(page: PageType): Node {
 		if(page.type === 'IfPageFormulaSchema') {
-			return <ExcelTable page={page} editable={true} handleChange={this.handleChange} />;
+			return <ExcelTable page={page} 
+						readonly={ !this.props.isLoading }
+						editable={ true } 
+						handleChange={this.handleChange} />;
+
 		} else if(page.type === 'IfPageParsonsSchema') {
-			return <Parsons page={page} editable={true} handleChange={this.handleChange} />;
+			return <Parsons page={page} 
+						readonly={ !this.props.isLoading }
+						editable={ true } 
+						handleChange={this.handleChange} />;
+
 		} else if(page.type === 'IfPageChoiceSchema') {
-			return <Choice page={page} editable={true} showSolution={false} handleChange={this.handleChange} />;
+			return <Choice page={page} 
+						readonly={ !this.props.isLoading }
+						editable={ true } 
+						showSolution={false} 
+						handleChange={this.handleChange} />;
+
 		} else if(page.type === 'IfPageTextSchema') {
 			return <Text page={page} 
-						editable={true} 
+						readonly={ !this.props.isLoading }
+						editable={ true } 
 						handleChange={this.handleChange} 
 						handleSubmit={ () => this.handleSubmit() } />;
 		} else {
@@ -193,8 +207,6 @@ export default class IfLevelPlay extends React.Component<PropsType> {
 
 		// If this is a tutorial and they go it wrong, set continue text to try again.
 		const next = page.code === 'tutorial' && !page.correct ? 'try again' : 'continue';
-
-		console.log(page);
 
 		// If no feedback, then don't create large element.
 		if(typeof page.client_feedback === 'undefined' || 
@@ -294,6 +306,7 @@ export default class IfLevelPlay extends React.Component<PropsType> {
 		event.preventDefault(); // cancel any keypress.
 	}
 
+
 	// Render 
 	render(): Node {
 		console.assert(this.props.selected_page_index < this.props.level.pages.length, 
@@ -307,7 +320,6 @@ export default class IfLevelPlay extends React.Component<PropsType> {
 		if(this.props.show_feedback) {
 			page = this.props.level.pages[this.props.show_feedback_on];
 		}
-		
 		
 		// Build results 
 		const lead = this._render_page_lead(page);
