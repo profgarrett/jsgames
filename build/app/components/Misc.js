@@ -6,6 +6,8 @@ import { OverlayTrigger, Tooltip, Glyphicon } from 'react-bootstrap';
 //import { Link } from 'react-router-dom';
 //import { LinkContainer } from 'react-router-bootstrap';
 
+import { RotateLoader, ClipLoader, ScaleLoader } from 'react-spinners';
+
 //  Old browser compatability.
 import 'whatwg-fetch'; // ajax support.
 import Promise from 'promise-polyfill';
@@ -267,10 +269,18 @@ export class Menu extends React.Component {
 
 export class Loading extends React.Component {
 	render() {
+		const style = {
+			position: 'absolute',
+			left: '50%',
+			top: '50%',
+			paddingTop: 150,
+			transform: 'translate(-50%, -50%)'
+		};
+
 		return (
-			<Row><Col>
-			{ this.props.loading ? <b>Loading</b> : '' }
-			</Col></Row>
+			<div style={style}>
+				{ this.props.loading ? <ClipLoader size={70} color='black' /> : null }
+			</div>
 		);
 	}
 }
@@ -281,15 +291,43 @@ Loading.propTypes = {
 
 
 export class Message extends React.Component {
+	constructor(props) {
+		super(props);
+		this.state = { hidden: false };
+	}
 	render() {
-		if(this.props.message.length > 0 )
-			return (<Alert bsStyle={ this.props.style ? this.props.style : 'info' }>{ this.props.message }</Alert>); 
-		else
-			return (<p></p>);
+		if(this.props.message.length < 1 || this.state.hidden) return null;
+
+		const that = this;
+		const style = {
+			position: 'fixed',
+			left: 0,
+			right: 0,
+			top: 0,
+			textAlign: 'center',
+			marginTop: 5,
+			marginLeft: '20%',
+			marginRight: '20%'
+		};
+		const spinner = !this.props.spinner ? null : 
+					<ScaleLoader color='white' height={15} />;
+
+		return (
+			<div style={style} 
+					onClick={ () => that.setState({ hidden: true }) } >
+				<Alert bsStyle={ this.props.style ? this.props.style : 'info' }>
+					<div >
+						{ this.props.message }
+						{ spinner }
+					</div>
+				</Alert>
+			</div>
+		);
 	}
 }
 Message.propTypes = {
 	message: PropTypes.string.isRequired,
+	spinner: PropTypes.bool,
 	style: PropTypes.string
 };
 

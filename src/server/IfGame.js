@@ -5,9 +5,9 @@ const { DataFactory } = require('./DataFactory');
 const { test } = require('./tutorials/test');
 const { test_gens } = require('./tutorials/test_gens');
 const { tutorial } = require('./tutorials/tutorial');
-const { math1, math2, math3 } = require('./tutorials/math');
+const { math1, math2 } = require('./tutorials/math');
 const { text } = require('./tutorials/text');
-const { sum } = require('./tutorials/sum');
+const { summary } = require('./tutorials/summary');
 const { if1 } = require('./tutorials/if1');
 const { if2 } = require('./tutorials/if2');
 const { dates } = require('./tutorials/dates');
@@ -82,6 +82,15 @@ const baseifgame = {
 
 			// Remove key, as it's not a valid item in the class.
 			delete json.versions;
+		}
+
+		// Even though solution_feedback is not required by schemas, on server always initialized
+		// This helps the updateCorrect() functions know that we are on the server.  If this is 
+		// null, then they assume we're on the client and can not calculate correct or not.
+		// Really, should just require solution_feedback on all json templates, but it's easier to
+		// not have to hard code.
+		if(typeof json.solution_feedback === 'undefined') {
+			json.solution_feedback = [];
 		}
 
 
@@ -182,11 +191,6 @@ const baseifgame = {
 			if(last_page.completed) 
 				throw new Error('IfGame.addPageOrMarkAsComplete.lastpage_already_completed');
 
-			// Update the feedback on the prior solution.
-			if(last_page.client_has_answered()) {
-				last_page.feedback = last_page.get_feedback();
-			}
-
 			// Test to see if the last page needs to be correct to continue.
 			// Note that the last page may not have been answered by the user yet.
 			if( last_page.correct_required && !last_page.correct ) {
@@ -239,10 +243,9 @@ const IfLevelModelFactory = {
 		dates: { ...baseifgame, ...dates},
 		math1: { ...baseifgame, ...math1},
 		math2: { ...baseifgame, ...math2},
-		math3: { ...baseifgame, ...math3},
 		if1: { ...baseifgame, ...if1},
 		if2: { ...baseifgame, ...if2},
-		sum: { ...baseifgame, ...sum},
+		summary: { ...baseifgame, ...summary},
 		text: { ...baseifgame, ...text},
 		test_gens: { ...baseifgame, ...test_gens }
 	},

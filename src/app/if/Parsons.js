@@ -4,6 +4,8 @@ import PropTypes from 'prop-types';
 import { ListGroup, ListGroupItem } from 'react-bootstrap';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 
+import { HtmlSpan } from './../components/Misc';
+
 // change background colour if dragging
 const getItemStyle = (isDragging, draggableStyle) => ({
   background: isDragging ? '#eee' : '#fff',
@@ -182,7 +184,7 @@ export default class Parsons extends React.Component {
 		if(!this.props.editable) {
 			return (
 				<ListGroup>
-					{ page.client_items.map( (item,i) => <ListGroupItem key={i}>{item}</ListGroupItem> ) }
+					{ page.client_items.map( (item,i) => <ListGroupItem key={i}><HtmlSpan html={item}/></ListGroupItem> ) }
 				</ListGroup>
 			);
 		} else {

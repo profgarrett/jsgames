@@ -110,6 +110,173 @@ flow-typed install
 ```
 
 
+## Authoring Tutorials.
+
+
+Tutorials are written as code.  They should be placed into the src/server/tutorials folder, and 
+then references in the src/client/ifgame.js constant below
+IfLevelModelFactory.levels
+
+### Gen Functions
+
+Pages are created by gen functions.  The first two are simple, linear and shuffe.
+
+```
+const example = {
+	gen: LinearGen,
+	pages: [
+
+	]
+const example1 = {
+	gen: ShuffleGen,
+	pages: [
+
+	]
+}
+```
+
+The until function has a single page that repeated generates until the until function returns true.  Normally, you will want to have versions in the single page return multiple versions of itself.  The versions function also uses a random seed for the level. See the following example.
+
+```
+const x = {
+	gen: UntilGen
+	until: ( page => boolean),
+	pages: [
+		{}
+	]
+}
+```
+
+
+### Pages
+
+There are several kinds of pages.
+
+Common fields
+	code
+		Used to help initialize common patterns.  E.g.,
+		test or tutorial.
+	helpblock
+	history
+		Array of objcts with changes.
+	correct
+		True/false.
+	correct_required
+		Do we need correct===true to continue?  False for
+		tutorial pages, true for test pages.
+	completed
+		Is this q done?  If so, allow no updates.
+	solution_feedback: [ { 'has': 'no_values', args: [ 'a' ] } ]
+		Exists only on server side. Used by .updatecorrect to
+		populate client_feedback.
+
+
+IfPageTextSchema display information without any user input. They 
+only have two fields. Note that we use <br/><br/> for line breaks,
+as it is automatically converted into <div>.
+```
+{	type: 'IfPageTextSchema',
+	description: `Words!
+			<br/><br/>
+			More words!`
+```
+
+
+IfPageFormulaSchema shows an Excel grid. There are a variety 
+of optional fields.
+
+Required fields:
+	description: ''
+	instruction: ''
+	solution_f: ''
+	code: 'tutorial' or 'test'
+
+Optional fields:
+	client_f_format: '0'
+	client_feedback: null or ['asdf', ...]  
+		Updated by .updateCorrect on server side.
+	column_titles: ['title']
+	column_formats: [ '' ]
+		$  dollar format with no decimals.
+	 	$. Dollar format with two decimals.
+	 	0  Number without any decimal points.
+	 	,  Decimal style
+	 	shortdate Date styled as 1/1/11
+	 	text Text
+	 	c  Text
+	 	%  Percent.
+	tests: [ { a: 1 } ],
+	solution_f: '=1'
+	solution_feedback: [ { 'has': 'no_values', args: [ 'a' ] } ]
+		Exists only on server side. Used by .updatecorrect to
+		populate client_feedback.
+	versions: [ ... ]
+		Verions can contain options to override default options.
+
+
+IfPageParsonsSchema give a list of options for the user to place in order.
+
+Required fields:
+	description: ''
+	instruction: ''
+	solution_items = [ 'a', 'b' ]
+	code: tutorial or test.
+
+Optional fields:
+	versions
+	client_feedback: null or ['asdf', ...]  
+		Updated by .updateCorrect on server side.
+	solution_feedback: [ { 'has': 'no_values', args: [ 'a' ] } ]
+		Exists only on server side. Used by .updatecorrect to
+		populate client_feedback.
+
+
+IfPageChoiceSchema allows a user to select from a list of options.
+Can be either true or false.
+
+Required fields:
+	description: ''
+	instruction: ''
+	client_items = [ 'a', 'b' ]
+	code: tutorial or test.
+	solution: ? or * for any, or a specific value.
+	client_feedback: null or ['asdf', ...]  
+		Updated by .updateCorrect on server side.
+	solution_feedback: [ { 'has': 'no_values', args: [ 'a' ] } ]
+		Exists only on server side. Used by .updatecorrect to
+		populate client_feedback.
+
+Optional fields:
+	versions
+		solution: (l: level, p: page): string
+
+
+### Has functions, solution_feedback
+
+Called with { has: 'references', args: [ 'a1' ]}
+
+	no_values: No literals
+	references(args): Make sure that references are in answer
+	symbols(args): Make sure that the symbosl are included
+
+### DataFactory
+
+DataFactory is used to generate random data.
+	randDate(plus_or_minus_dats, seed)
+	randPercent(from, to, seed)
+	randB(from, to, seed)
+	randOf([], seed)
+	randNumbers(rows, cols, max_n, seed)
+	randDates(rows, columns, { a_range, b_range, c_range })
+	randName(seed)
+	randPeople(rows)
+	randNumbersAndColors( rows)
+	randomizeList([], seed)
+
+
+
+
+
 ## Author
 
 Nathan Garrett, profgarrett@gmail.com

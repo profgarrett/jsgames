@@ -9,7 +9,7 @@ import type { ChoicePageType } from './IfTypes';
 type PropsType = {
 	page: ChoicePageType,
 	editable: boolean,
-	handleChange: (Any) => void,
+	handleChange: (any) => void,
 	showSolution: boolean
 };
 

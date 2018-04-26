@@ -174,7 +174,7 @@ export default class IfLevelScore extends React.Component<LevelPropsType, StateT
 				+ ' tutorial pages';
 		const quiz_completed = level.get_score_attempted() > 0 ? 
 				', and earned ' + level.get_score_correct() + 
-				' of ' + level.get_score_attempted() + ' on the quizzes' : '';
+				' of ' + level.get_score_attempted() + ' on the quiz pages' : '';
 
 		// Use formulas with i to generate unique keys upon completion.
 		const results = build_score(level.pages);

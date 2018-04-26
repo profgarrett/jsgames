@@ -64,9 +64,20 @@ class Schema {
 				
 			} else if(this[key] instanceof Array) {
 				// If a contained array of objects have toJson function, use them
-				json[key] = this[key].map( 
+
+				// Do not encode functions.  Relies upon them being server-side only, set
+				//		by the tutorial code.  They aren't serialized over the wire or 
+				//		saved to the db.
+				let items = this[key].filter( i => typeof i !== 'function');
+
+				json[key] = items.map( 
 						i => (typeof i.toJson === 'function') ? i.toJson() : i 
 						);
+
+			} else if(typeof this[key] === 'function') {
+				// Do not encode functions.  Relies upon them being server-side only, set
+				//		by the tutorial code.  They aren't serialized over the wire or 
+				//		saved to the db.
 			} else {
 				// Normal conversion.
 				json[key] = this[key];

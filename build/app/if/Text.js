@@ -7,7 +7,8 @@ import React from 'react';
                   
                     
                    
-                               
+                                
+                             
   
 
 
@@ -18,6 +19,7 @@ export default class Text extends React.Component            {
 	constructor(props     ) {
 		super(props);
 		(this     ).state = {};
+		(this     ).handleEnter = this.handleEnter.bind(this);
 	}
 
 	// After props are updated, send a signal to show that it's been read.
@@ -26,6 +28,21 @@ export default class Text extends React.Component            {
 			nextProps.handleChange({ client_read: true });	
 		}
 		return {};
+	}
+
+	componentDidMount() {
+		document.addEventListener('keypress', this.handleEnter);
+	}
+
+	componentWillUnmount() {
+		document.removeEventListener('keypress', this.handleEnter);
+	}
+
+	handleEnter(event     )      {
+		if(event.key === 'Enter' ) {
+			this.props.handleSubmit();
+		}
+		event.preventDefault(); // cancel any keypress.
 	}
 
 	// Build out the table 

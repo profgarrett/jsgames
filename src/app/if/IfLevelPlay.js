@@ -1,7 +1,8 @@
 // @flow
 import React from 'react';
+import ReactDom from 'react-dom';
 import type { Node } from 'react';
-import { Glyphicon, Panel, Button, Table, Popover, OverlayTrigger, Modal } from 'react-bootstrap';
+import { Glyphicon, Panel, Button, Table, Popover, Overlay, OverlayTrigger, Modal } from 'react-bootstrap';
 import { HtmlSpan, HtmlDiv, incorrect_glyphicon, correct_glyphicon, completed_glyphicon, progress_glyphicon} from './../components/Misc';
 
 import ExcelTable from './ExcelTable';
@@ -10,7 +11,6 @@ import Choice from './Choice';
 import Parsons from './Parsons';
 
 import type { LevelType, PageType } from './IfTypes';
-
 
 
 // Build the score list at the bottom of the page.
@@ -90,27 +90,19 @@ type PropsType = {
 	level: LevelType,
 	selected_page_index: number,
 	onChange: (Object) => void,
-	onSubmit: (void) => void
-};
-type StateType = {
-	show_next_feedback: boolean,
-	show_feedback_on: number
-	/*
-	last_feedback_shown: ?string,
-	last_submitted_page_index: ?number
-	*/
+	onSubmit: (void) => void,
+	onViewFeedback: (void) => void,
+	show_feedback: boolean,
+	show_feedback_on: number,
+	isLoading: boolean
 };
 
 
 
-export default class IfLevelPlay extends React.Component<PropsType, StateType> {
+export default class IfLevelPlay extends React.Component<PropsType> {
 
 	constructor(props: any) {
 		super(props);
-		(this: any).state = {
-			show_next_feedback: false,
-			show_feedback_on: -1
-		};
 		(this: any).handleChange = this.handleChange.bind(this);
 		(this: any).handleSubmit = this.handleSubmit.bind(this);
 		(this: any)._feedback_listen_for_enter = this._feedback_listen_for_enter.bind(this);
@@ -120,40 +112,9 @@ export default class IfLevelPlay extends React.Component<PropsType, StateType> {
 		this.props.onChange(new_value);
 	} 
 
-	/*
-	static getDerivedStateFromProps( nextProps: PropsType, prevState: StateType): ?Object {
-		const page = nextProps.level.pages[nextProps.selected_page_index];
-
-		// If the page shown has changed from the last time we submitted, 
-		//		or the feedback given has changed, then re-show it.
-		// Index won't change if we have fixed something, and then resubmitted
-		//		it (like a tutorial).
-		debugger;
-		if(	prevState.last_submitted_page_index !== nextProps.selected_page_index &&
-			prevState.last_feedback_shown !== page.feedback ) {
-			// See if there is any feedback to be shown.  If so, flag.
-			if( page.feedback && page.feedback.length > 0 )
-				return { 'show_feedback': true };
-		}
-
-		// No changes to state.
-		return null;
-	}
-	*/
-
-	handleSubmit(e: SyntheticEvent<HTMLButtonElement>) {
-		const page = this.props.level.pages[this.props.selected_page_index];
-
-		e.preventDefault();
+	handleSubmit(e: ?SyntheticEvent<HTMLButtonElement>) {
+		if(e) e.preventDefault();
 		this.props.onSubmit();
-
-		// Don't set state if we were looking at something that doesn't require a review.
-		if(page.type !== 'IfPageTextSchema' && page.type !== 'IfPageChoiceSchema') {
-			this.setState({ 
-				show_next_feedback: true,
-				show_feedback_on: this.props.selected_page_index
-			});
-		}
 	}
 
 	// Render a single page.
@@ -170,9 +131,16 @@ export default class IfLevelPlay extends React.Component<PropsType, StateType> {
 				</Panel>
 				);
 		} else {
-			return <HtmlDiv className='lead' html={ page.description } />;
+			// Make a little prettier by replacing linebreaks with div.lead.
+			// Looks better spacing-wise, as we have instructions below the lead in 
+			// a div.lead.
+			const descriptions = page.description.split('<br/><br/>');
+
+			return descriptions.map( (d: string, i: number): Node =>
+					<HtmlDiv className='lead' key={i} html={ d } /> );
 		}
 	}
+
 
 	// Render problem
 	_render_page_problem(page: PageType): Node {
@@ -183,48 +151,136 @@ export default class IfLevelPlay extends React.Component<PropsType, StateType> {
 		} else if(page.type === 'IfPageChoiceSchema') {
 			return <Choice page={page} editable={true} showSolution={false} handleChange={this.handleChange} />;
 		} else if(page.type === 'IfPageTextSchema') {
-			return <Text page={page} editable={true} handleChange={this.handleChange} />;
+			return <Text page={page} 
+						editable={true} 
+						handleChange={this.handleChange} 
+						handleSubmit={ () => this.handleSubmit() } />;
 		} else {
 			throw new Error('Invalid type in IfLevelPlay '+page.type);
 		}
 	}
 
-	// If needed, render a pop-up giving feedback on the given submission.
-	// Should generally be passed the previous page, but it's up to the calling to determine.
-	_render_page_feedback(page: PageType): Node {
+
+	// Create buttons for the page.
+	// Includes review pop-ups if needed.
+	_render_page_buttons(page: PageType): Node {
+		// Use a different color for the submission button if we are test v. tutorial.
 		const that = this;
 
-		if(!this.state.show_next_feedback) return null;
+		//  Button.
+		const button_style = page.correct_required ? 'success': 'primary'; 
+		const submit = <Button id='iflevelplaysubmit' 
+				type='submit' 
+				bsStyle={button_style}
+				disabled={this.props.isLoading}
+				>
+				Contine to next page</Button>;
 
-		// If no feedback, then don't create element
-		if(page.feedback === null || page.feedback.length < 1 ) return null;
+		const exit = <Button 
+				bsStyle='link' 
+				disabled={this.props.isLoading}
+				href={'/ifgame/'+this.props.level.code } 
+				>Exit</Button>;
 
-		const f_li = page.feedback.map( (f: string, i: number): Node => <li key={i}>{f}</li>);
 
+		// If we're not supposed to show feedback, then just return the buttons.
+		if(!this.props.show_feedback) 
+			return <div>{ exit } { submit}</div>;
+
+
+		// Start listening for user input (enter key).
 		document.addEventListener('keypress', this._feedback_listen_for_enter);
 
-		// Feedback!  Return element.
-		return (
-			<div className='static-modal' 
-				onClick={ (): any => {
-					that.setState({'show_next_feedback': false});
-					document.removeEventListener('keypress', that._feedback_listen_for_enter);
-				}} >
-				<Modal.Dialog>
-				<Modal.Header>
-				<Modal.Title>Feedback</Modal.Title>
-				</Modal.Header>
-				<Modal.Body>
-					<ul>
-						{ f_li }
-					</ul>
-				</Modal.Body>
-				<Modal.Footer>
-					Click anywhere or press <kbd>enter</kbd> to continue
-				</Modal.Footer>
-				</Modal.Dialog>
-			</div>
-		);
+		// If this is a tutorial and they go it wrong, set continue text to try again.
+		const next = page.code === 'tutorial' && !page.correct ? 'try again' : 'continue';
+
+		console.log(page);
+
+		// If no feedback, then don't create large element.
+		if(typeof page.client_feedback === 'undefined' || 
+				page.client_feedback === null ||
+				page.client_feedback.length < 1 ) {
+
+			// No feedback.
+			const pop = (
+				<Popover 
+						id='renderpagefeedbackpopup'
+						target={submit}
+						>
+						{ page.correct ? 
+							<div style={{color: 'rgb(60, 118, 61)'}}>Correct!</div> : 
+							<div style={{color: 'rgb(169, 68, 66)'}}>Incorrect answer</div>
+						}
+						Click or press <kbd>enter</kbd> to {next}.
+					</Popover>
+				);
+
+			const div = (
+				<div style={{
+					position: 'fixed',
+					top: 0, left: 0, right: 0, bottom: 0,
+					zIndex: 100000,
+					}}
+					onClick={ (e: any): any => {
+						e.stopPropagation();
+						that.props.onViewFeedback();
+						document.removeEventListener('keypress', that._feedback_listen_for_enter);
+					}}
+					></div>
+			);
+
+			return (
+				<div>
+					{ exit }
+					<Overlay 
+						placement='left'
+						target={(): any => document.getElementById('iflevelplaysubmit') }
+						overlay={pop}
+						show={true}
+						container={this}
+						>
+						{ pop }
+					</Overlay>,
+					{ submit }
+					{ div }
+				</div>
+			);
+
+		} else {
+			// We have one or more specific items of feedback to tell the user.
+
+			// Build specific feedback LIs.
+			const f_li = page.client_feedback.map( (f: string, i: number): Node => <li key={i}>{f}</li>);
+
+			// Return full-screen feedback.
+			return (
+				<div>
+					<div className='static-modal' style={{ textAlign: 'left'}} 
+						onClick={ (e: any): any => {
+							e.stopPropagation();
+							that.props.onViewFeedback();
+							document.removeEventListener('keypress', that._feedback_listen_for_enter);
+						}} >
+						<Modal.Dialog>
+							<Modal.Header>
+								<Modal.Title>Incorrect answer</Modal.Title>
+							</Modal.Header>
+							<Modal.Body>
+								<ul>
+									{ f_li }
+								</ul>
+							</Modal.Body>
+							<Modal.Footer>
+								Click anywhere or press <kbd>enter</kbd> to {next}
+							</Modal.Footer>
+						</Modal.Dialog>
+					</div>
+					{ exit } 
+					{ submit }
+				</div>
+			);
+		}
+
 	}
 
 
@@ -232,7 +288,7 @@ export default class IfLevelPlay extends React.Component<PropsType, StateType> {
 	// page as feedback is displayed/hidden.
 	_feedback_listen_for_enter(event: any): any {
 		if(event.key === 'Enter' || event.key === 'Escape' || event.key === ' ') {
-			this.setState({ 'show_next_feedback': false });
+			this.props.onViewFeedback();
 			document.removeEventListener( 'keypress', this._feedback_listen_for_enter);
 		}
 		event.preventDefault(); // cancel any keypress.
@@ -248,29 +304,28 @@ export default class IfLevelPlay extends React.Component<PropsType, StateType> {
 		// Render the current page, or if we are reviewing last submission, n-1.
 		// Use previous submitted index to figure out which to shown feedback on.
 		// Once show_next_feedback is cleared, then we will revert to current page.
-		if(this.state.show_next_feedback) {
-			page = this.props.level.pages[this.state.show_feedback_on];
+		if(this.props.show_feedback) {
+			page = this.props.level.pages[this.props.show_feedback_on];
 		}
 		
-		// Use a different color for the submission button if we are test v. tutorial.
-		const button_style = page.correct_required ? 'success': 'primary'; 
 		
 		// Build results 
 		const lead = this._render_page_lead(page);
 		const results = build_score(this.props.level.pages);
 		const problem = this._render_page_problem(page);
-		const review = this._render_page_feedback(page);
+		const buttons = this._render_page_buttons(page);
 
 		return (
-			<div>
+			<div style={{position: 'relative' }}>
 				<form name='c' onSubmit={this.handleSubmit}>
-					{ lead }
-					<div className='lead'>
-						<Glyphicon style={{ top: 3, paddingRight: 5, fontSize: 21 }} glyph='hand-right'/>
-						<HtmlSpan className='lead' html={ page.instruction } />
+					<div style={{ opacity: this.props.show_feedback ? 0.5 : 1 }}>
+						{ lead }
+						<div className='lead'>
+							<Glyphicon style={{ top: 3, paddingRight: 5, fontSize: 21 }} glyph='hand-right'/>
+							<HtmlSpan className='lead' html={ page.instruction } />
+						</div>
+						{ problem }
 					</div>
-					{ problem }
-					{ review }
 					<Panel >
 						<Table style={{ margin: 0}} >
 							<tbody>
@@ -282,8 +337,7 @@ export default class IfLevelPlay extends React.Component<PropsType, StateType> {
 									{ results }
 								</td>
 								<td style={rightTdStyle}>
-									<Button bsStyle='link' href={'/ifgame/'+this.props.level.code } >Exit</Button>
-									<Button type='submit' bsStyle={button_style}>Contine to next page</Button>
+									{ buttons }
 								</td>
 							</tr>
 							</tbody>

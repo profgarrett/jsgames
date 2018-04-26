@@ -5,14 +5,14 @@ const { DataFactory } = require('./DataFactory');
 const { test } = require('./tutorials/test');
 const { test_gens } = require('./tutorials/test_gens');
 const { tutorial } = require('./tutorials/tutorial');
-const { math1, math2, math3 } = require('./tutorials/math');
+const { math1, math2 } = require('./tutorials/math');
 const { text } = require('./tutorials/text');
-const { sum } = require('./tutorials/sum');
+const { summary } = require('./tutorials/summary');
 const { if1 } = require('./tutorials/if1');
 const { if2 } = require('./tutorials/if2');
 const { dates } = require('./tutorials/dates');
 
-                                                     
+                                                               
 
 // Use model term instead of schema to clarify server v. client, and to add room 
 // for later adding server-side functionality.
@@ -31,19 +31,34 @@ const arrayDifferent = (a1            , a2            )          => {
 };
 
 
-
 const baseifgame = {
 	/* 
 		Setup page json prior to using it to create a new properly typed class object.
+
+		Seed parameter is used to generate stable random sequences.
 	*/
-	_initialize_json: function(original_json        )         {
+	_initialize_json: function(seed        , page_count        , original_json        )         {
 		let json = {...original_json};
+		let version_i         = 0;
+		let version         = {};
+		let randomly_sorted_versions                = [];
 
 		// Initialize different versions of the page based on the levels seed object.
 		// Relies upon versions being set to an array of objects or functions.
 		if(json.versions instanceof Array) {
 			// Pick a version.
-			let version         = DataFactory.randOf(json.versions, this.seed);
+
+			if(json.versions.length < 1) 
+				throw new Error('baseifgame._initialize_json.json.versions.length=0');
+
+			// We want a randomly-generated sequence of versions. That way,
+			//  the user doesn't get the same item multiple times w/o first
+			//  going through all of the other items.
+			// 
+			randomly_sorted_versions = DataFactory.randomizeList(json.versions, seed);
+			// Find ith item for this run.
+			version_i = page_count % json.versions.length;
+			version = randomly_sorted_versions[version_i];
 
 			// Initialize contained objects.
 			for(let item in version) {
@@ -67,6 +82,15 @@ const baseifgame = {
 
 			// Remove key, as it's not a valid item in the class.
 			delete json.versions;
+		}
+
+		// Even though solution_feedback is not required by schemas, on server always initialized
+		// This helps the updateCorrect() functions know that we are on the server.  If this is 
+		// null, then they assume we're on the client and can not calculate correct or not.
+		// Really, should just require solution_feedback on all json templates, but it's easier to
+		// not have to hard code.
+		if(typeof json.solution_feedback === 'undefined') {
+			json.solution_feedback = [];
 		}
 
 
@@ -167,7 +191,6 @@ const baseifgame = {
 			if(last_page.completed) 
 				throw new Error('IfGame.addPageOrMarkAsComplete.lastpage_already_completed');
 
-
 			// Test to see if the last page needs to be correct to continue.
 			// Note that the last page may not have been answered by the user yet.
 			if( last_page.correct_required && !last_page.correct ) {
@@ -194,7 +217,7 @@ const baseifgame = {
 			// Since a non-null result was given, we should add a new page.
 
 			// setup new page 
-			const initialized_json = this._initialize_json(new_page_json);
+			const initialized_json = this._initialize_json(level.seed, level.pages.length, new_page_json);
 			const new_page = level.get_new_page(initialized_json);
 			level.pages.push(new_page);
 
@@ -220,10 +243,9 @@ const IfLevelModelFactory = {
 		dates: { ...baseifgame, ...dates},
 		math1: { ...baseifgame, ...math1},
 		math2: { ...baseifgame, ...math2},
-		math3: { ...baseifgame, ...math3},
 		if1: { ...baseifgame, ...if1},
 		if2: { ...baseifgame, ...if2},
-		sum: { ...baseifgame, ...sum},
+		summary: { ...baseifgame, ...summary},
 		text: { ...baseifgame, ...text},
 		test_gens: { ...baseifgame, ...test_gens }
 	},

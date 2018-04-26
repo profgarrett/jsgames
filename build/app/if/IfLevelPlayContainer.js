@@ -1,16 +1,38 @@
+//      
 import React from 'react';
 import PropTypes from 'prop-types';
+                                  
+
 import { Breadcrumb, Col, Row } from 'react-bootstrap';
 
 import IfLevelPlay from './IfLevelPlay';
-import { ErrorBoundary, Message, Loading } from './../components/Misc';
+import { ErrorBoundary, Message } from './../components/Misc';
 import { IfLevelSchema } from './../../shared/IfGame';
 
 import ForceLogin from './../components/ForceLogin';
 
 
-export default class IfLevelPlayContainer extends React.Component {
-	constructor(props) {
+                                           
+
+
+                  
+              
+  
+                  
+                 
+                      
+                    
+                   
+                   
+                             
+                        
+                          
+            
+  
+
+
+export default class IfLevelPlayContainer extends React.Component                       {
+	constructor(props           ) {
 		super(props);
 		this.state = { 
 			message: 'Loading data from server',
@@ -18,16 +40,32 @@ export default class IfLevelPlayContainer extends React.Component {
 			isLoading: true,
 			isSaving: false,
 			level: null,
-			selected_page_index: null,
+			selected_page_index: -1,
+			show_feedback: false,
+			show_feedback_on: 0,
 			_id: this.props.match.params._id
 		};
-		this.onSubmit = this.onSubmit.bind(this);
-		this.onChange = this.onChange.bind(this);
+		(this     ).onSubmit = this.onSubmit.bind(this);
+		(this     ).onChange = this.onChange.bind(this);
+		(this     ).onViewFeedback = this.onViewFeedback.bind(this);
 	}
+
+
+	// Mark that the user has finished viewing the feedback.
+	onViewFeedback(){
+		this.setState({ show_feedback: false });
+	}
+
 
 	// Get an update of the user's input.
 	// Changes is passed a json object with the updated values.
-	onChange(json) {
+	onChange(json        ) {
+		if(typeof this.state.level === 'undefined' || this.state.level === null) 
+			throw new Error('Invalid onChange of undefined IfLevelPlayContainer');
+		
+		// Don't accept any input if we are currently loading
+		if(this.state.isLoading) return;
+
 		const i = this.state.selected_page_index;
 		let new_history_item = { created: new Date(), ...json };
 		let history = [...this.state.level.pages[i].history, new_history_item];
@@ -47,23 +85,41 @@ export default class IfLevelPlayContainer extends React.Component {
 
 	// Update the current page and send to the server for an update.
 	onSubmit() {
+
+		// Don't accept any input if we are currently loading
+		if(this.state.isLoading) return;
+
+		// Make sure that we have a level.		
+		if(typeof this.state.level === 'undefined' || this.state.level === null) 
+			throw new Error('Invalid onSubmit of undefined IfLevelPlayContainer');
+
+		// Make sure that we don't already have a future page loaded in front of the current page.
+		if( this.state.selected_page_index < this.state.level.pages.length-1 )
+			throw new Error('current_page_i < this.state.level.pages.length-1 in IfLevelPlayContainer.onSubmit');
+
 		let id = this.state.level._id, 
 			level = this.state.level,
 			current_page_i = this.state.selected_page_index,
 			current_page = level.pages[current_page_i];
-		
-		console.assert(typeof this !== 'undefined', 'Invalid this passed');
+	
 
+
+		// NDG 4/23/18.  DISABLED: FORCE SERVER VALIDATION FOR VALIDATION RULES.
+		//
 		// Validate.  Note that some pages will allow local validation, but others require posting
-		// to the server.  This check is prior to submission to the server.
+		// 	to the server.  This check is prior to submission to the server.
+		// 	Note that solution_feedback rules require posting to the server. So, it's possible to 
+		//	pass local validation, but fail server valiation.
+		/*
 		if (current_page.correct === false) {
-			// Don't continue if we page.correct is false (null is ok)
+			// Don't continue if we know that page.correct is false (null is ok)
 			this.setState({
 				message: 'You must submit the correct answer before continuing.',
 				messageStyle: 'warning'
 			});
 			return;
 		}
+		*/
 
 		// Make sure that the user has submitted something
 		if(!current_page.client_has_answered()) {
@@ -74,17 +130,21 @@ export default class IfLevelPlayContainer extends React.Component {
 			return;
 		}
 
-		// Make sure that we don't already have a future page loaded in front of the current page.
-		if( current_page_i < this.state.level.pages.length-1 ) {
-			throw new Error('current_page_i < this.state.level.pages.length-1 in IfLevelPlayContainer.onSubmit');
-		}
-
 		// Show loading status.
 		this.setState({ 
 			message: 'Saving',
 			messageStyle: '',
+			show_feedback_on: current_page_i, // remember what page to show feedback on.
+			show_feedback: false, // set to true after we get back the results from the server
 			isLoading: true
 		});
+
+		// Don't set state if we were looking at something that doesn't require a review.
+		const show_feedback = (
+					current_page.type !== 'IfPageTextSchema' && 
+					current_page.type !== 'IfPageChoiceSchema'
+				);
+
 
 		// Fire AJAX.
 		fetch('/api/ifgame/level/'+ id, {
@@ -96,25 +156,30 @@ export default class IfLevelPlayContainer extends React.Component {
 				},
 				body: level.toJsonString()
 			})
-			.then( response => response.json() )
-			.then( json => {
+			.then( (response     )         => response.json() )
+			.then( (json        )            => {
 				if(json._error) throw new Error(json._error); 
 				return new IfLevelSchema(json);
 			})
-			.then( ifLevel => {
+			.then( (ifLevel           ) => {
 				if(ifLevel.completed) {
 					this.context.router.history.push('/ifgame/level/'+ifLevel._id+'/score');
 				} else {
+					
+					console.log('container');
+					console.log(ifLevel.pages[ifLevel.pages.length-1]);
+
 					this.setState({ 
 						selected_page_index: ifLevel.pages.length-1,
 						level: ifLevel,
+						show_feedback: show_feedback,
 						message: ifLevel.pages[ifLevel.pages.length-1].correct === false ? 'You must submit the correct answer before continuing' : '',
 						messageStyle: ifLevel.pages[ifLevel.pages.length-1].correct === false ? 'warning' : '',
 						isLoading: false
 					});
 				}
 			})
-			.catch( error => {
+			.catch( (error     ) => {
 				this.setState({ 
 					level: null, 
 					message: error.message,
@@ -129,6 +194,7 @@ export default class IfLevelPlayContainer extends React.Component {
 	componentDidMount() {
 		let _id = this.props.match.params._id;
 
+		// After the screen loads, fire off the initial request populate the level.
 		fetch('/api/ifgame/level/'+_id, {
 				credentials: 'include'
 			})
@@ -153,7 +219,8 @@ export default class IfLevelPlayContainer extends React.Component {
 			});
 	}
 
-	render() {
+
+	render()       {
 		//<Breadcrumb.Item href='/'>Home</Breadcrumb.Item>-->
 		const crumbs = this.state.level ?
 			<Breadcrumb>
@@ -169,14 +236,17 @@ export default class IfLevelPlayContainer extends React.Component {
 					{ crumbs }
 					<h3>{ this.state.level ? this.state.level.title : '' }</h3>
 
-					<Message message={this.state.message} style={this.state.messageStyle} />
-					<Loading loading={this.state.isLoading } />
+					<Message spinner={this.state.isLoading } message={this.state.message} style={this.state.messageStyle} />
 					<ErrorBoundary>
 					{ this.state.level ? <IfLevelPlay 
 							level={this.state.level} 
 							selected_page_index={this.state.selected_page_index }
 							onSubmit={this.onSubmit}
 							onChange={this.onChange}
+							show_feedback={this.state.show_feedback}
+							show_feedback_on={this.state.show_feedback_on}
+							onViewFeedback={this.onViewFeedback}
+							isLoading={this.state.isLoading}
 						/> : '' }
 					</ErrorBoundary>
 				</Col>
@@ -184,9 +254,8 @@ export default class IfLevelPlayContainer extends React.Component {
 		);
 	}
 }
-IfLevelPlayContainer.propTypes = {
-	match: PropTypes.object.isRequired
-};
+
 IfLevelPlayContainer.contextTypes = {
 	router: PropTypes.object.isRequired
 };
+

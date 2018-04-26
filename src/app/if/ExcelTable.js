@@ -31,8 +31,7 @@ const transform_if_date = dt => {
 // Use the given format style to properly display the input.
 // Very flexible with input format, guessing how to respond. 
 const format = (input, format) => {
-	if(input ===null) return null;
-	let result = '';
+	if(input === null) return null;
 
 	// Undefined format.  Guess!
 	if(typeof format === 'undefined' || format === null || format === '') {
@@ -50,7 +49,7 @@ const format = (input, format) => {
 		}
 	}
 
-	if(format === 'text' || format === 'c') {
+	if(format === 'text' || format === 'c' ) {
 		// Text
 		return input;
 
@@ -62,6 +61,10 @@ const format = (input, format) => {
 		} else {
 			return input;
 		}
+
+	} else if( format === '0' ) {
+		// Format without any decimal numbers.
+		return Math.round(input);
 
 	} else if( format === ',' ) {
 		// Decimal
@@ -225,8 +228,10 @@ export default class ExcelTable extends React.Component {
 
 			} else if (page.solution_test_results.length !== null) {
 				// Good value results, and we know if it should be true or false.
-
-				if(	page.client_test_results[i].result === page.solution_test_results[i].result) {
+				
+				// Check precision to .00 only - as we have floating point errors.
+				if(	Math.round(page.client_test_results[i].result * 100) === 
+						Math.round(page.solution_test_results[i].result * 100 )) {
 					// Render the field with a checkbox showing success.
 					fieldResult = <td style={style}>{ clean(page.client_test_results[i].result, page.client_f_format) }<SmallOkGlyphicon /></td>;
 				} else {

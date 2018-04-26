@@ -7,7 +7,8 @@ import type { TextPageType } from './IfTypes';
 type PropsType = {
 	page: TextPageType,
 	editable: boolean,
-	handleChange: (Object) => void
+	handleChange: (Object) => void,
+	handleSubmit: (void) => void
 };
 
 
@@ -18,6 +19,7 @@ export default class Text extends React.Component<PropsType> {
 	constructor(props: any) {
 		super(props);
 		(this: any).state = {};
+		(this: any).handleEnter = this.handleEnter.bind(this);
 	}
 
 	// After props are updated, send a signal to show that it's been read.
@@ -26,6 +28,21 @@ export default class Text extends React.Component<PropsType> {
 			nextProps.handleChange({ client_read: true });	
 		}
 		return {};
+	}
+
+	componentDidMount() {
+		document.addEventListener('keypress', this.handleEnter);
+	}
+
+	componentWillUnmount() {
+		document.removeEventListener('keypress', this.handleEnter);
+	}
+
+	handleEnter(event: any): any {
+		if(event.key === 'Enter' ) {
+			this.props.handleSubmit();
+		}
+		event.preventDefault(); // cancel any keypress.
 	}
 
 	// Build out the table 

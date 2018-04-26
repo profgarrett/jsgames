@@ -3,7 +3,7 @@
 /**
 	Node main event loop
 */
-const DEBUG_DELAY = 0;
+const DEBUG_DELAY = 500;
 const express = require('express');
 const path = require('path');
 const bodyParser = require('body-parser');
@@ -445,7 +445,7 @@ app.post('/api/ifgame/level/:id',
 		if(select_results.length === 0) return res.sendStatus(404);
 
 		// Ensure that this level isn't completed.
-		if(select_results[0].completed) throw new res.sendStatus(401);
+		if(select_results[0].completed) return res.sendStatus(401);
 
 		// update.
 		let iflevel = new IfLevelModel(select_results[0]); // initialize from sql

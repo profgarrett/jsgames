@@ -33,7 +33,7 @@ export type PageType = {
 	code: string,
 	description: string,
 	instruction: string,
-	feedback: Array<string>,
+	client_feedback: Array<string>,
 	solution_feedback: Array<Function>,
 
 	correct: boolean,

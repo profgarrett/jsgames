@@ -6,13 +6,13 @@ import type { Node } from 'react';
 import { Breadcrumb, Col, Row } from 'react-bootstrap';
 
 import IfLevelPlay from './IfLevelPlay';
-import { ErrorBoundary, Message, Loading } from './../components/Misc';
+import { ErrorBoundary, Message } from './../components/Misc';
 import { IfLevelSchema } from './../../shared/IfGame';
 
 import ForceLogin from './../components/ForceLogin';
 
 
-import type { LevelType, PageType } from './IfTypes';
+import type { LevelType } from './IfTypes';
 
 
 type PropsType = {
@@ -25,10 +25,9 @@ type StateType = {
 	isSaving: boolean,
 	level: ?LevelType,
 	selected_page_index: number,
+	show_feedback: boolean,
+	show_feedback_on: number,
 	_id: number
-};
-type ContextType = {
-	router: Object
 };
 
 
@@ -42,11 +41,21 @@ export default class IfLevelPlayContainer extends React.Component<PropsType, Sta
 			isSaving: false,
 			level: null,
 			selected_page_index: -1,
+			show_feedback: false,
+			show_feedback_on: 0,
 			_id: this.props.match.params._id
 		};
 		(this: any).onSubmit = this.onSubmit.bind(this);
 		(this: any).onChange = this.onChange.bind(this);
+		(this: any).onViewFeedback = this.onViewFeedback.bind(this);
 	}
+
+
+	// Mark that the user has finished viewing the feedback.
+	onViewFeedback(){
+		this.setState({ show_feedback: false });
+	}
+
 
 	// Get an update of the user's input.
 	// Changes is passed a json object with the updated values.
@@ -54,6 +63,9 @@ export default class IfLevelPlayContainer extends React.Component<PropsType, Sta
 		if(typeof this.state.level === 'undefined' || this.state.level === null) 
 			throw new Error('Invalid onChange of undefined IfLevelPlayContainer');
 		
+		// Don't accept any input if we are currently loading
+		if(this.state.isLoading) return;
+
 		const i = this.state.selected_page_index;
 		let new_history_item = { created: new Date(), ...json };
 		let history = [...this.state.level.pages[i].history, new_history_item];
@@ -73,6 +85,9 @@ export default class IfLevelPlayContainer extends React.Component<PropsType, Sta
 
 	// Update the current page and send to the server for an update.
 	onSubmit() {
+
+		// Don't accept any input if we are currently loading
+		if(this.state.isLoading) return;
 
 		// Make sure that we have a level.		
 		if(typeof this.state.level === 'undefined' || this.state.level === null) 
@@ -119,8 +134,17 @@ export default class IfLevelPlayContainer extends React.Component<PropsType, Sta
 		this.setState({ 
 			message: 'Saving',
 			messageStyle: '',
+			show_feedback_on: current_page_i, // remember what page to show feedback on.
+			show_feedback: false, // set to true after we get back the results from the server
 			isLoading: true
 		});
+
+		// Don't set state if we were looking at something that doesn't require a review.
+		const show_feedback = (
+					current_page.type !== 'IfPageTextSchema' && 
+					current_page.type !== 'IfPageChoiceSchema'
+				);
+
 
 		// Fire AJAX.
 		fetch('/api/ifgame/level/'+ id, {
@@ -141,9 +165,14 @@ export default class IfLevelPlayContainer extends React.Component<PropsType, Sta
 				if(ifLevel.completed) {
 					this.context.router.history.push('/ifgame/level/'+ifLevel._id+'/score');
 				} else {
+					
+					console.log('container');
+					console.log(ifLevel.pages[ifLevel.pages.length-1]);
+
 					this.setState({ 
 						selected_page_index: ifLevel.pages.length-1,
 						level: ifLevel,
+						show_feedback: show_feedback,
 						message: ifLevel.pages[ifLevel.pages.length-1].correct === false ? 'You must submit the correct answer before continuing' : '',
 						messageStyle: ifLevel.pages[ifLevel.pages.length-1].correct === false ? 'warning' : '',
 						isLoading: false
@@ -190,6 +219,7 @@ export default class IfLevelPlayContainer extends React.Component<PropsType, Sta
 			});
 	}
 
+
 	render(): Node {
 		//<Breadcrumb.Item href='/'>Home</Breadcrumb.Item>-->
 		const crumbs = this.state.level ?
@@ -206,14 +236,17 @@ export default class IfLevelPlayContainer extends React.Component<PropsType, Sta
 					{ crumbs }
 					<h3>{ this.state.level ? this.state.level.title : '' }</h3>
 
-					<Message message={this.state.message} style={this.state.messageStyle} />
-					<Loading loading={this.state.isLoading } />
+					<Message spinner={this.state.isLoading } message={this.state.message} style={this.state.messageStyle} />
 					<ErrorBoundary>
 					{ this.state.level ? <IfLevelPlay 
 							level={this.state.level} 
 							selected_page_index={this.state.selected_page_index }
 							onSubmit={this.onSubmit}
 							onChange={this.onChange}
+							show_feedback={this.state.show_feedback}
+							show_feedback_on={this.state.show_feedback_on}
+							onViewFeedback={this.onViewFeedback}
+							isLoading={this.state.isLoading}
 						/> : '' }
 					</ErrorBoundary>
 				</Col>

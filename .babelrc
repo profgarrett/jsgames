@@ -2,6 +2,7 @@
 	"presets": ['react', 'env', 'flow'],
 	"plugins": [
 		"transform-object-rest-spread", 
-		'transform-flow-strip-types'
+		'transform-flow-strip-types',
+		'emotion' /* needed for react-spinners */
 	]
 }
