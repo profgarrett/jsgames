@@ -8,7 +8,7 @@ const express = require('express');
 const path = require('path');
 const bodyParser = require('body-parser');
 const compression = require('compression');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const cookieParser = require('cookie-parser');
 const bugsnag = require('bugsnag');
 

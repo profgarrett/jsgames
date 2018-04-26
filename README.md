@@ -17,7 +17,12 @@ Load code
 git clone http://github.com/profgarrett/jsgames
 ```
 
-Create a secret.js file in the root folder. Update to your settings. You will need your own Bugsnag API.  If it's blank, then bugsnag will not handle any errors.  DEBUG can be set to true/false in order to enable debugging and local development. All local bugs are pushed to a log.txt file by default.
+Install NPM packages
+```
+npm pull
+```
+
+Create a secret.js file in the \build\server folder. The Bugsnag API is optional, or use DEBUG. Local bugs are pushed to a log.txt file by default.
 ```
 module.exports = {
 	ADMIN_USERNAME: '',
@@ -32,7 +37,22 @@ module.exports = {
 };
 ```
 
-You will also need to create your own tutorial files.  Place them in \server\tutorials. You can also get them by emailing Nathan.
+
+After updating, visit this page to update SQL schema.
+```
+http://hosthame/api/sql
+```
+
+Create tutorial files and put in \server\tutorials. You can also get them by emailing Nathan.  See below for tutorial information. Note that you need to build them first, as you shouldn't deploy with flow type annotations.
+
+Then, run tests. Replace x with the code used to create users on your system. Note that this requires the test tutorial file to be uploaded.
+```
+http://hostname/ifgame/test/?USER_CREATION_SECRET=x
+```
+
+
+
+## Architecture
 
 The react application is contained the build folder.  The backend is handled by the node application in the server/app.js file.  
 
@@ -46,15 +66,6 @@ If you're having trouble getting npm packages to update, npm-install-missing is 
 
 ### Updating
 
-After updating, visit page to update SQL schema.
-```
-http://hosthame/api/sql
-```
-
-Then, run tests. Replace x with the code used to create users on your system.
-```
-http://hostname/ifgame/test/?USER_CREATION_SECRET=x
-```
 
 
 
@@ -152,6 +163,7 @@ const x = {
 
 There are several kinds of pages.
 
+```
 Common fields
 	code
 		Used to help initialize common patterns.  E.g.,
@@ -169,7 +181,7 @@ Common fields
 	solution_feedback: [ { 'has': 'no_values', args: [ 'a' ] } ]
 		Exists only on server side. Used by .updatecorrect to
 		populate client_feedback.
-
+```
 
 IfPageTextSchema display information without any user input. They 
 only have two fields. Note that we use <br/><br/> for line breaks,
@@ -185,6 +197,7 @@ as it is automatically converted into <div>.
 IfPageFormulaSchema shows an Excel grid. There are a variety 
 of optional fields.
 
+```
 Required fields:
 	description: ''
 	instruction: ''
@@ -212,10 +225,11 @@ Optional fields:
 		populate client_feedback.
 	versions: [ ... ]
 		Verions can contain options to override default options.
-
+```
 
 IfPageParsonsSchema give a list of options for the user to place in order.
 
+```
 Required fields:
 	description: ''
 	instruction: ''
@@ -229,11 +243,12 @@ Optional fields:
 	solution_feedback: [ { 'has': 'no_values', args: [ 'a' ] } ]
 		Exists only on server side. Used by .updatecorrect to
 		populate client_feedback.
-
+```
 
 IfPageChoiceSchema allows a user to select from a list of options.
 Can be either true or false.
 
+```
 Required fields:
 	description: ''
 	instruction: ''
@@ -249,6 +264,7 @@ Required fields:
 Optional fields:
 	versions
 		solution: (l: level, p: page): string
+```
 
 
 ### Has functions, solution_feedback
@@ -262,6 +278,7 @@ Called with { has: 'references', args: [ 'a1' ]}
 ### DataFactory
 
 DataFactory is used to generate random data.
+```
 	randDate(plus_or_minus_dats, seed)
 	randPercent(from, to, seed)
 	randB(from, to, seed)
@@ -272,8 +289,7 @@ DataFactory is used to generate random data.
 	randPeople(rows)
 	randNumbersAndColors( rows)
 	randomizeList([], seed)
-
-
+```
 
 
 

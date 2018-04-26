@@ -36,7 +36,7 @@
     "babel-preset-env": "^1.6.1",
     "babel-preset-flow": "^6.23.0",
     "babel-preset-react": "^6.24.1",
-    "bcrypt": "^1.0.3",
+    "bcryptjs": "^2.4.3",
     "body-parser": "^1.18.2",
     "bugsnag": "^2.3.1",
     "bugsnag-js": "^4.4.0",
