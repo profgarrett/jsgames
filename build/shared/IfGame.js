@@ -405,7 +405,7 @@ class IfPageParsonsSchema extends Schema {
 
 	// Return a nicely formatted view of the client's input. 
 	toString()         {
-		let items = this.client_items.slice().reverse();
+		let items = this.client_items === null ? [] : this.client_items.slice().reverse();
 		return items.reduce( (accum, item) => item+(accum.length>0 ? ', ': '')+accum, '');
 	}
 

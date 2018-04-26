@@ -307,7 +307,8 @@ export class Message extends React.Component {
 			textAlign: 'center',
 			marginTop: 5,
 			marginLeft: '20%',
-			marginRight: '20%'
+			marginRight: '20%',
+			zIndex: 9000
 		};
 		const spinner = !this.props.spinner ? null : 
 					<ScaleLoader color='white' height={15} />;

@@ -166,9 +166,6 @@ export default class IfLevelPlayContainer extends React.Component               
 					this.context.router.history.push('/ifgame/level/'+ifLevel._id+'/score');
 				} else {
 					
-					console.log('container');
-					console.log(ifLevel.pages[ifLevel.pages.length-1]);
-
 					this.setState({ 
 						selected_page_index: ifLevel.pages.length-1,
 						level: ifLevel,
