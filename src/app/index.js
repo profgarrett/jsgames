@@ -23,20 +23,24 @@ import Homepage from './components/Homepage';
 import bugsnag from 'bugsnag-js';
 import createPlugin from 'bugsnag-react';
 
-const bugsnagClient = bugsnag({
-  apiKey: '9b68269d9ba2d11171ecafa393afbb8e',
-  autoCaptureSessions: true,
-  releaseStage: window.location.hostname === 'localhost' ? 'development' : 'production',
-  notifyReleaseStages: [ 'development', 'production' ]
-});
 
-const ErrorBoundary = bugsnagClient.use(createPlugin(React));
+let Root = null;
 
+if(window.location.hostname === 'localhost') {
 
-const Root = () => (
-	<BrowserRouter>
-		<ErrorBoundary>
-			<Grid>
+	const bugsnagClient = bugsnag({
+		apiKey: '9b68269d9ba2d11171ecafa393afbb8e',
+		autoCaptureSessions: true,
+		releaseStage: 'production',
+		notifyReleaseStages: [ 'development', 'production' ]
+	});
+
+	const ErrorBoundary = bugsnagClient.use(createPlugin(React));
+
+	Root = () => (
+		<BrowserRouter>
+			<ErrorBoundary>
+				<Grid>
 				<Menu page='/' />
 				<Switch>
 					<Route exact path='/' component={Homepage}></Route>
@@ -47,9 +51,26 @@ const Root = () => (
 					<Route component={PageNotFound}></Route>
 				</Switch>
 			</Grid>
-		</ErrorBoundary>
-	</BrowserRouter>
-);
+			</ErrorBoundary>
+		</BrowserRouter>
+	);
+
+} else {
+
+	Root = () => ( <BrowserRouter>
+				<Grid>
+				<Menu page='/' />
+				<Switch>
+					<Route exact path='/' component={Homepage}></Route>
+					<Route path='/login' component={Login}></Route>
+					<Route path='/logout' component={Logout}></Route>
+					<Route path='/chartgame' component={CgHome}></Route>
+					<Route path='/ifgame' component={IfHome}></Route>
+					<Route component={PageNotFound}></Route>
+				</Switch>
+				</Grid>
+			</BrowserRouter>);
+}
 
 
 ReactDOM.render(

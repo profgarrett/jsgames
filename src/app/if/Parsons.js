@@ -184,7 +184,7 @@ export default class Parsons extends React.Component {
 		if(!this.props.editable) {
 			return (
 				<ListGroup>
-					{ page.client_items.map( (item,i) => <ListGroupItem key={i}><HtmlSpan html={item}/></ListGroupItem> ) }
+					{ page.client_items.map( (item,i) => <ListGroupItem key={i}><HtmlSpan html={""+item}/></ListGroupItem> ) }
 				</ListGroup>
 			);
 		} else {

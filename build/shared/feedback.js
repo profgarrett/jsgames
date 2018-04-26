@@ -147,7 +147,7 @@ const has = {
 
 // Return feedback for a completed answer.
 // Only used in the server-side, where we have the solution_rules populated.
-export const get_feedback = (that          )                 => {
+const get_feedback = (that          )                 => {
 	let response = '';
 	let responses = [];
 
@@ -170,4 +170,9 @@ export const get_feedback = (that          )                 => {
 	}
 
 	return responses;
+};
+
+
+module.exports = {
+	get_feedback
 };
