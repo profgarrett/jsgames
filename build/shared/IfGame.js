@@ -1,5 +1,5 @@
 //      
-const { Schema } = require('./Schema');
+const { Schema, isDef, isArray, revive_dates_recursively } = require('./Schema');
 const { get_feedback } = require('./feedback');
 
 var FormulaParser = require('hot-formula-parser').Parser;
@@ -21,8 +21,8 @@ const IfLevels = [
 
 	{ code: 'summary', label: 'Summary function', description: 'Learn how to use summary functions.' },
 	{ code: 'text', label: 'Text functions', description: 'Learn a number of useful text functions' },
-	{ code: 'if1', label: 'IF Conditions', description: 'Learn how to create IF conditions' },
-	{ code: 'if2', label: 'IF Function', description: 'Learn how to use the IF function' }
+	{ code: 'if1', label: 'IF Conditions', description: 'Learn about boolean comparisons' },
+	{ code: 'if2', label: 'IF Function', description: 'Learn AND, OR, and NOT' }
 
 ];
 
@@ -41,13 +41,6 @@ const arrayDifferent = (a1            , a2            )          => {
 	return false;
 };
 
-// Convenience function for initializing schema.
-let isDef = function(v     )          {
-	return typeof v !== 'undefined';
-};
-let isArray = function(u     )          {
-	return (u instanceof Array);
-};
 
 // Force boolean, not truthy or falsy.
 // Allow null values.
@@ -68,33 +61,6 @@ const noObjectsInArray = (i_array            )             => {
 	return i_array;
 };
 
-
-// Go through the given obj or array, recursively matching items that look like a date
-// back to the date() object. Works when dates are in '1981-12-20T04:00:14.000Z format, 
-// not Unix seconds mode.  Needed, as some objects are dynamic, such as tests containing dates.
-function revive_dates_recursively(obj     )      {
-	var datePattern = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
-
-	if(obj instanceof Array ) {
-		return obj.map( (o     )      => revive_dates_recursively(o) );
-	}
-
-	if(typeof obj === 'object' ) {
-		for(let name in obj) {
-			if(obj.hasOwnProperty(name)) {
-				obj[name] = revive_dates_recursively(obj[name]);
-			}
-		}
-		return obj;
-	}
-
-	if(typeof obj === 'string') {
-		if(datePattern.test(obj)) {
-			return new Date(obj);
-		}
-	}
-	return obj;
-}
 
 
 // Return fields in common for all Pages.

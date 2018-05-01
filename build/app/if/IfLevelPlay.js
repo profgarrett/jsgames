@@ -145,14 +145,28 @@ export default class IfLevelPlay extends React.Component            {
 	// Render problem
 	_render_page_problem(page          )       {
 		if(page.type === 'IfPageFormulaSchema') {
-			return <ExcelTable page={page} editable={true} handleChange={this.handleChange} />;
+			return <ExcelTable page={page} 
+						readonly={ !this.props.isLoading }
+						editable={ true } 
+						handleChange={this.handleChange} />;
+
 		} else if(page.type === 'IfPageParsonsSchema') {
-			return <Parsons page={page} editable={true} handleChange={this.handleChange} />;
+			return <Parsons page={page} 
+						readonly={ !this.props.isLoading }
+						editable={ true } 
+						handleChange={this.handleChange} />;
+
 		} else if(page.type === 'IfPageChoiceSchema') {
-			return <Choice page={page} editable={true} showSolution={false} handleChange={this.handleChange} />;
+			return <Choice page={page} 
+						readonly={ !this.props.isLoading }
+						editable={ true } 
+						showSolution={false} 
+						handleChange={this.handleChange} />;
+
 		} else if(page.type === 'IfPageTextSchema') {
 			return <Text page={page} 
-						editable={true} 
+						readonly={ !this.props.isLoading }
+						editable={ true } 
 						handleChange={this.handleChange} 
 						handleSubmit={ () => this.handleSubmit() } />;
 		} else {
@@ -259,7 +273,7 @@ export default class IfLevelPlay extends React.Component            {
 							that.props.onViewFeedback();
 							document.removeEventListener('keypress', that._feedback_listen_for_enter);
 						}} >
-						<Modal.Dialog>
+						<Modal.Dialog style={{marginTop: 150}}>
 							<Modal.Header>
 								<Modal.Title>Incorrect answer</Modal.Title>
 							</Modal.Header>
@@ -292,6 +306,7 @@ export default class IfLevelPlay extends React.Component            {
 		event.preventDefault(); // cancel any keypress.
 	}
 
+
 	// Render 
 	render()       {
 		console.assert(this.props.selected_page_index < this.props.level.pages.length, 
@@ -305,7 +320,6 @@ export default class IfLevelPlay extends React.Component            {
 		if(this.props.show_feedback) {
 			page = this.props.level.pages[this.props.show_feedback_on];
 		}
-		
 		
 		// Build results 
 		const lead = this._render_page_lead(page);

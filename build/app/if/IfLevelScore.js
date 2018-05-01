@@ -2,57 +2,16 @@
 import React from 'react';
 import { Panel, Popover, OverlayTrigger, Well } from 'react-bootstrap';
 
-import 'rc-slider/assets/index.css';
-import 'rc-tooltip/assets/bootstrap.css';
-import Slider from 'rc-slider';
-
-//import { IfPageSchema } from './../../shared/IfGame';
 import { HtmlDiv, incorrect_glyphicon, correct_glyphicon, completed_glyphicon } from './../components/Misc';
 
 import ExcelTable from './ExcelTable';
 import Choice from './Choice';
 import Parsons from './Parsons';
 import Text from './Text';
+import HistorySlider from './HistorySlider';
 
                                                      
                                   
-
-
-
-                         
-                
-                               
-  
-                    
-
-// Allows moving forward/backwards through history of a single page.
-class HistorySlider extends React.Component                              {
-
-	render()       {
-		const page = this.props.page;
-		const style = { marginBottom:5, margin: 5};
-
-		if(page.history.length === 0) throw new Error('HistorySlider needs history.length > 0');
-
-		const first = page.history[0].created.getTime();
-		const last = page.history[page.history.length-1].created.getTime();
-
-		// Convert history to an obj keyed by index.
-		let i = 0;
-		const marks = page.history.reduce( (marks         /*, history_item: Object*/)      => {
-			marks[i] = ''; // history_item.created.toLocaleTimeString();
-			i++;
-			return marks;
-		}, {});
-
-		return (
-			<div style={style}>
-				<Slider min={0} max={i-1} marks={marks} onChange={this.props.handleChange} defaultValue={last-first} />
-			</div>
-
-		);
-	}
-}
 
 
 
@@ -116,7 +75,7 @@ class IfLevelScorePage extends React.Component                                 {
 						<Panel.Collapse >
 							<Panel.Body>
 								<HistorySlider page={page_at} handleChange={this.setHistory} />
-								<ExcelTable page={page_at} editable={false} />
+								<ExcelTable page={page_at} readonly={true} editable={false} />
 							</Panel.Body>
 						</Panel.Collapse>
 					</Panel>
