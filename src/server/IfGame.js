@@ -8,8 +8,7 @@ const { tutorial } = require('./tutorials/tutorial');
 const { math1, math2 } = require('./tutorials/math');
 const { text } = require('./tutorials/text');
 const { summary } = require('./tutorials/summary');
-const { if1 } = require('./tutorials/if1');
-const { if2 } = require('./tutorials/if2');
+const { if1, if2 } = require('./tutorials/if');
 const { dates } = require('./tutorials/dates');
 
 import type { LevelType, PageType } from './../app/if/IfTypes';

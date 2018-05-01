@@ -273,7 +273,7 @@ export default class IfLevelPlay extends React.Component<PropsType> {
 							that.props.onViewFeedback();
 							document.removeEventListener('keypress', that._feedback_listen_for_enter);
 						}} >
-						<Modal.Dialog>
+						<Modal.Dialog style={{marginTop: 150}}>
 							<Modal.Header>
 								<Modal.Title>Incorrect answer</Modal.Title>
 							</Modal.Header>

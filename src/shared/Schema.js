@@ -1,3 +1,4 @@
+// @flow 
 /*
 	Schema is a class for building models.
 	It's shared on both client and server sides.
@@ -129,8 +130,47 @@ class Schema {
 	}
 } 
 
+// Convenience function for initializing schema.
+let isDef = function(v: any): boolean {
+	return typeof v !== 'undefined';
+};
+let isArray = function(u: any): boolean {
+	return (u instanceof Array);
+};
+
+
+// Go through the given obj or array, recursively matching items that look like a date
+// back to the date() object. Works when dates are in '1981-12-20T04:00:14.000Z format, 
+// not Unix seconds mode.  Needed, as some objects are dynamic, such as tests containing dates.
+function revive_dates_recursively(obj: any): any {
+	var datePattern = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
+
+	if(obj instanceof Array ) {
+		return obj.map( (o: any): any => revive_dates_recursively(o) );
+	}
+
+	if(typeof obj === 'object' ) {
+		for(let name in obj) {
+			if(obj.hasOwnProperty(name)) {
+				obj[name] = revive_dates_recursively(obj[name]);
+			}
+		}
+		return obj;
+	}
+
+	if(typeof obj === 'string') {
+		if(datePattern.test(obj)) {
+			return new Date(obj);
+		}
+	}
+	return obj;
+}
+
 
 module.exports = {
-	Schema
+	Schema,
+	isDef,
+	isArray,
+	revive_dates_recursively
 };
 

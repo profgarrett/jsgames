@@ -3,7 +3,7 @@
 /**
 	Node main event loop
 */
-const DEBUG_DELAY = 1000;
+const DEBUG_DELAY = 500;
 const express = require('express');
 const path = require('path');
 const bodyParser = require('body-parser');
@@ -13,7 +13,8 @@ const cookieParser = require('cookie-parser');
 const bugsnag = require('bugsnag');
 
 const {USER_CREATION_SECRET, JWT_AUTH_SECRET, BUGSNAG_API, DEBUG,
-		MYSQL_HOST, MYSQL_USER, MYSQL_PASSWORD, MYSQL_DATABASE 
+		MYSQL_HOST, MYSQL_USER, MYSQL_PASSWORD, MYSQL_DATABASE,
+		ADMIN_USERNAME
 		} = require('./secret.js'); 
 
 
@@ -379,6 +380,35 @@ app.get('/api/ifgame/levels/byCode/:code',
 		next(e);
 	}
 });
+
+
+// Select object updated in the last 30m.
+// Require current user to match secret.js ADMIN_USERNAME.
+app.get('/api/ifgame/recent_levels', nocache, require_logged_in_user,
+	async (req: $Request, res: $Response, next: NextFunction): Promise<any> => {
+	try {
+		const sql = 'SELECT * FROM iflevels WHERE updated > NOW() - INTERVAL 30 MINUTE';
+		const username = get_username_or_emptystring(req);
+
+		if(username !== ADMIN_USERNAME)
+			throw new Error('Invalid username '+username+' for recent_levels');
+
+		let select_results = await run_mysql_query(sql);
+
+		if(select_results.length === 0) return res.json([]);
+
+		let iflevels = select_results.map( (l: Object): Object => (new IfLevelModel(l)).toJson() );
+
+		// Remove secret fields and transmit.
+		iflevels = iflevels.map( (l: Object): Object => return_level_prepared_for_transmit(l));
+		
+		res.json(iflevels);
+	} catch (e) {
+		log_error(e);
+		next(e);
+	}
+});
+
 
 
 // Select object, provide it is owned by the logged in user.
