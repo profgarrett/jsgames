@@ -10,12 +10,13 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "lint": "eslint.js",
+    "build0": "rm -rf build/*",
     "build1": "flow-remove-types src -d build",
     "build2": "webpack --config webpack.production.config.js --display-error-details",
     "build3": "cp secret.distribution.js build/server/secret.js",
-    "build4": "scp -r build profgarrett@excel.fun:excel.fun/jsgames/",
-    "build5": "ssh profgarrett@excel.fun \"cd excel.fun; rm log.txt; touch tmp/restart.txt\"",
-    "build": "npm run build1 | npm rum build2 | npm run build3 | npm run build4 | npm rum build5",
+    "build4": "scp -r sql profgarrett@excel.fun:excel.fun/jsgames/",
+    "build5": "scp -r build profgarrett@excel.fun:excel.fun/jsgames/",
+    "build6": "ssh profgarrett@excel.fun \"cd excel.fun; rm log.txt; touch tmp/restart.txt\"",
     "startflow": "./node_modules/flow-bin/flow-osx-v0.69.0/flow",
     "startreact": "webpack-dev-server --hot --inline --watch",
     "startnode": "nodemon src/server/app.js --watch src --exec babel-node --presets babel-preset-env --inspect",
@@ -90,6 +91,7 @@
     "whatwg-fetch": "^2.0.4"
   },
   "devDependencies": {
+    "clean-webpack-plugin": "^0.1.19",
     "flow-remove-types": "^1.2.3",
     "fsevents": "^1.1.3"
   }

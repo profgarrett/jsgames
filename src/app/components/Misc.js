@@ -3,8 +3,6 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Row, Col, Alert } from 'react-bootstrap';
 import { OverlayTrigger, Tooltip, Glyphicon } from 'react-bootstrap';
-//import { Link } from 'react-router-dom';
-//import { LinkContainer } from 'react-router-bootstrap';
 
 import { RotateLoader, ClipLoader, ScaleLoader } from 'react-spinners';
 

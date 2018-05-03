@@ -3,8 +3,34 @@
 PassengerNodejs /home/profgarrett/.nvm/versions/node/v9.4.0/bin/node
 
 
-# SetEnv _PASSENGER_NODE_CONTROL_SERVER 1
-# Forced SSL (redirecting http to https)
-# RewriteEngine on
-# RewriteCond %{SERVER_PORT} !^443$
-# RewriteRule ^/(.*) https://%{HTTP_HOST}/$1 [NC,R=301,L] 
+# Force use of https.
+RewriteCond %{HTTPS} !=on
+RewriteCond %{SERVER_PORT} 80 
+RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# Prevent caching of index.html file.
+# Used to make sure that clients load the latest application file.
+# Sub-pages use unique hashes for each build, so those can be cached ok.
+<IfModule mod_expires.c>
+	# Enable expirations.
+	ExpiresActive On
+
+	# Cache all files for 2 weeks after access (A).
+	ExpiresDefault A1209600
+
+	# JS is hashed.
+	<FilesMatch ".(js)$">
+		Header set Cache-Control "max-age=31536000, public"
+	</FilesMatch>
+
+	# Update images and css stuff daily
+	<FilesMatch ".(css|jpg|jpeg|png|gif|ico)$">
+		Header set Cache-Control "max-age=86400, public"
+	</FilesMatch>
+
+	# Refresh index pages so clients immediately get a new copy of the js link.
+	<FilesMatch ".(html)$">
+		Header set Cache-Control "max-age=60, public"
+	</FilesMatch>
+
+</IfModule>

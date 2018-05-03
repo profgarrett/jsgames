@@ -8,8 +8,6 @@ This project provides a set of Javascript games and tutorials.
 
 Requires a server with Node.js installed and a MySql server.
 
-
-
 ### Installing
 
 Load code 

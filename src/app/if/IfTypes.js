@@ -1,6 +1,5 @@
 // @flow
 
-
 export type LevelType = {
 	_id: string,
 	code: string,

@@ -508,6 +508,38 @@ app.post('/api/ifgame/level/:id',
 
 
 ////////////////////////////////////////////////////////////////////////
+//   Feedback Module
+////////////////////////////////////////////////////////////////////////
+
+
+// Create a new feedback entry.
+app.post('/api/feedback/', 
+	nocache, require_logged_in_user,
+	async (req: $Request, res: $Response, next: NextFunction): Promise<any> => {
+	try {
+		const created = from_utc_to_myql(to_utc(new Date()));
+		const username = get_username_or_emptystring(req);
+		const data = JSON.stringify(req.body.data);
+		const message = req.body.message;
+		const code = req.body.code;
+
+		const insert_sql = `INSERT INTO feedback 
+				(username, message, created, data, code) 
+				VALUES (?, ?, ?, ?, ?)`;
+					
+		const values = [ username, message, created, data, code ];
+
+		let insert_results = await run_mysql_query(insert_sql, values);
+		console.log(insert_results);
+
+		res.json({ success: true });
+	} catch (e) {
+		log_error(e);
+		next(e);
+	}
+});
+
+////////////////////////////////////////////////////////////////////////
 //   Authentication
 ////////////////////////////////////////////////////////////////////////
 
@@ -564,12 +596,7 @@ app.get('/api/logout', (req: $Request, res: $Response) => {
 
 
 
-// Simple end-point to test if the user is logged in or not.
-app.get('/api/login/', (req: $Request, res: $Response) => {
-	let u: string = get_username_or_emptystring(req);
 
-	res.json({ 'logged_in': u!=='', username: u });
-});
 
 
 // Delete the test user
@@ -591,6 +618,95 @@ app.post('/api/login_clear_test_user/',
 });
 
 
+// Log the user in.
+async function login_and_maybe_create_user(params: Object): any {
+	console.log(params); //////
+
+
+
+	let hashed_password = bcrypt.hashSync(params.password, 8);
+	let user = { username: params.username, hashed_password: hashed_password };
+	const select_sql = 'SELECT * FROM users WHERE username = ?';
+	
+
+	let select_results = await run_mysql_query(select_sql, [params.username]);
+
+	// test the db for presense of user.  If not found, create given proper perms.
+	if(select_results.length === 0) {
+		// Username not found.
+
+		// Did the passed token match the value in secret.js?
+		if(params.token !== USER_CREATION_SECRET ) {
+			return 403;// no, error hard.
+		} else {
+			// Yes, create user and log in.
+			const insert_sql = 'INSERT INTO users (username, hashed_password) VALUES (?, ?)';
+			let insert_results = await run_mysql_query(insert_sql, [user.username, user.hashed_password]);
+			
+			if(insert_results.affectedRows !== 1) return 500;
+		}
+
+
+	} else if(select_results.length === 1) {
+		// We have a user. Test username.
+		if(!bcrypt.compareSync(params.password, select_results[0].hashed_password)) {
+			return 401;  // Bad password or username.
+		} 
+
+	} else {
+		// Multiple users found with same username.  Shouldn't be possible due to db constraints.
+		throw 500;
+	}
+
+	// We have a proper user.  Continue!
+	let jwt_token = jwt.sign({ username: user.username }, JWT_AUTH_SECRET, { expiresIn: 864000 });
+	const last = (new Date()).toString().replace(/ /g, '_').replace('(', '').replace(')', '').replace(/:/g,'_').replace(/-/g, '_');
+
+	params.res.cookie('x-access-token', jwt_token);
+	params.res.cookie('x-access-token-username', user.username);
+	params.res.cookie('x-access-token-refreshed', last);
+
+	return user;
+}
+
+// Simple end-point for logging in and/or creating a user.
+// Mimmicks post. Used for auto-login instead of going through the react 
+// page, as that takes a lot longer to load.  This quickly sets the information
+// and returns it to a clean index page.
+app.get('/api/login/', 
+	nocache,
+	async (req: $Request, res: $Response, next: NextFunction): Promise<any> => {
+	try {
+		var user = await login_and_maybe_create_user({
+			token: req.query.token,
+			password: req.query.password,
+			username: req.query.username,
+			res: res
+		});
+
+		// If a number is returned, use that error status code.
+		if(typeof user === 'number') res.sendStatus(user);
+
+		// Otherwise, we have a valid user and have been logged in.
+		// Issue redirect.
+		const url = req.query.url;
+		res.redirect('/'+url);
+	}
+	catch (e) {
+		log_error(e);
+		next(e);
+	}
+});
+
+
+// Simple end-point to test if the user is logged in or not.
+app.get('/api/login/status', (req: $Request, res: $Response) => {
+	let u: string = get_username_or_emptystring(req);
+
+	res.json({ 'logged_in': u!=='', username: u });
+});
+
+
 /*
 	Login AND/OR create user.
 	Creating a user requires a passed token, which much match the value given in secret.js
@@ -600,55 +716,16 @@ app.post('/api/login/',
 	nocache, 
 	async (req: $Request, res: $Response, next: NextFunction): Promise<any> => {
 	try {
-		//
-		let body = (req.body: any); // cast to fix flow issue converting mixed -> object.
-		body = (body: { 
-				username: string, token: string, 
-				username: string, password: string 
+		console.log(req.body);
+		const user = await login_and_maybe_create_user({
+				token: req.body.token,
+				password: req.body.password,
+				username: req.body.username,
+				res: res
 			});
 
-		let token = body.token;
-		let password = body.password;
-		let hashed_password = bcrypt.hashSync(password, 8);
-		let user = { username: body.username, hashed_password: hashed_password };
-		const select_sql = 'SELECT * FROM users WHERE username = ?';
+		if(typeof user === 'number') return res.sendStatus(user);
 
-		let select_results = await run_mysql_query(select_sql, [user.username]);
-
-		// test the db for presense of user.  If not found, create given proper perms.
-		if(select_results.length === 0) {
-			// Username not found.
-
-			// Did the passed token match the value in secret.js?
-			if(token !== USER_CREATION_SECRET ) {
-				return res.sendStatus(403);// no, error hard.
-			} else {
-				// Yes, create user and log in.
-				const insert_sql = 'INSERT INTO users (username, hashed_password) VALUES (?, ?)';
-				let insert_results = await run_mysql_query(insert_sql, [user.username, user.hashed_password]);
-				
-				if(insert_results.affectedRows !== 1) throw new Error(500);
-			}
-
-
-		} else if(select_results.length === 1) {
-			// We have a user. Test username.
-			if(!bcrypt.compareSync(password, select_results[0].hashed_password)) {
-				return res.sendStatus(401);  // Bad password or username.
-			} 
-
-		} else {
-			// Multiple users found with same username.  Shouldn't be possible due to db constraints.
-			throw new Error(500);
-		}
-
-		// We have a proper user.  Continue!
-		let jwt_token = jwt.sign({ username: user.username }, JWT_AUTH_SECRET, { expiresIn: 864000 });
-		const last = (new Date()).toString().replace(/ /g, '_').replace('(', '').replace(')', '').replace(/:/g,'_').replace(/-/g, '_');
-
-		res.cookie('x-access-token', jwt_token);
-		res.cookie('x-access-token-username', user.username);
-		res.cookie('x-access-token-refreshed', last);
 		return res.json({ username: user.username, logged_in: true });
 	}
 	catch (e) {

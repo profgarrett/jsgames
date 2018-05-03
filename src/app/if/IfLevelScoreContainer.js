@@ -55,6 +55,7 @@ export default class IfLevelScoreContainer extends React.Component {
 	render() {
 		const crumbs = this.state.level ?
 			<Breadcrumb>
+				<Breadcrumb.Item href={'/ifgame/'}>Home</Breadcrumb.Item>
 				<Breadcrumb.Item href={'/ifgame/'+this.state.level.code}>List</Breadcrumb.Item>
 				<Breadcrumb.Item active>{ this.state.level.title }</Breadcrumb.Item>
 			</Breadcrumb>

@@ -1,16 +1,11 @@
-var HTMLWebpackPlugin = require('html-webpack-plugin');
-var HTMLWebpackPluginConfig = new HTMLWebpackPlugin({
-	template: __dirname + '/src/app/index.html',
-	filename: 'index.html',
-	inject: 'body',
-
-});
+const HTMLWebpackPlugin = require('html-webpack-plugin');
 const webpack = require('webpack');
 const UglifyJSPlugin = require('uglifyjs-webpack-plugin');
-
+const CleanWebpackPlugin = require('clean-webpack-plugin');
+//const { GOOGLEID } = require('./secret.distribution.js');
 
 module.exports = {
-	mode: 'development',
+	mode: 'production',
 	entry: ['babel-polyfill', __dirname + '/src/app/index.js'],
 	module: {
 		rules: [
@@ -25,11 +20,13 @@ module.exports = {
 			}
 		]
 	},
-	output: {
-		filename: 'transformed.js',
-		path:   __dirname + '/build/public'
-	},
 	plugins: [
+		new CleanWebpackPlugin(['build/public']), // wipe out all bad files.
+		new HTMLWebpackPlugin({
+			template: __dirname + '/src/app/index.html',
+			filename: 'index.html',
+			inject: 'body'
+		}),
 		new UglifyJSPlugin({
 			sourceMap: true
 		}),
@@ -37,6 +34,10 @@ module.exports = {
 			'process.env.NODE_ENV': JSON.stringify('production')
 		})
 	],
+	output: {
+		filename: '[name].[chunkhash].js',
+		path:   __dirname + '/build/public'
+	},
 	devtool: 'source-map',
 
 	devServer: {

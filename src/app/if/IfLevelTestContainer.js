@@ -40,7 +40,7 @@ const login_tests = [
 	},
 	{
 		title: 'Login: check status as guest',
-		url: '/api/login',
+		url: '/api/login/status',
 		options: { method: 'GET' },
 		test_response: (response, json) => json.logged_in === false
 	},
@@ -66,7 +66,7 @@ const login_tests = [
 	},
 	{
 		title: 'Login: check status as logged in user',
-		url: '/api/login',
+		url: '/api/login/status',
 		options: { method: 'GET' },
 		test_response: (response, json) => response.status !== 401 && json.logged_in === true
 	},

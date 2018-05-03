@@ -96,16 +96,23 @@ type PropsType = {
 	show_feedback_on: number,
 	isLoading: boolean
 };
+type StateType = {
+	// When feedback is given, force a delay before allowing a submission event.
+	// Used to ignore 2nd half of double-click events.
+	lastFeedbackDismissal: Object 
+};
 
 
-
-export default class IfLevelPlay extends React.Component<PropsType> {
+export default class IfLevelPlay extends React.Component<PropsType, StateType> {
 
 	constructor(props: any) {
 		super(props);
 		(this: any).handleChange = this.handleChange.bind(this);
 		(this: any).handleSubmit = this.handleSubmit.bind(this);
 		(this: any)._feedback_listen_for_enter = this._feedback_listen_for_enter.bind(this);
+		(this: any).state = {
+			lastFeedbackDismissal: new Date()
+		};
 	}
 
 	handleChange(new_value: Object) {
@@ -114,6 +121,12 @@ export default class IfLevelPlay extends React.Component<PropsType> {
 
 	handleSubmit(e: ?SyntheticEvent<HTMLButtonElement>) {
 		if(e) e.preventDefault();
+
+		// Do not allow submissions within 1/2s of previous ones.
+		// Keeps users who double-click from accidentally re-submitting.
+		if( (new Date()).getTime() - this.state.lastFeedbackDismissal.getTime() < 500)
+			return; 
+					
 		this.props.onSubmit();
 	}
 
@@ -181,6 +194,8 @@ export default class IfLevelPlay extends React.Component<PropsType> {
 		// Use a different color for the submission button if we are test v. tutorial.
 		const that = this;
 
+
+
 		//  Button.
 		const button_style = page.correct_required ? 'success': 'primary'; 
 		const submit = <Button id='iflevelplaysubmit' 
@@ -232,9 +247,11 @@ export default class IfLevelPlay extends React.Component<PropsType> {
 					position: 'fixed',
 					top: 0, left: 0, right: 0, bottom: 0,
 					zIndex: 100000,
+					cursor: 'pointer' // see https://github.com/facebook/react/issues/1169
 					}}
 					onClick={ (e: any): any => {
 						e.stopPropagation();
+						this.setState({ lastFeedbackDismissal: new Date() });
 						that.props.onViewFeedback();
 						document.removeEventListener('keypress', that._feedback_listen_for_enter);
 					}}
@@ -267,9 +284,10 @@ export default class IfLevelPlay extends React.Component<PropsType> {
 			// Return full-screen feedback.
 			return (
 				<div>
-					<div className='static-modal' style={{ textAlign: 'left'}} 
+					<div className='static-modal' style={{ textAlign: 'left' }} 
 						onClick={ (e: any): any => {
 							e.stopPropagation();
+							this.setState({ lastFeedbackDismissal: new Date() });
 							that.props.onViewFeedback();
 							document.removeEventListener('keypress', that._feedback_listen_for_enter);
 						}} >
@@ -301,6 +319,7 @@ export default class IfLevelPlay extends React.Component<PropsType> {
 	_feedback_listen_for_enter(event: any): any {
 		if(event.key === 'Enter' || event.key === 'Escape' || event.key === ' ') {
 			this.props.onViewFeedback();
+			this.setState({ lastFeedbackDismissal: new Date() });
 			document.removeEventListener( 'keypress', this._feedback_listen_for_enter);
 		}
 		event.preventDefault(); // cancel any keypress.

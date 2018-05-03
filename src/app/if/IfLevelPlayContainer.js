@@ -10,7 +10,7 @@ import { ErrorBoundary, Message } from './../components/Misc';
 import { IfLevelSchema } from './../../shared/IfGame';
 
 import ForceLogin from './../components/ForceLogin';
-
+import Feedback from './../components/Feedback';
 
 import type { LevelType } from './IfTypes';
 
@@ -221,6 +221,7 @@ export default class IfLevelPlayContainer extends React.Component<PropsType, Sta
 		//<Breadcrumb.Item href='/'>Home</Breadcrumb.Item>-->
 		const crumbs = this.state.level ?
 			<Breadcrumb>
+				<Breadcrumb.Item href={'/ifgame/'}>Home</Breadcrumb.Item>
 				<Breadcrumb.Item href={'/ifgame/'+this.state.level.code}>List</Breadcrumb.Item>
 				<Breadcrumb.Item active>{ this.state.level.title }</Breadcrumb.Item>
 			</Breadcrumb>
@@ -235,16 +236,24 @@ export default class IfLevelPlayContainer extends React.Component<PropsType, Sta
 
 					<Message spinner={this.state.isLoading } message={this.state.message} style={this.state.messageStyle} />
 					<ErrorBoundary>
-					{ this.state.level ? <IfLevelPlay 
-							level={this.state.level} 
-							selected_page_index={this.state.selected_page_index }
-							onSubmit={this.onSubmit}
-							onChange={this.onChange}
-							show_feedback={this.state.show_feedback}
-							show_feedback_on={this.state.show_feedback_on}
-							onViewFeedback={this.onViewFeedback}
-							isLoading={this.state.isLoading}
-						/> : '' }
+					{ !this.state.level ? '' :
+						<div>
+							<IfLevelPlay 
+								level={this.state.level} 
+								selected_page_index={this.state.selected_page_index }
+								onSubmit={this.onSubmit}
+								onChange={this.onChange}
+								show_feedback={this.state.show_feedback}
+								show_feedback_on={this.state.show_feedback_on}
+								onViewFeedback={this.onViewFeedback}
+								isLoading={this.state.isLoading}
+							/>
+							<Feedback
+								data={this.state.level}
+								code={this.state.level.code}
+							/>
+						</div>
+					}
 					</ErrorBoundary>
 				</Col>
 			</Row>

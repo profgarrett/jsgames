@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 
 import IfLevelList from './IfLevelList';
 
-import { PageHeader, Row, Col, Well, Button } from 'react-bootstrap';
+import { Breadcrumb, PageHeader, Row, Col, Well, Button } from 'react-bootstrap';
 
 import { Message, Loading } from './../components/Misc';
 import { IfLevelSchema, IfLevels } from './../../shared/IfGame';
@@ -65,10 +65,14 @@ export default class IfLevelListContainer extends React.Component {
 			})
 			.then( response => response.json() )
 			.then( json => {
+
 				let newLevel = new IfLevelSchema(json);
+				this.context.router.history.push('/ifgame/level/'+newLevel._id+'/play');
+				/*
 				this.setState( prevState => ({ 
 					levels: [newLevel, ...prevState.levels]
 				}));
+				*/
 			}).catch( error => {
 				console.log(error);
 				this.setState({ message: error });
@@ -91,6 +95,14 @@ export default class IfLevelListContainer extends React.Component {
 		let button_level = IfLevels.filter( level => level.code === code )[0];
 		let button;
 
+		const crumbs = (
+			<Breadcrumb>
+				<Breadcrumb.Item href={'/ifgame/'}>Home</Breadcrumb.Item>
+				<Breadcrumb.Item active>List</Breadcrumb.Item>
+			</Breadcrumb>
+			);
+
+
 		if(this.state.isLoading === false
 			&& this.state.levels.filter( l=> !l.completed ).length === 0) {
 			button = (<Button 
@@ -106,6 +118,7 @@ export default class IfLevelListContainer extends React.Component {
 			<div>
 			<Row>
 				<Col xs={12}>
+					{ crumbs }
 					<ForceLogin />
 					<PageHeader>{ button_level.label }</PageHeader>
 					<Message message={this.state.message} style={this.state.message_style} />
@@ -158,4 +171,7 @@ export default class IfLevelListContainer extends React.Component {
 }
 IfLevelListContainer.propTypes = {
 	match: PropTypes.object.isRequired
+};
+IfLevelListContainer.contextTypes = {
+	router: PropTypes.object.isRequired
 };
