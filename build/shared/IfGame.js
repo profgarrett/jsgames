@@ -723,14 +723,18 @@ class IfLevelSchema extends Schema {
 			});
 
 		if(pages.length > 0) {
-			// Make sure that the last page is correctly null or not.
+			// Make sure that the last page is correctly null or not. If not, then truncate.
 			if(this.completed) {
 				// Last page check
 				if(pages[pages.length-1].correct === null)
 					throw new Error('IfGame.Shared.Level.get_score_as_array found completed last null');
 			} else {
-				if(pages[pages.length-1].correct !== null)
-					throw new Error('IfGame.Shared.Level.get_score_as_array found uncompleted last not null');
+				// Last page is not completed, pop off.
+				if(pages[pages.length-1].correct !== null) {
+					pages = pages.slice();
+					pages.pop(); 
+				}
+				//throw new Error('IfGame.Shared.Level.get_score_as_array found uncompleted last not null');
 			}
 
 			// Make sure that all completed pages are either true or false.

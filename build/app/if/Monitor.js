@@ -1,10 +1,10 @@
 //      
 import React from 'react';
-import { Panel, Popover, OverlayTrigger, Well } from 'react-bootstrap';
+//import { Panel, Popover, OverlayTrigger, Well } from 'react-bootstrap';
+import ReactTable from 'react-table';
+import 'react-table/react-table.css';
 
-//import { IfPageSchema } from './../../shared/IfGame';
-import { HtmlDiv, incorrect_glyphicon, correct_glyphicon, completed_glyphicon } from './../components/Misc';
-import { PrettyDate } from './../components/Misc';
+import { HtmlDiv, PrettyDate } from './../components/Misc';
 
 import ExcelTable from './ExcelTable';
 import Choice from './Choice';
@@ -26,22 +26,39 @@ class Person extends React.Component                  {
 
 		const levels = this.props.levels.map( 
 				(l           , i        )       => 
-					<PersonLevel level={l} key={i} />);
-
-		return (<div>
-				User: { person }
-				Levels: { levels }
-				Date: <PrettyDate date={this.props.levels[0].updated} />
-			</div>
-		);
+					<PersonLevel person={person} level={l} key={i} />);
+//				Date: <PrettyDate date={this.props.levels[0].updated} />
+		
+		return (<Table>
+			<thead><tr>
+				<th>Person</th><th>Date</th><th>Tutorial</th><th>Pages</th><th>Score</th>
+			</tr></thead>
+			<tbody>{ levels }</tbody>
+		</Table>);
 	}
 }
 
                              
+                
                  
   
 class PersonLevel extends React.Component                       {
+
+
 	render()       {
+		const level = this.props.level;
+
+ 		const row = (<tr>
+ 				<td>{ this.props.person }</td>
+ 				<td>{ level.code }</td>
+ 				<td>Created: { level.created.toString() }</td>
+ 				<td>{ level.pages.length }</td>
+ 				<td>{ level.get_score_correct() } of { level.get_score_attempted() }</td>
+ 			 </tr>);
+
+		return row;
+	}
+	render_actual_problem()       {
 
 		// Figure out which control to use for the page.
 		let problem;
@@ -103,16 +120,77 @@ class PersonLevel extends React.Component                       {
 export default class Monitor extends React.Component            {
 	constructor(props     ) {
 		super(props);
-		//(this: any).setHistory = this.setHistory.bind(this);
 	}
 
 	render()       {
 		if(this.props.levels.length < 1) 
 			return <div/>;
+
+		const columns = [{
+			id: 'username',
+			Header: 'Username', 
+			accessor: l => l.username,
+			width: 200
+		}, {
+			id: 'code',
+			Header: 'Code',
+			accessor: l => l.code,
+			width: 100
+		}, {
+			id: 'page',
+			Header: 'Page #',
+			accessor: l => l.page,
+			width: 100
+		}, {
+			id: 'created',
+			Header: 'Created',
+			accessor: l => l.created.toString()
+		}, {
+			id: 'value',
+			Header: 'value',
+			accessor: l => l.value
+		}];
+
+		const data = 
+			this.props.levels.reduce(
+				(accumLevels, level) => accumLevels.concat( 
+					level.pages.reduce(
+						(accumPages, page) => accumPages.concat(
+							page.history.map(
+								(history, history_i) => {
+										return {
+											username: level.username, 
+											code: level.code,
+											page: 0,
+											created: history.created.toString(),
+											value: history.client_f ? history.client_f : '?'+page.toString() 
+										}; 
+									}
+							)
+						)
+					,[])
+				),[]);
+
+		return (<div>
+				<ReactTable 
+					data={data} 
+
+					filterable={true}
+					columns={columns} 
+				/>
+			</div>
+		);
+
+	}
+
+	render_overall()       {
+		if(this.props.levels.length < 1) 
+			return <div/>;
 		
 		// Sort levels into an object of people.
+		/*
 		const people = this.props.levels.reduce( 
-			(accum        , l           )         => {
+			(accum: Object, l: LevelType): Object => {
 				if(typeof accum[l.username] === 'undefined') {
 					accum[l.username] = [];
 				}
@@ -126,62 +204,47 @@ export default class Monitor extends React.Component            {
 				p.push( <Person key={key} levels={people[key]} /> );
 			}
 		}
+		*/
+
+		const columns = [{
+			id: 'username',
+			Header: 'Username', 
+			accessor: l => l.username,
+			width: 200
+		}, {
+			id: 'code',
+			Header: 'Code',
+			accessor: l => l.code,
+			width: 100
+		}, {
+			id: 'pages',
+			Header: 'Page #',
+			accessor: l => l.pages.length,
+			width: 100
+		}, {
+			id: 'created',
+			Header: 'Created',
+			accessor: l => l.created.toString()
+		}, {
+			id: 'score',
+			Header: 'Score',
+			accessor: l => l.get_score_correct() + ' of ' + l.get_score_attempted()
+		}, {
+			id: 'completed',
+			Header: 'Done',
+			accessor: l => l.completed ? 'Y' : 'N'
+		}];
+
+		const data = this.props.levels;
 
 		return (<div>
-			{p}
+				<ReactTable 
+					data={data} 
+
+					filterable={true}
+					columns={columns} 
+				/>
 			</div>
 		);
 	}
 }
-
-
-
-
-const build_score = (pages                 )      => pages.map( (p          , i        )      => {
-	let g = null;
-	let title = '';
-	let html = '';
-
-	// Build the glyph to use for display.
-	if(!p.completed) {
-		throw new Error('Can not view score for uncompleted');
-	}
-
-	// Finished
-	if(p.correct_required) {
-		// Tutorial page.
-		title = 'Completed';
-		html = p.description + 
-			(p.toString().length > 0 ?
-				'<br/><div class="well well-sm">'+ p.toString()+'</div>' :
-				'');
-		g = completed_glyphicon();
-	} else {
-		// Graded page
-		if(p.correct) {
-			title = 'Correct answer';
-			html = p.description + '<br/><div style={background} class="well well-sm">'+p.toString()+'</div>';
-			g = correct_glyphicon();
-		} else {
-			title = 'Incorrect answer';
-			html = p.description + '<br/><div class="well well-sm">'+p.toString()+'</div>';
-			g = incorrect_glyphicon();
-		}
-	}
-	
-	const pop = (
-		<Popover title={title} id={'iflevelplayrenderscore_id_'+i}>
-			<HtmlDiv html={html} />
-		</Popover>
-	);
-
-	return (
-		<span key={'iflevelplayrenderscore'+i}>
-			<OverlayTrigger trigger={['hover','focus']} placement='top' overlay={pop}>
-				{g}
-			</OverlayTrigger>
-		</span>
-	);
-
-});
-

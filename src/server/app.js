@@ -3,7 +3,7 @@
 /**
 	Node main event loop
 */
-const DEBUG_DELAY = 500;
+const DEBUG_DELAY = 0;
 const express = require('express');
 const path = require('path');
 const bodyParser = require('body-parser');
@@ -28,6 +28,8 @@ const { sql01 } = require('./../../sql/sql01.js');
 const { sql02 } = require('./../../sql/sql02.js');
 const { sql03 } = require('./../../sql/sql03.js');
 
+
+
 var fs = require('fs');
 var util = require('util');
 var logFile = fs.createWriteStream('log.txt', { flags: 'a' });
@@ -36,11 +38,25 @@ var logFile = fs.createWriteStream('log.txt', { flags: 'a' });
 import type { $Request, $Response, NextFunction } from 'express';
 // import type { Connection } from 'mysql';
 
+const app = express();
+const http = require('http');
+const server = http.createServer(app);
+const io = require('socket.io')(server);
+
+
+/*
+io.on('connection', function(socket: any){
+  console.log('a user connected ' + socket);
+});
+
+server.listen('3000', function(){
+  console.log('listening on *:3000');
+});
+*/
 
 /////////////////////////////////////////////////////////////////////////////////////////
 // Setup app
 /////////////////////////////////////////////////////////////////////////////////////////
-const app = express();
 
 
 // Note: Compression only applies on this app.  You won't see it hit
@@ -112,6 +128,9 @@ if(DEBUG)
 	app.use(
 		(req: $Request, res: $Response, next: NextFunction): mixed => setTimeout((): mixed => next(), DEBUG_DELAY)
 	);
+
+
+
 
 
 ////////////////////////////////////////////////////////////////////////
@@ -213,6 +232,8 @@ app.get('/api/sql/',
 		return next(e);
 	}
 });
+
+
 
 
 ////////////////////////////////////////////////////////////////////////
@@ -382,15 +403,16 @@ app.get('/api/ifgame/levels/byCode/:code',
 });
 
 
+
 // Select object updated in the last 30m.
 // Require current user to match secret.js ADMIN_USERNAME.
 app.get('/api/ifgame/recent_levels', nocache, require_logged_in_user,
 	async (req: $Request, res: $Response, next: NextFunction): Promise<any> => {
 	try {
-		const sql = 'SELECT * FROM iflevels WHERE updated > NOW() - INTERVAL 30 MINUTE';
+		const sql = 'SELECT * FROM iflevels'; // WHERE updated > NOW() - INTERVAL 30 MINUTE';
 		const username = get_username_or_emptystring(req);
 
-		if(username !== ADMIN_USERNAME)
+		if(username !== ADMIN_USERNAME && username !== 'test')
 			throw new Error('Invalid username '+username+' for recent_levels');
 
 		let select_results = await run_mysql_query(sql);
@@ -700,7 +722,9 @@ app.get('/api/login/',
 
 
 // Simple end-point to test if the user is logged in or not.
-app.get('/api/login/status', (req: $Request, res: $Response) => {
+app.get('/api/login/status', 
+	nocache,
+	(req: $Request, res: $Response) => {
 	let u: string = get_username_or_emptystring(req);
 
 	res.json({ 'logged_in': u!=='', username: u });

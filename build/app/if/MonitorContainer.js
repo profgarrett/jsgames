@@ -32,15 +32,23 @@ export default class MonitorContainer extends React.Component                   
 			isLoading: true,
 			levels: [],
 		};
-		(this     ).refresh = this.refresh.bind(this);
+		(this     ).refreshData = this.refreshData.bind(this);
+		(this     ).handleSubmit = this.handleSubmit.bind(this);
 	}
 
 	componentDidMount() {
 		// Load data.
-		this.refresh();
+		this.refreshData();
 	}
 
-	refresh() {
+
+	handleSubmit(e                                    ) {
+		if(e) e.preventDefault();
+		this.refreshData();
+	}
+
+	refreshData() {
+
 		fetch('/api/ifgame/recent_levels', {
 				method: 'get',
 				credentials: 'include',
@@ -60,6 +68,7 @@ export default class MonitorContainer extends React.Component                   
 				});
 			})
 			.catch( error => {
+				debugger;
 				this.setState({ 
 					levels: [],
 					message: 'Error: ' + error,
@@ -81,11 +90,11 @@ export default class MonitorContainer extends React.Component                   
 			</Breadcrumb>
 			);
 
-		const reload = (
-			<Button bsStyle='primary' 
-					href={ that.refresh() }>
-					Refresh page
-			</Button>
+		const filter = (
+			<form name='c' onSubmit={this.handleSubmit}>
+
+				<Button bsStyle='primary'>Refresh filter</Button>
+			</form>
 			);
 
 		return (
@@ -97,7 +106,7 @@ export default class MonitorContainer extends React.Component                   
 
 					<Message message={this.state.message} style={this.state.messageStyle} />
 					<Loading loading={this.state.isLoading } />
-					<div style={{ textAlign: 'center' }}>{ reload }</div>
+					{ filter }
 					<Monitor levels={this.state.levels} />
 				</Col>
 			</Row>

@@ -32,15 +32,23 @@ export default class MonitorContainer extends React.Component<MonitorPropsType, 
 			isLoading: true,
 			levels: [],
 		};
-		(this: any).refresh = this.refresh.bind(this);
+		(this: any).refreshData = this.refreshData.bind(this);
+		(this: any).handleSubmit = this.handleSubmit.bind(this);
 	}
 
 	componentDidMount() {
 		// Load data.
-		this.refresh();
+		this.refreshData();
 	}
 
-	refresh() {
+
+	handleSubmit(e: ?SyntheticEvent<HTMLButtonElement>) {
+		if(e) e.preventDefault();
+		this.refreshData();
+	}
+
+	refreshData() {
+
 		fetch('/api/ifgame/recent_levels', {
 				method: 'get',
 				credentials: 'include',
@@ -60,6 +68,7 @@ export default class MonitorContainer extends React.Component<MonitorPropsType, 
 				});
 			})
 			.catch( error => {
+				debugger;
 				this.setState({ 
 					levels: [],
 					message: 'Error: ' + error,
@@ -81,11 +90,11 @@ export default class MonitorContainer extends React.Component<MonitorPropsType, 
 			</Breadcrumb>
 			);
 
-		const reload = (
-			<Button bsStyle='primary' 
-					href={ that.refresh() }>
-					Refresh page
-			</Button>
+		const filter = (
+			<form name='c' onSubmit={this.handleSubmit}>
+
+				<Button bsStyle='primary'>Refresh filter</Button>
+			</form>
 			);
 
 		return (
@@ -97,7 +106,7 @@ export default class MonitorContainer extends React.Component<MonitorPropsType, 
 
 					<Message message={this.state.message} style={this.state.messageStyle} />
 					<Loading loading={this.state.isLoading } />
-					<div style={{ textAlign: 'center' }}>{ reload }</div>
+					{ filter }
 					<Monitor levels={this.state.levels} />
 				</Col>
 			</Row>

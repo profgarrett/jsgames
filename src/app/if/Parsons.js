@@ -179,12 +179,12 @@ export default class Parsons extends React.Component {
 
 		let unused_items = toObjs(get_unused_items(page.potential_items, page.client_items));
 		let used_items = toObjs(page.client_items ? page.client_items : []);
-
+		let client_items = null === page.client_items ? [] : page.client_items;
 
 		if(!this.props.editable) {
 			return (
 				<ListGroup>
-					{ page.client_items.map( (item,i) => <ListGroupItem key={i}><HtmlSpan html={""+item}/></ListGroupItem> ) }
+					{ client_items.map( (item,i) => <ListGroupItem key={i}><HtmlSpan html={""+item}/></ListGroupItem> ) }
 				</ListGroup>
 			);
 		} else {
