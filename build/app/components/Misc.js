@@ -67,11 +67,11 @@ export class SmallOkGlyphicon extends React.Component {
 // This is a standard Glyph for showing success.
 export class CompletedGlyphicon extends React.Component {
 	render() {
-		return glyph('Completed', 'check');
+		return glyph('Completed', 'check', 'black');
 	}
 }
-export function completed_glyphicon() {
-	return glyph('Completed', 'check');
+export function completed_glyphicon( color='black' ) {
+	return glyph('Completed', 'check', color );
 }
 
 
@@ -156,12 +156,13 @@ export class HtmlDiv extends React.Component {
 
 	render() {
 		// Use dangerouslySetInnerHtml so that the description can use html characters.
-		return <div className={this.props.className} dangerouslySetInnerHTML={ { '__html': this.props.html } }></div>;
+		return <div className={this.props.className} style={this.props.style} dangerouslySetInnerHTML={ { '__html': this.props.html } }></div>;
 	}
 }
 HtmlDiv.propTypes = {
 	html: PropTypes.string.isRequired,
-	className: PropTypes.string
+	className: PropTypes.string,
+	style: PropTypes.object
 };
 
 

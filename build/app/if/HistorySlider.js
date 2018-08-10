@@ -24,8 +24,8 @@ export default class HistorySlider extends React.Component                      
 
 		if(page.history.length === 0) throw new Error('HistorySlider needs history.length > 0');
 
-		const first = page.history[0].created.getTime();
-		const last = page.history[page.history.length-1].created.getTime();
+		const first = page.history[0].dt.getTime();
+		const last = page.history[page.history.length-1].dt.getTime();
 
 		// Convert history to an obj keyed by index.
 		let i = 0;

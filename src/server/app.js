@@ -231,9 +231,10 @@ app.get('/api/sql/',
 		if(old_version < 4 ) {
 			await update_version( sql04 );
 		}
-		res.json({ 'old_version': old_version, 'new_version': 3 });
-	} catch(e ){
+		res.json({ 'old_version': old_version, 'new_version': 4 });
+	} catch(e){
 		log_error(e);
+		res.json(e);
 		return next(e);
 	}
 });
@@ -416,7 +417,7 @@ app.get('/api/ifgame/levels/byCode/:code',
 app.get('/api/ifgame/recent_levels', nocache, require_logged_in_user,
 	async (req: $Request, res: $Response, next: NextFunction): Promise<any> => {
 	try {
-		const sql = 'SELECT * FROM iflevels WHERE code="math2" and not Username = "garrettn"'; // WHERE updated > NOW() - INTERVAL 30 MINUTE';
+		const sql = 'SELECT * FROM iflevels WHERE updated > NOW() - INTERVAL 60 MINUTE';
 		const username = get_username_or_emptystring(req);
 
 		if(username !== ADMIN_USERNAME && username !== 'test')

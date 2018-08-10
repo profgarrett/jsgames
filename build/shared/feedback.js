@@ -42,8 +42,10 @@ const values = (page                 , values                        )          
 
 	if(page.client_f === null) return null;
 
+	const client_f = page.client_f.toLowerCase();
+
 	for(let i=0; i<values.length; i++) {
-		if(page.client_f.indexOf(''+values[i]) === -1) {
+		if(client_f.indexOf((''+values[i]).toLowerCase()) === -1) {
 			missing.push(values[i]);
 		}
 	}
@@ -51,9 +53,9 @@ const values = (page                 , values                        )          
 	if (missing.length === 0) {
 		return null;
 	} else if (missing.length === 1) {
-		return 'You are missing the ' + missing[0] + ' number.';
+		return 'You are missing the ' + missing[0] + ' value.';
 	} else {
-		return 'You are missing these numbers: ' + missing.join(', ');
+		return 'You are missing these values: ' + missing.join(', ');
 	}
 };
 
@@ -158,6 +160,20 @@ const get_feedback = (that          )                 => {
 	// Do not give feedback on un-submitted items.
 	if(!that.client_has_answered) return [];
 
+
+	// Always check to make sure that there is a = sign.
+	response = has['symbols'](that, ['=']);
+	if(response !== null) responses.push(response);
+
+	// Always check to make sure that there are no ' single quotes.
+	response = has['no_symbols'](that, ['\'']);
+	if(response !== null) responses.push(response);
+
+
+	// If no custom rules are defined, return any from '='.
+	if(that.solution_feedback.length === 0) return responses;
+
+
 	// Loop through feedbacks, returning any that return a non-null response.
 	for(let i = 0; i < that.solution_feedback.length; i++) {
 		// Make sure that it is a valid has type.
@@ -168,6 +184,9 @@ const get_feedback = (that          )                 => {
 		response = has[that.solution_feedback[i].has](that, that.solution_feedback[i].args);
 		if(response !== null) responses.push(response);
 	}
+
+	if(responses === null) throw new Error('Null responses in get_feedback');
+
 
 	return responses;
 };

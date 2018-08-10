@@ -294,8 +294,14 @@ const IfLevelModelFactory = {
 		const level = this.levels[code].create();
 
 		level.username = username;
+		
 		// Turn on ability to skip for IF levels & for half of all users
-		if(level.code.substr(0,2) == 'if' && (level.seed > 0.5  || level.username === 'garrettn')) {
+		// Turn username into char codes, add, and mod2 to split into 50/50% groups.
+		// Add escape value for 'garrettn' user to make it easier to test curriculum.
+		if(	level.code.substr(0,2) == 'if' && 
+			(level.username.split('').reduce( (i, s) => s.charCodeAt(0) + i, 1 ) % 2 === 0
+				|| level.username === 'garrettn')
+			) {
 			level.allow_skipping_tutorial = true;
 		} else {
 			level.allow_skipping_tutorial = false;

@@ -37,7 +37,8 @@ class IfLevelScorePage extends React.Component                                 {
 	// Update this.state to show different versions of the current page.
 	setHistory(history_i        ) {
 		const history = this.props.page.history[history_i];
-		const json = { ...this.props.page.toJson(), ...history };
+		const json = this.props.page.toJson();
+		json.client_f = history.client_f;
 
 		// History items have created, which we don't want in a page.
 		delete json['created'];
@@ -127,13 +128,20 @@ export default class IfLevelScore extends React.Component                       
 	render()       {
 		const level = this.props.level;
 		if(!level) return <div></div>;
+		const pages = level.pages;
 
-		const title_completed = 'You completed ' + 
-				(level.pages.length - level.get_score_attempted())
-				+ ' tutorial pages';
-		const quiz_completed = level.get_score_attempted() > 0 ? 
-				', and earned ' + level.get_score_correct() + 
-				' of ' + level.get_score_attempted() + ' on the quiz pages' : '';
+		const tutorial_completed = pages.filter( p => p.code === 'tutorial' && p.correct ).length;
+		const tutorial_incomplete = pages.filter( p => p.code === 'tutorial' && !p.correct ).length;
+		const test_correct = pages.filter( p => p.code === 'test' && p.correct ).length;
+		const test_incorrect = pages.filter( p => p.code === 'test' && !p.correct ).length;
+
+		const title_completed = 'You completed '+ tutorial_completed + 
+				(tutorial_incomplete > 0 ? ' of ' + (tutorial_incomplete+tutorial_completed) : '') +
+				' tutorial pages';
+
+		const quiz_completed = test_incorrect+test_correct > 0 ? 
+				', and earned ' + test_correct +
+				' of ' + (test_correct+test_incorrect) + ' on the quiz pages' : '';
 
 		// Use formulas with i to generate unique keys upon completion.
 		const results = build_score(level.pages);
@@ -153,38 +161,43 @@ export default class IfLevelScore extends React.Component                       
 }
 
 
+// Build the score list at the bottom of the page.
 const build_score = (pages                 )      => pages.map( (p          , i        )      => {
 	let g = null;
 	let title = '';
 	let html = '';
 
-	// Build the glyph to use for display.
-	if(!p.completed) {
-		throw new Error('Can not view score for uncompleted');
-	}
 
-	// Finished
-	if(p.correct_required) {
-		// Tutorial page.
+	if(p.code === 'tutorial') {
+
 		title = 'Completed';
 		html = p.description + 
-			(p.toString().length > 0 ?
-				'<br/><div class="well well-sm">'+ p.toString()+'</div>' :
-				'');
-		g = completed_glyphicon();
-	} else {
+			(p.toString().length < 1 ? '' : '<br/><div class="well well-sm">'+ p.toString()+'</div>');
+
+		if(p.correct) {
+			g = completed_glyphicon('black');
+		} else {
+			g = completed_glyphicon('gray');
+		}
+	} else if (p.code === 'test') {
+
 		// Graded page
 		if(p.correct) {
 			title = 'Correct answer';
-			html = p.description + '<br/><div style={background} class="well well-sm">'+p.toString()+'</div>';
+			html = p.description + '<br/><div class="well well-sm">'+p.toString()+'</div>'; // style={background} 
 			g = correct_glyphicon();
 		} else {
 			title = 'Incorrect answer';
 			html = p.description + '<br/><div class="well well-sm">'+p.toString()+'</div>';
 			g = incorrect_glyphicon();
 		}
+	} else {
+		console.log(p);
+		throw new Error('what?');
 	}
-	
+
+
+
 	const pop = (
 		<Popover title={title} id={'iflevelplayrenderscore_id_'+i}>
 			<HtmlDiv html={html} />
@@ -198,6 +211,5 @@ const build_score = (pages                 )      => pages.map( (p          , i 
 			</OverlayTrigger>
 		</span>
 	);
-
 });
 

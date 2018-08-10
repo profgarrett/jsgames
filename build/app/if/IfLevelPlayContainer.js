@@ -45,8 +45,8 @@ export default class IfLevelPlayContainer extends React.Component               
 			show_feedback_on: 0,
 			_id: this.props.match.params._id
 		};
-		(this     ).onSubmit = this.onSubmit.bind(this);
 		(this     ).onChange = this.onChange.bind(this);
+		(this     ).onNext = this.onNext.bind(this);
 		(this     ).onViewFeedback = this.onViewFeedback.bind(this);
 	}
 
@@ -67,15 +67,15 @@ export default class IfLevelPlayContainer extends React.Component               
 		if(this.state.isLoading) return;
 
 		const i = this.state.selected_page_index;
-		let new_history_item = { created: new Date(), ...json };
-		let history = [...this.state.level.pages[i].history, new_history_item];
+		//let new_history_item = { created: new Date(), ...json };
+		//let history = [...this.state.level.pages[i].history, new_history_item];
 
 		// Create a fresh page.
 		let page_json = { ...this.state.level.pages[i].toJson()};
 		let page = this.state.level.get_new_page(page_json);
 
 		// Update fresh page with new values.
-		page.updateUserFields({ ...page_json, ...json, history  });
+		page.updateUserFields({ ...page_json, ...json });
 		
 		let level = new IfLevelSchema(this.state.level.toJson());
 		level.pages[i] = page;
@@ -83,9 +83,11 @@ export default class IfLevelPlayContainer extends React.Component               
 		this.setState({ level });
 	}
 
-	// Update the current page and send to the server for an update.
-	onSubmit() {
 
+	// Update the current page and send to the server for an update.
+	// Next is true when we want to submit and get the next page. It's false when 
+	// we just want to test the current page, and if wrong, then not continue.
+	onNext( validate_only          ) {
 		// Don't accept any input if we are currently loading
 		if(this.state.isLoading) return;
 
@@ -103,26 +105,13 @@ export default class IfLevelPlayContainer extends React.Component               
 			current_page = level.pages[current_page_i];
 	
 
-
-		// NDG 4/23/18.  DISABLED: FORCE SERVER VALIDATION FOR VALIDATION RULES.
-		//
-		// Validate.  Note that some pages will allow local validation, but others require posting
-		// 	to the server.  This check is prior to submission to the server.
-		// 	Note that solution_feedback rules require posting to the server. So, it's possible to 
-		//	pass local validation, but fail server valiation.
-		/*
-		if (current_page.correct === false) {
-			// Don't continue if we know that page.correct is false (null is ok)
-			this.setState({
-				message: 'You must submit the correct answer before continuing.',
-				messageStyle: 'warning'
-			});
-			return;
+		// If the last page is a text-only one, update last page to show that it's been viewed.
+		if(current_page.type === 'IfPageTextSchema') {
+			current_page.client_read = true;
 		}
-		*/
 
 		// Make sure that the user has submitted something
-		if(!current_page.client_has_answered()) {
+		if(!current_page.client_has_answered() && current_page.correct_required) {
 			this.setState({
 				message: 'You must provide an answer before continuing.',
 				messageStyle: 'warning'
@@ -139,15 +128,12 @@ export default class IfLevelPlayContainer extends React.Component               
 			isLoading: true
 		});
 
-		// Don't set state if we were looking at something that doesn't require a review.
-		const show_feedback = (
-					current_page.type !== 'IfPageTextSchema' && 
-					current_page.type !== 'IfPageChoiceSchema'
-				);
-
+		// User is allowed to just check the answer.  If they do, set URL
+		// to pass this behavior to the server.
+		const url = '/api/ifgame/level/'+id+'?validate_only=' + (validate_only ? '1': '0'); 
 
 		// Fire AJAX.
-		fetch('/api/ifgame/level/'+ id, {
+		fetch(url, {
 				method: 'post',
 				credentials: 'include',
 				headers: {
@@ -162,19 +148,59 @@ export default class IfLevelPlayContainer extends React.Component               
 				return new IfLevelSchema(json);
 			})
 			.then( (ifLevel           ) => {
-				if(ifLevel.completed) {
+				const page = ifLevel.pages[current_page_i];
+
+				// Test to see if we're at the end of the level. If so, go to the reviw screen.
+				if(ifLevel.completed) { 
 					this.context.router.history.push('/ifgame/level/'+ifLevel._id+'/score');
-				} else {
-					
-					this.setState({ 
-						selected_page_index: ifLevel.pages.length-1,
+					return;
+				} 
+
+				// Did we try to validate? If so, show feedback no matter what.
+				if(validate_only) {
+					// Show feedback.
+					this.setState({
+						isLoading: false,
 						level: ifLevel,
-						show_feedback: show_feedback,
-						message: ifLevel.pages[ifLevel.pages.length-1].correct === false ? 'You must submit the correct answer before continuing' : '',
-						messageStyle: ifLevel.pages[ifLevel.pages.length-1].correct === false ? 'warning' : '',
-						isLoading: false
+						show_feedback: true
 					});
+					return;
+				} 
+
+				// User clicked on 'next'.
+				// Go back to the top of the page.
+				window.scrollTo(0,0);
+
+
+				// Does the submitted page *not* require feedback to be shown?
+				// If not, set index to the latest page.
+				if(!page.show_feedback_on) {
+					this.setState({
+						isLoading: false,
+						level: ifLevel,
+						selected_page_index: ifLevel.pages.length-1,
+					});
+					return;
 				}
+
+				// If !correct_required, then don't show feedback. Only show if user hit feedback.
+				if(!page.correct_required && page.code === 'tutorial' ) {
+					this.setState({
+						isLoading: false,
+						level: ifLevel,
+						selected_page_index: ifLevel.pages.length-1,
+					});
+					return;
+				}
+
+				// Show feedback
+				this.setState({ 
+					isLoading: false,
+					level: ifLevel,
+					selected_page_index: ifLevel.pages.length-1,
+					show_feedback: true
+				});
+				
 			})
 			.catch( (error     ) => {
 				this.setState({ 
@@ -241,8 +267,9 @@ export default class IfLevelPlayContainer extends React.Component               
 							<IfLevelPlay 
 								level={this.state.level} 
 								selected_page_index={this.state.selected_page_index }
-								onSubmit={this.onSubmit}
-								onChange={this.onChange}
+								onNext={ ()=>this.onNext(false) }
+								onValidate={ ()=>this.onNext(true) }
+								onChange={ this.onChange }
 								show_feedback={this.state.show_feedback}
 								show_feedback_on={this.state.show_feedback_on}
 								onViewFeedback={this.onViewFeedback}
