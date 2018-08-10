@@ -27,6 +27,7 @@ const mysql = require('promise-mysql');
 const { sql01 } = require('./../../sql/sql01.js');
 const { sql02 } = require('./../../sql/sql02.js');
 const { sql03 } = require('./../../sql/sql03.js');
+const { sql04 } = require('./../../sql/sql04.js');
 
 
 
@@ -83,12 +84,13 @@ if(!DEBUG && typeof BUGSNAG_API !== undefined && BUGSNAG_API.length > 0) {
 	bugsnag.register(BUGSNAG_API);
 	app.use(bugsnag.requestHandler);
 	app.use(bugsnag.errorHandler);
+	console.log('loading bugsnag');
 }
 
 
 // Set parsing for application/x-www-form-urlencoded
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json({ limit: '10mb'}));
+app.use(bodyParser.urlencoded({ limit: '10mb', extended: false }));
 app.use(cookieParser());
 
 
@@ -226,6 +228,9 @@ app.get('/api/sql/',
 		if(old_version < 3 ) {
 			await update_version( sql03 );
 		}
+		if(old_version < 4 ) {
+			await update_version( sql04 );
+		}
 		res.json({ 'old_version': old_version, 'new_version': 3 });
 	} catch(e ){
 		log_error(e);
@@ -347,12 +352,12 @@ app.post('/api/ifgame/new_level_by_code/:code',
 	async (req: $Request, res: $Response, next: NextFunction): Promise<any> => {
 	try {
 		const code = req.params.code;
-		const level = IfLevelModelFactory.create(code);
+		const username = get_username_or_emptystring(req);
+		const level = IfLevelModelFactory.create(code, username);
 		const now = from_utc_to_myql(to_utc(new Date()));
 
-		const username = get_username_or_emptystring(req);
 		const insert_sql = `INSERT INTO iflevels (type, username, code, title, description, completed, 
-			pages, history, created, updated, seed) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+			pages, history, created, updated, seed, allow_skipping_tutorial) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
 		level.username = username;
 
 					
@@ -363,7 +368,9 @@ app.post('/api/ifgame/new_level_by_code/:code',
 				JSON.stringify(level.pages.map( (p: Object ): Object => p.toJson() )), 
 				JSON.stringify(level.history), 
 				now, now,
-				level.seed ];
+				level.seed,
+				level.allow_skipping_tutorial
+				];
 
 		let insert_results = await run_mysql_query(insert_sql, values);
 
@@ -409,7 +416,7 @@ app.get('/api/ifgame/levels/byCode/:code',
 app.get('/api/ifgame/recent_levels', nocache, require_logged_in_user,
 	async (req: $Request, res: $Response, next: NextFunction): Promise<any> => {
 	try {
-		const sql = 'SELECT * FROM iflevels'; // WHERE updated > NOW() - INTERVAL 30 MINUTE';
+		const sql = 'SELECT * FROM iflevels WHERE code="math2" and not Username = "garrettn"'; // WHERE updated > NOW() - INTERVAL 30 MINUTE';
 		const username = get_username_or_emptystring(req);
 
 		if(username !== ADMIN_USERNAME && username !== 'test')
@@ -485,6 +492,7 @@ app.post('/api/ifgame/level/:id',
 	nocache, require_logged_in_user,
 	async (req: $Request, res: $Response, next: NextFunction): Promise<any> => {
 	try {
+		const validate_only = req.query.validate_only === '1'; // do we just check the current page?
 		const username = get_username_or_emptystring(req);
 		const _id = req.params.id;
 		const sql_select = 'SELECT * FROM iflevels WHERE _id = ? AND username = ?';
@@ -503,9 +511,20 @@ app.post('/api/ifgame/level/:id',
 		let iflevel = new IfLevelModel(select_results[0]); // initialize from sql
 		iflevel.updateUserFields(req.body); // update client_f and history
 
-		IfLevelModelFactory.addPageOrMarkAsComplete(iflevel); 
+		// Make sure that there is feedback.
+		iflevel.pages.filter( p => p.client_feedback === null).filter( p=> p.type === 'IfPageFormulaSchema').map( p => {
+			throw new Error('Client feedback shoudl not be null');
+		});
 
-		// Note: Use pages.toJson() to make sure that type is included.
+
+
+		// If we're just supposed to validate, don't add a new page.
+		if(!validate_only) {
+			// Update and add new page if needed.
+			IfLevelModelFactory.addPageOrMarkAsComplete(iflevel); 
+		}
+
+		// Note: Use pages.toJson() to make sure that they properly convert to json.
 		let values = [iflevel.completed ? 1 : 0, 
 					JSON.stringify(iflevel.pages.map( (p: Object ): Object => p.toJson() )), 
 					JSON.stringify(iflevel.history), 
@@ -517,6 +536,7 @@ app.post('/api/ifgame/level/:id',
 
 		// Ensure exactly 1 item was updated.
 		if(update_results.changedRows !== 1) return res.sendStatus(500);
+
 
 		res.json(return_level_prepared_for_transmit(iflevel.toJson()));
 	} catch (e) {
@@ -552,7 +572,6 @@ app.post('/api/feedback/',
 		const values = [ username, message, created, data, code ];
 
 		let insert_results = await run_mysql_query(insert_sql, values);
-		console.log(insert_results);
 
 		res.json({ success: true });
 	} catch (e) {
@@ -642,10 +661,6 @@ app.post('/api/login_clear_test_user/',
 
 // Log the user in.
 async function login_and_maybe_create_user(params: Object): any {
-	console.log(params); //////
-
-
-
 	let hashed_password = bcrypt.hashSync(params.password, 8);
 	let user = { username: params.username, hashed_password: hashed_password };
 	const select_sql = 'SELECT * FROM users WHERE username = ?';
@@ -740,7 +755,6 @@ app.post('/api/login/',
 	nocache, 
 	async (req: $Request, res: $Response, next: NextFunction): Promise<any> => {
 	try {
-		console.log(req.body);
 		const user = await login_and_maybe_create_user({
 				token: req.body.token,
 				password: req.body.password,

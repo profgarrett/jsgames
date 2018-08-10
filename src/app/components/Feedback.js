@@ -72,8 +72,8 @@ export default class Login extends React.Component<PropsType, StateType> {
 			position: 'fixed',
 			backgroundColor: '#f5f5f5',
 			border: 'solid 1px #ddd',
-			top: 100,
-			padding: 10
+			top: 0,
+			padding: 15
 		};
 
 		const expandedStyle = {
@@ -83,13 +83,15 @@ export default class Login extends React.Component<PropsType, StateType> {
 
 		const contractedStyle = {
 			...commonStyle,
+			/*
 			'WebkitTransform': 'rotate(-90deg)',
 			'MozTransform': 'rotate(-90deg)',
 			'msTransform': 'rotate(-90deg)',
 			'OTransform': 'rotate(-90deg)',
 			transform: 'rotate(-90deg)',
+			*/
 			margin: 0,
-			right: -22,
+			right: 0,
 			cursor: 'pointer'
 		};
 

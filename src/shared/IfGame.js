@@ -15,14 +15,17 @@ const IfLevels = [
 	{ code: 'tutorial', label: 'Website Introduction', description: 'Learn how to complete tutorials.' },
 	{ code: 'math1', label: 'Math 1', description: 'Create basic arithmetic formulas.' },
 	{ code: 'math2', label: 'Math 2', description: 'Create advanced arithmetic formulas.' },
-//	{ code: 'math3', label: 'Math 3', description: 'Solve complicated problems with arithmetic.' }
-
 	{ code: 'dates', label: 'Date Functions', description: 'Learn about date functions.' },
-
 	{ code: 'summary', label: 'Summary function', description: 'Learn how to use summary functions.' },
 	{ code: 'text', label: 'Text functions', description: 'Learn a number of useful text functions' },
-	{ code: 'if1', label: 'IF Conditions', description: 'Learn about boolean comparisons' },
-	{ code: 'if2', label: 'IF Function', description: 'Learn AND, OR, and NOT' }
+	{ code: 'if1', label: 'IF1: Logical number comparisons', description: 'Compare numbers' },
+	{ code: 'if2', label: 'IF2: Logical text comparisons', description: 'Compare words' },
+	{ code: 'if2', label: 'IF2: IF function', description: 'Create simple formulas with IF' },
+	{ code: 'if3', label: 'IF3: the IF function', description: 'Create simple formulas with IF' },
+	{ code: 'if4', label: 'IF4: Logical functions', description: 'Learn about AND, OR, & NOT' },
+	{ code: 'if5', label: 'IF5: Logical functions and IF', description: 'Use AND, OR, & NOT inside of IF' },
+	{ code: 'if6', label: 'IF6: Booleans', description: 'Figure out TRUE and FALSE' },
+	{ code: 'if7', label: 'IF7: IF and Math', description: 'Embed math inside of IF' }
 
 ];
 
@@ -99,7 +102,12 @@ function common_schema(): Object {
 
 		// After a page is completed, set TRUE so that no more updates are allowed.
 		// This is done by code in server/ifGame, as the client doesn't know what the conditions are.
-		completed: { type: 'Boolean', initialize: (b) => isDef(b) ? bool(b) : false }
+		completed: { type: 'Boolean', initialize: (b) => isDef(b) ? bool(b) : false },
+
+		// Should we show feedback on this item after it is chosen?
+		// Useful to differentiate between survey questions and those we want the user to know the right answer.
+		show_feedback_on: { type: 'Boolean', initialize: (b) => isDef(b) ? bool(b) : true }
+
 	};
 }
 
@@ -169,6 +177,7 @@ class IfPageTextSchema extends Schema {
 
 		if(!this.client_read) return; // no client submission.
 
+		this.client_feedback = [];
 		this.correct = true;
 	}
 
@@ -248,7 +257,7 @@ class IfPageChoiceSchema extends Schema {
 		if(this.completed) return; // do not update completed items.
 
 		// Update feedback.
-		this.client_feedback = get_feedback(this);
+		//this.client_feedback = get_feedback(this);
 
 		if(this.client === null) return; // no client submission.
 
@@ -310,7 +319,7 @@ class IfPageParsonsSchema extends Schema {
 
 	// Has the user provided input?
 	client_has_answered(): boolean {
-		return this.client_items !== null && this.client_items.length > 1;
+		return this.client_items !== null && this.client_items.length > 0;
 	}
 
 	/*
@@ -353,9 +362,6 @@ class IfPageParsonsSchema extends Schema {
 			return;
 		}
 
-		// Update feedback, we need this to see if the answer is correct.
-		this.client_feedback = get_feedback(this);
-
 		// Check to see if we can provide a solution.
 		// Solutions are not always available (ie, if we're on the client)
 		if(this.solution_items.length < 1) return;
@@ -367,6 +373,8 @@ class IfPageParsonsSchema extends Schema {
 		for(let i=0; i<this.solution_items.length && this.correct; i++) {
 			this.correct = (this.client_items[i] == this.solution_items[i]);
 		}
+
+		this.client_feedback = [];
 	}
 
 	// Return a nicely formatted view of the client's input. 
@@ -390,6 +398,7 @@ class IfPageFormulaSchema extends Schema {
 
 	constructor(json: Object) {
 		super(json); // set passed fields.
+
 		this.updateSolutionTestResults();
 		this.updateClientTestResults();
 		this.updateCorrect();
@@ -427,7 +436,7 @@ class IfPageFormulaSchema extends Schema {
 
 	// Has the user provided input?
 	client_has_answered(): boolean {
-		return this.client_f !== null && this.client_f.length > 1;
+		return this.client_f !== null && this.client_f.length > 0;
 	}
 
 
@@ -443,14 +452,31 @@ class IfPageFormulaSchema extends Schema {
 		if(this.completed && this.client_f !== json.client_f) throw new Error('Invalid attempt to update completed client_f');
 		if(this.completed) return;
 
+		const old_client_f = this.client_f;
 		this.client_f = json.client_f;
-		this.history = json.history;
-		if(!(json.history instanceof Array)) throw new Error('Invalid history type '+typeof history);
-		
+		this.history = Array.from(json.history);
+
+		// If the old and new solutions don't match, the null out the correct variable and the client feedback.
+		// We do this as it no longer pertains to the solution.
+		if(old_client_f !== json.client_f) {
+			this.correct = null;
+			this.client_feedback = null;
+		}
+
 		// Update level parsing as needed.
 		this.updateSolutionTestResults();
 		this.updateClientTestResults();
 		this.updateCorrect();
+
+		// Update history.
+		this.history.push({
+				dt: new Date(),
+				code: 'client_update',
+				client_f: json.client_f, 
+				client_feedback: this.client_feedback,
+				correct: this.correct,
+				tests: this.tests
+		});
 	}
 
 
@@ -480,28 +506,32 @@ class IfPageFormulaSchema extends Schema {
 		// Happens when the server provides us a json with .completed set.
 		if(this.completed) return;
 
-		// Check to see if we can provide a solution.
-		// Solutions are not always available, in which case is correct set to null.
-		if(this.solution_test_results.length !== this.tests.length || 
-				this.client_f === null ||
-				this.client_f.length < 1) {
+		// Create custom feedback.
+		// See if we are on the client, in which case solution_feedback is not provided.
+		if(typeof this.solution_feedback !== 'undefined' &&
+				this.solution_feedback !== null) {
+
+			this.client_feedback = get_feedback(this);
+		} 
+
+		// Check to see if we have any input from the user.
+		if(this.client_f === null || this.client_f.length < 1) {
 			this.correct = null;
+			return;
+		}
+
+		// If we don't have a solution, then (i.e., on the client) then just keep the old
+		// correct variable.  Don't over-write it, as we may be on the client and
+		// are reading out the result of the server's code.
+		if(typeof this.solution_f === 'undefined' || this. solution_f === null) {
 			return;
 		}
 
 		// Start testing with the assumption of correctness.
 		this.correct = true;
 
-		// Check to see if there is any feedback.  If so, then return incorrect.
-
-		// Update feedback IF we have the solution rules defined and at least one rule.
-		if(typeof this.solution_feedback !== 'undefined' &&
-				this.solution_feedback !== null && 
-				this.solution_feedback.length > 0) {
-			this.client_feedback = get_feedback(this);
-		}
-
 		// Feedback may be null if we're on the client, not server.
+		// But, if it's not null, and longer than zero, then this is not correct.
 		if(typeof this.client_feedback !== 'undefined' && this.client_feedback !== null ) {
 			this.correct = (this.client_feedback.length === 0);
 			if(!this.correct) return;
@@ -526,6 +556,7 @@ class IfPageFormulaSchema extends Schema {
 
 		// Check to make sure that there are no errors. If any errors, fail.
 		this.correct = (0 === this.client_test_results.filter( t => t.error !== null ).length);
+
 		if(!this.correct) return;
 
 
@@ -537,12 +568,8 @@ class IfPageFormulaSchema extends Schema {
 	__clean_parse_formula( dirty_formula: string ): string {
 		let d = /\d/;
 		let formula = dirty_formula.trim(); 
-		//let D = new RegExp('\D');
 
-		// Issue 1: Change true=>TRUE, and false=>FALSE.
-		formula = formula.replace( /true/ig, 'TRUE').replace( /false/ig, 'FALSE');
-
-		// Issue 2: parser doesn't work with .1, so change to 0.1
+		// Issue 1: Parser doesn't work with .1, so change to 0.1
 		
 		// Go through the formula, testing to see if we have a non-digit . digit pattern.
 		// JS doesn't have look behinds, so we can't use a regex like a normal human.
@@ -558,6 +585,30 @@ class IfPageFormulaSchema extends Schema {
 
 			}
 		}
+
+		// Issue 2: Excel isn't case sensitive, but string comparisons with parser are.
+		// Lowercase everything.
+		formula = formula.toLowerCase();
+
+
+		// Issue 3: Change true=>TRUE, and false=>FALSE.
+		// Note that this has to happen after toLowerCase.
+		formula = formula.replace( /true/ig, 'TRUE').replace( /false/ig, 'FALSE');
+
+
+
+		// Issue 4: Excel doesn't like single-quotes ' but parser is ok with it.
+		// Change formula to one that generates an error.
+		if(formula.match(/'/) !== null) {
+			formula = '=1/';
+		}
+
+
+		// Issue 5: Parser doesn't like TRUE or FALSE, but is ok with TRUE() or FALSE().
+		// Add ()
+		//formula = formula.replace( /false/g, 'false()' ).replace( /true/g, 'true()');
+		// Clean up any duplicate true()(). Unlikely, but possible.
+		//formula = formula.replace( /false\(\)\(\)/g, 'false()' ).replace( /true\(\)\(\)/g, 'true()');
 
 		return formula;
 	}
@@ -590,13 +641,13 @@ class IfPageFormulaSchema extends Schema {
 		parser.on('callCellValue', function(cellCoord, done) {
 			let coor = cellCoord.label.toLowerCase();
 			if(coor.substr(1) !== '1') {
-				throw new Error('#REF');
+				throw new Error('#REF '+ coor);
 			}
 			if(typeof current_test[coor.substr(0,1)] === 'undefined') {
-				throw new Error('#REF');
+				throw new Error('#REF' + coor);
 			}
 			let res = current_test[coor.substr(0,1)];
-			done(res);
+			done(typeof res ==='string' ? res.toLowerCase() : res );
 		});
 
 
@@ -616,7 +667,7 @@ class IfPageFormulaSchema extends Schema {
 
 			for (var col = startCellCoord.column.index; col <= endCellCoord.column.index; col++) {
 				if( typeof current_test[ i_to_alpha(col) ] !== 'undefined') {
-					fragment.push( current_test[ i_to_alpha(col) ] );
+					fragment.push( current_test[ i_to_alpha(col) ].toLowerCase() );
 				} else {
 					throw new Error('#REF');
 				}
@@ -637,8 +688,9 @@ class IfPageFormulaSchema extends Schema {
 			try {
 				res =  parser.parse(clean_formula.substr(1));  // Parser doesn't want a starting `=`
 			} catch(e) {
-				console.log(e);
+				console.log(res);
 				res.error = '#ERROR!';
+
 			}
 		}
 		return res;
@@ -647,8 +699,9 @@ class IfPageFormulaSchema extends Schema {
 
 
 	// Return a nicely formatted view of the client's input. 
+	// Don't return nulls but instead an empty string.
 	toString(): string {
-		return this.client_f;
+		return this.client_f === null ? '': this.client_f;
 	}
 }
 
@@ -693,6 +746,8 @@ class IfLevelSchema extends Schema {
 			description: { type: 'String', initialize: (s) => isDef(s) ? s : null },
 
 			completed: { type: 'Boolean', initialize: (s) => isDef(s) ? b(s) : false },
+			
+			allow_skipping_tutorial: { type: 'Boolean', initialize: (s) => isDef(s) ? b(s) : false },
 
 			pages: { type: 'Array', initialize: (aJ) => isDef(aJ) ? a(aJ).map(j => {
 						return this.get_new_page(j);
@@ -737,13 +792,6 @@ class IfLevelSchema extends Schema {
 				//throw new Error('IfGame.Shared.Level.get_score_as_array found uncompleted last not null');
 			}
 
-			// Make sure that all completed pages are either true or false.
-			if(pages.filter( (p: PageType): boolean => p.completed)
-					.map( (p: PageType) => {
-							if(!(p.correct === true || p.correct === false))
-								throw new Error('IfGame.Shared.Level.get_score_as_array found null in completed.');
-						})
-					);
 		}
 
 		this.pages.map( (p: PageType) => {
@@ -778,22 +826,7 @@ class IfLevelSchema extends Schema {
 	get_score_incorrect(): number {
 		return this.get_score_as_array(1,0,0,0).reduce( (accum, i) => accum + i, 0);
 	}
-	get_score_streak(): number {
-		throw new Error('not implemented');
-		/*
-		let i=this['results'].length;
-		let accum = 0;
 
-		for(i=this['results'].length-1; i>=0; i--) {
-			if(this['results'][i]) {
-				accum++;
-			} else {
-				return accum;
-			}
-		}
-		return accum;
-		*/
-	}
 
 	/**
 		Returns an initialized object based on the correct class type.
@@ -801,18 +834,26 @@ class IfLevelSchema extends Schema {
 	*/
 	get_new_page(json: Object): PageType {
 		//return new json.type(json);
-		
+		let new_page = null;
+
 		if(json.type === 'IfPageParsonsSchema') {
-			return new IfPageParsonsSchema(json);
+			new_page = new IfPageParsonsSchema(json);
 		} else if (json.type === 'IfPageFormulaSchema') {
-			return new IfPageFormulaSchema(json);
+			new_page = new IfPageFormulaSchema(json);
 		} else if (json.type === 'IfPageChoiceSchema') {
-			return new IfPageChoiceSchema(json);
+			new_page = new IfPageChoiceSchema(json);
 		} else if (json.type === 'IfPageTextSchema') {
-			return new IfPageTextSchema(json);
+			new_page = new IfPageTextSchema(json);
 		} else {
 			throw new Error('Invalid get_new_page(type) param of ' + json.type);
 		}
+
+		// Pull the setting from level to see if we should allow skipping a tutorial page.
+		if(this.allow_skipping_tutorial && new_page.code === 'tutorial') {
+			new_page.correct_required = false;
+		}
+
+		return new_page;
 	}
 
 	updateUserFields(json: Object) {
@@ -829,7 +870,7 @@ class IfLevelSchema extends Schema {
 			}
 		});
 		
-		this.history = [...this.history, { created: new Date(), title: 'updateUserFields'}];
+		this.history = [...this.history, { dt: new Date(), code: 'shared_updateUserFields'}];
 		this.updated = new Date();
 
 	}

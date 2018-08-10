@@ -48,13 +48,13 @@ class PersonLevel extends React.Component<PersonLevelPropsType> {
 	render(): Node {
 		const level = this.props.level;
 
- 		const row = (<tr>
- 				<td>{ this.props.person }</td>
- 				<td>{ level.code }</td>
- 				<td>Created: { level.created.toString() }</td>
- 				<td>{ level.pages.length }</td>
- 				<td>{ level.get_score_correct() } of { level.get_score_attempted() }</td>
- 			 </tr>);
+		const row = (<tr>
+			<td>{ this.props.person }</td>
+			<td>{ level.code }</td>
+			<td>Created: { level.created.toString() }</td>
+			<td>{ level.pages.length }</td>
+			<td>{ level.get_score_correct() } of { level.get_score_attempted() }</td>
+		 </tr>);
 
 		return row;
 	}
@@ -117,7 +117,7 @@ type PropsType = {
 	levels: Array<LevelType>
 };
 
-export default class Monitor extends React.Component<PropsType> {
+export default class IfMonitor extends React.Component<PropsType> {
 	constructor(props: any) {
 		super(props);
 	}

@@ -1,30 +1,28 @@
 //@flow
 import React from 'react';
-import PropTypes from 'prop-types';
 import { Row, Col, Breadcrumb, Button  } from 'react-bootstrap';
-import { Link } from 'react-router-dom';
 
-import Monitor from './Monitor';
+import IfActivity from './IfActivity';
 import { Message, Loading } from './../components/Misc';
 
 import { IfLevelSchema } from './../../shared/IfGame';
 
 import ForceLogin from './../components/ForceLogin';
 
-import type { LevelType, PageType } from './IfTypes';
+import type { LevelType } from './IfTypes';
 import type { Node } from 'react';
 
 
-type MonitorPropsType = {};
+type ActivityPropsType = {};
 
-type MonitorContainerStateType = {
+type ActivityContainerStateType = {
 	message: string,
 	messageStyle: string,
 	isLoading: boolean,
 	levels: Array<LevelType>
 };
 
-export default class MonitorContainer extends React.Component<MonitorPropsType, MonitorContainerStateType> {
+export default class IfActivityContainer extends React.Component<ActivityPropsType, ActivityContainerStateType> {
 	constructor(props: any) {
 		super(props);
 		this.state = { 
@@ -68,7 +66,6 @@ export default class MonitorContainer extends React.Component<MonitorPropsType, 
 				});
 			})
 			.catch( error => {
-				debugger;
 				this.setState({ 
 					levels: [],
 					message: 'Error: ' + error,
@@ -81,12 +78,11 @@ export default class MonitorContainer extends React.Component<MonitorPropsType, 
 
 
 	render(): Node {
-		const that = this;
 
 		const crumbs = (
 			<Breadcrumb>
-				<Breadcrumb.Item href='/ifgame/'>If Games</Breadcrumb.Item>
-				<Breadcrumb.Item active>Monitor</Breadcrumb.Item>
+				<Breadcrumb.Item title='home' href='/ifgame/'>If Games</Breadcrumb.Item>
+				<Breadcrumb.Item title='Activity' active>Activity</Breadcrumb.Item>
 			</Breadcrumb>
 			);
 
@@ -107,7 +103,7 @@ export default class MonitorContainer extends React.Component<MonitorPropsType, 
 					<Message message={this.state.message} style={this.state.messageStyle} />
 					<Loading loading={this.state.isLoading } />
 					{ filter }
-					<Monitor levels={this.state.levels} />
+					<IfActivity levels={this.state.levels} />
 				</Col>
 			</Row>
 		);

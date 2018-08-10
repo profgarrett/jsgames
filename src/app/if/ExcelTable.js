@@ -12,7 +12,7 @@ const format_tf = tf => {
 	if (tf === true ) {
 		return <span style={{color: '#3c763d'}}>True</span>;
 	} else if( tf === false ) {
-		return <span style={{color: '#c7254e'}}>False</span>;
+		return <span style={{color: 'black'}}>False</span>;
 	}
 	return tf; // string result.
 };
@@ -49,13 +49,13 @@ const format = (input, format) => {
 		}
 	}
 
-	if(format === 'text' || format === 'c' ) {
+	if(format === 'text' || format === 'c' || format === '' ) {
 		// Text
 		return input;
 
-	} else if( format === 'shortdate' ) {
+	} else if( format === 'shortdate' || format === 'date' ) {
 		// A column can be formatted as a shortdate, but not yet have a date (such as a partial formula)
-		// If a Date instance, return. Otherwise, just give the item.
+		// If a Date instance, return formatted. Otherwise, just give the item.
 		if(input instanceof Date) {
 			return input.toLocaleDateString(); //'en-US', {style:'decimal'});
 		} else {
@@ -66,7 +66,7 @@ const format = (input, format) => {
 		// Format without any decimal numbers.
 		return Math.round(input);
 
-	} else if( format === ',' ) {
+	} else if( format === ',' || format === '.' ) {
 		// Decimal
 		return input.toLocaleString('en-US', {style:'decimal'});
 
@@ -219,7 +219,7 @@ export default class ExcelTable extends React.Component {
 				// No client solution. Empty cell.
 				fieldResult = <td></td>;
 
-			} else if (page.client_test_results[i].error!==null) {
+			} else if (page.client_test_results[i].error!==null || page.client_f.substr(0,1) !== '=') {
 				// Error in result
 				fieldResult = <td style={style} className='bg-danger'>{page.client_test_results[i].error}</td>;
 
@@ -230,8 +230,10 @@ export default class ExcelTable extends React.Component {
 			} else if (page.solution_test_results.length !== null) {
 				// Good value results, and we know if it should be true or false.
 				
+				// See if it matches. Works for either text or numbers.
 				// Check precision to .00 only - as we have floating point errors.
-				if(	Math.round(page.client_test_results[i].result * 100) === 
+				if(	page.client_test_results[i].result === page.solution_test_results[i].result ||
+						Math.round(page.client_test_results[i].result * 100) === 
 						Math.round(page.solution_test_results[i].result * 100 )) {
 					// Render the field with a checkbox showing success.
 					fieldResult = <td style={style}>{ clean(page.client_test_results[i].result, page.client_f_format) }<SmallOkGlyphicon /></td>;

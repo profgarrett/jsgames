@@ -23,34 +23,42 @@ const build_score = (pages: Array<PageType>): any => pages.map( (p: PageType, i:
 	if(!p.completed) {
 		// In progress
 		title = 'In progress';
-		html = '';
+		html = p.description;
 		g = progress_glyphicon();
+
 	} else {
 		// Finished
+		
+		if(p.code === 'tutorial') {
 
-		if(p.correct_required) {
-			// Tutorial page.
 			title = 'Completed';
 			html = p.description + 
-				(p.toString().length > 0 ?
-					'<br/><div class="well well-sm">'+ p.toString()+'</div>' :
-					'');
-			g = completed_glyphicon();
-		} else {
+				(p.toString().length < 1 ? '' : '<br/><div class="well well-sm">'+ p.toString()+'</div>');
+
+			if(p.correct) {
+				g = completed_glyphicon('black');
+			} else {
+				g = completed_glyphicon('gray');
+			}
+		} else if (p.code === 'test') {
+
 			// Graded page
 			if(p.correct) {
 				title = 'Correct answer';
-				html = p.description + '<br/><div style={background} class="well well-sm">'+p.toString()+'</div>';
+				html = p.description + '<br/><div class="well well-sm">'+p.toString()+'</div>'; // style={background} 
 				g = correct_glyphicon();
 			} else {
 				title = 'Incorrect answer';
 				html = p.description + '<br/><div class="well well-sm">'+p.toString()+'</div>';
 				g = incorrect_glyphicon();
 			}
+		} else {
+			throw new Error('Error building score');
 		}
 
 	}
-	
+
+
 	const pop = (
 		<Popover title={title} id={'iflevelplayrenderscore_id_'+i}>
 			<HtmlDiv html={html} />
@@ -90,7 +98,8 @@ type PropsType = {
 	level: LevelType,
 	selected_page_index: number,
 	onChange: (Object) => void,
-	onSubmit: (void) => void,
+	onNext: (void) => void,
+	onValidate: (void) => void,
 	onViewFeedback: (void) => void,
 	show_feedback: boolean,
 	show_feedback_on: number,
@@ -108,37 +117,115 @@ export default class IfLevelPlay extends React.Component<PropsType, StateType> {
 	constructor(props: any) {
 		super(props);
 		(this: any).handleChange = this.handleChange.bind(this);
-		(this: any).handleSubmit = this.handleSubmit.bind(this);
-		(this: any)._feedback_listen_for_enter = this._feedback_listen_for_enter.bind(this);
+		(this: any).handleNext = this.handleNext.bind(this);
+		(this: any).handleValidate = this.handleValidate.bind(this);
+		(this: any)._on_keypress = this._on_keypress.bind(this);
+		(this: any)._on_click = this._on_click.bind(this);
+
 		(this: any).state = {
 			lastFeedbackDismissal: new Date()
 		};
+
+		document.addEventListener('keypress', this._on_keypress);
+
 	}
 
 	handleChange(new_value: Object) {
 		this.props.onChange(new_value);
 	} 
 
-	handleSubmit(e: ?SyntheticEvent<HTMLButtonElement>) {
+
+	handleValidate(e: ?SyntheticEvent<HTMLButtonElement>) {
 		if(e) e.preventDefault();
 
 		// Do not allow submissions within 1/2s of previous ones.
 		// Keeps users who double-click from accidentally re-submitting.
 		if( (new Date()).getTime() - this.state.lastFeedbackDismissal.getTime() < 500)
 			return; 
-					
-		this.props.onSubmit();
+		this.props.onValidate();
 	}
 
+
+	handleNext(e: ?SyntheticEvent<HTMLButtonElement>) {
+		if(e) e.preventDefault();
+
+		// Do not allow submissions within 1/2s of previous ones.
+		// Keeps users who double-click from accidentally re-submitting.
+		if( (new Date()).getTime() - this.state.lastFeedbackDismissal.getTime() < 500)
+			return; 
+		
+		this.props.onNext();
+	}
+
+
+
+	// If we are showing feedback, and enter/escape is hit, then dismiss feedback window.
+	_on_keypress(event: any): any {
+		const page = this.props.level.pages[this.props.level.pages.length-1];
+
+		if(this.props.show_feedback) {
+			if(event.key === 'Enter' || event.key === 'Escape' || event.key === ' ') {
+				event.preventDefault(); // cancel any keypress.
+				this.props.onViewFeedback();
+				this.setState({ lastFeedbackDismissal: new Date() });
+			}
+		} else {
+			// Handle keypresses for advancing tutorial window.
+			// Normally, enter will submit the form.  However, if a validate option is 
+			// present, and the answer is wrong, we should instead validate.
+			if(event.key === 'Enter'
+					&& page.code === 'tutorial' 
+					&& page.correct_required === false
+					&& page.correct !== true 
+					&& page.type === 'IfPageFormulaSchema') {
+				event.preventDefault(); // cancel any keypress.
+				this.handleValidate(event);
+			}
+
+			// Handle keypress for advancing when viewing just a plain text page.
+			if(event.key === 'Enter' 
+					&& page.type === 'IfPageTextSchema') {
+				event.preventDefault();
+				this.handleNext();
+			}
+		}
+	}
+
+	// Universal click handler to dismiss feedback.
+	_on_click(event: any): any {
+		event.stopPropagation();
+		this.setState({ lastFeedbackDismissal: new Date() });
+		this.props.onViewFeedback();
+	}
+
+
+
 	// Render a single page.
-	_render_page_lead(page: PageType): Node {
-		if(!page.correct_required) {
+	_render_page_lead(page: PageType, pageId: number): Node {
+		if(page.code === 'test') {
+			// Do a custom animation to draw eye to the instruction
+			// Ugly hack to get stylesheet and insert keyframes.
+			const stylesheet = document.styleSheets[0];
+			const keyframes = `@keyframes quizIn${pageId} {
+				0% { color: white } 
+				100% { color: black }
+				}`;
+			stylesheet.insertRule(keyframes, stylesheet.cssRules.length);
+
+			const t = `quizIn${pageId} 2s ease`;
+			const style = {
+				MozAnimation: t,
+				WebkitAnimation: t,
+				OAnimation: t,
+				animation: t
+			};
+
 			return (
 				<Panel bsStyle='primary'>
 					<Panel.Heading>
 						<Panel.Title componentClass='h3'>Quiz Question</Panel.Title>
 					</Panel.Heading>
-					<Panel.Body collapsible={false}>
+					<Panel.Body collapsible={false} style={ style }>
 						<HtmlDiv html={ page.description } />
 					</Panel.Body>
 				</Panel>
@@ -147,182 +234,272 @@ export default class IfLevelPlay extends React.Component<PropsType, StateType> {
 			// Make a little prettier by replacing linebreaks with div.lead.
 			// Looks better spacing-wise, as we have instructions below the lead in 
 			// a div.lead.
-			const descriptions = page.description.split('<br/><br/>');
+			let descriptions = page.description.split('<br/><br/>');
 
-			return descriptions.map( (d: string, i: number): Node =>
+			descriptions = descriptions.map( (d: string, i: number): Node =>
 					<HtmlDiv className='lead' key={i} html={ d } /> );
+
+			return <div>{ descriptions}</div>;
 		}
 	}
 
 
-	// Render problem
-	_render_page_problem(page: PageType): Node {
+	// Create button to validate any formula, parsons, or choice answers.
+	// This only shows if there are the proper conditions.
+	_render_page_validate_button(page: PageType): Node {
+		const that = this;
+
+		// Don't show 'validate' button if correct isn't required.
+		if(page.correct_required) return;
+
+		// Don't have validate button for all types of pages.
+		if(page.type === 'IfPageTextSchema') return;
+
+		// Hide validate for pages that don't show feedback.
+		if(!page.show_feedback_on) return;
+
+
+		//  Button style. If required, primary. Else secondary.
+		let button_style = 'default';
+		let button_text = 'Check answer';
+
+		if(page.code === 'tutorial') {
+			if(page.correct_required) {
+				if(page.client_has_answered() && !page.correct) {
+					// Require a correct answer.
+					button_style = 'warning';
+				} else if(page.client_has_answered() && page.correct) {
+					button_style = 'success'; 
+				} else {
+					// No answer, or unknown if correct (e.g., on a quiz question)
+					button_style = 'primary';
+				}
+			}
+		} else if (page.code ==='test') {
+			button_style = 'primary';
+			if(page.client_has_answered()) {
+				button_text = 'Submit answer';
+			}
+		}
+
+		// Text to say if we're going to try again or continue.
+		//const next = page.correct_required && !page.correct ? 'try again' : 'continue';
+
+		return <Button id='iflevelplayvalidate' 
+					bsStyle={button_style}
+					disabled={this.props.isLoading}
+					onClick={ () => that.props.onValidate() }
+					>{ button_text }</Button>;
+	}
+
+
+	// Backdrop that allow us to click anywhere to dismiss pop-up or inline pop-up.
+	_render_fullpage_invisible_div(): Node {
+		if(!this.props.show_feedback) return;
+
+		return <div style={{
+					position: 'fixed',
+					top: 0, left: 0, right: 0, bottom: 0,
+					zIndex: 100000,
+					cursor: 'pointer' // see https://github.com/facebook/react/issues/1169
+					}}
+					onClick={ this._on_click }
+					></div>;
+	}
+
+
+	// Create the pop-up or pop-over elements
+	_render_page_feedback_inline(page: PageType, button: Node, orientation: string): Node {
+		if(!(orientation == 'left' || orientation == 'right')) alert('invalid orientation ' + orientation);
+
+		// Don't show feedback.
+		if(!this.props.show_feedback) return;
+
+		// No feedback to show.
+		if(typeof page.client_feedback === 'undefined' || 
+				page.client_feedback === null ) return;
+
+		// If feedback, then don't create inline but defer to pop-up.
+		if(page.client_feedback.length > 0) return;
+
+		//Return overlay
+		return (
+			<div>
+				<Overlay
+					show={true}
+					target={ (): any => document.getElementById(button.props.id) }
+					placement={ orientation }
+					container={document.body}
+					containerPadding={0}
+					>
+					<Popover 
+						id='_render_page_feedback_inline'
+						onClick={ this._on_click }
+						>
+						{ page.correct ? 
+							<div style={{color: 'rgb(60, 118, 61)'}}>Correct!</div> : 
+							<div style={{color: 'rgb(169, 68, 66)'}}>Incorrect answer</div>
+						}
+						Click or press <kbd>enter</kbd>
+					</Popover>
+				</Overlay>
+			</div>
+		);
+	}
+
+	// We have one or more specific items of feedback to tell the user.
+	// Return a full-screen pop-up IF props.show_feedback
+	_render_page_feedback_popup(page: PageType): Node {
+
+		// Don't render anything if there's no feedback.
+		if( !( page.client_feedback && page.client_feedback.length && page.client_feedback.length > 0) )
+			return;
+
+		if( !this.props.show_feedback ) return;
+
+		// Build specific feedback LIs.
+		const f_li = page.client_feedback.map( (f: string, i: number): Node => <li key={i}>{f}</li>);
+
+		// Return full-screen feedback.
+		return <div className='static-modal' 
+					style={{ textAlign: 'left', zIndex: 100000 }} 
+					onClick={ this._on_click } >
+					<Modal.Dialog style={{marginTop: 150}}>
+						<Modal.Header>
+							<Modal.Title>Incorrect answer</Modal.Title>
+						</Modal.Header>
+						<Modal.Body>
+							<ul>
+								{ f_li }
+							</ul>
+						</Modal.Body>
+						<Modal.Footer>
+							Click anywhere or press <kbd>enter</kbd>
+						</Modal.Footer>
+					</Modal.Dialog>
+				</div>;
+	}
+
+
+	// Create lower 'next page' & exit buttons.
+	_render_page_submit_button(page: PageType): Node {
+		// Use a different color for the submission button if we are test v. tutorial.
+		let button_style = 'primary';
+		let button_text = 'Next page';
+		let button_disabled = this.props.isLoading;
+
+		// if a tutorial that allows skipping questions, then change to skip instead of submit.
+		if(page.code === 'tutorial' && !page.correct_required && page.type !== 'IfPageTextSchema') {
+			if(page.correct) {
+				button_text = 'Next page';
+				button_style = 'primary';
+			} else {
+				button_text = 'Skip to next page';
+				button_style = 'default';
+			}
+		} 
+
+		// If a test, make sure that they've submitted something.
+		if (page.code ==='test' && !page.client_has_answered()) {
+			button_disabled = true;
+			button_style = 'primary';
+		}
+
+		return <Button id='_render_page_submit_button' 
+				type='submit' 
+				bsStyle={button_style}
+				disabled={button_disabled}
+				>{button_text}</Button>;
+	}
+
+
+
+	_render_exercise_panel(page: PageType, validate_button: Node ): Node {
+		let problem = null;
+
+		// Build correct page.
 		if(page.type === 'IfPageFormulaSchema') {
-			return <ExcelTable page={page} 
+			problem = <ExcelTable page={page} 
 						readonly={ !this.props.isLoading }
 						editable={ true } 
 						handleChange={this.handleChange} />;
 
 		} else if(page.type === 'IfPageParsonsSchema') {
-			return <Parsons page={page} 
+			problem = <Parsons page={page} 
 						readonly={ !this.props.isLoading }
 						editable={ true } 
 						handleChange={this.handleChange} />;
 
 		} else if(page.type === 'IfPageChoiceSchema') {
-			return <Choice page={page} 
+			problem = <Choice page={page} 
 						readonly={ !this.props.isLoading }
 						editable={ true } 
 						showSolution={false} 
 						handleChange={this.handleChange} />;
 
 		} else if(page.type === 'IfPageTextSchema') {
-			return <Text page={page} 
+			problem = <Text page={page} 
 						readonly={ !this.props.isLoading }
 						editable={ true } 
 						handleChange={this.handleChange} 
-						handleSubmit={ () => this.handleSubmit() } />;
+						handleSubmit={ () => this.handleNext() } />;
 		} else {
 			throw new Error('Invalid type in IfLevelPlay '+page.type);
 		}
-	}
+
+		let title = 'Optional Exercise';
+		let style = 'panel panel-default';
 
 
-	// Create buttons for the page.
-	// Includes review pop-ups if needed.
-	_render_page_buttons(page: PageType): Node {
-		// Use a different color for the submission button if we are test v. tutorial.
-		const that = this;
-
-
-
-		//  Button.
-		const button_style = page.correct_required ? 'success': 'primary'; 
-		const submit = <Button id='iflevelplaysubmit' 
-				type='submit' 
-				bsStyle={button_style}
-				disabled={this.props.isLoading}
-				>
-				Contine to next page</Button>;
-
-		const exit = <Button 
-				bsStyle='link' 
-				disabled={this.props.isLoading}
-				href={'/ifgame/'+this.props.level.code } 
-				>Exit</Button>;
-
-
-		// If we're not supposed to show feedback, then just return the buttons.
-		if(!this.props.show_feedback) 
-			return <div>{ exit } { submit}</div>;
-
-
-		// Start listening for user input (enter key).
-		document.addEventListener('keypress', this._feedback_listen_for_enter);
-
-		// If this is a tutorial and they go it wrong, set continue text to try again.
-		const next = page.code === 'tutorial' && !page.correct ? 'try again' : 'continue';
-
-		// If no feedback, then don't create large element.
-		if(typeof page.client_feedback === 'undefined' || 
-				page.client_feedback === null ||
-				page.client_feedback.length < 1 ) {
-
-			// No feedback.
-			const pop = (
-				<Popover 
-						id='renderpagefeedbackpopup'
-						target={submit}
-						>
-						{ page.correct ? 
-							<div style={{color: 'rgb(60, 118, 61)'}}>Correct!</div> : 
-							<div style={{color: 'rgb(169, 68, 66)'}}>Incorrect answer</div>
-						}
-						Click or press <kbd>enter</kbd> to {next}.
-					</Popover>
-				);
-
-			const div = (
-				<div style={{
-					position: 'fixed',
-					top: 0, left: 0, right: 0, bottom: 0,
-					zIndex: 100000,
-					cursor: 'pointer' // see https://github.com/facebook/react/issues/1169
-					}}
-					onClick={ (e: any): any => {
-						e.stopPropagation();
-						this.setState({ lastFeedbackDismissal: new Date() });
-						that.props.onViewFeedback();
-						document.removeEventListener('keypress', that._feedback_listen_for_enter);
-					}}
-					></div>
-			);
-
+		// If we're just looking at text, don't use the embedded panel.
+		if(page.type === 'IfPageTextSchema') {
 			return (
-				<div>
-					{ exit }
-					<Overlay 
-						placement='left'
-						target={(): any => document.getElementById('iflevelplaysubmit') }
-						overlay={pop}
-						show={true}
-						container={this}
-						>
-						{ pop }
-					</Overlay>,
-					{ submit }
-					{ div }
-				</div>
-			);
-
-		} else {
-			// We have one or more specific items of feedback to tell the user.
-
-			// Build specific feedback LIs.
-			const f_li = page.client_feedback.map( (f: string, i: number): Node => <li key={i}>{f}</li>);
-
-			// Return full-screen feedback.
-			return (
-				<div>
-					<div className='static-modal' style={{ textAlign: 'left' }} 
-						onClick={ (e: any): any => {
-							e.stopPropagation();
-							this.setState({ lastFeedbackDismissal: new Date() });
-							that.props.onViewFeedback();
-							document.removeEventListener('keypress', that._feedback_listen_for_enter);
-						}} >
-						<Modal.Dialog style={{marginTop: 150}}>
-							<Modal.Header>
-								<Modal.Title>Incorrect answer</Modal.Title>
-							</Modal.Header>
-							<Modal.Body>
-								<ul>
-									{ f_li }
-								</ul>
-							</Modal.Body>
-							<Modal.Footer>
-								Click anywhere or press <kbd>enter</kbd> to {next}
-							</Modal.Footer>
-						</Modal.Dialog>
-					</div>
-					{ exit } 
-					{ submit }
+				<div className='lead' >
+					<Glyphicon style={{ top: 3, paddingRight: 5, fontSize: 21 }} glyph='hand-right'/>
+					<HtmlSpan html={ page.instruction } />
 				</div>
 			);
 		}
 
-	}
 
-
-	// Function used as an event listender.  It will be added or removed from the
-	// page as feedback is displayed/hidden.
-	_feedback_listen_for_enter(event: any): any {
-		if(event.key === 'Enter' || event.key === 'Escape' || event.key === ' ') {
-			this.props.onViewFeedback();
-			this.setState({ lastFeedbackDismissal: new Date() });
-			document.removeEventListener( 'keypress', this._feedback_listen_for_enter);
+		// Don't use embedded panels for required problems.
+		if(page.code === 'tutorial' && page.correct_required) {
+			return (
+				<div>
+				<div className='lead' >
+					<Glyphicon style={{ top: 3, paddingRight: 5, fontSize: 21 }} glyph='hand-right'/>
+					<HtmlSpan html={ page.instruction } />
+				</div>
+				{ problem }
+				</div>
+			);		
 		}
-		event.preventDefault(); // cancel any keypress.
+
+		if(page.code === 'test') {
+			return (
+				<div>
+				<div className='lead' >
+					<Glyphicon style={{ top: 3, paddingRight: 5, fontSize: 21 }} glyph='hand-right'/>
+					<HtmlSpan html={ page.instruction } />
+				</div>
+				{ problem }
+				</div>
+			);
+		}
+
+		// Build panel and return for tutorials that don't require the correct answer.
+		return (
+			<div className={style} style={{ }}>
+				<div className='panel-heading'>{title}</div>
+				<div className='panel-body'>
+					<HtmlDiv className='' 
+						style={{ paddingBottom: 10}} 
+						html={ page.instruction } />
+					{ problem }
+					{ validate_button }
+				</div>
+			</div>
+		);
 	}
 
 
@@ -332,50 +509,60 @@ export default class IfLevelPlay extends React.Component<PropsType, StateType> {
 			'Page '+this.props.selected_page_index+' is not valid in IfLevelPlay');
 
 		let page = this.props.level.pages[this.props.selected_page_index];
+		let pageI = this.props.selected_page_index; // used to keep track of the page #
 
 		// Render the current page, or if we are reviewing last submission, n-1.
 		// Use previous submitted index to figure out which to shown feedback on.
 		// Once show_next_feedback is cleared, then we will revert to current page.
 		if(this.props.show_feedback) {
 			page = this.props.level.pages[this.props.show_feedback_on];
+			pageI = this.props.show_feedback_on;
 		}
 		
-		// Build results 
-		const lead = this._render_page_lead(page);
-		const results = build_score(this.props.level.pages);
-		const problem = this._render_page_problem(page);
-		const buttons = this._render_page_buttons(page);
+		const validate_button = this._render_page_validate_button(page);
+		const next_button = this._render_page_submit_button(page);
+
+		// Setup inline options for pop-up.
+		let button = next_button;
+		let orientation = 'left';
+
+		if (page.code ==='tutorial' && !page.correct_required) {
+			button = validate_button;
+			orientation = 'right';
+		}
 
 		return (
-			<div style={{position: 'relative' }}>
-				<form name='c' onSubmit={this.handleSubmit}>
-					<div style={{ opacity: this.props.show_feedback ? 0.5 : 1 }}>
-						{ lead }
-						<div className='lead'>
-							<Glyphicon style={{ top: 3, paddingRight: 5, fontSize: 21 }} glyph='hand-right'/>
-							<HtmlSpan className='lead' html={ page.instruction } />
-						</div>
-						{ problem }
-					</div>
-					<Panel >
-						<Table style={{ margin: 0}} >
-							<tbody>
-							<tr>
-								<td style={titleTdStyle}>  
-									<span>Progress</span>
-								</td>
-								<td style={leftTdStyle}>
-									{ results }
-								</td>
-								<td style={rightTdStyle}>
-									{ buttons }
-								</td>
-							</tr>
-							</tbody>
-						</Table>
-					</Panel>
-				</form>
-
+			<div>
+				<div style={{position: 'relative', opacity: this.props.show_feedback ? 0.5 : 1 }}>
+					<form name='c' onSubmit={this.handleNext}>
+						{ this._render_page_lead(page, pageI) }
+						{ this._render_exercise_panel(page, validate_button) }
+						<Panel >
+							<Table style={{ margin: 0}} >
+								<tbody>
+								<tr>
+									<td style={titleTdStyle}>  
+										<span>Progress</span>
+									</td>
+									<td style={leftTdStyle}>
+										{ build_score(this.props.level.pages) }
+									</td>
+									<td style={rightTdStyle}>
+										<Button 
+											bsStyle='link' disabled={this.props.isLoading}
+											href={'/ifgame/'+this.props.level.code } 
+											>Exit</Button>
+										{ next_button }
+									</td>
+								</tr>
+								</tbody>
+							</Table>
+						</Panel>
+					</form>
+				</div>
+				{ this._render_fullpage_invisible_div() }
+				{ this._render_page_feedback_popup(page) }
+				{ this._render_page_feedback_inline(page, button, orientation) }
 			</div>
 		);
 	}

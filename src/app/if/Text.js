@@ -30,6 +30,7 @@ export default class Text extends React.Component<PropsType> {
 		return {};
 	}
 
+	
 	componentDidMount() {
 		document.addEventListener('keypress', this.handleEnter);
 	}
@@ -44,6 +45,7 @@ export default class Text extends React.Component<PropsType> {
 		}
 		event.preventDefault(); // cancel any keypress.
 	}
+	
 
 	// Build out the table 
 	// Doesn't need to actually return anything, as the description will be shown 

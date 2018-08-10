@@ -6,7 +6,8 @@ import IfLevelListContainer from './IfLevelListContainer';
 import IfLevelPlayContainer from './IfLevelPlayContainer';
 import IfLevelScoreContainer from './IfLevelScoreContainer';
 import IfLevelTestContainer from './IfLevelTestContainer';
-import MonitorContainer from './MonitorContainer';
+import IfMonitorContainer from './IfMonitorContainer';
+import IfActivityContainer from './IfActivityContainer';
 
 
 export default class IfHome extends React.Component {
@@ -17,7 +18,8 @@ export default class IfHome extends React.Component {
 			<div>
 				<Switch>
 					<Route exact path='/ifgame/' component={IfLevelListContainer} />
-					<Route exact path='/ifgame/monitor' component={MonitorContainer} />
+					<Route exact path='/ifgame/activity' component={IfActivityContainer} />
+					<Route exact path='/ifgame/monitor' component={IfMonitorContainer} />
 					<Route exact path='/ifgame/test' component={IfLevelTestContainer} />
 					<Route exact path='/ifgame/:_code' component={IfLevelListContainer} />
 					<Route exact path='/ifgame/level/:_id/play' component={IfLevelPlayContainer} />

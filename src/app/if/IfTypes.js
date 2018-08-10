@@ -18,6 +18,8 @@ export type LevelType = {
 	pages: Array<PageType>,
 	history: Array<Object>,
 
+	allow_skipping_tutorial: boolean,
+
 	get_score_as_array: (any, any, any, any) => Array<Object>,
 	get_new_page: (Object) => Object,
 	toJson: () => Object,
@@ -38,6 +40,7 @@ export type PageType = {
 	correct: boolean,
 	correct_required: boolean,
 	completed: boolean,
+	show_feedback_on: boolean,
 
 	+get_feedback: () => ?string,
 	+client_has_answered: () => boolean,
@@ -61,6 +64,7 @@ export type TextPageType = {
 	correct: boolean,
 	correct_required: boolean,
 	completed: boolean,
+	show_feedback_on: boolean,
 	
 	+client_has_answered: () => boolean,	
 	+get_feedback: () => ?string,
@@ -87,6 +91,7 @@ export type ChoicePageType = {
 	correct: boolean,
 	correct_required: boolean,
 	completed: boolean,
+	show_feedback_on: boolean,
 	
 	client_has_answered: () => boolean,	
 	get_feedback: () => ?string,
@@ -117,6 +122,7 @@ export type ParsonsPageType = {
 	correct: boolean,
 	correct_required: boolean,
 	completed: boolean,
+	show_feedback_on: boolean,
 	
 	client_has_answered: () => boolean,	
 	get_feedback: () => ?string,
@@ -145,6 +151,7 @@ export type FormulaPageType = {
 	correct: boolean,
 	correct_required: boolean,
 	completed: boolean,
+	show_feedback_on: boolean,
 
 	client_has_answered: () => boolean,	
 	get_feedback: () => ?string,
