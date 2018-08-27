@@ -706,6 +706,54 @@ class IfPageFormulaSchema extends Schema {
 }
 
 
+
+
+/*
+	This page holds a single exercise for formula using a horizontal parsons (harsons).
+	It's the same as the FormulaSchema, with the addition of a toolbox.
+*/
+class IfPageHarsonsSchema extends IfPageFormulaSchema {
+
+
+	get type(): string {
+		return 'IfPageHarsonsSchema';
+	}
+
+	get schema(): Object {
+		let inherit = common_schema();
+
+		return {
+			...inherit,
+
+			// Used by this.parse to test client_f against solution_f.
+			tests: { type: 'Array', initialize: (a) => isDef(a) && isArray(a) ? revive_dates_recursively(a) : [] },
+			column_titles: { type: 'Array', initialize: (a) => isDef(a) && isArray(a) ? noObjectsInArray(a) : [] },
+			column_formats: { type: 'Array', initialize: (a) => isDef(a) && isArray(a) ? noObjectsInArray(a) : [] },
+			
+			client_f: { type: 'Javascript', initialize: (s) => isDef(s) ? s : null },
+			client_f_format: { type: 'String', initialize: (s) => isDef(s) ? s : '' },
+			client_test_results: { type: 'Array', initialize: (a) => isDef(a) && isArray(a) ? a : [] },
+
+			solution_f: { type: 'Javascript', initialize: (s) => isDef(s) ? s : null },
+			solution_test_results: { type: 'Array', initialize: (a) => isDef(a) && isArray(a) ? a : [] },
+
+			// Should we show students the results of the solutions, or the solutions themselves?
+			solution_f_visible: { type: 'Boolean', initialize: (s) => isDef(s) ? bool(s) : false },
+			solution_test_results_visible: { type: 'Boolean', initialize: (s) => isDef(s) ? s : false },
+
+			// What blockly blocks should be included?
+			// This should be an array of strings.
+			toolbox: { type: 'Array', initialize: (a) => isDef(a) && isArray(a) ? a : [] }
+		};
+	}
+}
+
+
+
+
+
+
+
 /*
 	A level is the owner object which can be created and used.
 	It contains multiple pages.
@@ -838,6 +886,8 @@ class IfLevelSchema extends Schema {
 
 		if(json.type === 'IfPageParsonsSchema') {
 			new_page = new IfPageParsonsSchema(json);
+		} else if (json.type === 'IfPageHarsonsSchema') {
+			new_page = new IfPageHarsonsSchema(json);
 		} else if (json.type === 'IfPageFormulaSchema') {
 			new_page = new IfPageFormulaSchema(json);
 		} else if (json.type === 'IfPageChoiceSchema') {
@@ -884,6 +934,7 @@ module.exports = {
 	IfPageTextSchema,
 	IfPageChoiceSchema,
 	IfPageFormulaSchema,
-	IfPageParsonsSchema
+	IfPageParsonsSchema,
+	IfPageHarsonsSchema
 };
 

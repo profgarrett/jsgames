@@ -270,8 +270,10 @@ Optional fields:
 Called with { has: 'references', args: [ 'a1' ]}
 
 	no_values: No literals
+	values: [0, *, ?, 'x']  <= * is text, ? is number.
 	references(args): Make sure that references are in answer
-	symbols(args): Make sure that the symbosl are included
+	symbols(args): Make sure that the symbosl are included.  Use ? to include dropdown.
+	functions
 
 ### DataFactory
 

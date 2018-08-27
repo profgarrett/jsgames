@@ -1,5 +1,5 @@
 // @flow
-const { IfLevelSchema, IfPageTextSchema, IfPageParsonsSchema, IfPageChoiceSchema, IfPageFormulaSchema  } = require('./../shared/IfGame');
+const { IfLevelSchema, } = require('./../shared/IfGame');
 const { DataFactory } = require('./DataFactory');
 
 const { test } = require('./tutorials/test');
@@ -152,7 +152,7 @@ const baseifgame = {
 			json.code = typeof json.code === 'undefined' ? 'tutorial' : json.code;
 
 
-		} else if(json.type === 'IfPageFormulaSchema') {
+		} else if(json.type === 'IfPageFormulaSchema' || json.type === 'IfPageHarsonsSchema') {
 			// Setup the major important fields based off of type.
 			if(json.code === 'tutorial') {
 				// Allow over-riding correct_required if set by the json object.

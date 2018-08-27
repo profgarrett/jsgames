@@ -178,6 +178,46 @@ export type FormulaPageType = {
 };
 
 
+export type HarsonsPageType = {
+	// Copy from PageType
+	type: string,
+
+	code: string,
+	description: string,
+	instruction: string,
+	feedback: Array<string>,
+	solution_feedback: Array<Function>,
+
+	correct: boolean,
+	correct_required: boolean,
+	completed: boolean,
+	show_feedback_on: boolean,
+
+	client_has_answered: () => boolean,	
+	get_feedback: () => ?string,
+	updateUserFields: (Object) => void,
+	history: Array<Object>,
+	toJson: Function,
+	// End Copy
+
+	helpblock: string,
+
+	tests: Array<Object>,
+	column_titles: Array<string>,
+	column_formats: Array<string>,
+
+	client_f: string,
+	client_f_format: string,
+	client_test_results: Array<Object>,
+
+	solution_f: string,
+	solution_f_match: Function,
+	solution_test_results: Array<Object>,
+	solution_f_visible: boolean,
+	solution_test_results_visible: boolean,
+
+	workspace: Array<Object>
+};
 
 
 /**
