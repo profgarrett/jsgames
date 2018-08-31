@@ -59,7 +59,7 @@ class IfLevelScorePage extends React.Component                                 {
 		// Figure out which control to use for the page.
 		let problem, solution;
 
-		if(page_at.type === 'IfPageFormulaSchema') {
+		if(page_at.type === 'IfPageFormulaSchema' || page_at.type === 'IfPageHarsonsSchema') {
 			// Show solution?
 			if(page_final.solution_f && page_final.solution_f.length > 0) {
 				solution = (

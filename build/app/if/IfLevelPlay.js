@@ -1,6 +1,5 @@
 //      
 import React from 'react';
-import ReactDom from 'react-dom';
                                   
 import { Glyphicon, Panel, Button, Table, Popover, Overlay, OverlayTrigger, Modal } from 'react-bootstrap';
 import { HtmlSpan, HtmlDiv, incorrect_glyphicon, correct_glyphicon, completed_glyphicon, progress_glyphicon} from './../components/Misc';
@@ -9,6 +8,7 @@ import ExcelTable from './ExcelTable';
 import Text from './Text';
 import Choice from './Choice';
 import Parsons from './Parsons';
+import Harsons from './Harsons';
 
                                                      
 
@@ -437,6 +437,13 @@ export default class IfLevelPlay extends React.Component                       {
 						showSolution={false} 
 						handleChange={this.handleChange} />;
 
+		} else if(page.type === 'IfPageHarsonsSchema') {
+			problem = <Harsons page={page} 
+						readonly={ !this.props.isLoading }
+						editable={ true } 
+						showSolution={ false } 
+						handleChange={this.handleChange} />;
+
 		} else if(page.type === 'IfPageTextSchema') {
 			problem = <Text page={page} 
 						readonly={ !this.props.isLoading }
@@ -533,7 +540,7 @@ export default class IfLevelPlay extends React.Component                       {
 
 		return (
 			<div>
-				<div style={{position: 'relative', opacity: this.props.show_feedback ? 0.5 : 1 }}>
+				<div id='iflevelplay' style={{position: 'relative', opacity: this.props.show_feedback ? 0.5 : 1 }}>
 					<form name='c' onSubmit={this.handleNext}>
 						{ this._render_page_lead(page, pageI) }
 						{ this._render_exercise_panel(page, validate_button) }

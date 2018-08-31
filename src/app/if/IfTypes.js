@@ -7,6 +7,7 @@ export type LevelType = {
 	type: string,
 
 	seed: number,
+	harsons_randomly_on_username: boolean,
 
 	title: string,
 	description: string,
@@ -35,7 +36,7 @@ export type PageType = {
 	description: string,
 	instruction: string,
 	client_feedback: Array<string>,
-	solution_feedback: Array<Function>,
+	feedback: Array<Function>,
 
 	correct: boolean,
 	correct_required: boolean,
@@ -59,7 +60,7 @@ export type TextPageType = {
 	description: string,
 	instruction: string,
 	feedback: Array<string>,
-	solution_feedback: Array<Function>,
+	feedback: Array<Function>,
 
 	correct: boolean,
 	correct_required: boolean,
@@ -86,7 +87,7 @@ export type ChoicePageType = {
 	description: string,
 	instruction: string,
 	feedback: Array<string>,
-	solution_feedback: Array<Function>,
+	feedback: Array<Function>,
 
 	correct: boolean,
 	correct_required: boolean,
@@ -117,7 +118,7 @@ export type ParsonsPageType = {
 	description: string,
 	instruction: string,
 	feedback: Array<string>,
-	solution_feedback: Array<Function>,
+	feedback: Array<Function>,
 
 	correct: boolean,
 	correct_required: boolean,
@@ -146,7 +147,7 @@ export type FormulaPageType = {
 	description: string,
 	instruction: string,
 	feedback: Array<string>,
-	solution_feedback: Array<Function>,
+	feedback: Array<Function>,
 
 	correct: boolean,
 	correct_required: boolean,
@@ -186,7 +187,7 @@ export type HarsonsPageType = {
 	description: string,
 	instruction: string,
 	feedback: Array<string>,
-	solution_feedback: Array<Function>,
+	feedback: Array<Function>,
 
 	correct: boolean,
 	correct_required: boolean,

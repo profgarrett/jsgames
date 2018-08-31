@@ -28,6 +28,7 @@ const { sql01 } = require('./../../sql/sql01.js');
 const { sql02 } = require('./../../sql/sql02.js');
 const { sql03 } = require('./../../sql/sql03.js');
 const { sql04 } = require('./../../sql/sql04.js');
+const { sql05 } = require('./../../sql/sql05.js');
 
 
 
@@ -231,7 +232,10 @@ app.get('/api/sql/',
 		if(old_version < 4 ) {
 			await update_version( sql04 );
 		}
-		res.json({ 'old_version': old_version, 'new_version': 4 });
+		if(old_version < 5 ) {
+			await update_version( sql05 );
+		}
+		res.json({ 'old_version': old_version, 'new_version': 5 });
 	} catch(e){
 		log_error(e);
 		res.json(e);
@@ -358,7 +362,8 @@ app.post('/api/ifgame/new_level_by_code/:code',
 		const now = from_utc_to_myql(to_utc(new Date()));
 
 		const insert_sql = `INSERT INTO iflevels (type, username, code, title, description, completed, 
-			pages, history, created, updated, seed, allow_skipping_tutorial) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+			pages, history, created, updated, seed, allow_skipping_tutorial, harsons_randomly_on_username) 
+			VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
 		level.username = username;
 
 					
@@ -370,7 +375,8 @@ app.post('/api/ifgame/new_level_by_code/:code',
 				JSON.stringify(level.history), 
 				now, now,
 				level.seed,
-				level.allow_skipping_tutorial
+				level.allow_skipping_tutorial,
+				level.harsons_randomly_on_username
 				];
 
 		let insert_results = await run_mysql_query(insert_sql, values);
@@ -784,7 +790,7 @@ app.get('/', (req, res) => {
 });
 */
 app.get('/api/version', nocache, (req: $Request, res: $Response) => {
-	res.json({ version: 1.0, 
+	res.json({ version: 1.1, 
 		environment: process.env.NODE_ENV, 
 		debug: DEBUG 
 	});
@@ -824,6 +830,9 @@ app.get('/transformed.js.map', (req: $Request, res: $Response) => {
 });
 
 
+// Load static files.
+app.use('/static', express.static('public'));
+
 // Default case that returns the general index page.
 // Needed for when client is on a subpage and refreshes the page to return the react app.
 // SHould be last.
@@ -832,6 +841,7 @@ app.get('*', (req: $Request, res: $Response) => {
 	log_error( build_path('index.html'));
 	res.sendFile(build_path('index.html'));
 });
+
 
 //app.use(function (err, req, res, next) {
   // handle error

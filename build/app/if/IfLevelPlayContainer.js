@@ -263,7 +263,7 @@ export default class IfLevelPlayContainer extends React.Component               
 					<Message spinner={this.state.isLoading } message={this.state.message} style={this.state.messageStyle} />
 					<ErrorBoundary>
 					{ !this.state.level ? '' :
-						<div>
+						<div id='iflevelplaycontainer'>
 							<IfLevelPlay 
 								level={this.state.level} 
 								selected_page_index={this.state.selected_page_index }

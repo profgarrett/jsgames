@@ -11,7 +11,8 @@ const { summary } = require('./tutorials/summary');
 const { if1, if2, if3, if4, if5, if6, if7 } = require('./tutorials/if');
 const { dates } = require('./tutorials/dates');
 
-import type { LevelType, PageType } from './../app/if/IfTypes';
+import { parseFeedback } from './parseFeedback';
+import type { LevelType /*, PageType */ } from './../app/if/IfTypes';
 
 // Use model term instead of schema to clarify server v. client, and to add room 
 // for later adding server-side functionality.
@@ -96,15 +97,10 @@ const baseifgame = {
 			delete json.versions;
 		}
 
-		// Even though solution_feedback is not required by schemas, on server it should always be initialized
-		// This helps the updateCorrect() functions know that we are on the server.  If this is 
-		// null, then they assume we're on the client and can not calculate correct or not.
-		// Really, should just require solution_feedback on all json templates, but it's easier to
-		// not have to hard code.
-		if(typeof json.solution_feedback === 'undefined' || json.solution_feedback === null) {
-			json.solution_feedback = [];
+		// Make sure feedback is always initialized
+		if(typeof json.feedback === 'undefined' || json.feedback === null) {
+			json.feedback = [];
 		}
-
 
 		// Type-specific setup
 		if( json.type === 'IfPageTextSchema' ) {
@@ -165,10 +161,17 @@ const baseifgame = {
 				json.correct_required = false;
 				json.solution_test_results_visible = false;
 				json.solution_f_visible = false;
+
 			} else {
 				throw new Error('Invalid formula code '+json.code+' in baseifgame');
 			}
 
+			// Look to see if no feedback has been defined.  If so, then automatically
+			// parse out the elements and create the toolbox.
+			if( json.type === 'IfPageHarsonsSchema') {
+				const feedback = parseFeedback( json.solution_f );
+				json.feedback = feedback;
+			}
 
 		} else {
 			throw new Error('Invalid page type '+json.type+' in baseifgame');
@@ -193,17 +196,20 @@ const baseifgame = {
 
 
 	// Make a new level.
-	create: function(): LevelType {
-		let level = new IfLevelModel({
+	create: function(json: any): LevelType {
+		const params = {
 			type: 'IfLevelSchema',
 			title: this.title,
 			code: this.code,
-			allow_skipping_tutorial: true,
+			harsons_randomly_on_username: this.harsons_randomly_on_username,
 			description: this.description,
+			allow_skipping_tutorial: this.allow_skipping_tutorial,
 			completed: false,
 			pages: [],
 			history: [ { dt: new Date(), code: 'server_level_created' } ]
-		});
+		};
+
+		const level = new IfLevelModel( { ...params, ...json } );
 
 		return level;
 	},
@@ -244,12 +250,26 @@ const baseifgame = {
 		const reversed_pages = level.pages.slice().reverse();
 		const new_page_json = this.gen.gen(level.seed, reversed_pages, this.gen);
 
+
 		// Check result of gen function.
 		if(new_page_json !== null) {
 			// Since a non-null result was given, we should add a new page.
 
+			// Figure out seed value based on username.
+			const username_as_number = level.username.split('').reduce( (i, s) => s.charCodeAt(0) + i, 1 );
+			const username_as_0_or_1 = username_as_number % 2;
+
+			// If the level is requesting a seed value for tutorials based on username, 
+			// then go ahead and change type for half of all users.
+			if(level.harsons_randomly_on_username 
+					&& new_page_json.type === 'IfPageFormulaSchema' 
+					&& username_as_0_or_1 === 1) {
+				new_page_json.type = 'IfPageHarsonsSchema';
+			}
+
 			// setup new page 
 			const initialized_json = this._initialize_json(level.seed, level.pages.length, new_page_json);
+
 			const new_page = level.get_new_page(initialized_json);
 			level.pages.push(new_page);
 
@@ -260,6 +280,7 @@ const baseifgame = {
 			level.completed = true;
 			level.history = [...level.history, { dt: new Date(), page_i_finished: level.pages.length-1, code: 'server_level_completed'}];
 		}
+
 		return level;
 	}
 
@@ -291,21 +312,8 @@ const IfLevelModelFactory = {
 	create: function(code: string, username: string): LevelType {
 		if(typeof this.levels[code] === 'undefined') throw new Error('Invalid type '+code+' passed to IfLevelModelFactory.create');
 
-		const level = this.levels[code].create();
-
-		level.username = username;
-		
-		// Turn on ability to skip for IF levels & for half of all users
-		// Turn username into char codes, add, and mod2 to split into 50/50% groups.
-		// Add escape value for 'garrettn' user to make it easier to test curriculum.
-		if(	level.code.substr(0,2) == 'if' && 
-			(level.username.split('').reduce( (i, s) => s.charCodeAt(0) + i, 1 ) % 2 === 0
-				|| level.username === 'garrettn')
-			) {
-			level.allow_skipping_tutorial = true;
-		} else {
-			level.allow_skipping_tutorial = false;
-		}
+		const allow_skipping_tutorial = username === 'garrettn' || username === 'test';
+		const level = this.levels[code].create({ username, allow_skipping_tutorial });
 
 		return this.levels[code].addPageOrMarkAsComplete(level);
 	},

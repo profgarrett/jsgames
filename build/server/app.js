@@ -784,7 +784,7 @@ app.get('/', (req, res) => {
 });
 */
 app.get('/api/version', nocache, (req          , res           ) => {
-	res.json({ version: 1.0, 
+	res.json({ version: 1.1, 
 		environment: process.env.NODE_ENV, 
 		debug: DEBUG 
 	});
@@ -824,6 +824,9 @@ app.get('/transformed.js.map', (req          , res           ) => {
 });
 
 
+// Load static files.
+app.use('/static', express.static('public'));
+
 // Default case that returns the general index page.
 // Needed for when client is on a subpage and refreshes the page to return the react app.
 // SHould be last.
@@ -832,6 +835,7 @@ app.get('*', (req          , res           ) => {
 	log_error( build_path('index.html'));
 	res.sendFile(build_path('index.html'));
 });
+
 
 //app.use(function (err, req, res, next) {
   // handle error

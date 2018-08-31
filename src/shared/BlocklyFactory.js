@@ -5,7 +5,6 @@
 */
 
 
-
 /*
 
 Precision
@@ -160,12 +159,16 @@ function build_value_string_input() {
 // This dictionary is used to translate a symbol into a word.
 // Needed to refer to dictionary entries.
 const symbol_to_word = {
-	'+': 'addition',
+	'<': 'lt',
+	'>': 'gt',
+	'<=': 'le',
+	'>=': 'ge',
+	'=': 'equality',   // NOTE: This is different from equal, as that's the =len('a') type.	'+': 'addition',
+
 	'-': 'subtraction',
 	'/': 'division',
 	'*': 'multiplication',
-	'^': 'exponent',
-	'=': 'equality'   // NOTE: This is different from equal, as that's the =len('a') type.
+	'^': 'exponent'
 };
 
 function build_symbol(symbol) {
@@ -173,40 +176,70 @@ function build_symbol(symbol) {
 	if(symbol === '?') return build_symbol_dropdown();
 
 	const type = symbol_to_word[symbol]; 
+	const comparison = symbol.substr(0,1) == '<' || symbol.substr(0,1) == '>';
 
-	const json = {
-			'type': 'formula_'+type,
-			'message0': '%1 %2 %3',
-			'args0': [
-				{
-					'type': 'input_value',
-					'name': 'leftNumber',
-					'check': 'Number'
-				},
-				{
-					'type': 'field_label',
-					'text': ' '+symbol+' ',
-					'class': 'blocklyArith'
-				},
-				{
-					'type': 'input_value',
-					'name': 'rightNumber',
-					'check': 'Number'
+
+	const json = comparison 
+			? 
+				{ // < > <= >= =
+				'type': 'symbol_'+type,
+				'message0': '%1 %2 %3',
+				'args0': [
+					{
+						'type': 'input_value',
+						'name': 'leftValue',
+					},
+					{
+						'type': 'field_label',
+						'text': ' '+symbol+' ',
+						'class': 'blocklyArith'
+					},
+					{
+						'type': 'input_value',
+						'name': 'rightValue',
+					}
+				],
+				'inputsInline': true,
+				'output': 'Boolean',
+				'colour': 180,
+				'tooltip': '',
+				'helpUrl': ''
 				}
-			],
-			'inputsInline': true,
-			'output': 'Number',
-			'colour': 120,
-			'tooltip': '',
-			'helpUrl': ''
-	};
+			:
+			{ // + - / *
+				'type': 'symbol_'+type,
+				'message0': '%1 %2 %3',
+				'args0': [
+					{
+						'type': 'input_value',
+						'name': 'leftValue',
+						'check': 'Number'
+					},
+					{
+						'type': 'field_label',
+						'text': ' '+symbol+' ',
+						'class': 'blocklyArith'
+					},
+					{
+						'type': 'input_value',
+						'name': 'rightValue',
+						'check': 'Number'
+					}
+				],
+				'inputsInline': true,
+				'output': 'Number',
+				'colour': 120,
+				'tooltip': '',
+				'helpUrl': ''
+			};
 
 	const f = ( block ) => {
-			var value_leftnumber = Blockly.JavaScript.valueToCode(block, 'leftNumber', Blockly.JavaScript.ORDER_ATOMIC);
-			var value_rightnumber = Blockly.JavaScript.valueToCode(block, 'rightNumber', Blockly.JavaScript.ORDER_ATOMIC);
-			// TODO: Assemble JavaScript into code variable.
-			var code = value_leftnumber + ' ' + symbol + ' ' + value_rightnumber;
-			// TODO: Change ORDER_NONE to the correct strength.
+			const value_leftvalue = Blockly.JavaScript.valueToCode(block, 'leftValue', Blockly.JavaScript.ORDER_ATOMIC);
+			const value_rightvalue = Blockly.JavaScript.valueToCode(block, 'rightValue', Blockly.JavaScript.ORDER_ATOMIC);
+			
+			// Return formula.
+			const code = value_leftvalue + ' ' + symbol + ' ' + value_rightvalue;
+
 			return [code, Blockly.JavaScript.ORDER_ATOMIC];
 		};
 
@@ -275,7 +308,8 @@ function build_symbol_dropdown() {
 const function_arguments = {
 	'left': [ 'String', 'Number'],
 	'floor': ['Number'],
-	'if': ['Boolean', 'Any', 'Any']
+	'if': ['Boolean', 'Any', 'Any'],
+	'not': [ 'Boolean']
 };
 
 
@@ -448,18 +482,29 @@ function build_block(block_title, f) {
 	This function does 2 things:
 	  * initialize blocks
 	  * return a string XML for initialized the toolbox.
+
+	It'll default to page.toolbox. If that's not present, it'll fall back to
+	feedback (which uses the same rules). If there are both, then it'll 
+	combine by adding anything unique. Lastly, it'll run parseFormula to pick up 
+	any symbols not explicitly added by the rules.
+
 */
 function get_toolbox_xml( page ) {
+
+	if(page.toolbox == null || page.feedback === null) {
+		throw new Error('Null toolbox or feedback for get_toolbox_xml');
+	}
+	const source = page.toolbox.concat(page.feedback);
 	const toolbox = [];
 
-	if(page.toolbox == null || page.toolbox.length === 0)
-		throw new Error('Invalid BlocklyFactor page, no toolbox items');
+	if(source.length === 0) 
+		throw new Error('Empty toolbox or feedback for get_toolbox_xml');
 
 	// Always add the = block.
 	toolbox.push(build_block('equal', build_equal));
 
 	// Create each rule as needed.
-	page.toolbox.forEach( rule => {
+	source.forEach( rule => {
 		if(rule.has === 'values' ) {
 			rule.args.forEach( value => 
 				toolbox.push(build_block( 'values_'+ value,  () => build_value(value) ))
@@ -476,6 +521,8 @@ function get_toolbox_xml( page ) {
 			rule.args.forEach( value => 
 				toolbox.push(build_block( 'symbols_'+ symbol_to_word[value],  () => build_symbol(value) ))
 			);
+		} else if (rule.has === 'equal') {
+			// Already added equal block.
 		} else {
 			console.log(rule);
 			throw new Error('Invalid *has* for page in BlocklyFactory: ' + rule);

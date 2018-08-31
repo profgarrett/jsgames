@@ -126,6 +126,11 @@ Tutorials are written as code.  They should be placed into the src/server/tutori
 then references in the src/client/ifgame.js constant below
 IfLevelModelFactory.levels
 
+### Levels
+```
+tutorial_seed_based_on_username: // Sets if people should get a consistent tutorial choice based off of their username, or if it should be random each time.  Defaults to false.
+```
+
 ### Gen Functions
 
 Pages are created by gen functions.  The first two are simple, linear and shuffe.
@@ -222,7 +227,13 @@ Optional fields:
 		Exists only on server side. Used by .updatecorrect to
 		populate client_feedback.
 	versions: [ ... ]
-		Verions can contain options to override default options.
+		Versions can contain options to override default options.
+		For example, 
+		[ { solution_f: '123' }, { solution_f: 2 }]
+
+		Or, you can have it be a function that is run upon initial creation.
+		[ { solution_f: ( page ) => 123 } ]
+
 ```
 
 IfPageParsonsSchema give a list of options for the user to place in order.
@@ -297,6 +308,13 @@ DataFactory is used to generate random data.
 
 Nathan Garrett, profgarrett@gmail.com
 
+Thanks to EW for use of the formula parser.
+```
+	E. W. Bachtal, Inc.
+	http://ewbi.blogs.com/develops/2004/12/excel_formula_p.html
+```
+
+Other credits found in NPM packages.
 
 
 ## License
