@@ -274,14 +274,16 @@ const strip_secrets = function(input: Object): Object {
 	if( Array.isArray(input)) {
 		return input.map(strip_secrets);
 	}
-
+	
 	// create a clean new object.
 	let new_json = {};
 
 	// recursively iterate through.
 	for(let property in input ) {
 		if(input.hasOwnProperty(property)) {
-			if(property.substr(0,8) !== 'solution' || ( property.substr(0,8) === 'solution' && input[property+'_visible'] ) ) {
+			if(property.substr(0,8) !== 'solution' 
+				|| ( property.substr(0,8) === 'solution' && input[property+'_visible'] ) ) {
+
 				if(Array.isArray(input[property])) {
 					new_json[property] = strip_secrets(input[property]);
 				} else {
@@ -423,7 +425,8 @@ app.get('/api/ifgame/levels/byCode/:code',
 app.get('/api/ifgame/recent_levels', nocache, require_logged_in_user,
 	async (req: $Request, res: $Response, next: NextFunction): Promise<any> => {
 	try {
-		const sql = 'SELECT * FROM iflevels WHERE updated > NOW() - INTERVAL 60 MINUTE';
+		const INTERVAL = 60*24*7*4;
+		const sql = 'SELECT * FROM iflevels WHERE updated > NOW() - INTERVAL '+INTERVAL+' MINUTE';
 		const username = get_username_or_emptystring(req);
 
 		if(username !== ADMIN_USERNAME && username !== 'test')
@@ -668,19 +671,25 @@ app.post('/api/login_clear_test_user/',
 
 // Log the user in.
 async function login_and_maybe_create_user(params: Object): any {
-	let hashed_password = bcrypt.hashSync(params.password, 8);
-	let user = { username: params.username, hashed_password: hashed_password };
+
+	// Setup 
+	// If a null username/password was passed, then create a random user and password.
+	const username = params.username === '' ? 'anon' + Math.floor(Math.random()*100000000000) : params.username;
+	const password = params.password === '' ? 'p' + Math.floor(Math.random()*100000000000) : params.password;
+
+	const hashed_password = bcrypt.hashSync(password, 8);
+	let user = { username: username, hashed_password: hashed_password };
 	const select_sql = 'SELECT * FROM users WHERE username = ?';
 	
 
-	let select_results = await run_mysql_query(select_sql, [params.username]);
+	let select_results = await run_mysql_query(select_sql, [username]);
 
 	// test the db for presense of user.  If not found, create given proper perms.
 	if(select_results.length === 0) {
 		// Username not found.
 
 		// Did the passed token match the value in secret.js?
-		if(params.token !== USER_CREATION_SECRET ) {
+		if(params.token !== USER_CREATION_SECRET && params.token !== 'anonymous' ) {
 			return 403;// no, error hard.
 		} else {
 			// Yes, create user and log in.
@@ -693,7 +702,7 @@ async function login_and_maybe_create_user(params: Object): any {
 
 	} else if(select_results.length === 1) {
 		// We have a user. Test username.
-		if(!bcrypt.compareSync(params.password, select_results[0].hashed_password)) {
+		if(!bcrypt.compareSync(password, select_results[0].hashed_password)) {
 			return 401;  // Bad password or username.
 		} 
 
@@ -703,7 +712,7 @@ async function login_and_maybe_create_user(params: Object): any {
 	}
 
 	// We have a proper user.  Continue!
-	let jwt_token = jwt.sign({ username: user.username }, JWT_AUTH_SECRET, { expiresIn: 864000 });
+	let jwt_token = jwt.sign({ username: username }, JWT_AUTH_SECRET, { expiresIn: 864000 });
 	const last = (new Date()).toString().replace(/ /g, '_').replace('(', '').replace(')', '').replace(/:/g,'_').replace(/-/g, '_');
 
 	params.res.cookie('x-access-token', jwt_token);
@@ -790,7 +799,7 @@ app.get('/', (req, res) => {
 });
 */
 app.get('/api/version', nocache, (req: $Request, res: $Response) => {
-	res.json({ version: 1.1, 
+	res.json({ version: 1.2, 
 		environment: process.env.NODE_ENV, 
 		debug: DEBUG 
 	});

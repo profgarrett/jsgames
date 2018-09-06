@@ -8,10 +8,11 @@ const { tutorial } = require('./tutorials/tutorial');
 const { math1, math2 } = require('./tutorials/math');
 const { text } = require('./tutorials/text');
 const { summary } = require('./tutorials/summary');
-const { if1, if2, if3, if4, if5, if6, if7 } = require('./tutorials/if');
+const { if1, if2, if3, if4, if5, if6, if7, if8 } = require('./tutorials/if');
 const { dates } = require('./tutorials/dates');
+const { rounding } = require('./tutorials/rounding');
 
-import { parseFeedback } from './parseFeedback';
+const { parseFeedback } = require('./parseFeedback');
 import type { LevelType /*, PageType */ } from './../app/if/IfTypes';
 
 // Use model term instead of schema to clarify server v. client, and to add room 
@@ -74,21 +75,14 @@ const baseifgame = {
 			version = randomly_sorted_versions[version_i];
 
 			// Initialize contained objects.
-			for(let item in version) {
-				if(version.hasOwnProperty(item)) {
-					if(typeof version[item] === 'function') {
+			for(let key in version) {
+				if(version.hasOwnProperty(key)) {
+					if(typeof version[key] === 'function') {
 						// If function, run
-						json[item] = version[item](this, json);
+						json[key] = version[key](json[key]);
 					} else {
 						// If not, then just assign.  
-
-						// See if starting with ..., which means to append.
-						if(typeof version[item] === 'string' && 
-								version[item].substr(0,3) === '...') {
-							json[item] = json[item] + version[item].substr(3);
-						} else {
-							json[item] = version[item];
-						}
+						json[key] = version[key];
 					}
 				}
 			}
@@ -159,19 +153,21 @@ const baseifgame = {
 
 			} else if(json.code === 'test') {
 				json.correct_required = false;
-				json.solution_test_results_visible = false;
+				json.solution_test_results_visible = true;
 				json.solution_f_visible = false;
 
 			} else {
 				throw new Error('Invalid formula code '+json.code+' in baseifgame');
 			}
 
-			// Look to see if no feedback has been defined.  If so, then automatically
+			// Look to see if no feedback/toolbox has been defined.  If so, then automatically
 			// parse out the elements and create the toolbox.
-			if( json.type === 'IfPageHarsonsSchema') {
+			if( json.type === 'IfPageHarsonsSchema' 
+					&& typeof json.toolbox === 'undefined') {
 				const feedback = parseFeedback( json.solution_f );
 				json.feedback = feedback;
 			}
+
 
 		} else {
 			throw new Error('Invalid page type '+json.type+' in baseifgame');
@@ -263,8 +259,19 @@ const baseifgame = {
 			// then go ahead and change type for half of all users.
 			if(level.harsons_randomly_on_username 
 					&& new_page_json.type === 'IfPageFormulaSchema' 
-					&& username_as_0_or_1 === 1) {
+					&& username_as_0_or_1 === 0) {
 				new_page_json.type = 'IfPageHarsonsSchema';
+			}
+
+			// Harsons uses toolboxes, but ifPageFormulaSchemas do not.  Since some types automatically change
+			// back and forth from Formula pages to Harsons, we need to delete the toolbox if it's not
+			// going to be transformed.
+			if(new_page_json.type === 'IfPageFormulaSchema' && typeof new_page_json.toolbox !== 'undefined') {
+				delete new_page_json.toolbox;
+				// Delete any versions of the toolbox as well.
+				if(typeof new_page_json.versions !== 'undefined') {
+					new_page_json.versions.forEach( v => delete v.toolbox );
+				}
 			}
 
 			// setup new page 
@@ -296,6 +303,7 @@ const IfLevelModelFactory = {
 		dates: { ...baseifgame, ...dates},
 		math1: { ...baseifgame, ...math1},
 		math2: { ...baseifgame, ...math2},
+		rounding: { ...baseifgame, ...rounding },
 		if1: { ...baseifgame, ...if1},
 		if2: { ...baseifgame, ...if2},
 		if3: { ...baseifgame, ...if3},
@@ -303,6 +311,7 @@ const IfLevelModelFactory = {
 		if5: { ...baseifgame, ...if5},
 		if6: { ...baseifgame, ...if6},
 		if7: { ...baseifgame, ...if7},
+		if8: { ...baseifgame, ...if8},
 		summary: { ...baseifgame, ...summary},
 		text: { ...baseifgame, ...text},
 		test_gens: { ...baseifgame, ...test_gens }
@@ -312,7 +321,7 @@ const IfLevelModelFactory = {
 	create: function(code: string, username: string): LevelType {
 		if(typeof this.levels[code] === 'undefined') throw new Error('Invalid type '+code+' passed to IfLevelModelFactory.create');
 
-		const allow_skipping_tutorial = username === 'garrettn' || username === 'test';
+		const allow_skipping_tutorial = username === 'garrettn' || username === 'xtest';
 		const level = this.levels[code].create({ username, allow_skipping_tutorial });
 
 		return this.levels[code].addPageOrMarkAsComplete(level);

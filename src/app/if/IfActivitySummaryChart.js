@@ -32,7 +32,7 @@ export default class IfActivitySummaryChart extends React.Component<PropsType> {
 	levels_to_pages( levels: Array<LevelType> ): any {
 		const question_pages = {};
 
-		// Add each page to one of hte above..
+		// Add each page to one of the above..
 		levels.forEach( (l: LevelType) => {
 
 			l.pages.forEach( (p: PageType) => {
@@ -69,7 +69,8 @@ export default class IfActivitySummaryChart extends React.Component<PropsType> {
 		const pages = this.levels_to_pages(this.props.levels);
 		const summaries = pages.map( p => this.pages_to_summary(pages));
 
-		const trs = []; // summaries.map( s => <tr><td>{s.title}</td><td>{s.n}</td><td>{s.percent}%</td></tr>);
+		debugger;
+		const trs = summaries.map( s => <tr><td>{s.title}</td><td>{s.n}</td><td>{s.percent}%</td></tr>);
 
 		return (<table>{ trs }</table>);
 	}

@@ -23,8 +23,14 @@ class Schema {
 		// Allow 'type' key without a matching field schema definition.
 		for(const key of Object.keys(json)) {
 			if(typeof schema[key] === 'undefined' && key !== 'type' ) {
-				//if(DEBUG) console.log( { schema, json });
-				throw new Error('Invalid key "' + key + '" in ' + this['type']);
+				// Error.  Fail silently, unless we are on localhost. In that case,
+				// throw a message to localhost.
+				// NDG: FIXME to properly log.
+				console.log( 'Invalid key for object');
+				console.log( { schema, json });
+				// solution_feedback
+				// throw new Error('Invalid key "' + key + '" in ' + this['type']);
+
 			}
 		}
 

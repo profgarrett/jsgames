@@ -223,7 +223,7 @@ Optional fields:
 	 	%  Percent.
 	tests: [ { a: 1 } ],
 	solution_f: '=1'
-	solution_feedback: [ { 'has': 'no_values', args: [ 'a' ] } ]
+	feedback: [ { 'has': 'no_values', args: [ 'a' ] } ]
 		Exists only on server side. Used by .updatecorrect to
 		populate client_feedback.
 	versions: [ ... ]

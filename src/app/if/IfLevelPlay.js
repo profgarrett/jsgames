@@ -108,7 +108,10 @@ type PropsType = {
 type StateType = {
 	// When feedback is given, force a delay before allowing a submission event.
 	// Used to ignore 2nd half of double-click events.
-	lastFeedbackDismissal: Object 
+	lastFeedbackDismissal: Object,
+	// Last displayed index.  Used to trigger a page scroll event when we start 
+	// showing a new page.
+	lastPageI: number
 };
 
 
@@ -123,7 +126,8 @@ export default class IfLevelPlay extends React.Component<PropsType, StateType> {
 		(this: any)._on_click = this._on_click.bind(this);
 
 		(this: any).state = {
-			lastFeedbackDismissal: new Date()
+			lastFeedbackDismissal: new Date(),
+			lastPageI: 0
 		};
 
 		document.addEventListener('keypress', this._on_keypress);
@@ -207,12 +211,12 @@ export default class IfLevelPlay extends React.Component<PropsType, StateType> {
 			// Ugly hack to get stylesheet and insert keyframes.
 			const stylesheet = document.styleSheets[0];
 			const keyframes = `@keyframes quizIn${pageId} {
-				0% { color: white } 
-				100% { color: black }
+				0% { color: #d9edf7; background-color: #d9edf7; } 
+				100% { color: black; background-color: white; }
 				}`;
 			stylesheet.insertRule(keyframes, stylesheet.cssRules.length);
 
-			const t = `quizIn${pageId} 2s ease`;
+			const t = `quizIn${pageId} 4s ease`;
 			const style = {
 				MozAnimation: t,
 				WebkitAnimation: t,
@@ -524,6 +528,12 @@ export default class IfLevelPlay extends React.Component<PropsType, StateType> {
 		if(this.props.show_feedback) {
 			page = this.props.level.pages[this.props.show_feedback_on];
 			pageI = this.props.show_feedback_on;
+		}
+
+		// If the i page has changed, then fire a scroll back to top.
+		if( this.state.lastPageI !== pageI) {
+			window.scrollTo(1,1);
+			this.setState({ lastPageI: pageI });
 		}
 		
 		const validate_button = this._render_page_validate_button(page);

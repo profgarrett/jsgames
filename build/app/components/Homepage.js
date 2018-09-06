@@ -9,6 +9,7 @@ import ForceLogin from './ForceLogin';
 
 export default class Homepage extends React.Component {
 	render() {
+		window.location.replace('/ifgame');
 
 		return (
 			<Row>

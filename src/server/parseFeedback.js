@@ -11,16 +11,20 @@ function uniq(a) {
 }
 
 
-// Conver a formula into auto-generated feedback.
+// Takes in a formula, parses it, and converts into auto-generated feedback
+// similar to the hand-written rules for pages.
+// 
+// Note that the sequence of the functions matters.  They will be in this
+// order for the toolbox.
 function parseFeedback(formula) {
   const tokens = parseFormula(formula).filter( t => t.token.length > 0);
   var feedback = [];
 
-  var values = [
-    ...tokens.filter( t => t.subtype === 'number').map( t => parseInt(t.token, 10) ),
-    ...tokens.filter( t => t.subtype === 'text').map( t => t.token )
+
+  var functions = [
+    ...tokens.filter( t => t.type === 'function').map( t => t.token )
   ];
-  feedback.push({ has: 'values', args: uniq(values) });
+  feedback.push({ has: 'functions', args: uniq(functions) });
 
 
   var symbols = [
@@ -31,20 +35,17 @@ function parseFeedback(formula) {
   feedback.push({ has: 'symbols', args: uniq(symbols) });
 
 
-  var functions = [
-    ...tokens.filter( t => t.type === 'function').map( t => t.token )
-  ];
-  feedback.push({ has: 'functions', args: uniq(functions) });
-
-
   var references = [
     ...tokens.filter( t => t.subtype === 'range').map( t => t.token )
   ];
   feedback.push({ has: 'references', args: uniq(references) });
 
 
-  console.log(feedback);
-  console.log(tokens);
+  var values = [
+    ...tokens.filter( t => t.subtype === 'number').map( t => parseInt(t.token, 10) ),
+    ...tokens.filter( t => t.subtype === 'text').map( t => t.token )
+  ];
+  feedback.push({ has: 'values', args: uniq(values) });
 
   return feedback;
 }
@@ -53,9 +54,6 @@ function parseFormula(formula) {
   var tokens = getTokens(formula);
   var token = '';
   const results = [];
-
-  console.log(tokens);
-
 
   while (tokens.moveNext()) {
 

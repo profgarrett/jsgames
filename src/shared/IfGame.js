@@ -16,18 +16,26 @@ const IfLevels = [
 	{ code: 'math1', label: 'Math 1', description: 'Create basic arithmetic formulas.' },
 	{ code: 'math2', label: 'Math 2', description: 'Create advanced arithmetic formulas.' },
 	{ code: 'dates', label: 'Date Functions', description: 'Learn about date functions.' },
+	{ code: 'rounding', label: 'Rounding Functions', description: 'Round numbers.' },
 	{ code: 'summary', label: 'Summary function', description: 'Learn how to use summary functions.' },
 	{ code: 'text', label: 'Text functions', description: 'Learn a number of useful text functions' },
 	{ code: 'if1', label: 'IF1: Logical number comparisons', description: 'Compare numbers' },
 	{ code: 'if2', label: 'IF2: Logical text comparisons', description: 'Compare words' },
-	{ code: 'if2', label: 'IF2: IF function', description: 'Create simple formulas with IF' },
 	{ code: 'if3', label: 'IF3: the IF function', description: 'Create simple formulas with IF' },
 	{ code: 'if4', label: 'IF4: Logical functions', description: 'Learn about AND, OR, & NOT' },
 	{ code: 'if5', label: 'IF5: Logical functions and IF', description: 'Use AND, OR, & NOT inside of IF' },
-	{ code: 'if6', label: 'IF6: Booleans', description: 'Figure out TRUE and FALSE' },
-	{ code: 'if7', label: 'IF7: IF and Math', description: 'Embed math inside of IF' }
+	{ code: 'if6', label: 'IF6: IF and Math', description: 'Embed math inside of an IF' },
+	{ code: 'if7', label: 'IF7: Booleans 1', description: 'Figure out TRUE and FALSE' },
+	{ code: 'if8', label: 'IF8: Booleans 2', description: 'Use booleans with the AND & OR functions' }
 
 ];
+
+// Polyfill for testing if a number is an integer.
+// Currenlty in modern browsers, but below is for IE.
+// Source: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/isInteger#Polyfill
+function isInteger(nVal: number): boolean {
+    return typeof nVal === 'number' && isFinite(nVal) && nVal > -9007199254740992 && nVal < 9007199254740992 && Math.floor(nVal) === nVal;
+}
 
 
 // Are the arrays similar or different?
@@ -525,8 +533,13 @@ class IfPageFormulaSchema extends Schema {
 			return;
 		}
 
+
 		// Start testing with the assumption of correctness.
 		this.correct = true;
+
+		// Since we are actually testing, make solution results visible after something
+		//  has been submitted and no more changes are possible.
+		this.solution_test_results_visible = true;
 
 		// Feedback may be null if we're on the client, not server.
 		// But, if it's not null, and longer than zero, then this is not correct.
@@ -685,6 +698,13 @@ class IfPageFormulaSchema extends Schema {
 
 			}
 		}
+
+		// Go through results and round any floating point numbers
+		// to 2 decimal points.
+		if(typeof res.result === 'number' && !isInteger(res.result)) {
+			res.result = Math.round(res.result*100)/100;
+		}
+
 		return res;
 	}
 

@@ -152,7 +152,7 @@ export default class IfLevelListContainer extends React.Component {
 			<Row>
 				<Col xs={12}>
 					<ForceLogin />
-					<PageHeader>List of all levels</PageHeader>
+					<PageHeader>Formula Trainer</PageHeader>
 					<Message message={this.state.message} style={this.state.message_style} />
 					<Loading loading={this.state.isLoading } />
 				</Col>
@@ -162,6 +162,13 @@ export default class IfLevelListContainer extends React.Component {
 					<IfLevelList levels={this.state.levels} />
 				</Col>
 				<Col xs={4}>
+					<div className='alert alert-warning' role='alert'>
+						This site shows you how to write Excel formulas.
+						<br/><br/>
+						Report issues to &nbsp;
+						<a className='alert-link' 
+							href='mailto:nathan.garrett@woodbury.edu'>Nathan Garrett</a>.
+					</div>
 					{ buttons }
 				</Col>
 			</Row>

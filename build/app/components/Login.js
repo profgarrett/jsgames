@@ -132,10 +132,51 @@ export default class Login extends React.Component {
 		this.setState({ password: e.target.value });
 	}
 
+
+
 	render() {
+		const that = this;
 		let formStyle = {
 			visible: !this.isLoading
 		};
+
+		/* 
+			Request a new user to be created as an anonymous user
+		*/
+		function create_anon_user(event) {
+
+			// Fire AJAX.
+			fetch('/api/login/', {
+					method: 'POST',
+					credentials: 'include',
+					mode: 'same-origin',
+					headers: {
+						'Accept': 'application/json',
+						'Content-Type': 'application/json'
+					},
+					body: JSON.stringify({ username: '' , password: '', token: 'anonymous' })
+				})
+				.then( response => response.json() )
+				.then( json => {
+					if(json._error) throw new Error(json._error); 
+
+					that.setState({ message: 'Success creating an anonymous user acount!', messageStyle: 'success', isLoading: false});
+					setTimeout( () => {
+						that.context.router.history.push(that.state.url);
+					}, location.host === 'localhost:8080' ? 1000 : 0);  // add a short delay if on dev.
+
+				})
+				.catch( error => {
+					let e = { 
+						messageStyle: 'danger', 
+						message: error.message,
+						isLoading: false
+					};
+
+					that.setState({...e});
+
+				});		
+		}
 
 		return (
 			<Row>
@@ -168,6 +209,10 @@ export default class Login extends React.Component {
 							<Button type='submit' bsStyle='primary'>Login</Button>
 						</FormGroup>
 					</form>
+					<h3>Guest Access</h3>
+					<p>If you are not a student trying to join a class, you can create a test user account
+						using the button below.</p>
+					<Button type='submit' onClick={create_anon_user}>Log in as an anonymous user</Button>
 				</Col>
 			</Row>
 		);

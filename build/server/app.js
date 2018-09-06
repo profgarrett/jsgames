@@ -28,6 +28,7 @@ const { sql01 } = require('./../../sql/sql01.js');
 const { sql02 } = require('./../../sql/sql02.js');
 const { sql03 } = require('./../../sql/sql03.js');
 const { sql04 } = require('./../../sql/sql04.js');
+const { sql05 } = require('./../../sql/sql05.js');
 
 
 
@@ -231,7 +232,10 @@ app.get('/api/sql/',
 		if(old_version < 4 ) {
 			await update_version( sql04 );
 		}
-		res.json({ 'old_version': old_version, 'new_version': 4 });
+		if(old_version < 5 ) {
+			await update_version( sql05 );
+		}
+		res.json({ 'old_version': old_version, 'new_version': 5 });
 	} catch(e){
 		log_error(e);
 		res.json(e);
@@ -270,14 +274,16 @@ const strip_secrets = function(input        )         {
 	if( Array.isArray(input)) {
 		return input.map(strip_secrets);
 	}
-
+	
 	// create a clean new object.
 	let new_json = {};
 
 	// recursively iterate through.
 	for(let property in input ) {
 		if(input.hasOwnProperty(property)) {
-			if(property.substr(0,8) !== 'solution' || ( property.substr(0,8) === 'solution' && input[property+'_visible'] ) ) {
+			if(property.substr(0,8) !== 'solution' 
+				|| ( property.substr(0,8) === 'solution' && input[property+'_visible'] ) ) {
+
 				if(Array.isArray(input[property])) {
 					new_json[property] = strip_secrets(input[property]);
 				} else {
@@ -358,7 +364,8 @@ app.post('/api/ifgame/new_level_by_code/:code',
 		const now = from_utc_to_myql(to_utc(new Date()));
 
 		const insert_sql = `INSERT INTO iflevels (type, username, code, title, description, completed, 
-			pages, history, created, updated, seed, allow_skipping_tutorial) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+			pages, history, created, updated, seed, allow_skipping_tutorial, harsons_randomly_on_username) 
+			VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
 		level.username = username;
 
 					
@@ -370,7 +377,8 @@ app.post('/api/ifgame/new_level_by_code/:code',
 				JSON.stringify(level.history), 
 				now, now,
 				level.seed,
-				level.allow_skipping_tutorial
+				level.allow_skipping_tutorial,
+				level.harsons_randomly_on_username
 				];
 
 		let insert_results = await run_mysql_query(insert_sql, values);
@@ -662,19 +670,25 @@ app.post('/api/login_clear_test_user/',
 
 // Log the user in.
 async function login_and_maybe_create_user(params        )      {
-	let hashed_password = bcrypt.hashSync(params.password, 8);
-	let user = { username: params.username, hashed_password: hashed_password };
+
+	// Setup 
+	// If a null username/password was passed, then create a random user and password.
+	const username = params.username === '' ? 'anon' + Math.floor(Math.random()*100000000000) : params.username;
+	const password = params.password === '' ? 'p' + Math.floor(Math.random()*100000000000) : params.password;
+
+	const hashed_password = bcrypt.hashSync(password, 8);
+	let user = { username: username, hashed_password: hashed_password };
 	const select_sql = 'SELECT * FROM users WHERE username = ?';
 	
 
-	let select_results = await run_mysql_query(select_sql, [params.username]);
+	let select_results = await run_mysql_query(select_sql, [username]);
 
 	// test the db for presense of user.  If not found, create given proper perms.
 	if(select_results.length === 0) {
 		// Username not found.
 
 		// Did the passed token match the value in secret.js?
-		if(params.token !== USER_CREATION_SECRET ) {
+		if(params.token !== USER_CREATION_SECRET && params.token !== 'anonymous' ) {
 			return 403;// no, error hard.
 		} else {
 			// Yes, create user and log in.
@@ -687,7 +701,7 @@ async function login_and_maybe_create_user(params        )      {
 
 	} else if(select_results.length === 1) {
 		// We have a user. Test username.
-		if(!bcrypt.compareSync(params.password, select_results[0].hashed_password)) {
+		if(!bcrypt.compareSync(password, select_results[0].hashed_password)) {
 			return 401;  // Bad password or username.
 		} 
 
@@ -697,7 +711,7 @@ async function login_and_maybe_create_user(params        )      {
 	}
 
 	// We have a proper user.  Continue!
-	let jwt_token = jwt.sign({ username: user.username }, JWT_AUTH_SECRET, { expiresIn: 864000 });
+	let jwt_token = jwt.sign({ username: username }, JWT_AUTH_SECRET, { expiresIn: 864000 });
 	const last = (new Date()).toString().replace(/ /g, '_').replace('(', '').replace(')', '').replace(/:/g,'_').replace(/-/g, '_');
 
 	params.res.cookie('x-access-token', jwt_token);
@@ -784,7 +798,7 @@ app.get('/', (req, res) => {
 });
 */
 app.get('/api/version', nocache, (req          , res           ) => {
-	res.json({ version: 1.1, 
+	res.json({ version: 1.2, 
 		environment: process.env.NODE_ENV, 
 		debug: DEBUG 
 	});

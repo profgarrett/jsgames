@@ -7,7 +7,7 @@ import React from 'react';
 import type { LevelType } from './IfTypes';
 import type { Node } from 'react';
 import IfActivitySummaryChart from './IfActivitySummaryChart';
-import IfActivityMistakesChart from './IfActivityMistakesChart';
+//import IfActivityMistakesChart from './IfActivityMistakesChart';
 
 
 type PropsType = {
@@ -40,8 +40,8 @@ export default class IfActivity extends React.Component<PropsType> {
 			)
 		);
 
-
 		// Make a unique row for each distinct level
+		/*
 		const rows = [];
 		Object.keys(levelDict).forEach( 
 			(key: string): Node => {
@@ -54,11 +54,9 @@ export default class IfActivity extends React.Component<PropsType> {
 				));
 			}
 		);
+		*/
 
-
-
-
-/*
+		/*
 		const data = 
 			this.props.levels.reduce(
 				(accumLevels, level) => accumLevels.concat( 
@@ -78,9 +76,46 @@ export default class IfActivity extends React.Component<PropsType> {
 						)
 					,[])
 				),[]);
-*/
+		*/
+
+		
+		// Create a summary chart for each level.
+		const summary_charts = [];
+
+		Object.keys(levelDict).forEach( 
+			(key: string): any => {
+				summary_charts.push( (
+					<div>
+						<h1>{key}</h1>
+						<IfActivitySummaryChart levels={levelDict[key]} />
+					</div> 
+				));
+			}
+		);
+		/*
+		IfActivitySummaryChart
+			this.props.levels.reduce(
+				(accumLevels, level) => accumLevels.concat( 
+					level.pages.reduce(
+						(accumPages, page) => accumPages.concat(
+							page.history.map(
+								(history, history_i) => {
+										return {
+											username: level.username, 
+											code: level.code,
+											page: 0,
+											created: history.created.toString(),
+											value: history.client_f ? history.client_f : '?'+page.toString() 
+										}; 
+									}
+							)
+						)
+					,[])
+				),[]);
+		*/
+
 		return (<div>
-				{ rows }
+			{summary_charts}
 			</div>
 		);
 

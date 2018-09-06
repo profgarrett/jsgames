@@ -153,13 +153,10 @@ const get_feedback = (that          )                 => {
 	let response = '';
 	let responses = [];
 
-	// If we're on the client, we don't have access to feedback.  Return null for
-	//	unknown/unset/unitialized.
-	if(that.solution_feedback === null) return null;
+	if(that.feedback === null) return null;
 
 	// Do not give feedback on un-submitted items.
 	if(!that.client_has_answered) return [];
-
 
 	// Always check to make sure that there is a = sign.
 	response = has['symbols'](that, ['=']);
@@ -171,25 +168,25 @@ const get_feedback = (that          )                 => {
 
 
 	// If no custom rules are defined, return any from '='.
-	if(that.solution_feedback.length === 0) return responses;
+	if(that.feedback.length === 0) return responses;
 
 
 	// Loop through feedbacks, returning any that return a non-null response.
-	for(let i = 0; i < that.solution_feedback.length; i++) {
+	for(let i = 0; i < that.feedback.length; i++) {
 		// Make sure that it is a valid has type.
-		if(typeof has[that.solution_feedback[i].has] === 'undefined')
-			throw new Error('Invalid solution_feedback type of '+that.solution_feedback[i].has);
+		if(typeof has[that.feedback[i].has] === 'undefined')
+			throw new Error('Invalid feedback type of '+that.feedback[i].has);
 
 		// Run has code and save result (if not null, meaning ok).
-		response = has[that.solution_feedback[i].has](that, that.solution_feedback[i].args);
+		response = has[that.feedback[i].has](that, that.feedback[i].args);
 		if(response !== null) responses.push(response);
 	}
 
 	if(responses === null) throw new Error('Null responses in get_feedback');
 
-
 	return responses;
 };
+
 
 
 module.exports = {

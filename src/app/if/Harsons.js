@@ -43,18 +43,28 @@ export default class Harsons extends React.Component<HarsonsPropsType, HarsonsSt
 
 		const options = { 
 			toolbox : toolbox_xml, 
+			grid: {
+				spacing: 30,
+				length: 3,
+				colour: '#ccc',
+				snap: true
+			},
+			zoom: {
+				controls: true,
+				wheel: true
+			},
 			collapse : false, 
 			comments : false, 
 			disable : false, 
-			maxBlocks : Infinity, 
-			trashcan : false, 
+			maxBlocks : 15, 
+			trashcan : false, // it'd be nice to add, but long formulas may go over the top of this. 
 			horizontalLayout : true, 
 			toolboxPosition : 'start', 
 			css : true, 
-			media : 'https://blockly-demo.appspot.com/static/media/', 
+			media : '/static/blockly_2018_08_23/media/', 
 			rtl : false, 
 			scrollbars : false, 
-			sounds : true, 
+			sounds : false, 
 			oneBasedIndex : true
 		};
 
@@ -108,7 +118,7 @@ export default class Harsons extends React.Component<HarsonsPropsType, HarsonsSt
 		// Don't do this unless we have a workspace.
 		if(typeof this.state.workspace === 'undefined') return;
 
-		if(prevProps.page.description !== this.props.page.description &&
+		if(prevProps.page.description !== this.props.page.description ||
 			prevProps.page.instruction !== this.props.page.instruction ) {
 			// We have a new page. Clear old toolbox and solution and reload toolbox with
 			// current solution.
@@ -126,11 +136,7 @@ export default class Harsons extends React.Component<HarsonsPropsType, HarsonsSt
 
 	// Build out the input box.
 	_render_field(page: HarsonsPageType): Node {
-		const helpblockStyle = {
-			color: 'white',
-			marginBottom: 5,
-			paddingLeft: 5
-		};
+
 		let helpblock = page.helpblock ? <HelpBlock style={helpblockStyle}><HtmlSpan html={ page.helpblock } /></HelpBlock> : '';
 	
 		return (
@@ -155,7 +161,7 @@ export default class Harsons extends React.Component<HarsonsPropsType, HarsonsSt
 		if(page.tests.length === 0) throw new Error('Invalid length of tests for '+page.code);
 
 		const blocklyAreaStyle = {
-			height: 150,
+			height: 175,
 			//position: 'absolute',
 			backgroundColor: 'red'
 		};
@@ -165,12 +171,20 @@ export default class Harsons extends React.Component<HarsonsPropsType, HarsonsSt
 			return <p>{ this.props.page.client_f }</p>;
 		}
 
+		const helpblockStyle = {
+			color: 'white',
+			backgroundColor: '#337ab7',
+			marginBottom: 5,
+			padding: 7
+		};
+		const helpblock = page.helpblock ? <HelpBlock style={helpblockStyle}>Hint: <HtmlSpan html={ page.helpblock } /></HelpBlock> : '';
 
 		// Return full interface.
 		return (
 			<div>
 				<div id='blocklyArea' style={blocklyAreaStyle}></div>
 				<div id='blocklyDiv' style={{'position': 'absolute'}}></div>
+				{ helpblock }
 				<ExcelTable page={page} 
 						readonly={ true }
 						editable={ false } 

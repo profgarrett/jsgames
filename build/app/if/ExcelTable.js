@@ -21,6 +21,7 @@ const format_tf = tf => {
 // Needed because REACT freaks out if given an obj to render.  Normally dates will be formatted by format,
 //	but can't rely on this from user input.
 const transform_if_date = dt => {
+
 	if(dt instanceof Date) {
 		return dt.toLocaleDateString('en-US', { });
 	} else {
@@ -39,6 +40,12 @@ const format = (input, format) => {
 			return input.toLocaleString('en-US');
 		else
 			return input;
+	}
+
+	// Test to see if this is a string version of a date (i.e., json)
+	// If so, change back to date.
+	if (typeof input === 'string' && input.length === 24 && input.match( /^\d{4}\-\d{2}\-\d{2}T\d\d\:\d\d/ ).length > 0) {
+		input = new Date(input);
 	}
 
 	if(input instanceof Date) {
