@@ -5,6 +5,7 @@ import { Row, Col, Alert } from 'react-bootstrap';
 import { OverlayTrigger, Tooltip, Glyphicon } from 'react-bootstrap';
 
 import { RotateLoader, ClipLoader, ScaleLoader } from 'react-spinners';
+import secret from './../../server/secret';
 
 //  Old browser compatability.
 import 'whatwg-fetch'; // ajax support.
@@ -339,4 +340,14 @@ export function get_cookie(arg) {
 	let match = cookies.filter( c=> c.name === arg );
 
 	return match.length === 0 ? null : match[0].value;
+}
+
+export function get_username() {
+	return get_cookie('x-access-token-username');
+}
+
+// Return boolean with if the user is an administrator or not.
+export function get_user_is_admin() {
+	const username = get_username();
+	return (username === secret.ADMIN_USERNAME || username === 'test');
 }

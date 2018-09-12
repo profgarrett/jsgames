@@ -425,7 +425,8 @@ app.get('/api/ifgame/levels/byCode/:code',
 app.get('/api/ifgame/recent_levels', nocache, require_logged_in_user,
 	async (req          , res           , next              )               => {
 	try {
-		const sql = 'SELECT * FROM iflevels WHERE updated > NOW() - INTERVAL 60 MINUTE';
+		const INTERVAL = 60*24*7*4;
+		const sql = 'SELECT * FROM iflevels WHERE updated > NOW() - INTERVAL '+INTERVAL+' MINUTE';
 		const username = get_username_or_emptystring(req);
 
 		if(username !== ADMIN_USERNAME && username !== 'test')

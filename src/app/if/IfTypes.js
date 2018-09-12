@@ -19,6 +19,9 @@ export type LevelType = {
 	pages: Array<PageType>,
 	history: Array<Object>,
 
+	get_first_update_date: () => Date,
+	get_last_update_date: () => Date,
+
 	allow_skipping_tutorial: boolean,
 
 	get_score_as_array: (any, any, any, any) => Array<Object>,

@@ -117,13 +117,21 @@ function common_schema(): Object {
 	};
 }
 
+/**
+	Common base class for shared behavior.
+*/
+class IfPageBaseSchema extends Schema {
 
+	get type(): string {
+		return 'IfPageBaseSchema';
+	}
+}
 
 
 /*
 	This pages displays information to the user.
 */
-class IfPageTextSchema extends Schema {
+class IfPageTextSchema extends IfPageBaseSchema {
 
 	constructor(json: Object) {
 		super(json); // set passed fields.
@@ -201,7 +209,7 @@ class IfPageTextSchema extends Schema {
 	It can have either a correct choice or a range of choices.
 	If a range of choices, then solution should be a wildcard ? or *.
 */
-class IfPageChoiceSchema extends Schema {
+class IfPageChoiceSchema extends IfPageBaseSchema {
 
 	constructor(json: Object) {
 		super(json); // set passed fields.
@@ -297,7 +305,7 @@ class IfPageChoiceSchema extends Schema {
 
 	The solution fields are not sent to the client unless they have the _visible tag set.
 */
-class IfPageParsonsSchema extends Schema {
+class IfPageParsonsSchema extends IfPageBaseSchema {
 
 	constructor(json: Object) {
 		super(json); // set passed fields.
@@ -400,7 +408,7 @@ class IfPageParsonsSchema extends Schema {
 
 	The solution fields are not sent to the client unless they have the _visible tag set.
 */
-class IfPageFormulaSchema extends Schema {
+class IfPageFormulaSchema extends IfPageBaseSchema {
 
 	constructor(json: Object) {
 		super(json); // set passed fields.
@@ -919,6 +927,28 @@ class IfLevelSchema extends Schema {
 		}
 
 		return new_page;
+	}
+
+	// Convert dt to date if it is text.
+	_date_ify( s: any): Date {
+		if(typeof s === 'string') return new Date(s);
+		return s;
+	}
+
+	/*
+		When was this created?
+		Find the oldest page.
+	*/
+	get_first_update_date(): ?Date {
+		return this.history.length > 0 
+			? this._date_ify(this.history[0].dt)
+			: null;
+	}
+
+	get_last_update_date(): ?Date {
+		return this.history.length > 0 
+			? this._date_ify(this.history[this.history.length-1].dt)
+			: null;
 	}
 
 	updateUserFields(json: Object) {

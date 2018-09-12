@@ -9,6 +9,12 @@ import { BrowserRouter, Switch, Route } from 'react-router-dom';
 import Promise from 'promise-polyfill';
 if (!window.Promise) { window.Promise = Promise; }
 
+// Number polyfill.
+// Source: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/MAX_SAFE_INTEGER
+if (!Number.MAX_SAFE_INTEGER) {
+    Number.MAX_SAFE_INTEGER = Math.pow(2, 53) - 1; // 9007199254740991
+}
+
 // Display components
 import { Grid } from 'react-bootstrap';
 

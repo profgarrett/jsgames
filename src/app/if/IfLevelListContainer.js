@@ -165,7 +165,7 @@ export default class IfLevelListContainer extends React.Component {
 			<Row>
 				<Col xs={8}>
 					<IfLevelList levels={this.state.levels} />
-					<ul>{ links.map( l => <li><a href={l}>{l}</a></li> ) }</ul>
+					<ul>{ links.map( (l,i) => <li key={'link'+i}><a href={l}>{l}</a></li> ) }</ul>
 				</Col>
 				<Col xs={4}>
 					<div className='alert alert-warning' role='alert'>

@@ -5,7 +5,7 @@ import IfLevelList from './IfLevelList';
 
 import { Breadcrumb, PageHeader, Row, Col, Well, Button } from 'react-bootstrap';
 
-import { Message, Loading } from './../components/Misc';
+import { get_user_is_admin, Message, Loading } from './../components/Misc';
 import { IfLevelSchema, IfLevels } from './../../shared/IfGame';
 
 import ForceLogin from './../components/ForceLogin';
@@ -68,11 +68,7 @@ export default class IfLevelListContainer extends React.Component {
 
 				let newLevel = new IfLevelSchema(json);
 				this.context.router.history.push('/ifgame/level/'+newLevel._id+'/play');
-				/*
-				this.setState( prevState => ({ 
-					levels: [newLevel, ...prevState.levels]
-				}));
-				*/
+
 			}).catch( error => {
 				console.log(error);
 				this.setState({ message: error });
@@ -136,6 +132,15 @@ export default class IfLevelListContainer extends React.Component {
 
 
 	render_all() {
+
+		const links = !get_user_is_admin() ? [] : [
+			'/api/version',
+			'/logout',
+			'/ifgame/test/?USER_CREATION_SECRET=supersecret',
+			'/ifgame/activity',
+			'/ifgame/monitor'
+		];
+
 		const buttons = IfLevels.map( (level, i) => (
 			<div key={i}>
 				<h4>{level.label}</h4>
@@ -160,6 +165,7 @@ export default class IfLevelListContainer extends React.Component {
 			<Row>
 				<Col xs={8}>
 					<IfLevelList levels={this.state.levels} />
+					<ul>{ links.map( (l,i) => <li key={'link'+i}><a href={l}>{l}</a></li> ) }</ul>
 				</Col>
 				<Col xs={4}>
 					<div className='alert alert-warning' role='alert'>
@@ -170,6 +176,7 @@ export default class IfLevelListContainer extends React.Component {
 							href='mailto:nathan.garrett@woodbury.edu'>Nathan Garrett</a>.
 					</div>
 					{ buttons }
+					<br/><br/>
 				</Col>
 			</Row>
 			</div>
