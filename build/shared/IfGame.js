@@ -897,6 +897,13 @@ class IfLevelSchema extends Schema {
 	get_score_incorrect()         {
 		return this.get_score_as_array(1,0,0,0).reduce( (accum, i) => accum + i, 0);
 	}
+	get_tutorial_pages_completed()         {
+		return this.pages.length - this.get_score_attempted();
+	}
+
+	get_score_as_percent()         {
+		return Math.round(100 * this.get_score_correct() / this.get_score_attempted()); 
+	}
 
 
 	/**
@@ -949,6 +956,16 @@ class IfLevelSchema extends Schema {
 		return this.history.length > 0 
 			? this._date_ify(this.history[this.history.length-1].dt)
 			: null;
+	}
+
+	// Return the time from the first edit to the last edit.
+	get_time_in_minutes()         {
+		const first = this.get_first_update_date();
+		const last = this.get_last_update_date();
+
+		if(first === null || last === null) return 0;
+
+		return Math.round( (last.getTime() - first.getTime()) / 60000 );
 	}
 
 	updateUserFields(json        ) {

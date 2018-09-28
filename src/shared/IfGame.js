@@ -30,6 +30,20 @@ const IfLevels = [
 
 ];
 
+
+
+// Are we on the server or on the client?
+function is_server(): boolean {
+	return ! (typeof window !== 'undefined' && window.document );
+}
+
+
+// Convert dt to date if it is text.
+function convert_to_date_if_string( s: any): Date {
+		if(typeof s === 'string') return new Date(s);
+		return s;
+}
+
 // Polyfill for testing if a number is an integer.
 // Currenlty in modern browsers, but below is for IE.
 // Source: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/isInteger#Polyfill
@@ -125,6 +139,68 @@ class IfPageBaseSchema extends Schema {
 	get type(): string {
 		return 'IfPageBaseSchema';
 	}
+
+
+	/*
+		When was this created?
+		Find the oldest history item.
+	*/
+	get_first_update_date(): ?Date {
+		const history = this.history.filter( h => h.code === 'client_update');
+		return history.length > 0 
+			? convert_to_date_if_string(history[0].dt)
+			: null;
+	}
+
+	get_last_update_date(): ?Date {
+		const history = this.history.filter( h => h.code === 'client_update');
+		return history.length > 0 
+			? convert_to_date_if_string(history[history.length-1].dt)
+			: null;
+	}
+
+	// Return the time from the first edit to the last edit.
+	// Ignores periods with an update longer than 2 minutes.
+	get_time_in_seconds(): number {
+		const max_period = 60*2*1000;
+		const first = this.get_first_update_date();
+		const last = this.get_last_update_date();
+
+		// Filter history to only have client_udpates.
+		// Early data didn't code client_update properly, doing it on the server.
+		// Add filter to pull out anything with client_feedback, which can only 
+		// be generated on the server.
+		// REMOVE/FIXME
+		const history = this.history
+				.filter( h => h.code === 'client_update' )
+				.filter( h => h.client_feedback === null ); 
+
+		if(first === null || last === null) return 0;
+
+		let ms = 0;
+		let last_ms_time = 0;
+		let current_ms_time = 0;
+
+		for(let i = 0; i < history.length; i++) {
+			current_ms_time = convert_to_date_if_string( history[i].dt ).getTime();
+
+			// Add on time
+			// Note that stupid freaking clocks sometimes go backwards for an unknown
+			// reason.  Not sure why....
+			if( current_ms_time - last_ms_time <= max_period &&
+				current_ms_time - last_ms_time > 0 ) {   
+				ms += current_ms_time - last_ms_time;
+			}
+			last_ms_time = current_ms_time;
+		}
+
+		if(ms < 0) {
+			debugger;
+		}
+
+		return Math.round( ms / 1000 );
+	}
+
 }
 
 
@@ -470,27 +546,31 @@ class IfPageFormulaSchema extends IfPageBaseSchema {
 		this.client_f = json.client_f;
 		this.history = Array.from(json.history);
 
+		const code = is_server() ? 'server_update' : 'client_update';
+
 		// If the old and new solutions don't match, the null out the correct variable and the client feedback.
 		// We do this as it no longer pertains to the solution.
 		if(old_client_f !== json.client_f) {
 			this.correct = null;
 			this.client_feedback = null;
+
+			// Update history.
+			this.history.push({
+					dt: new Date(),
+					code: code,
+					client_f: json.client_f, 
+					client_feedback: this.client_feedback,
+					correct: this.correct,
+					tests: this.tests
+			});
+
+			// Update level parsing as needed.
+			this.updateSolutionTestResults();
+			this.updateClientTestResults();
+			this.updateCorrect();
 		}
 
-		// Update level parsing as needed.
-		this.updateSolutionTestResults();
-		this.updateClientTestResults();
-		this.updateCorrect();
 
-		// Update history.
-		this.history.push({
-				dt: new Date(),
-				code: 'client_update',
-				client_f: json.client_f, 
-				client_feedback: this.client_feedback,
-				correct: this.correct,
-				tests: this.tests
-		});
 	}
 
 
@@ -897,6 +977,13 @@ class IfLevelSchema extends Schema {
 	get_score_incorrect(): number {
 		return this.get_score_as_array(1,0,0,0).reduce( (accum, i) => accum + i, 0);
 	}
+	get_tutorial_pages_completed(): number {
+		return this.pages.length - this.get_score_attempted();
+	}
+
+	get_score_as_percent(): number {
+		return Math.round(100 * this.get_score_correct() / this.get_score_attempted()); 
+	}
 
 
 	/**
@@ -929,26 +1016,30 @@ class IfLevelSchema extends Schema {
 		return new_page;
 	}
 
-	// Convert dt to date if it is text.
-	_date_ify( s: any): Date {
-		if(typeof s === 'string') return new Date(s);
-		return s;
-	}
-
 	/*
 		When was this created?
 		Find the oldest page.
 	*/
 	get_first_update_date(): ?Date {
 		return this.history.length > 0 
-			? this._date_ify(this.history[0].dt)
+			? convert_to_date_if_string(this.history[0].dt)
 			: null;
 	}
 
 	get_last_update_date(): ?Date {
 		return this.history.length > 0 
-			? this._date_ify(this.history[this.history.length-1].dt)
+			? convert_to_date_if_string(this.history[this.history.length-1].dt)
 			: null;
+	}
+
+	// Return the time from the first edit to the last edit.
+	get_time_in_minutes(): number {
+		const first = this.get_first_update_date();
+		const last = this.get_last_update_date();
+
+		if(first === null || last === null) return 0;
+
+		return Math.round( (last.getTime() - first.getTime()) / 60000 );
 	}
 
 	updateUserFields(json: Object) {

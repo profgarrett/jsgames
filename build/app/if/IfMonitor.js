@@ -14,18 +14,19 @@ import Text from './Text';
                                                      
                                   
 
+/*
 
-                        
-                         
-  
+type PersonPropsType = {
+	levels: Array<LevelType>
+};
 
-class Person extends React.Component                  {
+class Person extends React.Component<PersonPropsType> {
 
-	render()       {
+	render(): Node {
 		const person = this.props.levels[0].username;
 
 		const levels = this.props.levels.map( 
-				(l           , i        )       => 
+				(l: LevelType, i: number): Node => 
 					<PersonLevel person={person} level={l} key={i} />);
 //				Date: <PrettyDate date={this.props.levels[0].updated} />
 		
@@ -38,14 +39,14 @@ class Person extends React.Component                  {
 	}
 }
 
-                             
-                
-                 
-  
-class PersonLevel extends React.Component                       {
+type PersonLevelPropsType = {
+	person: string,
+	level: LevelType
+};
+class PersonLevel extends React.Component<PersonLevelPropsType> {
 
 
-	render()       {
+	render(): Node {
 		const level = this.props.level;
 
 		const row = (<tr>
@@ -54,11 +55,11 @@ class PersonLevel extends React.Component                       {
 			<td>Created: { level.created.toString() }</td>
 			<td>{ level.pages.length }</td>
 			<td>{ level.get_score_correct() } of { level.get_score_attempted() }</td>
-		 </tr>);
+			</tr>);
 
 		return row;
 	}
-	render_actual_problem()       {
+	render_actual_problem(): Node {
 
 		// Figure out which control to use for the page.
 		let problem;
@@ -110,7 +111,7 @@ class PersonLevel extends React.Component                       {
 		);
 	}
 }
-
+*/
 
 
                   
@@ -155,15 +156,25 @@ export default class IfMonitor extends React.Component            {
 			this.props.levels.reduce(
 				(accumLevels, level) => accumLevels.concat( 
 					level.pages.reduce(
-						(accumPages, page) => accumPages.concat(
-							page.history.map(
-								(history, history_i) => {
+						(accumPages, page, p_index) => accumPages.concat(
+							page.history
+								.filter( // filter non f and unused events.
+									h => typeof h.client_f !== 'undefined' &&
+										h.code !== 'created' && h.code !== 'server_page_completed'
+								).filter( // filter dups and progressively built items  A, A+, A+1, ...
+									(h, i, h_array) => {
+										if(i==h_array.length-1) return true; // always return last item.
+										return (h.client_f !== h_array[i+1].client_f 
+											&& h.client_f !== h_array[i+1].client_f.substr(0, h.client_f.length));
+									}
+								).map( // reduce.
+									(history) => {
 										return {
 											username: level.username, 
 											code: level.code,
-											page: 0,
-											created: history.created.toString(),
-											value: history.client_f ? history.client_f : '?'+page.toString() 
+											page: p_index,
+											created: history.dt.toLocaleTimeString(),
+											value:  history.client_f
 										}; 
 									}
 							)

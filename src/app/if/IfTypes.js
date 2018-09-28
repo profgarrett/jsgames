@@ -21,10 +21,17 @@ export type LevelType = {
 
 	get_first_update_date: () => Date,
 	get_last_update_date: () => Date,
+	get_time_in_minutes: () => number,
 
 	allow_skipping_tutorial: boolean,
 
 	get_score_as_array: (any, any, any, any) => Array<Object>,
+	get_score_correct: () => number,
+	get_score_incorrect: () => number,
+	get_score_attempted: () => number,
+	get_tutorial_pages_completed: () => number,
+	get_score_as_percent: () => number,
+	
 	get_new_page: (Object) => Object,
 	toJson: () => Object,
 	toJsonString: () => string

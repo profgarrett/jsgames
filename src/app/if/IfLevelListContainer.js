@@ -138,7 +138,8 @@ export default class IfLevelListContainer extends React.Component {
 			'/logout',
 			'/ifgame/test/?USER_CREATION_SECRET=supersecret',
 			'/ifgame/activity',
-			'/ifgame/monitor'
+			'/ifgame/monitor',
+			'/ifgame/grades',
 		];
 
 		const buttons = IfLevels.map( (level, i) => (

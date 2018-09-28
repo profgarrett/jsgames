@@ -209,13 +209,21 @@ export default class IfLevelPlay extends React.Component<PropsType, StateType> {
 		if(page.code === 'test') {
 			// Do a custom animation to draw eye to the instruction
 			// Ugly hack to get stylesheet and insert keyframes.
-			const stylesheet = document.styleSheets[0];
-			const keyframes = `@keyframes quizIn${pageId} {
-				0% { color: #d9edf7; background-color: #d9edf7; } 
-				100% { color: black; background-color: white; }
-				}`;
-			stylesheet.insertRule(keyframes, stylesheet.cssRules.length);
 
+			try {
+				const stylesheet = document.styleSheets[0];
+				const keyframes = `@keyframes quizIn${pageId} {
+					0% { color: #d9edf7; background-color: #d9edf7; } 
+					100% { color: black; background-color: white; }
+					}`;
+				stylesheet.insertRule(keyframes, stylesheet.cssRules.length);
+			} catch(e) {
+				// Ignore any errors generated here.
+				// TODO: Some issue with Safari occasionally throws an error here. 
+				//       Says that stylesheet.cssRules is null.
+				console.error(e);
+			}
+			
 			const t = `quizIn${pageId} 4s ease`;
 			const style = {
 				MozAnimation: t,

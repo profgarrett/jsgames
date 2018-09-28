@@ -426,7 +426,11 @@ app.get('/api/ifgame/recent_levels', nocache, require_logged_in_user,
 	async (req          , res           , next              )               => {
 	try {
 		const INTERVAL = 60*24*7*4;
-		const sql = 'SELECT * FROM iflevels WHERE updated > NOW() - INTERVAL '+INTERVAL+' MINUTE';
+		const ignore = '"' + ['garrettn', 'test', 'bob'].join( '","')+'"';
+		const sql = 'SELECT * FROM iflevels WHERE ' +
+				'updated > NOW() - INTERVAL '+INTERVAL+' MINUTE ' +
+				'AND username NOT IN ('+ignore+')';
+				//' AND username = "caracozar" AND code="math1"';
 		const username = get_username_or_emptystring(req);
 
 		if(username !== ADMIN_USERNAME && username !== 'test')

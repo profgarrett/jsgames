@@ -26,8 +26,8 @@ class Schema {
 				// Error.  Fail silently, unless we are on localhost. In that case,
 				// throw a message to localhost.
 				// NDG: FIXME to properly log.
-				console.log( 'Invalid key for object');
-				console.log( { schema, json });
+				console.log( 'Invalid key ' + key + ' for object');
+				//console.log( { schema, json });
 				// solution_feedback
 				// throw new Error('Invalid key "' + key + '" in ' + this['type']);
 
