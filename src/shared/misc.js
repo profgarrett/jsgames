@@ -26,7 +26,6 @@ function turn_array_into_map( a: Array<any>, get_p: any, sort_order_alpha: boole
 
 
 
-
 module.exports = {
 	turn_array_into_map
 };

@@ -12,9 +12,8 @@ export default class IfLevelList extends React.Component {
 		let aCompleted = this.props.levels.filter( level => level.completed),
 			aUncompleted =  this.props.levels.filter( level => !level.completed);
 
-		const score = ( g => g.get_score_attempted() < 1 ? '' : 
-				' Score '+ g.get_score_correct() + ' of ' + g.get_score_attempted() 
-			);
+		const score = level => !level.completed ? '' : 'scored ' + level.get_test_score_as_percent()+ '%';
+
 
 		// Put in most recent first order.
 		aCompleted.sort( (a, b) => a.created > b.created ? -1 : 1 );
@@ -48,9 +47,7 @@ export default class IfLevelList extends React.Component {
 						g=> (
 							<li key={g._id}>
 								<Link to={'/ifgame/level/'+g._id+'/score'}>
-									{g.title}, completed&nbsp;
-									<PrettyDate date={ g.created } />.  
-									{ score(g) }
+									{g.title}, { score(g) }	<PrettyDate date={ g.created } />.  
 								</Link>
 							</li>
 							)

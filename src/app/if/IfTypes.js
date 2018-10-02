@@ -25,12 +25,12 @@ export type LevelType = {
 
 	allow_skipping_tutorial: boolean,
 
-	get_score_as_array: (any, any, any, any) => Array<Object>,
-	get_score_correct: () => number,
-	get_score_incorrect: () => number,
-	get_score_attempted: () => number,
+	get_test_score_correct: () => number,
+	get_test_score_incorrect: () => number,
+	get_test_score_attempted: () => number,
 	get_tutorial_pages_completed: () => number,
-	get_score_as_percent: () => number,
+	get_tutorial_pages_uncompleted: () => number,
+	get_test_score_as_percent: () => number,
 	
 	get_new_page: (Object) => Object,
 	toJson: () => Object,

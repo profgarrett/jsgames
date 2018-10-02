@@ -937,8 +937,7 @@ class IfLevelSchema extends Schema {
 			} else {
 				// Last page is not completed, pop off.
 				if(pages[pages.length-1].correct !== null) {
-					pages = pages.slice();
-					pages.pop(); 
+					pages = pages.slice().pop();
 				}
 				//throw new Error('IfGame.Shared.Level.get_score_as_array found uncompleted last not null');
 			}
@@ -952,9 +951,11 @@ class IfLevelSchema extends Schema {
 
 
 		// Map
-		let results = this.pages.map( (p: PageType): Array<any> => { 
-			if(!p.correct_required && p.correct) return y;
-			if(!p.correct_required && !p.correct) return n;
+		let results = this.pages.map( (p: PageType): Array<any> => {
+
+			if(p.correct === null) return unscored_but_completed; 
+			if(p.correct_required && p.correct) return y;
+			if(p.correct_required && !p.correct) return n;
 			
 			return unscored_but_completed; //condition: if(p.correct_required) 
 		});
@@ -968,21 +969,41 @@ class IfLevelSchema extends Schema {
 		return results;
 	}
 
-	get_score_correct(): number {
-		return this.get_score_as_array(1,0,0,0).reduce( (accum, i) => accum + i, 0);
+/*
+	get_test_score_correct: () => number,
+	get_test_score_incorrect: () => number,
+	get_test_score_attempted: () => number,
+	get_tutorial_pages_completed: () => number,
+	get_tutorial_pages_uncompleted: () => number,
+	get_test_score_as_percent: () => number,
+*/
+
+	get_test_score_correct(): number {
+		return this.pages.filter( p => p.code === 'test' && p.completed && p.correct ).length;
 	}
-	get_score_attempted(): number {
-		return this.get_score_as_array(1,1,0,0).reduce( (accum, i) => accum + i, 0);
+	get_test_score_incorrect(): number {
+		return this.pages.filter( p => p.code === 'test' && p.completed && !p.correct ).length;
 	}
-	get_score_incorrect(): number {
-		return this.get_score_as_array(1,0,0,0).reduce( (accum, i) => accum + i, 0);
+	get_test_score_attempted(): number {
+		return this.pages.filter( p => p.code === 'test' && p.completed ).length;
 	}
 	get_tutorial_pages_completed(): number {
-		return this.pages.length - this.get_score_attempted();
+		return this.pages.filter( p => p.code === 'tutorial' && p.completed === true ).length;
+	}
+	get_tutorial_pages_uncompleted(): number {
+		return this.pages.filter( p => p.code === 'tutorial' && p.completed !== true ).length;
 	}
 
-	get_score_as_percent(): number {
-		return Math.round(100 * this.get_score_correct() / this.get_score_attempted()); 
+	get_test_score_as_percent(): number | null {
+		const attempted = this.get_test_score_attempted();
+		if( !this.completed ) 
+			throw new Error('You can not run get_test_score_as_percent before a level has been completed');
+
+		// If there are no actual test pages, but the tutorial has been completed, then return 100%
+		if( attempted < 1 ) return 100;
+
+		// Return the rounded result.
+		return Math.round(100 * this.get_test_score_correct() / attempted); 
 	}
 
 

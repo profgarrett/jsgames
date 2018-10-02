@@ -5,8 +5,11 @@ import IfLevelList from './IfLevelList';
 
 import { Breadcrumb, PageHeader, Row, Col, Well, Button } from 'react-bootstrap';
 
-import { get_user_is_admin, Message, Loading } from './../components/Misc';
+import { get_user_is_admin, get_username, Message, Loading } from './../components/Misc';
+
 import { IfLevelSchema, IfLevels } from './../../shared/IfGame';
+
+import IfGrades from './IfGrades';
 
 import ForceLogin from './../components/ForceLogin';
 
@@ -21,7 +24,8 @@ export default class IfLevelListContainer extends React.Component {
 			message: 'Loading data from server',
 			message_style: 'info',
 			isLoading: true,
-			levels: []
+			levels: [],
+			grades: []
 		};
 		this.insertGame = this.insertGame.bind(this);
 	}
@@ -29,6 +33,7 @@ export default class IfLevelListContainer extends React.Component {
 	componentDidMount() {
 		const code = this.props.match.params._code ? this.props.match.params._code : 'all';
 		
+		// Fetch levels
 		fetch('/api/ifgame/levels/byCode/'+code, {
 				credentials: 'include'
 			})
@@ -50,6 +55,32 @@ export default class IfLevelListContainer extends React.Component {
 					isLoading: false
 				});
 			});
+
+		// Fetch grades
+		fetch('/api/ifgame/grades/' + get_username(), {
+				method: 'get',
+				credentials: 'include',
+				headers: {
+					'Accept': 'application/json',
+					'Content-Type': 'application/json'
+				}
+			})
+			.then( response => response.json() )
+			.then( json => {
+				this.setState({
+					grades: json
+				});
+			})
+			.catch( error => {
+				this.setState({ 
+					grades: [],
+					message: 'Error: ' + error,
+					messageStyle: 'Error',
+					isLoading: false
+				});
+			});
+
+
 	}
 
 	insertGame(code) {
@@ -140,6 +171,7 @@ export default class IfLevelListContainer extends React.Component {
 			'/ifgame/activity',
 			'/ifgame/monitor',
 			'/ifgame/grades',
+			'/ifgame/answers'
 		];
 
 		const buttons = IfLevels.map( (level, i) => (
@@ -161,6 +193,7 @@ export default class IfLevelListContainer extends React.Component {
 					<PageHeader>Formula Trainer</PageHeader>
 					<Message message={this.state.message} style={this.state.message_style} />
 					<Loading loading={this.state.isLoading } />
+					<IfGrades data={this.state.grades} />
 				</Col>
 			</Row>
 			<Row>

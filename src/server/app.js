@@ -17,7 +17,6 @@ const { IfLevelModelFactory, IfLevelModel } = require('./IfGame');
 
 const { from_utc_to_myql, run_mysql_query, update_mysql_database_schema, to_utc } = require('./mysql.js');
 const { login_and_maybe_create_user, require_logged_in_user, 
-		return_level_without,
 		get_username_or_emptystring, return_level_prepared_for_transmit} = require('./network.js');
 
 const { turn_array_into_map } = require('./../shared/misc.js');
@@ -31,8 +30,8 @@ import type { $Request, $Response, NextFunction } from 'express';
 // import type { Connection } from 'mysql';
 
 const app = express();
-const http = require('http');
-const server = http.createServer(app);
+//const http = require('http');
+//const server = http.createServer(app);
 //const io = require('socket.io')(server);
 
 
@@ -231,6 +230,7 @@ app.get('/api/ifgame/recent_levels', nocache, require_logged_in_user,
 				'AND username NOT IN ('+ignore+')';
 				//' AND username = "caracozar" AND code="math1"';
 		const username = get_username_or_emptystring(req);
+		//const level = req.params.level ? req.params.level : 'tutorial';
 
 		if(username !== ADMIN_USERNAME && username !== 'test')
 			throw new Error('Invalid username '+username+' for recent_levels');
@@ -253,18 +253,29 @@ app.get('/api/ifgame/recent_levels', nocache, require_logged_in_user,
 
 
 // Get grades for registered users.
-app.get('/api/ifgame/grades', nocache, require_logged_in_user,
+// If the param username is passed, then return that user's information only.
+app.get('/api/ifgame/grades/:username?', nocache, require_logged_in_user,
 	async (req: $Request, res: $Response, next: NextFunction): Promise<any> => {
 	try {
 		const ignore = '"' + ['garrettn', 'test', 'bob'].join( '","')+'"';
-		const sql = 'SELECT * FROM iflevels WHERE COMPLETED = 1 AND ' +
-				' username NOT IN ('+ignore+')';
 		const username = get_username_or_emptystring(req);
+		const param_username = typeof req.params.username === 'undefined' ? '' : req.params.username;
+		const sql = 'SELECT * FROM iflevels WHERE COMPLETED = 1 ' +
+				(param_username === username 
+				? ' AND username = ?' 
+				: ' AND username NOT IN ('+ignore+')');
 
-		if(username !== ADMIN_USERNAME && username !== 'test')
+		// Make sure that if a username was given, that it equals the current user.
+		if(param_username !== '' && param_username !== username) {
 			throw new Error('Invalid username '+username+' for recent_levels');
+		}
 
-		let select_results = await run_mysql_query(sql);
+		// Ensure that if we want everything, that it's an admin user.
+		if(param_username === '' && (username !== ADMIN_USERNAME && username !== 'test')) {
+			throw new Error('Invalid user '+username+' for recent_levels');
+		}
+
+		let select_results = await run_mysql_query(sql, [param_username]);
 
 		if(select_results.length === 0) return res.json([]);
 
@@ -282,9 +293,9 @@ app.get('/api/ifgame/grades', nocache, require_logged_in_user,
 
 			level_map.forEach( (levels, code) => {
 				u[code] = levels.reduce( (max, l) => 
-						max > l.get_score_as_percent() 
+						max > l.get_test_score_as_percent() 
 						? max 
-						: l.get_score_as_percent()
+						: l.get_test_score_as_percent()
 						, 0);
 			});
 

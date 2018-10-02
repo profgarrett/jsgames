@@ -2,31 +2,34 @@
 import React from 'react';
 import { Row, Col, Breadcrumb, Button  } from 'react-bootstrap';
 
-import IfGrades from './IfGrades';
+import IfAnswers from './IfAnswers';
 import { Message, Loading } from './../components/Misc';
+
+import { IfLevelSchema } from './../../shared/IfGame';
 
 import ForceLogin from './../components/ForceLogin';
 
+import type { LevelType } from './IfTypes';
 import type { Node } from 'react';
 
 
-type GradesPropsType = {};
+type AnswersPropsType = {};
 
-type GradesContainerStateType = {
+type AnswersContainerStateType = {
 	message: string,
 	messageStyle: string,
 	isLoading: boolean,
-	data: Array<any>
+	levels: Array<LevelType>
 };
 
-export default class IfGradesContainer extends React.Component<GradesPropsType, GradesContainerStateType> {
+export default class IfAnswersContainer extends React.Component<AnswersPropsType, AnswersContainerStateType> {
 	constructor(props: any) {
 		super(props);
 		this.state = { 
 			message: 'Loading data from server',
 			messageStyle: '',
 			isLoading: true,
-			data: [],
+			levels: [],
 		};
 		(this: any).refreshData = this.refreshData.bind(this);
 		(this: any).handleSubmit = this.handleSubmit.bind(this);
@@ -45,7 +48,7 @@ export default class IfGradesContainer extends React.Component<GradesPropsType, 
 
 	refreshData() {
 
-		fetch('/api/ifgame/grades', {
+		fetch('/api/ifgame/recent_levels', {
 				method: 'get',
 				credentials: 'include',
 				headers: {
@@ -54,9 +57,10 @@ export default class IfGradesContainer extends React.Component<GradesPropsType, 
 				}
 			})
 			.then( response => response.json() )
-			.then( json => {
+			.then( json => json.map( j => new IfLevelSchema(j) ) )
+			.then( ifLevels => {
 				this.setState({
-					data: json,
+					levels: ifLevels,
 					messageStyle: '',
 					message: '',
 					isLoading: false
@@ -64,7 +68,7 @@ export default class IfGradesContainer extends React.Component<GradesPropsType, 
 			})
 			.catch( error => {
 				this.setState({ 
-					data: [],
+					levels: [],
 					message: 'Error: ' + error,
 					messageStyle: 'Error',
 					isLoading: false
@@ -79,12 +83,13 @@ export default class IfGradesContainer extends React.Component<GradesPropsType, 
 		const crumbs = (
 			<Breadcrumb>
 				<Breadcrumb.Item title='home' href='/ifgame/'>If Games</Breadcrumb.Item>
-				<Breadcrumb.Item title='Grades' active>Grades</Breadcrumb.Item>
+				<Breadcrumb.Item title='Answers' active>Answers</Breadcrumb.Item>
 			</Breadcrumb>
 			);
 
 		const filter = (
 			<form name='c' onSubmit={this.handleSubmit}>
+
 				<Button bsStyle='primary'>Refresh filter</Button>
 			</form>
 			);
@@ -94,12 +99,12 @@ export default class IfGradesContainer extends React.Component<GradesPropsType, 
 				<Col>
 					<ForceLogin/>
 					{ crumbs }
-					<h3>Grades</h3>
+					<h3>Recently Updated Levels</h3>
 
 					<Message message={this.state.message} style={this.state.messageStyle} />
 					<Loading loading={this.state.isLoading } />
 					{ filter }
-					<IfGrades data={this.state.data} />
+					<IfAnswers levels={this.state.levels} />
 				</Col>
 			</Row>
 		);
