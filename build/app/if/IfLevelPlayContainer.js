@@ -248,7 +248,6 @@ export default class IfLevelPlayContainer extends React.Component               
 		const crumbs = this.state.level ?
 			<Breadcrumb>
 				<Breadcrumb.Item href={'/ifgame/'}>Home</Breadcrumb.Item>
-				<Breadcrumb.Item href={'/ifgame/'+this.state.level.code}>List</Breadcrumb.Item>
 				<Breadcrumb.Item active>{ this.state.level.title }</Breadcrumb.Item>
 			</Breadcrumb>
 			: <span></span>;

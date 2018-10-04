@@ -9,7 +9,7 @@ import { get_user_is_admin, get_username, Message, Loading } from './../componen
 
 import { IfLevelSchema, IfLevels } from './../../shared/IfGame';
 
-import IfGrades from './IfGrades';
+import IfMyProgress from './IfMyProgress';
 
 import ForceLogin from './../components/ForceLogin';
 
@@ -106,19 +106,10 @@ export default class IfLevelListContainer extends React.Component {
 			}).then( () => this.setState({ isLoading: false }));
 	}
 
-	render() {
-		const code = this.props.match.params._code ? this.props.match.params._code : 'all';
-		if(code === 'all') {
-			return this.render_all();
-		} else {
-			return this.render_code(code);
-		}
-	}
-
 
 	// Render levels that match the given code.
 	// Hides add button if there are any uncompleted items.
-	render_code(code) {
+	_render_code(code) {
 		let button_level = IfLevels.filter( level => level.code === code )[0];
 		let button;
 
@@ -162,8 +153,8 @@ export default class IfLevelListContainer extends React.Component {
 	}
 
 
-	render_all() {
-
+	_render_all() {
+		const that = this;
 		const links = !get_user_is_admin() ? [] : [
 			'/api/version',
 			'/logout',
@@ -174,34 +165,60 @@ export default class IfLevelListContainer extends React.Component {
 			'/ifgame/answers'
 		];
 
-		const buttons = IfLevels.map( (level, i) => (
-			<div key={i}>
-				<h4>{level.label}</h4>
+		const buttons = [];
+		const completed_tutorials = this.state.levels.filter( l => l.completed ).map( l => l.code );
+
+		
+		// Create a button for each tutorial that we have already completed.
+		IfLevels
+			.filter( l => completed_tutorials.includes(l.code) )
+			.map( (level,i) => {
+			buttons.push(
+				<li key={'iflevellistcontainerbutton'+i}>
 					<Button 
 						onClick={ e => this.insertGame(level.code, e) } 
+						bsStyle='link'
+						style={{ padding: 0 }}
 						disabled={ this.state.isLoading } >
-						{ level.description }
+						{ level.code.substr(0,1).toUpperCase() + level.code.substr(1) }
 					</Button>
-			</div>
-		));
+				</li>
+			);
+		});
+
 
 		return (
 			<div>
 			<Row>
 				<Col xs={12}>
 					<ForceLogin />
-					<PageHeader>Formula Trainer</PageHeader>
+					<div style={{ paddingTop: 10}} />
 					<Message message={this.state.message} style={this.state.message_style} />
 					<Loading loading={this.state.isLoading } />
-					<IfGrades data={this.state.grades} />
+					<IfMyProgress 
+							grades={this.state.grades} 
+							levels={this.state.levels} 
+							onClickNewCode={ (code,e)=> that.insertGame(code,e)}
+							onClickContinueLevel={ (ifLevel,e)=> this.context.router.history.push('/ifgame/level/'+ifLevel._id+'/play') } />
 				</Col>
 			</Row>
 			<Row>
 				<Col xs={8}>
 					<IfLevelList levels={this.state.levels} />
-					<ul>{ links.map( (l,i) => <li key={'link'+i}><a href={l}>{l}</a></li> ) }</ul>
+					<ul>{ links.map( (l,i) => <li key={'link'+i}><a href={l}>{l}</a></li> )}
+					</ul>
 				</Col>
 				<Col xs={4}>
+					{ buttons.length === 0 ? '' : <h4>Restart a tutorial</h4> }
+					<ul>{ buttons }</ul>
+					<br/><br/>
+				</Col>
+			</Row>
+			</div>
+		);
+	}
+
+/*
 					<div className='alert alert-warning' role='alert'>
 						This site shows you how to write Excel formulas.
 						<br/><br/>
@@ -209,13 +226,18 @@ export default class IfLevelListContainer extends React.Component {
 						<a className='alert-link' 
 							href='mailto:nathan.garrett@woodbury.edu'>Nathan Garrett</a>.
 					</div>
-					{ buttons }
-					<br/><br/>
-				</Col>
-			</Row>
-			</div>
-		);
+
+*/
+
+	render() {
+		const code = this.props.match.params._code ? this.props.match.params._code : 'all';
+		if(code === 'all') {
+			return this._render_all();
+		} else {
+			return this._render_code(code);
+		}
 	}
+
 }
 IfLevelListContainer.propTypes = {
 	match: PropTypes.object.isRequired

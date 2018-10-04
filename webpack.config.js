@@ -23,7 +23,8 @@ module.exports = {
 		]
 	},
 	output: {
-		filename: 'transformed.js',
+		filename: 'packedjs.js',
+		publicPath: '/',
 		path:   __dirname + '/build/public'
 	},
 	plugins: [HTMLWebpackPluginConfig],

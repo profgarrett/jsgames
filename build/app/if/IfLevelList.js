@@ -7,14 +7,13 @@ import { PrettyDate } from './../components/Misc';
 
 export default class IfLevelList extends React.Component {
 
-	render() {
+	_render_levels() {
 		// Filter returned values into finished and unfinished.
 		let aCompleted = this.props.levels.filter( level => level.completed),
 			aUncompleted =  this.props.levels.filter( level => !level.completed);
 
-		const score = ( g => g.get_score_attempted() < 1 ? '' : 
-				' Score '+ g.get_score_correct() + ' of ' + g.get_score_attempted() 
-			);
+		const score = level => !level.completed ? '' : 'scored ' + level.get_test_score_as_percent()+ '%';
+
 
 		// Put in most recent first order.
 		aCompleted.sort( (a, b) => a.created > b.created ? -1 : 1 );
@@ -25,13 +24,14 @@ export default class IfLevelList extends React.Component {
 
 		const open = aUncompleted.length < 1 ? <span /> : (
 			<div>
-				<h3>Open Tutorial{ aUncompleted.length > 1 ? 's' : '' }</h3>
+				<h4>Your open tutorial{ aUncompleted.length > 1 ? 's' : '' }</h4>
 				<ul>
 					{ aUncompleted.map( 
 						g=> (
 							<li key={g._id}>
 								<Link to={'/ifgame/level/'+g._id+'/play'}>
-									{g.title}, started&nbsp;
+									<b>{g.code.substr(0,1).toUpperCase()+g.code.substr(1)}</b>: &nbsp;
+										{g.title}, started&nbsp;
 									<PrettyDate date={ g.created } />
 								</Link>
 							</li>
@@ -42,15 +42,14 @@ export default class IfLevelList extends React.Component {
 
 		const closed = aCompleted.length < 1 ? <span /> : (
 			<div>
-				<h3>Completed Tutorial{ aCompleted.length > 1 ? 's' : '' }</h3>
+				<h4>Review completed tutorials</h4>
 				<ul>
 					{ aCompleted.map( 
 						g=> (
 							<li key={g._id}>
 								<Link to={'/ifgame/level/'+g._id+'/score'}>
-									{g.title}, completed&nbsp;
-									<PrettyDate date={ g.created } />.  
-									{ score(g) }
+									<b>{g.code.substr(0,1).toUpperCase()+g.code.substr(1)}</b>: &nbsp;
+										{g.title}, { score(g) }	<PrettyDate date={ g.created } />  
 								</Link>
 							</li>
 							)
@@ -59,6 +58,10 @@ export default class IfLevelList extends React.Component {
 			</div>);
 
 		return <div>{ open } { closed }</div>;
+	}
+
+	render() {
+		return this._render_levels();
 	}
 }
 IfLevelList.propTypes = {

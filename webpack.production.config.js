@@ -36,6 +36,7 @@ module.exports = {
 	],
 	output: {
 		filename: '[name].[chunkhash].js',
+		publicPath: '/',
 		path:   __dirname + '/build/public'
 	},
 	devtool: 'source-map',

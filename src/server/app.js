@@ -257,13 +257,12 @@ app.get('/api/ifgame/recent_levels', nocache, require_logged_in_user,
 app.get('/api/ifgame/grades/:username?', nocache, require_logged_in_user,
 	async (req: $Request, res: $Response, next: NextFunction): Promise<any> => {
 	try {
-		const ignore = '"' + ['garrettn', 'test', 'bob'].join( '","')+'"';
+		//const ignore = '"' + ['garrettn', 'test', 'bob'].join( '","')+'"';
 		const username = get_username_or_emptystring(req);
 		const param_username = typeof req.params.username === 'undefined' ? '' : req.params.username;
 		const sql = 'SELECT * FROM iflevels WHERE COMPLETED = 1 ' +
-				(param_username === username 
-				? ' AND username = ?' 
-				: ' AND username NOT IN ('+ignore+')');
+				(param_username === '' ? '' : ' AND username = ?');
+		//		: ' AND username NOT IN ('+ignore+')');
 
 		// Make sure that if a username was given, that it equals the current user.
 		if(param_username !== '' && param_username !== username) {
@@ -277,7 +276,7 @@ app.get('/api/ifgame/grades/:username?', nocache, require_logged_in_user,
 
 		let select_results = await run_mysql_query(sql, [param_username]);
 
-		if(select_results.length === 0) return res.json([]);
+		if(select_results.length === 0) return res.json([ { username: param_username} ]);
 
 		let iflevels = select_results.map( l => new IfLevelModel(l) );
 
@@ -302,7 +301,7 @@ app.get('/api/ifgame/grades/:username?', nocache, require_logged_in_user,
 			grades.push(u);
 		});
 
-		res.json(grades);
+		return res.json(grades);
 	} catch (e) {
 		log_error(e);
 		next(e);

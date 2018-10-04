@@ -1,6 +1,6 @@
 //@flow
 import React from 'react';
-import { Row, Col, Breadcrumb, Button  } from 'react-bootstrap';
+import { Row, Col, Breadcrumb, DropdownButton, MenuItem, Button  } from 'react-bootstrap';
 
 import IfAnswers from './IfAnswers';
 import { Message, Loading } from './../components/Misc';
@@ -19,6 +19,7 @@ type AnswersContainerStateType = {
 	message: string,
 	messageStyle: string,
 	isLoading: boolean,
+	code: string,
 	levels: Array<LevelType>
 };
 
@@ -29,6 +30,7 @@ export default class IfAnswersContainer extends React.Component<AnswersPropsType
 			message: 'Loading data from server',
 			messageStyle: '',
 			isLoading: true,
+			code: 'tutorial',
 			levels: [],
 		};
 		(this: any).refreshData = this.refreshData.bind(this);
@@ -48,7 +50,7 @@ export default class IfAnswersContainer extends React.Component<AnswersPropsType
 
 	refreshData() {
 
-		fetch('/api/ifgame/recent_levels', {
+		fetch('/api/ifgame/recent_levels/'+this.state.code, {
 				method: 'get',
 				credentials: 'include',
 				headers: {
@@ -89,8 +91,10 @@ export default class IfAnswersContainer extends React.Component<AnswersPropsType
 
 		const filter = (
 			<form name='c' onSubmit={this.handleSubmit}>
-
-				<Button bsStyle='primary'>Refresh filter</Button>
+				<DropdownButton bsStyle='Default' title='Level' key='levelsection' id='levelselect'>
+					{ IfLevels.map( (l,i) => <MenuItem eventKey={i}>{l.code}</MenuItem>})}
+				</DropdownButton>
+				<Button bsStyle='primary'>Update</Button>
 			</form>
 			);
 

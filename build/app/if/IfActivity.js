@@ -4,41 +4,20 @@ import React from 'react';
 
 //import { HtmlDiv } from './../components/Misc';
 
-                                           
+                                                                                                       
                                   
-import IfActivitySummaryChart from './IfActivitySummaryChart';
-//import IfActivityMistakesChart from './IfActivityMistakesChart';
 
+import { HtmlDiv } from './../components/Misc';
+import { turn_array_into_map } from './../../shared/misc';
 
+import ReactTable from 'react-table';
+import 'react-table/react-table.css';
 
 
                   
                          
   
 
-function turn_array_into_map( a            , get_p     , sort_order_alpha          = true )      {
-
-	var m = new Map();
-	var index = '';
-
-	// Create a new array that is properly sorted by get_p
-	// Map uses insertion order, so this sets insertion order 
-	// the get_p function's result (i.e., string, date, etc..)
-
-	var sorted_a = sort_order_alpha
-		? a.sort( (a,b) => get_p(a) < get_p(b) ? -1 : 1 )
-		: a.sort( (a,b) => get_p(a) > get_p(b) ? -1 : 1 );
-
-	sorted_a.map( item => {
-		// Add new map [] if the key doesn't exist.
-		index = get_p(item);
-
-		if( !m.has(index) ) m.set(index, []);
-		m.get(index).push(item);
-	});
-
-	return m;
-}
 
 
 function toDate( max       )         {
@@ -79,7 +58,7 @@ export default class IfActivity extends React.Component            {
 		const columns = [ 
 			'tutorial',
 			'math1', 'math2', 'summary', 'rounding',
-			'if1', 'if2', 'if3', 'if4', 'if5', 'if6', 'if7' ];
+			'if1', 'if2', 'if3', 'if4', 'if5', 'if6', 'if7', 'if8' ];
 
 		const finished_levels = this.props.levels.filter( l => l.completed );
 
@@ -162,6 +141,8 @@ export default class IfActivity extends React.Component            {
 				<table style={table_css}>{ table }</table>
 			</div>);
 	}
+
+
 
 
 
@@ -321,104 +302,6 @@ export default class IfActivity extends React.Component            {
 					{this._render_pages_summary() }
 					{this._render_users_pages_by_date() }
 				</div>);
-
-
-		const levelDict = {};
-
-		// Organize by level.code
-		this.props.levels.map( (level            ) => {
-			if(!levelDict.hasOwnProperty(level.code)) {
-				levelDict[level.code] = [];
-			}
-			levelDict[level.code].push(level);
-		});
-
-		// Sort each level by username
-		Object.keys(levelDict).forEach( 
-			(key        )      => levelDict[key] = levelDict[key].sort( 
-				(a           , b           )          => a.username > b.username 
-			)
-		);
-
-		// Make a unique row for each distinct level
-		/*
-		const rows = [];
-		Object.keys(levelDict).forEach( 
-			(key: string): Node => {
-
-				rows.push((<div key={ key }>
-					<h1>{ levelDict[key][0].code }</h1>
-					<b>Items: { levelDict[key].length }</b>
-					<IfActivitySummaryChart levels={levelDict[key]} />
-					</div>
-				));
-			}
-		);
-		*/
-
-		/*
-		const data = 
-			this.props.levels.reduce(
-				(accumLevels, level) => accumLevels.concat( 
-					level.pages.reduce(
-						(accumPages, page) => accumPages.concat(
-							page.history.map(
-								(history, history_i) => {
-										return {
-											username: level.username, 
-											code: level.code,
-											page: 0,
-											created: history.created.toString(),
-											value: history.client_f ? history.client_f : '?'+page.toString() 
-										}; 
-									}
-							)
-						)
-					,[])
-				),[]);
-		*/
-
-		
-		// Create a summary chart for each level.
-		const summary_charts = [];
-
-		Object.keys(levelDict).forEach( 
-			(key        )      => {
-				summary_charts.push( (
-					<div>
-						<h1>{key}</h1>
-						<IfActivitySummaryChart levels={levelDict[key]} />
-					</div> 
-				));
-			}
-		);
-		/*
-		IfActivitySummaryChart
-			this.props.levels.reduce(
-				(accumLevels, level) => accumLevels.concat( 
-					level.pages.reduce(
-						(accumPages, page) => accumPages.concat(
-							page.history.map(
-								(history, history_i) => {
-										return {
-											username: level.username, 
-											code: level.code,
-											page: 0,
-											created: history.created.toString(),
-											value: history.client_f ? history.client_f : '?'+page.toString() 
-										}; 
-									}
-							)
-						)
-					,[])
-				),[]);
-		*/
-
-		return (<div>
-			{summary_charts}
-			</div>
-		);
-
 	}
 
 }

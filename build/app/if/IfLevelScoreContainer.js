@@ -56,7 +56,6 @@ export default class IfLevelScoreContainer extends React.Component {
 		const crumbs = this.state.level ?
 			<Breadcrumb>
 				<Breadcrumb.Item href={'/ifgame/'}>Home</Breadcrumb.Item>
-				<Breadcrumb.Item href={'/ifgame/'+this.state.level.code}>List</Breadcrumb.Item>
 				<Breadcrumb.Item active>{ this.state.level.title }</Breadcrumb.Item>
 			</Breadcrumb>
 			: <span></span>;
@@ -64,8 +63,8 @@ export default class IfLevelScoreContainer extends React.Component {
 		const back = this.state.level ?
 			<Button bsStyle='primary' 
 					style={{ marginBottom: 20, marginTop: 20 }} 
-					href={ '/ifgame/'+ this.state.level.code }>
-					Back to list
+					href={ '/ifgame/' }>
+					Back to home page
 			</Button>
 			: <span />;
 
@@ -78,6 +77,7 @@ export default class IfLevelScoreContainer extends React.Component {
 
 					<Message message={this.state.message} style={this.state.messageStyle} />
 					<Loading loading={this.state.isLoading } />
+					<div style={{ textAlign: 'center' }}>{ back }</div>
 					{ this.state.level ? <IfLevelScore level={this.state.level} /> : '' }
 					<div style={{ textAlign: 'center' }}>{ back }</div>
 					<br/>

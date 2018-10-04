@@ -30,6 +30,20 @@ const IfLevels = [
 
 ];
 
+
+
+// Are we on the server or on the client?
+function is_server()          {
+	return ! (typeof window !== 'undefined' && window.document );
+}
+
+
+// Convert dt to date if it is text.
+function convert_to_date_if_string( s     )       {
+		if(typeof s === 'string') return new Date(s);
+		return s;
+}
+
 // Polyfill for testing if a number is an integer.
 // Currenlty in modern browsers, but below is for IE.
 // Source: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/isInteger#Polyfill
@@ -125,6 +139,68 @@ class IfPageBaseSchema extends Schema {
 	get type()         {
 		return 'IfPageBaseSchema';
 	}
+
+
+	/*
+		When was this created?
+		Find the oldest history item.
+	*/
+	get_first_update_date()        {
+		const history = this.history.filter( h => h.code === 'client_update');
+		return history.length > 0 
+			? convert_to_date_if_string(history[0].dt)
+			: null;
+	}
+
+	get_last_update_date()        {
+		const history = this.history.filter( h => h.code === 'client_update');
+		return history.length > 0 
+			? convert_to_date_if_string(history[history.length-1].dt)
+			: null;
+	}
+
+	// Return the time from the first edit to the last edit.
+	// Ignores periods with an update longer than 2 minutes.
+	get_time_in_seconds()         {
+		const max_period = 60*2*1000;
+		const first = this.get_first_update_date();
+		const last = this.get_last_update_date();
+
+		// Filter history to only have client_udpates.
+		// Early data didn't code client_update properly, doing it on the server.
+		// Add filter to pull out anything with client_feedback, which can only 
+		// be generated on the server.
+		// REMOVE/FIXME
+		const history = this.history
+				.filter( h => h.code === 'client_update' )
+				.filter( h => h.client_feedback === null ); 
+
+		if(first === null || last === null) return 0;
+
+		let ms = 0;
+		let last_ms_time = 0;
+		let current_ms_time = 0;
+
+		for(let i = 0; i < history.length; i++) {
+			current_ms_time = convert_to_date_if_string( history[i].dt ).getTime();
+
+			// Add on time
+			// Note that stupid freaking clocks sometimes go backwards for an unknown
+			// reason.  Not sure why....
+			if( current_ms_time - last_ms_time <= max_period &&
+				current_ms_time - last_ms_time > 0 ) {   
+				ms += current_ms_time - last_ms_time;
+			}
+			last_ms_time = current_ms_time;
+		}
+
+		if(ms < 0) {
+			debugger;
+		}
+
+		return Math.round( ms / 1000 );
+	}
+
 }
 
 
@@ -470,27 +546,31 @@ class IfPageFormulaSchema extends IfPageBaseSchema {
 		this.client_f = json.client_f;
 		this.history = Array.from(json.history);
 
+		const code = is_server() ? 'server_update' : 'client_update';
+
 		// If the old and new solutions don't match, the null out the correct variable and the client feedback.
 		// We do this as it no longer pertains to the solution.
 		if(old_client_f !== json.client_f) {
 			this.correct = null;
 			this.client_feedback = null;
+
+			// Update history.
+			this.history.push({
+					dt: new Date(),
+					code: code,
+					client_f: json.client_f, 
+					client_feedback: this.client_feedback,
+					correct: this.correct,
+					tests: this.tests
+			});
+
+			// Update level parsing as needed.
+			this.updateSolutionTestResults();
+			this.updateClientTestResults();
+			this.updateCorrect();
 		}
 
-		// Update level parsing as needed.
-		this.updateSolutionTestResults();
-		this.updateClientTestResults();
-		this.updateCorrect();
 
-		// Update history.
-		this.history.push({
-				dt: new Date(),
-				code: 'client_update',
-				client_f: json.client_f, 
-				client_feedback: this.client_feedback,
-				correct: this.correct,
-				tests: this.tests
-		});
 	}
 
 
@@ -498,7 +578,7 @@ class IfPageFormulaSchema extends IfPageBaseSchema {
 	updateClientTestResults() {
 		if(this.client_f === null || this.client_f.length < 1) return;
 
-		this.client_test_results = this.tests.map( t => this.__parse(this.client_f, t));
+		this.client_test_results = this.tests.map( t => this.__parse(this.client_f, t, this.client_f_format));
 	}
 
 
@@ -509,7 +589,7 @@ class IfPageFormulaSchema extends IfPageBaseSchema {
 	updateSolutionTestResults() {
 		if(this.solution_f === null || this.solution_f.length < 1) return;
 
-		this.solution_test_results = this.tests.map( t => this.__parse(this.solution_f, t ) );
+		this.solution_test_results = this.tests.map( t => this.__parse(this.solution_f, t, this.client_f_format) );
 	}
 
 
@@ -557,14 +637,17 @@ class IfPageFormulaSchema extends IfPageBaseSchema {
 		}
 
 		// Check individual answers
-		// Rounds to 2 decimal points to avoid problems with floating point numbers.
 		for(let i=0; i<this.client_test_results.length && this.correct; i++) {
+
 			if(typeof this.client_test_results[i].result === 'string') {
+				// String.
 				this.correct = (
 					this.client_test_results[i].result == 
 					this.solution_test_results[i].result
 					);
 			} else {
+				// Number.
+				// Rounds to 2 decimal points to avoid problems with floating point numbers.
 				this.correct = (
 					Math.round(this.client_test_results[i].result * 100) == 
 					Math.round(this.solution_test_results[i].result * 100)
@@ -615,7 +698,6 @@ class IfPageFormulaSchema extends IfPageBaseSchema {
 		formula = formula.replace( /true/ig, 'TRUE').replace( /false/ig, 'FALSE');
 
 
-
 		// Issue 4: Excel doesn't like single-quotes ' but parser is ok with it.
 		// Change formula to one that generates an error.
 		if(formula.match(/'/) !== null) {
@@ -638,7 +720,7 @@ class IfPageFormulaSchema extends IfPageBaseSchema {
 
 		@arg formula
 	*/
-	__parse(formula        , current_test            )         {
+	__parse(formula        , current_test            , s_format        )         {
 
 		// Update test results.
 		//let columns = Object.keys(this.tests[0]);
@@ -706,6 +788,19 @@ class IfPageFormulaSchema extends IfPageBaseSchema {
 
 			}
 		}
+
+
+		// See if the result is a date.  If so, go ahead and transform it according to the
+		// given format code. Otherwise, we get the default toString behavior, which gives us
+		// a string like '2018-10-04T16:12:12.345Z'.
+		if( s_format === 'shortdate' 
+				&& typeof res.result !== 'undefined'
+				&& res.result !== null
+				&& typeof res.result === 'object' 
+				&& typeof res.result.toLocaleDateString !== 'undefined') {
+			res.result = res.result.toLocaleDateString('en-US');
+		}
+
 
 		// Go through results and round any floating point numbers
 		// to 2 decimal points.
@@ -857,8 +952,7 @@ class IfLevelSchema extends Schema {
 			} else {
 				// Last page is not completed, pop off.
 				if(pages[pages.length-1].correct !== null) {
-					pages = pages.slice();
-					pages.pop(); 
+					pages = pages.slice().pop();
 				}
 				//throw new Error('IfGame.Shared.Level.get_score_as_array found uncompleted last not null');
 			}
@@ -872,9 +966,11 @@ class IfLevelSchema extends Schema {
 
 
 		// Map
-		let results = this.pages.map( (p          )             => { 
-			if(!p.correct_required && p.correct) return y;
-			if(!p.correct_required && !p.correct) return n;
+		let results = this.pages.map( (p          )             => {
+
+			if(p.correct === null) return unscored_but_completed; 
+			if(p.correct_required && p.correct) return y;
+			if(p.correct_required && !p.correct) return n;
 			
 			return unscored_but_completed; //condition: if(p.correct_required) 
 		});
@@ -888,21 +984,41 @@ class IfLevelSchema extends Schema {
 		return results;
 	}
 
-	get_score_correct()         {
-		return this.get_score_as_array(1,0,0,0).reduce( (accum, i) => accum + i, 0);
+/*
+	get_test_score_correct: () => number,
+	get_test_score_incorrect: () => number,
+	get_test_score_attempted: () => number,
+	get_tutorial_pages_completed: () => number,
+	get_tutorial_pages_uncompleted: () => number,
+	get_test_score_as_percent: () => number,
+*/
+
+	get_test_score_correct()         {
+		return this.pages.filter( p => p.code === 'test' && p.completed && p.correct ).length;
 	}
-	get_score_attempted()         {
-		return this.get_score_as_array(1,1,0,0).reduce( (accum, i) => accum + i, 0);
+	get_test_score_incorrect()         {
+		return this.pages.filter( p => p.code === 'test' && p.completed && !p.correct ).length;
 	}
-	get_score_incorrect()         {
-		return this.get_score_as_array(1,0,0,0).reduce( (accum, i) => accum + i, 0);
+	get_test_score_attempted()         {
+		return this.pages.filter( p => p.code === 'test' && p.completed ).length;
 	}
 	get_tutorial_pages_completed()         {
-		return this.pages.length - this.get_score_attempted();
+		return this.pages.filter( p => p.code === 'tutorial' && p.completed === true ).length;
+	}
+	get_tutorial_pages_uncompleted()         {
+		return this.pages.filter( p => p.code === 'tutorial' && p.completed !== true ).length;
 	}
 
-	get_score_as_percent()         {
-		return Math.round(100 * this.get_score_correct() / this.get_score_attempted()); 
+	get_test_score_as_percent()                {
+		const attempted = this.get_test_score_attempted();
+		if( !this.completed ) 
+			throw new Error('You can not run get_test_score_as_percent before a level has been completed');
+
+		// If there are no actual test pages, but the tutorial has been completed, then return 100%
+		if( attempted < 1 ) return 100;
+
+		// Return the rounded result.
+		return Math.round(100 * this.get_test_score_correct() / attempted); 
 	}
 
 
@@ -936,25 +1052,19 @@ class IfLevelSchema extends Schema {
 		return new_page;
 	}
 
-	// Convert dt to date if it is text.
-	_date_ify( s     )       {
-		if(typeof s === 'string') return new Date(s);
-		return s;
-	}
-
 	/*
 		When was this created?
 		Find the oldest page.
 	*/
 	get_first_update_date()        {
 		return this.history.length > 0 
-			? this._date_ify(this.history[0].dt)
+			? convert_to_date_if_string(this.history[0].dt)
 			: null;
 	}
 
 	get_last_update_date()        {
 		return this.history.length > 0 
-			? this._date_ify(this.history[this.history.length-1].dt)
+			? convert_to_date_if_string(this.history[this.history.length-1].dt)
 			: null;
 	}
 

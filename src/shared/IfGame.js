@@ -578,7 +578,7 @@ class IfPageFormulaSchema extends IfPageBaseSchema {
 	updateClientTestResults() {
 		if(this.client_f === null || this.client_f.length < 1) return;
 
-		this.client_test_results = this.tests.map( t => this.__parse(this.client_f, t));
+		this.client_test_results = this.tests.map( t => this.__parse(this.client_f, t, this.client_f_format));
 	}
 
 
@@ -589,7 +589,7 @@ class IfPageFormulaSchema extends IfPageBaseSchema {
 	updateSolutionTestResults() {
 		if(this.solution_f === null || this.solution_f.length < 1) return;
 
-		this.solution_test_results = this.tests.map( t => this.__parse(this.solution_f, t ) );
+		this.solution_test_results = this.tests.map( t => this.__parse(this.solution_f, t, this.client_f_format) );
 	}
 
 
@@ -637,14 +637,17 @@ class IfPageFormulaSchema extends IfPageBaseSchema {
 		}
 
 		// Check individual answers
-		// Rounds to 2 decimal points to avoid problems with floating point numbers.
 		for(let i=0; i<this.client_test_results.length && this.correct; i++) {
+
 			if(typeof this.client_test_results[i].result === 'string') {
+				// String.
 				this.correct = (
 					this.client_test_results[i].result == 
 					this.solution_test_results[i].result
 					);
 			} else {
+				// Number.
+				// Rounds to 2 decimal points to avoid problems with floating point numbers.
 				this.correct = (
 					Math.round(this.client_test_results[i].result * 100) == 
 					Math.round(this.solution_test_results[i].result * 100)
@@ -695,7 +698,6 @@ class IfPageFormulaSchema extends IfPageBaseSchema {
 		formula = formula.replace( /true/ig, 'TRUE').replace( /false/ig, 'FALSE');
 
 
-
 		// Issue 4: Excel doesn't like single-quotes ' but parser is ok with it.
 		// Change formula to one that generates an error.
 		if(formula.match(/'/) !== null) {
@@ -718,7 +720,7 @@ class IfPageFormulaSchema extends IfPageBaseSchema {
 
 		@arg formula
 	*/
-	__parse(formula: string, current_test: Array<any>): Object {
+	__parse(formula: string, current_test: Array<any>, s_format: string): Object {
 
 		// Update test results.
 		//let columns = Object.keys(this.tests[0]);
@@ -786,6 +788,19 @@ class IfPageFormulaSchema extends IfPageBaseSchema {
 
 			}
 		}
+
+
+		// See if the result is a date.  If so, go ahead and transform it according to the
+		// given format code. Otherwise, we get the default toString behavior, which gives us
+		// a string like '2018-10-04T16:12:12.345Z'.
+		if( s_format === 'shortdate' 
+				&& typeof res.result !== 'undefined'
+				&& res.result !== null
+				&& typeof res.result === 'object' 
+				&& typeof res.result.toLocaleDateString !== 'undefined') {
+			res.result = res.result.toLocaleDateString('en-US');
+		}
+
 
 		// Go through results and round any floating point numbers
 		// to 2 decimal points.

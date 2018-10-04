@@ -15,6 +15,7 @@ if (!Number.MAX_SAFE_INTEGER) {
     Number.MAX_SAFE_INTEGER = Math.pow(2, 53) - 1; // 9007199254740991
 }
 
+
 // [].includes polyfill.
 // Source: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/includes#Polyfill
 // https://tc39.github.io/ecma262/#sec-array.prototype.includes
@@ -117,7 +118,7 @@ if(window.location.hostname !== 'localhost') {
 
 } else {
 
-	Root = () => ( <BrowserRouter>
+	Root = () => ( <BrowserRouter basename='/'>
 				<Grid>
 				<Menu page='/' />
 				<Switch>
