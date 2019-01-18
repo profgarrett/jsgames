@@ -15,10 +15,10 @@ const IfLevels = [
 	{ code: 'tutorial', label: 'Website Introduction', description: 'Learn how to complete tutorials.' },
 	{ code: 'math1', label: 'Math 1', description: 'Create basic arithmetic formulas.' },
 	{ code: 'math2', label: 'Math 2', description: 'Create advanced arithmetic formulas.' },
-	{ code: 'dates', label: 'Date Functions', description: 'Learn about date functions.' },
-	{ code: 'rounding', label: 'Rounding Functions', description: 'Round numbers.' },
 	{ code: 'summary', label: 'Summary function', description: 'Learn how to use summary functions.' },
+	{ code: 'dates', label: 'Date Functions', description: 'Learn about date functions.' },
 	{ code: 'text', label: 'Text functions', description: 'Learn a number of useful text functions' },
+	{ code: 'rounding', label: 'Rounding Functions', description: 'Round numbers.' },
 	{ code: 'if1', label: 'IF1: Logical number comparisons', description: 'Compare numbers' },
 	{ code: 'if2', label: 'IF2: Logical text comparisons', description: 'Compare words' },
 	{ code: 'if3', label: 'IF3: the IF function', description: 'Create simple formulas with IF' },
@@ -159,21 +159,88 @@ class IfPageBaseSchema extends Schema {
 			: null;
 	}
 
-	// Return the time from the first edit to the last edit.
-	// Ignores periods with an update longer than 2 minutes.
-	get_time_in_seconds(): number {
-		const max_period = 60*2*1000;
+	get_max_period_in_ms(): number {
+		return 5*60*1000; // 5 minutes.
+	}
+
+	// Find out if this was abandoned.  I.E., how long did the user pause 
+	// after starting before continuing.  This generally means that they were stuck.
+	get_break_times_in_minutes(): Array<number> {
+		const max_period = this.get_max_period_in_ms();
 		const first = this.get_first_update_date();
 		const last = this.get_last_update_date();
 
 		// Filter history to only have client_udpates.
+		let history0 = this.history.filter( h => h.code === 'client_update' );
+
 		// Early data didn't code client_update properly, doing it on the server.
-		// Add filter to pull out anything with client_feedback, which can only 
-		// be generated on the server.
-		// REMOVE/FIXME
-		const history = this.history
-				.filter( h => h.code === 'client_update' )
-				.filter( h => h.client_feedback === null ); 
+		// Add filter to pull out anything any history item with a time earlier
+		// than a previous entry.
+		let history = history0.reduce( (accum, h) => {
+			if(accum.length === 0) {
+				// First.
+				accum.push(h);
+				return accum;
+			} else if( accum[accum.length-1].dt < h.dt) {
+				// Good!  Add + return.
+				accum.push(h);
+				return accum;
+			} else {
+				// dt occurs prior to earlier event. Don't add.
+				return accum;
+			}
+		}, []);
+
+		if(first === null || last === null || history.length < 1) return [];
+
+		let abandoned = [];
+		let last_ms_time = convert_to_date_if_string( history[0].dt ).getTime();
+		let current_ms_time = 0;
+
+		for(let i = 0; i < history.length; i++) {
+			current_ms_time = convert_to_date_if_string( history[i].dt ).getTime();
+
+			// Add on time
+			// Note that stupid freaking clocks sometimes go backwards for an unknown
+			// reason.  Not sure why....
+			if( current_ms_time - last_ms_time > max_period &&
+				current_ms_time - last_ms_time > 0 ) {   
+				// Convert to minutes and push.
+				abandoned.push( Math.round((current_ms_time - last_ms_time)/(1000*60) ) );
+			}
+			last_ms_time = current_ms_time;
+		}
+
+		return abandoned;
+	}
+
+	// Return the time from the first edit to the last edit.
+	// Ignores periods with an update longer than 5 minutes.
+	get_time_in_seconds(): number {
+		const max_period = this.get_max_period_in_ms();
+		const first = this.get_first_update_date();
+		const last = this.get_last_update_date();
+
+		// Filter history to only have client_udpates.
+		let history0 = this.history.filter( h => h.code === 'client_update' );
+
+		// Early data didn't code client_update properly, doing it on the server.
+		// Add filter to pull out anything any history item with a time earlier
+		// than a previous entry.
+		let history = history0.reduce( (accum, h) => {
+			if(accum.length === 0) {
+				// First.
+				accum.push(h);
+				return accum;
+			} else if( accum[accum.length-1].dt < h.dt) {
+				// Good!  Add + return.
+				accum.push(h);
+				return accum;
+			} else {
+				// dt occurs prior to earlier event. Don't add.
+				return accum;
+			}
+		}, []);
 
 		if(first === null || last === null) return 0;
 
@@ -201,6 +268,47 @@ class IfPageBaseSchema extends Schema {
 		return Math.round( ms / 1000 );
 	}
 
+
+	// Change the casing of the instructions, description, and help.
+	// Loops through, changing the case of anything in a <code> block.
+	// Will not change case of anything within "quotes".
+	// E.g., 
+	//	from:	"Blah <code>=IF(A1="Bob", 1, FALSE)</code> blah
+	//	to:		"Blah <code>=if(a1="Bob", 1, false)</code> blah
+	// Passing optional_field limits to a single field.  
+	standardize_formula_case( optional_field: string ) {
+		if(typeof optional_field !== 'undefined') {
+			// Swap out the given field.
+			let s = this[optional_field];
+			if(s === null || s === '') return;
+
+			const block_reg = /<code>(.*?)<\/code>/g;
+			let matches = s.match(block_reg);
+
+			if(matches && matches !== null) {
+				matches.map( dirty => {
+					// Split formula into sections along " (double quotes)
+					// Lowercase only if not inside.
+					let splits = dirty.split('"');
+					for(let i=0; i<splits.length; i++) {
+						if( i%2 === 0) splits[i] = splits[i].toLowerCase();
+					}
+					let clean = splits.join('"');
+
+					// Done!  Replace original.
+					s = s.replace(dirty, clean);
+				});
+			}
+			this[optional_field] = s;
+			
+		} else {
+			this.standardize_formula_case('description');
+			this.standardize_formula_case('instruction');
+			this.standardize_formula_case('helpblock');
+			if(typeof this.solution_f !== 'undefined') 
+					this.standardize_formula_case('solution_f');
+		}
+	}
 }
 
 
@@ -559,9 +667,7 @@ class IfPageFormulaSchema extends IfPageBaseSchema {
 					dt: new Date(),
 					code: code,
 					client_f: json.client_f, 
-					client_feedback: this.client_feedback,
-					correct: this.correct,
-					tests: this.tests
+					correct: this.correct
 			});
 
 			// Update level parsing as needed.
@@ -906,6 +1012,9 @@ class IfLevelSchema extends Schema {
 
 			// Should half of users get Harsons instead of formula pages?
 			harsons_randomly_on_username: { type: 'Boolean', initialize: (i) => isDef(i) ? b(i) : false },
+
+			// should we go through the instructions and standardize formula sentence case?
+			standardize_formula_case: { type: 'Boolean', initialize: (i) => isDef(i) ? b(i) : false },
 
 			code: { type: 'String', initialize: (s) => isDef(s) ? s : null },
 			title: { type: 'String', initialize: (s) => isDef(s) ? s : null },

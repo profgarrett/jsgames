@@ -155,7 +155,8 @@ export default class IfLevelListContainer extends React.Component {
 
 	_render_all() {
 		const that = this;
-		const links = !get_user_is_admin() ? [] : [
+		const ADMIN = get_user_is_admin();
+		const links = !ADMIN ? [] : [
 			'/api/version',
 			'/logout',
 			'/ifgame/test/?USER_CREATION_SECRET=supersecret',
@@ -168,11 +169,13 @@ export default class IfLevelListContainer extends React.Component {
 		const buttons = [];
 		const completed_tutorials = this.state.levels.filter( l => l.completed ).map( l => l.code );
 
-		
+		// If an admin, allow restarting any level. Otherwise, just restart 
+		// already completed levels.
+		const codes = ADMIN ? IfLevels
+				: IfLevels.filter( l => completed_tutorials.includes(l.code) );
+
 		// Create a button for each tutorial that we have already completed.
-		IfLevels
-			.filter( l => completed_tutorials.includes(l.code) )
-			.map( (level,i) => {
+		codes.map( (level,i) => {
 			buttons.push(
 				<li key={'iflevellistcontainerbutton'+i}>
 					<Button 

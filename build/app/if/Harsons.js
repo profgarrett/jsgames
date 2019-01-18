@@ -47,7 +47,7 @@ export default class Harsons extends React.Component                            
 				spacing: 30,
 				length: 3,
 				colour: '#ccc',
-				snap: true
+				snap: false
 			},
 			zoom: {
 				controls: true,
@@ -103,10 +103,35 @@ export default class Harsons extends React.Component                            
 		// Add change listener to blockly.  As changes happen in blockly,
 		// this will fire the event to update the solution.
 		workspace.addChangeListener( event => {
-			var code = Blockly.JavaScript.workspaceToCode(workspace);
+
+			// we are still drag+dropping.
+			if(workspace.isDragging()) return;
+			
+			// Look to see if this change puts a new block as a top-level item.
+			// Only allow = as top-level items.
+			if(event.type === Blockly.Events.BLOCK_MOVE) {
+				const workspace = Blockly.Workspace.getById(event.workspaceId);
+				const block = workspace.getBlockById(event.blockId);
+
+
+				//console.log({ block, event});
+				// Make sure that we still have a block (ie, it hasnt' been deleted)
+				// and that it isn't the equal (root of the tree)
+				if(block !== null && block.type !== 'equal') {
+					// If not an equal, then we should disable any nodes.
+					if(typeof event.newParentId === 'undefined') {
+						block.setDisabled(true);
+					} else {
+						block.setDisabled(false);
+					}
+				}
+			}
+			const code = Blockly.JavaScript.workspaceToCode(workspace);
+
 			if(code !== this.props.client_f) {
 				that.props.handleChange({ client_f: code });
 			}
+
 		});
 
 		this.setState({ workspace });

@@ -3,18 +3,38 @@ import React from 'react';
 
                                                                                                        
                                   
+import { DEMO_MODE } from './../../server/secret';
 
 import { HtmlDiv } from './../components/Misc';
 import { turn_array_into_map } from './../../shared/misc';
 
 import ReactTable from 'react-table';
 import 'react-table/react-table.css';
-
+import {Badge} from 'react-bootstrap';
 
                   
                          
   
 
+
+// toLocaleTimeString is super slow when used with a larger number of objects.
+// Create a custom little formatter to speed things up.  Changed from 6s to 
+// almost nothing.
+const formatDate = (dt      )         => {
+	return dt.getMonth() + '/' +
+		dt.getDate() + ', ' +
+		dt.getHours() + ':' + 
+		(dt.getMinutes() + ':').padStart(3, '0') +
+		(dt.getSeconds() + '').padStart(2, '0');
+
+	//return '123'; //.toLocaleTimeString('en-US')
+};
+
+// Return if the tag array has a matching tag.
+// T/F
+const has_tag = (tags               , match        )          => {
+	return 0 < tags.filter( t => t.tag === match ).length;
+};
 
 export default class IfAnswers extends React.Component            {
 	constructor(props     ) {
@@ -27,10 +47,10 @@ export default class IfAnswers extends React.Component            {
 
 	*/
 	_render_level_solutions()       {
-		const finished_levels = this.props.levels.filter( l => l.completed );
+		//const finished_levels = this.props.levels.filter( l => l.completed );
 
 		// Organize into a map of levels.
-		const level_map = turn_array_into_map(finished_levels, 
+		const level_map = turn_array_into_map(this.props.levels, 
 			(l           )         => l.code
 		);
 
@@ -48,22 +68,34 @@ export default class IfAnswers extends React.Component            {
 		const columns = [{
 			id: 'username',
 			Header: 'Username', 
-			accessor: p => p.username,
-			width: 200
+			accessor: p => DEMO_MODE ? '*****' : p.username,
+			width: 150
 		}, {
 			id: 'seconds',
-			Header: 'Seconds',
+			Header: 'Time (s)',
 			accessor: p => p.seconds,
-			width: 100
+			width: 75
 		}, {
 			id: 'correct',
 			Header: 'Correct?',
 			accessor: p => p.correct,
-			width: 100
+			width: 80
 		}, {
 			id: 'type',
 			Header: 'type',
-			accessor: p => p.type
+			accessor: p => p.type,
+			width: 80
+		}, {
+			id: 'breaks',
+			Header: 'breaks',
+			accessor: p => p.breaks,
+			width: 30
+		}, {
+			id: 'completed',
+			Header: 'completed',
+			accessor: p => p.completed ? '' : 'N' ,
+			width: 50
+
 		}, {
 			id: 'value',
 			Header: 'value',
@@ -96,12 +128,13 @@ export default class IfAnswers extends React.Component            {
 			let key = '';
 
 			l.pages.forEach( (p          ) => {
-				key = p.description+'<br>'+ p.instruction;
+				key =  p.description+'<br>'+ p.instruction + ' ('+p.type + ')';
 				if(!q_map.has(key)) q_map.set(key, []);
 				q_map.get(key).push(p);
 			});
 		});
 
+		/** Not needed.  Moved to server-side
 
 		const filter_history = 	(h) => h.filter( // filter non f and unused events.
 									h => typeof h.client_f !== 'undefined' &&
@@ -125,34 +158,50 @@ export default class IfAnswers extends React.Component            {
 
 										return true; // default to returning.
 									}
-								);
+								).filter( // remove null values 
+									h => h !== null
 
+								).filter( // filter out any harsons with a ;, as those are returned whenver something is being
+									// built (drag and drop operation), or something is put on the background.
+									h => (h.client_f.search(';') === -1)
+								);
+		*/
+
+
+		const pretty_history = h => {
+				return h.client_f + ' ' + h.tags
+					//.filter( t => t.tag !== 'intermediate')
+					.map( t => '<span class="badge">'+t.tag+'</span>' )
+					.join(' ');
+		};
 
 		// Html result, holding all of the keys and tables.
-		const html = [];
+		const q_summaries = [];
 
 		// For each question...
 		q_map.forEach( (values                 , key) => {
 
-			const harsons = values.filter( p => p.type === 'IfPageHarsonsSchema' );
-			const formulas = values.filter( p => p.type === 'IfPageFormulaSchema' );
-			const qs = values.filter( p => p.type === 'IfPageChoiceSchema');
-			const table_data = [];
+			const formula_pages = values.filter( p => p.type === 'IfPageHarsonsSchema' || p.type === 'IfPageFormulaSchema' );
+			const choice_pages = values.filter( p => p.type === 'IfPageChoiceSchema');
+			const page_table_data = [];
+
 			// For each type of answer to the question
 			// Note that some can be harsons and/or formulas, so it isn't as weird 
 			// as it looks.
-			formulas.map( (p                 ) => {
-				const history = filter_history(p.history).map( h => h.client_f);
-				const history_string = history.join('<br/>');
+			formula_pages.map( (p                 ) => {
+				const history = p.history.filter( h => !has_tag(h.tags, 'intermediate' ) );
+				const history_string = history.map( h => pretty_history(h) ).join('<br/>');
 				const expand_string = p.history
 					.filter( h => typeof h.client_f !== 'undefined')
-					.map( h => h.dt.toLocaleTimeString('en-US') + ': ' + h.client_f )
+					.map( h => formatDate(h.dt) + ': ' + pretty_history(h) )
 					.join('<br/>');
 
-				table_data.push( { 
+				page_table_data.push( { 
 					username: p.username,
 					seconds: p.get_time_in_seconds(),
 					correct: p.correct ? 'Yes' : '',
+					breaks: p.get_break_times_in_minutes().join(', '),
+					completed: p.completed,
 					type: 'formulas',
 					value: history_string,
 					expand: expand_string
@@ -160,23 +209,122 @@ export default class IfAnswers extends React.Component            {
 				
 			});
 
-			html.push( <div>
+			choice_pages.map( (p                ) => {
+				page_table_data.push( {
+					username: p.username,
+					seconds: p.get_time_in_seconds(),
+					correct: p.correct === true ? 'Yes' : (p.correct === false ? 'No' : ''),
+					breaks: p.get_break_times_in_minutes().join(', '),
+					completed: p.completed,
+					type: 'choice',
+					value: p.client,
+					expand: ''
+				});
+			});
+
+			const answer_table = (<div>
 				<HtmlDiv style={{ backgroundColor: 'gray', marginTop: 20 }} html={key}/>
-				{ table_data.length === 0 ? <div/> : 
+				{ page_table_data.length === 0 ? <div/> : 
 				<ReactTable 
-					data={table_data} 
+					data={page_table_data} 
 					filterable={true}
 					columns={columns}
+					defaultSorted={['type', 'seconds']}
+					defaultPageSize={page_table_data.length}
+					style={{ backgroundColor: '#f5f5f5' }}
 					SubComponent={ (p) => <HtmlDiv html={p.original.expand} /> }
 				/> }
 				</div>);
 
+			// Create a summary row for the page.
+			q_summaries.push( {
+				key: key,
+				type: values[0].type,
+				count: values.length,
+				code: values[0].code,
+				correct_average: values.reduce( 
+					(sum, p) => sum+ (p.correct?1:0), 0 
+					) / (values.length === 0 ? 1 : values.length),
+				seconds_average: values.reduce( 
+					(sum, p) => sum+p.get_time_in_seconds(), 0 
+					) / (values.length === 0 ? 1 : values.length),
+				breaks: values.reduce( 
+					(count, p) => count + p.get_break_times_in_minutes().length,
+					0),
+				completion: Math.round(
+						values.reduce( (count, p) => count + (p.completed ? 1 : 0), 0) / values.length * 100
+						) + '%',
+				expand: answer_table
+			});
 		});
 
 
-		return (<div>
-				<h3>Level Page Answers by User</h3>
-				{ html }
+
+		const summary_columns = [{
+			id: 'key',
+			Header: 'Key', 
+			accessor: p => p.key
+		}, {
+			id: 'type',
+			Header: 'Type',
+			accessor: p => p.type.substr(6),
+			width: 100
+		}, {
+			id: 'count',
+			Header: 'Count',
+			accessor: p => p.count,
+			width: 100
+		}, {
+			id: 'completion',
+			Header: 'completion',
+			accessor: p => p.completion,
+			width: 75
+		}, {
+			id: 'code',
+			Header: 'code',
+			accessor: p => p.code,
+			width: 100
+		}, {
+			id: 'correct',
+			Header: 'Correct',
+			accessor: p => Math.round(p.correct_average*100)+'%',
+			width: 100
+		}, {
+			id: 'seconds',
+			Header: 'Seconds',
+			accessor: p => Math.round(p.seconds_average),
+			width: 50
+		}, {
+			id: 'breaks',
+			Header: 'breaks',
+			accessor: p => p.breaks,
+			width: 50
+		}, {
+			expander: true,
+			Header: () => <b>More</b>,
+			width: 65,
+			Expander: ({ isExpanded, ...rest }) => 
+				<span> 
+					{ isExpanded 
+						? <span>&#x2299;</span>
+						: <span>&#x2295;</span>}
+				</span>,
+			style: {
+				cursor: 'pointer',
+				fontSize: 16
+			}
+
+		}];
+
+		const summary = <ReactTable
+			data={q_summaries}
+			filterable={true}
+			columns={summary_columns}
+			SubComponent={ (q) => <div>X { q.original.expand }</div> }
+			/>;
+
+		return (<div id='IfAnswersTopDiv' key='IfAnswersTopDiv'>
+				{ summary }
 			</div>
 		);
 	}

@@ -191,7 +191,7 @@ export default class ExcelTable extends React.Component {
 		const increment_row = 
 				(formula, row_i) => 
 					columns.reduce( (accum, c) => 
-						accum.replace( new RegExp(c+'1', 'ig' ), c.toUpperCase()+row_i),
+						accum.replace( new RegExp(c+'1', 'ig' ), c+row_i),
 						formula);
 
 		// Build table.

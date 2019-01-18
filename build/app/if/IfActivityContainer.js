@@ -1,11 +1,11 @@
 //     
 import React from 'react';
-import { Row, Col, Breadcrumb, Button  } from 'react-bootstrap';
+import { Row, Col, Breadcrumb, DropdownButton, MenuItem  } from 'react-bootstrap';
 
 import IfActivity from './IfActivity';
 import { Message, Loading } from './../components/Misc';
 
-import { IfLevelSchema } from './../../shared/IfGame';
+import { IfLevels, IfLevelSchema } from './../../shared/IfGame';
 
 import ForceLogin from './../components/ForceLogin';
 
@@ -19,6 +19,7 @@ import ForceLogin from './../components/ForceLogin';
                  
                       
                     
+              
                          
   
 
@@ -28,10 +29,11 @@ export default class IfActivityContainer extends React.Component                
 		this.state = { 
 			message: 'Loading data from server',
 			isLoading: true,
+			code: 'math1',
 			levels: [],
 		};
 		(this     ).refreshData = this.refreshData.bind(this);
-		(this     ).handleSubmit = this.handleSubmit.bind(this);
+		(this     ).handleChange = this.handleChange.bind(this);
 	}
 
 	componentDidMount() {
@@ -40,14 +42,14 @@ export default class IfActivityContainer extends React.Component                
 	}
 
 
-	handleSubmit(e                                    ) {
-		if(e) e.preventDefault();
-		this.refreshData();
+	handleChange(value     ) {
+		//if(e) e.preventDefault();
+		this.setState({ code: value }, () => this.refreshData());
 	}
 
 	refreshData() {
 
-		fetch('/api/ifgame/recent_levels', {
+		fetch('/api/ifgame/recent_levels/'+this.state.code, {
 				method: 'get',
 				credentials: 'include',
 				headers: {
@@ -87,9 +89,13 @@ export default class IfActivityContainer extends React.Component                
 			);
 
 		const filter = (
-			<form name='c' onSubmit={this.handleSubmit}>
-
-				<Button bsStyle='primary'>Refresh filter</Button>
+			<form name='c' onSubmit={this.handleChange}>
+				<DropdownButton 
+						onSelect={this.handleChange}
+						bsStyle='primary' title='Pick a level to view' 
+						key='levelsection' id='levelselect'>
+					{ IfLevels.map( (l,i) => <MenuItem key={'dropdownitem'+i} eventKey={l.code}>{l.code}</MenuItem> )}
+				</DropdownButton>
 			</form>
 			);
 

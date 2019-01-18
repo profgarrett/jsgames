@@ -65,7 +65,7 @@ function build_reference(ref) {
 			'args0': [
 				{
 					'type': 'field_label',
-					'text': ref.toUpperCase(),
+					'text': ref,
 				},
 				{
 					'type': 'input_value',
@@ -81,7 +81,7 @@ function build_reference(ref) {
 
 	const f = block => {
 		var value_right = Blockly.JavaScript.valueToCode(block, 'right', Blockly.JavaScript.ORDER_NONE);
-		var code = ref.toUpperCase() + ' ' + value_right;
+		var code = ref + ' ' + value_right;
 		return [code, Blockly.JavaScript.ORDER_ATOMIC ];
 	};
 
@@ -183,7 +183,7 @@ function build_value_number_input(accept_right_input) {
 		};
 
 	const f = (block) => {
-		var value_right = accept_right_input 
+		var value_right = !accept_right_input 
 			? ''
 			: ' ' + Blockly.JavaScript.valueToCode(block, 'right', Blockly.JavaScript.ORDER_NONE);
 		var number_input = block.getFieldValue('input');
@@ -499,7 +499,7 @@ function build_function1(f_name, arg_type0){
 	const json = {
 		'type': 'function_'+f_name,
 		'lastDummyAlign0': 'CENTRE',
-		'message0': f_name.toUpperCase()+'( %1 %2 )',
+		'message0': f_name+'( %1 %2 )',
 		'args0': [
 			{
 				'type': 'input_dummy',
@@ -520,7 +520,7 @@ function build_function1(f_name, arg_type0){
 
 	const f = (block) => {
 		var value_condition = Blockly.JavaScript.valueToCode(block, 'condition', Blockly.JavaScript.ORDER_ATOMIC);
-		return [f_name.toUpperCase()+'('+value_condition+')', Blockly.JavaScript.ORDER_NONE];
+		return [f_name+'('+value_condition+')', Blockly.JavaScript.ORDER_NONE];
 	};
 
 	return {json, f};
@@ -536,7 +536,7 @@ function build_function2(f_name, arg_type0, arg_type1){
 	const json = {
 		'type': 'function_'+f_name,
 		'lastDummyAlign0': 'CENTRE',
-		'message0': f_name.toUpperCase()+'( %1 %2, %3 )',
+		'message0': f_name+'( %1 %2, %3 )',
 		'args0': [
 			{
 				'type': 'input_dummy',
@@ -563,7 +563,7 @@ function build_function2(f_name, arg_type0, arg_type1){
 	const f = (block) => {
 		var first = Blockly.JavaScript.valueToCode(block, 'first', Blockly.JavaScript.ORDER_ATOMIC);
 		var second = Blockly.JavaScript.valueToCode(block, 'second', Blockly.JavaScript.ORDER_ATOMIC);
-		return [f_name.toUpperCase()+'('+first+','+second+')', Blockly.JavaScript.ORDER_NONE];
+		return [f_name+'('+first+','+second+')', Blockly.JavaScript.ORDER_NONE];
 	};
 
 	return {json, f};
@@ -627,7 +627,7 @@ function build_function3(f_name, arg_type0, arg_type1, arg_type2){
 	const json = {
 		'type': 'function_'+f_name,
 		'lastDummyAlign0': 'CENTRE',
-		'message0': label.toUpperCase()+'( %1 %2, %3, %4 )',
+		'message0': label+'( %1 %2, %3, %4 )',
 		'args0': [
 			{
 				'type': 'input_dummy',
@@ -660,7 +660,7 @@ function build_function3(f_name, arg_type0, arg_type1, arg_type2){
 		var first = Blockly.JavaScript.valueToCode(block, 'first', Blockly.JavaScript.ORDER_ATOMIC);
 		var second = Blockly.JavaScript.valueToCode(block, 'second', Blockly.JavaScript.ORDER_ATOMIC);
 		var third = Blockly.JavaScript.valueToCode(block, 'third', Blockly.JavaScript.ORDER_ATOMIC);
-		return [label.toUpperCase()+'('+first+','+second+','+third+')', Blockly.JavaScript.ORDER_NONE];
+		return [label+'('+first+','+second+','+third+')', Blockly.JavaScript.ORDER_NONE];
 	};
 
 	return {json, f};

@@ -5,7 +5,7 @@ import { Row, Col, Breadcrumb, DropdownButton, MenuItem, Button  } from 'react-b
 import IfAnswers from './IfAnswers';
 import { Message, Loading } from './../components/Misc';
 
-import { IfLevelSchema } from './../../shared/IfGame';
+import { IfLevels, IfLevelSchema } from './../../shared/IfGame';
 
 import ForceLogin from './../components/ForceLogin';
 
@@ -30,11 +30,11 @@ export default class IfAnswersContainer extends React.Component<AnswersPropsType
 			message: 'Loading data from server',
 			messageStyle: '',
 			isLoading: true,
-			code: 'tutorial',
+			code: 'summary',
 			levels: [],
 		};
 		(this: any).refreshData = this.refreshData.bind(this);
-		(this: any).handleSubmit = this.handleSubmit.bind(this);
+		(this: any).handleChange = this.handleChange.bind(this);
 	}
 
 	componentDidMount() {
@@ -43,9 +43,18 @@ export default class IfAnswersContainer extends React.Component<AnswersPropsType
 	}
 
 
+	/*
 	handleSubmit(e: ?SyntheticEvent<HTMLButtonElement>) {
 		if(e) e.preventDefault();
+		this.setState({  })
 		this.refreshData();
+	}
+	*/
+
+	handleChange(value: any) {
+		//if(e) e.preventDefault();
+		this.setState({ code: value }, () => this.refreshData());
+
 	}
 
 	refreshData() {
@@ -90,11 +99,13 @@ export default class IfAnswersContainer extends React.Component<AnswersPropsType
 			);
 
 		const filter = (
-			<form name='c' onSubmit={this.handleSubmit}>
-				<DropdownButton bsStyle='Default' title='Level' key='levelsection' id='levelselect'>
-					{ IfLevels.map( (l,i) => <MenuItem eventKey={i}>{l.code}</MenuItem>})}
+			<form name='c' >
+				<DropdownButton 
+						onSelect={this.handleChange}
+						bsStyle='primary' title='Pick a level to view' 
+						key='levelsection' id='levelselect'>
+					{ IfLevels.map( (l,i) => <MenuItem key={'dropdownitem'+i} eventKey={l.code}>{l.code}</MenuItem> )}
 				</DropdownButton>
-				<Button bsStyle='primary'>Update</Button>
 			</form>
 			);
 
@@ -103,7 +114,7 @@ export default class IfAnswersContainer extends React.Component<AnswersPropsType
 				<Col>
 					<ForceLogin/>
 					{ crumbs }
-					<h3>Recently Updated Levels</h3>
+					<h3>Answers for { this.state.code }</h3>
 
 					<Message message={this.state.message} style={this.state.messageStyle} />
 					<Loading loading={this.state.isLoading } />

@@ -8,7 +8,8 @@ export type LevelType = {
 
 	seed: number,
 	harsons_randomly_on_username: boolean,
-
+	standardize_formula_case: boolean,
+	
 	title: string,
 	description: string,
 	updated: Date,
@@ -57,7 +58,9 @@ export type PageType = {
 	+client_has_answered: () => boolean,
 	updateUserFields: (Object) => void,
 	history: Array<Object>,
-	+toJson: Function
+	+toJson: Function,
+	get_time_in_seconds: () => number,
+	standardize_formula_case: () => void
 };
 
 
@@ -82,6 +85,8 @@ export type TextPageType = {
 	updateUserFields: (Object) => void,
 	history: Array<Object>,
 	+toJson: Function,
+	get_time_in_seconds: () => number,
+	standardize_formula_case: () => void,
 	// End Copy
 
 	client_read: boolean
@@ -109,6 +114,8 @@ export type ChoicePageType = {
 	updateUserFields: (Object) => void,
 	history: Array<Object>,
 	toJson: Function,
+	get_time_in_seconds: () => number,
+	standardize_formula_case: () => void,
 	// End Copy
 
 	client: string,
@@ -140,6 +147,8 @@ export type ParsonsPageType = {
 	updateUserFields: (Object) => void,
 	history: Array<Object>,
 	toJson: Function,
+	get_time_in_seconds: () => number,
+	standardize_formula_case: () => void,
 	// End Copy
 
 	helpblock: string,
@@ -169,6 +178,8 @@ export type FormulaPageType = {
 	updateUserFields: (Object) => void,
 	history: Array<Object>,
 	toJson: Function,
+	get_time_in_seconds: () => number,
+	standardize_formula_case: () => void,
 	// End Copy
 
 	helpblock: string,
@@ -209,6 +220,8 @@ export type HarsonsPageType = {
 	updateUserFields: (Object) => void,
 	history: Array<Object>,
 	toJson: Function,
+	get_time_in_seconds: () => number,
+	standardize_formula_case: () => void,
 	// End Copy
 
 	helpblock: string,

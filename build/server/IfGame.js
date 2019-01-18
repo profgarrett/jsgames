@@ -96,6 +96,9 @@ const baseifgame = {
 			json.feedback = [];
 		}
 
+		// Setup the capitalization option.
+
+
 		// Type-specific setup
 		if( json.type === 'IfPageTextSchema' ) {
 			// Mark that correct is required for all.
@@ -197,6 +200,7 @@ const baseifgame = {
 			type: 'IfLevelSchema',
 			title: this.title,
 			code: this.code,
+			standardize_formula_case: this.standardize_formula_case,
 			harsons_randomly_on_username: this.harsons_randomly_on_username,
 			description: this.description,
 			allow_skipping_tutorial: this.allow_skipping_tutorial,
@@ -278,6 +282,11 @@ const baseifgame = {
 			const initialized_json = this._initialize_json(level.seed, level.pages.length, new_page_json);
 
 			const new_page = level.get_new_page(initialized_json);
+
+			// Clean-up case if required.
+			console.log(level.standardize_formula_case);
+			if(level.standardize_formula_case) new_page.standardize_formula_case();
+
 			level.pages.push(new_page);
 
 			level.history = [...level.history, { dt: new Date(), page_i_added: level.pages.length-1, code: 'server_page_added'}];
@@ -322,7 +331,18 @@ const IfLevelModelFactory = {
 		if(typeof this.levels[code] === 'undefined') throw new Error('Invalid type '+code+' passed to IfLevelModelFactory.create');
 
 		const allow_skipping_tutorial = username === 'garrettn' || username === 'xtest';
-		const level = this.levels[code].create({ username, allow_skipping_tutorial });
+
+		// If we are the admin, or 1/2th of users, then standardize the display 
+		// of formula cases.
+		const username_as_number = username.split('').reduce( (i, s) => s.charCodeAt(0) + i, 1 );
+		const username_as_0_or_1 = username_as_number % 2;
+		const standardize_formula_case = username_as_0_or_1=== 1 || (username === 'garrettn');
+
+		const level = this.levels[code].create({ 
+				username, 
+				allow_skipping_tutorial,
+				standardize_formula_case 
+			});
 
 		return this.levels[code].addPageOrMarkAsComplete(level);
 	},

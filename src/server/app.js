@@ -14,12 +14,14 @@ const bugsnag = require('bugsnag');
 const {BUGSNAG_API, DEBUG, ADMIN_USERNAME, VERSION } = require('./secret.js'); 
 
 const { IfLevelModelFactory, IfLevelModel } = require('./IfGame');
+const { IfLevels } = require('./../shared/IfGame');
 
 const { from_utc_to_myql, run_mysql_query, update_mysql_database_schema, to_utc } = require('./mysql.js');
 const { login_and_maybe_create_user, require_logged_in_user, 
 		get_username_or_emptystring, return_level_prepared_for_transmit} = require('./network.js');
 
 const { turn_array_into_map } = require('./../shared/misc.js');
+const { return_tagged_level } = require('./tag.js');
 
 var fs = require('fs');
 var util = require('util');
@@ -162,8 +164,9 @@ app.post('/api/ifgame/new_level_by_code/:code',
 		const now = from_utc_to_myql(to_utc(new Date()));
 
 		const insert_sql = `INSERT INTO iflevels (type, username, code, title, description, completed, 
-			pages, history, created, updated, seed, allow_skipping_tutorial, harsons_randomly_on_username) 
-			VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+			pages, history, created, updated, seed, allow_skipping_tutorial, harsons_randomly_on_username, 
+			standardize_formula_case) 
+			VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
 		level.username = username;
 
 					
@@ -176,7 +179,8 @@ app.post('/api/ifgame/new_level_by_code/:code',
 				now, now,
 				level.seed,
 				level.allow_skipping_tutorial,
-				level.harsons_randomly_on_username
+				level.harsons_randomly_on_username,
+				level.standardize_formula_case
 				];
 
 		let insert_results = await run_mysql_query(insert_sql, values);
@@ -220,30 +224,38 @@ app.get('/api/ifgame/levels/byCode/:code',
 
 // Select object updated in the last time period..
 // Require current user to match secret.js ADMIN_USERNAME.
-app.get('/api/ifgame/recent_levels', nocache, require_logged_in_user,
+app.get('/api/ifgame/recent_levels/:code', nocache, require_logged_in_user,
 	async (req: $Request, res: $Response, next: NextFunction): Promise<any> => {
 	try {
-		const INTERVAL = 60*24*7*4;
+		const param_code = req.params.code;
+		const code_in_array = IfLevels.filter( l => l.code === param_code).map( l => l.code );
+
+		if(code_in_array.length !== 1)
+			throw new Error('Invalid code type '+param_code+' passed to recent_levels');
+
+		const INTERVAL = 60*24*7*15;  // time in minutes.
 		const ignore = '"' + ['garrettn', 'test', 'bob'].join( '","')+'"';
 		const sql = 'SELECT * FROM iflevels WHERE ' +
+				'code = ? AND ' +
 				'updated > NOW() - INTERVAL '+INTERVAL+' MINUTE ' +
 				'AND username NOT IN ('+ignore+')';
-				//' AND username = "caracozar" AND code="math1"';
+				//' username = "alharbis0" AND code="if1"';
 		const username = get_username_or_emptystring(req);
 		//const level = req.params.level ? req.params.level : 'tutorial';
 
 		if(username !== ADMIN_USERNAME && username !== 'test')
 			throw new Error('Invalid username '+username+' for recent_levels');
 
-		let select_results = await run_mysql_query(sql);
+		let select_results = await run_mysql_query(sql, code_in_array);
 
 		if(select_results.length === 0) return res.json([]);
 
 		let iflevels = select_results.map( (l: Object): Object => (new IfLevelModel(l)).toJson() );
 
 		// Remove secret fields and transmit.
+		iflevels = iflevels.map( (l: Object): Object => return_tagged_level(l) );
 		iflevels = iflevels.map( (l: Object): Object => return_level_prepared_for_transmit(l));
-		
+
 		res.json(iflevels);
 	} catch (e) {
 		log_error(e);
@@ -383,7 +395,7 @@ app.post('/api/ifgame/level/:id',
 
 		// Make sure that there is feedback.
 		iflevel.pages.filter( p => p.client_feedback === null).filter( p=> p.type === 'IfPageFormulaSchema').map( p => {
-			throw new Error('Client feedback shoudl not be null');
+			throw new Error('Client feedback should not be null');
 		});
 
 

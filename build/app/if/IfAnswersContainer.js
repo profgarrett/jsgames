@@ -1,11 +1,11 @@
 //     
 import React from 'react';
-import { Row, Col, Breadcrumb, Button  } from 'react-bootstrap';
+import { Row, Col, Breadcrumb, DropdownButton, MenuItem, Button  } from 'react-bootstrap';
 
 import IfAnswers from './IfAnswers';
 import { Message, Loading } from './../components/Misc';
 
-import { IfLevelSchema } from './../../shared/IfGame';
+import { IfLevels, IfLevelSchema } from './../../shared/IfGame';
 
 import ForceLogin from './../components/ForceLogin';
 
@@ -19,6 +19,7 @@ import ForceLogin from './../components/ForceLogin';
                  
                       
                     
+              
                          
   
 
@@ -29,10 +30,11 @@ export default class IfAnswersContainer extends React.Component                 
 			message: 'Loading data from server',
 			messageStyle: '',
 			isLoading: true,
+			code: 'tutorial',
 			levels: [],
 		};
 		(this     ).refreshData = this.refreshData.bind(this);
-		(this     ).handleSubmit = this.handleSubmit.bind(this);
+		(this     ).handleChange = this.handleChange.bind(this);
 	}
 
 	componentDidMount() {
@@ -41,14 +43,23 @@ export default class IfAnswersContainer extends React.Component                 
 	}
 
 
-	handleSubmit(e                                    ) {
+	/*
+	handleSubmit(e: ?SyntheticEvent<HTMLButtonElement>) {
 		if(e) e.preventDefault();
+		this.setState({  })
 		this.refreshData();
+	}
+	*/
+
+	handleChange(value     ) {
+		//if(e) e.preventDefault();
+		this.setState({ code: value }, () => this.refreshData());
+
 	}
 
 	refreshData() {
 
-		fetch('/api/ifgame/recent_levels', {
+		fetch('/api/ifgame/recent_levels/'+this.state.code, {
 				method: 'get',
 				credentials: 'include',
 				headers: {
@@ -88,9 +99,13 @@ export default class IfAnswersContainer extends React.Component                 
 			);
 
 		const filter = (
-			<form name='c' onSubmit={this.handleSubmit}>
-
-				<Button bsStyle='primary'>Refresh filter</Button>
+			<form name='c' >
+				<DropdownButton 
+						onSelect={this.handleChange}
+						bsStyle='primary' title='Pick a level to view' 
+						key='levelsection' id='levelselect'>
+					{ IfLevels.map( (l,i) => <MenuItem key={'dropdownitem'+i} eventKey={l.code}>{l.code}</MenuItem> )}
+				</DropdownButton>
 			</form>
 			);
 
@@ -99,7 +114,7 @@ export default class IfAnswersContainer extends React.Component                 
 				<Col>
 					<ForceLogin/>
 					{ crumbs }
-					<h3>Recently Updated Levels</h3>
+					<h3>Answers for { this.state.code }</h3>
 
 					<Message message={this.state.message} style={this.state.messageStyle} />
 					<Loading loading={this.state.isLoading } />
