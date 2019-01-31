@@ -163,7 +163,8 @@ export default class IfLevelListContainer extends React.Component {
 			'/ifgame/activity',
 			'/ifgame/monitor',
 			'/ifgame/grades',
-			'/ifgame/answers'
+			'/ifgame/answers',
+			'/ifgame/questions'
 		];
 
 		const buttons = [];

@@ -10,7 +10,6 @@ import { turn_array_into_map } from './../../shared/misc';
 
 import ReactTable from 'react-table';
 import 'react-table/react-table.css';
-import {Badge} from 'react-bootstrap';
 
                   
                          
@@ -30,11 +29,21 @@ const formatDate = (dt      )         => {
 	//return '123'; //.toLocaleTimeString('en-US')
 };
 
+// Show a history item in an appealing fashion.
+const pretty_history = h => {
+	const tags = h.tags
+			.map( t => '<span class="badge">'+t.tag+'</span>' );
+
+	return h.client_f + ' ' + tags.join(' ');
+};
+
 // Return if the tag array has a matching tag.
 // T/F
 const has_tag = (tags               , match        )          => {
 	return 0 < tags.filter( t => t.tag === match ).length;
 };
+
+
 
 export default class IfAnswers extends React.Component            {
 	constructor(props     ) {
@@ -122,8 +131,9 @@ export default class IfAnswers extends React.Component            {
 
 		// Convert to map.
 
-		// Turn levels into a map, with each obj as an array of matching questions.
+		// Turn levels into a map, with each obj as an array of matching Answers.
 		const q_map = new Map();
+
 		levels.map( (l           ) => {
 			let key = '';
 
@@ -133,47 +143,6 @@ export default class IfAnswers extends React.Component            {
 				q_map.get(key).push(p);
 			});
 		});
-
-		/** Not needed.  Moved to server-side
-
-		const filter_history = 	(h) => h.filter( // filter non f and unused events.
-									h => typeof h.client_f !== 'undefined' &&
-										h.client_f !== null &&
-										h.code !== 'created' &&
-										h.code !== 'server_page_completed'
-								).filter( // filter dups and progressively built items  A, A+, A+1, ...
-									(h, i, h_array) => {
-										// always return last item.
-										if(i==h_array.length-1) return true; 
-
-										// must be different than next.
-										if (h.client_f === h_array[i+1].client_f) return false;
-
-										// must be different than next + 1 or more characters, i.e. ignore intermediate typing
-										if(h.client_f === h_array[i+1].client_f.substr(0, h.client_f.length)) return false;
-
-										// see if we are deleting, i.e., the current entry could entirely fit inside 
-										// of the previous entry.
-										if(i>1 && h_array[i-1].client_f.indexOf(h.client_f) !== -1) return false;
-
-										return true; // default to returning.
-									}
-								).filter( // remove null values 
-									h => h !== null
-
-								).filter( // filter out any harsons with a ;, as those are returned whenver something is being
-									// built (drag and drop operation), or something is put on the background.
-									h => (h.client_f.search(';') === -1)
-								);
-		*/
-
-
-		const pretty_history = h => {
-				return h.client_f + ' ' + h.tags
-					//.filter( t => t.tag !== 'intermediate')
-					.map( t => '<span class="badge">'+t.tag+'</span>' )
-					.join(' ');
-		};
 
 		// Html result, holding all of the keys and tables.
 		const q_summaries = [];
@@ -189,7 +158,7 @@ export default class IfAnswers extends React.Component            {
 			// Note that some can be harsons and/or formulas, so it isn't as weird 
 			// as it looks.
 			formula_pages.map( (p                 ) => {
-				const history = p.history.filter( h => !has_tag(h.tags, 'intermediate' ) );
+				const history = p.history.filter( h => !has_tag(h.tags, 'INTERMEDIATE' ) );
 				const history_string = history.map( h => pretty_history(h) ).join('<br/>');
 				const expand_string = p.history
 					.filter( h => typeof h.client_f !== 'undefined')

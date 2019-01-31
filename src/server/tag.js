@@ -142,8 +142,10 @@ function is_in( value: any, aValues: Array<any>): boolean {
 					return true;
 		} else if (typeof value === 'number' ) {
 			if(aValues[i] === value) return true;
+		} else if (typeof value === 'boolean' ) {
+			if(aValues[i] === value) return true;
 		} else {
-			throw new Error('Invalid type passed to is_in '+typeof value )
+			throw new Error('Invalid type '+value+' passed to is_in '+typeof value );
 		}
 	}
 	return false;

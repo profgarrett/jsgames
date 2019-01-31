@@ -26,6 +26,27 @@ Precision
 */
 
 
+
+/*
+	Records a list of functions that are available to blockly.
+*/
+const function_arguments = {
+	'left': [ 'String', 'Number'],
+	'right': [ 'String', 'Number'],
+	'floor': ['Number'],
+	'round': ['Number', 'Number'],
+	'if': ['Boolean', 'Any', 'Any'],
+	'not': [ 'Boolean'],
+	'and': ['Boolean', 'Boolean'],
+	'and3': ['Boolean', 'Boolean', 'Boolean'],
+	'or': ['Boolean', 'Boolean'],
+	'or3': ['Boolean', 'Boolean', 'Boolean'],
+	'andor2': ['Boolean', 'Boolean'],
+	'andor3': ['Boolean', 'Boolean', 'Boolean']
+};
+
+
+
 function build_equal() {
 
 	const json = { 
@@ -99,6 +120,7 @@ function build_value(value, accept_right_input=true) {
 	const isNumber = typeof value === 'number';
 
 	// Nope, do an exact match.
+	console.log([value, accept_right_input]);
 	const json = accept_right_input
 		? {
 			'type': 'value_'+value,
@@ -131,10 +153,11 @@ function build_value(value, accept_right_input=true) {
 		};
 
 	const f = block => {
-		var value_right = accept_right_input 
+		var value_right = !accept_right_input 
 			? ''
 			: ' ' + Blockly.JavaScript.valueToCode(block, 'right', Blockly.JavaScript.ORDER_NONE);
 		var code = (typeof value === 'number' ? value : '"'+value+'"') + value_right;
+		debugger;
 		return [code, Blockly.JavaScript.ORDER_ATOMIC ];
 	};
 
@@ -450,22 +473,6 @@ function build_symbol_arithmetic_dropdown() {
 
 	return {json, f};
 }
-
-
-const function_arguments = {
-	'left': [ 'String', 'Number'],
-	'right': [ 'String', 'Number'],
-	'floor': ['Number'],
-	'round': ['Number', 'Number'],
-	'if': ['Boolean', 'Any', 'Any'],
-	'not': [ 'Boolean'],
-	'and': ['Boolean', 'Boolean'],
-	'and3': ['Boolean', 'Boolean', 'Boolean'],
-	'or': ['Boolean', 'Boolean'],
-	'or3': ['Boolean', 'Boolean', 'Boolean'],
-	'andor2': ['Boolean', 'Boolean'],
-	'andor3': ['Boolean', 'Boolean', 'Boolean']
-};
 
 
 

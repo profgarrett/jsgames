@@ -10,6 +10,23 @@ function uniq(a) {
     });
 }
 
+function is_boolean(s) {
+  if(typeof s === 'boolean') return true;
+  return s.toLowerCase() === 'true' || s.toLowerCase() === 'false';
+}
+
+// Checks to see if a reference is valid.
+function is_valid_reference( ref ) {
+
+  // Check to see if it's a range reference (a1:b1)
+  if(ref.length === 5 && ref.search(':') === 2) return true;
+
+  // Normal cell references
+  if(ref.length !== 2) return false;
+  if(ref.substr(1,1).search(/\d/) !== 0 ) return false;
+  if(ref.substr(0,1).search(/\w/) !== 0) return false;
+  return true;
+}
 
 // Takes in a formula, parses it, and converts into auto-generated feedback
 // similar to the hand-written rules for pages.
@@ -32,16 +49,52 @@ function parseFeedback(formula) {
     ...tokens.filter( t => t.subtype === 'logical').map( t => t.token ),
     ...tokens.filter( t => t.subtype === 'math').map( t => t.token )
   ];
+
+  // Pull out True/False.
+  let t_or_f_tokens = symbols.filter(sym => is_boolean(sym));
+  symbols = symbols.filter(sym => !is_boolean(sym) );
+
   feedback.push({ has: 'symbols', args: uniq(symbols) });
 
 
   var references = [
     ...tokens.filter( t => t.subtype === 'range').map( t => t.token )
   ];
-  feedback.push({ has: 'references', args: uniq(references) });
+  references = uniq(references);
+
+  // The parser assumes unquoted strings are references.
+  // Pull these out as invalid tokens, and only allow A1 style references.
+  // This prevents AA1, but that really isn't a problem as this uses
+  // small datasets.
+  // Add them as an invalid token.
+  let invalid_tokens = references.filter( r => !is_valid_reference(r));
+
+  // If TRUE/FALSE was found, put it into a separate spot after clean-up.
+  invalid_tokens
+      .filter( t => is_boolean(t) )
+      .map( t => t_or_f_tokens.push(t));
+
+  // Finalize remaining tokens.
+  invalid_tokens = invalid_tokens.filter( t => !is_boolean(t));
+  if(invalid_tokens.length > 0) {
+    feedback.push({ has: 'invalid_tokens', args: invalid_tokens });
+  }
+
+  // Finalize references.
+  references = references.filter( r => is_valid_reference(r));
+  feedback.push({ has: 'references', args: references });
 
 
+  // Clean-up booleans to have a consistent type.
+  t_or_f_tokens = t_or_f_tokens.map( t => {
+    if(typeof t === 'boolean') return t;
+    return t.toLowerCase() ==='true';
+   });
+
+
+  // Add all remaining values.
   var values = [
+    ...uniq(t_or_f_tokens),
     ...tokens.filter( t => t.subtype === 'number').map( t => parseInt(t.token, 10) ),
     ...tokens.filter( t => t.subtype === 'text').map( t => t.token )
   ];

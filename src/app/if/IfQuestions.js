@@ -1,5 +1,6 @@
 // @flow
 import React from 'react';
+import { IfLevels } from './../../shared/IfGame';
 
 import type { LevelType, PageType, FormulaPageType, HarsonsPageType, ChoicePageType } from './IfTypes';
 import type { Node } from 'react';
@@ -20,7 +21,12 @@ type PropsType = {
 // Create a custom little formatter to speed things up.  Changed from 6s to 
 // almost nothing.
 const formatDate = (dt: Date): string => {
-	return dt.getMonth() + '/' +
+
+	if(typeof dt === 'undefined') return 'undefined';
+	if(typeof dt.getFullYear === 'undefined') return 'undefined';
+
+	return dt.getFullYear().toString().substr(2) + '/' +
+		dt.getMonth() + 1 + '/' +
 		dt.getDate() + ', ' +
 		dt.getHours() + ':' + 
 		(dt.getMinutes() + ':').padStart(3, '0') +
@@ -42,7 +48,45 @@ const pretty_history = h => {
 const has_tag = (tags: Array<Object>, match: string): boolean => {
 	return 0 < tags.filter( t => t.tag === match ).length;
 };
+const get_first_matching_tag = (tags: Array<Object>, match: string): ?Object => {
+	const f_tags = tags.filter( t => t.tag === match );
+	if(f_tags.length > 0) return f_tags[0];
+	return null;
+};
 
+
+
+/*
+	Pass in an array of pages.
+	Returns a listing of the top tags and their counts.
+	Filters intermediate tags.
+	@return [ { tag: '', n: 2} ]
+*/
+function rollup_tags(pages: Array<PageType>): Array<any> {
+
+	const tags = [];
+
+	pages.map( (p: PageType) => {
+		if(typeof p.history == 'undefined') return;
+
+		p.history.map( h => {
+			h.tags.map( tag => {
+				let tag_summary = get_first_matching_tag(tags, tag.tag);
+				if(tag_summary === null) {
+					tags.push({ tag: tag.tag, n: 1});
+				} else {
+					tag_summary.n = tag_summary.n+1;
+				}
+			});
+		});
+	});
+
+	return tags.filter( 
+			t => t.tag !== 'INTERMEDIATE' && 
+				t.tag !== 'INVALID_TOKEN' &&
+				t.tag !== 'CORRECT')
+				.sort( (t1, t2) => t1.n < t2.n ? 1 : -1 ) ;
+}
 
 
 export default class IfQuestions extends React.Component<PropsType> {
@@ -51,28 +95,9 @@ export default class IfQuestions extends React.Component<PropsType> {
 	}
 
 
-	/**
-		Return historical information
 
-	*/
-	_render_level_solutions(): Node {
-		//const finished_levels = this.props.levels.filter( l => l.completed );
-
-		// Organize into a map of levels.
-		const level_map = turn_array_into_map(this.props.levels, 
-			(l: LevelType): string => l.code
-		);
-
-		const html = [];
-
-		level_map.forEach( ls => {
-			html.push( this._render_level_solutions_level(ls) );
-		});
-
-		return html;
-	}
-
-	_render_level_solutions_level(levels: Array<LevelType>): Node {
+	// i is used to avoid polluting multiple top-level IDs.
+	_render_level_solutions_level(levels: Array<LevelType>, i: number): Node {
 
 		const columns = [{
 			id: 'username',
@@ -83,6 +108,7 @@ export default class IfQuestions extends React.Component<PropsType> {
 			id: 'seconds',
 			Header: 'Time (s)',
 			accessor: p => p.seconds,
+			style: {textAlign: 'right'},
 			width: 75
 		}, {
 			id: 'correct',
@@ -98,13 +124,13 @@ export default class IfQuestions extends React.Component<PropsType> {
 			id: 'breaks',
 			Header: 'breaks',
 			accessor: p => p.breaks,
+			style: {textAlign: 'right'},
 			width: 30
 		}, {
 			id: 'completed',
 			Header: 'completed',
 			accessor: p => p.completed ? '' : 'N' ,
 			width: 50
-
 		}, {
 			id: 'value',
 			Header: 'value',
@@ -137,17 +163,21 @@ export default class IfQuestions extends React.Component<PropsType> {
 		levels.map( (l: LevelType) => {
 			let key = '';
 
-			l.pages.forEach( (p: PageType) => {
-				key =  p.description+'<br>'+ p.instruction + ' ('+p.type + ')';
-				if(!q_map.has(key)) q_map.set(key, []);
-				q_map.get(key).push(p);
-			});
+			l.pages
+				.filter( q => q.type !== 'IfPageTextSchema' )
+				.forEach( (p: PageType) => {
+					key =  p.description+'<br>'+ p.instruction + ' ('+p.type + ')';
+					if(!q_map.has(key)) q_map.set(key, []);
+					q_map.get(key).push(p);
+				});
 		});
 
 		// Html result, holding all of the keys and tables.
 		const q_summaries = [];
 
 		// For each question...
+		// 		Create the sub table
+		//		Create the summary row of data to display in the table.
 		q_map.forEach( (values: Array<PageType>, key) => {
 
 			const formula_pages = values.filter( p => p.type === 'IfPageHarsonsSchema' || p.type === 'IfPageFormulaSchema' );
@@ -191,7 +221,17 @@ export default class IfQuestions extends React.Component<PropsType> {
 				});
 			});
 
+			const tag_summary = rollup_tags(formula_pages);
+
 			const answer_table = (<div>
+				
+				<div>
+					<b>Tags: </b>
+					{ tag_summary.map( 
+						(t,i) => <span key={'tagsummary'+i} className='badge'>{t.n + ' ' + t.tag }</span> 
+					)}
+				</div>
+
 				<HtmlDiv style={{ backgroundColor: 'gray', marginTop: 20 }} html={key}/>
 				{ page_table_data.length === 0 ? <div/> : 
 				<ReactTable 
@@ -208,7 +248,7 @@ export default class IfQuestions extends React.Component<PropsType> {
 			// Create a summary row for the page.
 			q_summaries.push( {
 				key: key,
-				type: values[0].type,
+				type: values[0].type.replace('Schema', ''),
 				count: values.length,
 				code: values[0].code,
 				correct_average: values.reduce( 
@@ -220,6 +260,7 @@ export default class IfQuestions extends React.Component<PropsType> {
 				breaks: values.reduce( 
 					(count, p) => count + p.get_break_times_in_minutes().length,
 					0),
+				tags: tag_summary,
 				completion: Math.round(
 						values.reduce( (count, p) => count + (p.completed ? 1 : 0), 0) / values.length * 100
 						) + '%',
@@ -230,43 +271,54 @@ export default class IfQuestions extends React.Component<PropsType> {
 
 
 		const summary_columns = [{
-			id: 'key',
-			Header: 'Key', 
-			accessor: p => p.key
+			id: 'code',
+			Header: 'code',
+			accessor: p => p.code,
+			width: 70
 		}, {
 			id: 'type',
 			Header: 'Type',
 			accessor: p => p.type.substr(6),
+			width: 70
+		}, {
+			id: 'key',
+			Header: 'Question', 
+			accessor: p => p.key,
 			width: 100
 		}, {
 			id: 'count',
-			Header: 'Count',
+			Header: 'N',
 			accessor: p => p.count,
-			width: 100
+			style: {textAlign: 'right'},
+			width: 50
 		}, {
-			id: 'completion',
+			id: 'Completed',
 			Header: 'completion',
 			accessor: p => p.completion,
-			width: 75
-		}, {
-			id: 'code',
-			Header: 'code',
-			accessor: p => p.code,
+			style: {textAlign: 'right'},
 			width: 100
 		}, {
 			id: 'correct',
 			Header: 'Correct',
 			accessor: p => Math.round(p.correct_average*100)+'%',
+			style: {textAlign: 'right'},
 			width: 100
 		}, {
 			id: 'seconds',
 			Header: 'Seconds',
 			accessor: p => Math.round(p.seconds_average),
+			style: {textAlign: 'right'},
 			width: 50
+		}, {
+			id: 'tags',
+			Header: 'Tags',
+			accessor: p => p.tags.map( t => t.n + ' ' + t.tag ).join(', '),
+			width: 200
 		}, {
 			id: 'breaks',
 			Header: 'breaks',
-			accessor: p => p.breaks,
+			accessor: p => p.breaks === 0 ? '' : p.breaks,
+			style: {textAlign: 'right'},
 			width: 50
 		}, {
 			expander: true,
@@ -292,7 +344,7 @@ export default class IfQuestions extends React.Component<PropsType> {
 			SubComponent={ (q) => <div>X { q.original.expand }</div> }
 			/>;
 
-		return (<div id='IfQuestionsTopDiv' key='IfQuestionsTopDiv'>
+		return (<div id={'IfQuestionsTopDiv'+i} key={'IfQuestionsTopDiv'+i}>
 				{ summary }
 			</div>
 		);
@@ -304,9 +356,19 @@ export default class IfQuestions extends React.Component<PropsType> {
 		if(this.props.levels.length < 1) 
 			return <div/>;
 
-		return (<div>
-					{this._render_level_solutions() }
-				</div>);
+		// Organize into a map of levels.
+		const level_map = turn_array_into_map(this.props.levels, 
+			(l: LevelType): string => l.code
+		);
+
+		const html = [];
+
+		level_map.forEach( (ls,i) => {
+			html.push( <h1 key={'IfQuestionsKeyH1' + i}>{ ls[0].code }</h1> );
+			html.push( this._render_level_solutions_level(ls,i) );
+		});
+
+		return <div>{html}</div>;
 	}
 
 }

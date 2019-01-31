@@ -20,7 +20,8 @@ type PropsType = {
 // Create a custom little formatter to speed things up.  Changed from 6s to 
 // almost nothing.
 const formatDate = (dt: Date): string => {
-	return dt.getMonth() + '/' +
+	return dt.getFullYear().toString().substr(2) + '/' +
+		dt.getMonth()+1 + '/' +
 		dt.getDate() + ', ' +
 		dt.getHours() + ':' + 
 		(dt.getMinutes() + ':').padStart(3, '0') +

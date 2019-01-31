@@ -11,6 +11,7 @@ const { sql04 } = require('./../../sql/sql04.js');
 const { sql05 } = require('./../../sql/sql05.js');
 const { sql06 } = require('./../../sql/sql06.js');
 const { sql07 } = require('./../../sql/sql07.js');
+const { sql08 } = require('./../../sql/sql08.js');
 
 /**
 	Initialize MYSQL with credentials from secret.js.
@@ -103,7 +104,7 @@ const to_utc = (dt: Date): number => {
 async function update_mysql_database_schema(): Promise<any> {
 	
 	const old_version = await _update_get_version();
-
+	console.log(old_version);
 	if(old_version < 1) {
 		await _update_update_version( sql01 );
 	}
@@ -127,9 +128,12 @@ async function update_mysql_database_schema(): Promise<any> {
 	if(old_version < 7 ) {
 		await _update_update_version( sql07 );
 	}
+	if(old_version < 8 ) {
+		await _update_update_version( sql08 );
+	}
 
 
-	return { 'old_version': old_version, 'new_version': 7 };
+	return { 'old_version': old_version, 'new_version': 8 };
 }
 
 

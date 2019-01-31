@@ -236,10 +236,10 @@ app.get('/api/ifgame/recent_levels/:code', nocache, require_logged_in_user,
 		const INTERVAL = 60*24*7*15;  // time in minutes.
 		const ignore = '"' + ['garrettn', 'test', 'bob'].join( '","')+'"';
 		const sql = 'SELECT * FROM iflevels WHERE ' +
-				//'code = ? AND ' +
-				//'updated > NOW() - INTERVAL '+INTERVAL+' MINUTE ' +
-				//'AND username NOT IN ('+ignore+')';
-				'  username = "alharbis0" AND code="if1"';
+				'code = ? AND ' +
+				'updated > NOW() - INTERVAL '+INTERVAL+' MINUTE ' +
+				'AND username NOT IN ('+ignore+')';
+				//' username = "alharbis0" AND code="if1"';
 		const username = get_username_or_emptystring(req);
 		//const level = req.params.level ? req.params.level : 'tutorial';
 

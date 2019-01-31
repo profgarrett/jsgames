@@ -50,8 +50,11 @@ export default class Harsons extends React.Component                            
 				snap: false
 			},
 			zoom: {
-				controls: true,
-				wheel: true
+				controls: false,
+				wheel: false,
+				startScale: 1.5,
+				maxScale: 1.5,
+				minScale: 1.5
 			},
 			collapse : false, 
 			comments : false, 

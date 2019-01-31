@@ -30,7 +30,7 @@ export default class IfAnswersContainer extends React.Component                 
 			message: 'Loading data from server',
 			messageStyle: '',
 			isLoading: true,
-			code: 'tutorial',
+			code: 'summary',
 			levels: [],
 		};
 		(this     ).refreshData = this.refreshData.bind(this);
