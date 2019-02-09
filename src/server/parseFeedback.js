@@ -17,15 +17,25 @@ function is_boolean(s) {
 
 // Checks to see if a reference is valid.
 function is_valid_reference( ref ) {
+  const refs = ref.split(':');
+  let result = false;
 
-  // Check to see if it's a range reference (a1:b1)
-  if(ref.length === 5 && ref.search(':') === 2) return true;
+  // Some users may do a1:b1:c1, which we are going to ignore because it's weird.
+  if(refs.length > 2) return false;
+
+  // Test each element.
+  for(let i=0; i<refs.length; i++) {
+    result = /^[a-z][0-9]{1,2}$/i.test(refs[i]);
+    if(!result) return false;
+  }
+
+  return true;
 
   // Normal cell references
-  if(ref.length !== 2) return false;
-  if(ref.substr(1,1).search(/\d/) !== 0 ) return false;
-  if(ref.substr(0,1).search(/\w/) !== 0) return false;
-  return true;
+  //if(ref.length !== 2) return false;
+  //if(ref.substr(1,1).search(/\d/) !== 0 ) return false;
+  //if(ref.substr(0,1).search(/\w/) !== 0) return false;
+  //return true;
 }
 
 // Takes in a formula, parses it, and converts into auto-generated feedback
