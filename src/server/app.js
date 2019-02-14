@@ -265,6 +265,7 @@ app.get('/api/ifgame/levels/byCode/:code',
 
 // Select object updated in the last time period..
 // Require current user to match secret.js ADMIN_USERNAME.
+// Allows retrieving solutions, as it requires admin use.
 app.get('/api/ifgame/recent_levels/', nocache, require_logged_in_user,
 	async (req: $Request, res: $Response, next: NextFunction): Promise<any> => {
 	try {
@@ -325,7 +326,7 @@ app.get('/api/ifgame/recent_levels/', nocache, require_logged_in_user,
 
 		// Remove secret fields and transmit.
 		iflevels = iflevels.map( (l: Object): Object => return_tagged_level(l) );
-		iflevels = iflevels.map( (l: Object): Object => return_level_prepared_for_transmit(l));
+		//iflevels = iflevels.map( (l: Object): Object => return_level_prepared_for_transmit(l));
 
 		res.json(iflevels);
 	} catch (e) {

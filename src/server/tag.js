@@ -5,7 +5,7 @@
 */
 import type { LevelType, FormulaPageType } from './../app/if/IfTypes';
 
-const { /*parseFormula,*/ parseFeedback } = require('./parseFeedback');
+const { /*parseFormula,*/ parseFeedback } = require('./../shared/parseFeedback');
 
 
 // Enable DEBUG to run all tests on tagger.
@@ -712,6 +712,8 @@ if(DEBUG) {
 }
 
 
+
+
 function return_tagged_level(level: LevelType): LevelType {
 
 	level.pages = level.pages.map( page => {
@@ -724,7 +726,10 @@ function return_tagged_level(level: LevelType): LevelType {
 			filtered_history = add_tags(filtered_history);
 			filtered_history = tag_single_letter_typos(filtered_history);
 			filtered_history = tag_intermediate_history(filtered_history);
-			filtered_history = tag_paste(filtered_history);
+
+			// Only use the 'paste' tag for normal typed in solutions.
+			if(page.type === 'IfPageFormulaSchema') 
+				filtered_history = tag_paste(filtered_history);
 
 			page.history = filtered_history;
 
@@ -771,4 +776,5 @@ function return_tagged_level(level: LevelType): LevelType {
 module.exports = {
 	has_tag,
 	return_tagged_level	
+
 };

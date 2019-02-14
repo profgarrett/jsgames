@@ -92,7 +92,6 @@ if (!Array.prototype.includes) {
 import { Grid } from 'react-bootstrap';
 
 // Import app components.
-import CgHome from './cg/CgHome';
 import IfHome from './if/IfHome';
 import { Menu, PageNotFound } from './components/Misc';
 import Login from './components/Login';
@@ -125,7 +124,6 @@ if(window.location.hostname !== 'localhost') {
 					<Route exact path='/' component={Homepage}></Route>
 					<Route path='/login' component={Login}></Route>
 					<Route path='/logout' component={Logout}></Route>
-					<Route path='/chartgame' component={CgHome}></Route>
 					<Route path='/ifgame' component={IfHome}></Route>
 					<Route component={PageNotFound}></Route>
 				</Switch>
@@ -143,7 +141,6 @@ if(window.location.hostname !== 'localhost') {
 					<Route exact path='/' component={Homepage}></Route>
 					<Route path='/login' component={Login}></Route>
 					<Route path='/logout' component={Logout}></Route>
-					<Route path='/chartgame' component={CgHome}></Route>
 					<Route path='/ifgame' component={IfHome}></Route>
 					<Route component={PageNotFound}></Route>
 				</Switch>

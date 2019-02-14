@@ -32,6 +32,8 @@ type QuestionsContainerStateType = {
 	iduser: ?number,
 	users: ?Array<any>,
 
+	output: string,
+
 	levels: Array<LevelType>
 };
 
@@ -53,6 +55,8 @@ export default class IfQuestionsContainer extends React.Component<QuestionsProps
 			iduser: null,
 			users: null, // loads to array
 
+			output: 'excel', // either table or excel.
+
 			levels: [],
 		};
 		(this: any).refreshFilters = this.refreshFilters.bind(this);
@@ -61,6 +65,8 @@ export default class IfQuestionsContainer extends React.Component<QuestionsProps
 		(this: any).handleCodeFilterChange = this.handleCodeFilterChange.bind(this);
 		(this: any).handleIdSectionFilterChange = this.handleIdSectionFilterChange.bind(this);
 		(this: any).handleIdUserFilterChange = this.handleIdUserFilterChange.bind(this);
+		(this: any).handleOutputFilterChange = this.handleOutputFilterChange.bind(this);
+
 	}
 
 	componentDidMount() {
@@ -74,6 +80,9 @@ export default class IfQuestionsContainer extends React.Component<QuestionsProps
 	}
 	handleIdUserFilterChange(value: string) {
 		this.setState({ iduser: parseInt(value, 10)});
+	}
+	handleOutputFilterChange(value: string) {
+		this.setState({ output: value });
 	}
 
 
@@ -221,8 +230,6 @@ export default class IfQuestionsContainer extends React.Component<QuestionsProps
 				: 'User: ' + this.state.users.filter( 
 						s => s.iduser === this.state.iduser )[0].username;
 
-
-
 		const filter = (
 			<form name='c' >
 				<DropdownButton 
@@ -255,6 +262,14 @@ export default class IfQuestionsContainer extends React.Component<QuestionsProps
 								<MenuItem key={'select_user_dropdownitem'+i} 
 								eventKey={user.iduser}>{user.username}</MenuItem> )}
 				</DropdownButton>
+				<DropdownButton 
+						onSelect={this.handleOutputFilterChange}
+						bsStyle='primary' 
+						title={this.state.output}
+						key='select_output' id='select_output'>
+							<MenuItem eventKey='excel'>excel</MenuItem>
+							<MenuItem eventKey='table'>table</MenuItem>
+				</DropdownButton>
 				<Button
 						disabled={this.state.loading_data}
 						bsStyle='primary'
@@ -274,7 +289,7 @@ export default class IfQuestionsContainer extends React.Component<QuestionsProps
 					<Message message={this.state.message} style={this.state.messageStyle} />
 					<Loading loading={this.state.loading_data } />
 					{ filter }
-					<IfQuestions levels={this.state.levels} />
+					<IfQuestions levels={this.state.levels} output={this.state.output} />
 				</Col>
 			</Row>
 		);

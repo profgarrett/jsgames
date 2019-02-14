@@ -1,6 +1,6 @@
 // @flow
 
-function turn_array_into_map( a: Array<any>, get_p: any, sort_order_alpha: boolean = true ): Map {
+function turn_array_into_map( a: Array<any>, get_p: any, sort_order_alpha: boolean = true ): Map<string, any> {
 
 	var m = new Map();
 	var index = '';
