@@ -1,3 +1,5 @@
+require('@babel/polyfill');
+
 const HTMLWebpackPlugin = require('html-webpack-plugin');
 const webpack = require('webpack');
 const UglifyJSPlugin = require('uglifyjs-webpack-plugin');
@@ -6,7 +8,7 @@ const CleanWebpackPlugin = require('clean-webpack-plugin');
 
 module.exports = {
 	mode: 'production',
-	entry: ['babel-polyfill', __dirname + '/src/app/index.js'],
+	entry: ['@babel/polyfill', __dirname + '/src/app/index.js'],
 	module: {
 		rules: [
 			{

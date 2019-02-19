@@ -9,7 +9,7 @@ const path = require('path');
 const bodyParser = require('body-parser');
 const compression = require('compression');
 const cookieParser = require('cookie-parser');
-const bugsnag = require('bugsnag');
+const bugsnag = require('@bugsnag/js');
 
 const {BUGSNAG_API, DEBUG, ADMIN_USERNAME, VERSION } = require('./secret.js'); 
 
@@ -196,6 +196,47 @@ app.post('/api/ifgame/new_level_by_code/:code',
 
 
 
+// List a list of classes.
+app.get('/api/ifgame/sections/', 
+	nocache, require_logged_in_user, 
+	async (req          , res           , next              )               => {
+	try {
+		const username = get_username_or_emptystring(req);
+		if(username !== ADMIN_USERNAME && username !== 'test')
+			throw new Error('Invalid username '+username+' for sections');
+
+		const sql = 'SELECT * FROM sections';
+		const sections = await run_mysql_query(sql);
+		res.json(sections);
+	} catch (e) {
+		log_error(e);
+		next(e);
+	}
+});
+
+
+
+// List a list of classes.
+app.get('/api/ifgame/users/', 
+	nocache, require_logged_in_user,
+	async (req          , res           , next              )               => {
+	try {
+		const username = get_username_or_emptystring(req);
+		if(username !== ADMIN_USERNAME && username !== 'test')
+			throw new Error('Invalid username '+username+' for users');
+
+		const sql = 'SELECT * FROM users';
+		const users = await run_mysql_query(sql);
+		const clean_users = users.map( u => { return { iduser: u.iduser, username: u.username }; } );
+		res.json(clean_users);
+	} catch (e) {
+		log_error(e);
+		next(e);
+	}
+});
+
+
+
 // List objects owned by the logged in user.
 // :type may be 'all', or limited to a single code.
 app.get('/api/ifgame/levels/byCode/:code', 
@@ -224,29 +265,60 @@ app.get('/api/ifgame/levels/byCode/:code',
 
 // Select object updated in the last time period..
 // Require current user to match secret.js ADMIN_USERNAME.
-app.get('/api/ifgame/recent_levels/:code', nocache, require_logged_in_user,
+// Allows retrieving solutions, as it requires admin use.
+app.get('/api/ifgame/recent_levels/', nocache, require_logged_in_user,
 	async (req          , res           , next              )               => {
 	try {
-		const param_code = req.params.code;
-		const code_in_array = IfLevels.filter( l => l.code === param_code).map( l => l.code );
-
-		if(code_in_array.length !== 1)
-			throw new Error('Invalid code type '+param_code+' passed to recent_levels');
-
-		const INTERVAL = 60*24*7*15;  // time in minutes.
-		const ignore = '"' + ['garrettn', 'test', 'bob'].join( '","')+'"';
-		const sql = 'SELECT * FROM iflevels WHERE ' +
-				'code = ? AND ' +
-				'updated > NOW() - INTERVAL '+INTERVAL+' MINUTE ' +
-				'AND username NOT IN ('+ignore+')';
-				//' username = "alharbis0" AND code="if1"';
+		// Require ADMIN
 		const username = get_username_or_emptystring(req);
-		//const level = req.params.level ? req.params.level : 'tutorial';
-
 		if(username !== ADMIN_USERNAME && username !== 'test')
 			throw new Error('Invalid username '+username+' for recent_levels');
 
-		let select_results = await run_mysql_query(sql, code_in_array);
+
+		// Get cleaned-up params (string or int)
+		const sql_params = [];
+
+		const param_code = typeof req.query.code === 'undefined' 
+			? null : req.query.code;
+		if(param_code !== null) sql_params.push(param_code);
+
+		const param_idsection = typeof req.query.idsection === 'undefined'
+			? null : parseInt(req.query.idsection, 0);
+		if(param_idsection !== null) sql_params.push(param_idsection);
+
+		const param_iduser = typeof req.query.iduser === 'undefined'
+			? null : parseInt(req.query.iduser, 0);
+		if(param_iduser !== null) sql_params.push(param_iduser);
+
+
+		// Make sure that the given code is valid. If not, then immediately fail
+		// to avoid having some type of SQL injection issue.
+		const code_in_array = IfLevels.filter( l => l.code === param_code).map( l => l.code );
+		if(param_code !== null && code_in_array.length !== 1)
+			throw new Error('Invalid code type '+param_code+' passed to recent_levels');
+
+
+		// Build time limit.
+		const INTERVAL = 60*24*7*35;  // time in minutes => hours => days => weeks
+		const ignore = '"' + ['garrettn', 'test', 'bob'].join( '","')+'"';
+
+
+		// Build SQL statement.
+		// Note that we trust that all given params have already been cleaned up.
+		const sql = 'select distinct iflevels.* ' +
+			' from iflevels ' +
+				'inner join users on iflevels.username = users.username ' +
+				'left outer join users_sections on users_sections.iduser = users.iduser ' +
+				'left outer join sections on sections.idsection = users_sections.idsection ' +
+			' WHERE ' +
+				(param_code === null ? '' : 'IfLevels.code = ? AND ') +
+				(param_idsection === null ? '' : ' sections.idsection = ? AND ')  +
+				(param_iduser === null ? '' : ' users.iduser = ? AND ')  +
+				' IfLevels.updated > NOW() - INTERVAL '+INTERVAL+' MINUTE AND ' +
+				' iflevels.username NOT IN ('+ignore+')';
+				//' username = "alharbis0" AND code="if1"';
+
+		let select_results = await run_mysql_query(sql, sql_params);
 
 		if(select_results.length === 0) return res.json([]);
 
@@ -254,7 +326,7 @@ app.get('/api/ifgame/recent_levels/:code', nocache, require_logged_in_user,
 
 		// Remove secret fields and transmit.
 		iflevels = iflevels.map( (l        )         => return_tagged_level(l) );
-		iflevels = iflevels.map( (l        )         => return_level_prepared_for_transmit(l));
+		//iflevels = iflevels.map( (l: Object): Object => return_level_prepared_for_transmit(l));
 
 		res.json(iflevels);
 	} catch (e) {
@@ -271,8 +343,14 @@ app.get('/api/ifgame/grades/:username?', nocache, require_logged_in_user,
 	try {
 		//const ignore = '"' + ['garrettn', 'test', 'bob'].join( '","')+'"';
 		const username = get_username_or_emptystring(req);
-		const param_username = typeof req.params.username === 'undefined' ? '' : req.params.username;
-		const sql = 'SELECT * FROM iflevels WHERE COMPLETED = 1 ' +
+		const param_username = typeof req.params.username === 'undefined' 
+			? '' : req.params.username;
+		const param_section = typeof req.query.section === 'undefined'
+			? '' : req.query.section;
+
+		const sql = 'SELECT * FROM iflevels ' +
+				' WHERE COMPLETED = 1 ' +
+				(param_section === '' ? '' : ' AND ') +
 				(param_username === '' ? '' : ' AND username = ?');
 		//		: ' AND username NOT IN ('+ignore+')');
 

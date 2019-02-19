@@ -1,17 +1,31 @@
-import 'babel-polyfill'; // IE11 compatability.
+import '@babel/polyfill'; // IE11 compatability.
+
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Row, Col, Alert } from 'react-bootstrap';
-import { OverlayTrigger, Tooltip, Glyphicon } from 'react-bootstrap';
-
-import { RotateLoader, ClipLoader, ScaleLoader } from 'react-spinners';
+import { ClipLoader, ScaleLoader } from 'react-spinners';
 import secret from './../../server/secret';
+
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faHandPointRight, faCheck, faCheckSquare, faPencilAlt, faMinusCircle } from '@fortawesome/free-solid-svg-icons';
 
 //  Old browser compatability.
 import 'whatwg-fetch'; // ajax support.
 import Promise from 'promise-polyfill';
 if (!window.Promise) { window.Promise = Promise; }
 
+
+export class PageHeader extends React.Component {
+	render() {
+		return (
+		<div className='pb-2 mt-4 mb-2 border-bottom'>
+			{ this.props.header }
+		</div>);
+	}
+}
+PageHeader.propTypes = {
+	header: PropTypes.string.isRequired
+};
 
 /*
 	This wraps problematic compoments that throw errors.
@@ -44,22 +58,26 @@ ErrorBoundary.propTypes = {
 };
 
 
-
-const glyph = (message, glyph, color='black', font_size=24) => {
-	let style = {
-		fontSize: font_size,
-		color: color,
-		paddingLeft: 2
-	};
-
-	return (<Glyphicon style={ style } glyph={ glyph } />);
-};
-
+// Source:
+// https://github.com/FortAwesome/react-fontawesome
 
 // Used as an inline checkmark.
 export class SmallOkGlyphicon extends React.Component {
 	render() {
-		return glyph('Ok', 'ok', '#3c763d', '12');
+		return (<FontAwesomeIcon 
+			style={{ paddingLeft: 2, paddingTop: 2, paddingRight: 5, fontSize: '1.4rem', color: '#3c763d' }} 
+			icon={faCheck} />);
+	}
+}
+
+					
+
+// This is a standard Glyph for showing success.
+export class HandPointRightGlyphicon extends React.Component {
+	render() {
+		return (<FontAwesomeIcon 
+			style={{ paddingLeft: 2, top: 3, paddingRight: 5, fontSize: 21 }} 
+			icon={faHandPointRight} />);
 	}
 }
 
@@ -68,32 +86,34 @@ export class SmallOkGlyphicon extends React.Component {
 // This is a standard Glyph for showing success.
 export class CompletedGlyphicon extends React.Component {
 	render() {
-		return glyph('Completed', 'check', 'black');
+		return (<FontAwesomeIcon 
+			style={{ color: this.props.color, paddingLeft: 2, paddingTop: 3, paddingRight: 5, fontSize: '2em' }} 
+			icon={faCheckSquare} />);
 	}
 }
-export function completed_glyphicon( color='black' ) {
-	return glyph('Completed', 'check', color );
-}
+CompletedGlyphicon.propTypes = {
+	color: PropTypes.string.isRequired
+};
+
 
 
 export class CorrectGlyphicon extends React.Component {
 	render() {
-		return glyph('Completed', 'check');
+		return (<FontAwesomeIcon 
+			style={{ color: 'green', paddingLeft: 2, top: 3, paddingRight: 5, fontSize: '2em' }} 
+			icon={faCheck} />);
 	}
 }
-export function correct_glyphicon() {
-	return glyph('Correct', 'ok-circle', '#3c763d');
-}
+
 
 
 // This is a standard Glyph for showing progress.
 export class ProgressGlyphicon extends React.Component {
 	render() {
-		return glyph('In progress', 'pencil');
+		return (<FontAwesomeIcon 
+			style={{ color: 'black', paddingLeft: 2, top: 3, paddingRight: 5, fontSize: '2em' }} 
+			icon={faPencilAlt} />);
 	}
-}
-export function progress_glyphicon() {
-		return glyph('In progress', 'pencil');
 }
 
 
@@ -101,11 +121,10 @@ export function progress_glyphicon() {
 // This is a standard Glyph for showing success.
 export class IncorrectGlyphicon extends React.Component {
 	render() {
-		return glyph('Incorrect', 'remove-circle', 'rgb(199, 37, 78)');
+		return (<FontAwesomeIcon 
+			style={{ paddingLeft: 2, top: 3, paddingRight: 5, fontSize: '2em', color: 'rgb(199, 37, 78)' }} 
+			icon={faMinusCircle} />);
 	}
-}
-export function incorrect_glyphicon() {
-	return glyph('Incorrect', 'remove-circle', 'rgb(199, 37, 78)');
 }
 
 
@@ -316,7 +335,7 @@ export class Message extends React.Component {
 		return (
 			<div style={style} 
 					onClick={ () => that.setState({ hidden: true }) } >
-				<Alert bsStyle={ this.props.style ? this.props.style : 'info' }>
+				<Alert variant={ this.props.style ? this.props.style : 'info' }>
 					<div >
 						{ this.props.message }
 						{ spinner }

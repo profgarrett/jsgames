@@ -157,7 +157,7 @@ function build_value(value, accept_right_input=true) {
 			? ''
 			: ' ' + Blockly.JavaScript.valueToCode(block, 'right', Blockly.JavaScript.ORDER_NONE);
 		var code = (typeof value === 'number' ? value : '"'+value+'"') + value_right;
-		debugger;
+		
 		return [code, Blockly.JavaScript.ORDER_ATOMIC ];
 	};
 

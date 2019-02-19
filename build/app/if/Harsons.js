@@ -1,6 +1,6 @@
 //      
 import React from 'react';
-import { HelpBlock, FormControl } from 'react-bootstrap';
+import { FormControl } from 'react-bootstrap';
 import { HtmlSpan } from './../components/Misc';
 import BlocklyFactory from './../../shared/BlocklyFactory';
 
@@ -164,8 +164,13 @@ export default class Harsons extends React.Component                            
 
 	// Build out the input box.
 	_render_field(page                 )       {
-
-		let helpblock = page.helpblock ? <HelpBlock style={helpblockStyle}><HtmlSpan html={ page.helpblock } /></HelpBlock> : '';
+		const helpblockStyle = {
+			color: 'white',
+			backgroundColor: '#337ab7',
+			marginBottom: 5,
+			padding: 7
+		};
+		let helpblock = page.helpblock ? <div style={helpblockStyle}><HtmlSpan html={ page.helpblock } /></div> : '';
 	
 		return (
 			<div>
@@ -205,7 +210,7 @@ export default class Harsons extends React.Component                            
 			marginBottom: 5,
 			padding: 7
 		};
-		const helpblock = page.helpblock ? <HelpBlock style={helpblockStyle}>Hint: <HtmlSpan html={ page.helpblock } /></HelpBlock> : '';
+		const helpblock = page.helpblock ? <div style={helpblockStyle}>Hint: <HtmlSpan html={ page.helpblock } /></div> : '';
 
 		// Return full interface.
 		return (

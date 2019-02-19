@@ -263,7 +263,7 @@ const baseifgame = {
 			// then go ahead and change type for half of all users.
 			if(level.harsons_randomly_on_username 
 					&& new_page_json.type === 'IfPageFormulaSchema' 
-					&& username_as_0_or_1 === 0) {
+					&& username_as_0_or_1 === 1) {
 				new_page_json.type = 'IfPageHarsonsSchema';
 			}
 

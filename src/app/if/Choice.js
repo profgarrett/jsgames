@@ -53,7 +53,7 @@ export default class Choice extends React.Component<PropsType> {
 				// Only show selected.
 				return (
 					<ListGroup>
-						<ListGroupItem bsStyle={style}>{ page.client }</ListGroupItem>
+						<ListGroupItem variant={style}>{ page.client }</ListGroupItem>
 					</ListGroup>
 				);
 			}

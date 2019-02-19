@@ -89,7 +89,7 @@ export default class IfMonitorContainer extends React.Component                 
 		const filter = (
 			<form name='c' onSubmit={this.handleSubmit}>
 
-				<Button bsStyle='primary'>Refresh filter</Button>
+				<Button variant='primary'>Refresh filter</Button>
 			</form>
 			);
 

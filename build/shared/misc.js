@@ -1,6 +1,6 @@
 //      
 
-function turn_array_into_map( a            , get_p     , sort_order_alpha          = true )      {
+function turn_array_into_map( a            , get_p     , sort_order_alpha          = true )                   {
 
 	var m = new Map();
 	var index = '';

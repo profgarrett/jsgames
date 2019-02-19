@@ -2,14 +2,15 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 import IfLevelList from './IfLevelList';
+import {PageHeader} from './../components/Misc';
 
-import { Breadcrumb, PageHeader, Row, Col, Well, Button } from 'react-bootstrap';
+import { Breadcrumb, Container, Row, Col, Card, Button } from 'react-bootstrap';
 
 import { get_user_is_admin, get_username, Message, Loading } from './../components/Misc';
 
 import { IfLevelSchema, IfLevels } from './../../shared/IfGame';
 
-import IfMyProgress from './IfMyProgress';
+import MyProgress from './MyProgress';
 
 import ForceLogin from './../components/ForceLogin';
 
@@ -110,6 +111,7 @@ export default class IfLevelListContainer extends React.Component {
 	// Render levels that match the given code.
 	// Hides add button if there are any uncompleted items.
 	_render_code(code) {
+		
 		let button_level = IfLevels.filter( level => level.code === code )[0];
 		let button;
 
@@ -133,23 +135,24 @@ export default class IfLevelListContainer extends React.Component {
 		}
 
 		return (
-			<div>
 			<Row>
 				<Col xs={12}>
 					{ crumbs }
 					<ForceLogin />
-					<PageHeader>{ button_level.label }</PageHeader>
+					<PageHeader header ={ button_level.label } />
 					<Message message={this.state.message} style={this.state.message_style} />
 					<Loading loading={this.state.isLoading } />
-					<Well>
-						{button_level.description }
-					</Well>
+					<Card>
+						<Card.Body>
+							{button_level.description }
+						</Card.Body>
+					</Card>
 					{ button }		
 					<IfLevelList levels={this.state.levels} />
 				</Col>
 			</Row>
-			</div>
 		);
+		
 	}
 
 
@@ -160,10 +163,8 @@ export default class IfLevelListContainer extends React.Component {
 			'/api/version',
 			'/logout',
 			'/ifgame/test/?USER_CREATION_SECRET=supersecret',
-			'/ifgame/activity',
 			'/ifgame/monitor',
 			'/ifgame/grades',
-			'/ifgame/answers',
 			'/ifgame/questions'
 		];
 
@@ -181,7 +182,7 @@ export default class IfLevelListContainer extends React.Component {
 				<li key={'iflevellistcontainerbutton'+i}>
 					<Button 
 						onClick={ e => this.insertGame(level.code, e) } 
-						bsStyle='link'
+						variant='link'
 						style={{ padding: 0 }}
 						disabled={ this.state.isLoading } >
 						{ level.code.substr(0,1).toUpperCase() + level.code.substr(1) }
@@ -192,33 +193,33 @@ export default class IfLevelListContainer extends React.Component {
 
 
 		return (
-			<div>
-			<Row>
-				<Col xs={12}>
-					<ForceLogin />
-					<div style={{ paddingTop: 10}} />
-					<Message message={this.state.message} style={this.state.message_style} />
-					<Loading loading={this.state.isLoading } />
-					<IfMyProgress 
+			<Container fluid='true'>
+				<Row>
+					<Col>
+						<ForceLogin />
+						<div style={{ paddingTop: 10}} />
+						<Message message={this.state.message} style={this.state.message_style} />
+						<Loading loading={this.state.isLoading } />
+						<MyProgress 
 							grades={this.state.grades} 
 							levels={this.state.levels} 
 							onClickNewCode={ (code,e)=> that.insertGame(code,e)}
-							onClickContinueLevel={ (ifLevel,e)=> this.context.router.history.push('/ifgame/level/'+ifLevel._id+'/play') } />
-				</Col>
-			</Row>
-			<Row>
-				<Col xs={8}>
-					<IfLevelList levels={this.state.levels} />
-					<ul>{ links.map( (l,i) => <li key={'link'+i}><a href={l}>{l}</a></li> )}
-					</ul>
-				</Col>
-				<Col xs={4}>
-					{ buttons.length === 0 ? '' : <h4>Restart a tutorial</h4> }
-					<ul>{ buttons }</ul>
-					<br/><br/>
-				</Col>
-			</Row>
-			</div>
+							onClickContinueLevel={ (ifLevel)=> this.context.router.history.push('/ifgame/level/'+ifLevel._id+'/play') } />
+					</Col>
+				</Row>
+				<Row>
+					<Col sm={8} style={{ padding: '1.25rem'}} >
+						<IfLevelList levels={this.state.levels} />
+						<ul>{ links.map( (l,i) => <li key={'link'+i}><a href={l}>{l}</a></li> )}
+						</ul>
+					</Col>
+					<Col sm={4} style={{ padding: '1.25rem'}} >
+						{ buttons.length === 0 ? '' : <h4>Restart a tutorial</h4> }
+						<ul>{ buttons }</ul>
+						<br/><br/>
+					</Col>
+				</Row>
+			</Container>
 		);
 	}
 

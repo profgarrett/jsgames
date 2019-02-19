@@ -1,6 +1,6 @@
 //     
 import React from 'react';
-import { Row, Col, Breadcrumb, DropdownButton, MenuItem, Button  } from 'react-bootstrap';
+import { Container, ButtonToolbar, ButtonGroup, Row, Col, Breadcrumb, DropdownButton, Dropdown, Button  } from 'react-bootstrap';
 
 import IfQuestions from './IfQuestions';
 import { Message, Loading } from './../components/Misc';
@@ -18,8 +18,22 @@ import ForceLogin from './../components/ForceLogin';
                                     
                  
                       
-                    
+
+           
+                       
+
+           
               
+                      
+
+                    
+                       
+
+                 
+                    
+
+                
+
                          
   
 
@@ -29,37 +43,133 @@ export default class IfQuestionsContainer extends React.Component               
 		this.state = { 
 			message: 'Loading data from server',
 			messageStyle: '',
-			isLoading: true,
-			code: 'summary',
+
+			loading_data: true,
+
+			code: 'tutorial',
+			codes: IfLevels.map( l => l.code ),
+
+			idsection: null,
+			sections: null, // loads to an array from server.
+
+			iduser: null,
+			users: null, // loads to array
+
+			output: 'table', // either table or excel.
+
 			levels: [],
 		};
-		(this     ).refreshData = this.refreshData.bind(this);
-		(this     ).handleChange = this.handleChange.bind(this);
+		(this     ).refreshFilters = this.refreshFilters.bind(this);
+		(this     ).refreshLevels = this.refreshLevels.bind(this);
+
+		(this     ).handleCodeFilterChange = this.handleCodeFilterChange.bind(this);
+		(this     ).handleIdSectionFilterChange = this.handleIdSectionFilterChange.bind(this);
+		(this     ).handleIdUserFilterChange = this.handleIdUserFilterChange.bind(this);
+		(this     ).handleOutputFilterChange = this.handleOutputFilterChange.bind(this);
+
 	}
 
 	componentDidMount() {
-		// Load data.
-		this.refreshData();
+		this.refreshFilters();
+	}
+	handleCodeFilterChange(value        ) {
+		this.setState({ code: value});
+	}
+	handleIdSectionFilterChange(value        ) {
+		this.setState({ idsection: parseInt(value,10)});
+	}
+	handleIdUserFilterChange(value        ) {
+		this.setState({ iduser: parseInt(value, 10)});
+	}
+	handleOutputFilterChange(value        ) {
+		this.setState({ output: value });
 	}
 
 
-	/*
-	handleSubmit(e: ?SyntheticEvent<HTMLButtonElement>) {
-		if(e) e.preventDefault();
-		this.setState({  })
-		this.refreshData();
+	// Load the filter values.
+	refreshFilters() {
+		this.setState({ loading_data: true, message: 'loading filters' });
+		const newState = { loading_data: false, message: '' };
+
+		// Start with sections.
+		fetch('/api/ifgame/sections', {
+				method: 'get',
+				credentials: 'include',
+				headers: {
+					'Accept': 'application/json',
+					'Content-Type': 'application/json'
+				}
+			})
+			.then( response => response.json() )
+			.then( json => {
+				if( json.length > 0) {
+					// Set the section to the first item and load.
+					newState.sections = json;
+					newState.idsection = -1; // json[0].idsection; default to no section.
+				} else {
+					// No sections found.
+					newState.sections = [];
+				}
+
+				// Now load list of people.
+				fetch('/api/ifgame/users', {
+						method: 'get',
+						credentials: 'include',
+						headers: {
+							'Accept': 'application/json',
+							'Content-Type': 'application/json'
+						}
+					})
+					.then( response => response.json() )
+					.then( json => {
+						if( json.length > 0) {
+							newState.users = json;
+							newState.iduser = -1; // json[0].iduser; default to all users
+						} else {
+							newState.users = [];
+						}
+
+						// Now update state.
+						this.setState(newState, this.refreshLevels()); 
+
+					})
+					.catch( error => {
+						this.setState({ 
+							message: 'Error: ' + error,
+							messageStyle: 'danger',
+							loading_data: false
+						});
+					});
+
+			})
+			.catch( error => {
+				this.setState({ 
+					message: 'Error: ' + error,
+					messageStyle: 'danger',
+					loading_data: false
+				});
+			});
 	}
-	*/
 
-	handleChange(value     ) {
-		//if(e) e.preventDefault();
-		this.setState({ code: value }, () => this.refreshData());
 
-	}
+	refreshLevels() {
+		const params = [];
 
-	refreshData() {
+		if(this.state.code !== null && this.state.code !== 'All') 
+				params.push('code='+ this.state.code);
 
-		fetch('/api/ifgame/recent_levels/'+this.state.code, {
+		if(this.state.idsection !== null && this.state.idsection !== -1) 
+				params.push('idsection='+ this.state.idsection);
+
+		if(this.state.iduser !== null && this.state.iduser !== -1) 
+				params.push('iduser='+ this.state.iduser);
+
+		const q_string = params.length === 0 ? '' :
+				'?' + params.join('&');
+ 
+		this.setState({ loading_data: true, message: 'Loading data from server' });
+
+		fetch('/api/ifgame/recent_levels/'+ q_string, {
 				method: 'get',
 				credentials: 'include',
 				headers: {
@@ -74,15 +184,15 @@ export default class IfQuestionsContainer extends React.Component               
 					levels: ifLevels,
 					messageStyle: '',
 					message: '',
-					isLoading: false
+					loading_data: false
 				});
 			})
 			.catch( error => {
 				this.setState({ 
 					levels: [],
 					message: 'Error: ' + error,
-					messageStyle: 'Error',
-					isLoading: false
+					messageStyle: 'danger',
+					loading_data: false
 				});
 			});
 	}
@@ -98,18 +208,89 @@ export default class IfQuestionsContainer extends React.Component               
 			</Breadcrumb>
 			);
 
+		// Build filter datasets, adding a -1 option for all.
+		const levels = ['All'];
+		IfLevels.map(l => levels.push(l.code));
+
+		const sections = [{ idsection: -1, code: 'All' }];
+		if(this.state.sections !== null) 
+				this.state.sections.map( section => sections.push(section));
+
+		const users = [{ iduser: -1, username: 'All'}];
+		if(this.state.users !== null) 
+				this.state.users.map( user => users.push(user));
+
+		const section_title = this.state.idsection === -1 || this.state.idsection === null
+				? 'Pick a section' 
+				: 'Section: ' + this.state.sections.filter( 
+						s => s.idsection === this.state.idsection )[0].code;
+
+		const user_title = this.state.iduser === -1 || this.state.iduser === null
+				? 'Pick a user' 
+				: 'User: ' + this.state.users.filter( 
+						s => s.iduser === this.state.iduser )[0].username;
+
 		const filter = (
 			<form name='c' >
+				<ButtonToolbar>
+				<ButtonGroup>
 				<DropdownButton 
-						onSelect={this.handleChange}
-						bsStyle='primary' title='Pick a level to view' 
-						key='levelsection' id='levelselect'>
-					{ IfLevels.map( (l,i) => <MenuItem key={'dropdownitem'+i} eventKey={l.code}>{l.code}</MenuItem> )}
+						onSelect={this.handleCodeFilterChange}
+						variant='primary' 
+						title= { this.state.code } 
+						key='select_code' id='select_code'>
+							{ levels.map( (code,i) => 
+								<Dropdown.Item
+									key={'select_code_dropdownitem'+i} 
+									eventKey={code}>{code}
+								</Dropdown.Item> 
+							)}
 				</DropdownButton>
+				<DropdownButton 
+						onSelect={this.handleIdSectionFilterChange}
+						variant='primary' 
+						title= {section_title}
+						key='select_section' id='select_section'>
+							{ sections.map( (section,i) => 
+								<Dropdown.Item key={'select_section_dropdownitem'+i} 
+								eventKey={section.idsection}>{section.code}</Dropdown.Item> )}
+				</DropdownButton>
+				<DropdownButton 
+						onSelect={this.handleIdUserFilterChange}
+						variant='primary' 
+						title={user_title}
+						key='select_user' id='select_user'>
+							{ users.map( (user,i) => 
+								<Dropdown.Item key={'select_user_dropdownitem'+i} 
+								eventKey={user.iduser}>{user.username}</Dropdown.Item> )}
+				</DropdownButton>
+				</ButtonGroup> 
+
+				<ButtonGroup>
+				<DropdownButton 
+						onSelect={this.handleOutputFilterChange}
+						variant='primary' 
+						title={this.state.output}
+						key='select_output' id='select_output'>
+							<Dropdown.Item eventKey='excel'>excel</Dropdown.Item>
+							<Dropdown.Item eventKey='table'>table</Dropdown.Item>
+				</DropdownButton>
+				</ButtonGroup>
+
+				<ButtonGroup>
+				<Button
+						disabled={this.state.loading_data}
+						variant='primary'
+						onClick={ () => this.refreshLevels()}
+				>{ this.state.loading_data ? 'Loading...' : 'Refresh' }
+				</Button>
+				</ButtonGroup>
+				</ButtonToolbar>
 			</form>
 			);
 
 		return (
+			<Container>
 			<Row>
 				<Col>
 					<ForceLogin/>
@@ -117,11 +298,12 @@ export default class IfQuestionsContainer extends React.Component               
 					<h3>Questions for { this.state.code }</h3>
 
 					<Message message={this.state.message} style={this.state.messageStyle} />
-					<Loading loading={this.state.isLoading } />
+					<Loading loading={this.state.loading_data } />
 					{ filter }
-					<IfQuestions levels={this.state.levels} />
+					<IfQuestions levels={this.state.levels} output={this.state.output} />
 				</Col>
 			</Row>
+			</Container>
 		);
 	}
 }

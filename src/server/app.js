@@ -9,7 +9,7 @@ const path = require('path');
 const bodyParser = require('body-parser');
 const compression = require('compression');
 const cookieParser = require('cookie-parser');
-const bugsnag = require('bugsnag');
+const bugsnag = require('@bugsnag/js');
 
 const {BUGSNAG_API, DEBUG, ADMIN_USERNAME, VERSION } = require('./secret.js'); 
 

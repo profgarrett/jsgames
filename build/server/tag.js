@@ -5,7 +5,12 @@
 */
                                                                       
 
-const { /*parseFormula,*/ parseFeedback } = require('./parseFeedback');
+const { /*parseFormula,*/ parseFeedback } = require('./../shared/parseFeedback');
+
+
+// Enable DEBUG to run all tests on tagger.
+const DEBUG = false;
+
 
 
 /**
@@ -41,39 +46,140 @@ const filter_history =
 		);
 
 
+// Don't return items that are the same as the next item.
+// Spaces are significant.
+const remove_duplicate_history = (h) => h.filter(
+		(h, i, h_array) => {
+			// Return last item
+			if(i+1 === h_array.length) return true;
+
+			// If the same as the previous item, don't return.
+			if(h_array[i+1].client_f === h.client_f) return false;
+
+			return true;
+		}
+	);
+
+/*
+if(DEBUG) {
+	remove_duplicate_history([ 
+		{ client_f: '=' }, 
+		{ client_f: '=' }, 
+		{ client_f: '= ' }, 
+		{ client_f: '=LEFT("Left' }, 
+		{ client_f: '=LEFT("Left' }, 
+		]
+	).map( h=> console.log( [h.tags, h.client_f]));
+}
+*/
+
+const add_tags = (h) => h.map( h => { return { tags: [], ...h }; } );
+
+
+
+// tag items with a single letter backspace and re-add.
+const tag_single_letter_typos = (h) => h.map( 
+		(h, i, h_array) => {
+
+			// Make sure that there are at least 2 more items.
+			// n0, n1, and n2 ()
+			if(i+2 >= h_array.length) 
+				return h;
+
+			// See if the next item, n1, is one letter shorter.
+			// and if the following item, n2, is back to this length
+			if(h_array[i].client_f.length === h_array[i+2].client_f.length && 
+				h_array[i].client_f.length -1 === h_array[i+1].client_f.length ) {
+				// Make sure that we aren't deleting a longer stretch.
+				// AKA, Golf, Gol, Go, God...
+				if( i<1 || 
+					h_array[i-1].client_f.length < h_array[i].client_f.length) {				
+					h.tags.push({tag:'TYPO'});
+				}
+			}
+
+			return h;
+		}
+	);
+
+
+// TESTS.
+/*
+if(DEBUG) {
+	tag_single_letter_typos(add_tags([ 
+		{ client_f: '`' }, 
+		{ client_f: '' }, 
+		{ client_f: '=' }, 
+		{ client_f: '=LEFT("Le' }, 
+		{ client_f: '=LEFT("Lez' }, 
+		{ client_f: '=LEFT("Le' }, 
+		{ client_f: '=LEFT("Lef' }, 
+		{ client_f: '=LEFT("Lefz' }, 
+		{ client_f: '=LEFT("Lef' }, 
+		{ client_f: '=LEFT("Left' }, 
+		]
+	)).map( h=> console.log( [h.tags, h.client_f]));
+
+	tag_single_letter_typos(add_tags([ 
+		{ client_f: '=LEFT("Left", ' }, 
+		{ client_f: '=LEFT("Left",' }, 
+		{ client_f: '=LEFT("Left"' }, 
+		{ client_f: '=LEFT("Left' }, 
+		{ client_f: '=LEFT("Lefty' }, 
+		{ client_f: '=LEFT("Lefty"' }, 
+		]
+	)).map( h=> console.log( [h.tags, h.client_f]));
+}
+*/
+
 // tag progressively built items  A, A+, A+1, ...
-// Also addes a tags: [] property to each history object in the array.
 const tag_intermediate_history = (h) => h.map( 
 		(h, i, h_array) => {
 			// always return last item.
-			if(i==h_array.length-1)
-					return { tags: [], ...h }; 
+			if(i==h_array.length-1) 
+					return h; 
+
+			// If it has the TYPO tag, then mark as intermediate.
+			if(has_tag(h.tags, 'TYPO')){
+				h.tags.push({tag:'INTERMEDIATE'});
+				return h;
+			}
 
 			// must be different than next.
-			if (h.client_f === h_array[i+1].client_f) 
-					return { tags: [{tag:'INTERMEDIATE'}], ...h };
+			if (h.client_f === h_array[i+1].client_f) {
+				h.tags.push({tag:'INTERMEDIATE'});
+				return h;
+			}
 
 			// must be different than next + 1 or more characters, i.e. ignore intermediate typing
 			// Only valid if the adding is at the end.
-			if(h.client_f === h_array[i+1].client_f.substr(0, h.client_f.length)) 
-					return { tags: [{tag:'INTERMEDIATE'}], ...h };
+			if(h.client_f === h_array[i+1].client_f.substr(0, h.client_f.length))  {
+				h.tags.push({tag:'INTERMEDIATE'});
+				return h;
+			}
 
 			// See if we have a pattern of progressively-built inner options.
 			// i.e., =(), =(a), =(a1)
-			if(is_sub_sequence(h.client_f, h_array[i+1].client_f))
-					return { tags: [{tag:'INTERMEDIATE'}], ...h };
+			if(is_sub_sequence(h.client_f, h_array[i+1].client_f)) {
+				h.tags.push({tag:'INTERMEDIATE'});
+				return h;
+			}
 
 			// See if we have intermediate deletions.
 			// i.e., =(a1), =(a), =()
-			if(i>0 && is_sub_sequence(h.client_f, h_array[i-1].client_f))
-					return { tags: [{tag:'INTERMEDIATE'}], ...h };
+			if(i>0 && is_sub_sequence(h.client_f, h_array[i-1].client_f)) {
+				h.tags.push({tag:'INTERMEDIATE'});
+				return h;
+			}
 
 			// see if we are deleting, i.e., the current entry could entirely fit inside 
 			// of the previous entry. Only valid if the deletion is at the end.
-			if(i>1 && h_array[i-1].client_f.indexOf(h.client_f) !== -1) 
-					return { tags: [{tag:'INTERMEDIATE'}], ...h };
+			if(i>1 && h_array[i-1].client_f.indexOf(h.client_f) !== -1)  {
+				h.tags.push({tag:'INTERMEDIATE'});
+				return h;
+			}
 
-			return { tags: [], ...h }; // default to returning.
+			return h; // default to returning.
 		}
 	);
 
@@ -94,34 +200,128 @@ function is_sub_sequence(s1        , s2        )          {
 	return j===s1.length;
 }
 
-/*
+
 // TESTS.
+/*
+if(DEBUG) {
+	tag_intermediate_history([ 
+		{ client_f: '=LEFT("L", 1)' }, 
+		{ client_f: '=LEFT("Le", 1)' }, 
+		{ client_f: '=LEFT("Lef", 1)' }, 
+		{ client_f: '=LEFT("Left", 1)' }, 
+		{ client_f: '=LEFT("Left", 2)' }, 
+		]
+	).map( h=> console.log( [h.tags, h.client_f]));
 
-tag_intermediate_history([ 
-	{ client_f: '=LEFT("L", 1)' }, 
-	{ client_f: '=LEFT("Le", 1)' }, 
-	{ client_f: '=LEFT("Lef", 1)' }, 
-	{ client_f: '=LEFT("Left", 1)' }, 
-	{ client_f: '=LEFT("Left", 2)' }, 
-	]
-).map( h=> console.log( [h.tags, h.client_f]));
-
-tag_intermediate_history([ 
-	{ client_f: '=LEFT("Left", ' }, 
-	{ client_f: '=LEFT("Left", 1' }, 
-	{ client_f: '=LEFT("Left", 1)' }, 
-	{ client_f: '=LEFT("Lef", 1)' }, 
-	{ client_f: '=LEFT("Le", 1)' }, 
-	{ client_f: '=LEFT("", 1)' }, 
-	{ client_f: '=LEFT("R", 1)' }, 
-	{ client_f: '=LEFT("Ri", 1)' }, 
-	{ client_f: '=LEFT("Rig", 1)' }, 
-	{ client_f: '=LEFT("Righ", 1)' }, 
-	{ client_f: '=LEFT("Right", 1)' }, 
-	{ client_f: '=LEFT("Right", 2)' }, 
-	]
-).map( h=> console.log( [h.tags, h.client_f]));
+	tag_intermediate_history([ 
+		{ client_f: '=LEFT("Left", ' }, 
+		{ client_f: '=LEFT("Left", 1' }, 
+		{ client_f: '=LEFT("Left", 1)' }, 
+		{ client_f: '=LEFT("Lef", 1)' }, 
+		{ client_f: '=LEFT("Le", 1)' }, 
+		{ client_f: '=LEFT("", 1)' }, 
+		{ client_f: '=LEFT("R", 1)' }, 
+		{ client_f: '=LEFT("Ri", 1)' }, 
+		{ client_f: '=LEFT("Rig", 1)' }, 
+		{ client_f: '=LEFT("Righ", 1)' }, 
+		{ client_f: '=LEFT("Right", 1)' }, 
+		{ client_f: '=LEFT("Right", 2)' }, 
+		]
+	).map( h=> console.log( [h.tags, h.client_f]));
+}
 */
+
+
+
+// Tag items that have more than a single character added.
+const tag_paste = (h) => h.map( 
+		(h, i, h_array) => {
+
+			// If first item > one character, then mark.			
+			if(i === 0 && h.client_f.length > 1)  {
+				h.tags.push( {tag:'PASTE'} );
+				return h;
+			}
+
+			// If not first item, and more than 1 character longer, then mark.
+			if(i > 0 && h.client_f.length > h_array[i-1].client_f.length + 1)  {
+				h.tags.push( {tag:'PASTE'} );
+				return h;
+			}
+
+			return h; // default to returning.
+		}
+	);
+
+
+// TESTS.
+/*
+if(DEBUG) {
+	tag_paste(add_tags([ 
+		{ client_f: 'ABC' }, 
+		{ client_f: 'ABC' }, 
+		{ client_f: '' }, 
+		{ client_f: 'A' }, 
+		{ client_f: 'ABC' }, 
+		{ client_f: 'ABCD' }, 
+		{ client_f: 'ABCDEF' }, 
+		]
+	)).map( h=> console.log( [h.tags, h.client_f]));
+
+}
+*/
+
+// Changes range refernce, such as A1:B1 into ['a1', 'b1', 'c1' ]
+// Doesn't care about C2 rows, just assumes all on row 1. 
+function convert_range_ref_into_individual_refs( parsed                )                {
+	return parsed.map( has => {
+		// Only mess with references.
+		if( has.has !== 'references') return has;
+
+		const old_ref_array = has.args;
+		const new_ref_array = [];
+
+		old_ref_array.map( ref => {
+			const refs = ref.split(':');
+			if(refs.length === 1) {
+				new_ref_array.push(ref);
+				return;
+			}
+
+			if(refs.length !== 2) {
+				console.log(parsed);
+				console.log([ 'ERROR', ...refs]);
+				throw new Error('Problem convert_range_ref_into_individual_refs');
+			}
+
+			const col1 = refs[0].substr(0,1);
+			const col2 = refs[1].substr(0,1);
+			const references = [refs[0]];
+
+			let current = col1;
+			while(current !== col2 ) {
+				current = String.fromCharCode(current.charCodeAt(0) + 1);
+				references.push(current+'1');
+			}
+
+			references.map( ref => new_ref_array.push(ref));
+		});
+
+		return { has: 'references', args: new_ref_array };
+	});
+
+}
+
+/*
+if(DEBUG) {
+	console.log( convert_range_ref_into_individual_refs('A1') );
+	console.log( convert_range_ref_into_individual_refs('A1:C1') );
+	console.log( convert_range_ref_into_individual_refs('B1:E1') );
+	console.log( convert_range_ref_into_individual_refs('A1:B2') );
+
+}
+*/
+
 
 
 // Return if the tag array has a matching tag.
@@ -142,8 +342,10 @@ function is_in( value     , aValues            )          {
 					return true;
 		} else if (typeof value === 'number' ) {
 			if(aValues[i] === value) return true;
+		} else if (typeof value === 'boolean' ) {
+			if(aValues[i] === value) return true;
 		} else {
-			throw new Error('Invalid type passed to is_in '+typeof value )
+			throw new Error('Invalid type '+value+' passed to is_in '+typeof value );
 		}
 	}
 	return false;
@@ -183,10 +385,16 @@ const ENTRY_TESTS = [
 		if: (solution_f        , client_f        ) => {
 			const parsed = parseFeedback(client_f);
 			const references = parsed.filter( has => has.has === 'references' );
+			let refs = [];
 
-			for(let i=0; i<references.length; i++) {
-				for(let j=0; j<references[i].args.length; j++) {
-					if( references[i].args[j].substr(1,1) !== '1') return true;
+			//  no references.
+			if(references.length === 0) return false;
+
+			for(let i=0; i<references[0].args.length; i++) {
+				refs = references[0].args[i].split(':');
+				for( let j = 0; j < refs.length; j++) {
+					if( refs[j].substr(1,1) !== '1') return true;
+					if( refs[j].length > 2 ) return true;
 				}
 			}
 			return false;
@@ -194,6 +402,12 @@ const ENTRY_TESTS = [
 		tests: [
 			{ triggered: false, solution_f: '', client_f: '=A1' },
 			{ triggered: true, solution_f: '', client_f: '=B2' },
+			{ triggered: true, solution_f: '', client_f: '=C12' },
+			{ triggered: true, solution_f: '', client_f: '=A10' },
+			{ triggered: true, solution_f: '', client_f: '=A2:A2' },
+			{ triggered: true, solution_f: '', client_f: '=A10:A11' },
+			{ triggered: true, solution_f: '', client_f: '=A20:A2' },
+			{ triggered: false, solution_f: '', client_f: '=A1:C1' },
 		]
 	},{
 		tag: 'NON_EXISTANT_COLUMN_REFERENCE',
@@ -220,27 +434,82 @@ const ENTRY_TESTS = [
 			{ triggered: true, solution_f: '', client_f: '=C1',  page: { tests: [ {'a': 1, 'b': 2} ] } }
 		]
 	},{
-		tag: 'USES_REFERENCE_NOT_IN_SOLUTION',
-		if: (solution_f        , client_f        , page                 ) => {
-			const parsed  = parseFeedback(client_f);
+		tag: 'USES_A_REFERENCE_NOT_IN_SOLUTION',
+		if: (solution_f        , client_f         ) => {
+			const parsed  = convert_range_ref_into_individual_refs(parseFeedback(client_f));
 			const references = parsed.filter( has => has.has === 'references' );
-			
-			for(let i=0; i<references.length; i++) {
-				for(let j=0; j<references[i].args.length; j++) {
-					let ref = references[i].args[j].substr(0,1);
-					if(typeof page.tests[0][ref.toLowerCase()] === 'undefined' &&
-						typeof page.tests[0][ref.toUpperCase()] === 'undefined' ) return true;
+			const solution_parsed = convert_range_ref_into_individual_refs(parseFeedback(solution_f));
+			const solution_references = solution_parsed.filter( has => has.has == 'references' );
+			let found = true;
+
+			// If the client has references, but the solution doesn't return TRUE.
+			if(references.length > 0 && solution_references.length === 0) return true;
+
+			for(let i=0; i<references[0].args.length; i++) {
+				found = false;
+				for(let j=0; j<solution_references[0].args.length; j++) {
+					if( references[0].args[i].toLowerCase() === 
+						solution_references[0].args[j].toLowerCase()) {
+						found = true;
+					}
 				}
+				if(!found) return true;
 			}
 			return false;
 		},
 		tests: [
-			{ triggered: false, solution_f: '', client_f: '=a1', page: { tests: [ {'a': 1, 'b': 2} ] } },
-			{ triggered: false, solution_f: '', client_f: '=b1', page: { tests: [ {'a': 1, 'b': 2} ] } },
-			{ triggered: true, solution_f: '', client_f: '=c1',  page: { tests: [ {'a': 1, 'b': 2} ] } },
-			{ triggered: false, solution_f: '', client_f: '=A1', page: { tests: [ {'a': 1, 'b': 2} ] } },
-			{ triggered: false, solution_f: '', client_f: '=B1', page: { tests: [ {'a': 1, 'b': 2} ] } },
-			{ triggered: true, solution_f: '', client_f: '=C1',  page: { tests: [ {'a': 1, 'b': 2} ] } },
+			{ triggered: true, solution_f: '', client_f: '=a1' },
+			{ triggered: false, solution_f: '=a1', client_f: '=a1' },
+			{ triggered: true, solution_f: '=a1', client_f: '=b1' },
+			{ triggered: false, solution_f: '=c1', client_f: '=1' },
+			{ triggered: false, solution_f: '=b1+a1+c1', client_f: '=B1+a1' },
+			{ triggered: true, solution_f: '=C1+A1', client_f: '=C1+d1' },
+			{ triggered: true, solution_f: '=c1/4', client_f: '=b1/c1/e1' },
+			{ triggered: true, solution_f: '=b1/2', client_f: '=b1-c1' },
+			{ triggered: false, solution_f: '=SUM(a1,b1,c1)', client_f: '=sum(a1:c1)' },
+			{ triggered: true, solution_f: '=SUM(a1,c1)', client_f: '=sum(a1:c1)' },
+			{ triggered: false, solution_f: '=SUM(a1:c1)', client_f: '=sum(a1,b1,c1)' },
+			{ triggered: false, solution_f: '=SUM(a1:c1)', client_f: '=sum(a1,c1)' },
+			
+		]
+	},{
+		tag: 'MISSING_A_REFERENCE_USED_IN_SOLUTION',
+		if: (solution_f        , client_f         ) => {
+			const parsed  = convert_range_ref_into_individual_refs(parseFeedback(client_f));
+			const references = parsed.filter( has => has.has === 'references' );
+			const solution_parsed = convert_range_ref_into_individual_refs(parseFeedback(solution_f));
+			const solution_references = solution_parsed.filter( has => has.has == 'references' );
+			let found = true;
+
+			// If the solution has no references we're ok.
+			if(solution_references.length === 0 ) return false;
+
+			for(let i=0; i<solution_references[0].args.length; i++) {
+				found = false;
+				for(let j=0; j<references[0].args.length; j++) {
+					if( solution_references[0].args[i].toLowerCase() === 
+						references[0].args[j].toLowerCase()) {
+						found = true;
+					}
+				}
+				if(!found) return true;
+			}
+			return false;
+		},
+		tests: [
+			{ triggered: false, solution_f: '', client_f: '=a1' },
+			{ triggered: false, solution_f: '=a1', client_f: '=a1' },
+			{ triggered: true, solution_f: '=a1', client_f: '=1' },
+			{ triggered: false, solution_f: '=a1', client_f: '=A1' },
+			{ triggered: true, solution_f: '=c1', client_f: '=A1' },
+			{ triggered: true, solution_f: '=b1+a1+c1', client_f: '=B1+a1' },
+			{ triggered: true, solution_f: '=C1+A1', client_f: '=C1+d1' },
+			{ triggered: false, solution_f: '=c1/4', client_f: '=b1/c1/e1' },
+			{ triggered: false, solution_f: '=SUM(a1,b1,c1)', client_f: '=sum(a1:c1)' },
+			{ triggered: false, solution_f: '=SUM(a1:c1)', client_f: '=sum(a1,b1,c1)' },
+			{ triggered: true, solution_f: '=SUM(a1,c1)', client_f: '=sum(a1:b1)' },
+			{ triggered: true, solution_f: '=SUM(a1:e1)', client_f: '=sum(a1,c1)' },
+
 		]
 	},{
 		tag: 'A1_TYPO',
@@ -426,20 +695,22 @@ console.log( parseFeedback('=sum(a1,b1,10_'));
 //console.log( parseFeedback('=OR(False, FALSE,  true)'));
 //console.log( parseFeedback('=OR("False", "FALSE",  "true")'));
 //console.log( parseFeedback('=OR("Falsy", "Truthy",  "1")'));
-
+*/
 
 // Run tests.
 
-ENTRY_TESTS.map( test => {
-	console.log('Testing '+test.tag);
-	test.tests.map( t => {
-		let triggered = test.if(t.solution_f, t.client_f, t.page);
-		if( triggered !== t.triggered ) {
-			console.log(['Failed tag test', t]);
-		}
+if(DEBUG) {
+	ENTRY_TESTS.map( test => {
+		console.log('Testing '+test.tag);
+		test.tests.map( t => {
+			let triggered = test.if(t.solution_f, t.client_f, t.page);
+			if( triggered !== t.triggered ) {
+				console.log(['Failed tag test', t]);
+			}
+		});
 	});
-});
-*/
+}
+
 
 
 
@@ -451,7 +722,15 @@ function return_tagged_level(level           )            {
 
 			// Clean-up history.
 			let filtered_history = filter_history(page.history);
+			filtered_history = remove_duplicate_history(filtered_history);
+			filtered_history = add_tags(filtered_history);
+			filtered_history = tag_single_letter_typos(filtered_history);
 			filtered_history = tag_intermediate_history(filtered_history);
+
+			// Only use the 'paste' tag for normal typed in solutions.
+			if(page.type === 'IfPageFormulaSchema') 
+				filtered_history = tag_paste(filtered_history);
+
 			page.history = filtered_history;
 
 			let parsed = {};
@@ -497,4 +776,5 @@ function return_tagged_level(level           )            {
 module.exports = {
 	has_tag,
 	return_tagged_level	
+
 };

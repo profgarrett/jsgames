@@ -111,7 +111,7 @@ export default class Login extends React.Component                       {
 								/>
 								<div style={{ textAlign: 'right', marginTop: 10 }}>
 									<Button type='submit' 
-										bsStyle='primary'
+										variant='primary'
 										disabled={this.state.submitting}
 										>
 										Submit</Button>

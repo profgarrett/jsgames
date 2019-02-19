@@ -1,3 +1,6 @@
+require('@babel/polyfill');
+
+
 var HTMLWebpackPlugin = require('html-webpack-plugin');
 var HTMLWebpackPluginConfig = new HTMLWebpackPlugin({
 	template: __dirname + '/src/app/index.html',
@@ -8,7 +11,7 @@ var HTMLWebpackPluginConfig = new HTMLWebpackPlugin({
 
 module.exports = {
 	mode: 'development',
-	entry: ['babel-polyfill', __dirname + '/src/app/index.js'],
+	entry: ['@babel/polyfill', __dirname + '/src/app/index.js'],
 	module: {
 		rules: [
 			{

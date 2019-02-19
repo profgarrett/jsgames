@@ -126,8 +126,12 @@ function common_schema()         {
 
 		// Should we show feedback on this item after it is chosen?
 		// Useful to differentiate between survey questions and those we want the user to know the right answer.
-		show_feedback_on: { type: 'Boolean', initialize: (b) => isDef(b) ? bool(b) : true }
+		show_feedback_on: { type: 'Boolean', initialize: (b) => isDef(b) ? bool(b) : true },
 
+		// Problem Tags.
+		// Used to help with analysis of question success and failure.
+		// Either an empty array or an array with string tags.
+		tags: { type: 'Array', initialize: (a) => isDef(a) && isArray(a) ? a : [] },
 	};
 }
 

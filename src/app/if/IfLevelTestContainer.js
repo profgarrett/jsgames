@@ -1,6 +1,6 @@
 import React from 'react';
-import { PageHeader, Row, Col } from 'react-bootstrap';
-
+import { Row, Col } from 'react-bootstrap';
+import { PageHeader } from './../components/Misc';
 import IfLevelTest from './IfLevelTest';
 import { Message, Loading } from './../components/Misc';
 import { IfLevelSchema } from './../../shared/IfGame';
@@ -679,7 +679,7 @@ export default class IfLevelListContainer extends React.Component {
 			<div>
 			<Row>
 				<Col xs={12}>
-					<PageHeader>Testing Page</PageHeader>
+					<PageHeader header='Testing Page' />
 					<Message message={this.state.message} style={this.state.message_style} />
 					<Loading loading={this.state.isLoading } />
 					<IfLevelTest tests={this.state.tests} />

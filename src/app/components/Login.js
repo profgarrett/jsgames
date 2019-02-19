@@ -1,7 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Row, Col, FormControl, FormGroup, ControlLabel, Button } from 'react-bootstrap';
+import { Form, Container, Row, Col, Button } from 'react-bootstrap';
 import { Message, Loading, get_cookie } from './../components/Misc';
+
 
 import 'url-search-params-polyfill';
 
@@ -179,42 +180,44 @@ export default class Login extends React.Component {
 		}
 
 		return (
-			<Row>
-				<Col>
-					<h3>Log in</h3>
-					<Message message={this.state.message} style={this.state.messageStyle} />
-					<Loading loading={this.state.isLoading } />
-					<form name='loginform' onSubmit={this.onSubmit} style={formStyle}>
-						<FormGroup>
-							<ControlLabel>Username</ControlLabel>
-							<FormControl 
-								id='LoginUsername'
-								ref={(input) => { this.client_fInput = input; }}
-								onChange={this.onUsernameChange}
-								value={this.state.username }
-								type='text'
-								placeholder='Type in your user name'
-							/>
-						</FormGroup>
-						<FormGroup>
-							<ControlLabel>Username</ControlLabel>
-							<FormControl 
-								id='LoginPassword'
-								type='password'
-								value={this.state.password }
-								onChange={this.onPasswordChange}
-								placeholder='Type in your password'
-							/>
-							<br/>
-							<Button type='submit' bsStyle='primary'>Login</Button>
-						</FormGroup>
-					</form>
-					<h3>Guest Access</h3>
-					<p>If you are not a student trying to join a class, you can create a test user account
-						using the button below.</p>
-					<Button type='submit' onClick={create_anon_user}>Log in as an anonymous user</Button>
-				</Col>
-			</Row>
+			<Container>
+				<Row>
+					<Col>
+						<h3>Log in</h3>
+						<Message message={this.state.message} style={this.state.messageStyle} />
+						<Loading loading={this.state.isLoading } />
+						<Form name='loginform' onSubmit={this.onSubmit} style={formStyle}>
+							<Form.Group>
+								<Form.Label>Username</Form.Label>
+								<Form.Control 
+									id='LoginUsername'
+									ref={(input) => { this.client_fInput = input; }}
+									onChange={this.onUsernameChange}
+									value={this.state.username }
+									type='text'
+									placeholder='Type in your user name'
+								/>
+							</Form.Group>
+							<Form.Group>
+								<Form.Label>Username</Form.Label>
+								<Form.Control 
+									id='LoginPassword'
+									type='password'
+									value={this.state.password }
+									onChange={this.onPasswordChange}
+									placeholder='Type in your password'
+								/>
+								<br/>
+								<Button type='submit' variant='primary'>Login</Button>
+							</Form.Group>
+						</Form>
+						<h3>Guest Access</h3>
+						<p>If you are not a student trying to join a class, you can create a test user account
+							using the button below.</p>
+						<Button type='submit' onClick={create_anon_user}>Log in as an anonymous user</Button>
+					</Col>
+				</Row>
+			</Container>
 		);
 	}
 }

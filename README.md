@@ -314,6 +314,11 @@ Thanks to EW for use of the formula parser.
 	http://ewbi.blogs.com/develops/2004/12/excel_formula_p.html
 ```
 
+Thanks for Font Awesome for free Glyphs
+https://fontawesome.com/start
+
+
+
 Other credits found in NPM packages.
 
 

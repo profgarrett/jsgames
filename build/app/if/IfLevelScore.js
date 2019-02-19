@@ -1,8 +1,9 @@
 //      
 import React from 'react';
-import { Panel, Popover, OverlayTrigger, Well } from 'react-bootstrap';
+import { Popover, OverlayTrigger, Card } from 'react-bootstrap';
 
-import { HtmlDiv, incorrect_glyphicon, correct_glyphicon, completed_glyphicon } from './../components/Misc';
+import { HtmlDiv, IncorrectGlyphicon, CorrectGlyphicon, CompletedGlyphicon } from './../components/Misc';
+
 
 import ExcelTable from './ExcelTable';
 import Choice from './Choice';
@@ -63,23 +64,20 @@ class IfLevelScorePage extends React.Component                                 {
 			// Show solution?
 			if(page_final.solution_f && page_final.solution_f.length > 0) {
 				solution = (
-					<Panel.Footer>Solution: <code>{ page_final.solution_f}</code></Panel.Footer>
+					<div>Solution: <code>{ page_final.solution_f}</code></div>
 				);
 			}
 					
 			// Show problem.
+			//defaultExpanded={!page_final.correct}
 			problem = (
-				<Panel defaultExpanded={!page_final.correct}>
-						<Panel.Heading>
-							<Panel.Title toggle><div>{ page_final.client_f} </div></Panel.Title>
-						</Panel.Heading>
-						<Panel.Collapse >
-							<Panel.Body>
-								<HistorySlider page={page_at} handleChange={this.setHistory} />
-								<ExcelTable page={page_at} readonly={true} editable={false} />
-							</Panel.Body>
-						</Panel.Collapse>
-					</Panel>
+				<Card >
+					<Card.Body>
+						<Card.Title><div>{ page_final.client_f} </div></Card.Title>
+						<HistorySlider page={page_at} handleChange={this.setHistory} />
+						<ExcelTable page={page_at} readonly={true} editable={false} />
+					</Card.Body>
+				</Card>
 			);
 
 		} else if(page_at.type === 'IfPageTextSchema') {
@@ -103,18 +101,19 @@ class IfLevelScorePage extends React.Component                                 {
 			throw new Error('Invalid type in IfLevelScore '+page_at.type);
 		}
 
-		return (
-			<Panel key={i} bsStyle={ page_final.correct===null ? 'info' : (page_final.correct ? 'success' : 'danger' ) } >
-				<Panel.Heading >
-					Page {i+1}
-				</Panel.Heading>
-				<Panel.Body>
+/*
+//key={i} 
+				*/
+		return (<Card variant={ page_final.correct===null ? 'info' : (page_final.correct ? 'success' : 'danger' ) }>
+				<Card.Body>
+					<Card.Title >
+						Page {i+1}
+					</Card.Title>
 					{ lead }
 					{ problem }
-				</Panel.Body>
-				{ solution }
-			</Panel>
-		);
+					{ solution }
+				</Card.Body>
+			</Card>);
 	}
 }
 
@@ -148,12 +147,14 @@ export default class IfLevelScore extends React.Component                       
 
 		return (
 			<div>
-				<Well>
+				<Card>
+					<Card.Body>
 					<div style={{ textAlign: 'center' }}>
 						<h3>{ title_completed}{quiz_completed}</h3>
 						{ results }
 					</div>
-				</Well>
+					</Card.Body>
+				</Card>
 				{ level.pages.map( (p,i) => <IfLevelScorePage level={level} page={p} i={i} key={i} /> ) }
 			</div>
 		);
@@ -172,24 +173,20 @@ const build_score = (pages                 )      => pages.map( (p          , i 
 
 		title = 'Completed';
 		html = p.description + 
-			(p.toString().length < 1 ? '' : '<br/><div class="well well-sm">'+ p.toString()+'</div>');
+			(p.toString().length < 1 ? '' : '<br/><div class="card ">'+ p.toString()+'</div>');
 
-		if(p.correct) {
-			g = completed_glyphicon('black');
-		} else {
-			g = completed_glyphicon('gray');
-		}
+		g = <CompletedGlyphicon color={ p.correct ? 'black' : 'gray' } />;
 	} else if (p.code === 'test') {
 
 		// Graded page
 		if(p.correct) {
 			title = 'Correct answer';
-			html = p.description + '<br/><div class="well well-sm">'+p.toString()+'</div>'; // style={background} 
-			g = correct_glyphicon();
+			html = p.description + '<br/><div class="card ">'+p.toString()+'</div>'; // style={background} 
+			g = <CorrectGlyphicon />;
 		} else {
 			title = 'Incorrect answer';
-			html = p.description + '<br/><div class="well well-sm">'+p.toString()+'</div>';
-			g = incorrect_glyphicon();
+			html = p.description + '<br/><div class="card">'+p.toString()+'</div>';
+			g = <IncorrectGlyphicon/>;
 		}
 	} else {
 		console.log(p);

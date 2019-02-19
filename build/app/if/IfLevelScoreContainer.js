@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Row, Col, Breadcrumb, Button  } from 'react-bootstrap';
+import { Container, Row, Col, Breadcrumb, Button  } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 
 
@@ -61,7 +61,7 @@ export default class IfLevelScoreContainer extends React.Component {
 			: <span></span>;
 
 		const back = this.state.level ?
-			<Button bsStyle='primary' 
+			<Button variant='primary' 
 					style={{ marginBottom: 20, marginTop: 20 }} 
 					href={ '/ifgame/' }>
 					Back to home page
@@ -69,20 +69,22 @@ export default class IfLevelScoreContainer extends React.Component {
 			: <span />;
 
 		return (
-			<Row>
-				<Col>
-					<ForceLogin/>
-					{ crumbs }
-					<h3>{ this.state.level ? this.state.level.title : '' }</h3>
+			<Container>
+				<Row>
+					<Col>
+						<ForceLogin/>
+						{ crumbs }
+						<h3>{ this.state.level ? this.state.level.title : '' }</h3>
 
-					<Message message={this.state.message} style={this.state.messageStyle} />
-					<Loading loading={this.state.isLoading } />
-					<div style={{ textAlign: 'center' }}>{ back }</div>
-					{ this.state.level ? <IfLevelScore level={this.state.level} /> : '' }
-					<div style={{ textAlign: 'center' }}>{ back }</div>
-					<br/>
-				</Col>
-			</Row>
+						<Message message={this.state.message} style={this.state.messageStyle} />
+						<Loading loading={this.state.isLoading } />
+						<div style={{ textAlign: 'center' }}>{ back }</div>
+						{ this.state.level ? <IfLevelScore level={this.state.level} /> : '' }
+						<div style={{ textAlign: 'center' }}>{ back }</div>
+						<br/>
+					</Col>
+				</Row>
+			</Container>
 		);
 	}
 }

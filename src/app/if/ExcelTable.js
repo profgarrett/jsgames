@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Table, HelpBlock, FormControl } from 'react-bootstrap';
+import { Table, FormControl } from 'react-bootstrap';
 import { HtmlSpan, SmallOkGlyphicon, BlueSpan } from './../components/Misc';
 
 
@@ -133,7 +133,7 @@ export default class ExcelTable extends React.Component {
 			marginBottom: 5,
 			paddingLeft: 5
 		};
-		let helpblock = page.helpblock ? <HelpBlock style={helpblockStyle}><HtmlSpan html={ page.helpblock } /></HelpBlock> : '';
+		let helpblock = page.helpblock ? <div style={helpblockStyle}><HtmlSpan html={ page.helpblock } /></div> : '';
 	
 		return (
 			<div>
@@ -166,12 +166,12 @@ export default class ExcelTable extends React.Component {
 		const tdStringStyle = {
 			textAlign: 'left',
 			paddingLeft: 10,
-			verticalAlign: 'middle'
+			verticalAlign: 'middle',
 		};
 		const tdNumberStyle = {
 			textAlign: 'right',
 			paddingRight: 10,
-			verticalAlign: 'middle'
+			verticalAlign: 'middle',
 		};
 		const headerStyle = {
 			textAlign: 'center',
@@ -186,6 +186,14 @@ export default class ExcelTable extends React.Component {
 			paddingRight: '15px'
 		};
 
+		const addInfoColor = e => {
+			return { backgroundColor: '#d9edf7', ...e};
+		};
+		const addDangerColor = e => {
+			return { backgroundColor: '#f2dede', ...e};
+		};
+
+		
 
 		// Helper function to increment the a1, b2, ... references to a2, b2.
 		const increment_row = 
@@ -211,11 +219,11 @@ export default class ExcelTable extends React.Component {
 					fieldFormula = <td className='bg-primary' >{ this._render_field(page) }</td>;
 				} else {
 					// Readonly first field.
-					fieldFormula = <td className='bg-info' >{ page.client_f }</td>;
+					fieldFormula = <td className='outline-info' >{ page.client_f }</td>;
 				}
 
 			} else {
-				fieldFormula = <td className='bg-info'>{ page.client_f ? increment_row(page.client_f, i+1) : '' }</td>;
+				fieldFormula = <td style={{ backgroundColor: '#d9edf7' }}>{ page.client_f ? increment_row(page.client_f, i+1) : '' }</td>;
 			}
 			
 			// Figure out if the cell is a string or a number.
@@ -228,11 +236,11 @@ export default class ExcelTable extends React.Component {
 
 			} else if (page.client_test_results[i].error!==null || page.client_f.substr(0,1) !== '=') {
 				// Error in result
-				fieldResult = <td style={style} className='bg-danger'>{page.client_test_results[i].error}</td>;
+				fieldResult = <td style={addDangerColor(style)}>{page.client_test_results[i].error}</td>;
 
 			} else if (page.solution_test_results.length === 0 ) {
 				// Good value result, but we don't know the result
-				fieldResult = <td style={style}>{ clean(page.client_test_results[i].result, page.client_f_format) }</td>;
+				fieldResult = <td style={addInfoColor(style)}>{ clean(page.client_test_results[i].result, page.client_f_format) }</td>;
 
 			} else if (page.solution_test_results.length !== null) {
 				// Good value results, and we know if it should be true or false.
@@ -246,15 +254,15 @@ export default class ExcelTable extends React.Component {
 					fieldResult = <td style={style}>{ clean(page.client_test_results[i].result, page.client_f_format) }<SmallOkGlyphicon /></td>;
 				} else {
 					// Render normally
-					fieldResult = <td style={style}>{ clean(page.client_test_results[i].result, page.client_f_format) }</td>;
+					fieldResult = <td style={(style)}>{ clean(page.client_test_results[i].result, page.client_f_format) }</td>;
 				}
 			}
 
-			// set fieldSolution to the results fo the formula.
+			// set fieldSolution to the results for the formula.
 			if(page.solution_test_results !== null && page.solution_test_results.length > 0) {
-				fieldSolution = <td className='bg-info' style={style}>{ clean(page.solution_test_results[i].result, page.client_f_format) }</td>;
+				fieldSolution = <td style={style}>{ clean(page.solution_test_results[i].result, page.client_f_format) }</td>;
 				if(page.correct === false) {
-					fieldSolution = <td className='bg-info' style={style}>{ clean(page.solution_test_results[i].result, page.client_f_format) }</td>;
+					fieldSolution = <td style={style}>{ clean(page.solution_test_results[i].result, page.client_f_format) }</td>;
 				}
 			}
 
@@ -307,7 +315,7 @@ export default class ExcelTable extends React.Component {
 		}
 
 		return (
-			<Table bordered condensed hover>
+			<Table bordered hover>
 				<thead style={headerStyle}>
 					<tr>
 						<th style={headerStyle} width={25}></th>

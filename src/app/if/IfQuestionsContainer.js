@@ -1,6 +1,6 @@
 //@flow
 import React from 'react';
-import { Row, Col, Breadcrumb, DropdownButton, MenuItem, Button  } from 'react-bootstrap';
+import { Container, ButtonToolbar, ButtonGroup, Row, Col, Breadcrumb, DropdownButton, Dropdown, Button  } from 'react-bootstrap';
 
 import IfQuestions from './IfQuestions';
 import { Message, Loading } from './../components/Misc';
@@ -55,7 +55,7 @@ export default class IfQuestionsContainer extends React.Component<QuestionsProps
 			iduser: null,
 			users: null, // loads to array
 
-			output: 'excel', // either table or excel.
+			output: 'table', // either table or excel.
 
 			levels: [],
 		};
@@ -232,54 +232,65 @@ export default class IfQuestionsContainer extends React.Component<QuestionsProps
 
 		const filter = (
 			<form name='c' >
+				<ButtonToolbar>
+				<ButtonGroup>
 				<DropdownButton 
 						onSelect={this.handleCodeFilterChange}
-						bsStyle='primary' 
+						variant='primary' 
 						title= { this.state.code } 
 						key='select_code' id='select_code'>
 							{ levels.map( (code,i) => 
-								<MenuItem
+								<Dropdown.Item
 									key={'select_code_dropdownitem'+i} 
 									eventKey={code}>{code}
-								</MenuItem> 
+								</Dropdown.Item> 
 							)}
 				</DropdownButton>
 				<DropdownButton 
 						onSelect={this.handleIdSectionFilterChange}
-						bsStyle='primary' 
+						variant='primary' 
 						title= {section_title}
 						key='select_section' id='select_section'>
 							{ sections.map( (section,i) => 
-								<MenuItem key={'select_section_dropdownitem'+i} 
-								eventKey={section.idsection}>{section.code}</MenuItem> )}
+								<Dropdown.Item key={'select_section_dropdownitem'+i} 
+								eventKey={section.idsection}>{section.code}</Dropdown.Item> )}
 				</DropdownButton>
 				<DropdownButton 
 						onSelect={this.handleIdUserFilterChange}
-						bsStyle='primary' 
+						variant='primary' 
 						title={user_title}
 						key='select_user' id='select_user'>
 							{ users.map( (user,i) => 
-								<MenuItem key={'select_user_dropdownitem'+i} 
-								eventKey={user.iduser}>{user.username}</MenuItem> )}
+								<Dropdown.Item key={'select_user_dropdownitem'+i} 
+								eventKey={user.iduser}>{user.username}</Dropdown.Item> )}
 				</DropdownButton>
+				</ButtonGroup> 
+
+				<ButtonGroup>
 				<DropdownButton 
 						onSelect={this.handleOutputFilterChange}
-						bsStyle='primary' 
+						variant='primary' 
 						title={this.state.output}
 						key='select_output' id='select_output'>
-							<MenuItem eventKey='excel'>excel</MenuItem>
-							<MenuItem eventKey='table'>table</MenuItem>
+							<Dropdown.Item eventKey='excel'>excel</Dropdown.Item>
+							<Dropdown.Item eventKey='table'>table</Dropdown.Item>
 				</DropdownButton>
+				</ButtonGroup>
+
+				<ButtonGroup>
 				<Button
 						disabled={this.state.loading_data}
-						bsStyle='primary'
+						variant='primary'
 						onClick={ () => this.refreshLevels()}
 				>{ this.state.loading_data ? 'Loading...' : 'Refresh' }
 				</Button>
+				</ButtonGroup>
+				</ButtonToolbar>
 			</form>
 			);
 
 		return (
+			<Container>
 			<Row>
 				<Col>
 					<ForceLogin/>
@@ -292,6 +303,7 @@ export default class IfQuestionsContainer extends React.Component<QuestionsProps
 					<IfQuestions levels={this.state.levels} output={this.state.output} />
 				</Col>
 			</Row>
+			</Container>
 		);
 	}
 }

@@ -1,8 +1,10 @@
 // @flow
 import React from 'react';
 import type { Node } from 'react';
-import { Glyphicon, Panel, Button, Table, Popover, Overlay, OverlayTrigger, Modal } from 'react-bootstrap';
-import { HtmlSpan, HtmlDiv, incorrect_glyphicon, correct_glyphicon, completed_glyphicon, progress_glyphicon} from './../components/Misc';
+import { Card, Button, Table, Popover, Overlay, OverlayTrigger, Modal } from 'react-bootstrap';
+import { HtmlSpan, HtmlDiv, 
+		HandPointRightGlyphicon, IncorrectGlyphicon, CorrectGlyphicon, 
+		CompletedGlyphicon, ProgressGlyphicon} from './../components/Misc';
 
 import ExcelTable from './ExcelTable';
 import Text from './Text';
@@ -24,7 +26,7 @@ const build_score = (pages: Array<PageType>): any => pages.map( (p: PageType, i:
 		// In progress
 		title = 'In progress';
 		html = p.description;
-		g = progress_glyphicon();
+		g = <ProgressGlyphicon />;
 
 	} else {
 		// Finished
@@ -35,22 +37,18 @@ const build_score = (pages: Array<PageType>): any => pages.map( (p: PageType, i:
 			html = p.description + 
 				(p.toString().length < 1 ? '' : '<br/><div class="well well-sm">'+ p.toString()+'</div>');
 
-			if(p.correct) {
-				g = completed_glyphicon('black');
-			} else {
-				g = completed_glyphicon('gray');
-			}
+			g = <CompletedGlyphicon color={ p.correct ? 'black' : 'gray' } />;
 		} else if (p.code === 'test') {
 
 			// Graded page
 			if(p.correct) {
 				title = 'Correct answer';
 				html = p.description + '<br/><div class="well well-sm">'+p.toString()+'</div>'; // style={background} 
-				g = correct_glyphicon();
+				g = <CorrectGlyphicon />;
 			} else {
 				title = 'Incorrect answer';
 				html = p.description + '<br/><div class="well well-sm">'+p.toString()+'</div>';
-				g = incorrect_glyphicon();
+				g = <IncorrectGlyphicon />;
 			}
 		} else {
 			throw new Error('Error building score');
@@ -58,20 +56,16 @@ const build_score = (pages: Array<PageType>): any => pages.map( (p: PageType, i:
 
 	}
 
-
-	const pop = (
-		<Popover title={title} id={'iflevelplayrenderscore_id_'+i}>
-			<HtmlDiv html={html} />
-		</Popover>
-	);
-
-	return (
-		<span key={'iflevelplayrenderscore'+i}>
-			<OverlayTrigger trigger={['hover','focus']} placement='top' overlay={pop}>
-				{g}
-			</OverlayTrigger>
-		</span>
-	);
+	return (<OverlayTrigger 
+					key={'iflevelplayrenderscore'+i}
+					trigger='hover'
+					placement='top' 
+					overlay={
+						<Popover title={title} id={'iflevelplayrenderscore_id_'+i}>
+							<HtmlDiv html={html} />
+						</Popover>}>
+					<span>{g}</span>
+			</OverlayTrigger>);
 });
 
 
@@ -113,6 +107,54 @@ type StateType = {
 	// showing a new page.
 	lastPageI: number
 };
+
+/*
+	  <>
+		<Button variant="primary" onClick={this.handleShow}>
+		  Launch demo modal
+		</Button>
+		*/
+class ModalFeedback extends React.Component {
+	constructor(props, context) {
+		super(props, context);
+
+		this.handleShow = this.handleShow.bind(this);
+		this.handleClose = this.handleClose.bind(this);
+
+		this.state = {
+		show: false,
+		};
+	}
+
+	handleClose() {
+		this.setState({ show: false });
+	}
+
+	handleShow() {
+		this.setState({ show: true });
+	}
+
+	render() {
+	return (
+
+		<Modal show={this.state.show} onHide={this.handleClose}>
+			<Modal.Header closeButton>
+			<Modal.Title>{ }</Modal.Title>
+		</Modal.Header>
+		<Modal.Body>Woohoo, you're reading this text in a modal!</Modal.Body>
+		<Modal.Footer>
+		<Button variant="secondary" onClick={this.handleClose}>
+		Close
+		</Button>
+		<Button variant="primary" onClick={this.handleClose}>
+		Save Changes
+		</Button>
+		</Modal.Footer>
+		</Modal>
+
+	);
+	}
+	}
 
 
 export default class IfLevelPlay extends React.Component<PropsType, StateType> {
@@ -233,14 +275,14 @@ export default class IfLevelPlay extends React.Component<PropsType, StateType> {
 			};
 
 			return (
-				<Panel bsStyle='primary'>
-					<Panel.Heading>
-						<Panel.Title componentClass='h3'>Quiz Question</Panel.Title>
-					</Panel.Heading>
-					<Panel.Body collapsible={false} style={ style }>
-						<HtmlDiv html={ page.description } />
-					</Panel.Body>
-				</Panel>
+				<Card variant='primary'>
+					<Card.Body>
+						<Card.Title >Quiz Question</Card.Title>
+						<div style={ style }>
+							<HtmlDiv html={ page.description } />
+						</div>
+					</Card.Body>
+				</Card>
 				);
 		} else {
 			// Make a little prettier by replacing linebreaks with div.lead.
@@ -249,7 +291,7 @@ export default class IfLevelPlay extends React.Component<PropsType, StateType> {
 			let descriptions = page.description.split('<br/><br/>');
 
 			descriptions = descriptions.map( (d: string, i: number): Node =>
-					<HtmlDiv className='lead' key={i} html={ d } /> );
+					<HtmlDiv className='lead' style={{ marginBottom: '1rem' }} key={i} html={ d } /> );
 
 			return <div>{ descriptions}</div>;
 		}
@@ -272,7 +314,7 @@ export default class IfLevelPlay extends React.Component<PropsType, StateType> {
 
 
 		//  Button style. If required, primary. Else secondary.
-		let button_style = 'default';
+		let button_style = 'primary';
 		let button_text = 'Check answer';
 
 		if(page.code === 'tutorial') {
@@ -298,7 +340,7 @@ export default class IfLevelPlay extends React.Component<PropsType, StateType> {
 		//const next = page.correct_required && !page.correct ? 'try again' : 'continue';
 
 		return <Button id='iflevelplayvalidate' 
-					bsStyle={button_style}
+					variant={button_style}
 					disabled={this.props.isLoading}
 					onClick={ () => that.props.onValidate() }
 					>{ button_text }</Button>;
@@ -372,24 +414,24 @@ export default class IfLevelPlay extends React.Component<PropsType, StateType> {
 		// Build specific feedback LIs.
 		const f_li = page.client_feedback.map( (f: string, i: number): Node => <li key={i}>{f}</li>);
 
+//style={{ textAlign: 'left', zIndex: 100000 }} 
+//					onClick={ this._on_click }
+
 		// Return full-screen feedback.
-		return <div className='static-modal' 
-					style={{ textAlign: 'left', zIndex: 100000 }} 
-					onClick={ this._on_click } >
-					<Modal.Dialog style={{marginTop: 150}}>
-						<Modal.Header>
-							<Modal.Title>Incorrect answer</Modal.Title>
-						</Modal.Header>
-						<Modal.Body>
-							<ul>
-								{ f_li }
-							</ul>
-						</Modal.Body>
-						<Modal.Footer>
-							Click anywhere or press <kbd>enter</kbd>
-						</Modal.Footer>
-					</Modal.Dialog>
-				</div>;
+		return (<Modal show={this.props.show_feedback} onHide={this._on_click}>
+					<Modal.Header closeButton>
+						<Modal.Title>Incorrect answer</Modal.Title>
+					</Modal.Header>
+					<Modal.Body>
+						<ul>
+							{ f_li }
+						</ul>
+					</Modal.Body>
+					<Modal.Footer>
+						<Button variant='link' size='sm' >Press <kbd>enter</kbd> or </Button>
+						<Button variant='primary' size='sm' onClick={this._on_click}>click</Button>
+					</Modal.Footer>
+				</Modal>);
 	}
 
 
@@ -407,7 +449,7 @@ export default class IfLevelPlay extends React.Component<PropsType, StateType> {
 				button_style = 'primary';
 			} else {
 				button_text = 'Skip to next page';
-				button_style = 'default';
+				button_style = 'secondary';
 			}
 		} 
 
@@ -419,7 +461,7 @@ export default class IfLevelPlay extends React.Component<PropsType, StateType> {
 
 		return <Button id='_render_page_submit_button' 
 				type='submit' 
-				bsStyle={button_style}
+				variant={button_style}
 				disabled={button_disabled}
 				>{button_text}</Button>;
 	}
@@ -466,15 +508,11 @@ export default class IfLevelPlay extends React.Component<PropsType, StateType> {
 			throw new Error('Invalid type in IfLevelPlay '+page.type);
 		}
 
-		let title = 'Optional Exercise';
-		let style = 'panel panel-default';
-
-
 		// If we're just looking at text, don't use the embedded panel.
 		if(page.type === 'IfPageTextSchema') {
 			return (
 				<div className='lead' >
-					<Glyphicon style={{ top: 3, paddingRight: 5, fontSize: 21 }} glyph='hand-right'/>
+					<HandPointRightGlyphicon />
 					<HtmlSpan html={ page.instruction } />
 				</div>
 			);
@@ -486,7 +524,7 @@ export default class IfLevelPlay extends React.Component<PropsType, StateType> {
 			return (
 				<div>
 				<div className='lead' >
-					<Glyphicon style={{ top: 3, paddingRight: 5, fontSize: 21 }} glyph='hand-right'/>
+					<HandPointRightGlyphicon />
 					<HtmlSpan html={ page.instruction } />
 				</div>
 				{ problem }
@@ -498,7 +536,7 @@ export default class IfLevelPlay extends React.Component<PropsType, StateType> {
 			return (
 				<div>
 				<div className='lead' >
-					<Glyphicon style={{ top: 3, paddingRight: 5, fontSize: 21 }} glyph='hand-right'/>
+					<HandPointRightGlyphicon />
 					<HtmlSpan html={ page.instruction } />
 				</div>
 				{ problem }
@@ -507,17 +545,19 @@ export default class IfLevelPlay extends React.Component<PropsType, StateType> {
 		}
 
 		// Build panel and return for tutorials that don't require the correct answer.
+		// Note: Position =Inherit is needed for blockly.  If that's not there, then it
+		// 	can't find the coordinates to move the div over.
 		return (
-			<div className={style} style={{ }}>
-				<div className='panel-heading'>{title}</div>
-				<div className='panel-body'>
+			<Card className='card card-default' style={{ position: 'inherit', marginTop: '1rem' }}>
+				<Card.Header>Optional Exercise</Card.Header>
+				<Card.Body>
 					<HtmlDiv className='' 
 						style={{ paddingBottom: 10}} 
 						html={ page.instruction } />
 					{ problem }
 					{ validate_button }
-				</div>
-			</div>
+				</Card.Body>
+			</Card>
 		);
 	}
 
@@ -562,27 +602,29 @@ export default class IfLevelPlay extends React.Component<PropsType, StateType> {
 					<form name='c' onSubmit={this.handleNext}>
 						{ this._render_page_lead(page, pageI) }
 						{ this._render_exercise_panel(page, validate_button) }
-						<Panel >
-							<Table style={{ margin: 0}} >
-								<tbody>
-								<tr>
-									<td style={titleTdStyle}>  
-										<span>Progress</span>
-									</td>
-									<td style={leftTdStyle}>
-										{ build_score(this.props.level.pages) }
-									</td>
-									<td style={rightTdStyle}>
-										<Button 
-											bsStyle='link' disabled={this.props.isLoading}
-											href={'/ifgame/'+this.props.level.code } 
-											>Exit</Button>
-										{ next_button }
-									</td>
-								</tr>
-								</tbody>
-							</Table>
-						</Panel>
+						<Card style={{ marginTop: '1rem' }}>
+							<Card.Body style={{ margin: 0, padding: 0 }}>
+								<Table style={{ margin: 0 }} >
+									<tbody>
+									<tr>
+										<td style={titleTdStyle}>  
+											<span>Progress</span>
+										</td>
+										<td style={leftTdStyle}>
+											{ build_score(this.props.level.pages) }
+										</td>
+										<td style={rightTdStyle}>
+											<Button 
+												variant='link' disabled={this.props.isLoading}
+												href={'/ifgame/' } 
+												>Exit</Button>
+											{ next_button }
+										</td>
+									</tr>
+									</tbody>
+								</Table>
+							</Card.Body>
+						</Card>
 					</form>
 				</div>
 				{ this._render_fullpage_invisible_div() }

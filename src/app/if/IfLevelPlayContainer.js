@@ -3,11 +3,12 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import type { Node } from 'react';
 
-import { Breadcrumb, Col, Row } from 'react-bootstrap';
+import { Breadcrumb, Container, Col, Row } from 'react-bootstrap';
 
 import IfLevelPlay from './IfLevelPlay';
 import { ErrorBoundary, Message } from './../components/Misc';
 import { IfLevelSchema } from './../../shared/IfGame';
+
 
 import ForceLogin from './../components/ForceLogin';
 import Feedback from './../components/Feedback';
@@ -253,36 +254,38 @@ export default class IfLevelPlayContainer extends React.Component<PropsType, Sta
 			: <span></span>;
 
 		return (
-			<Row>
-				<Col>
-					<ForceLogin />
-					{ crumbs }
-					<h3>{ this.state.level ? this.state.level.title : '' }</h3>
+			<Container fluid='true'>
+				<Row>
+					<Col>
+						<ForceLogin />
+						{ crumbs }
+						<h3>{ this.state.level ? this.state.level.title : '' }</h3>
 
-					<Message spinner={this.state.isLoading } message={this.state.message} style={this.state.messageStyle} />
-					<ErrorBoundary>
-					{ !this.state.level ? '' :
-						<div id='iflevelplaycontainer'>
-							<IfLevelPlay 
-								level={this.state.level} 
-								selected_page_index={this.state.selected_page_index }
-								onNext={ ()=>this.onNext(false) }
-								onValidate={ ()=>this.onNext(true) }
-								onChange={ this.onChange }
-								show_feedback={this.state.show_feedback}
-								show_feedback_on={this.state.show_feedback_on}
-								onViewFeedback={this.onViewFeedback}
-								isLoading={this.state.isLoading}
-							/>
-							<Feedback
-								data={this.state.level}
-								code={this.state.level.code}
-							/>
-						</div>
-					}
-					</ErrorBoundary>
-				</Col>
-			</Row>
+						<Message spinner={this.state.isLoading } message={this.state.message} style={this.state.messageStyle} />
+						<ErrorBoundary>
+						{ !this.state.level ? '' :
+							<div id='iflevelplaycontainer'>
+								<IfLevelPlay 
+									level={this.state.level} 
+									selected_page_index={this.state.selected_page_index }
+									onNext={ ()=>this.onNext(false) }
+									onValidate={ ()=>this.onNext(true) }
+									onChange={ this.onChange }
+									show_feedback={this.state.show_feedback}
+									show_feedback_on={this.state.show_feedback_on}
+									onViewFeedback={this.onViewFeedback}
+									isLoading={this.state.isLoading}
+								/>
+								<Feedback
+									data={this.state.level}
+									code={this.state.level.code}
+								/>
+							</div>
+						}
+						</ErrorBoundary>
+					</Col>
+				</Row>
+			</Container>
 		);
 	}
 }

@@ -9,7 +9,7 @@ const { /*parseFormula,*/ parseFeedback } = require('./../shared/parseFeedback')
 
 
 // Enable DEBUG to run all tests on tagger.
-const DEBUG = true;
+const DEBUG = false;
 
 
 

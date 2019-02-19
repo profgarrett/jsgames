@@ -85,7 +85,7 @@ export default class IfGradesContainer extends React.Component<GradesPropsType, 
 
 		const filter = (
 			<form name='c' onSubmit={this.handleSubmit}>
-				<Button bsStyle='primary'>Refresh filter</Button>
+				<Button variant='primary'>Refresh filter</Button>
 			</form>
 			);
 
