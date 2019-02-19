@@ -103,7 +103,7 @@ import { Container } from 'react-bootstrap';
 
 let Root = null;
 
-if(window.location.hostname === 'localhost') {
+if(window.location.hostname !== 'localhost') {
 
 	const bugsnagClient = bugsnag({
 		apiKey: '9b68269d9ba2d11171ecafa393afbb8e',
