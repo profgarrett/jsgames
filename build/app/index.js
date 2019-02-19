@@ -94,13 +94,16 @@ import { Menu, PageNotFound } from './components/Misc';
 import Login from './components/Login';
 import Logout from './components/Logout';
 import Homepage from './components/Homepage';
+
 import bugsnag from '@bugsnag/js';
-import createPlugin from '@bugsnag/plugin-react';
+import bugsnagReact from '@bugsnag/plugin-react';
+
+
 import { Container } from 'react-bootstrap';
 
 let Root = null;
 
-if(window.location.hostname !== 'localhost') {
+if(window.location.hostname === 'localhost') {
 
 	const bugsnagClient = bugsnag({
 		apiKey: '9b68269d9ba2d11171ecafa393afbb8e',
@@ -109,7 +112,8 @@ if(window.location.hostname !== 'localhost') {
 		notifyReleaseStages: [ 'development', 'production' ]
 	});
 
-	const ErrorBoundary = bugsnagClient.use(createPlugin(React));
+  bugsnagClient.use(bugsnagReact, React);
+	const ErrorBoundary = bugsnagClient.getPlugin('react');
 
 	Root = () => (
 		<BrowserRouter>

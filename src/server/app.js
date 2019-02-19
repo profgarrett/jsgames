@@ -10,8 +10,10 @@ const bodyParser = require('body-parser');
 const compression = require('compression');
 const cookieParser = require('cookie-parser');
 const bugsnag = require('@bugsnag/js');
+const bugsnagExpress = require('@bugsnag/plugin-express');
 
-const {BUGSNAG_API, DEBUG, ADMIN_USERNAME, VERSION } = require('./secret.js'); 
+
+const { BUGSNAG_API, DEBUG, ADMIN_USERNAME, VERSION } = require('./secret.js'); 
 
 const { IfLevelModelFactory, IfLevelModel } = require('./IfGame');
 const { IfLevels } = require('./../shared/IfGame');
@@ -73,9 +75,12 @@ function shouldCompress (req: $Request, res: $Response): boolean {
 // 	Possibly due to STDOUT issue.
 // Load bugsnag if it is defined in secret.js.
 if(!DEBUG && typeof BUGSNAG_API !== undefined && BUGSNAG_API.length > 0) {
-	bugsnag.register(BUGSNAG_API);
-	app.use(bugsnag.requestHandler);
-	app.use(bugsnag.errorHandler);
+	let bugsnagClient = bugsnag({ apiKey: BUGSNAG_API });
+	bugsnagClient.use(bugsnagExpress);
+
+	let bugsnagMiddleware = bugsnagClient.getPlugin('express');
+	app.use(bugsnagMiddleware.requestHandler);
+	app.use(bugsnagMiddleware.errorHandler);
 	console.log('loading bugsnag');
 }
 
@@ -311,12 +316,14 @@ app.get('/api/ifgame/recent_levels/', nocache, require_logged_in_user,
 				'left outer join users_sections on users_sections.iduser = users.iduser ' +
 				'left outer join sections on sections.idsection = users_sections.idsection ' +
 			' WHERE ' +
-				(param_code === null ? '' : 'IfLevels.code = ? AND ') +
+				(param_code === null ? '' : 'iflevels.code = ? AND ') +
 				(param_idsection === null ? '' : ' sections.idsection = ? AND ')  +
 				(param_iduser === null ? '' : ' users.iduser = ? AND ')  +
-				' IfLevels.updated > NOW() - INTERVAL '+INTERVAL+' MINUTE AND ' +
+				' iflevels.updated > NOW() - INTERVAL '+INTERVAL+' MINUTE AND ' +
 				' iflevels.username NOT IN ('+ignore+')';
 				//' username = "alharbis0" AND code="if1"';
+
+		console.log(sql);
 
 		let select_results = await run_mysql_query(sql, sql_params);
 
