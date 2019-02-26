@@ -27,6 +27,19 @@ const FUNCTION_LIST = [
 	'sum', 'count', 'average', 'min', 'max'
 ];
 
+// Return the number of times a string occurs.
+const countIn = (s: string, c: string): number => { 
+	let result = 0;
+
+	for(let i = 0; i<s.length; i++) {
+		if(s.substr(i,1) === c) {
+			result++;
+		}
+	}
+	return result;
+};
+
+
 // Filter 
 const filter_history = 	
 		(h) => h.filter( 
@@ -523,6 +536,21 @@ const ENTRY_TESTS = [
 			{ triggered: true, solution_f: '', client_f: '=a!' }
 		]	
 	},{
+		tag: 'UNMATCHED_PAREN',
+		if: ( solution_f: string /*, parsed_f */ ) => {
+			const left_p = countIn( solution_f, '(' );
+			const right_p = countIn( solution_f, ')' );
+
+			return (left_p !== right_p);
+		},
+		tests: [
+			{ triggered: false, solution_f: '=(1+2)' },
+			{ triggered: false, solution_f: '=if(1+2)' },
+			{ triggered: true, solution_f: '=(1+2' },
+			{ triggered: true, solution_f: '=1+2)' },
+		]
+
+	},{
 		tag: 'USES_FUNCTION_NOT_IN_SOLUTION',
 		if: (solution_f: string, client_f: string ) => {
 			const solution_parsed = parseFeedback(solution_f);
@@ -593,7 +621,7 @@ const ENTRY_TESTS = [
 			{ triggered: false, solution_f: '="a"', client_f: '=1/1' }
 		]		
 	},{
-		tag: 'FORMULA_WITHOUT_PAREN',
+		tag: 'FUNCTION_WITHOUT_PAREN',
 		if: (solution_f: string, client_f: string ) => {
 			const parsed  = parseFeedback(client_f);
 			const invalid = parsed.filter( has => has.has === 'invalid_tokens' );

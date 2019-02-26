@@ -323,6 +323,8 @@ app.get('/api/ifgame/recent_levels/', nocache, require_logged_in_user,
 				' iflevels.username NOT IN ('+ignore+')';
 				//' username = "alharbis0" AND code="if1"';
 
+		console.log(sql);
+
 		let select_results = await run_mysql_query(sql, sql_params);
 
 		if(select_results.length === 0) return res.json([]);

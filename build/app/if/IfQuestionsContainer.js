@@ -55,7 +55,7 @@ export default class IfQuestionsContainer extends React.Component               
 			iduser: null,
 			users: null, // loads to array
 
-			output: 'table', // either table or excel.
+			output: 'excel', // either table or excel.
 
 			levels: [],
 		};
@@ -290,19 +290,19 @@ export default class IfQuestionsContainer extends React.Component               
 			);
 
 		return (
-			<Container>
-			<Row>
-				<Col>
-					<ForceLogin/>
-					{ crumbs }
-					<h3>Questions for { this.state.code }</h3>
+			<Container fluid='true'>
+				<Row>
+					<Col>
+						<ForceLogin/>
+						{ crumbs }
+						<h3>Questions for { this.state.code }</h3>
 
-					<Message message={this.state.message} style={this.state.messageStyle} />
-					<Loading loading={this.state.loading_data } />
-					{ filter }
-					<IfQuestions levels={this.state.levels} output={this.state.output} />
-				</Col>
-			</Row>
+						<Message message={this.state.message} style={this.state.messageStyle} />
+						<Loading loading={this.state.loading_data } />
+						{ filter }
+						<IfQuestions levels={this.state.levels} output={this.state.output} />
+					</Col>
+				</Row>
 			</Container>
 		);
 	}
