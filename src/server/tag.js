@@ -346,13 +346,22 @@ function has_tag(tags: Array<Object>, match: string): boolean {
 // Looks to see if s is in the array.
 // Can be passed strings or numbers.
 // Case-insensitive.
-function is_in( value: any, aValues: Array<any>): boolean {
+// Does do partial matches for strings.
+function is_in( value: any, aValues: Array<any>, matchPartial: boolean): boolean {
+	let v = '', v_in = '';
+
 	for(let i = 0; i<aValues.length; i++) {
 		if(typeof value === 'string' ) {
-			// Case-insenitive check.
-			if(typeof aValues[i] === typeof value && 
-					aValues[i].toLowerCase() === value.toLowerCase()) 
-					return true;
+			// Case-insenitive check, seeing if the value is contained in the larger string.
+			v_in = (''+aValues[i]).toLowerCase();
+			v = (''+value).toLowerCase();
+
+			if(matchPartial) {
+				if(v_in.indexOf(v) !== -1) return true;
+			} else {
+				if(v===v_in) return true;
+			}
+
 		} else if (typeof value === 'number' ) {
 			if(aValues[i] === value) return true;
 		} else if (typeof value === 'boolean' ) {
@@ -364,8 +373,8 @@ function is_in( value: any, aValues: Array<any>): boolean {
 	return false;
 }
 
-function not_in( value: any, aValues: Array<any>): boolean {
-	return !is_in(value, aValues);
+function not_in( value: any, aValues: Array<any>, matchPartial: boolean): boolean {
+	return !is_in(value, aValues, matchPartial);
 }
 
 
@@ -566,7 +575,7 @@ const ENTRY_TESTS = [
 
 			// Test each client value by seeing if it is in the solution.
 			for(let i=0; i<functions[0].args.length; i++) {
-				if( not_in(functions[0].args[i], solution_functions[0].args)) return true;
+				if( not_in(functions[0].args[i], solution_functions[0].args, false)) return true;
 			}
 
 			// No unfound values located!
@@ -631,7 +640,7 @@ const ENTRY_TESTS = [
 
 			// Look to find a list of functions in the invalid list.
 			for(let i=0; i<invalid[0].args.length; i++ ){ 
-				if(is_in(invalid[0].args[i].toLowerCase(), FUNCTION_LIST)) return true;
+				if(is_in(invalid[0].args[i].toLowerCase(), FUNCTION_LIST, false)) return true;
 			}
 			return false;
 		},
@@ -685,7 +694,7 @@ const ENTRY_TESTS = [
 
 			// Test each client value by seeing if it is in the solution.
 			for(let i=0; i<values[0].args.length; i++) {
-				if( not_in(values[0].args[0], solution_values[0].args)) return true;
+				if( not_in(values[0].args[0], solution_values[0].args, true)) return true;
 			}
 
 			// No unfound values located!
@@ -706,13 +715,16 @@ const ENTRY_TESTS = [
 			{ triggered: false, solution_f: '="a"', client_f: '="A"', page: { type: '' }  },
 			{ triggered: false, solution_f: '="A"', client_f: '="a"', page: { type: '' }  },
 			{ triggered: true, solution_f: '="a"', client_f: '="ab"', page: { type: '' }  },
-			{ triggered: true, solution_f: '="ab"', client_f: '="a"' , page: { type: '' } },
+			{ triggered: false, solution_f: '="ab"', client_f: '="a"' , page: { type: '' } },
 			{ triggered: false, solution_f: '="b"&"c"', client_f: '="c"', page: { type: '' }  },
-			{ triggered: true, solution_f: '="CDE"', client_f: '="CD"', page: { type: '' }  },
+			{ triggered: false, solution_f: '="CDE"', client_f: '="CD"', page: { type: '' }  },
 			{ triggered: false, solution_f: '="CDE', client_f: '=CdE', page: { type: '' }  },
 			// Harsons.
 			{ triggered: false, solution_f: '=', client_f: '=0', page: { type: 'IfPageHarsonsSchema' }  },
 			{ triggered: false, solution_f: '=', client_f: '="abc"', page: { type: 'IfPageHarsonsSchema' }  },
+			// Text in parts.
+			{ triggered: false, solution_f: '="CDE"', client_f: '="C"&"DE"', page: { type: '' }  },
+
 
 		]
 	}

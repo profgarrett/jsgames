@@ -38,11 +38,16 @@ function is_valid_reference( ref ) {
   //return true;
 }
 
-// Takes in a formula, parses it, and converts into auto-generated feedback
-// similar to the hand-written rules for pages.
-// 
-// Note that the sequence of the functions matters.  They will be in this
-// order for the toolbox.
+/**
+  Takes in a formula, parses it, and converts into auto-generated feedback
+  similar to the hand-written rules for pages.
+ 
+  Note that the sequence of the functions matters.  They will be in this
+  order for the toolbox.
+
+  This parseFeedback function is heavily used. Do not chagne w/o doing a large 
+  search for toolbox construction and feedback to the user.
+*/
 function parseFeedback(formula) {
   const tokens = parseFormula(formula).filter( t => t.token.length > 0);
   var feedback = [];

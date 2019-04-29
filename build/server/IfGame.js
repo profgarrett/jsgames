@@ -45,6 +45,17 @@ const clean_text = ( dirty         )         => {
 	return clean;
 };
 
+
+
+// Turn a string into a y/n value.
+const random_boolean_from_string = (s) => {
+	const s_as_number = s.split('').reduce( (i, s) => s.charCodeAt(0) + i, 1 );
+	return (s_as_number % 2) === 1;
+};
+
+
+
+
 const baseifgame = {
 	/* 
 		Setup page json prior to using it to create a new properly typed class object.
@@ -169,8 +180,8 @@ const baseifgame = {
 					&& typeof json.toolbox === 'undefined') {
 				const feedback = parseFeedback( json.solution_f );
 				json.feedback = feedback;
+				json.toolbox = feedback;
 			}
-
 
 		} else {
 			throw new Error('Invalid page type '+json.type+' in baseifgame');
@@ -254,16 +265,18 @@ const baseifgame = {
 		// Check result of gen function.
 		if(new_page_json !== null) {
 			// Since a non-null result was given, we should add a new page.
-
-			// Figure out seed value based on username.
-			const username_as_number = level.username.split('').reduce( (i, s) => s.charCodeAt(0) + i, 1 );
-			const username_as_0_or_1 = username_as_number % 2;
-
 			// If the level is requesting a seed value for tutorials based on username, 
 			// then go ahead and change type for half of all users.
 			if(level.harsons_randomly_on_username 
 					&& new_page_json.type === 'IfPageFormulaSchema' 
-					&& username_as_0_or_1 === 1) {
+					&& random_boolean_from_string(level.username) ) {
+				new_page_json.type = 'IfPageHarsonsSchema';
+			}
+
+			// If we're the admin (garrettn), the switch.
+			if(level.harsons_randomly_on_username 
+					&& new_page_json.type === 'IfPageFormulaSchema' 
+					&& level.username === 'garrettn') {
 				new_page_json.type = 'IfPageHarsonsSchema';
 			}
 
@@ -284,7 +297,6 @@ const baseifgame = {
 			const new_page = level.get_new_page(initialized_json);
 
 			// Clean-up case if required.
-			console.log(level.standardize_formula_case);
 			if(level.standardize_formula_case) new_page.standardize_formula_case();
 
 			level.pages.push(new_page);
@@ -330,13 +342,11 @@ const IfLevelModelFactory = {
 	create: function(code        , username        )            {
 		if(typeof this.levels[code] === 'undefined') throw new Error('Invalid type '+code+' passed to IfLevelModelFactory.create');
 
-		const allow_skipping_tutorial = username === 'garrettn' || username === 'xtest';
+		const allow_skipping_tutorial = (username === 'garrettn');
 
 		// If we are the admin, or 1/2th of users, then standardize the display 
 		// of formula cases.
-		const username_as_number = username.split('').reduce( (i, s) => s.charCodeAt(0) + i, 1 );
-		const username_as_0_or_1 = username_as_number % 2;
-		const standardize_formula_case = username_as_0_or_1=== 1 || (username === 'garrettn');
+		const standardize_formula_case = random_boolean_from_string(username)  || (username === 'garrettn');
 
 		const level = this.levels[code].create({ 
 				username, 

@@ -169,7 +169,7 @@ export default class IfQuestionsContainer extends React.Component<QuestionsProps
  
 		this.setState({ loading_data: true, message: 'Loading data from server' });
 
-		fetch('/api/ifgame/recent_levels/'+ q_string, {
+		fetch('/api/ifgame/questions/'+ q_string, {
 				method: 'get',
 				credentials: 'include',
 				headers: {

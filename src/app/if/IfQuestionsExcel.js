@@ -22,9 +22,9 @@ const formatDate = (dt: Date): string => {
 	if(typeof dt === 'undefined') return 'undefined';
 	if(typeof dt.getFullYear === 'undefined') return 'undefined';
 
-	return dt.getFullYear().toString().substr(2) + '/' +
-		dt.getMonth() + 1 + '/' +
-		dt.getDate() + ', ' +
+	return dt.getFullYear().toString() + '/' +
+		(1+parseInt(dt.getMonth(),10)) + '/' +
+		dt.getDate() + ' ' +
 		dt.getHours() + ':' + 
 		(dt.getMinutes() + ':').padStart(3, '0') +
 		(dt.getSeconds() + '').padStart(2, '0');
@@ -60,6 +60,7 @@ export default class IfPagesExcel extends React.Component<DetailPropsType> {
 	flatten_levels(levels: any): any {
 		const columns = [
 			'level',
+			'a_standardize_formula_case',
 			'q_code',
 			'q_solution_f', 
 			'q_solution_f_length',
@@ -69,7 +70,8 @@ export default class IfPagesExcel extends React.Component<DetailPropsType> {
 			//'q_complexity_functions', 'q_complexity_values', 'q_complexity_symbols', 'q_complexity_references',
 			//'q_description', 'q_instruction', 
 			//'q_type',
-			'q_type_formula', 'q_type_harsons',
+			//'q_type_formula', 
+			'a_type',
 			'q_n', 
 			//'q_correct_average', 'q_seconds_average', 'q_tags',
 			
@@ -89,7 +91,6 @@ export default class IfPagesExcel extends React.Component<DetailPropsType> {
 			*/
 			//'a_tag_USES_NUMBER_IN_QUOTES',
 			
-			
 			//'a_tag_INTERMEDIATE',
 			'a_history_length', 
 			//'a_tag_TYPO', 'a_tag_CORRECT',
@@ -102,7 +103,10 @@ export default class IfPagesExcel extends React.Component<DetailPropsType> {
 		const rows = [];
 
 		levels.map( level_summary => {
-			const defaults = { 'level': level_summary.code };
+			const defaults = { 
+				level: level_summary.code
+			};
+			console.log(level_summary);
 			this.flatten_level_questions( rows, level_summary, columns, defaults );
 		});
 
@@ -148,9 +152,6 @@ export default class IfPagesExcel extends React.Component<DetailPropsType> {
 
 				q_description: question.description,
 				q_instruction: question.instruction,
-				q_type: question.type.substr(6),
-				q_type_harsons: question.type.substr(6) === 'HarsonsSchema' ? 1 : 0,
-				q_type_formula: question.type.substr(6) === 'FormulaSchema' ? 1 : 0,
 				q_n: question.n,
 				q_correct_average: Math.round(question.correct_average*100)+'%',
 				q_seconds_average: Math.round(question.seconds_average),
@@ -178,8 +179,9 @@ export default class IfPagesExcel extends React.Component<DetailPropsType> {
 		question.answers.map( answer => {
 			// Only track completed pages.
 			if(!answer.page.completed) return;
-			
+
 			const local = {
+				a_standardize_formula_case: answer.page.standardize_formula_case ? 1 : 0,
 				'a_username': DEMO_MODE ? '****' : answer.username, 
 				'a_seconds' : answer.seconds, 
 				//'a_breaks': answer.breaks, 
@@ -202,11 +204,15 @@ export default class IfPagesExcel extends React.Component<DetailPropsType> {
 				a_history_length: answer.page.history.length,
 				a_tutorial: answer.page.code === 'tutorial' ? 1 : 0,
 
-				'a_answer_final': "'" + this.replace_spans(answer.answer),
-				'a_answer_intermediate': "'" + this.replace_spans(answer.intermediate),
-				'a_answer_all': "'" + this.replace_spans(answer.all),
-				'a_sequence_in_level': answer.sequence_in_level,
-				'a_history_first_dt': answer.page.history.length > 0 ? formatDate(answer.page.history[0].dt) : null,
+				a_type: answer.page.type.substr(6),
+				a_type_harsons: answer.page.type.substr(6) === 'HarsonsSchema' ? 1 : 0,
+				a_type_formula: answer.page.type.substr(6) === 'FormulaSchema' ? 1 : 0,
+
+				a_answer_final: "'" + this.replace_spans(answer.answer),
+				a_answer_intermediate: "'" + this.replace_spans(answer.intermediate),
+				a_answer_all: "'" + this.replace_spans(answer.all),
+				a_sequence_in_level: answer.sequence_in_level,
+				a_history_first_dt: answer.page.history.length > 0 ? formatDate(answer.page.history[0].dt) : null,
 				...defaults
 			};
 

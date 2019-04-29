@@ -268,8 +268,9 @@ Output:
 export  function create_summary( levels: Array<LevelType>): any {
 	const summaries = [];
 
-	// Add username to all pages (since that data is stored in the level, not page)
+	// Add several variables to all pages (since that data is stored in the level, not page)
 	levels.map( l => l.pages.map( p => p.username = l.username ));
+	levels.map( l => l.pages.map( p => p.standardize_formula_case = l.standardize_formula_case ));
 
 	// Add the index (position) of each page in the level.  Since levels can use
 	// questions in any order, this allows detecting the order of each question later on.

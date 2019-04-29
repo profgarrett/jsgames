@@ -76,6 +76,7 @@ class IfLevelScorePage extends React.Component                                 {
 						<Card.Title><div>{ page_final.client_f} </div></Card.Title>
 						<HistorySlider page={page_at} handleChange={this.setHistory} />
 						<ExcelTable page={page_at} readonly={true} editable={false} />
+						<div style={{ textAlign:  'right', fontSize: 8, color: 'gray' }}>{ page_final.type }</div>
 					</Card.Body>
 				</Card>
 			);

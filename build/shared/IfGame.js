@@ -1012,7 +1012,7 @@ class IfLevelSchema extends Schema {
 
 			// The seed value is used to initialize random behavior for pages.
 			// Declaring it in the level allows for predictable behavior as pages are generated.
-			seed: { type: 'number', initialize: (dbl) => isDef(dbl) ? dbl : Math.random() },
+			seed: { type: 'number', initialize: (dbl) => isDef(dbl) ? dbl : Math.round(100000*Math.random()) },
 
 			// Should half of users get Harsons instead of formula pages?
 			harsons_randomly_on_username: { type: 'Boolean', initialize: (i) => isDef(i) ? b(i) : false },

@@ -82,7 +82,7 @@ class IfPagesTable extends React.Component<DetailPropsType> {
 						{ question.description }
 						{ question.instruction }
 						<b>{ question.solution_f }</b>
-						<div>{ question.complexity.map( 
+						<div>{ question.kcs.map( 
 							(tag,i) => 
 									<span key={'questioncomplexity'+i} className='badge badge-pill badge-info'>
 										{ tag.tag }</span>) }
