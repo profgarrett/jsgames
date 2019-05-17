@@ -12,7 +12,7 @@ const { get_kcs } = require('./../../shared/kcs');
 const USE_CASE_SENSITIVE_DESCRIPTION_COMPARISONS = false;
 
 // Should we export only formula pages?  Note: includes Harsons.
-const USE_FORMULA_PAGES_ONLY = true;
+const USE_FORMULA_PAGES_ONLY = false;
 
 const SOLUTION_F_LIST = [];
 
@@ -229,10 +229,11 @@ function create_summary_answer( page: PageType, ): any {
 		summary_answer.type = 'choice';
 		summary_answer.html = page.client;
 		summary_answer.expand = '';
-		summary_answer.answer = page.client;
+		summary_answer.client = page.client;
 		summary_answer.intermediate = '';
 		summary_answer.all = '';
 		summary_answer.code = page.code;
+		summary_answer.client_n = page.client_items.indexOf(page.client);
 	}
 
 	return summary_answer;

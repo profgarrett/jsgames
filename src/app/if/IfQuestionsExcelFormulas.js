@@ -135,7 +135,8 @@ export default class IfPagesExcel extends React.Component<DetailPropsType> {
 	flatten_level_questions(rows: Array<any>, level_summary: any, columns: any, defaults: any) {
 
 		level_summary.questions.map( question => {
-			
+			if( question.type === "IfPageChoiceSchema") return;
+
 			const local = {
 				q_code: question.description + '. ' + question.instruction,
 				q_solution_f: question.solution_f ? "'" + question.solution_f : '',
@@ -179,6 +180,7 @@ export default class IfPagesExcel extends React.Component<DetailPropsType> {
 		question.answers.map( answer => {
 			// Only track completed pages.
 			if(!answer.page.completed) return;
+			if(answer.page.type === 'IfPageChoiceSchema') return;
 
 			const local = {
 				a_standardize_formula_case: answer.page.standardize_formula_case ? 1 : 0,

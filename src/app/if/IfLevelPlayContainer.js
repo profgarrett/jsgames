@@ -246,6 +246,7 @@ export default class IfLevelPlayContainer extends React.Component<PropsType, Sta
 
 	render(): Node {
 		//<Breadcrumb.Item href='/'>Home</Breadcrumb.Item>-->
+		// <h3>{ this.state.level ? this.state.level.title : '' }</h3> 
 		const crumbs = this.state.level ?
 			<Breadcrumb>
 				<Breadcrumb.Item href={'/ifgame/'}>Home</Breadcrumb.Item>
@@ -259,7 +260,7 @@ export default class IfLevelPlayContainer extends React.Component<PropsType, Sta
 					<Col>
 						<ForceLogin />
 						{ crumbs }
-						<h3>{ this.state.level ? this.state.level.title : '' }</h3>
+						
 
 						<Message spinner={this.state.isLoading } message={this.state.message} style={this.state.messageStyle} />
 						<ErrorBoundary>

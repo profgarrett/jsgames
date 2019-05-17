@@ -14,6 +14,10 @@ import Harsons from './Harsons';
 
 import type { LevelType, PageType } from './IfTypes';
 
+// Delay put in to help avoid people double-clicking (which sometimes comes in as
+// two single clicks on iPad).
+const MINIMUM_TIME_BETWEEN_SUBMIT_EVENTS = 350;
+
 
 // Build the score list at the bottom of the page.
 const build_score = (pages: Array<PageType>): any => pages.map( (p: PageType, i: number): any => {
@@ -184,9 +188,10 @@ export default class IfLevelPlay extends React.Component<PropsType, StateType> {
 	handleValidate(e: ?SyntheticEvent<HTMLButtonElement>) {
 		if(e) e.preventDefault();
 
+
 		// Do not allow submissions within 1/2s of previous ones.
 		// Keeps users who double-click from accidentally re-submitting.
-		if( (new Date()).getTime() - this.state.lastFeedbackDismissal.getTime() < 500)
+		if( (new Date()).getTime() - this.state.lastFeedbackDismissal.getTime() < MINIMUM_TIME_BETWEEN_SUBMIT_EVENTS)
 			return; 
 		this.props.onValidate();
 	}
@@ -197,7 +202,7 @@ export default class IfLevelPlay extends React.Component<PropsType, StateType> {
 
 		// Do not allow submissions within 1/2s of previous ones.
 		// Keeps users who double-click from accidentally re-submitting.
-		if( (new Date()).getTime() - this.state.lastFeedbackDismissal.getTime() < 500)
+		if( (new Date()).getTime() - this.state.lastFeedbackDismissal.getTime() < MINIMUM_TIME_BETWEEN_SUBMIT_EVENTS)
 			return; 
 		
 		this.props.onNext();

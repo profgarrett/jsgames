@@ -56,7 +56,7 @@ const format = (input, format) => {
 		}
 	}
 
-	if(format === 'text' || format === 'c' || format === '' ) {
+	if(format === 'text' || format === 'c' || format === '' || format === ' ' ) {
 		// Text
 		return input;
 

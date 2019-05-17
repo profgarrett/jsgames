@@ -88,7 +88,7 @@ const symbols = (page: FormulaPageType, symbols: Array<string>): ?string => {
 	}
 };
 
-// Ensure that the given page has no numbers in it.  It should only use references.
+// Ensure that the given page has none of the matching symbols.
 const no_symbols = (page: FormulaPageType, symbols: Array<string>): ?string => {
 	let missing = [];
 
@@ -108,6 +108,7 @@ const no_symbols = (page: FormulaPageType, symbols: Array<string>): ?string => {
 		return 'You should not use these symbols: ' + missing.join(', ');
 	}
 };
+
 
 
 

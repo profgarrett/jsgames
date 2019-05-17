@@ -20,12 +20,25 @@ const DataFactory = {
 	},
 
 	// Return a random percentage (2 decimals) between the two given numbers.
+	// If the number is > 1, then assume that we should convert. If <1, then 
+	// assume it's already in decimal form.
 	// @seed is optional.
 	randPercent: (from: number, to: number, seed?: number): number => {
-		return Math.floor(
-			(typeof seed === 'undefined' ? Math.random() : seed )
-			* ((to*100)-(from*100)+1)+(from*100)
-		)/100;
+
+		if(from>1 && to>1) {
+			// > 1
+			return Math.floor(
+				(typeof seed === 'undefined' ? Math.random() : seed )
+				* (to-from+1)+from
+			)/100;
+		} else {
+			// < 1
+			return Math.floor(
+				(typeof seed === 'undefined' ? Math.random() : seed )
+				* ((to*100)-(from*100)+1)+(from*100)
+			)/100;
+		}
+
 	},
 
 

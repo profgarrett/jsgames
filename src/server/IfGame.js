@@ -5,7 +5,11 @@ const { DataFactory } = require('./DataFactory');
 const { test } = require('./tutorials/test');
 const { test_gens } = require('./tutorials/test_gens');
 const { tutorial } = require('./tutorials/tutorial');
-const { math1, math2 } = require('./tutorials/math');
+
+const { math1 } = require('./tutorials/math1');
+const { math2 } = require('./tutorials/math2');
+const { math3 } = require('./tutorials/math3');
+
 const { text } = require('./tutorials/text');
 const { summary } = require('./tutorials/summary');
 const { if1, if2, if3, if4, if5, if6, if7, if8 } = require('./tutorials/if');
@@ -296,6 +300,12 @@ const baseifgame = {
 
 			const new_page = level.get_new_page(initialized_json);
 
+			// Add an initial history item for the created date using server time (not client time)
+			new_page.history.push({
+				code: 'server_create',
+				dt: new Date()
+			});
+
 			// Clean-up case if required.
 			if(level.standardize_formula_case) new_page.standardize_formula_case();
 
@@ -324,6 +334,7 @@ const IfLevelModelFactory = {
 		dates: { ...baseifgame, ...dates},
 		math1: { ...baseifgame, ...math1},
 		math2: { ...baseifgame, ...math2},
+		math3: { ...baseifgame, ...math3},
 		rounding: { ...baseifgame, ...rounding },
 		if1: { ...baseifgame, ...if1},
 		if2: { ...baseifgame, ...if2},
