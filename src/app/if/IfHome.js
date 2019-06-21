@@ -9,6 +9,7 @@ import IfLevelTestContainer from './IfLevelTestContainer';
 import IfMonitorContainer from './IfMonitorContainer';
 import IfGradesContainer from './IfGradesContainer';
 import IfQuestionsContainer from './IfQuestionsContainer';
+import IfLevelDebugContainer from './IfLevelDebugContainer';
 
 export default class IfHome extends React.Component {
 
@@ -24,6 +25,7 @@ export default class IfHome extends React.Component {
 					<Route exact path='/ifgame/:_code' component={IfLevelListContainer} />
 					<Route exact path='/ifgame/level/:_id/play' component={IfLevelPlayContainer} />
 					<Route exact path='/ifgame/level/:_id/score' component={IfLevelScoreContainer} />
+					<Route exact path='/ifgame/leveldebug/:_id' component={IfLevelDebugContainer} />
 				</Switch>
 		);
 	}

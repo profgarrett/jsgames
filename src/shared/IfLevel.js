@@ -2,7 +2,8 @@
 const { Schema, isDef  } = require('./Schema');
 const { IfPageTextSchema, IfPageChoiceSchema, 
 		IfPageFormulaSchema,	
-		IfPageParsonsSchema, IfPageHarsonsSchema } = require('./IfPage');
+		IfPageParsonsSchema, IfPageHarsonsSchema,
+		IfPageNumberAnswerSchema } = require('./IfPage');
 
 import type { PageType } from './../app/if/IfTypes';
 
@@ -15,12 +16,15 @@ import type { PageType } from './../app/if/IfTypes';
 const IfLevels = [
 	{ code: 'tutorial', label: 'Website Introduction', description: 'Learn how to complete tutorials.' },
 	{ code: 'math1', label: 'Math 1', description: 'Use addition and subtraction' },
+	{ code: 'math1review', label: 'Math 1 Review', description: 'Review addition and subtraction' },
 	{ code: 'math2', label: 'Math 2', description: 'Use division and multiplication.' },
+	{ code: 'math2review', label: 'Math 2 Review', description: 'Review division and multiplication' },
 	{ code: 'math3', label: 'Math 3', description: 'Learn exponents, parentheses, and order of operations' },
-	{ code: 'summary', label: 'Summary function', description: 'Learn how to use summary functions.' },
-	{ code: 'dates', label: 'Date Functions', description: 'Learn about date functions.' },
-	{ code: 'text', label: 'Text functions', description: 'Learn a number of useful text functions' },
-	{ code: 'rounding', label: 'Rounding Functions', description: 'Round numbers.' },
+	{ code: 'math3review', label: 'Math 3 Review', description: 'Review exponents, parentheses, and order of operations' },
+	{ code: 'functions1', label: 'Functions 1', description: 'Learn how to use basic functions.' },
+	{ code: 'functions1review', label: 'Functions 1 Review', description: 'Review basic functions.' },
+	{ code: 'functions2', label: 'Functions 2', description: 'Learn how to use more functions.' },
+	{ code: 'functions2review', label: 'Functions 2 Review', description: 'Review more functions.' },
 	{ code: 'if1', label: 'IF1: Logical number comparisons', description: 'Compare numbers' },
 	{ code: 'if2', label: 'IF2: Logical text comparisons', description: 'Compare words' },
 	{ code: 'if3', label: 'IF3: the IF function', description: 'Create simple formulas with IF' },
@@ -28,8 +32,11 @@ const IfLevels = [
 	{ code: 'if5', label: 'IF5: Logical functions and IF', description: 'Use AND, OR, & NOT inside of IF' },
 	{ code: 'if6', label: 'IF6: IF and Math', description: 'Embed math inside of an IF' },
 	{ code: 'if7', label: 'IF7: Booleans 1', description: 'Figure out TRUE and FALSE' },
-	{ code: 'if8', label: 'IF8: Booleans 2', description: 'Use booleans with the AND & OR functions' }
-
+	{ code: 'if8', label: 'IF8: Booleans 2', description: 'Use booleans with the AND & OR functions' },
+	{ code: 'math4', label: 'Math 4', description: 'Learn growth and rounding functions' },
+	{ code: 'math4review', label: 'Math 4 Review', description: 'Review growth and rounding functions' },
+	{ code: 'surveymath1', label: 'Survey of Math Concepts 1', description: 'Review your math concepts' },
+	{ code: 'surveymath2', label: 'Survey of Math Concepts 2', description: 'Review your math concepts' },
 ];
 
 
@@ -222,6 +229,9 @@ class IfLevelSchema extends Schema {
 			new_page = new IfPageChoiceSchema(json);
 		} else if (json.type === 'IfPageTextSchema') {
 			new_page = new IfPageTextSchema(json);
+		} else if (json.type === 'IfPageNumberAnswerSchema') {
+			new_page = new IfPageNumberAnswerSchema(json);
+
 		} else {
 			throw new Error('Invalid get_new_page(type) param of ' + json.type);
 		}

@@ -5,6 +5,8 @@ const { from_mysql_to_utc, run_mysql_query } = require('./mysql');
 const bcrypt = require('bcryptjs');
 
 const jwt = require('jsonwebtoken');
+const JWT_EXPIRE_SECONDS = 60*60*24*300; // 300 days.
+
 
 import type { $Request, $Response, NextFunction } from 'express';
 
@@ -20,6 +22,8 @@ import type { $Request, $Response, NextFunction } from 'express';
 	If finding a property with prefix solution..., will look for matching solution..._visible.  
 		If that is true, then send anyway. 
 
+	@TODO: Remove any values in the template_values that are used in the solution and not shown in description or instruction.
+	
 	Test: 
 		strip_secrets([{ x: 1, 'solution_show': 2, 'solution_show_visible': true, 'solution_hide': 2, 'solution_hide_visible': false }])
 */
@@ -96,18 +100,20 @@ let return_level_without = (input, without) => {
 // Convenience function for cleaning up and preparing a level for returning.
 // Includes both removing secrets, as well as converting dates to UTC format.
 // @level_or_levels can deal with being either an array or a single item.
-const return_level_prepared_for_transmit = (level: Object): Object => {
+const return_level_prepared_for_transmit = (level: Object, secure: boolean): Object => {
 	// Do not accept IfLevels. Instead, need json.
-	if(level instanceof IfLevelModel) {
-		throw new Error('Should submit json instead of IfLevel');
+	if(!(level instanceof IfLevelModel)) {
+		throw new Error('Should submit IfLevel, not JSON');
 	}
+	if(typeof secure === 'undefined') throw Error('Secure level network/return_level_prepared_for_transmit?');
 
-	let clean_level = _strip_secrets(level);
+	const json = level.toJson();
+	let clean_json = secure ? _strip_secrets(json) : json ;
 
-	clean_level.updated = from_mysql_to_utc(clean_level.updated); 
-	clean_level.created = from_mysql_to_utc(clean_level.created); 
+	clean_json.updated = from_mysql_to_utc(clean_json.updated); 
+	clean_json.created = from_mysql_to_utc(clean_json.created); 
 
-	return clean_level;
+	return clean_json;
 };
 
 
@@ -117,16 +123,37 @@ const return_level_prepared_for_transmit = (level: Object): Object => {
 
 
 // Find the current username.
-function get_username_or_emptystring(req: $Request): string {
-	const  token = req.cookies['x-access-token'];
+// Side effect of logging the user out if the token has expired.
+function get_username_or_emptystring(req: $Request, res: $Response): string {
+	const token = req.cookies['x-access-token'];
+	let result = {};
 	if (!token) return '';
 
-	let result = jwt.verify(token, JWT_AUTH_SECRET);
+	if(typeof res === 'undefined') {
+		throw new Error('undefined res for get_username_or_emptystring');
+	}
+
+	try {
+		result = jwt.verify(token, JWT_AUTH_SECRET);
+	} catch (e) {
+		if(e.name === 'TokenExpiredError') {
+			logout_user(req, res);
+			return '';
+		}
+	}
+
 	result = (result: any); // cast to fix flow issue converting mixed -> object.
 	result = (result: { username: string});
 
 	if(typeof result.username === 'string') return result.username;
 	return '';
+}
+
+// Logout user.
+function logout_user(req: $Request, res: $Response) {
+	res.clearCookie('x-access-token');
+	res.clearCookie('x-access-token-refreshed');
+	res.clearCookie('x-access-token-username');
 }
 
 /**
@@ -135,11 +162,11 @@ function get_username_or_emptystring(req: $Request): string {
 	Fails with 401 error if not logged in.
 */
 function require_logged_in_user(req: $Request, res: $Response, next: NextFunction): any {
-	const username = get_username_or_emptystring(req);
+	const username = get_username_or_emptystring(req, res);
 	
 	// Refresh login token
 	if(username !== '') {
-		const token = jwt.sign({ username: username }, JWT_AUTH_SECRET, { expiresIn: 864000 });
+		const token = jwt.sign({ username: username }, JWT_AUTH_SECRET, { expiresIn: JWT_EXPIRE_SECONDS });
 		const last = (new Date()).toString().replace(/ /g, '_').replace('(', '').replace(')', '').replace(/:/g,'_').replace(/-/g, '_');
 		res.cookie('x-access-token', token);
 		res.cookie('x-access-token-username', username);
@@ -208,6 +235,7 @@ async function login_and_maybe_create_user(params: Object): any {
 
 
 module.exports = {
+	logout_user,
 	return_level_without,
 	return_level_prepared_for_transmit,
 	get_username_or_emptystring,

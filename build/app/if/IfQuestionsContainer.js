@@ -25,12 +25,13 @@ import ForceLogin from './../components/ForceLogin';
            
               
                       
+                   
 
-                    
-                       
+                   
+                      
 
-                 
-                    
+                
+                   
 
                 
 
@@ -49,11 +50,15 @@ export default class IfQuestionsContainer extends React.Component               
 			code: 'tutorial',
 			codes: IfLevels.map( l => l.code ),
 
-			idsection: null,
-			sections: null, // loads to an array from server.
+			idsection: -1,
+			sections: [], // loads to an array from server.
+			pagetype: 'IfPageChoiceSchema', //'IfPageFormulaSchema|IfPageHarsonsSchema', 
+					// filter by only include certain type of pages in results.
+					// should be either 'IfPageChoiceSchema', 'IfPageFormulaSchema|IfPageHarsonsSchema'
+					// or IfPageParsonsSchema
 
-			iduser: null,
-			users: null, // loads to array
+			iduser: -1,
+			users: [], // loads to array
 
 			output: 'excel', // either table or excel.
 
@@ -64,6 +69,7 @@ export default class IfQuestionsContainer extends React.Component               
 
 		(this     ).handleCodeFilterChange = this.handleCodeFilterChange.bind(this);
 		(this     ).handleIdSectionFilterChange = this.handleIdSectionFilterChange.bind(this);
+		(this     ).handlePageTypeFilterChange = this.handlePageTypeFilterChange.bind(this);
 		(this     ).handleIdUserFilterChange = this.handleIdUserFilterChange.bind(this);
 		(this     ).handleOutputFilterChange = this.handleOutputFilterChange.bind(this);
 
@@ -71,6 +77,9 @@ export default class IfQuestionsContainer extends React.Component               
 
 	componentDidMount() {
 		this.refreshFilters();
+	}
+	handlePageTypeFilterChange(value        ) {
+		this.setState({ pagetype: value});
 	}
 	handleCodeFilterChange(value        ) {
 		this.setState({ code: value});
@@ -89,7 +98,7 @@ export default class IfQuestionsContainer extends React.Component               
 	// Load the filter values.
 	refreshFilters() {
 		this.setState({ loading_data: true, message: 'loading filters' });
-		const newState = { loading_data: false, message: '' };
+		const newState = { ...this.state, loading_data: false, message: '' };
 
 		// Start with sections.
 		fetch('/api/ifgame/sections', {
@@ -216,6 +225,8 @@ export default class IfQuestionsContainer extends React.Component               
 		if(this.state.sections !== null) 
 				this.state.sections.map( section => sections.push(section));
 
+
+
 		const users = [{ iduser: -1, username: 'All'}];
 		if(this.state.users !== null) 
 				this.state.users.map( user => users.push(user));
@@ -229,6 +240,14 @@ export default class IfQuestionsContainer extends React.Component               
 				? 'Pick a user' 
 				: 'User: ' + this.state.users.filter( 
 						s => s.iduser === this.state.iduser )[0].username;
+
+		const pagetype_options = [
+				'IfPageChoiceSchema', 
+				'IfPageHarsonsSchema',
+				'IfPageFormulaSchema',
+				'IfPageFormulaSchema|IfPageHarsonsSchema',
+				'IfPageParsonsSchema'
+			];
 
 		const filter = (
 			<form name='c' >
@@ -277,6 +296,19 @@ export default class IfQuestionsContainer extends React.Component               
 				</DropdownButton>
 				</ButtonGroup>
 
+
+				<ButtonGroup>
+				<DropdownButton 
+						onSelect={this.handlePageTypeFilterChange}
+						variant='primary' 
+						title={this.state.pagetype}
+						key='select_output' id='select_output'>
+							{ pagetype_options.map( (option,i) => 
+								<Dropdown.Item key={'select_pagetype_dropdownitem'+i} 
+								eventKey={option}>{option}</Dropdown.Item> )}
+				</DropdownButton>
+				</ButtonGroup>
+
 				<ButtonGroup>
 				<Button
 						disabled={this.state.loading_data}
@@ -289,6 +321,13 @@ export default class IfQuestionsContainer extends React.Component               
 			</form>
 			);
 
+		// Filter returned values based off of pagetype filter set in state.
+		const filterpagetype = (type        ) => this.state.pagetype.split('|').includes( type ) ;
+		const filtered_levels = this.state.levels.map( (level           ) => { 
+			const pages = level.pages.filter(p => filterpagetype(p.type) );
+			return { ...level, pages };
+		});
+
 		return (
 			<Container fluid='true'>
 				<Row>
@@ -300,7 +339,7 @@ export default class IfQuestionsContainer extends React.Component               
 						<Message message={this.state.message} style={this.state.messageStyle} />
 						<Loading loading={this.state.loading_data } />
 						{ filter }
-						<IfQuestions levels={this.state.levels} output={this.state.output} />
+						<IfQuestions levels={filtered_levels} output={this.state.output} />
 					</Col>
 				</Row>
 			</Container>

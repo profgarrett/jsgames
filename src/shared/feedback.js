@@ -1,10 +1,13 @@
 // @flow
 import type { FormulaPageType, PageType } from './../app/if/IfTypes';
-
+const { fill_template } = require('./template');
 
 // Feedback types are used by the server to create custom feedback for page submissions.
 // They are referred to frequently inside of tutorials for validation and more useful
 // input to the user.
+// 
+// They are sensitive to template values, so it's legal to do suff like {v} and expect
+// to have the {v} value filled in from template_values.
 
 
 
@@ -12,16 +15,17 @@ import type { FormulaPageType, PageType } from './../app/if/IfTypes';
 // Ensure that the given page uses all of the given references.
 // Returns either null or the missing references.
 const references = (page: FormulaPageType, values: Array<string>): ?string => {
-	let missing = [];
+	let missing = [], value = null;
 
 	if(page.client_f === null) return null;
 
 	// References are case insensitive.
-	const lf = page.client_f.toLowerCase();
-
+	const lf = fill_template(page.client_f.toLowerCase(), page.template_values);
+	
 	for(let i=0; i<values.length; i++) {
-		if(lf.indexOf(values[i].toLowerCase()) === -1) {
-			missing.push(values[i]);
+		value = fill_template(values[i].toLowerCase(), page.template_values);
+		if(lf.indexOf(value) === -1) {
+			missing.push(value);
 		}
 	}
 
@@ -38,15 +42,16 @@ const references = (page: FormulaPageType, values: Array<string>): ?string => {
 // Ensure that the given page has the given values in it.
 // Case sensitive.
 const values = (page: FormulaPageType, values: Array<number | string>): ?string => {
-	let missing = [];
+	let missing = [], value = null;
 
 	if(page.client_f === null) return null;
 
-	const client_f = page.client_f.toLowerCase();
+	const client_f = fill_template(page.client_f, page.template_values);
 
 	for(let i=0; i<values.length; i++) {
-		if(client_f.indexOf((''+values[i]).toLowerCase()) === -1) {
-			missing.push(values[i]);
+		value = fill_template((''+values[i]).toLowerCase(), page.template_values);
+		if(client_f.indexOf((value)) === -1) {
+			missing.push(value);
 		}
 	}
 
@@ -69,13 +74,17 @@ const no_values = (page: FormulaPageType): ?string => {
 
 // Ensure that the given page has given symbols.
 const symbols = (page: FormulaPageType, symbols: Array<string>): ?string => {
-	let missing = [];
+	let missing = [], symbol = '';
 
 	if(page.client_f === null) return null;
 
+	const client_f = fill_template(page.client_f.toLowerCase(), page.template_values);
+
+
 	for(let i=0; i<symbols.length; i++) {
-		if(page.client_f.indexOf(symbols[i]) === -1) {
-			missing.push(symbols[i]);
+		symbol = fill_template(symbols[i].toLowerCase(), page.template_values);
+		if(client_f.indexOf(symbol) === -1) {
+			missing.push(symbol);
 		}
 	}
 
@@ -90,13 +99,16 @@ const symbols = (page: FormulaPageType, symbols: Array<string>): ?string => {
 
 // Ensure that the given page has none of the matching symbols.
 const no_symbols = (page: FormulaPageType, symbols: Array<string>): ?string => {
-	let missing = [];
+	let missing = [], symbol = '';
 
 	if(page.client_f === null) return null;
 
+	const client_f = fill_template(page.client_f.toLowerCase(), page.template_values);
+
 	for(let i=0; i<symbols.length; i++) {
-		if(page.client_f.indexOf(symbols[i]) !== -1) {
-			missing.push(symbols[i]);
+		symbol = fill_template(symbols[i].toLowerCase(), page.template_values);
+		if(client_f.indexOf(symbol) !== -1) {
+			missing.push(symbol);
 		}
 	}
 
@@ -114,16 +126,17 @@ const no_symbols = (page: FormulaPageType, symbols: Array<string>): ?string => {
 
 // Ensure that the given page has the given functions in it.
 const functions = (page: FormulaPageType, functions: Array<string>): ?string => {
-	let missing = [];
-
+	let missing = [], func = '';
+ 
 	if(page.client_f === null) return null;
 
 	// Functions are case insensitive.
-	const lf = page.client_f.toLowerCase();
+	const lf = fill_template(page.client_f.toLowerCase(), page.template_values);
 
 	for(let i=0; i<functions.length; i++) {
-		if(lf.indexOf(functions[i].toLowerCase()) === -1) {
-			missing.push(functions[i]);
+		func = fill_template(functions[i].toLowerCase(), page.template_values);
+		if(lf.indexOf(func.toLowerCase()) === -1) {
+			missing.push(func);
 		}
 	}
 

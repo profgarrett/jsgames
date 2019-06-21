@@ -104,7 +104,6 @@ const to_utc = (dt      )         => {
 async function update_mysql_database_schema()               {
 	
 	const old_version = await _update_get_version();
-	console.log(old_version);
 	if(old_version < 1) {
 		await _update_update_version( sql01 );
 	}

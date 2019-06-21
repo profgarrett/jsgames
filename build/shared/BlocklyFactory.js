@@ -3,7 +3,7 @@
 
 	It doesn't deal with the actual html, but just the code segments.
 */
-
+const { fill_template } = require('./template');
 
 /*
 
@@ -120,7 +120,7 @@ function build_value(value, accept_right_input=true) {
 	const isNumber = typeof value === 'number';
 
 	// Nope, do an exact match.
-	console.log([value, accept_right_input]);
+	
 	const json = accept_right_input
 		? {
 			'type': 'value_'+value,
@@ -771,8 +771,13 @@ const get_toolbox_item_sort = (s) => {
 	combine by adding anything unique. Lastly, it'll run parseFormula to pick up 
 	any symbols not explicitly added by the rules.
 
+	This is template-aware, so you can use things like ={n} and have {n} show up properly.
 */
 function get_toolbox_xml( page ) {
+	// Template-aware text.
+	const t = (s) => {
+		return fill_template(s, page.template_values);
+	};
 
 	if(page.toolbox == null || page.feedback === null) {
 		throw new Error('Null toolbox or feedback for get_toolbox_xml');
@@ -788,20 +793,21 @@ function get_toolbox_xml( page ) {
 
 	// Create each rule as needed.
 	source.forEach( rule => {
+		
 		if (rule.has === 'functions' ) {
-			rule.args.forEach( value => 
+			rule.args.map(value => t(value)).forEach( value => 
 				toolbox.push(build_block( 'functions_'+ value,  () => build_function(value) ))
 			);
 		} else if (rule.has === 'symbols' ) {
-			rule.args.forEach( value => 
+			rule.args.map(value => t(value)).forEach( value => 
 				toolbox.push(build_block( 'symbols_'+ symbol_to_word[value],  () => build_symbol(value) ))
 			);
 		} else if(rule.has === 'references' ) {
-			rule.args.forEach( value => 
+			rule.args.map(value => t(value)).forEach( value => 
 				toolbox.push(build_block( 'references_'+ value,  () => build_reference(value) ))
 			);
 		} else if(rule.has === 'values' ) {
-			rule.args.forEach( value => 
+			rule.args.map(value => t(value)).forEach( value => 
 				toolbox.push(build_block( 'values_'+ value,  () => build_value(value) ))
 			);
 		} else if (rule.has === 'equal') {

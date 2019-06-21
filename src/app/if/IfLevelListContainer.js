@@ -6,7 +6,7 @@ import {PageHeader} from './../components/Misc';
 
 import { Breadcrumb, Container, Row, Col, Card, Button } from 'react-bootstrap';
 
-import { get_user_is_admin, get_username, Message, Loading } from './../components/Misc';
+import { get_user_is_admin, get_username_or_emptystring, Message, Loading } from './../components/Misc';
 
 import { IfLevelSchema, IfLevels } from './../../shared/IfGame';
 
@@ -58,7 +58,7 @@ export default class IfLevelListContainer extends React.Component {
 			});
 
 		// Fetch grades
-		fetch('/api/ifgame/grades/' + get_username(), {
+		fetch('/api/ifgame/grades/' + get_username_or_emptystring(), {
 				method: 'get',
 				credentials: 'include',
 				headers: {
@@ -128,29 +128,26 @@ export default class IfLevelListContainer extends React.Component {
 			button = (<Button 
 						onClick={ e => this.insertGame(button_level.code, e) } 
 						disabled={ this.state.isLoading } >
-						Begin a new tutorial
+						Start
 					</Button>); 
 		} else {
 			button = '';
 		}
 
 		return (
-			<Row>
+			<Container fluid='true'>
+				<Row>
 				<Col xs={12}>
 					{ crumbs }
 					<ForceLogin />
 					<PageHeader header ={ button_level.label } />
 					<Message message={this.state.message} style={this.state.message_style} />
 					<Loading loading={this.state.isLoading } />
-					<Card>
-						<Card.Body>
-							{button_level.description }
-						</Card.Body>
-					</Card>
-					{ button }		
 					<IfLevelList levels={this.state.levels} />
+					{ button }		
 				</Col>
 			</Row>
+			</Container>
 		);
 		
 	}
@@ -169,7 +166,8 @@ export default class IfLevelListContainer extends React.Component {
 			'/ifgame/surveys'
 		];
 
-		const buttons = [];
+		const debug_buttons = [];
+		const restart_buttons = [];
 		const completed_tutorials = this.state.levels.filter( l => l.completed ).map( l => l.code );
 
 		// If an admin, allow restarting any level. Otherwise, just restart 
@@ -177,19 +175,28 @@ export default class IfLevelListContainer extends React.Component {
 		const codes = ADMIN ? IfLevels
 				: IfLevels.filter( l => completed_tutorials.includes(l.code) );
 
+
 		// Create a button for each tutorial that we have already completed.
 		codes.map( (level,i) => {
-			buttons.push(
+			restart_buttons.push(
 				<li key={'iflevellistcontainerbutton'+i}>
 					<Button 
 						onClick={ e => this.insertGame(level.code, e) } 
 						variant='link'
 						style={{ padding: 0 }}
 						disabled={ this.state.isLoading } >
-						{ level.code.substr(0,1).toUpperCase() + level.code.substr(1) }
+						{ level.label }
 					</Button>
 				</li>
 			);
+
+			if(ADMIN) {
+				debug_buttons.push(
+					<li key={'iflevellistdebugcontainerbutton'+i}>
+						<a href={'/ifgame/leveldebug/'+level.code}>{level.code}</a>
+					</li>
+				);
+			}
 		});
 
 
@@ -215,8 +222,15 @@ export default class IfLevelListContainer extends React.Component {
 						</ul>
 					</Col>
 					<Col sm={4} style={{ padding: '1.25rem'}} >
-						{ buttons.length === 0 ? '' : <h4>Restart a tutorial</h4> }
-						<ul>{ buttons }</ul>
+						{ debug_buttons.length === 0 ? '' : 
+							<div>
+								<h4>Debug a tutorial</h4> 
+								<ul>{ debug_buttons }</ul>
+								<br/><br/>
+							</div>
+						}
+						{ restart_buttons.length === 0 ? '' : <h4>Restart a tutorial</h4> }
+						<ul>{ restart_buttons }</ul>
 						<br/><br/>
 					</Col>
 				</Row>

@@ -1,7 +1,7 @@
 // @flow
-const { Schema, isDef, isArray, revive_dates_recursively } = require('./Schema');
+const { Schema, isDef, isObject, isArray, revive_dates_recursively } = require('./Schema');
 const { get_feedback } = require('./feedback');
-
+const { fill_template } = require('./template');
 var FormulaParser = require('hot-formula-parser').Parser;
 //import type { PageType } from './../app/if/IfTypes';
 
@@ -95,6 +95,10 @@ function common_schema(): Object {
 		// Null if not set, array otherwise.
 		client_feedback: { type: 'Array', initialize: (a) => isDef(a) && isArray(a) ? a : null },
 
+		// Template_values contains values that will be used to replace the {a} marks in 
+		// any of the user-visible strings, as well as the solution.
+		template_values: { type: 'Object', initialize: (o) => isDef(o) && isObject(o) ? o : {} },
+
 		// After a page is completed, set TRUE so that no more updates are allowed.
 		// This is done by code in server/ifGame, as the client doesn't know what the conditions are.
 		completed: { type: 'Boolean', initialize: (b) => isDef(b) ? bool(b) : false },
@@ -107,6 +111,10 @@ function common_schema(): Object {
 		// Used to help with analysis of question success and failure.
 		// Either an empty array or an array with string tags.
 		tags: { type: 'Array', initialize: (a) => isDef(a) && isArray(a) ? a : [] },
+
+		// KCs.
+		// A list of strings that are used to track the type of problem.
+		kcs: { type: 'Array', initialize: (a) => isDef(a) && isArray(a) ? a : [] },
 	};
 }
 
@@ -319,6 +327,14 @@ class IfPageTextSchema extends IfPageBaseSchema {
 		return this.client_read;
 	}
 
+	// Automatically fill in the answer.
+	// Used for testing out on the server. 
+	debug_answer() {
+		this.client_read = true;
+		this.updateCorrect();
+	}
+
+
 	/*
 		Update any fields for which user has permissions.
 		
@@ -366,6 +382,196 @@ class IfPageTextSchema extends IfPageBaseSchema {
 
 
 
+
+/*
+	Get a single-line piece of information from the user.
+*/
+class IfPageNumberAnswerSchema extends IfPageBaseSchema {
+
+	constructor(json: Object) {
+		super(json); // set passed fields.
+		this.updateCorrect();
+	}
+
+	get type(): string {
+		return 'IfPageNumberAnswerSchema';
+	}
+
+	get schema(): Object {
+		let inherit = common_schema();
+
+		return {
+			...inherit,
+			client: { type: 'number', initialize: (i) => isDef(i) && i !== null ? parseFloat(i) : null },
+			solution: { type: 'number', initialize: (i) => isDef(i) ? parseFloat(i) : null }
+		};
+	}
+
+	// Has the user provided input?
+	client_has_answered(): boolean {
+		return this.client !== null;
+	}
+
+
+	// Automatically fill in the answer.
+	// Used for testing out on the server. 
+	debug_answer() {
+		this.client = this.solution;
+		this.updateCorrect();
+	}
+
+
+	/*
+		Update any fields for which user has permissions.
+		
+		Safe to re-run, with the exception that upon changing client_items, will
+		reset this.correct (since we don't know its status).  Will re-run updateCorrect() in 
+		case this is on the server and we're updating the object.
+
+		Run upon initial obj creation.
+	*/
+	updateUserFields(json: Object) {
+		if(typeof json === 'undefined') throw new Error('IfGames.updateUserFields(json) is null');
+		if(json.type !== this.type ) throw new Error('Invalid type '+json.type+' in ' + this.type + '.updateUserFields');
+
+		// don't allow updates to finished items. Note that completed isn't set internally by this obj,
+		// but instead is set by the server code with knowledge of each tutorial's rules.
+		if(this.completed) return; 
+
+		if(this.client !== json.client ){
+			this.client = json.client;
+			this.history = json.history;
+		}
+
+		this.updateCorrect();
+	}
+
+	/* 
+		Update correct *if* a solution is provided.
+		
+		Don't updateFeedback, as this type never has feedback rules applied.
+	*/
+	updateCorrect() {
+		if(this.completed) return; // do not update completed items.
+
+		if(!this.client === null) return; // no client submission.
+
+		this.client_feedback = [];
+		this.correct = Math.round(this.client*100)/100 === Math.round(this.solution*100)/100;
+	}
+
+	// Return a nicely formatted view of the client's input. 
+	toString(): string {
+		return this.client;
+	}
+}
+
+
+
+/*
+	Get a single-line piece of information from the user.
+*/
+class IfPageShortTextAnswerSchema extends IfPageBaseSchema {
+
+	constructor(json: Object) {
+		super(json); // set passed fields.
+		this.updateCorrect();
+	}
+
+	get type(): string {
+		return 'IfPageShortTextAnswerSchema';
+	}
+
+	get schema(): Object {
+		let inherit = common_schema();
+
+		return {
+			...inherit,
+			client: { type: 'string', initialize: (s) => isDef(s) ? s : '' }
+		};
+	}
+
+	// Has the user provided input?
+	client_has_answered(): boolean {
+		return this.client.length > 0;
+	}
+
+
+	// Automatically fill in the answer.
+	// Used for testing out on the server. 
+	debug_answer() {
+		this.client = 'ShortText';
+		this.updateCorrect();
+	}
+
+
+	/*
+		Update any fields for which user has permissions.
+		
+		Safe to re-run, with the exception that upon changing client_items, will
+		reset this.correct (since we don't know its status).  Will re-run updateCorrect() in 
+		case this is on the server and we're updating the object.
+
+		Run upon initial obj creation.
+	*/
+	updateUserFields(json: Object) {
+		if(typeof json === 'undefined') throw new Error('IfGames.updateUserFields(json) is null');
+		if(json.type !== this.type ) throw new Error('Invalid type '+json.type+' in ' + this.type + '.updateUserFields');
+
+		// don't allow updates to finished items. Note that completed isn't set internally by this obj,
+		// but instead is set by the server code with knowledge of each tutorial's rules.
+		if(this.completed) return; 
+
+		if(this.client !== json.client ){
+			this.client = json.client;
+			this.history = json.history;
+		}
+
+		this.updateCorrect();
+	}
+
+	/* 
+		Update correct *if* a solution is provided.
+		
+		Don't updateFeedback, as this type never has feedback rules applied.
+	*/
+	updateCorrect() {
+		if(this.completed) return; // do not update completed items.
+
+		if(!this.client === '') return; // no client submission.
+
+		this.client_feedback = [];
+		this.correct = true;
+	}
+
+	// Return a nicely formatted view of the client's input. 
+	toString(): string {
+		return this.client;
+	}
+}
+
+
+
+/*
+	Get a single-line piece of information from the user.
+*/
+class IfPageLongTextAnswerSchema extends IfPageShortTextAnswerSchema {
+
+	get type(): string {
+		return 'IfPageLongTextAnswerSchema';
+	}
+
+	// Automatically fill in the answer.
+	// Used for testing out on the server. 
+	debug_answer() {
+		this.client = 'LongText';
+		this.updateCorrect();
+	}
+}
+
+
+
+
 /*
 	A page holds a single choice question.
 
@@ -400,6 +606,18 @@ class IfPageChoiceSchema extends IfPageBaseSchema {
 	client_has_answered(): boolean {
 		return this.client !== null;
 	}
+
+
+	// Automatically fill in the answer.
+	// Used for testing out on the server.  Not usable on client side, as 
+	// solution will not be present.
+	debug_answer() {
+		if(typeof this.solution === 'undefined') {
+			throw new Error('You can not debug answer without solution being present');
+		}
+		this.client = this.client_items[0];
+		this.updateCorrect();
+	}		
 
 	/*
 		Update any fields for which user has permissions.
@@ -498,6 +716,19 @@ class IfPageParsonsSchema extends IfPageBaseSchema {
 	client_has_answered(): boolean {
 		return this.client_items !== null && this.client_items.length > 0;
 	}
+
+	// Automatically fill in the answer.
+	// Used for testing out on the server.  Not usable on client side, as 
+	// solution_f will not be present.
+	debug_answer() {
+		if(typeof this.solution_items === 'undefined' || this.solution_items.length < 1) {
+			throw new Error('You can not debug answer without solution_items being present')
+		}
+		this.client_items = this.solution_items;
+		this.updateCorrect();
+	}		
+
+
 
 	/*
 		Update any fields for which user has permissions.
@@ -617,6 +848,18 @@ class IfPageFormulaSchema extends IfPageBaseSchema {
 	}
 
 
+	// Automatically fill in the answer.
+	// Used for testing out on the server.  Not usable on client side, as 
+	// solution_f will not be present.
+	debug_answer() {
+		if(typeof this.solution_f === 'undefined') {
+			throw new Error('You can not debug answer without solution_f being present');
+		}
+		this.client_f = fill_template(this.solution_f, this.template_values);
+		this.updateCorrect();
+	}		
+
+
 	// Update any fields for which user has permissions.
 	// Save to re-run.  Can also run upon initial obj creation.
 	updateUserFields(json: Object) {
@@ -662,8 +905,9 @@ class IfPageFormulaSchema extends IfPageBaseSchema {
 	// Parse each test with the client code.
 	updateClientTestResults() {
 		if(this.client_f === null || this.client_f.length < 1) return;
+		const client_f = this.client_f; //fill_template(this.client_f, this.template_values);
 
-		this.client_test_results = this.tests.map( t => this.__parse(this.client_f, t, this.client_f_format));
+		this.client_test_results = this.tests.map( t => this.__parse(client_f, t, this.client_f_format));
 	}
 
 
@@ -672,9 +916,10 @@ class IfPageFormulaSchema extends IfPageBaseSchema {
 		Make sure that we actually have a solution before generating anything.
 	*/
 	updateSolutionTestResults() {
+		const solution_f = fill_template(this.solution_f, this.template_values);
 		if(this.solution_f === null || this.solution_f.length < 1) return;
 
-		this.solution_test_results = this.tests.map( t => this.__parse(this.solution_f, t, this.client_f_format) );
+		this.solution_test_results = this.tests.map( t => this.__parse(solution_f, t, this.client_f_format) );
 	}
 
 
@@ -957,6 +1202,9 @@ module.exports = {
 	IfPageChoiceSchema,
 	IfPageFormulaSchema,
 	IfPageParsonsSchema,
-	IfPageHarsonsSchema
+	IfPageHarsonsSchema,
+	IfPageNumberAnswerSchema,
+	IfPageShortTextAnswerSchema,
+	IfPageLongTextAnswerSchema
 };
 

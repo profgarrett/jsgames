@@ -80,6 +80,32 @@ const ShuffleGen = (seed: number, pages: Array<PageType>, gen: GenType): any => 
 };
 
 
+/**
+	Randomly shuffle a list until we reach limit.
+
+	If len < limit, then it will re-use items.
+*/
+const ShuffleGenUntilLimit = (seed: number, pages: Array<PageType>, gen: GenType): any => {
+	// Create a new gen that is randomized by the given seed.
+	
+	if(typeof gen.limit === 'undefined') 
+		throw new Error('Must give a limit value to ShuffleGenUntilLimit');
+
+	let randomized_gen = {
+		...gen,
+		pages: DataFactory.randomizeList(gen.pages.slice(), seed).slice(0, gen.limit)
+	};
+	
+	// See if we need additional pages.
+	while(randomized_gen.pages.length < gen.limit ) {
+		randomized_gen.pages.push( gen.pages[ DataFactory.randB(0, gen.pages.length-1 ) ] );
+	}
+
+	// Treat this as a Linear Gen.
+	return LinearGen(seed, pages, randomized_gen);
+};
+
+
 
 
 // Continue for as long as until is false.
@@ -137,10 +163,12 @@ const UntilGen = (seed: number, pages: Array<PageType>, gen: GenType): any => {
 			If TRUE, then exits.
 
 	Note that the test_gen must be of a fixed length.  It cannot expand, like an UNTIL gen.
+	If the test_gen list is shorter than the total numbers of test items requested, it will
+	just go back into it again after another random sort.
 */
 const AdaptiveGen = (seed: number, pages: Array<PageType>, me: AdaptiveGenType): any => {
 	let result = null;
-	let original_pages = pages.slice();
+	let original_pages = []; // pages.slice() will be run in the while looop to populate this.
 	let consumed_pages = [];
 
 	if(typeof me.tutorial_gen.gen === 'undefined' ||
@@ -172,7 +200,7 @@ const AdaptiveGen = (seed: number, pages: Array<PageType>, me: AdaptiveGenType):
 
 		// Test_gen returned null, meaning that it consumed enough pages.
 		// Build a sequence of pages that the gen consumed. We use
-		// this array to pass into UNTIL, which needs their results to test.
+		// this array to pass into UNTIL.
 		consumed_pages = original_pages.slice(pages.length);
 
 		// See if we are done.  If so, return null.
@@ -198,6 +226,7 @@ module.exports = {
 	UntilGen: UntilGen,
 	ShuffleGen: ShuffleGen,
 	LinearGen: LinearGen,
-	AdaptiveGen: AdaptiveGen
+	AdaptiveGen: AdaptiveGen,
+	ShuffleGenUntilLimit: ShuffleGenUntilLimit
 };
 

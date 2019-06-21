@@ -3,13 +3,14 @@ import React from 'react';
 import { Popover, OverlayTrigger, Card } from 'react-bootstrap';
 
 import { HtmlDiv, IncorrectGlyphicon, CorrectGlyphicon, CompletedGlyphicon } from './../components/Misc';
-
+import { fill_template } from './../../shared/template.js';
 
 import ExcelTable from './ExcelTable';
 import Choice from './Choice';
 import Parsons from './Parsons';
 import Text from './Text';
 import HistorySlider from './HistorySlider';
+import NumberAnswer from './NumberAnswer';
 
                                                      
                                   
@@ -53,12 +54,16 @@ class IfLevelScorePage extends React.Component                                 {
 		const i = this.props.i;
 		let page_final = this.props.page;
 		let page_at = this.state.page;
+		const desc = fill_template(page_final.description, page_final.template_values);
+		const inst = fill_template(page_final.instruction, page_final.template_values);
+		
 
-		let lead = <HtmlDiv className='lead' html={ page_final.description} />;
+		let lead = <HtmlDiv className='lead' html={ desc } />;
 
 
 		// Figure out which control to use for the page.
 		let problem, solution;
+
 
 		if(page_at.type === 'IfPageFormulaSchema' || page_at.type === 'IfPageHarsonsSchema') {
 			// Show solution?
@@ -74,6 +79,7 @@ class IfLevelScorePage extends React.Component                                 {
 				<Card >
 					<Card.Body>
 						<Card.Title><div>{ page_final.client_f} </div></Card.Title>
+						<HtmlDiv className='lead' html={ inst } />
 						<HistorySlider page={page_at} handleChange={this.setHistory} />
 						<ExcelTable page={page_at} readonly={true} editable={false} />
 						<div style={{ textAlign:  'right', fontSize: 8, color: 'gray' }}>{ page_final.type }</div>
@@ -81,15 +87,24 @@ class IfLevelScorePage extends React.Component                                 {
 				</Card>
 			);
 
+
+		} else if(page_at.type === 'IfPageNumberAnswerSchema') {
+			problem = (<div>
+					<NumberAnswer page={page_at} editable={false} />
+				</div>);
+
+
 		} else if(page_at.type === 'IfPageTextSchema') {
 			problem = (<div>
 					<Text page={page_at} editable={false} />
 				</div>);
 
+
 		} else if(page_at.type === 'IfPageParsonsSchema') {
 			problem = (<div>
 					<Parsons page={page_at} editable={false} show_solution={page_final.correct === false} />
 				</div>);
+
 
 		} else if(page_at.type === 'IfPageChoiceSchema') {
 			// Show range of choice only if the user was wrong.  If no right answer,
@@ -97,6 +112,7 @@ class IfLevelScorePage extends React.Component                                 {
 			problem = (<div>
 					<Choice page={page_at} editable={false} show_solution={page_final.correct === false} />
 				</div>);
+
 
 		} else {
 			throw new Error('Invalid type in IfLevelScore '+page_at.type);
@@ -168,12 +184,12 @@ const build_score = (pages                 )      => pages.map( (p          , i 
 	let g = null;
 	let title = '';
 	let html = '';
-
+	const desc = fill_template(p.description, p.template_values);
 
 	if(p.code === 'tutorial') {
 
 		title = 'Completed';
-		html = p.description + 
+		html = desc + 
 			(p.toString().length < 1 ? '' : '<br/><div class="card ">'+ p.toString()+'</div>');
 
 		g = <CompletedGlyphicon color={ p.correct ? 'black' : 'gray' } />;
@@ -182,11 +198,11 @@ const build_score = (pages                 )      => pages.map( (p          , i 
 		// Graded page
 		if(p.correct) {
 			title = 'Correct answer';
-			html = p.description + '<br/><div class="card ">'+p.toString()+'</div>'; // style={background} 
+			html = desc + '<br/><div class="card ">'+p.toString()+'</div>'; // style={background} 
 			g = <CorrectGlyphicon />;
 		} else {
 			title = 'Incorrect answer';
-			html = p.description + '<br/><div class="card">'+p.toString()+'</div>';
+			html = desc + '<br/><div class="card">'+p.toString()+'</div>';
 			g = <IncorrectGlyphicon/>;
 		}
 	} else {

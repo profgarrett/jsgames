@@ -71,7 +71,6 @@ export default class IfPagesExcel extends React.Component<DetailPropsType> {
 			const defaults = { 
 				level: level_summary.code
 			};
-			console.log(level_summary);
 			this.flatten_level_questions( rows, level_summary, columns, defaults );
 		});
 

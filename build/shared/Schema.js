@@ -16,6 +16,7 @@ class Schema {
 		//let methods = this.methods;
 
 		if(this.type !== json.type) {
+			debugger;
 			throw Error('Schema.constructor: json.type ('+json.type+') !== '+this.type);
 		}
 
@@ -143,7 +144,9 @@ let isDef = function(v     )          {
 let isArray = function(u     )          {
 	return (u instanceof Array);
 };
-
+let isObject = function(o     )          {
+	return typeof o === 'object'
+};
 
 // Go through the given obj or array, recursively matching items that look like a date
 // back to the date() object. Works when dates are in '1981-12-20T04:00:14.000Z format, 
@@ -177,6 +180,7 @@ module.exports = {
 	Schema,
 	isDef,
 	isArray,
+	isObject,
 	revive_dates_recursively
 };
 

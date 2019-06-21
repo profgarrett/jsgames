@@ -11,6 +11,10 @@ import Text from './Text';
 import Choice from './Choice';
 import Parsons from './Parsons';
 import Harsons from './Harsons';
+import NumberAnswer from './NumberAnswer';
+
+
+import { fill_template } from './../../shared/template.js';
 
 import type { LevelType, PageType } from './IfTypes';
 
@@ -24,12 +28,13 @@ const build_score = (pages: Array<PageType>): any => pages.map( (p: PageType, i:
 	let g = null;
 	let title = '';
 	let html = '';
+	const desc = fill_template(p.description, p.template_values);
 
 	// Build the glyph to use for display.
 	if(!p.completed) {
 		// In progress
 		title = 'In progress';
-		html = p.description;
+		html = desc;
 		g = <ProgressGlyphicon />;
 
 	} else {
@@ -38,7 +43,7 @@ const build_score = (pages: Array<PageType>): any => pages.map( (p: PageType, i:
 		if(p.code === 'tutorial') {
 
 			title = 'Completed';
-			html = p.description + 
+			html = desc + 
 				(p.toString().length < 1 ? '' : '<br/><div class="well well-sm">'+ p.toString()+'</div>');
 
 			g = <CompletedGlyphicon color={ p.correct ? 'black' : 'gray' } />;
@@ -47,11 +52,11 @@ const build_score = (pages: Array<PageType>): any => pages.map( (p: PageType, i:
 			// Graded page
 			if(p.correct) {
 				title = 'Correct answer';
-				html = p.description + '<br/><div class="well well-sm">'+p.toString()+'</div>'; // style={background} 
+				html = desc + '<br/><div class="well well-sm">'+p.toString()+'</div>'; // style={background} 
 				g = <CorrectGlyphicon />;
 			} else {
 				title = 'Incorrect answer';
-				html = p.description + '<br/><div class="well well-sm">'+p.toString()+'</div>';
+				html = desc + '<br/><div class="well well-sm">'+p.toString()+'</div>';
 				g = <IncorrectGlyphicon />;
 			}
 		} else {
@@ -278,22 +283,25 @@ export default class IfLevelPlay extends React.Component<PropsType, StateType> {
 				OAnimation: t,
 				animation: t
 			};
+			const desc = fill_template(page.description, page.template_values);
 
 			return (
 				<Card variant='primary'>
 					<Card.Body>
 						<Card.Title >Quiz Question</Card.Title>
 						<div style={ style }>
-							<HtmlDiv html={ page.description } />
+							<HtmlDiv html={ desc } />
 						</div>
 					</Card.Body>
 				</Card>
 				);
+
 		} else {
 			// Make a little prettier by replacing linebreaks with div.lead.
 			// Looks better spacing-wise, as we have instructions below the lead in 
 			// a div.lead.
-			let descriptions = page.description.split('<br/><br/>');
+			let desc = fill_template(page.description, page.template_values);
+			let descriptions = desc.split('<br/><br/>');
 
 			descriptions = descriptions.map( (d: string, i: number): Node =>
 					<HtmlDiv className='lead' style={{ marginBottom: '1rem' }} key={i} html={ d } /> );
@@ -475,11 +483,12 @@ export default class IfLevelPlay extends React.Component<PropsType, StateType> {
 
 	_render_exercise_panel(page: PageType, validate_button: Node ): Node {
 		let problem = null;
+		const instruc = fill_template(page.instruction, page.template_values);
 
 		// Build correct page.
 		if(page.type === 'IfPageFormulaSchema') {
 			problem = <ExcelTable page={page} 
-						readonly={ !this.props.isLoading }
+						readonly={ this.props.isLoading }
 						editable={ true } 
 						handleChange={this.handleChange} />;
 
@@ -491,24 +500,32 @@ export default class IfLevelPlay extends React.Component<PropsType, StateType> {
 
 		} else if(page.type === 'IfPageChoiceSchema') {
 			problem = <Choice page={page} 
-						readonly={ !this.props.isLoading }
+						readonly={ this.props.isLoading }
 						editable={ true } 
 						showSolution={false} 
 						handleChange={this.handleChange} />;
 
 		} else if(page.type === 'IfPageHarsonsSchema') {
 			problem = <Harsons page={page} 
-						readonly={ !this.props.isLoading }
+						readonly={ this.props.isLoading }
 						editable={ true } 
 						showSolution={ false } 
 						handleChange={this.handleChange} />;
 
 		} else if(page.type === 'IfPageTextSchema') {
 			problem = <Text page={page} 
-						readonly={ !this.props.isLoading }
+						readonly={ this.props.isLoading }
 						editable={ true } 
 						handleChange={this.handleChange} 
 						handleSubmit={ () => this.handleNext() } />;
+
+		} else if(page.type === 'IfPageNumberAnswerSchema') {
+			problem = <NumberAnswer page={page} 
+						readonly={ this.props.isLoading }
+						editable={ true } 
+						handleChange={this.handleChange} 
+						handleSubmit={ () => this.handleNext() } />;
+
 		} else {
 			throw new Error('Invalid type in IfLevelPlay '+page.type);
 		}
@@ -518,7 +535,7 @@ export default class IfLevelPlay extends React.Component<PropsType, StateType> {
 			return (
 				<div className='lead' >
 					<HandPointRightGlyphicon />
-					<HtmlSpan html={ page.instruction } />
+					<HtmlSpan html={ instruc } />
 				</div>
 			);
 		}
@@ -530,7 +547,7 @@ export default class IfLevelPlay extends React.Component<PropsType, StateType> {
 				<div>
 				<div className='lead' >
 					<HandPointRightGlyphicon />
-					<HtmlSpan html={ page.instruction } />
+					<HtmlSpan html={ instruc } />
 				</div>
 				{ problem }
 				</div>
@@ -542,7 +559,7 @@ export default class IfLevelPlay extends React.Component<PropsType, StateType> {
 				<div>
 				<div className='lead' >
 					<HandPointRightGlyphicon />
-					<HtmlSpan html={ page.instruction } />
+					<HtmlSpan html={ instruc } />
 				</div>
 				{ problem }
 				</div>
@@ -558,7 +575,7 @@ export default class IfLevelPlay extends React.Component<PropsType, StateType> {
 				<Card.Body>
 					<HtmlDiv className='' 
 						style={{ paddingBottom: 10}} 
-						html={ page.instruction } />
+						html={ instruc } />
 					{ problem }
 					{ validate_button }
 				</Card.Body>
@@ -619,10 +636,7 @@ export default class IfLevelPlay extends React.Component<PropsType, StateType> {
 											{ build_score(this.props.level.pages) }
 										</td>
 										<td style={rightTdStyle}>
-											<Button 
-												variant='link' disabled={this.props.isLoading}
-												href={'/ifgame/' } 
-												>Exit</Button>
+											
 											{ next_button }
 										</td>
 									</tr>
@@ -630,6 +644,13 @@ export default class IfLevelPlay extends React.Component<PropsType, StateType> {
 								</Table>
 							</Card.Body>
 						</Card>
+						<div style={{ textAlign: 'center', paddingTop: 20 }}>
+							<Button 
+								style={{ color: 'gray' }}
+								variant='link' disabled={this.props.isLoading}
+								href={'/ifgame/' } 
+								>Exit</Button>
+						</div>
 					</form>
 				</div>
 				{ this._render_fullpage_invisible_div() }

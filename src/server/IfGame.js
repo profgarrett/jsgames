@@ -1,20 +1,23 @@
 // @flow
 const { IfLevelSchema, } = require('./../shared/IfGame');
 const { DataFactory } = require('./DataFactory');
+const { compile_template_values } = require('./../shared/template.js');
 
 const { test } = require('./tutorials/test');
 const { test_gens } = require('./tutorials/test_gens');
 const { tutorial } = require('./tutorials/tutorial');
 
-const { math1 } = require('./tutorials/math1');
-const { math2 } = require('./tutorials/math2');
-const { math3 } = require('./tutorials/math3');
+const { math1, math1review } = require('./tutorials/math1');
+const { math2, math2review } = require('./tutorials/math2');
+const { math3, math3review } = require('./tutorials/math3');
+const { math4, math4review } = require('./tutorials/math4');
 
-const { text } = require('./tutorials/text');
-const { summary } = require('./tutorials/summary');
+const { functions1, functions1review } = require('./tutorials/functions1');
+const { functions2, functions2review } = require('./tutorials/functions2');
+
 const { if1, if2, if3, if4, if5, if6, if7, if8 } = require('./tutorials/if');
-const { dates } = require('./tutorials/dates');
-const { rounding } = require('./tutorials/rounding');
+
+const { surveymath1, surveymath2 } = require('./tutorials/surveymath');
 
 const { parseFeedback } = require('./parseFeedback');
 import type { LevelType /*, PageType */ } from './../app/if/IfTypes';
@@ -84,7 +87,7 @@ const baseifgame = {
 			//  the user doesn't get the same item multiple times w/o first
 			//  going through all of the other items.
 			// 
-			randomly_sorted_versions = DataFactory.randomizeList(json.versions, seed);
+			randomly_sorted_versions = DataFactory.randomizeList(json.versions.slice(), seed);
 			// Find ith item for this run.
 			version_i = page_count % json.versions.length;
 			version = randomly_sorted_versions[version_i];
@@ -111,7 +114,11 @@ const baseifgame = {
 			json.feedback = [];
 		}
 
-		// Setup the capitalization option.
+
+		// Setup template values (if any!);
+		// This converts strings like [1-3] into numbers 1, 2, or 3.
+		// It also works with references. See templates for more information.
+		json.template_values = compile_template_values( json );
 
 
 		// Type-specific setup
@@ -129,6 +136,7 @@ const baseifgame = {
 
 			// Add a default code.
 			json.code = 'tutorial';
+
 
 		} else if(json.type === 'IfPageParsonsSchema') {
 
@@ -160,6 +168,24 @@ const baseifgame = {
 			json.code = typeof json.code === 'undefined' ? 'tutorial' : json.code;
 
 
+		} else if(json.type === 'IfPageNumberAnswerSchema') {
+			// Allow the user to submit a number.
+
+			if(json.code === 'tutorial') {
+				json.correct_required = true;
+			} else if (json.code === 'test') {
+				json.correct_required = false;
+			}
+
+			json.solution_test_results_visible = true;
+			json.solution_f_visible = false;
+
+			// Default instruction text.
+			if(typeof json.instruction === 'undefined') 
+				json.instruction = 'Type in a number';
+
+
+
 		} else if(json.type === 'IfPageFormulaSchema' || json.type === 'IfPageHarsonsSchema') {
 			// Setup the major important fields based off of type.
 			if(json.code === 'tutorial') {
@@ -188,20 +214,23 @@ const baseifgame = {
 			}
 
 		} else {
+			console.log(json);
 			throw new Error('Invalid page type '+json.type+' in baseifgame');
 		}
 
 		// Require description and instructions.
 		if( typeof json.description === 'undefined' || json.description === null ||
-			typeof json.instruction === 'undefined' || json.instruction === null) 
+			typeof json.instruction === 'undefined' || json.instruction === null) {
+			console.log( json );
 			throw new Error('IfGameServerInitializeJson.NullDescriptionOrInstructions');
+		}
 
 		// Remove extra tabs characters and double spaces.
 		json.description = clean_text(json.description);
 		json.instruction = clean_text(json.instruction);
 
 		// Initialize history
-		json.history = [ { dt: new Date(), code: 'created' } ];
+		json.history = [ { dt: new Date(), code: 'server_initialized' } ];
 
 
 
@@ -297,7 +326,6 @@ const baseifgame = {
 
 			// setup new page 
 			const initialized_json = this._initialize_json(level.seed, level.pages.length, new_page_json);
-
 			const new_page = level.get_new_page(initialized_json);
 
 			// Add an initial history item for the created date using server time (not client time)
@@ -331,11 +359,18 @@ const IfLevelModelFactory = {
 	levels: {
 		test: { ...baseifgame, ...test },
 		tutorial: { ...baseifgame, ...tutorial },
-		dates: { ...baseifgame, ...dates},
 		math1: { ...baseifgame, ...math1},
+		math1review: { ...baseifgame, ...math1review},
 		math2: { ...baseifgame, ...math2},
+		math2review: { ...baseifgame, ...math2review},
 		math3: { ...baseifgame, ...math3},
-		rounding: { ...baseifgame, ...rounding },
+		math3review: { ...baseifgame, ...math3review},
+		math4: { ...baseifgame, ...math4},
+		math4review: { ...baseifgame, ...math4review},
+		functions1: { ...baseifgame, ...functions1},
+		functions1review: { ...baseifgame, ...functions1review},
+		functions2: { ...baseifgame, ...functions2},
+		functions2review: { ...baseifgame, ...functions2review},
 		if1: { ...baseifgame, ...if1},
 		if2: { ...baseifgame, ...if2},
 		if3: { ...baseifgame, ...if3},
@@ -344,8 +379,8 @@ const IfLevelModelFactory = {
 		if6: { ...baseifgame, ...if6},
 		if7: { ...baseifgame, ...if7},
 		if8: { ...baseifgame, ...if8},
-		summary: { ...baseifgame, ...summary},
-		text: { ...baseifgame, ...text},
+		surveymath1: { ...baseifgame, ...surveymath1 },
+		surveymath2: { ...baseifgame, ...surveymath2 },
 		test_gens: { ...baseifgame, ...test_gens }
 	},
 

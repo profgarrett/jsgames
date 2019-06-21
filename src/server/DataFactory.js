@@ -25,7 +25,7 @@ const DataFactory = {
 	// @seed is optional.
 	randPercent: (from: number, to: number, seed?: number): number => {
 
-		if(from>1 && to>1) {
+		if(from>=1 && to>=1) {
 			// > 1
 			return Math.floor(
 				(typeof seed === 'undefined' ? Math.random() : seed )

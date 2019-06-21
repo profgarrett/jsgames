@@ -183,7 +183,7 @@ export default class Login extends React.Component {
 			<Container>
 				<Row>
 					<Col>
-						<h3>Log in</h3>
+						<h3 style={{ marginTop: 30}} >Log in</h3>
 						<Message message={this.state.message} style={this.state.messageStyle} />
 						<Loading loading={this.state.isLoading } />
 						<Form name='loginform' onSubmit={this.onSubmit} style={formStyle}>

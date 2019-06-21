@@ -159,7 +159,7 @@ if(DEBUG) {
 
 
 // Return a complexity analysis of the ideal solution.
-export function get_kcs( solution_f         )                {
+function get_kcs( solution_f         )                {
 	const kcs = get_function_kcs(solution_f);
 	const parsed_f = parseFeedback( solution_f );
 	
@@ -186,4 +186,6 @@ export function get_kcs( solution_f         )                {
 
 	return kcs;
 }
+
+module.exports = { get_kcs };
 

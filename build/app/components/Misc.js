@@ -361,12 +361,15 @@ export function get_cookie(arg) {
 	return match.length === 0 ? null : match[0].value;
 }
 
-export function get_username() {
-	return get_cookie('x-access-token-username');
+export function get_username_or_emptystring() {
+	let cookie =  get_cookie('x-access-token-username');
+	if(cookie === null) return '';
+	return cookie;
+	
 }
 
 // Return boolean with if the user is an administrator or not.
 export function get_user_is_admin() {
-	const username = get_username();
+	const username = get_username_or_emptystring();
 	return (username === secret.ADMIN_USERNAME || username === 'test');
 }

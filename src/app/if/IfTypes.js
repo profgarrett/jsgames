@@ -46,6 +46,7 @@ export type PageType = {
 	code: string,
 	description: string,
 	instruction: string,
+	template_values: Object,
 	client_feedback: Array<string>,
 	feedback: Array<Function>,
 
@@ -60,7 +61,9 @@ export type PageType = {
 	history: Array<Object>,
 	+toJson: Function,
 	get_time_in_seconds: () => number,
-	standardize_formula_case: () => void
+	standardize_formula_case: () => void,
+
+	debug_answer: Function
 };
 
 
@@ -72,6 +75,7 @@ export type TextPageType = {
 	code: string,
 	description: string,
 	instruction: string,
+	template_values: Object,
 	feedback: Array<string>,
 	feedback: Array<Function>,
 
@@ -93,6 +97,99 @@ export type TextPageType = {
 };
 
 
+export type IfPageShortTextSchemaType = {
+
+	// Copy from PageType
+	type: string,
+
+	code: string,
+	description: string,
+	instruction: string,
+	template_values: Object,
+	feedback: Array<string>,
+	feedback: Array<Function>,
+
+	correct: boolean,
+	correct_required: boolean,
+	completed: boolean,
+	show_feedback_on: boolean,
+	
+	+client_has_answered: () => boolean,	
+	+get_feedback: () => ?string,
+	updateUserFields: (Object) => void,
+	history: Array<Object>,
+	+toJson: Function,
+	get_time_in_seconds: () => number,
+	standardize_formula_case: () => void,
+	// End Copy
+
+	client: string
+};
+
+
+export type IfPageLongTextSchemaType = {
+
+	// Copy from PageType
+	type: string,
+
+	code: string,
+	description: string,
+	instruction: string,
+	template_values: Object,
+	feedback: Array<string>,
+	feedback: Array<Function>,
+
+	correct: boolean,
+	correct_required: boolean,
+	completed: boolean,
+	show_feedback_on: boolean,
+	
+	+client_has_answered: () => boolean,	
+	+get_feedback: () => ?string,
+	updateUserFields: (Object) => void,
+	history: Array<Object>,
+	+toJson: Function,
+	get_time_in_seconds: () => number,
+	standardize_formula_case: () => void,
+	// End Copy
+
+	client: string
+};
+
+
+export type IfPageNumberAnswerSchemaType = {
+
+	// Copy from PageType
+	type: string,
+
+	code: string,
+	description: string,
+	instruction: string,
+	template_values: Object,
+	feedback: Array<string>,
+	feedback: Array<Function>,
+
+	correct: boolean,
+	correct_required: boolean,
+	completed: boolean,
+	show_feedback_on: boolean,
+	
+	+client_has_answered: () => boolean,	
+	+get_feedback: () => ?string,
+	updateUserFields: (Object) => void,
+	history: Array<Object>,
+	+toJson: Function,
+	get_time_in_seconds: () => number,
+	standardize_formula_case: () => void,
+	// End Copy
+
+	client: number,
+	solution: number
+};
+
+
+
+
 export type ChoicePageType = {
 
 	// Copy from PageType
@@ -101,6 +198,7 @@ export type ChoicePageType = {
 	code: string,
 	description: string,
 	instruction: string,
+	template_values: Object,
 	feedback: Array<string>,
 	feedback: Array<Function>,
 
@@ -134,6 +232,7 @@ export type ParsonsPageType = {
 	code: string,
 	description: string,
 	instruction: string,
+	template_values: Object,
 	feedback: Array<string>,
 	feedback: Array<Function>,
 
@@ -165,6 +264,7 @@ export type FormulaPageType = {
 	code: string,
 	description: string,
 	instruction: string,
+	template_values: Object,
 	feedback: Array<string>,
 	feedback: Array<Function>,
 
@@ -207,6 +307,7 @@ export type HarsonsPageType = {
 	code: string,
 	description: string,
 	instruction: string,
+	template_values: Object,
 	feedback: Array<string>,
 	feedback: Array<Function>,
 

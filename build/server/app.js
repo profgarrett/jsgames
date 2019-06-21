@@ -19,7 +19,8 @@ const { IfLevelModelFactory, IfLevelModel } = require('./IfGame');
 const { IfLevels } = require('./../shared/IfGame');
 
 const { from_utc_to_myql, run_mysql_query, update_mysql_database_schema, to_utc } = require('./mysql.js');
-const { login_and_maybe_create_user, require_logged_in_user, 
+const { logout_user, 
+		login_and_maybe_create_user, require_logged_in_user, 
 		get_username_or_emptystring, return_level_prepared_for_transmit} = require('./network.js');
 
 const { turn_array_into_map } = require('./../shared/misc.js');
@@ -164,7 +165,7 @@ app.post('/api/ifgame/new_level_by_code/:code',
 	async (req          , res           , next              )               => {
 	try {
 		const code = req.params.code;
-		const username = get_username_or_emptystring(req);
+		const username = get_username_or_emptystring(req, res);
 		const level = IfLevelModelFactory.create(code, username);
 		const now = from_utc_to_myql(to_utc(new Date()));
 
@@ -192,7 +193,7 @@ app.post('/api/ifgame/new_level_by_code/:code',
 
 		level._id = insert_results.insertId;
 
-		res.json(return_level_prepared_for_transmit(level.toJson()));
+		res.json(return_level_prepared_for_transmit(level, true));
 	} catch (e) {
 		log_error(e);
 		next(e);
@@ -206,7 +207,7 @@ app.get('/api/ifgame/sections/',
 	nocache, require_logged_in_user, 
 	async (req          , res           , next              )               => {
 	try {
-		const username = get_username_or_emptystring(req);
+		const username = get_username_or_emptystring(req, res);
 		if(username !== ADMIN_USERNAME && username !== 'test')
 			throw new Error('Invalid username '+username+' for sections');
 
@@ -226,7 +227,7 @@ app.get('/api/ifgame/users/',
 	nocache, require_logged_in_user,
 	async (req          , res           , next              )               => {
 	try {
-		const username = get_username_or_emptystring(req);
+		const username = get_username_or_emptystring(req, res);
 		if(username !== ADMIN_USERNAME && username !== 'test')
 			throw new Error('Invalid username '+username+' for users');
 
@@ -250,16 +251,64 @@ app.get('/api/ifgame/levels/byCode/:code',
 	try {
 		const sql = 'SELECT * FROM iflevels WHERE username = ? AND (code = ? OR ? = "all")';
 		const code = req.params.code;
-		const username = get_username_or_emptystring(req);
+		const username = get_username_or_emptystring(req, res);
 
 		let iflevels = await run_mysql_query(sql, [username, code, code]);
 
 		// Convert into models, and then back to JSON.
-		iflevels = iflevels.map( (l        )         => (new IfLevelModel(l)).toJson() );
+		iflevels = iflevels.map( (l        )         => (new IfLevelModel(l)) );
 
 		// Remove secret fields and transmit.
-		iflevels = iflevels.map( (l        )         => return_level_prepared_for_transmit(l));
+		iflevels = iflevels.map( (l        )         => return_level_prepared_for_transmit(l, true));
 		res.json(iflevels);
+	} catch (e) {
+		log_error(e);
+		next(e);
+	}
+});
+
+
+
+
+
+/**
+	 Gets a debug template for a given tutorial.
+	Require current user to match secret.js ADMIN_USERNAME.
+
+	Note that this doesn't hit the database at all, but instead builds a temporary 
+	level and returns it to the user.
+*/
+app.get('/api/ifgame/debuglevel/:code', nocache, require_logged_in_user,
+	async (req          , res           , next              )               => {
+	try {
+		const param_code = req.params.code; // level code.
+
+		// Require ADMIN
+		const username = get_username_or_emptystring(req, res);
+		if(username !== ADMIN_USERNAME && username !== 'test')
+			throw new Error('Invalid username '+username+' for debuglevel');
+
+		// Make sure that the given code is valid. If not, then immediately fail
+		// to avoid having some type of SQL injection issue.
+		const code_in_array = IfLevels.filter( l => l.code === param_code).map( l => l.code );
+		if(code_in_array.length !== 1)
+			throw new Error('Invalid code type '+param_code+' passed to debuglevel');
+
+		const level = IfLevelModelFactory.create(code_in_array[0], username);
+
+		let loop_escape = 50;
+		let last_page = {};
+
+		while(!level.completed && loop_escape > 0) {
+			loop_escape--; // emergency escape in case something goes wrong.
+
+			// Complete last page.
+			last_page = level.pages[level.pages.length-1];
+			last_page.debug_answer();
+			IfLevelModelFactory.addPageOrMarkAsComplete(level); 
+		}
+
+		res.json(return_level_prepared_for_transmit(level, false));
 	} catch (e) {
 		log_error(e);
 		next(e);
@@ -277,7 +326,7 @@ app.get('/api/ifgame/questions/', nocache, require_logged_in_user,
 	async (req          , res           , next              )               => {
 	try {
 		// Require ADMIN
-		const username = get_username_or_emptystring(req);
+		const username = get_username_or_emptystring(req, res);
 		if(username !== ADMIN_USERNAME && username !== 'test')
 			throw new Error('Invalid username '+username+' for recent_levels');
 
@@ -308,7 +357,7 @@ app.get('/api/ifgame/questions/', nocache, require_logged_in_user,
 
 		// Build time limit.
 		const INTERVAL = 60*24*7*52;  // time in minutes => hours => days => weeks
-		const ignore = '"' + ['xgarrettn', 'test', 'bob'].join( '","')+'"';
+		const ignore = '"' + ['garrettn', 'test', 'bob'].join( '","')+'"';
 
 
 		// Build SQL statement.
@@ -335,11 +384,11 @@ app.get('/api/ifgame/questions/', nocache, require_logged_in_user,
 
 		if(select_results.length === 0) return res.json([]);
 
-		let iflevels = select_results.map( (l        )         => (new IfLevelModel(l)).toJson() );
+		let iflevels = select_results.map( (l        )         => (new IfLevelModel(l)) );
 
 		// Remove secret fields and transmit.
 		iflevels = iflevels.map( (l        )         => return_tagged_level(l) );
-		//iflevels = iflevels.map( (l: Object): Object => return_level_prepared_for_transmit(l));
+		iflevels = iflevels.map( (l        )         => return_level_prepared_for_transmit(l, false));
 
 		res.json(iflevels);
 	} catch (e) {
@@ -355,7 +404,7 @@ app.get('/api/ifgame/recent_levels/', nocache, require_logged_in_user,
 	async (req          , res           , next              )               => {
 	try {
 		// Require ADMIN
-		const username = get_username_or_emptystring(req);
+		const username = get_username_or_emptystring(req, res);
 		if(username !== ADMIN_USERNAME && username !== 'test')
 			throw new Error('Invalid username '+username+' for recent_levels');
 
@@ -408,11 +457,11 @@ app.get('/api/ifgame/recent_levels/', nocache, require_logged_in_user,
 
 		if(select_results.length === 0) return res.json([]);
 
-		let iflevels = select_results.map( (l        )         => (new IfLevelModel(l)).toJson() );
+		let iflevels = select_results.map( (l        )         => (new IfLevelModel(l)) );
 
 		// Remove secret fields and transmit.
 		iflevels = iflevels.map( (l        )         => return_tagged_level(l) );
-		//iflevels = iflevels.map( (l: Object): Object => return_level_prepared_for_transmit(l));
+		iflevels = iflevels.map( (l        )         => return_level_prepared_for_transmit(l, true));
 
 		res.json(iflevels);
 	} catch (e) {
@@ -428,7 +477,8 @@ app.get('/api/ifgame/grades/:username?', nocache, require_logged_in_user,
 	async (req          , res           , next              )               => {
 	try {
 		//const ignore = '"' + ['garrettn', 'test', 'bob'].join( '","')+'"';
-		const username = get_username_or_emptystring(req);
+		
+		const username = get_username_or_emptystring(req, res);
 		const param_username = typeof req.params.username === 'undefined' 
 			? '' : req.params.username;
 		const param_section = typeof req.query.section === 'undefined'
@@ -492,7 +542,7 @@ app.get('/api/ifgame/level/:id', nocache, require_logged_in_user,
 	try {
 		const sql = 'SELECT * FROM iflevels WHERE _id = ? AND username = ?';
 		const _id = req.params.id;
-		const username = get_username_or_emptystring(req);
+		const username = get_username_or_emptystring(req, res);
 
 		let select_results = await run_mysql_query(sql, [_id, username]);
 
@@ -500,7 +550,7 @@ app.get('/api/ifgame/level/:id', nocache, require_logged_in_user,
 		
 		let iflevel = new IfLevelModel(select_results[0]); // initialize from sql
 		
-		res.json(return_level_prepared_for_transmit(iflevel.toJson()));
+		res.json(return_level_prepared_for_transmit(iflevel, true));
 	} catch (e) {
 		log_error(e);
 		next(e);
@@ -516,7 +566,7 @@ app.delete('/api/ifgame/level/:id',
 	async (req          , res           , next              )               => {
 	try {
 		const sql = 'DELETE FROM iflevels WHERE username = "test" '; // AND _id = ?
-		const username = get_username_or_emptystring(req);
+		const username = get_username_or_emptystring(req, res);
 
 		if(username !== 'test') {
 			return res.sendStatus(401); // unauthorized.
@@ -539,7 +589,7 @@ app.post('/api/ifgame/level/:id',
 	async (req          , res           , next              )               => {
 	try {
 		const validate_only = req.query.validate_only === '1'; // do we just check the current page?
-		const username = get_username_or_emptystring(req);
+		const username = get_username_or_emptystring(req, res);
 		const _id = req.params.id;
 		const sql_select = 'SELECT * FROM iflevels WHERE _id = ? AND username = ?';
 		const sql_update = `UPDATE iflevels SET completed = ?, pages = ?, history = ?, 
@@ -583,8 +633,7 @@ app.post('/api/ifgame/level/:id',
 		// Ensure exactly 1 item was updated.
 		if(update_results.changedRows !== 1) return res.sendStatus(500);
 
-
-		res.json(return_level_prepared_for_transmit(iflevel.toJson()));
+		res.json(return_level_prepared_for_transmit(iflevel, true));
 	} catch (e) {
 		log_error(e);
 		next(e);
@@ -606,7 +655,7 @@ app.post('/api/feedback/',
 	async (req          , res           , next              )               => {
 	try {
 		const created = from_utc_to_myql(to_utc(new Date()));
-		const username = get_username_or_emptystring(req);
+		const username = get_username_or_emptystring(req, res);
 		const data = JSON.stringify(req.body.data);
 		const message = req.body.message;
 		const code = req.body.code;
@@ -632,15 +681,11 @@ app.post('/api/feedback/',
 
 // Log out.
 app.post('/api/logout', (req          , res           ) => {
-	res.clearCookie('x-access-token');
-	res.clearCookie('x-access-token-refreshed');
-	res.clearCookie('x-access-token-username');
+	logout_user(req, res);
 	res.json({ 'logout': true });
 });
 app.get('/api/logout', (req          , res           ) => {
-	res.clearCookie('x-access-token');
-	res.clearCookie('x-access-token-refreshed');
-	res.clearCookie('x-access-token-username');
+	logout_user(req, res);
 	res.json({ 'logout1': true });
 });
 
@@ -705,7 +750,7 @@ app.get('/api/login/',
 app.get('/api/login/status', 
 	nocache,
 	(req          , res           ) => {
-	let u         = get_username_or_emptystring(req);
+	let u         = get_username_or_emptystring(req, res);
 
 	res.json({ 'logged_in': u!=='', username: u });
 });

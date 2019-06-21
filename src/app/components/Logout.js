@@ -76,6 +76,7 @@ export default class Logout extends React.Component {
 		return (
 			<Row>
 				<Col>
+					<br/><br/>
 					<h3>Logging out</h3>
 					<Message message={this.state.message} style={this.state.messageStyle} />
 					<Loading loading={this.state.isLoading } />
