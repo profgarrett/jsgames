@@ -4,6 +4,7 @@ import { Row, Col, Breadcrumb, Button  } from 'react-bootstrap';
 
 import IfGrades from './IfGrades';
 import { Message, Loading } from './../components/Misc';
+import Filter from './Filter';
 
 import ForceLogin from './../components/ForceLogin';
 
@@ -16,7 +17,8 @@ type GradesContainerStateType = {
 	message: string,
 	messageStyle: string,
 	isLoading: boolean,
-	data: Array<any>
+	data: Array<any>,
+	filter: Object
 };
 
 export default class IfGradesContainer extends React.Component<GradesPropsType, GradesContainerStateType> {
@@ -27,11 +29,14 @@ export default class IfGradesContainer extends React.Component<GradesPropsType, 
 			messageStyle: '',
 			isLoading: true,
 			data: [],
+			filter: false
 		};
-		(this: any).refreshData = this.refreshData.bind(this);
-		(this: any).handleSubmit = this.handleSubmit.bind(this);
+		(this: any).onRefreshData = this.onRefreshData.bind(this);
+		(this: any).onReady = this.onReady.bind(this);
+		//(this: any).handleSubmit = this.handleSubmit.bind(this);
 	}
 
+	/*
 	componentDidMount() {
 		// Load data.
 		this.refreshData();
@@ -42,10 +47,22 @@ export default class IfGradesContainer extends React.Component<GradesPropsType, 
 		if(e) e.preventDefault();
 		this.refreshData();
 	}
+	*/
 
-	refreshData() {
+	onReady() {
+		this.setState({ isLoading: false});
+	}
 
-		fetch('/api/ifgame/grades', {
+	onRefreshData(filter: Object) {
+		console.log(filter);
+
+		const args = [];
+		if(filter.code != 'All') args.push('code='+filter.code);
+		if(filter.section !== -1) args.push('section='+filter.section);
+		if(filter.user !== '-1') args.push('user='+filter.user);
+
+		
+		fetch('/api/ifgame/grades?'+args.join('&'), {
 				method: 'get',
 				credentials: 'include',
 				headers: {
@@ -83,22 +100,15 @@ export default class IfGradesContainer extends React.Component<GradesPropsType, 
 			</Breadcrumb>
 			);
 
-		const filter = (
-			<form name='c' onSubmit={this.handleSubmit}>
-				<Button variant='primary'>Refresh filter</Button>
-			</form>
-			);
-
 		return (
 			<Row>
 				<Col>
 					<ForceLogin/>
 					{ crumbs }
 					<h3>Grades</h3>
-
 					<Message message={this.state.message} style={this.state.messageStyle} />
 					<Loading loading={this.state.isLoading } />
-					{ filter }
+					<Filter onChange={this.onRefreshData} onReady={this.onReady} />
 					<IfGrades data={this.state.data} />
 				</Col>
 			</Row>

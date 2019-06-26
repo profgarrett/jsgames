@@ -3,7 +3,7 @@
 /**
 	Node main event loop
 */
-const DEBUG_DELAY = 0;
+const DEBUG_DELAY = 500;
 const express = require('express');
 const path = require('path');
 const bodyParser = require('body-parser');
@@ -267,6 +267,33 @@ app.get('/api/ifgame/levels/byCode/:code',
 	}
 });
 
+
+
+
+
+// Get completed or uncompleted objects owned by the logged in user.
+// :type may be 'all', or limited to a single code.
+app.get('/api/ifgame/levels/byCompleted/:code', 
+	nocache, require_logged_in_user,
+	async (req: $Request, res: $Response, next: NextFunction): Promise<any> => {
+	try {
+		const sql = 'SELECT * FROM iflevels WHERE username = ? AND (completed = ?)';
+		const code = req.params.code === 'true' || req.params.code === 'True';
+		const username = get_username_or_emptystring(req, res);
+
+		let iflevels = await run_mysql_query(sql, [username, code, code]);
+
+		// Convert into models, and then back to JSON.
+		iflevels = iflevels.map( (l: Object): Object => (new IfLevelModel(l)) );
+
+		// Remove secret fields and transmit.
+		iflevels = iflevels.map( (l: Object): Object => return_level_prepared_for_transmit(l, true));
+		res.json(iflevels);
+	} catch (e) {
+		log_error(e);
+		next(e);
+	}
+});
 
 
 

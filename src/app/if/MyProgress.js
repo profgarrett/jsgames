@@ -8,24 +8,60 @@ import { HtmlSpan } from './../components/Misc';
 //import type { IfLevelType } from './../../app/if/IfTypes';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faThumbsUp, faMinus } from '@fortawesome/free-solid-svg-icons';
+import { PrettyDate } from './../components/Misc';
+import { Link } from 'react-router-dom';
 
-/* 
-	List of tutorials and reviews to use for the Progress.
-	Keeps out ones that we don't want to use
+/*
+	List of tutorials that should be shown as a row for the table
 */
-const TUTORIALS = IfLevels.filter( l => [
-	'tutorial', 
-	'math1', 'math2', 'math3',
+const TUTORIAL_LEVEL_LIST = [
+	'tutorial', 'math1', 'math2', 'math3',
 	'functions1', 'functions2', 
 	'if1', 'if2', 'if3', 'if4', 'if5', 'if6', 'if7', 'if8',
-	'math4'].includes(l.code)
-	);
+	'math4'];
 
-const REVIEWS = IfLevels.filter( l=> [
-	'math1', 'math2', 'math3',
-	'functions1', 'functions2', 
-	'math4'].includes(l.code)
-	);
+
+
+const GREEN_GRADE = 85;
+const PASSING_GRADE = 74;
+
+
+
+// Make a pretty glyph for success / failure.
+const glyph = score => {
+	if( score === null || typeof score === 'undefined') return '';
+
+	if( score >= GREEN_GRADE ) return (<span>
+		<OverlayTrigger 
+				placement='top' 
+				overlay={
+					<Tooltip id='render_my_grades_tooltip'>
+						{ score+'%' }
+					</Tooltip>
+				}
+				>
+			<FontAwesomeIcon icon={faThumbsUp} style={{ color: 'green'}} />
+		</OverlayTrigger>
+		</span>);
+	
+	if( score >= PASSING_GRADE ) return (<span>
+
+		<OverlayTrigger placement='top' overlay={<Tooltip id='render_my_grades_tooltip'>{ score+'%' }</Tooltip>}>
+			<FontAwesomeIcon icon={faThumbsUp} style={{ color: 'black'}}/>					
+		</OverlayTrigger>
+		</span>);
+
+
+	return (<span>
+		<OverlayTrigger placement='top' overlay={<Tooltip  id='render_my_grades_tooltip'>{ score+'%' }</Tooltip>}>
+			<FontAwesomeIcon icon={faMinus} style={{color: 'orange'}}  />
+
+		</OverlayTrigger>
+		</span>);
+	
+};
+
+
 
 // Data should be loaded from the grades api.
 // Contains 
@@ -34,130 +70,83 @@ const REVIEWS = IfLevels.filter( l=> [
 //	]
 type PropsType = {
 	grades: Array<any>,
-	levels: Array<LevelType>,
+	uncompleted_levels: Array<LevelType>,
 	onClickNewCode: Function,
 	onClickContinueLevel: Function
 };
 
-
-// Return the average of the given items.
-const avg_of = function(obj: Object, arr: Array<any>): number {
-	let totals = arr.map( a => typeof obj[a] === 'undefined' ? 0 : obj[a] );
-	let sum = totals.reduce( (sum, i) => sum + i, 0);
-	return Math.round(sum / arr.length);
-};
-
-const GREEN_GRADE = 85;
-const PASSING_GRADE = 74;
 
 
 export default class MyProgress extends React.Component<PropsType> {
 
 
 	/**
-		Return a single person's grades w/o the full table.
+		Return a table showing all of the tutorials.
 	*/
-	_render_my_grades(tutorial_grades: Object, review_grades: Object, iflevels: Array<Object>): Node {
-
-		// Create a list of distinct columns.
-		// Do not include review levels.
-		const tutorials = iflevels.map( l => l.code ).filter( s => s.search('review') === -1 );
+	_render_table(levels: Array<Object>): Node {
+		let counter = 0;
+		const grades = [];
 
 		// Style
-		const td_style = { textAlign: 'center', verticalAlign: 'middle', width: '6%' };
-		const th_style = { textAlign: 'center', verticalAlign: 'middle'};
+		const td_c = { textAlign: 'center', verticalAlign: 'middle', width: '6%' };
+		const td_l = { textAlign: 'left', verticalAlign: 'middle'};
+		const td_disabled = { ...td_c, color: 'lightgray'};
 
 		// Return tds.
-		const tds_tutorials = [];
-		const tds_review = [];
+		const trs = [];
+		let tds = [];
 
 
-		//console.log( [tutorial_grades, review_grades]);
-		
-		// See if we have at least one grade.  If so, show table.
-		let at_least_one_grade = false;
-		for(let key in tutorial_grades) {
-			//max_tutorial_grades[key] = tutorial_grades[key];
-			if(key !=='username') at_least_one_grade = true;
+		// Add header row.
+		const header_tr = (<tr key={'MyProgressRowTR'+counter++} >
+				<th key={'MyProgressRowTD'+counter++} style={td_c}>Lesson</th>
+				<th key={'MyProgressRowTD'+counter++} style={td_c}>Review</th>
+				<th key={'MyProgressRowTD'+counter++} style={td_l}>Topic</th>
+				<th key={'MyProgressRowTD'+counter++} style={td_l}>Description</th>
+			</tr>);
+
+		// Add individual rows for each tutorial.
+		for(let i=0; i<levels.length; i++) {
+			tds = [];
+
+			// Build TDS
+			tds.push(<td key={'MyProgressRowTD'+counter++} style={td_c}>{ glyph( levels[i].tutorial_highest_grade ) }</td>);
+
+			if(levels[i].review_available) {
+				tds.push(<td key={'MyProgressRowTD'+counter++} style={td_c}>{ glyph( levels[i].review_highest_grade ) }</td>);
+			} else {
+				tds.push(<td key={'MyProgressRowTD'+counter++} style={td_disabled}>NA</td>);
+			}
+
+			tds.push(<td key={'MyProgressRowTD'+counter++} style={td_l}><Link to={'/ifgame/levels/'+levels[i].code+'/'}>{ levels[i].label }</Link></td>);
+			tds.push(<td key={'MyProgressRowTD'+counter++} style={td_l}>{ levels[i].description }</td>);
+
+			// Save grades for overall average.
+			/*
+			if(levels[i].tutorial_highest_grade !== null) 
+				grades.push( levels[i].tutorial_highest_grade !== null );
+			if(levels[i].tutorial_highest_grade !== null) 
+				grades.push( levels[i].tutorial_highest_grade !== null );
+			grades.push( max_of(levels[i].review_completed_levels) );
+			*/
+			trs.push(<tr key={'MyProgressRow'+counter++}>{tds}</tr>);
 		}
-		// If the user hasn't completed anything, return an empty div.
-		if(!at_least_one_grade) return <div/>;
 
-		// Make a pretty glyph for success / failure.
-		const glyph = score => {
-			if( score === null || typeof score === 'undefined') return '';
-
-			if( score >= GREEN_GRADE ) return (<span>
-				<OverlayTrigger 
-						placement='top' 
-						overlay={
-							<Tooltip id='render_my_grades_tooltip'>
-								{ score+'%' }
-							</Tooltip>
-						}
-						>
-					<FontAwesomeIcon icon={faThumbsUp} style={{ color: 'green'}} />
-				</OverlayTrigger>
-				</span>);
-			
-			if( score >= PASSING_GRADE ) return (<span>
-
-				<OverlayTrigger placement='top' overlay={<Tooltip id='render_my_grades_tooltip'>{ score+'%' }</Tooltip>}>
-					<FontAwesomeIcon icon={faThumbsUp} style={{ color: 'black'}}/>					
-				</OverlayTrigger>
-				</span>);
+		// Push total row.
+		/*
+		trs.push( <tr>
+				<td>Total</td>
+				<td rowSpan={5}>{ grades.reduce( (sum, g) => g + sum, 0) / grades.length }</td>
+			</tr>);
+		*/
 
 
-			return (<span>
-				<OverlayTrigger placement='top' overlay={<Tooltip  id='render_my_grades_tooltip'>{ score+'%' }</Tooltip>}>
-					<FontAwesomeIcon icon={faMinus} style={{color: 'orange'}}  />
-
-				</OverlayTrigger>
-				</span>);
-			
-		};
-
-
-		tutorials.map( code => { 
-			tds_tutorials.push( 
-				<td key={'ifgrades_render_my_grades_tutorial' + code} style={td_style}>
-					{ glyph(tutorial_grades[code]) }
-				</td>
-			);
-			tds_review.push(
-				<td key={'ifgrades_render_my_grades_review' + code} style={td_style}>
-					{ glyph(review_grades[code+'review']) }
-				</td>
-			);
-		});
-
-		// Summary
-		const all_grades = {
-			...tutorial_grades,
-			...review_grades
-		};
-
-		tds_tutorials.push(
-				<td rowSpan={2} key='ifgrades_render_my_grades_all' style={td_style}>
-					{ avg_of(all_grades, tutorials) + '%' }
-				</td>
-			);
-
-
-		return (<Table bordered style={{ fontSize: '80%' }}>
-					<thead className='thead-dark'>
-						<tr>
-							<th style={th_style}></th>
-							{ tutorials.map(t=> <th key={t} style={th_style}>{t.substr(0,1).toUpperCase() + t.substr(1)}</th>)}
-							<th style={th_style}>Completion</th>
-						</tr>
-					</thead>
+		return (<Table bordered style={{ fontSize: '80%', marginTop: 15 }}>
+					<thead className='thead-dark'>{ header_tr }</thead>
 					<tbody>
-						<tr><td style={th_style}>Lessons</td>{tds_tutorials}</tr>
-						<tr><td style={th_style}>Reviews</td>{tds_review}</tr>
+						{ trs }
 					</tbody>
 				</Table>);
-		
 	}
 
 
@@ -165,232 +154,136 @@ export default class MyProgress extends React.Component<PropsType> {
 	/**
 		Give the next clickable lesson
 	*/
-	_render_next_lesson(grades: Object, levels: Array<Object>): Node {
-		let onClickNewCode = '',
-			onClickNextLevel = null,
-			topMessage = '',
-			bottomMessage = '',
-			i = 0;
-		const lesson_levels = TUTORIALS; // IfLevels.filter( l => l.code.search('review') === -1);
+	_render_next_lesson(levels: Array<Object>): Node {
 
-		if(typeof grades.tutorial === 'undefined') { 
-			// totally new to site.
+		// Look through list of levels until we find the next that should be completed.
+		for(let i=0; i<levels.length; i++) {
 
-			// See if the user has a partially-completed tutorial.
-			if( levels.filter( l => l.code === 'tutorial' ).length > 0 ) {
-				// Yes!  Give link to continue.
+			// If we are incomplete, suggest finishing.
+			if(levels[i].tutorial_incompleted_levels.length > 0) {
 
-				onClickNextLevel = levels.filter( l => l.code === 'tutorial' )[0];
-				topMessage = 'You are working on the <b>' + levels[i].code + '</b> lesson.';
-				bottomMessage = 'Click here to continue';
-
-			} else {
-				// Nope.  Need a new one.
-				onClickNewCode = 'tutorial';
-				topMessage = 'This website will introduce you to Excel formulas.';
-				bottomMessage = 'Start tutorial';
+				return (<span>You are currently working on&nbsp;
+							<Link to={'/ifgame/level/'+levels[i].tutorial_incompleted_levels[0]._id+'/play'}>
+								{levels[i].label}</Link>&nbsp;
+								(started <PrettyDate date={levels[i].tutorial_incompleted_levels[0].created} />)
+						</span>);
 			}
 
-		} else { 
-			// has some grades.
-
-			// See if we scored too low on the last completed item.  If so, 
-			// suggest redoing it.
-			for(i = 0; i<lesson_levels.length; i++) {
-				if( typeof grades[lesson_levels[i].code] !== 'undefined' 
-					&& grades[lesson_levels[i].code] < PASSING_GRADE
-					){
-					// Bad! We didn't do well.
-
-					// See if there is an open tutorial matching the code.
-					if( levels.filter( 
-							l => !l.completed && l.code === lesson_levels[i].code
-							).length > 0 ) {
-
-						// There is an open tutorial matching this ID
-						onClickNextLevel = levels.filter(
-							l => !l.completed && l.code === lesson_levels[i].code
-							)[0];
-						topMessage = 'You are redoing the <b>' + lesson_levels[i].code + '</b> lesson.';
-						bottomMessage = 'Click here to continue';
-
-					} else {
-						// There is not an open tutorial.
-						onClickNewCode = lesson_levels[i].code;
-						topMessage = 'Your <b>'+onClickNewCode+'</b> tutorial did not earn '+PASSING_GRADE+'%. ' +
-								'You need to correctly answer '+PASSING_GRADE+'% of the quiz questions before continuing to the next tutorial.';
-						bottomMessage = 'Click to restart';
-					}
-					break;
-				}
-			}
-
-			// If we haven't found a new code or continuing ID yet,
-			// Figure out which to start.
-			if(onClickNewCode === '' && onClickNextLevel === null) {
-				// Since we don't have a too low score, find the next item.
-
-				// Find next code item.
-				for(i = 0; i<lesson_levels.length; i++) {
-					if(typeof grades[lesson_levels[i].code] === 'undefined' ){
-						// This tutorial hasn't been completed.
-						// See if we have an in-progress item.
-
-						// See if there is an open tutorial matching it. 
-						if( levels.filter( 
-								l => !l.completed && l.code === lesson_levels[i].code
-								).length > 0 ) {
-							// There is an open tutorial!
-							onClickNextLevel = levels.filter(
-								l => !l.completed && l.code === lesson_levels[i].code
-								)[0];
-							topMessage = 'You are currently working on <b>' + lesson_levels[i].code + '</b>.';
-							bottomMessage = 'Click here to continue';
-						} else {
-							// There is not an open tutorial.
-							onClickNewCode = lesson_levels[i].code;
-							topMessage = 'Good job completing <b>' + lesson_levels[i-1].label + '</b>.';
-							bottomMessage = 'Start the next <b>' + lesson_levels[i].label + '</b> lesson.';
-						}
-						break;
-					}
-				}
-
+			// If we score low, suggest continuing.
+			if(levels[i].tutorial_highest_grade !== null && 
+					levels[i].tutorial_highest_grade < PASSING_GRADE) {
+				return (<span>Your <b>{levels[i].code}</b> lesson did not earn {PASSING_GRADE}%. 
+						You should redo it to get a higher grade before continuing.
+						<Button href='#' variant='primary' size='sm' style={{ marginLeft: 5, marginTop: -3 }}
+							onClick={ e=> this.props.onClickNewCode(levels[i].code, e) } >Redo level</Button>
+						</span>);
 			}
 		}
 
-	
-		if( onClickNewCode === '' && onClickNextLevel === null) {
-			// We have completed everything.
-			const completed = 'Great job!  You have completed all of the lessons. ' + 
-					'You can use the links on the bottom-right menu to restart ' +
-					'any of the lessons.';
+		// We don't have a level to redo or continue.  See if there is a new one.
+		// If we hit null, then we haven't done this tutorial yet.
+		for(let i=0; i<levels.length; i++) {
 
-			return (<div>{ completed }</div>);
-
-		} else {
-			// We have more to do.
-
-			return (<span>
-				<HtmlSpan html={topMessage} />
-				<span><Button href='#' variant='primary' size='sm' style={{ marginLeft: 5, marginTop: -3 }}
-					onClick={ e=> onClickNewCode !== ''
-							? this.props.onClickNewCode(onClickNewCode, e) 
-							: this.props.onClickContinueLevel(onClickNextLevel, e) } >
-					<HtmlSpan html={bottomMessage} />
-				</Button></span>
-				</span>);
+			if(levels[i].tutorial_highest_grade === null ){
+				return (<span>Your next lesson is {levels[i].label}.
+						<Button href='#' variant='primary' size='sm' style={{ marginLeft: 5, marginTop: -3 }}
+							onClick={ e=> this.props.onClickNewCode(levels[i].code, e) } >Start!</Button>
+						</span>);
+			}
 		}
 
-		//return [ '', 'Great job!  You\'ve completed all of the tutorials.'];
+		// If we haven't yet gotten an action, we must be done.
+		return (<div>Good job completing all of the available tutorials!</div>);
+		
 	}
 
 
 
+
 	/**
-		Give the next clickable review for a lesson.
-	*/
-	_render_next_review(level_grades: Object, review_grades: Object, levels: Array<Object>): Node {
-		let onClickNewCode = '',
-			onClickNextLevel = null,
-			buttonMessage = '';
+		Used to build out a datastructure useful for this display.
 
-		// Return any uncompleted review levels.
-		const uncompleted_review_levels = levels.filter( l => l.code.search('review') !== -1 && !l.completed);
 
-		//debugger;
-		if(uncompleted_review_levels.length>0) {
-			// We have at least one uncompled review.
-			// Continue working on existing review level.
-			onClickNextLevel = uncompleted_review_levels[0];
-			buttonMessage = 'Continue working on the <b>' + onClickNextLevel.code.replace('review','') + '</b> review.';
-
-		} else {
-			// Find what completed levels have uncompleted reviews.
-			for(let key in level_grades) {
-				if(onClickNewCode == '' && key !== 'username' && level_grades.hasOwnProperty(key)) {
-					// If we haven't completed the review for a completed level.
-					if(typeof review_grades[key+'review'] === 'undefined') {
-						// Does it exist?
-						if( REVIEWS.filter( code => code === key+'review').length > 0 ) {
-							onClickNewCode = key+'review';
-							buttonMessage = 'Start a review for '+key;
-						}
-					}
-				}
+			{ 
+				highest_tutorial_grade: null/98,
+				highest_tutorial_grade: null/98,
+				user_levels: [],
 			}
-		}
+	*/
+	get_levels(): Object {
+		const levels = [];
+		const uncompleted_levels = this.props.uncompleted_levels;
+		const grades = this.props.grades[0];
 
-	
-		if( onClickNewCode === '' && onClickNextLevel === null) {
-			// No review needed.
-			return <div/>;
+		// Go through each tutorial and build an object 
+		TUTORIAL_LEVEL_LIST.map( code => {
+			let l = {
+				code: code,
+				label: '',
+				description: '',
+				review_available: false,
 
-		} else {
-			// We a review to complete.
+				tutorial_highest_grade: null,
+				tutorial_incompleted_levels: [],
 
-			return (
-					<Button href='#' variant='outline-primary' size='sm' style={{ marginLeft: 5, marginTop: -3 }}
-					onClick={ e=> onClickNewCode !== ''
-							? this.props.onClickNewCode(onClickNewCode, e) 
-							: this.props.onClickContinueLevel(onClickNextLevel, e) } >
-					<HtmlSpan html={buttonMessage} />
-				</Button> );
-		}
+				review_highest_grade: null,
+				review_incompleted_levels: [],
+			};
 
-		//return [ '', 'Great job!  You\'ve completed all of the tutorials.'];
+			// Build out information on the level.
+			l.label = IfLevels.filter( l => l.code === code)[0].label;
+			l.description = IfLevels.filter( l => l.code === code)[0].description;
+
+			if(IfLevels.filter( l=> l.code === code+'review').length > 0) {
+				l.review_available = true;
+			}
+
+			if(typeof grades[code] !== 'undefined') {
+				l.tutorial_highest_grade = grades[code];
+			}
+
+			if(typeof grades[code+'review'] !== 'undefined') {
+				l.review_highest_grade = grades[code+'review'];
+			}
+
+			l.tutorial_incompleted_levels = uncompleted_levels.filter( l => l.code === code );
+			l.review_incompleted_levels = uncompleted_levels.filter( l => l.code === code+'review' );
+
+			levels.push(l);
+		});
+
+		return levels;
 	}
 
 
 
 	render(): Node {
 		// Data not yet loaded.
-		if(this.props.grades.length < 1 ) 
-			return <div/>;
-
-		const filtered_levels = this.props.levels; //.filter( l => l.code.search('review') === -1);
-		const grades = this.props.grades[0];
-		const filtered_levels_list = TUTORIALS; //.filter( l => l.code.search('review') === -1);
-
+		if(this.props.grades.length < 1)  throw new Error('Do not load until all data is present');
 		
-		// Split grade into 2 sections, original & reviews.
-		const review_grades = {};
-		const tutorial_grades = {};
-
-		for(var key in grades) {
-			if( grades.hasOwnProperty(key)) {
-				if(key.search('review') === -1) {
-					tutorial_grades[key] = grades[key];
-				} else {
-					review_grades[key] = grades[key];
-				}
-			}
-		}
-
 		// Only a single grades entry should be returned.
 		// [{ username: 'x', tutorial: 20, ... }
-		if(this.props.grades.length > 1) 
-			throw new Error('Invalid length of data passed to IfNextTutorial');
+		if(this.props.grades.length > 1) throw new Error('Invalid length of data passed to IfNextTutorial');
 
-		// Test data
-		// Blank: { username: 'x' }
-		// All. IfLevels.reduce( (obj, l) => { obj[l.code] = 90; return obj; }, {} )
-		// Redo . { 'tutorial': 90, 'math1': 100, 'math2': 50 };
-
+		const levels = this.get_levels();
+		
 		// If the user hasn't done anything, then have a friendlier title.
-		const title = typeof this.props.grades[0].tutorial === 'undefined' ? 'Welcome to the Formula Trainer website!' : 'Formula Trainer';
+		const title = typeof this.props.grades[0].tutorial === 'undefined' 
+				? 'Welcome to the Formula Trainer website!' 
+				: 'Formula Trainer';
 
+		// Return card.
 		return (
-			<Card style={{ backgroundColor: '#f5f5f5' }}>
-				<Card.Body>
-					<Card.Title>{title}</Card.Title>
-					<Card.Text>
-						{ this._render_next_lesson(tutorial_grades, filtered_levels) }
-					</Card.Text>
-						{ this._render_my_grades(tutorial_grades, review_grades, filtered_levels_list) }
-						{ this._render_next_review(tutorial_grades, review_grades, filtered_levels) }
-				</Card.Body>
-			</Card>);
+			<div className='card' style={{ backgroundColor: '#f5f5f5' }}>
+				<div className='card-body'>
+					<div className='h5'>{title}</div>
+					<div className='card-text'>
+						{ this._render_next_lesson(levels) }
+						<span style={{ marginBottom: 10}} /> 
+						{ this._render_table(levels) }
+					</div>
+				</div>
+			</div>);
 	}
 
 }

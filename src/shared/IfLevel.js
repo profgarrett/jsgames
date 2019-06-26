@@ -14,16 +14,16 @@ import type { PageType } from './../app/if/IfTypes';
 	Code value must match the filename in server/tutorial/...js
 */
 const IfLevels = [
-	{ code: 'tutorial', label: 'Website Introduction', description: 'Learn how to complete tutorials.' },
-	{ code: 'math1', label: 'Math 1', description: 'Use addition and subtraction' },
-	{ code: 'math1review', label: 'Math 1 Review', description: 'Review addition and subtraction' },
-	{ code: 'math2', label: 'Math 2', description: 'Use division and multiplication.' },
+	{ code: 'tutorial', label: 'Website Introduction', description: 'Learn how this website works.' },
+	{ code: 'math1', label: 'Math 1', description: 'Use addition, subtraction, multiplication, and division' },
+	{ code: 'math1review', label: 'Math 1 Review', description: 'Review arithmetic operations' },
+	{ code: 'math2', label: 'Math 2', description: 'Learn new ways to use multiplication and division.' },
 	{ code: 'math2review', label: 'Math 2 Review', description: 'Review division and multiplication' },
 	{ code: 'math3', label: 'Math 3', description: 'Learn exponents, parentheses, and order of operations' },
 	{ code: 'math3review', label: 'Math 3 Review', description: 'Review exponents, parentheses, and order of operations' },
-	{ code: 'functions1', label: 'Functions 1', description: 'Learn how to use basic functions.' },
+	{ code: 'functions1', label: 'Functions 1', description: 'Learn how to use range and rounding functions.' },
 	{ code: 'functions1review', label: 'Functions 1 Review', description: 'Review basic functions.' },
-	{ code: 'functions2', label: 'Functions 2', description: 'Learn how to use more functions.' },
+	{ code: 'functions2', label: 'Functions 2', description: 'Learn date and text functions.' },
 	{ code: 'functions2review', label: 'Functions 2 Review', description: 'Review more functions.' },
 	{ code: 'if1', label: 'IF1: Logical number comparisons', description: 'Compare numbers' },
 	{ code: 'if2', label: 'IF2: Logical text comparisons', description: 'Compare words' },

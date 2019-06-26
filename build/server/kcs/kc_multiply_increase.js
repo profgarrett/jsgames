@@ -223,7 +223,14 @@ const _multiply_increase_test_pages_base = {
 
 
 const test_pages = [
-	{	..._multiply_increase_test_pages_base,
+	{
+		..._multiply_increase_test_pages_base,
+		solution_f: '={cell1_ref}*(1+{n}/100)', 
+		description: 'Show the <b>total</b> of {cell1_title} if we {buy} another {n}%. Use <b>multiplication</b>.',
+
+	},{
+		// Dup to increase liklihood
+		..._multiply_increase_test_pages_base,
 		solution_f: '={cell1_ref}*(1+{n}/100)', 
 		description: 'Show the <b>total</b> of {cell1_title} if we {buy} another {n}%. Use <b>multiplication</b>.',
 

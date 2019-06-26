@@ -19,7 +19,7 @@ export class PageHeader extends React.Component {
 	render() {
 		return (
 		<div className='pb-2 mt-4 mb-2 border-bottom'>
-			{ this.props.header }
+			<h5>{ this.props.header }</h5>
 		</div>);
 	}
 }
@@ -224,8 +224,10 @@ export class PrettyDate extends React.Component {
 				diff < 86400 && Math.floor( diff / 3600 ) + ' hours ago') ||
 			day_diff == 1 && 'yesterday' ||
 			day_diff < 7 && day_diff + ' days ago' ||
-			day_diff < 31 && Math.ceil( day_diff / 7 ) + ' weeks ago';
-
+			(this.props.date.getMonth()+1) + '/' + this.props.date.getDate() + '/'+ this.props.date.getFullYear();
+			//day_diff < 31 && Math.ceil( day_diff / 7 ) + ' weeks ago' ||
+			//Math.ceil( day_diff / 30 ) + ' months ago';
+			
 		return (
 			<span>{ message}</span>
 		);

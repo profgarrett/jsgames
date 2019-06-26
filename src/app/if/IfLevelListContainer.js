@@ -5,16 +5,9 @@ import IfLevelList from './IfLevelList';
 import {PageHeader} from './../components/Misc';
 
 import { Breadcrumb, Container, Row, Col, Card, Button } from 'react-bootstrap';
-
 import { get_user_is_admin, get_username_or_emptystring, Message, Loading } from './../components/Misc';
-
 import { IfLevelSchema, IfLevels } from './../../shared/IfGame';
-
-import MyProgress from './MyProgress';
-
-import ForceLogin from './../components/ForceLogin';
-
-
+import { Link } from 'react-router-dom';
 
 export default class IfLevelListContainer extends React.Component {
 
@@ -24,17 +17,19 @@ export default class IfLevelListContainer extends React.Component {
 			code: this.props.match.params._code,
 			message: 'Loading data from server',
 			message_style: 'info',
-			isLoading: true,
-			levels: [],
-			grades: []
+			isLoadingLessons: true,
+			isLoadingReviews: true,
+			reviewUnavailable: IfLevels.filter( l=>l.code === this.props.match.params._code+'review' ).length === 0,
+			lessons: [],
+			reviews: []
 		};
-		this.insertGame = this.insertGame.bind(this);
+		this.insertLevel = this.insertLevel.bind(this);
 	}
 
 	componentDidMount() {
 		const code = this.props.match.params._code ? this.props.match.params._code : 'all';
 		
-		// Fetch levels
+		// Fetch lessons
 		fetch('/api/ifgame/levels/byCode/'+code, {
 				credentials: 'include'
 			})
@@ -42,50 +37,52 @@ export default class IfLevelListContainer extends React.Component {
 			.then( json => {
 				let ifLevels = json.map( j => new IfLevelSchema(j) );
 				this.setState({
-					levels: ifLevels,
+					lessons: ifLevels,
 					message: '',
 					message_style: 'info',
-					isLoading: false
+					isLoadingLessons: false
 				});
 			})
 			.catch( error => {
 				this.setState({ 
-					levels: [],
+					lessons: [],
 					message: 'Error: ' + error,
 					message_style: 'danger',
-					isLoading: false
-				});
-			});
-
-		// Fetch grades
-		fetch('/api/ifgame/grades/' + get_username_or_emptystring(), {
-				method: 'get',
-				credentials: 'include',
-				headers: {
-					'Accept': 'application/json',
-					'Content-Type': 'application/json'
-				}
-			})
-			.then( response => response.json() )
-			.then( json => {
-				this.setState({
-					grades: json
-				});
-			})
-			.catch( error => {
-				this.setState({ 
-					grades: [],
-					message: 'Error: ' + error,
-					messageStyle: 'Error',
-					isLoading: false
 				});
 			});
 
 
+		if(this.state.reviewUnavailable) {
+			// No reviews!
+			this.setState({ reviews: [], isLoadingReviews: false}); 
+		} else {
+			// Fetch reviews
+			fetch('/api/ifgame/levels/byCode/'+code+'review', {
+					credentials: 'include'
+				})
+				.then( response => response.json() )
+				.then( json => {
+					let ifLevels = json.map( j => new IfLevelSchema(j) );
+					this.setState({
+						reviews: ifLevels,
+						message: '',
+						message_style: 'info',
+						isLoadingReviews: false
+					});
+				})
+				.catch( error => {
+					this.setState({ 
+						reviews: [],
+						message: 'Error: ' + error,
+						message_style: 'danger',
+					});
+				});
+			}
 	}
 
-	insertGame(code) {
-		this.setState({ isLoading: true });
+
+	insertLevel(code) {
+		this.setState({ isLoadingReviews: true, isLoadingLessons: true });
 
 		fetch('/api/ifgame/new_level_by_code/'+code, {
 				method: 'post',
@@ -104,158 +101,156 @@ export default class IfLevelListContainer extends React.Component {
 			}).catch( error => {
 				console.log(error);
 				this.setState({ message: error });
-			}).then( () => this.setState({ isLoading: false }));
+			}).then( () => this.setState({ isLoadingReviews: false, isLoadingLessons: false }));
 	}
 
 
-	// Render levels that match the given code.
-	// Hides add button if there are any uncompleted items.
-	_render_code(code) {
+	// Return start new lesson button 
+	_render_lesson_button(code) {
+		const uncompleted_lessons_count = this.state.lessons.filter( l=> !l.completed ).length;
+		const completed_lessons_count = this.state.lessons.filter( l=> l.completed ).length;
+		const lesson_label = completed_lessons_count > 0 ? 'Restart lesson' : 'Start lesson';
+		const uncompleted_reviews_count = this.state.reviews.filter( l=> !l.completed ).length;
 		
-		let button_level = IfLevels.filter( level => level.code === code )[0];
-		let button;
+		// Don't post until data is loaded.
+		if(uncompleted_lessons_count > 0 || uncompleted_reviews_count > 0) return <span/>;
 
-		const crumbs = (
-			<Breadcrumb>
-				<Breadcrumb.Item href={'/ifgame/'}>Home</Breadcrumb.Item>
-				<Breadcrumb.Item active>List</Breadcrumb.Item>
-			</Breadcrumb>
-			);
+		return (<Button 
+				onClick={ e => this.insertLevel(code, e) }>
+					{lesson_label}
+			</Button>);
+	}
+
+	// Return start new review button
+	_render_review_button(code) {
+		const completed_lessons_count = this.state.lessons.filter( l=> l.completed ).length;
+		const uncompleted_reviews_count = this.state.reviews.filter( l=> !l.completed ).length;
+		const completed_reviews_count = this.state.reviews.filter( l=> l.completed ).length;
+
+		const review_label = completed_reviews_count > 0 ? 'Restart review' : 'Start review';
+		// Don't post until data is loaded.
+
+		if(uncompleted_reviews_count > 0) return <span/>;
+		if(completed_lessons_count < 1 ) return <span />;
+
+		return (<Button 
+					onClick={ e => this.insertLevel(code+'review', e) }>
+						{review_label}
+				</Button>);
+	}
 
 
-		if(this.state.isLoading === false
-			&& this.state.levels.filter( l=> !l.completed ).length === 0) {
-			button = (<Button 
-						onClick={ e => this.insertGame(button_level.code, e) } 
-						disabled={ this.state.isLoading } >
-						Start
-					</Button>); 
-		} else {
-			button = '';
+	_get_highest_grade(levels) {
+
+		return levels.filter( l=> l.completed ).reduce( (max, l) => {
+			let grade = l.get_test_score_as_percent();
+			if(max === null) return grade;
+			if(grade>max ) return grade;
+			return max;
+		}, null);
+	}
+
+
+	// Return the highest grade text
+	_render_highest_grade() {
+		const highest_lesson = this._get_highest_grade(this.state.lessons);
+		const highest_review = this._get_highest_grade(this.state.reviews);
+
+		// Not completed.
+		if(highest_lesson === null) {
+			return <div>You have not yet completed this lesson</div>;
 		}
+
+		// Completed lesson, but not review.
+		if(this.state.reviewUnavailable) {
+			return <div>Your highest grade is {highest_lesson}%.</div>;
+		}
+
+		// Need review.
+		if(highest_review === null) {
+			return <div>Your highest lesson grade is {highest_lesson}%.
+					You still need to complete the review.</div>;
+		} else {
+			return <div>Your best lesson grade is {highest_lesson}%, 
+					and your best review grade is {highest_review}%.</div>;
+		}
+	}
+
+
+	// Return a link to continue anything in progress.
+	_render_complete_in_progress() {
+		const in_progress_lessons = this.state.lessons.filter( l=>!l.completed);
+		const in_progress_reviews = this.state.reviews.filter( l=>!l.completed);
+
+		if(in_progress_lessons.length > 0) {
+			return <div><Button 
+							onClick={ () => this.context.router.history.push(
+								'/ifgame/level/'+in_progress_lessons[0]._id +'/play') }
+						>Continue your current lesson</Button>
+					</div>;
+		}
+
+		if(in_progress_reviews.length > 0) {
+			return <div><Button 
+							onClick={ () => this.context.router.history.push(
+								'/ifgame/level/'+in_progress_reviews[0]._id +'/play') }
+						>Continue your current review</Button>
+					</div>;
+		}
+
+		return <div/>;
+	}
+
+
+	render() {
+		const code = this.props.match.params._code ? this.props.match.params._code : 'all';
+		const page_level = IfLevels.filter( level => level.code === code )[0];
+
+		const p_style = { fontStyle: 'italic', marginBottom: '1rem'};
+		const crumbs = (<Breadcrumb>
+				<Breadcrumb.Item href={'/ifgame/'}>Home</Breadcrumb.Item>
+				<Breadcrumb.Item active>{ page_level.title } List</Breadcrumb.Item>
+			</Breadcrumb>);
+
+		const body_lesson = this.state.isLoadingLessons 
+				? <div/>
+				: <div>
+					<h5 style={{marginTop:'2rem'}}>Lesson</h5>
+					<p style={p_style} >{ page_level.description }</p>
+					<IfLevelList levels={this.state.lessons} />
+					{ this._render_lesson_button(code) }
+				</div>;
+
+		const body_review = this.state.isLoadingReviews || this.state.reviewUnavailable
+				? <div/>
+				: <div>
+					<h5 style={{marginTop:'2rem'}}>Review</h5>
+					<p style={p_style}>This review will help you remember the outcomes from the lesson.
+						Wait a week after completing the lesson before starting it.</p>
+					<IfLevelList levels={this.state.reviews} />
+					{ this._render_review_button(code) }		
+				</div>;
+
 
 		return (
 			<Container fluid='true'>
 				<Row>
 				<Col xs={12}>
 					{ crumbs }
-					<ForceLogin />
-					<PageHeader header ={ button_level.label } />
+					<h5>{ page_level.label }</h5>
+					<div>
+						{ this._render_highest_grade() }
+					</div>
+					<hr/>
+					<Loading loading={this.state.isLoadingReviews || this.state.isLoadingLessons } />
 					<Message message={this.state.message} style={this.state.message_style} />
-					<Loading loading={this.state.isLoading } />
-					<IfLevelList levels={this.state.levels} />
-					{ button }		
+					{ this._render_complete_in_progress() }
+					{ body_lesson }
+					{ body_review }
 				</Col>
 			</Row>
 			</Container>
-		);
-		
-	}
-
-
-	_render_all() {
-		const that = this;
-		const ADMIN = get_user_is_admin();
-		const links = !ADMIN ? [] : [
-			'/api/version',
-			'/logout',
-			'/ifgame/test/?USER_CREATION_SECRET=supersecret',
-			'/ifgame/monitor',
-			'/ifgame/grades',
-			'/ifgame/questions',
-			'/ifgame/surveys'
-		];
-
-		const debug_buttons = [];
-		const restart_buttons = [];
-		const completed_tutorials = this.state.levels.filter( l => l.completed ).map( l => l.code );
-
-		// If an admin, allow restarting any level. Otherwise, just restart 
-		// already completed levels.
-		const codes = ADMIN ? IfLevels
-				: IfLevels.filter( l => completed_tutorials.includes(l.code) );
-
-
-		// Create a button for each tutorial that we have already completed.
-		codes.map( (level,i) => {
-			restart_buttons.push(
-				<li key={'iflevellistcontainerbutton'+i}>
-					<Button 
-						onClick={ e => this.insertGame(level.code, e) } 
-						variant='link'
-						style={{ padding: 0 }}
-						disabled={ this.state.isLoading } >
-						{ level.label }
-					</Button>
-				</li>
-			);
-
-			if(ADMIN) {
-				debug_buttons.push(
-					<li key={'iflevellistdebugcontainerbutton'+i}>
-						<a href={'/ifgame/leveldebug/'+level.code}>{level.code}</a>
-					</li>
-				);
-			}
-		});
-
-
-		return (
-			<Container fluid='true'>
-				<Row>
-					<Col>
-						<ForceLogin />
-						<div style={{ paddingTop: 10}} />
-						<Message message={this.state.message} style={this.state.message_style} />
-						<Loading loading={this.state.isLoading } />
-						<MyProgress 
-							grades={this.state.grades} 
-							levels={this.state.levels} 
-							onClickNewCode={ (code,e)=> that.insertGame(code,e)}
-							onClickContinueLevel={ (ifLevel)=> this.context.router.history.push('/ifgame/level/'+ifLevel._id+'/play') } />
-					</Col>
-				</Row>
-				<Row>
-					<Col sm={8} style={{ padding: '1.25rem'}} >
-						<IfLevelList levels={this.state.levels} />
-						<ul>{ links.map( (l,i) => <li key={'link'+i}><a href={l}>{l}</a></li> )}
-						</ul>
-					</Col>
-					<Col sm={4} style={{ padding: '1.25rem'}} >
-						{ debug_buttons.length === 0 ? '' : 
-							<div>
-								<h4>Debug a tutorial</h4> 
-								<ul>{ debug_buttons }</ul>
-								<br/><br/>
-							</div>
-						}
-						{ restart_buttons.length === 0 ? '' : <h4>Restart a tutorial</h4> }
-						<ul>{ restart_buttons }</ul>
-						<br/><br/>
-					</Col>
-				</Row>
-			</Container>
-		);
-	}
-
-/*
-					<div className='alert alert-warning' role='alert'>
-						This site shows you how to write Excel formulas.
-						<br/><br/>
-						Report issues to &nbsp;
-						<a className='alert-link' 
-							href='mailto:nathan.garrett@woodbury.edu'>Nathan Garrett</a>.
-					</div>
-
-*/
-
-	render() {
-		const code = this.props.match.params._code ? this.props.match.params._code : 'all';
-		if(code === 'all') {
-			return this._render_all();
-		} else {
-			return this._render_code(code);
-		}
+		);		
 	}
 
 }

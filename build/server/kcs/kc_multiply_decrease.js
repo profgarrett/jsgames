@@ -85,6 +85,12 @@ const test_pages = [
 		description: 'Show the <b>total</b> of {cell1_title} if we {sell} {n}%. Use <b>multiplication</b>.',
 		kcs: ['multiply', 'percentile_to_decimal', 'multiply_decrease']
 	},{
+		// Dup to increase likihood.
+		..._multiply_decrease_test_pages_base,
+		solution_f: '={cell1_ref}*(1-{n}/100)', 
+		description: 'Show the <b>total</b> of {cell1_title} if we {sell} {n}%. Use <b>multiplication</b>.',
+		kcs: ['multiply', 'percentile_to_decimal', 'multiply_decrease']
+	},{
 		..._multiply_decrease_test_pages_base,
 		solution_f: '={cell1_ref}*{n}/100', 
 		description: 'Show the <b>decrease</b> of {cell1_title} if we {sell} {n}%. Use <b>multiplication</b>.',
