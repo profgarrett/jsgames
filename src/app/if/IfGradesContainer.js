@@ -1,6 +1,6 @@
 //@flow
 import React from 'react';
-import { Row, Col, Breadcrumb, Button  } from 'react-bootstrap';
+import { Container, Row, Col, Breadcrumb, Button  } from 'react-bootstrap';
 
 import IfGrades from './IfGrades';
 import { Message, Loading } from './../components/Misc';
@@ -49,18 +49,19 @@ export default class IfGradesContainer extends React.Component<GradesPropsType, 
 	}
 	*/
 
-	onReady() {
-		this.setState({ isLoading: false});
+	onReady(filter: Object) {
+		this.setState({ isLoading: false, message: ''});
+		this.onRefreshData(filter);
 	}
 
 	onRefreshData(filter: Object) {
-		console.log(filter);
-
 		const args = [];
-		if(filter.code != 'All') args.push('code='+filter.code);
-		if(filter.section !== -1) args.push('section='+filter.section);
-		if(filter.user !== '-1') args.push('user='+filter.user);
 
+		if(filter.code != '') args.push('code='+filter.code);
+		if(filter.idsection !== '') args.push('idsection='+filter.idsection);
+		if(filter.iduser !== '') args.push('iduser='+filter.iduser);
+
+		this.setState({ isLoading: true, message: 'Loading grade data'});
 		
 		fetch('/api/ifgame/grades?'+args.join('&'), {
 				method: 'get',
@@ -101,6 +102,7 @@ export default class IfGradesContainer extends React.Component<GradesPropsType, 
 			);
 
 		return (
+			<Container fluid='true'>
 			<Row>
 				<Col>
 					<ForceLogin/>
@@ -108,10 +110,11 @@ export default class IfGradesContainer extends React.Component<GradesPropsType, 
 					<h3>Grades</h3>
 					<Message message={this.state.message} style={this.state.messageStyle} />
 					<Loading loading={this.state.isLoading } />
-					<Filter onChange={this.onRefreshData} onReady={this.onReady} />
+					<Filter onChange={this.onRefreshData} onReady={this.onReady} disabled={this.state.isLoading} defaults={{code: 'tutorial'}} />
 					<IfGrades data={this.state.data} />
 				</Col>
 			</Row>
+			</Container>
 		);
 	}
 }

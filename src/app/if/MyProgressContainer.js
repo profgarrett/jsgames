@@ -59,7 +59,7 @@ export default class IfLevelListContainer extends React.Component {
 			});
 
 		// Fetch grades
-		fetch('/api/ifgame/grades/' + get_username_or_emptystring(), {
+		fetch('/api/ifgame/grades/?username=' + get_username_or_emptystring(), {
 				method: 'get',
 				credentials: 'include',
 				headers: {
@@ -120,8 +120,7 @@ export default class IfLevelListContainer extends React.Component {
 			'/ifgame/test/?USER_CREATION_SECRET=supersecret',
 			'/ifgame/monitor',
 			'/ifgame/grades',
-			'/ifgame/questions',
-			'/ifgame/surveys'
+			'/ifgame/questions'
 		];
 
 		const debug_buttons = !ADMIN ? [] :

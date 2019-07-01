@@ -123,7 +123,7 @@ export default class IfMonitor extends React.Component<PropsType> {
 		super(props);
 	}
 
-	render(): Node {
+	render_individual_results(): Node {
 		if(this.props.levels.length < 1) 
 			return <div/>;
 
@@ -194,7 +194,12 @@ export default class IfMonitor extends React.Component<PropsType> {
 
 	}
 
-	render_overall(): Node {
+	dateAsString(d: Object): string {
+		return d.getFullYear()+'/'+(d.getMonth()+1) +'/'+d.getDate() +
+				' ' + d.getHours()+':'+ (d.getMinutes()<10 ? '0': '') + d.getMinutes();
+	}
+
+	render(): Node {
 		if(this.props.levels.length < 1) 
 			return <div/>;
 		
@@ -235,11 +240,15 @@ export default class IfMonitor extends React.Component<PropsType> {
 		}, {
 			id: 'created',
 			Header: 'Created',
-			accessor: l => l.created.toString()
+			accessor: l => this.dateAsString(l.created)
+		}, {
+			id: 'updated',
+			Header: 'Last Updated',
+			accessor: l => this.dateAsString(l.updated)
 		}, {
 			id: 'score',
 			Header: 'Score',
-			accessor: l => l.get_score_correct() + ' of ' + l.get_score_attempted()
+			accessor: l => l.get_test_score_as_percent()
 		}, {
 			id: 'completed',
 			Header: 'Done',

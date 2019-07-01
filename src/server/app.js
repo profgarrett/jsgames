@@ -435,59 +435,60 @@ app.get('/api/ifgame/recent_levels/', nocache, require_logged_in_user,
 		if(username !== ADMIN_USERNAME && username !== 'test')
 			throw new Error('Invalid username '+username+' for recent_levels');
 
+		const INTERVAL = 60*24*7*1;  // time in minutes => hours => days => weeks
+		const sql_where_clauses = ['iflevels.completed = 1'];
+		const sql_where_values = [];
+		//const username = get_username_or_emptystring(req, res);
+		
+		// Build SQL values.
+		if(typeof req.query.iduser !== 'undefined') {
+			sql_where_values.push(req.query.iduser);
+			sql_where_clauses.push('users.iduser = ?');
+		}
 
-		// Get cleaned-up params (string or int)
-		const sql_params = [];
+		if(typeof req.query.idsection !=='undefined') {
+			sql_where_values.push(req.query.idsection);
+			sql_where_clauses.push('sections.idsection = ?');
+		}
 
-		// @TODO: Fix security hole. Only can be done by admins, but still SQL injection vulnerability.
-		const param_code = typeof req.query.code === 'undefined' 
-			? null : req.query.code;
-		if(param_code !== null) sql_params.push(param_code);
+		if(typeof req.query.code !=='undefined') {
+			sql_where_values.push(req.query.code);
+			sql_where_clauses.push('iflevels.code = ?');
+		}
 
-		const param_idsection = typeof req.query.idsection === 'undefined'
-			? null : parseInt(req.query.idsection, 0);
-		if(param_idsection !== null) sql_params.push(param_idsection);
+		if(typeof req.query.updated !=='undefined') {
+			// Return items updated since a recent date/time
+			sql_where_values.push(req.query.updated);
+			sql_where_clauses.push('iflevels.updated > ?');
+		} else {
+			// Return items newer than INTERVAL.
+			sql_where_clauses.push('iflevels.updated > NOW() - INTERVAL '+INTERVAL+' MINUTE ');
+		}
 
-		const param_iduser = typeof req.query.iduser === 'undefined'
-			? null : parseInt(req.query.iduser, 0);
-		if(param_iduser !== null) sql_params.push(param_iduser);
-
-
-		// Make sure that the given code is valid. If not, then immediately fail
-		// to avoid having some type of SQL injection issue.
-		const code_in_array = IfLevels.filter( l => l.code === param_code).map( l => l.code );
-		if(param_code !== null && code_in_array.length !== 1)
-			throw new Error('Invalid code type '+param_code+' passed to recent_levels');
-
-
-		// Build time limit.
-		const INTERVAL = 60*24*7*2;  // time in minutes => hours => days => weeks
-		const ignore = '"' + ['garrettn', 'test', 'bob'].join( '","')+'"';
+		// @TODO PERMISSION CHECK. High priority!!!!
 
 
 		// Build SQL statement.
-		// Note that we trust that all given params have already been cleaned up.
-		const sql = 'select distinct iflevels.* ' +
-			' from iflevels ' +
-				'inner join users on iflevels.username = users.username ' +
-				'left outer join users_sections on users_sections.iduser = users.iduser ' +
-				'left outer join sections on sections.idsection = users_sections.idsection ' +
-			' WHERE ' +
-				(param_code === null ? '' : 'iflevels.code = ? AND ') +
-				(param_idsection === null ? '' : ' sections.idsection = ? AND ')  +
-				(param_iduser === null ? '' : ' users.iduser = ? AND ')  +
-				' iflevels.updated > NOW() - INTERVAL '+INTERVAL+' MINUTE AND ' +
-				' iflevels.username NOT IN ('+ignore+')';
-				//' username = "alharbis0" AND code="if1"';
+		const sql = `
+			select distinct iflevels.* 
+			from iflevels
+				inner join users on iflevels.username = users.username
+			    left outer join users_sections on users.iduser = users_sections.iduser
+			    left outer join sections on users_sections.idsection = sections.idsection
+			where ` + 
+				sql_where_clauses.join(' AND ') +
+			' ORDER BY iflevels.updated desc LIMIT 100';
 
-		let select_results = await run_mysql_query(sql, sql_params);
+		console.log(sql);
+
+		let select_results = await run_mysql_query(sql, sql_where_values);
 
 		if(select_results.length === 0) return res.json([]);
 
 		let iflevels = select_results.map( (l: Object): Object => (new IfLevelModel(l)) );
 
 		// Remove secret fields and transmit.
-		iflevels = iflevels.map( (l: Object): Object => return_tagged_level(l) );
+		//iflevels = iflevels.map( (l: Object): Object => return_tagged_level(l) );
 		iflevels = iflevels.map( (l: Object): Object => return_level_prepared_for_transmit(l, true));
 
 		res.json(iflevels);
@@ -504,19 +505,35 @@ app.get('/api/ifgame/grades/:username?', nocache, require_logged_in_user,
 	async (req: $Request, res: $Response, next: NextFunction): Promise<any> => {
 	try {
 		//const ignore = '"' + ['garrettn', 'test', 'bob'].join( '","')+'"';
+		const sql_where_clauses = ['iflevels.completed = ?'];
+		const sql_where_values = [1];
+		//const username = get_username_or_emptystring(req, res);
 		
-		const username = get_username_or_emptystring(req, res);
-		const param_username = typeof req.params.username === 'undefined' 
-			? '' : req.params.username;
-		const param_section = typeof req.query.section === 'undefined'
-			? '' : req.query.section;
+		// Build SQL values.
+		if(typeof req.query.iduser !== 'undefined') {
+			sql_where_values.push(req.query.iduser);
+			sql_where_clauses.push('users.iduser = ?');
+		}
 
-		const sql = 'SELECT * FROM iflevels ' +
-				' WHERE COMPLETED = 1 ' +
-				(param_section === '' ? '' : ' AND ') +
-				(param_username === '' ? '' : ' AND username = ?');
-		//		: ' AND username NOT IN ('+ignore+')');
+		if(typeof req.query.username !== 'undefined') {
+			sql_where_values.push(req.query.username);
+			sql_where_clauses.push('users.username = ?');
+		}
 
+		if(typeof req.query.idsection !=='undefined') {
+			sql_where_values.push(req.query.idsection);
+			sql_where_clauses.push('sections.idsection = ?');
+		}
+
+		if(typeof req.query.code !=='undefined') {
+			sql_where_values.push(req.query.code);
+			sql_where_clauses.push('iflevels.code = ?');
+		}
+
+
+
+		// @TODO PERMISSION CHECK. High priority!!!!
+		/*
 		// Make sure that if a username was given, that it equals the current user.
 		if(param_username !== '' && param_username !== username) {
 			throw new Error('Invalid username '+username+' for recent_levels');
@@ -525,11 +542,22 @@ app.get('/api/ifgame/grades/:username?', nocache, require_logged_in_user,
 		// Ensure that if we want everything, that it's an admin user.
 		if(param_username === '' && (username !== ADMIN_USERNAME && username !== 'test')) {
 			throw new Error('Invalid user '+username+' for recent_levels');
-		}
+		} 
 
-		let select_results = await run_mysql_query(sql, [param_username]);
+		*/
 
-		if(select_results.length === 0) return res.json([ { username: param_username} ]);
+		const sql = `
+			select distinct iflevels.* 
+			from iflevels
+				inner join users on iflevels.username = users.username
+			    left outer join users_sections on users.iduser = users_sections.iduser
+			    left outer join sections on users_sections.idsection = sections.idsection
+			where ` + 
+				sql_where_clauses.join(' AND ');
+		
+		let select_results = await run_mysql_query(sql, sql_where_values);
+
+		if(select_results.length === 0) return res.json([ ]);
 
 		let iflevels = select_results.map( l => new IfLevelModel(l) );
 

@@ -1,45 +1,49 @@
 //@flow
 import React from 'react';
-import { Container, ButtonToolbar, ButtonGroup, Row, Col, Breadcrumb, DropdownButton, Dropdown, Button  } from 'react-bootstrap';
-import { IfLevels, IfLevelSchema } from './../../shared/IfGame';
+import { ButtonToolbar, ButtonGroup, DropdownButton, Dropdown, Button  } from 'react-bootstrap';
+import { IfLevels } from './../../shared/IfGame';
 
 import type { Node } from 'react';
 
 
 // onChagne will be passed an object with the filter values includ3ed.
 type PropsType = {
+	disabled: boolean, // provide a way to make it readonly, such as when data is being loaded externally.
 	onChange: (Object) => void,
-	onReady: () => void
+	onReady: () => void,
+	defaults: Object
 };
 
 type ContainerStateType = {
 	// Status.
-	loading_data: boolean,
+	loading_data: boolean, // are we loading the filter data?
 
 	// Filters. Will be passed to onChange.
 	code: string,
-	codes: Array<string>,
+	codes: Array<Object>,
 
 	pagetype: string, 
 	pagetypes: Array<string>,
 
-	section: number,
+	idsection: string, // note: this is a FK for the section's PK
 	sections: Array<any>,
 
-	user: number,
+	iduser: string, // note: this is ID, not username.
 	users: Array<any>
 };
 
 export default class Filter extends React.Component<PropsType, ContainerStateType> {
 	constructor(props: any) {
 		super(props);
+		const defaults = this.props.defaults || {};
+
 		this.state = { 
 			loading_data: true,
 
-			code: 'tutorial',
-			codes: IfLevels.map( l => l.code ),
+			code: defaults.code || '',
+			codes: IfLevels.map( l => {return { code: l.code, label: l.label }; }),
 
-			pagetype: 'IfPageChoiceSchema',
+			pagetype: 'IfPageFormulaSchema|IfPageHarsonsSchema',
 			pagetypes: [
 				'IfPageNumberAnswerSchema',
 				'IfPageChoiceSchema', 
@@ -48,15 +52,15 @@ export default class Filter extends React.Component<PropsType, ContainerStateTyp
 				'IfPageFormulaSchema|IfPageHarsonsSchema',
 				'IfPageParsonsSchema'],
 
-			section: -1,
+			idsection: '',
 			sections: [], // loads to an array from server.
 
-			user: -1,
+			iduser: '',
 			users: [], // loads to array
 
 		};
 		(this: any).loadFilters = this.loadFilters.bind(this);
-
+		(this: any).getFilter = this.getFilter.bind(this);
 		(this: any).handleCodeFilterChange = this.handleCodeFilterChange.bind(this);
 		(this: any).handleIdSectionFilterChange = this.handleIdSectionFilterChange.bind(this);
 		(this: any).handlePageTypeFilterChange = this.handlePageTypeFilterChange.bind(this);
@@ -74,20 +78,23 @@ export default class Filter extends React.Component<PropsType, ContainerStateTyp
 		this.setState({ pagetype: value});
 	}
 	handleIdSectionFilterChange(value: string) {
-		this.setState({ section: parseInt(value,10)});
+		this.setState({ idsection: value});
 	}
 	handleIdUserFilterChange(value: string) {
-		this.setState({ user: parseInt(value, 10)});
+		this.setState({ iduser: value });
+	}
+
+	getFilter(): Object {
+		return {
+			code: this.state.code,
+			pagetype: this.state.pagetype,
+			idsection: this.state.idsection,
+			iduser: this.state.iduser
+		};
 	}
 
 	handleSubmit() {
-		const filter = {
-			code: this.state.code,
-			pagetype: this.state.pagetype,
-			section: this.state.section,
-			user: this.state.user
-		};
-		this.props.onChange(filter);
+		this.props.onChange(this.getFilter());
 	}
 
 
@@ -110,7 +117,7 @@ export default class Filter extends React.Component<PropsType, ContainerStateTyp
 				if( json.length > 0) {
 					// Set the section to the first item and load.
 					newState.sections = json;
-					newState.section = -1; // json[0].idsection; default to no section.
+					newState.idsection = ''; // Default to no section.
 				} else {
 					// No sections found.
 					newState.sections = [];
@@ -127,9 +134,10 @@ export default class Filter extends React.Component<PropsType, ContainerStateTyp
 					})
 					.then( response => response.json() )
 					.then( json => {
+						newState.disabled = false;
 						if( json.length > 0) {
 							newState.users = json;
-							newState.user = -1; // json[0].iduser; default to all users
+							newState.iduser = ''; //  default to all users
 						} else {
 							newState.users = [];
 						}
@@ -137,7 +145,7 @@ export default class Filter extends React.Component<PropsType, ContainerStateTyp
 						// Now update state.
 						this.setState(newState); 
 
-						this.props.onReady();
+						this.props.onReady(this.getFilter());
 
 					})
 					.catch( error => {
@@ -162,26 +170,29 @@ export default class Filter extends React.Component<PropsType, ContainerStateTyp
 
 
 		// setup params 
-		const levels = ['All'];
-		IfLevels.map(l => levels.push(l.code));
+		const levels = [{ code: '', label: 'All'}];
+		IfLevels.map(l => levels.push({ code: l.code, label: l.label }));
 
-		const sections = [{ idsection: -1, code: 'All' }];
+		const sections = [{ idsection: '', code: 'All' }];
 		if(this.state.sections !== null) 
 			this.state.sections.map( section => sections.push(section));
 
-		const users = [{ iduser: -1, username: 'All'}];
+		const users = [{ iduser: '', username: 'All'}];
 		if(this.state.users !== null) 
 				this.state.users.map( user => users.push(user));
 
-		const section_title = this.state.section === -1 || this.state.section === null
+
+		const code_title = this.state.code === '' ? 'All Levels' : this.state.code;
+
+		const section_title = this.state.idsection === '' 
 				? 'Pick a section' 
 				: 'Section: ' + this.state.sections.filter( 
-						s => s.idsection === this.state.section )[0].code;
+						s => s.idsection == this.state.idsection )[0].code; // note: truthy for 4=="4"
 
-		const user_title = this.state.user === -1 || this.state.user === null
+		const user_title = this.state.iduser === '' 
 				? 'Pick a user' 
 				: 'User: ' + this.state.users.filter( 
-						s => s.iduser === this.state.user )[0].username;
+						s => s.iduser == this.state.iduser )[0].username; // note: truthy for 4=="4"
 
 		
 		const filter = (
@@ -189,19 +200,21 @@ export default class Filter extends React.Component<PropsType, ContainerStateTyp
 				<ButtonToolbar>
 				<ButtonGroup>
 				<DropdownButton 
+						disabled={ this.props.disabled } 
 						onSelect={this.handleCodeFilterChange}
 						variant='primary' 
-						title= { this.state.code } 
+						title= {code_title} 
 						key='select_code' id='select_code'>
-							{ levels.map( (code,i) => 
+							{ levels.map( (level,i) => 
 								<Dropdown.Item
 									key={'select_code_dropdownitem'+i} 
-									eventKey={code}>{code}
+									eventKey={level.code}>{level.label}
 								</Dropdown.Item> 
 							)}
 				</DropdownButton>
 
 				<DropdownButton 
+						disabled={ this.props.disabled } 
 						onSelect={this.handleIdSectionFilterChange}
 						variant='primary' 
 						title= {section_title}
@@ -212,6 +225,7 @@ export default class Filter extends React.Component<PropsType, ContainerStateTyp
 				</DropdownButton>
 
 				<DropdownButton 
+						disabled={ this.props.disabled } 
 						onSelect={this.handleIdUserFilterChange}
 						variant='primary' 
 						title={user_title}
@@ -222,7 +236,20 @@ export default class Filter extends React.Component<PropsType, ContainerStateTyp
 				</DropdownButton>
 				</ButtonGroup> 
 
+
 				<ButtonGroup>
+				<Button
+						disabled={ this.props.disabled } 
+						variant='primary'
+						onClick={ () => this.handleSubmit()}
+						>Refresh</Button>
+				</ButtonGroup>
+				</ButtonToolbar>
+			</form>
+			);
+			
+			/*
+							<ButtonGroup>
 				<DropdownButton 
 						onSelect={this.handlePageTypeFilterChange}
 						variant='primary' 
@@ -234,17 +261,7 @@ export default class Filter extends React.Component<PropsType, ContainerStateTyp
 				</DropdownButton>
 				</ButtonGroup>
 
-
-				<ButtonGroup>
-				<Button
-						variant='primary'
-						onClick={ () => this.handleSubmit()}
-						>Refresh</Button>
-				</ButtonGroup>
-				</ButtonToolbar>
-			</form>
-			);
-			
+*/
 
 		return filter;
 	}
