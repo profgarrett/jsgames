@@ -1,13 +1,14 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import IfLevelList from './IfLevelList';
-import {PageHeader} from './../components/Misc';
+//import IfLevelList from './IfLevelList';
+//import {PageHeader} from './../components/Misc';
 import { Link } from 'react-router-dom';
 
-import { Breadcrumb, Container, Row, Col, Card, Button } from 'react-bootstrap';
+import { Container, Row, Col } from 'react-bootstrap';
 
-import { get_user_is_admin, get_username_or_emptystring, Message, Loading } from './../components/Misc';
+import { Message, Loading } from './../components/Misc';
+import { getUserFromBrowser } from './../components/Authentication';
 
 import { IfLevelSchema, IfLevels } from './../../shared/IfGame';
 
@@ -34,7 +35,8 @@ export default class IfLevelListContainer extends React.Component {
 	}
 
 	componentDidMount() {
-		
+		const user = getUserFromBrowser();
+
 		// Fetch levels
 		fetch('/api/ifgame/levels/byCompleted/false', {
 				credentials: 'include'
@@ -59,7 +61,7 @@ export default class IfLevelListContainer extends React.Component {
 			});
 
 		// Fetch grades
-		fetch('/api/ifgame/grades/' + get_username_or_emptystring(), {
+		fetch('/api/ifgame/grades/?username=' + user.username, {
 				method: 'get',
 				credentials: 'include',
 				headers: {
@@ -112,16 +114,16 @@ export default class IfLevelListContainer extends React.Component {
 
 
 	render() {
+		const user = getUserFromBrowser();
 		const that = this;
-		const ADMIN = get_user_is_admin();
+		const ADMIN = user.isAdmin;
 		const links = !ADMIN ? [] : [
 			'/api/version',
 			'/logout',
 			'/ifgame/test/?USER_CREATION_SECRET=supersecret',
 			'/ifgame/monitor',
 			'/ifgame/grades',
-			'/ifgame/questions',
-			'/ifgame/surveys'
+			'/ifgame/questions'
 		];
 
 		const debug_buttons = !ADMIN ? [] :

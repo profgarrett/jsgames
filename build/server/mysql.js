@@ -12,6 +12,7 @@ const { sql05 } = require('./../../sql/sql05.js');
 const { sql06 } = require('./../../sql/sql06.js');
 const { sql07 } = require('./../../sql/sql07.js');
 const { sql08 } = require('./../../sql/sql08.js');
+const { sql09 } = require('./../../sql/sql09.js');
 
 /**
 	Initialize MYSQL with credentials from secret.js.
@@ -129,6 +130,9 @@ async function update_mysql_database_schema()               {
 	}
 	if(old_version < 8 ) {
 		await _update_update_version( sql08 );
+	}
+	if(old_version < 9 ) {
+		await _update_update_version( sql09 );
 	}
 
 

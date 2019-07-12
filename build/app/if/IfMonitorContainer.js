@@ -1,9 +1,10 @@
 //     
 import React from 'react';
-import { Row, Col, Breadcrumb, Button  } from 'react-bootstrap';
+import { Container, Row, Col, Breadcrumb, Button  } from 'react-bootstrap';
 
 import IfMonitor from './IfMonitor';
 import { Message, Loading } from './../components/Misc';
+import Filter from './Filter';
 
 import { IfLevelSchema } from './../../shared/IfGame';
 
@@ -26,28 +27,30 @@ export default class IfMonitorContainer extends React.Component                 
 	constructor(props     ) {
 		super(props);
 		this.state = { 
-			message: 'Loading data from server',
+			message: 'Loading filter data',
+			messageStyle: '',
 			isLoading: true,
 			levels: [],
 		};
-		(this     ).refreshData = this.refreshData.bind(this);
-		(this     ).handleSubmit = this.handleSubmit.bind(this);
+		(this     ).onRefreshData = this.onRefreshData.bind(this);
+		(this     ).onReady = this.onReady.bind(this);
 	}
 
-	componentDidMount() {
-		// Load data.
-		this.refreshData();
+	onReady(filter        ) {
+		this.setState({ isLoading: false, message: ''});
+		this.onRefreshData(filter);
 	}
 
+	onRefreshData(filter        ) {
+		const args = [];
+		
+		if(filter.code != '') args.push('code='+filter.code);
+		if(filter.idsection !== '') args.push('idsection='+filter.idsection);
+		if(filter.iduser !== '') args.push('iduser='+filter.iduser);
 
-	handleSubmit(e                                    ) {
-		if(e) e.preventDefault();
-		this.refreshData();
-	}
+		this.setState({ isLoading: true, message: 'Loading data' });
 
-	refreshData() {
-
-		fetch('/api/ifgame/recent_levels', {
+		fetch('/api/ifgame/recent_levels?'+args.join('&'), {
 				method: 'get',
 				credentials: 'include',
 				headers: {
@@ -86,26 +89,21 @@ export default class IfMonitorContainer extends React.Component                 
 			</Breadcrumb>
 			);
 
-		const filter = (
-			<form name='c' onSubmit={this.handleSubmit}>
-
-				<Button variant='primary'>Refresh filter</Button>
-			</form>
-			);
-
 		return (
+			<Container fluid='true'>
 			<Row>
 				<Col>
 					<ForceLogin/>
 					{ crumbs }
-					<h3>Recently Updated Levels</h3>
+					<h3>Recent Activity</h3>
 
 					<Message message={this.state.message} style={this.state.messageStyle} />
 					<Loading loading={this.state.isLoading } />
-					{ filter }
+					<Filter onChange={this.onRefreshData} onReady={this.onReady} disabled={this.state.isLoading} />
 					<IfMonitor levels={this.state.levels} />
 				</Col>
 			</Row>
+			</Container>
 		);
 	}
 }

@@ -41,6 +41,7 @@ export default class IfGrades extends React.Component            {
 			width: 200
 		}];
 
+		/*
 		columns.push( {
 			id:'part1',
 			Header: 'P1 Avg',
@@ -57,7 +58,7 @@ export default class IfGrades extends React.Component            {
 			textAlign: 'right',
 			accessor: l => avg_of(l, ['if1', 'if2', 'if3', 'if4', 'if5', 'if6', 'if7', 'if8']) + '%'
 		});
-
+		*/
 
 		columns.push( {
 			id:'total',
@@ -88,14 +89,15 @@ export default class IfGrades extends React.Component            {
 		const html = (<table style={tablestyle}><tbody>
 			{ this.props.data.map( (t,i) => <tr key={i}>
 					<td style={tdstyle}>{DEMO_MODE ? '*****' : t.username}</td>
-					<td style={tdstyle}>{ avg_of(t, ['if1', 'if2', 'if3', 'if4', 'if5', 'if6', 'if7', 'if8']) }</td>
-					<td style={tdstyle}>{ avg_of(t, ['tutorial', 'math1', 'math2', 'dates', 'rounding', 'summary', 'text']) }</td>
+					
 				</tr>) }
 			</tbody></table>);
 		
-
+/*
+<td style={tdstyle}>{ avg_of(t, ['if1', 'if2', 'if3', 'if4', 'if5', 'if6', 'if7', 'if8']) }</td>
+					<td style={tdstyle}>{ avg_of(t, ['tutorial', 'math1', 'math2', 'dates', 'rounding', 'summary', 'text']) }</td>
+					*/
 		return (<div>
-				<h3>Student Grades</h3>
 				<ReactTable 
 					data={this.props.data} 
 					filterable={true}

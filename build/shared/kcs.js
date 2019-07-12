@@ -1,7 +1,7 @@
 //     
 const { parseFeedback } = require('./parseFeedback');
 
-const DEBUG = true;
+const DEBUG = false;
 
 
 /**

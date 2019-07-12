@@ -1,7 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { get_username_or_emptystring } from './Misc';
-
+import { getUserFromBrowser } from './../components/Authentication';
 
 // Force any pages containing this one to log in first.
 export default class ForceLogin extends React.Component {
@@ -14,15 +13,15 @@ export default class ForceLogin extends React.Component {
 			bottom: '2px',
 			color: 'lightgray'
 		};
-		const username = get_username_or_emptystring();
+		const user = getUserFromBrowser();
 
-		if(username===null || username === '') {
+		if(user.username ===null || user.username === '') {
 			this.context.router.history.push('/login/');
 		}
 
 		return <div 
 			onClick={ ()=> that.context.router.history.push('/logout/') } 
-			style={ divStyle}>{ username }</div>;
+			style={ divStyle}>{ user.username }</div>;
 	}
 }
 ForceLogin.contextTypes = {

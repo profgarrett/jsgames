@@ -1,7 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Row, Col, FormControl } from 'react-bootstrap';
-import { Message, Loading, get_cookie } from './../components/Misc'
+import { Container, Row, Col } from 'react-bootstrap';
+import { Message, Loading } from './../components/Misc';
+import { getUserFromBrowser } from './../components/Authentication';
 
 
 
@@ -18,9 +19,10 @@ export default class Logout extends React.Component {
 
 	componentDidMount() {
 		const history = this.context.router.history;
+		const user = getUserFromBrowser();
 
 		// Test to see if we're actually logged in. 
-		if(get_cookie('x-access-token') === null) {
+		if(user.username.length < 1) {
 			console.log('not logged in!');
 			history.push('/');
 			return;
@@ -43,7 +45,7 @@ export default class Logout extends React.Component {
 				if(json._error) throw new Error(json._error); 
 
 				// Success!  Go ahead and log out, redirecting in 1.5s to homepage.
-				this.setState({ message: 'Success logging out!', messageStyle: 'success', isLoading: false})
+				this.setState({ message: 'Success logging out!', messageStyle: 'success', isLoading: false});
 				setTimeout( () => {
 					that.context.router.history.push('/');
 				}, 1500);
@@ -74,15 +76,14 @@ export default class Logout extends React.Component {
 
 	render() {
 		return (
+			<Container fluid='true'>
 			<Row>
 				<Col>
-					<br/><br/>
-					<h3>Logging out</h3>
 					<Message message={this.state.message} style={this.state.messageStyle} />
 					<Loading loading={this.state.isLoading } />
-
 				</Col>
 			</Row>
+			</Container>
 		);
 	}
 }

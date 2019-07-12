@@ -3,7 +3,7 @@
 /**
 	Node main event loop
 */
-const DEBUG_DELAY = 500;
+const DEBUG_DELAY = 0;
 const express = require('express');
 const path = require('path');
 const bodyParser = require('body-parser');
@@ -11,16 +11,20 @@ const compression = require('compression');
 const cookieParser = require('cookie-parser');
 const bugsnag = require('@bugsnag/js');
 const bugsnagExpress = require('@bugsnag/plugin-express');
+const crypto = require('crypto');
+const nodemailer = require('nodemailer');
 
 
-const { BUGSNAG_API, DEBUG, ADMIN_USERNAME, VERSION } = require('./secret.js'); 
+const { BUGSNAG_API, DEBUG, ADMIN_USERNAME, EMAIL_ADDRESS, EMAIL_PASSWORD, EMAIL_HOST, VERSION } = require('./secret.js'); 
 
 const { IfLevelModelFactory, IfLevelModel } = require('./IfGame');
 const { IfLevels } = require('./../shared/IfGame');
 
 const { from_utc_to_myql, run_mysql_query, update_mysql_database_schema, to_utc } = require('./mysql.js');
 const { logout_user, 
-		login_and_maybe_create_user, require_logged_in_user, 
+		hash_password,
+		login_user, require_logged_in_user, 
+		is_matching_mysql_user,
 		get_username_or_emptystring, return_level_prepared_for_transmit} = require('./network.js');
 
 const { turn_array_into_map } = require('./../shared/misc.js');
@@ -424,6 +428,7 @@ app.get('/api/ifgame/questions/', nocache, require_logged_in_user,
 	}
 });
 
+
 // Select object updated in the last time period..
 // Require current user to match secret.js ADMIN_USERNAME.
 // Allows retrieving solutions, as it requires admin use.
@@ -436,7 +441,7 @@ app.get('/api/ifgame/recent_levels/', nocache, require_logged_in_user,
 			throw new Error('Invalid username '+username+' for recent_levels');
 
 		const INTERVAL = 60*24*7*1;  // time in minutes => hours => days => weeks
-		const sql_where_clauses = ['iflevels.completed = 1'];
+		const sql_where_clauses = [];
 		const sql_where_values = [];
 		//const username = get_username_or_emptystring(req, res);
 		
@@ -478,8 +483,6 @@ app.get('/api/ifgame/recent_levels/', nocache, require_logged_in_user,
 			where ` + 
 				sql_where_clauses.join(' AND ') +
 			' ORDER BY iflevels.updated desc LIMIT 100';
-
-		console.log(sql);
 
 		let select_results = await run_mysql_query(sql, sql_where_values);
 
@@ -730,6 +733,10 @@ app.post('/api/feedback/',
 	}
 });
 
+
+
+
+
 ////////////////////////////////////////////////////////////////////////
 //   Authentication
 ////////////////////////////////////////////////////////////////////////
@@ -745,8 +752,126 @@ app.get('/api/logout', (req: $Request, res: $Response) => {
 });
 
 
+// Create a new email for resetting a password.
+app.post('/api/passwordresetrequest/', 
+	nocache, 
+	async (req: $Request, res: $Response, next: NextFunction): Promise<any> => {
+	try {
+		const created = from_utc_to_myql(to_utc(new Date()));
+		const username = req.body.username;
+		const code = crypto.randomBytes(12).toString('hex');
+		const message = `You have requested a password reset on Excel.fun.
+Please use the link below to reset your password.
+
+http://excel.fun/password/?passwordreset=${code}
 
 
+Thank you for using the Excel.fun website! If you have any questions, feel free to email me.
+
+Nathan Garrett, 
+profgarrett@gmail.com
+Excel.fun Administrator
+`;
+
+		// See if there is a valid email username in the system.
+		const select_sql = 'SELECT iduser FROM users where username = ?';
+		const select_results = await run_mysql_query(select_sql, [username]);
+
+		// Make sure a user matches the given username/email. If not, don't continue.
+		if(select_results.length == 0) { 
+			res.json({ success: false });
+			return;
+		}
+
+		const insert_sql = 'INSERT INTO passwordresets (created, email, iduser, code, used ) VALUES (?, ?, ?, ?, ?)';
+		const iduser = select_results[0].iduser;
+		const values = [ created, username, iduser, code, 0 ];
+		const insert_results = await run_mysql_query(insert_sql, values);
+
+		// Send email.
+		const transporter = nodemailer.createTransport({
+			host: 'mail.excel.fun',
+			port: 587,
+			secure: false, 
+			requireTLS: true,
+			tls: {
+				rejectUnauthorized: false
+			},
+			auth: {
+				user: EMAIL_ADDRESS,
+				pass: EMAIL_PASSWORD
+			}
+		});
+
+		const info = await transporter.sendMail({
+			from: '"Nathan @ Excel.fun" <Nathan@Excel.fun>', // sender address
+			to: username, 
+			subject: 'Reset Password for Excel.fun',
+			text: message
+		});
+		console.log(info);
+
+		res.json({ success: true });
+	} catch (e) {
+		log_error(e);
+		next(e);
+	}
+});
+
+
+/*
+	Login in the user for a password reset..
+*/
+app.post('/api/passwordreset/', 
+	nocache, 
+	async (req: $Request, res: $Response, next: NextFunction): Promise<any> => {
+	try {
+		//const username = req.body.username;
+		
+		const password = req.body.password;
+		const passwordreset = req.body.passwordreset;
+		const hashedpassword = hash_password(password);
+
+
+		// Check length of password.
+		if(password.length < 8) return res.json({ error: 'Invalid password', logged_in: false });
+
+		// See if we have matching information.
+		const sql_select_user = `SELECT distinct users.iduser, users.username FROM users 
+			inner join passwordresets on users.iduser = passwordresets.iduser
+			where passwordresets.code = ? AND used = 0`;
+
+		const select_user_results = await run_mysql_query(sql_select_user, [passwordreset]);
+		console.log(select_user_results);
+		if(select_user_results.length !== 1) return res.json({ error: 'No matching reset codes. Have you already reset your password?', logged_in: false });
+		const iduser = select_user_results[0].iduser;
+		const username = select_user_results[0].username;
+
+
+		// Delete the password token
+		const sql_update_results = 'UPDATE passwordresets SET used = 1 WHERE code = ?';
+		const sql_update_reset_results = await run_mysql_query(sql_update_results, [passwordreset]);
+		console.log(sql_update_reset_results);
+		if(sql_update_reset_results.affectedRows !== 1) return res.sendStatus(500);
+
+
+		// Change password on user 
+		const sql_update_user = 'UPDATE users SET hashed_password = ? WHERE iduser = ?';
+		const sql_update_user_results = await run_mysql_query(sql_update_user, [hashedpassword, iduser]);
+		console.log(sql_update_user_results);
+		if(sql_update_user_results.changedRows !== 1) return res.sendStatus(500);
+		
+
+		// Login the user.
+		const user = await login_user( username, password, res );
+
+		return res.json({ username: username, logged_in: true });
+	}
+	catch (e) {
+		log_error(e);
+		next(e);
+	}
+});
 
 
 // Delete the test user
@@ -813,29 +938,169 @@ app.get('/api/login/status',
 
 /*
 	Login AND/OR create user.
-	Creating a user requires a passed token, which much match the value given in secret.js
-	Without this token, no users can be created.
+	Creating a user may optionally require a passed token.
 */
 app.post('/api/login/', 
 	nocache, 
 	async (req: $Request, res: $Response, next: NextFunction): Promise<any> => {
 	try {
-		const user = await login_and_maybe_create_user({
-				token: req.body.token,
-				password: req.body.password,
-				username: req.body.username,
-				res: res
-			});
+		const matching = await is_matching_mysql_user(req.body.username, req.body.password);
 
-		if(typeof user === 'number') return res.sendStatus(user);
-
-		return res.json({ username: user.username, logged_in: true });
+		if(matching) {
+			await login_user(req.body.username, req.body.password, res);
+			return res.json({ username: req.body.username, logged_in: true });
+		} else {
+			return res.sendStatus(401);
+		}
 	}
 	catch (e) {
 		log_error(e);
 		next(e);
 	}
 });
+
+
+
+/*
+	Create in the user for a password reset.
+*/
+app.post('/api/create_user/', 
+	nocache, 
+	async (req: $Request, res: $Response, next: NextFunction): Promise<any> => {
+	try {
+		// If an empty username/password was passed, then create a random user and password.
+		const isAnon = req.body.username === '';
+		const username = isAnon ? 'anon' + Math.floor(Math.random()*100000000000) : req.body.username;
+		const password = 'p' + Math.floor(Math.random()*100000000000);
+		const hashed_password = hash_password(password);
+		const code = req.body.section_code;
+	
+
+		// Do some basic checking on the username.
+		const BANNED = [ '<', '>', '='];
+		for(let i=0; i<BANNED.length; i++) {
+			if(username.indexOf(BANNED[i]) !== -1) {
+				return res.json({ success: false, error: 'BadUsername'}); 
+			}
+		}
+
+		// Make sure that username is an email
+		// Very simple regex, string@string.string
+		if( !isAnon ) {
+			var re = /\S+@\S+\.\S+/;
+			if(!re.test(username)) {
+				return res.json({ success: false, error: 'BadUsername'}); 
+			}
+
+			if(username.length < 3) {
+				return res.json({ success: false, error: 'BadUsername'}); 	
+			}
+		}
+
+		// Make sure that that user doesn't already exists.
+		const sql_select_user = `SELECT distinct iduser, username FROM users 
+			where username = ? `; //and used = 0
+
+		const select_user_results = await run_mysql_query(sql_select_user, [username]);
+		if(select_user_results.length > 0) {
+			return res.json({ success: false, error: 'ExistingUser'});
+		}
+
+
+		// Create the user account.
+		let user = { username: username, hashed_password: hashed_password };
+		const insert_sql = 'INSERT INTO users (username, hashed_password) VALUES (?, ?)';
+		let insert_results = await run_mysql_query(insert_sql, [user.username, user.hashed_password]);
+			
+		if(insert_results.affectedRows !== 1) return res.sendStatus(500);
+		const iduser = insert_results.insertId;
+
+
+
+		// Find section join code (if present)
+		// Must not be an anon user.
+		if(!isAnon && code.length > 0) {
+			const sql_select_idsection = 'SELECT idsection FROM sections WHERE code = ?';
+			const select_idsection_results = code.length === 0 ? [] : await run_mysql_query(sql_select_idsection, [code]) ;
+
+			const idsection = select_idsection_results.length === 0 ? '' : select_idsection_results[0].idsection;
+			if(select_idsection_results.length === 0 && code !== '') {
+				return res.json({ success: false, error: 'InvalidCode'});
+			}
+
+			// Add id section
+			const insert_section_id_sql = `INSERT INTO users_sections (iduser, idsection, role) 
+				VALUES (?, ?, ?)`;
+			const insert_section_id_results = await run_mysql_query(insert_section_id_sql, [iduser, idsection, 'student']);
+			if(insert_section_id_results.affectedRows < 0 ) {
+				console.log(insert_section_id_results);
+				return res.sendStatus(500);
+			}
+		}
+
+
+		// Login the user.
+		const login_results = await login_user(username, password, res); 
+
+		// setup email
+		if( !isAnon) {
+				const created = from_utc_to_myql(to_utc(new Date()));
+				const reset_code = crypto.randomBytes(12).toString('hex');
+				const message = `You created an account on Excel.fun.
+Please use the link below to setup your password.
+
+http://excel.fun/password/?passwordreset=${reset_code}
+
+
+Thank you for using the Excel.fun website! If you have any questions, feel free to email me.
+
+Nathan Garrett, 
+Excel.fun Administrator
+		`;
+
+			const insert_reset_sql = 'INSERT INTO passwordresets (created, email, iduser, code, used ) VALUES (?, ?, ?, ?, ?)';
+			const insert_reset_results = await run_mysql_query(insert_reset_sql, [ created, username, iduser, reset_code, 0 ]);
+			if(insert_reset_results.affectedRows < 1) {
+				console.log(insert_reset_results);
+				return res.sendStatus(500);
+			}
+
+			// Send email.
+			const transporter = nodemailer.createTransport({
+				host: 'mail.excel.fun',
+				port: 587,
+				secure: false, 
+				requireTLS: true,
+				tls: {
+					rejectUnauthorized: false
+				},
+				auth: {
+					user: EMAIL_ADDRESS,
+					pass: EMAIL_PASSWORD
+				}
+			});
+
+			// Send email to setup password as long as have a @ symbol.
+			if(user.username.indexOf('@') !== -1) {
+				const info = await transporter.sendMail({
+					from: '"Nathan @ Excel.fun" <Nathan@Excel.fun>', // sender address
+					to: user.username, 
+					subject: 'Setup Password for Excel.fun',
+					text: message
+				});
+				console.log(info);
+			}
+		}
+
+		return res.json({ success: true, username: username, logged_in: true });
+
+	}
+	catch (e) {
+		log_error(e);
+		next(e);
+	}
+});
+
 
 
 ////////////////////////////////////////////////////////////////////////

@@ -4,7 +4,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Row, Col, Alert } from 'react-bootstrap';
 import { ClipLoader, ScaleLoader } from 'react-spinners';
-import secret from './../../server/secret';
+//import secret from './../../server/secret';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faHandPointRight, faCheck, faCheckSquare, faPencilAlt, faMinusCircle } from '@fortawesome/free-solid-svg-icons';
@@ -295,7 +295,8 @@ export class Loading extends React.Component {
 			left: '50%',
 			top: '50%',
 			paddingTop: 150,
-			transform: 'translate(-50%, -50%)'
+			transform: 'translate(-50%, -50%)',
+			zIndex: 100
 		};
 
 		return (
@@ -314,9 +315,12 @@ Loading.propTypes = {
 export class Message extends React.Component {
 	constructor(props) {
 		super(props);
-		this.state = { hidden: false };
+		this.state = { 
+			hidden: false 
+		};
 	}
 	render() {
+		
 		if(this.props.message.length < 1 || this.state.hidden) return null;
 
 		const that = this;
@@ -353,7 +357,7 @@ Message.propTypes = {
 	style: PropTypes.string
 };
 
-
+/*
 // Return the cookie with the given name.  If not found, return null.
 export function get_cookie(arg) {
 	let cookies = document.cookie.split(';').map( c => c.trim());
@@ -373,5 +377,7 @@ export function get_username_or_emptystring() {
 // Return boolean with if the user is an administrator or not.
 export function get_user_is_admin() {
 	const username = get_username_or_emptystring();
-	return (username === secret.ADMIN_USERNAME || username === 'test');
+	return (username === secret.ADMIN_USERNAME);
 }
+
+*/

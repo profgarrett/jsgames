@@ -1,9 +1,10 @@
 //     
 import React from 'react';
-import { Row, Col, Breadcrumb, Button  } from 'react-bootstrap';
+import { Container, Row, Col, Breadcrumb, Button  } from 'react-bootstrap';
 
 import IfGrades from './IfGrades';
 import { Message, Loading } from './../components/Misc';
+import Filter from './Filter';
 
 import ForceLogin from './../components/ForceLogin';
 
@@ -16,7 +17,8 @@ import ForceLogin from './../components/ForceLogin';
                  
                       
                     
-                 
+                  
+               
   
 
 export default class IfGradesContainer extends React.Component                                            {
@@ -27,25 +29,41 @@ export default class IfGradesContainer extends React.Component                  
 			messageStyle: '',
 			isLoading: true,
 			data: [],
+			filter: false
 		};
-		(this     ).refreshData = this.refreshData.bind(this);
-		(this     ).handleSubmit = this.handleSubmit.bind(this);
+		(this     ).onRefreshData = this.onRefreshData.bind(this);
+		(this     ).onReady = this.onReady.bind(this);
+		//(this: any).handleSubmit = this.handleSubmit.bind(this);
 	}
 
+	/*
 	componentDidMount() {
 		// Load data.
 		this.refreshData();
 	}
 
 
-	handleSubmit(e                                    ) {
+	handleSubmit(e: ?SyntheticEvent<HTMLButtonElement>) {
 		if(e) e.preventDefault();
 		this.refreshData();
 	}
+	*/
 
-	refreshData() {
+	onReady(filter        ) {
+		this.setState({ isLoading: false, message: ''});
+		this.onRefreshData(filter);
+	}
 
-		fetch('/api/ifgame/grades', {
+	onRefreshData(filter        ) {
+		const args = [];
+
+		if(filter.code != '') args.push('code='+filter.code);
+		if(filter.idsection !== '') args.push('idsection='+filter.idsection);
+		if(filter.iduser !== '') args.push('iduser='+filter.iduser);
+
+		this.setState({ isLoading: true, message: 'Loading grade data'});
+		
+		fetch('/api/ifgame/grades?'+args.join('&'), {
 				method: 'get',
 				credentials: 'include',
 				headers: {
@@ -83,25 +101,20 @@ export default class IfGradesContainer extends React.Component                  
 			</Breadcrumb>
 			);
 
-		const filter = (
-			<form name='c' onSubmit={this.handleSubmit}>
-				<Button variant='primary'>Refresh filter</Button>
-			</form>
-			);
-
 		return (
+			<Container fluid='true'>
 			<Row>
 				<Col>
 					<ForceLogin/>
 					{ crumbs }
 					<h3>Grades</h3>
-
 					<Message message={this.state.message} style={this.state.messageStyle} />
 					<Loading loading={this.state.isLoading } />
-					{ filter }
+					<Filter onChange={this.onRefreshData} onReady={this.onReady} disabled={this.state.isLoading} defaults={{code: 'tutorial'}} />
 					<IfGrades data={this.state.data} />
 				</Col>
 			</Row>
+			</Container>
 		);
 	}
 }

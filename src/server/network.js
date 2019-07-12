@@ -1,5 +1,5 @@
 //@flow
-const { JWT_AUTH_SECRET, USER_CREATION_SECRET } = require('./secret.js'); 
+const { JWT_AUTH_SECRET } = require('./secret.js'); 
 const { IfLevelModel } = require('./IfGame');
 const { from_mysql_to_utc, run_mysql_query } = require('./mysql');
 const bcrypt = require('bcryptjs');
@@ -154,6 +154,9 @@ function logout_user(req: $Request, res: $Response) {
 	res.clearCookie('x-access-token');
 	res.clearCookie('x-access-token-refreshed');
 	res.clearCookie('x-access-token-username');
+	res.clearCookie('iduser');
+	res.clearCookie('is-admin');
+	res.clearCookie('is-teacher');
 }
 
 /**
@@ -171,6 +174,13 @@ function require_logged_in_user(req: $Request, res: $Response, next: NextFunctio
 		res.cookie('x-access-token', token);
 		res.cookie('x-access-token-username', username);
 		res.cookie('x-access-token-refreshed', last);
+
+		// Perms. Used on client side to enable/hide information.
+		// @TODO Permissions
+		// res.cookie('iduser', '?');
+		// res.cookie('is-admin', 'False');
+		// res.cookie('is-teacher', 'False');
+		
 		return next();
 	} 
 
@@ -179,66 +189,50 @@ function require_logged_in_user(req: $Request, res: $Response, next: NextFunctio
 }
 
 
+function hash_password(password: string): string {
+	return bcrypt.hashSync(password, 8);
+}
+
+
+// See if there is a matching user in the database.
+async function is_matching_mysql_user(username: string, password: string): any {
+	const hashed_password = bcrypt.hashSync(password, 8);
+
+	const select_sql = 'SELECT iduser, hashed_password FROM users WHERE username = ?';
+	const select_results = await run_mysql_query(select_sql, [username]);
+	console.log(select_results);
+	if(select_results.length !== 1) return false;
+
+	// We have a user. Test password
+	return bcrypt.compareSync(password, select_results[0].hashed_password);
+}
+
 
 // Log the user in.
-async function login_and_maybe_create_user(params: Object): any {
-
-	// Setup 
-	// If a null username/password was passed, then create a random user and password.
-	const username = params.username === '' ? 'anon' + Math.floor(Math.random()*100000000000) : params.username;
-	const password = params.password === '' ? 'p' + Math.floor(Math.random()*100000000000) : params.password;
-
-	const hashed_password = bcrypt.hashSync(password, 8);
-	let user = { username: username, hashed_password: hashed_password };
-	const select_sql = 'SELECT * FROM users WHERE username = ?';
-	
-
-	let select_results = await run_mysql_query(select_sql, [username]);
-
-	// test the db for presense of user.  If not found, create given proper perms.
-	if(select_results.length === 0) {
-		// Username not found.
-
-		// Did the passed token match the value in secret.js?
-		if(params.token !== USER_CREATION_SECRET && params.token !== 'anonymous' ) {
-			return 403;// no, error hard.
-		} else {
-			// Yes, create user and log in.
-			const insert_sql = 'INSERT INTO users (username, hashed_password) VALUES (?, ?)';
-			let insert_results = await run_mysql_query(insert_sql, [user.username, user.hashed_password]);
-			
-			if(insert_results.affectedRows !== 1) return 500;
-		}
-
-
-	} else if(select_results.length === 1) {
-		// We have a user. Test username.
-		if(!bcrypt.compareSync(password, select_results[0].hashed_password)) {
-			return 401;  // Bad password or username.
-		} 
-
-	} else {
-		// Multiple users found with same username.  Shouldn't be possible due to db constraints.
-		throw 500;
-	}
-
+async function login_user(username: string, password: string, res: $Response): any {
 	// We have a proper user.  Continue!
 	let jwt_token = jwt.sign({ username: username }, JWT_AUTH_SECRET, { expiresIn: 864000 });
 	const last = (new Date()).toString().replace(/ /g, '_').replace('(', '').replace(')', '').replace(/:/g,'_').replace(/-/g, '_');
 
-	params.res.cookie('x-access-token', jwt_token);
-	params.res.cookie('x-access-token-username', user.username);
-	params.res.cookie('x-access-token-refreshed', last);
+	res.cookie('x-access-token', jwt_token);
+	res.cookie('x-access-token-username', username);
+	res.cookie('x-access-token-refreshed', last);
 
-	return user;
+	// Perms. Used on client side to enable/hide information.
+	//res.cookie('iduser', '?');
+	//res.cookie('is-admin', 'False');
+	//res.cookie('is-teacher', 'False');
+
 }
 
 
 module.exports = {
 	logout_user,
+	hash_password,
 	return_level_without,
 	return_level_prepared_for_transmit,
 	get_username_or_emptystring,
 	require_logged_in_user,
-	login_and_maybe_create_user
+	is_matching_mysql_user,
+	login_user
 };

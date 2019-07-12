@@ -213,7 +213,7 @@ export default class MyProgress extends React.Component<PropsType> {
 	get_levels(): Object {
 		const levels = [];
 		const uncompleted_levels = this.props.uncompleted_levels;
-		const grades = this.props.grades[0];
+		const grades = this.props.grades.length > 0 ? this.props.grades[0] : {};
 
 		// Go through each tutorial and build an object 
 		TUTORIAL_LEVEL_LIST.map( code => {
@@ -258,9 +258,8 @@ export default class MyProgress extends React.Component<PropsType> {
 
 
 	render(): Node {
-		// Data not yet loaded.
-		if(this.props.grades.length < 1)  throw new Error('Do not load until all data is present');
-		
+		const grades = this.props.grades.length>0 ? this.props.grades[0] : {};
+
 		// Only a single grades entry should be returned.
 		// [{ username: 'x', tutorial: 20, ... }
 		if(this.props.grades.length > 1) throw new Error('Invalid length of data passed to IfNextTutorial');
@@ -268,7 +267,7 @@ export default class MyProgress extends React.Component<PropsType> {
 		const levels = this.get_levels();
 		
 		// If the user hasn't done anything, then have a friendlier title.
-		const title = typeof this.props.grades[0].tutorial === 'undefined' 
+		const title = typeof grades.tutorial === 'undefined' 
 				? 'Welcome to the Formula Trainer website!' 
 				: 'Formula Trainer';
 

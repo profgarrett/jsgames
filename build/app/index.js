@@ -91,15 +91,13 @@ if (!Array.prototype.includes) {
 // Import app components.
 import IfHome from './if/IfHome';
 import { Menu, PageNotFound } from './components/Misc';
-import Login from './components/Login';
+import LoginContainer from './components/LoginContainer';
 import Logout from './components/Logout';
 import Homepage from './components/Homepage';
+import PasswordContainer from './components/PasswordContainer';
 
 import bugsnag from '@bugsnag/js';
 import bugsnagReact from '@bugsnag/plugin-react';
-
-
-import { Container } from 'react-bootstrap';
 
 let Root = null;
 
@@ -133,7 +131,8 @@ if(window.location.hostname !== 'localhost') {
 				<Menu page='/' />
 				<Switch>
 					<Route exact path='/' component={Homepage}></Route>
-					<Route path='/login' component={Login}></Route>
+					<Route path='/login' component={LoginContainer}></Route>
+          <Route path='/password' component={PasswordContainer}></Route>
 					<Route path='/logout' component={Logout}></Route>
 					<Route path='/ifgame' component={IfHome}></Route>
 					<Route component={PageNotFound}></Route>
@@ -148,7 +147,8 @@ if(window.location.hostname !== 'localhost') {
     <BrowserRouter basename='/'>
 				<Switch>
 					<Route exact path='/' component={Homepage}></Route>
-					<Route path='/login' component={Login}></Route>
+					<Route path='/login' component={LoginContainer}></Route>
+          <Route path='/password' component={PasswordContainer}></Route>
 					<Route path='/logout' component={Logout}></Route>
 					<Route path='/ifgame' component={IfHome}></Route>
 					<Route component={PageNotFound}></Route>

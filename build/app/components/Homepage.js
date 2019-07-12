@@ -15,7 +15,6 @@ export default class Homepage extends React.Component {
 			<Row>
 				<Col xs={8}>
 					<ForceLogin />
-					Loading...
 				</Col>
 			</Row>
 		);
