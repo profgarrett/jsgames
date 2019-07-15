@@ -218,6 +218,7 @@ async function login_user(username        , password        , res           )   
 	res.cookie('x-access-token-username', username);
 	res.cookie('x-access-token-refreshed', last);
 
+
 	// Perms. Used on client side to enable/hide information.
 	//res.cookie('iduser', '?');
 	//res.cookie('is-admin', 'False');

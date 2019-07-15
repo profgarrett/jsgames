@@ -3,7 +3,6 @@
 /**
 	Node main event loop
 */
-const DEBUG_DELAY = 0;
 const express = require('express');
 const path = require('path');
 const bodyParser = require('body-parser');
@@ -12,13 +11,15 @@ const cookieParser = require('cookie-parser');
 const bugsnag = require('@bugsnag/js');
 const bugsnagExpress = require('@bugsnag/plugin-express');
 const crypto = require('crypto');
-const nodemailer = require('nodemailer');
 
 
-const { BUGSNAG_API, DEBUG, ADMIN_USERNAME, EMAIL_ADDRESS, EMAIL_PASSWORD, EMAIL_HOST, VERSION } = require('./secret.js'); 
+const { BUGSNAG_API, DEBUG, ADMIN_USERNAME, VERSION } = require('./secret.js'); 
+
+const DEBUG_DELAY = DEBUG ? 500 : 0;
 
 const { IfLevelModelFactory, IfLevelModel } = require('./IfGame');
 const { IfLevels } = require('./../shared/IfGame');
+const { send_email } = require('./email.js');
 
 const { from_utc_to_myql, run_mysql_query, update_mysql_database_schema, to_utc } = require('./mysql.js');
 const { logout_user, 
@@ -207,16 +208,33 @@ app.post('/api/ifgame/new_level_by_code/:code',
 
 
 // List a list of classes.
-app.get('/api/ifgame/sections/', 
+app.get('/api/ifgame/sections/:username', 
 	nocache, require_logged_in_user, 
 	async (req          , res           , next              )               => {
 	try {
-		const username = get_username_or_emptystring(req, res);
-		if(username !== ADMIN_USERNAME && username !== 'test')
-			throw new Error('Invalid username '+username+' for sections');
 
-		const sql = 'SELECT * FROM sections';
-		const sections = await run_mysql_query(sql);
+		const req_username = req.params.username || '';
+		const username = get_username_or_emptystring(req, res);
+		let sql = 'SELECT * FROM sections ORDER BY opens DESC';
+		const params = [];
+
+		if(req_username === '') {
+			// All sections.  Check admin
+			if(username !== ADMIN_USERNAME && username !== 'test')
+				throw new Error('Invalid username '+username+' for sections');
+		} else {
+			// Just the current user's sections.
+			if(username !== req_username)
+				throw new Error('Invalid username request for sections');
+
+			sql = `SELECT sections.*, users_sections.role FROM users 
+				INNER JOIN users_sections on users.iduser = users_sections.iduser
+			    INNER JOIN sections on users_sections.idsection = sections.idsection
+				where users.username = ? ORDER BY opens DESC`;
+			params.push(username);
+		}
+
+		const sections = await run_mysql_query(sql, params);
 		res.json(sections);
 	} catch (e) {
 		log_error(e);
@@ -788,28 +806,7 @@ Excel.fun Administrator
 		const values = [ created, username, iduser, code, 0 ];
 		const insert_results = await run_mysql_query(insert_sql, values);
 
-		// Send email.
-		const transporter = nodemailer.createTransport({
-			host: 'mail.excel.fun',
-			port: 587,
-			secure: false, 
-			requireTLS: true,
-			tls: {
-				rejectUnauthorized: false
-			},
-			auth: {
-				user: EMAIL_ADDRESS,
-				pass: EMAIL_PASSWORD
-			}
-		});
-
-		const info = await transporter.sendMail({
-			from: '"Nathan @ Excel.fun" <Nathan@Excel.fun>', // sender address
-			to: username, 
-			subject: 'Reset Password for Excel.fun',
-			text: message
-		});
-		console.log(info);
+		send_email( username, 'Reset Password for Excel.fun', message);
 
 		res.json({ success: true });
 	} catch (e) {
@@ -973,7 +970,7 @@ app.post('/api/create_user/',
 		const username = isAnon ? 'anon' + Math.floor(Math.random()*100000000000) : req.body.username;
 		const password = 'p' + Math.floor(Math.random()*100000000000);
 		const hashed_password = hash_password(password);
-		const code = req.body.section_code;
+		let code = req.body.section_code;
 	
 
 		// Do some basic checking on the username.
@@ -1017,9 +1014,14 @@ app.post('/api/create_user/',
 
 
 
-		// Find section join code (if present)
-		// Must not be an anon user.
-		if(!isAnon && code.length > 0) {
+		// If an anon user, then join to the anonymous test group.
+		if(isAnon) {
+			code = 'anonymous';
+		}
+
+		// If we have any code, then create the new row.
+		if(code.length > 0) {
+			// Find section join code (if present)
 			const sql_select_idsection = 'SELECT idsection FROM sections WHERE code = ?';
 			const select_idsection_results = code.length === 0 ? [] : await run_mysql_query(sql_select_idsection, [code]) ;
 
@@ -1033,18 +1035,16 @@ app.post('/api/create_user/',
 				VALUES (?, ?, ?)`;
 			const insert_section_id_results = await run_mysql_query(insert_section_id_sql, [iduser, idsection, 'student']);
 			if(insert_section_id_results.affectedRows < 0 ) {
-				console.log(insert_section_id_results);
 				return res.sendStatus(500);
 			}
 		}
 
-
 		// Login the user.
 		const login_results = await login_user(username, password, res); 
+		const created = from_utc_to_myql(to_utc(new Date()));
 
 		// setup email
 		if( !isAnon) {
-				const created = from_utc_to_myql(to_utc(new Date()));
 				const reset_code = crypto.randomBytes(12).toString('hex');
 				const message = `You created an account on Excel.fun.
 Please use the link below to setup your password.
@@ -1065,30 +1065,9 @@ Excel.fun Administrator
 				return res.sendStatus(500);
 			}
 
-			// Send email.
-			const transporter = nodemailer.createTransport({
-				host: 'mail.excel.fun',
-				port: 587,
-				secure: false, 
-				requireTLS: true,
-				tls: {
-					rejectUnauthorized: false
-				},
-				auth: {
-					user: EMAIL_ADDRESS,
-					pass: EMAIL_PASSWORD
-				}
-			});
-
 			// Send email to setup password as long as have a @ symbol.
 			if(user.username.indexOf('@') !== -1) {
-				const info = await transporter.sendMail({
-					from: '"Nathan @ Excel.fun" <Nathan@Excel.fun>', // sender address
-					to: user.username, 
-					subject: 'Setup Password for Excel.fun',
-					text: message
-				});
-				console.log(info);
+				await send_email( user.username, 'Setup Password for Excel.fun', message);
 			}
 		}
 

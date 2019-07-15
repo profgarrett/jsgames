@@ -14,29 +14,38 @@ import type { PageType } from './../app/if/IfTypes';
 	Code value must match the filename in server/tutorial/...js
 */
 const IfLevels = [
-	{ code: 'tutorial', label: 'Website Introduction', description: 'Learn how this website works.' },
-	{ code: 'math1', label: 'Math 1', description: 'Use addition, subtraction, multiplication, and division' },
-	{ code: 'math1review', label: 'Math 1 Review', description: 'Review arithmetic operations' },
-	{ code: 'math2', label: 'Math 2', description: 'Learn new ways to use multiplication and division.' },
-	{ code: 'math2review', label: 'Math 2 Review', description: 'Review division and multiplication' },
-	{ code: 'math3', label: 'Math 3', description: 'Learn exponents, parentheses, and order of operations' },
-	{ code: 'math3review', label: 'Math 3 Review', description: 'Review exponents, parentheses, and order of operations' },
-	{ code: 'functions1', label: 'Functions 1', description: 'Learn how to use range and rounding functions.' },
-	{ code: 'functions1review', label: 'Functions 1 Review', description: 'Review basic functions.' },
-	{ code: 'functions2', label: 'Functions 2', description: 'Learn date and text functions.' },
-	{ code: 'functions2review', label: 'Functions 2 Review', description: 'Review more functions.' },
-	{ code: 'if1', label: 'IF1: Logical number comparisons', description: 'Compare numbers' },
-	{ code: 'if2', label: 'IF2: Logical text comparisons', description: 'Compare words' },
-	{ code: 'if3', label: 'IF3: the IF function', description: 'Create simple formulas with IF' },
-	{ code: 'if4', label: 'IF4: Logical functions', description: 'Learn about AND, OR, & NOT' },
-	{ code: 'if5', label: 'IF5: Logical functions and IF', description: 'Use AND, OR, & NOT inside of IF' },
-	{ code: 'if6', label: 'IF6: IF and Math', description: 'Embed math inside of an IF' },
-	{ code: 'if7', label: 'IF7: Booleans 1', description: 'Figure out TRUE and FALSE' },
-	{ code: 'if8', label: 'IF8: Booleans 2', description: 'Use booleans with the AND & OR functions' },
-	{ code: 'math4', label: 'Math 4', description: 'Learn growth and rounding functions' },
-	{ code: 'math4review', label: 'Math 4 Review', description: 'Review growth and rounding functions' },
-	{ code: 'surveymath1', label: 'Survey of Math Concepts 1', description: 'Review your math concepts' },
-	{ code: 'surveymath2', label: 'Survey of Math Concepts 2', description: 'Review your math concepts' },
+	{ code: 'tutorial', title: 'Website Introduction', description: 'Learn how to create formulas.' },
+
+	{ code: 'math1', title: 'Math 1', description: 'Use addition, subtraction, multiplication, and division' },
+	{ code: 'math1review', title: 'Math 1 Review', description: 'Review arithmetic operations' },
+	{ code: 'math2', title: 'Math 2', description: 'Learn new ways to use multiplication and division.' },
+	{ code: 'math2review', title: 'Math 2 Review', description: 'Review division and multiplication' },
+	{ code: 'math3', title: 'Math 3', description: 'Learn exponents, parentheses, and order of operations' },
+	{ code: 'math3review', title: 'Math 3 Review', description: 'Review exponents, parentheses, and order of operations' },
+	{ code: 'math4', title: 'Math 4', description: 'Learn growth and rounding functions' },
+	{ code: 'math4review', title: 'Math 4 Review', description: 'Review growth and rounding functions' },
+
+	{ code: 'functions1', title: 'Functions 1', description: 'Learn how to use range and rounding functions.' },
+	{ code: 'functions1review', title: 'Functions 1 Review', description: 'Review basic functions.' },
+	{ code: 'functions2', title: 'Functions 2', description: 'Learn date and text functions.' },
+	{ code: 'functions2review', title: 'Functions 2 Review', description: 'Review more functions.' },
+
+	{ code: 'if1', title: 'IF1: Logical number comparisons', description: 'Compare numbers' },
+	{ code: 'if2', title: 'IF2: Logical text comparisons', description: 'Compare words' },
+	{ code: 'if3', title: 'IF3: the IF function', description: 'Create simple formulas with IF' },
+	{ code: 'if4', title: 'IF4: Logical functions', description: 'Learn about AND, OR, & NOT' },
+	{ code: 'if5', title: 'IF5: Logical functions and IF', description: 'Use AND, OR, & NOT inside of IF' },
+	{ code: 'if6', title: 'IF6: IF and Math', description: 'Embed math inside of an IF' },
+	{ code: 'if7', title: 'IF7: Booleans 1', description: 'Figure out TRUE and FALSE' },
+	{ code: 'if8', title: 'IF8: Booleans 2', description: 'Use booleans with the AND & OR functions' },
+
+	{ code: 'surveymath1', title: 'Survey of Math Concepts 1', description: 'Review your math concepts' },
+	{ code: 'surveymath2', title: 'Survey of Math Concepts 2', description: 'Review your math concepts' },
+
+	{ code: 'surveywaiver_non_woodbury_student', title: 'Account Setup', description: 'Learn about this website and answer several questions' },
+	{ code: 'surveywaiver_non_woodbury_user', title: 'Account Setup', description: 'Learn about this website and answer several questions' },
+	{ code: 'surveywaiver_woodbury_student', title: 'Account Setup', description: 'Learn about this website and answer several questions' },
+
 ];
 
 

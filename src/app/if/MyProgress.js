@@ -2,9 +2,9 @@
 import React from 'react';
 import type { LevelType  } from './IfTypes';
 import type { Node } from 'react';
-import { Card, Table, Tooltip, OverlayTrigger, Button } from 'react-bootstrap';
+import { Card, DropdownButton, Dropdown, Table, Tooltip, OverlayTrigger, Button } from 'react-bootstrap';
 import { IfLevels } from './../../shared/IfGame';
-import { HtmlSpan } from './../components/Misc';
+
 //import type { IfLevelType } from './../../app/if/IfTypes';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faThumbsUp, faMinus } from '@fortawesome/free-solid-svg-icons';
@@ -13,8 +13,9 @@ import { Link } from 'react-router-dom';
 
 /*
 	List of tutorials that should be shown as a row for the table
+	Only used if it's not defined by the section.
 */
-const TUTORIAL_LEVEL_LIST = [
+const DEFAULT_TUTORIAL_LEVEL_LIST = [
 	'tutorial', 'math1', 'math2', 'math3',
 	'functions1', 'functions2', 
 	'if1', 'if2', 'if3', 'if4', 'if5', 'if6', 'if7', 'if8',
@@ -63,21 +64,42 @@ const glyph = score => {
 
 
 
-// Data should be loaded from the grades api.
+// Grades is loaded from the grades api.
 // Contains 
 // [
 //		{ username: 'bob', tutorial: 100, math1: 23 }   <== 23 is 23%.  Undone tutorials are undefined.
 //	]
+//
+// Sections are loaded from http://localhost:8080/api/ifgame/sections/nathan.garrett@woodbury.edu
+// [
+//		{ idsection, code, year, term, opens, closes, require_research_waiver, levels, role }
+// ]
+//
+// section.Levels are important, as they set the order and number of items to be completed.
+// "code1,code2,code3"
+// Used to mandate surveys and other useful items.
 type PropsType = {
+	sections: Array<any>,
 	grades: Array<any>,
 	uncompleted_levels: Array<LevelType>,
 	onClickNewCode: Function,
 	onClickContinueLevel: Function
 };
 
+type StateType = {
+	section: Object
+};
 
+export default class MyProgress extends React.Component<PropsType, StateType> {
 
-export default class MyProgress extends React.Component<PropsType> {
+	constructor(props: any) {
+		super(props);
+		this.state = { 
+			section: this.props.sections.length > 0 ? this.props.sections[0] : null
+		};
+
+		(this: any).handleSectionChange = this.handleSectionChange.bind(this);
+	}
 
 
 	/**
@@ -118,7 +140,7 @@ export default class MyProgress extends React.Component<PropsType> {
 				tds.push(<td key={'MyProgressRowTD'+counter++} style={td_disabled}>NA</td>);
 			}
 
-			tds.push(<td key={'MyProgressRowTD'+counter++} style={td_l}><Link to={'/ifgame/levels/'+levels[i].code+'/'}>{ levels[i].label }</Link></td>);
+			tds.push(<td key={'MyProgressRowTD'+counter++} style={td_l}><Link to={'/ifgame/levels/'+levels[i].code+'/'}>{ levels[i].title }</Link></td>);
 			tds.push(<td key={'MyProgressRowTD'+counter++} style={td_l}>{ levels[i].description }</td>);
 
 			// Save grades for overall average.
@@ -164,7 +186,7 @@ export default class MyProgress extends React.Component<PropsType> {
 
 				return (<span>You are currently working on&nbsp;
 							<Link to={'/ifgame/level/'+levels[i].tutorial_incompleted_levels[0]._id+'/play'}>
-								{levels[i].label}</Link>&nbsp;
+								{levels[i].title}</Link>&nbsp;
 								(started <PrettyDate date={levels[i].tutorial_incompleted_levels[0].created} />)
 						</span>);
 			}
@@ -185,7 +207,7 @@ export default class MyProgress extends React.Component<PropsType> {
 		for(let i=0; i<levels.length; i++) {
 
 			if(levels[i].tutorial_highest_grade === null ){
-				return (<span>Your next lesson is {levels[i].label}.
+				return (<span>Begin the {levels[i].title} activity.
 						<Button href='#' variant='primary' size='sm' style={{ marginLeft: 5, marginTop: -3 }}
 							onClick={ e=> this.props.onClickNewCode(levels[i].code, e) } >Start!</Button>
 						</span>);
@@ -199,6 +221,26 @@ export default class MyProgress extends React.Component<PropsType> {
 
 
 
+	/**
+		Get a list of tutorials to complete.
+
+		Pulls info from sections.  If any have a ?, then uses the given 
+		default.
+	*/
+	get_list(): Array<string> {
+
+		const list = this.props.sections.length === 0 || this.state.section.levels === null || this.state.section.levels === ''
+			? DEFAULT_TUTORIAL_LEVEL_LIST 
+			: this.state.section.levels.split(',');
+
+		for(let i=0; i<list.length; i++) {
+			if(list[i] === '?') {
+				DEFAULT_TUTORIAL_LEVEL_LIST.map( l => list.push(l) );
+			}
+		}
+
+		return list.filter( code => code !== '?');
+	}
 
 	/**
 		Used to build out a datastructure useful for this display.
@@ -215,11 +257,13 @@ export default class MyProgress extends React.Component<PropsType> {
 		const uncompleted_levels = this.props.uncompleted_levels;
 		const grades = this.props.grades.length > 0 ? this.props.grades[0] : {};
 
+		const list = this.get_list();
+
 		// Go through each tutorial and build an object 
-		TUTORIAL_LEVEL_LIST.map( code => {
+		list.map( code => {
 			let l = {
 				code: code,
-				label: '',
+				title: '',
 				description: '',
 				review_available: false,
 
@@ -231,7 +275,7 @@ export default class MyProgress extends React.Component<PropsType> {
 			};
 
 			// Build out information on the level.
-			l.label = IfLevels.filter( l => l.code === code)[0].label;
+			l.title = IfLevels.filter( l => l.code === code)[0].title;
 			l.description = IfLevels.filter( l => l.code === code)[0].description;
 
 			if(IfLevels.filter( l=> l.code === code+'review').length > 0) {
@@ -255,9 +299,18 @@ export default class MyProgress extends React.Component<PropsType> {
 		return levels;
 	}
 
+	handleSectionChange(value: string) {
+		const sections = this.props.sections.filter( s => s.code === value);
+
+		if(sections.length === 0) throw new Error('Invalid value section');
+
+		this.setState({ section: sections[0]});
+	}
+
 
 
 	render(): Node {
+		const list = this.get_list();
 		const grades = this.props.grades.length>0 ? this.props.grades[0] : {};
 
 		// Only a single grades entry should be returned.
@@ -271,15 +324,47 @@ export default class MyProgress extends React.Component<PropsType> {
 				? 'Welcome to the Formula Trainer website!' 
 				: 'Formula Trainer';
 
+		const section = this.props.sections.length == 0 
+				? null 
+				: <p style={{ fontSize: 8, textAlign: 'right' }}><i>Course: {this.state.section.title}</i></p>;
+
+		const picker = this.props.sections.length < 2 
+				? null
+				: <DropdownButton 
+						onSelect={this.handleSectionChange}
+						variant='primary' 
+						title= {this.state.section.title} 
+						key='select_code' id='select_code'>
+							{ this.props.sections.map( (section,i) => 
+								<Dropdown.Item
+									key={'select_code_dropdownitem'+i} 
+									eventKey={section.code}>{section.title}
+								</Dropdown.Item> 
+							)}
+				</DropdownButton>;
+
+		// See if we have completed the first level in the section list.
+		// This should be the agreement waiver for that particular group of people.
+		const waiver_completed = typeof grades[list[0]] !== 'undefined';
+
+
+		//debugger;
+		// only show table *if* they've completed any mandatory surveys.
+		const table =  /*!waiver_completed
+				? null 
+				: */ this._render_table(levels);
+
 		// Return card.
 		return (
 			<div className='card' style={{ backgroundColor: '#f5f5f5' }}>
 				<div className='card-body'>
 					<div className='h5'>{title}</div>
 					<div className='card-text'>
+						{ picker }
 						{ this._render_next_lesson(levels) }
 						<span style={{ marginBottom: 10}} /> 
-						{ this._render_table(levels) }
+						{ table }
+						{ section }
 					</div>
 				</div>
 			</div>);

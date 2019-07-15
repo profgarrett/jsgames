@@ -18,6 +18,7 @@ const { functions2, functions2review } = require('./tutorials/functions2');
 const { if1, if2, if3, if4, if5, if6, if7, if8 } = require('./tutorials/if');
 
 const { surveymath1, surveymath2 } = require('./tutorials/surveymath');
+const { surveywaiver_non_woodbury_student, surveywaiver_non_woodbury_user, surveywaiver_woodbury_student } = require('./tutorials/surveywaivers');
 
 const { parseFeedback } = require('./parseFeedback');
 import type { LevelType /*, PageType */ } from './../app/if/IfTypes';
@@ -381,7 +382,10 @@ const IfLevelModelFactory = {
 		if8: { ...baseifgame, ...if8},
 		surveymath1: { ...baseifgame, ...surveymath1 },
 		surveymath2: { ...baseifgame, ...surveymath2 },
-		test_gens: { ...baseifgame, ...test_gens }
+		test_gens: { ...baseifgame, ...test_gens },
+		surveywaiver_non_woodbury_student: { ...baseifgame, ...surveywaiver_non_woodbury_student }, 
+		surveywaiver_non_woodbury_user: { ...baseifgame, ...surveywaiver_non_woodbury_user },
+		surveywaiver_woodbury_student: { ...baseifgame, ...surveywaiver_woodbury_student }
 	},
 
 	// Create and return a new level of the given code.

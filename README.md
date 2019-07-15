@@ -48,6 +48,8 @@ Then, run tests. Replace x with the code used to create users on your system. No
 http://hostname/ifgame/test/?USER_CREATION_SECRET=x
 ```
 
+After installing, add a section with 'anonymous' as its code. New users w/o a username will
+be added to this group.
 
 
 ## Architecture

@@ -160,7 +160,7 @@ export default class LoginContainer extends React.Component<PropsType, StateType
 				if(json.error) throw new Error(json.error); 
 
 				this.setState({ 
-					message: 'Success creating your account!  Please check your email to find a link to verify your account.', 
+					message: 'Success creating your account!  If you provided an email, you will receive a link to verify your account.', 
 					messageStyle: 'success', 
 				});
 				setTimeout( () => {
