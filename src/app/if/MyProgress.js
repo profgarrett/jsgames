@@ -329,10 +329,10 @@ export default class MyProgress extends React.Component<PropsType, StateType> {
 				: <p style={{ fontSize: 8, textAlign: 'right' }}><i>Course: {this.state.section.title}</i></p>;
 
 		// If member of a section, as well as an admin for this course,
-		let course_links = null;
+		let picker = null;
 		if(this.props.sections.length > 0 && this.state.section.role === 'faculty') {
 			let p = '?idsection=' + this.state.section.idsection;	
-			course_links = (
+			let course_links = (
 				<InputGroup style={{ marginLeft: 3, marginTop: 3}}>
 					View this section&apos;s&nbsp;
 					<Link key='link1' to={'/ifgame/recent'+p}>recent activity</Link>,&nbsp;
@@ -340,11 +340,8 @@ export default class MyProgress extends React.Component<PropsType, StateType> {
 					<Link key='link3' to={'/ifgame/questions'+p}>questions</Link>
 				</InputGroup>
 				);
-		}
 
-		const picker = this.props.sections.length < 2 
-				? null
-				: <ButtonToolbar>
+			picker = (<ButtonToolbar>
 					<DropdownButton 
 						onSelect={this.handleSectionChange}
 						variant='primary' 
@@ -359,7 +356,9 @@ export default class MyProgress extends React.Component<PropsType, StateType> {
 							)}
 					</DropdownButton>
 					{ course_links }
-				</ButtonToolbar>;
+				</ButtonToolbar>);
+		}
+
 
 
 		// only show table *if* they've completed any mandatory surveys.

@@ -111,18 +111,18 @@ class IfPagesTable extends React.Component                  {
 			id: 'description',
 			Header: 'Desc',
 			accessor: q => q.description,
-			width: 150
+			width: 550
 		}, {
 			id: 'type',
 			Header: 'Type',
-			accessor: q => q.type.substr(6),
-			width: 70
+			accessor: q => q.type.substr(6).replace('Schema', ''),
+			width: 100
 		}, {
 			id: 'count',
-			Header: 'N',
+			Header: 'Count',
 			accessor: q => q.n,
 			style: {textAlign: 'right'},
-			width: 50
+			width: 100
 		}, {
 			id: 'correct',
 			Header: 'Correct',
@@ -134,18 +134,21 @@ class IfPagesTable extends React.Component                  {
 			Header: 'Seconds',
 			accessor: q => Math.round(q.seconds_average),
 			style: {textAlign: 'right'},
-			width: 50
+			width: 100
+			/*
 		}, {
 			id: 'tags',
 			Header: 'Tags',
 			accessor: q => q.tags.map( t => t.n + ' ' + t.tag ).join(', '),
 			width: 400
+
 		}, {
 			id: 'breaks',
 			Header: 'breaks',
 			accessor: q => q.breaks === 0 ? '' : q.breaks,
 			style: {textAlign: 'right'},
 			width: 50
+			*/
 		}, {
 			expander: true,
 			Header: () => <b>More</b>,
