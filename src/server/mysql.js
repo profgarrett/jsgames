@@ -14,6 +14,7 @@ const { sql07 } = require('./../../sql/sql07.js');
 const { sql08 } = require('./../../sql/sql08.js');
 const { sql09 } = require('./../../sql/sql09.js');
 const { sql10 } = require('./../../sql/sql10.js');
+const { sql11 } = require('./../../sql/sql11.js');
 
 /**
 	Initialize MYSQL with credentials from secret.js.
@@ -106,38 +107,22 @@ const to_utc = (dt: Date): number => {
 async function update_mysql_database_schema(): Promise<any> {
 	
 	const old_version = await _update_get_version();
-	if(old_version < 1) {
-		await _update_update_version( sql01 );
-	}
-	if(old_version < 2 ) {
-		await _update_update_version( sql02 );
-	}
-	if(old_version < 3 ) {
-		await _update_update_version( sql03 );
-	}
-	if(old_version < 4 ) {
-		await _update_update_version( sql04 );
-	}
-	if(old_version < 5 ) {
-		await _update_update_version( sql05 );
-	}
+
+	if(old_version < 1) await _update_update_version( sql01 );
+	if(old_version < 2 ) await _update_update_version( sql02 );
+	if(old_version < 3 ) await _update_update_version( sql03 );
+	if(old_version < 4 ) await _update_update_version( sql04 );
+	if(old_version < 5 ) await _update_update_version( sql05 );
 	if(old_version < 6 ) {
-		// Prunce some bad data from earlier schemas.
+		// Prune some bad data from earlier schemas.
 		await _update_fix_bad_page_data6();
 		await _update_update_version( sql06 );
 	}
-	if(old_version < 7 ) {
-		await _update_update_version( sql07 );
-	}
-	if(old_version < 8 ) {
-		await _update_update_version( sql08 );
-	}
-	if(old_version < 9 ) {
-		await _update_update_version( sql09 );
-	}
-	if(old_version < 10 ) {
-		await _update_update_version( sql10 );
-	}
+	if(old_version < 7 ) await _update_update_version( sql07 );
+	if(old_version < 8 ) await _update_update_version( sql08 );
+	if(old_version < 9 ) await _update_update_version( sql09 );
+	if(old_version < 10 ) await _update_update_version( sql10 );
+	if(old_version < 11 ) await _update_update_version( sql11 );
 
 
 	return { 'old_version': old_version, 'up_to_date': true };
@@ -153,6 +138,21 @@ async function _update_update_version(sqls: Array<string> ): Promise<void> {
 			return conn.query(sqls[i]);
 		});
 	}
+}
+
+
+// Make sure that the current logged in user has the faculty role.
+async function is_faculty(username: string): Promise<any> {
+
+	const role_sql = `SELECT distinct	users.iduser, users.username, users_sections.role
+		FROM users 
+			INNER JOIN users_sections 
+				ON users.iduser = users_sections.iduser
+		        AND users_sections.role = 'faculty'
+		WHERE username = ?`;
+	const roles = await run_mysql_query(role_sql, [username]);
+	
+	return (roles.length === 1);
 }
 
 /*
@@ -220,6 +220,7 @@ module.exports = {
 	to_utc, 
 	from_mysql_to_utc,
 	from_utc_to_myql,
+	is_faculty,
 	get_mysql_connection, run_mysql_query,
 	update_mysql_database_schema
 

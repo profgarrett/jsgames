@@ -82,7 +82,9 @@ class IfPagesTable extends React.Component<DetailPropsType> {
 						{ question.description }
 						{ question.instruction }
 						<b>{ question.solution_f }</b>
-						<div>{ question.kcs.map( 
+						<div>{ question.kcs === false
+							? ''
+							: question.kcs.map( 
 							(tag,i) => 
 									<span key={'questioncomplexity'+i} className='badge badge-pill badge-info'>
 										{ tag.tag }</span>) }
@@ -177,7 +179,7 @@ class IfPagesTable extends React.Component<DetailPropsType> {
 		// If empty, return a div.
 		if(levels.length < 1) 
 			return <div/>;
-
+		
 		// Go through each map of levels and return a table for each.
 		const html = levels.map( 
 			(level_summary,i) => 

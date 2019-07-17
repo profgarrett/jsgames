@@ -7,6 +7,11 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const JWT_EXPIRE_SECONDS = 60*60*24*300; // 300 days.
 
+const { DEBUG } = require('./secret.js'); 
+const fs = require('fs');
+const util = require('util');
+
+
 
                                                                  
 
@@ -227,6 +232,30 @@ async function login_user(username        , password        , res           )   
 }
 
 
+
+// Force responses to not be cached. Since we don't server actual files, and just API requests,
+// and those update, if a browser caches a response they may not stale/incorrect data later.
+// @Thanks to https://stackoverflow.com/questions/20429592/no-cache-in-a-nodejs-server
+function nocache(req          , res           , next              ) {
+	res.header('Cache-Control', 'private, no-cache, no-store, must-revalidate');
+	res.header('Expires', '-1');
+	res.header('Pragma', 'no-cache');
+	next();
+}
+
+
+
+// If we're not debugging, throw all errors to log file.
+const log_error = function (arg      ) {
+	if(DEBUG) {
+		console.log(arg);
+	} else {
+		let logFile = fs.createWriteStream('log.txt', { flags: 'a' });
+		logFile.write(util.format.apply(null, arguments) + '\n');
+		//ogStdout.write(util.format.apply(null, arguments) + '\n');
+	}
+};
+
 module.exports = {
 	logout_user,
 	hash_password,
@@ -235,5 +264,7 @@ module.exports = {
 	get_username_or_emptystring,
 	require_logged_in_user,
 	is_matching_mysql_user,
-	login_user
+	login_user,
+	nocache,
+	log_error
 };

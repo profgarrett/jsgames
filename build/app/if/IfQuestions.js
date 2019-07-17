@@ -23,8 +23,6 @@ export default class IfQuestions extends React.Component            {
 
 		const levels = create_summary(this.props.levels);
 
-		//console.log(levels);
-
 		if(this.props.output === 'table')
 			return <IfQuestionsTable levels={levels} />;
 

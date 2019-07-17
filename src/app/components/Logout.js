@@ -29,7 +29,7 @@ export default class Logout extends React.Component {
 		}
 
 		// Fire AJAX to log out.
-		fetch('/api/logout/', {
+		fetch('/api/users/logout/', {
 				method: 'POST',
 				credentials: 'include',
 				mode: 'same-origin',

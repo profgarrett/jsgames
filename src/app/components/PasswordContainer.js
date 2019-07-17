@@ -87,7 +87,7 @@ export default class PasswordContainer extends React.Component<PropsType, StateT
 		this.setState( { isLoading: true, message: 'Sending email with your information', messageStyle: 'info' });
 
 		// Fire AJAX.
-		fetch('/api/passwordresetrequest/', {
+		fetch('/api/users/passwordresetrequest/', {
 				method: 'POST',
 				credentials: 'include',
 				mode: 'same-origin',
@@ -117,7 +117,7 @@ export default class PasswordContainer extends React.Component<PropsType, StateT
 		const url = this.state.url;
 
 		// Fire AJAX to reset password and login with the new password.
-		fetch('/api/passwordreset/', {
+		fetch('/api/users/passwordreset/', {
 				method: 'POST',
 				credentials: 'include',
 				mode: 'same-origin',

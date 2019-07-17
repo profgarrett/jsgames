@@ -9,6 +9,7 @@ export type LevelType = {
 	seed: number,
 	harsons_randomly_on_username: boolean,
 	standardize_formula_case: boolean,
+	show_score_after_completing: boolean,
 	
 	title: string,
 	description: string,

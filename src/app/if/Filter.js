@@ -2,6 +2,9 @@
 import React from 'react';
 import { ButtonToolbar, ButtonGroup, DropdownButton, Dropdown, Button  } from 'react-bootstrap';
 import { IfLevels } from './../../shared/IfGame';
+import { getUserFromBrowser } from './../components/Authentication';
+
+import 'url-search-params-polyfill';
 
 import type { Node } from 'react';
 
@@ -10,88 +13,105 @@ import type { Node } from 'react';
 type PropsType = {
 	disabled: boolean, // provide a way to make it readonly, such as when data is being loaded externally.
 	onChange: (Object) => void,
-	onReady: () => void,
-	defaults: Object
+	onReady: (Object) => void,
+	defaults: Object,
+	filters: Object
 };
+
+/* Filters expects the following 
+{ 
+	'sections': null   <-- initial set of possible options.  Use null if wanting filter to grab values.
+	'randoms': ['a', 'b', 'c']  <-- initial set with specified list. 
+}
+*/
 
 type ContainerStateType = {
 	// Status.
-	loading_data: boolean, // are we loading the filter data?
+	filters: Object,
+	selection: Object,
+	loading: Object
 
-	// Filters. Will be passed to onChange.
-	code: string,
-	codes: Array<Object>,
-
-	pagetype: string, 
-	pagetypes: Array<string>,
-
-	idsection: string, // note: this is a FK for the section's PK
-	sections: Array<any>,
-
-	iduser: string, // note: this is ID, not username.
-	users: Array<any>
 };
 
 export default class Filter extends React.Component<PropsType, ContainerStateType> {
 	constructor(props: any) {
 		super(props);
-		const defaults = this.props.defaults || {};
 
-		this.state = { 
-			loading_data: true,
+		const filters = { ...this.props.filters };
+		const selection = { ...this.props.defaults };
 
-			code: defaults.code || '',
-			codes: IfLevels.map( l => {return { code: l.code, label: l.label }; }),
+		// Initialize selection to make sure that there is a value for each item.
+		// Empty array is uninitialized.
+		for(let filter in filters) {
+			if(filters.hasOwnProperty(filter)) {
+				if( typeof selection[filter] === 'undefined' ) {
+					selection[filter] = '';
+				}
+			}
+			if(typeof filters[filter] !== 'object' || typeof filters[filter].slice !== 'function') 
+				throw new Error('Filter needs to receive arrays for all args. Use empty for unset');
+		}
 
-			pagetype: 'IfPageFormulaSchema|IfPageHarsonsSchema',
-			pagetypes: [
-				'IfPageNumberAnswerSchema',
-				'IfPageChoiceSchema', 
-				'IfPageHarsonsSchema',
-				'IfPageFormulaSchema',
-				'IfPageFormulaSchema|IfPageHarsonsSchema',
-				'IfPageParsonsSchema'],
+		// Populate levels
+		if(typeof filters.levels !== 'undefined') {
+			filters.levels = IfLevels.map( l => { return { value: l.code, label: l.title }; });
+			filters.levels.unshift({ value:'', label: 'All'}); // add the all option
+		}
 
-			idsection: '',
-			sections: [], // loads to an array from server.
+		// Populate page types
+		if(typeof filters.pagetypes !== 'undefined') {
+			filters.pagetypes = [
+				{ value: 'IfGameNumberAnswerSchema', label:'Numbers' },
+				{ value: 'IfPageChoiceSchema',  label:'Choice' },
+				{ value: 'IfPageHarsonsSchema', label:'Harsons' },
+				{ value: 'IfPageFormulaSchema', label:'Formula' },
+				{ value: 'IfPageFormulaSchema|IfPageHarsonsSchema', label:'Harsons/Formula' },
+				{ value: 'IfPageParsonsSchema', label:'Parsons' }
+				];
+		}
 
-			iduser: '',
-			users: [], // loads to array
-
+		this.state = {
+			filters: filters,
+			selection: selection,
+			loading: []
 		};
+
 		(this: any).loadFilters = this.loadFilters.bind(this);
-		(this: any).getFilter = this.getFilter.bind(this);
-		(this: any).handleCodeFilterChange = this.handleCodeFilterChange.bind(this);
-		(this: any).handleIdSectionFilterChange = this.handleIdSectionFilterChange.bind(this);
-		(this: any).handlePageTypeFilterChange = this.handlePageTypeFilterChange.bind(this);
-		(this: any).handleIdUserFilterChange = this.handleIdUserFilterChange.bind(this);
+		(this: any).onChange = this.onChange.bind(this);
 		(this: any).handleSubmit = this.handleSubmit.bind(this);
 	}
 
 	componentDidMount() {
 		this.loadFilters();
 	}
-	handleCodeFilterChange(value: string) {
-		this.setState({ code: value});
-	}
-	handlePageTypeFilterChange(value: string) {
-		this.setState({ pagetype: value});
-	}
-	handleIdSectionFilterChange(value: string) {
-		this.setState({ idsection: value});
-	}
-	handleIdUserFilterChange(value: string) {
-		this.setState({ iduser: value });
+
+	onChange(key: any, e: any) {
+		const label = e.target.innerText;
+		const name = e.target.name.split('_')[0]; // grab first half of "field_1"
+		const newState = { 'selection': { ...this.state.selection} };
+
+		// Find matching value from the label.
+		let value = this.state.filters[name].filter( item => item.label === label);
+		if(value.length !== 1) throw new Error('Invalid key for Filter.onChange '+label);
+
+		newState.selection[name] = value[0].value;
+		
+		this.setState(newState);
 	}
 
+
 	getFilter(): Object {
-		return {
-			code: this.state.code,
-			pagetype: this.state.pagetype,
-			idsection: this.state.idsection,
-			iduser: this.state.iduser
-		};
+		const values = {};
+
+		for(let filter in this.state.filters) {
+			if(this.state.filters.hasOwnProperty(filter)) {
+				values[filter] = this.state.selection[filter];
+			}
+		}
+
+		return values;
 	}
+
 
 	handleSubmit() {
 		this.props.onChange(this.getFilter());
@@ -100,62 +120,121 @@ export default class Filter extends React.Component<PropsType, ContainerStateTyp
 
 	// Load the filter values.
 	loadFilters() {
-		this.setState({ loading_data: true });
-		const newState = { ...this.state, loading_data: false };
+		const user = getUserFromBrowser();
 
-		// Start with sections.
-		fetch('/api/ifgame/sections', {
-				method: 'get',
-				credentials: 'include',
-				headers: {
-					'Accept': 'application/json',
-					'Content-Type': 'application/json'
-				}
-			})
-			.then( response => response.json() )
-			.then( json => {
-				if( json.length > 0) {
-					// Set the section to the first item and load.
-					newState.sections = json;
-					newState.idsection = ''; // Default to no section.
-				} else {
-					// No sections found.
-					newState.sections = [];
-				}
-
-				// Now load list of people.
-				fetch('/api/ifgame/users', {
-						method: 'get',
-						credentials: 'include',
-						headers: {
-							'Accept': 'application/json',
-							'Content-Type': 'application/json'
-						}
-					})
-					.then( response => response.json() )
-					.then( json => {
-						newState.disabled = false;
-						if( json.length > 0) {
-							newState.users = json;
-							newState.iduser = ''; //  default to all users
-						} else {
-							newState.users = [];
-						}
-
-						// Now update state.
-						this.setState(newState); 
-
-						this.props.onReady(this.getFilter());
-
-					})
-					.catch( error => {
-						console.log(error);
-					});
-
-			})
-			.catch( error => {
-				console.log(error);
+		// Load section filter.
+		if( this.state.filters.sections ) {
+			// Remember that we're loading this.
+			this.setState((oldState) => {
+				const loading = oldState.loading.slice();
+				loading.push('sections');
+				return { loading: loading };
 			});
+
+			// Request.
+			fetch('/api/ifgame/sections', {
+					method: 'get',
+					credentials: 'include',
+					headers: {
+						'Accept': 'application/json',
+						'Content-Type': 'application/json'
+					}
+				})
+				.then( response => response.json() )
+				.then( json => {
+					this.setState((oldState) => {
+						// Load new data.
+
+						// remove loading info
+						const loading = oldState.loading.filter( w => w !== 'sections');
+
+						// Map the new data.
+						const sections = json.map( j => { return { label: j.title, value: j.idsection }; });
+						sections.unshift({ value:'', label: 'All'}); // add the all option
+
+						// See if there is a matching default from the props. If so, set.
+						// Note truthy comparison for "1" == 1 issues.
+						const selection = { ...oldState.selection };
+						if( typeof this.props.defaults['sections'] !== 'undefined') {
+							if(sections.filter( s => s.value == this.props.defaults['sections']).length !== 1)
+								throw new Error('Invalid section information passed to Filter');
+							selection['sections'] = this.props.defaults['sections'];
+						}
+
+						return {
+							filters: {...oldState.filters, sections: sections },
+							loading: loading,
+							selection: selection
+						};
+					}, () => { 	
+						// Are we ready to notify that this is loaded?  
+						if(this.state.loading.length === 0) {
+							this.props.onReady(this.getFilter());
+						}
+					});
+				})
+				.catch( error => {
+					console.log(error);
+				});
+		}
+
+
+		// Load user filter.
+		if( this.state.filters.users ) {
+			// Remember that we're loading this.
+			this.setState((oldState) => {
+				const loading = oldState.loading.slice();
+				loading.push('users');
+				return { loading: loading };
+			});
+
+			// Request.
+			fetch('/api/ifgame/users/', {
+					method: 'get',
+					credentials: 'include',
+					headers: {
+						'Accept': 'application/json',
+						'Content-Type': 'application/json'
+					}
+				})
+				.then( response => response.json() )
+				.then( json => {
+					this.setState((oldState) => {
+						// Load new data.
+
+						// remove loading info
+						const loading = oldState.loading.filter( w => w !== 'users');
+
+						// Map the new data.
+						const users = json.map( j => { return { label: j.username, value: j.iduser }; });
+						users.unshift({ value:'', label: 'All'}); // add the all option
+
+						// See if there is a matching default from the props. If so, set.
+						// Note truthy comparison for "1" == 1 issues.
+						const selection = { ...oldState.selection };
+						if( typeof this.props.defaults['users'] !== 'undefined') {
+							if(users.filter( s => s.value == this.props.defaults['users']).length !== 1)
+								throw new Error('Invalid user information passed to Filter');
+							selection['users'] = this.props.defaults['users'];
+						}
+
+						return {
+							filters: {...oldState.filters, users: users },
+							loading: loading,
+							selection: selection
+						};
+					}, () => { 	
+						// Are we ready to notify that this is loaded?  
+						if(this.state.loading.length === 0) {
+							this.props.onReady(this.getFilter());
+						}
+					});
+				})
+				.catch( error => {
+					console.log(error);
+				});
+
+		}
 	}
 
 
@@ -166,12 +245,50 @@ export default class Filter extends React.Component<PropsType, ContainerStateTyp
 
 
 		// If we are still loading data, don't show filter options.
-		if(this.state.loading_data) return <div>Loading filter</div>;
+		if(this.state.loading.length > 0) return <div>Loading filter</div>;
 
+		const buttons = [];
+		let title = '';
+		let button = null;
 
+		// Build buttons for each filter.
+		for(let filter in this.state.filters) {
+			if(this.state.filters.hasOwnProperty(filter)) {
+
+				// Find the matching title for the selected item (if any)
+				// Note truthy == instead of true === due to conversion of int to string.
+				const matching_items = this.state.filters[filter].filter( 
+									f => f.value == this.state.selection[filter]);
+
+				title = (this.state.selection[filter] == '' || matching_items.length === 0)
+							? filter.substr(0,1).toUpperCase() + filter.substr(1)
+							: filter.substr(0,1).toUpperCase() + filter.substr(1, filter.length-2) + ' ' + matching_items[0].label;
+				
+				button = <DropdownButton 
+						id={'button_filter_'+filter}
+						name ={'button_filter_'+filter}
+						disabled={ this.props.disabled } 
+						onSelect={ this.onChange }
+						variant='primary' 
+						title= { title }
+						key={'select_code_'+filter} >
+							{ this.state.filters[filter].map( (value,i) => 
+								<Dropdown.Item
+									key={'select_code_dropdownitem_'+filter+i} 
+									eventKey={value.code}
+									name={filter +'_'+i}
+									>{value.label}
+								</Dropdown.Item> 
+							)}
+				</DropdownButton>;
+				buttons.push(button);
+			}
+		}
+
+		/*
 		// setup params 
 		const levels = [{ code: '', label: 'All'}];
-		IfLevels.map(l => levels.push({ code: l.code, label: l.label }));
+		IfLevels.map(l => levels.push({ code: l.code, label: l.title }));
 
 		const sections = [{ idsection: '', code: 'All' }];
 		if(this.state.sections !== null) 
@@ -194,24 +311,6 @@ export default class Filter extends React.Component<PropsType, ContainerStateTyp
 				: 'User: ' + this.state.users.filter( 
 						s => s.iduser == this.state.iduser )[0].username; // note: truthy for 4=="4"
 
-		
-		const filter = (
-			<form name='c' >
-				<ButtonToolbar>
-				<ButtonGroup>
-				<DropdownButton 
-						disabled={ this.props.disabled } 
-						onSelect={this.handleCodeFilterChange}
-						variant='primary' 
-						title= {code_title} 
-						key='select_code' id='select_code'>
-							{ levels.map( (level,i) => 
-								<Dropdown.Item
-									key={'select_code_dropdownitem'+i} 
-									eventKey={level.code}>{level.label}
-								</Dropdown.Item> 
-							)}
-				</DropdownButton>
 
 				<DropdownButton 
 						disabled={ this.props.disabled } 
@@ -234,6 +333,14 @@ export default class Filter extends React.Component<PropsType, ContainerStateTyp
 								<Dropdown.Item key={'select_user_dropdownitem'+i} 
 								eventKey={user.iduser}>{user.username}</Dropdown.Item> )}
 				</DropdownButton>
+*/
+		
+		const filter = (
+			<form name='c' >
+				<ButtonToolbar>
+				<ButtonGroup>
+				
+				{ buttons }
 				</ButtonGroup> 
 
 

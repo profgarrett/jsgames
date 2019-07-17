@@ -25,7 +25,9 @@ export default class Text extends React.Component            {
 	// After props are updated, send a signal to show that it's been read.
 	static getDerivedStateFromProps(nextProps            /*, prevState*/)      {
 		if(!nextProps.page.client_read) {
-			nextProps.handleChange({ client_read: true });	
+			if(typeof nextProps.handleChange !== 'undefined') {
+				nextProps.handleChange({ client_read: true });	
+			}
 		}
 		return {};
 	}

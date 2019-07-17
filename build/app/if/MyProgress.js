@@ -2,21 +2,21 @@
 import React from 'react';
                                             
                                   
-import { Card, DropdownButton, Dropdown, Table, Tooltip, OverlayTrigger, Button } from 'react-bootstrap';
+import { Card, InputGroup, ButtonToolbar, DropdownButton, Dropdown, Table, Tooltip, OverlayTrigger, Button } from 'react-bootstrap';
 import { IfLevels } from './../../shared/IfGame';
+import { getUserFromBrowser } from './../components/Authentication';
 
 //import type { IfLevelType } from './../../app/if/IfTypes';
+import { Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faThumbsUp, faMinus } from '@fortawesome/free-solid-svg-icons';
 import { PrettyDate } from './../components/Misc';
-import { Link } from 'react-router-dom';
 
 /*
 	List of tutorials that should be shown as a row for the table
 	Only used if it's not defined by the section.
 */
 const DEFAULT_TUTORIAL_LEVEL_LIST = [
-	'surveywaiver_non_woodbury_user',
 	'tutorial', 'math1', 'math2', 'math3',
 	'functions1', 'functions2', 
 	'if1', 'if2', 'if3', 'if4', 'if5', 'if6', 'if7', 'if8',
@@ -108,7 +108,7 @@ export default class MyProgress extends React.Component                       {
 	*/
 	_render_table(levels               )       {
 		let counter = 0;
-		const grades = [];
+		const user = getUserFromBrowser();
 
 		// Style
 		const td_c = { textAlign: 'center', verticalAlign: 'middle', width: '6%' };
@@ -142,16 +142,15 @@ export default class MyProgress extends React.Component                       {
 			}
 
 			tds.push(<td key={'MyProgressRowTD'+counter++} style={td_l}><Link to={'/ifgame/levels/'+levels[i].code+'/'}>{ levels[i].title }</Link></td>);
-			tds.push(<td key={'MyProgressRowTD'+counter++} style={td_l}>{ levels[i].description }</td>);
 
-			// Save grades for overall average.
-			/*
-			if(levels[i].tutorial_highest_grade !== null) 
-				grades.push( levels[i].tutorial_highest_grade !== null );
-			if(levels[i].tutorial_highest_grade !== null) 
-				grades.push( levels[i].tutorial_highest_grade !== null );
-			grades.push( max_of(levels[i].review_completed_levels) );
-			*/
+			if(this.state.section !== null && this.state.section.role === 'faculty') {
+				tds.push(<td key={'MyProgressRowTD'+counter++} style={td_l}>{ levels[i].description }
+						&nbsp;(<Link to={'/ifgame/leveldebug/'+levels[i].code}>preview</Link>)
+					</td>);
+			} else {
+				tds.push(<td key={'MyProgressRowTD'+counter++} style={td_l}>{ levels[i].description }</td>);
+			}
+
 			trs.push(<tr key={'MyProgressRow'+counter++}>{tds}</tr>);
 		}
 
@@ -329,11 +328,27 @@ export default class MyProgress extends React.Component                       {
 				? null 
 				: <p style={{ fontSize: 8, textAlign: 'right' }}><i>Course: {this.state.section.title}</i></p>;
 
+		// If member of a section, as well as an admin for this course,
+		let course_links = null;
+		if(this.props.sections.length > 0 && this.state.section.role === 'faculty') {
+			let p = '?idsection=' + this.state.section.idsection;	
+			course_links = (
+				<InputGroup style={{ marginLeft: 3, marginTop: 3}}>
+					View this section&apos;s&nbsp;
+					<Link key='link1' to={'/ifgame/recent'+p}>recent activity</Link>,&nbsp;
+					<Link key='link2' to={'/ifgame/grades'+p}>grades</Link>, and &nbsp;
+					<Link key='link3' to={'/ifgame/questions'+p}>questions</Link>
+				</InputGroup>
+				);
+		}
+
 		const picker = this.props.sections.length < 2 
 				? null
-				: <DropdownButton 
+				: <ButtonToolbar>
+					<DropdownButton 
 						onSelect={this.handleSectionChange}
 						variant='primary' 
+						size='sm'
 						title= {this.state.section.title} 
 						key='select_code' id='select_code'>
 							{ this.props.sections.map( (section,i) => 
@@ -342,22 +357,20 @@ export default class MyProgress extends React.Component                       {
 									eventKey={section.code}>{section.title}
 								</Dropdown.Item> 
 							)}
-				</DropdownButton>;
-
-		// See if we have completed the first level in the section list.
-		// This should be the agreement waiver for that particular group of people.
-		const waiver_completed = typeof grades[list[0]] !== 'undefined';
+					</DropdownButton>
+					{ course_links }
+				</ButtonToolbar>;
 
 
-		//debugger;
 		// only show table *if* they've completed any mandatory surveys.
+		// @todo Need to re-enable this agreement after ending of Summer 2019 classes.
 		const table =  /*!waiver_completed
 				? null 
 				: */ this._render_table(levels);
 
 		// Return card.
 		return (
-			<div className='card' style={{ backgroundColor: '#f5f5f5' }}>
+			<div className='card' style={{ backgroundColor: '#f5f5f5', marginBottom: 40 }}>
 				<div className='card-body'>
 					<div className='h5'>{title}</div>
 					<div className='card-text'>

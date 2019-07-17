@@ -14,7 +14,7 @@ const { IfPageTextSchema, IfPageChoiceSchema,
 	Code value must match the filename in server/tutorial/...js
 */
 const IfLevels = [
-	{ code: 'tutorial', title: 'Website Introduction', description: 'Learn how this website works.' },
+	{ code: 'tutorial', title: 'Website Introduction', description: 'Learn how to create formulas.' },
 
 	{ code: 'math1', title: 'Math 1', description: 'Use addition, subtraction, multiplication, and division' },
 	{ code: 'math1review', title: 'Math 1 Review', description: 'Review arithmetic operations' },
@@ -42,9 +42,9 @@ const IfLevels = [
 	{ code: 'surveymath1', title: 'Survey of Math Concepts 1', description: 'Review your math concepts' },
 	{ code: 'surveymath2', title: 'Survey of Math Concepts 2', description: 'Review your math concepts' },
 
-	{ code: 'surveywaiver_non_woodbury_student', title: 'Account Setup', description: 'Learn about this website and answer several questions' },
-	{ code: 'surveywaiver_non_woodbury_user', title: 'Account Setup', description: 'Learn about this website and answer several questions' },
-	{ code: 'surveywaiver_woodbury_student', title: 'Account Setup', description: 'Learn about this website and answer several questions' },
+	{ code: 'surveywaiver_non_woodbury_student', title: 'Account Setup (Student)', description: 'Learn about this website and answer several questions' },
+	{ code: 'surveywaiver_non_woodbury_user', title: 'Account Setup (Anonymous user)', description: 'Learn about this website and answer several questions' },
+	{ code: 'surveywaiver_woodbury_student', title: 'Account Setup (WU student)', description: 'Learn about this website and answer several questions' },
 
 ];
 
@@ -108,6 +108,8 @@ class IfLevelSchema extends Schema {
 			completed: { type: 'Boolean', initialize: (s) => isDef(s) ? b(s) : false },
 			
 			allow_skipping_tutorial: { type: 'Boolean', initialize: (i) => isDef(i) ? b(i) : false },
+
+			show_score_after_completing: { type: 'Boolean', initialize: (i) => isDef(i) ? b(i) : true },
 
 			pages: { type: 'Array', initialize: (aJ) => isDef(aJ) ? a(aJ).map(j => {
 						return this.get_new_page(j);

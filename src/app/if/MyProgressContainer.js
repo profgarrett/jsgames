@@ -58,7 +58,7 @@ export default class IfLevelListContainer extends React.Component<PropsType, Sta
 
 
 		// Fetch sections.
-		fetch('/api/ifgame/sections/'+user.username, {
+		fetch('/api/ifgame/sections', {
 				credentials: 'include'
 			})
 			.then( response => response.json() )
@@ -99,7 +99,7 @@ export default class IfLevelListContainer extends React.Component<PropsType, Sta
 			});
 
 		// Fetch grades
-		fetch('/api/ifgame/grades/?username=' + user.username, {
+		fetch('/api/ifgame/grades?username=' + user.username, {
 				method: 'get',
 				credentials: 'include',
 				headers: {
@@ -152,35 +152,17 @@ export default class IfLevelListContainer extends React.Component<PropsType, Sta
 
 
 	render(): Node {
-		const user = getUserFromBrowser();
-		const that = this;
-		const ADMIN = user.isAdmin;
-		const links = !ADMIN ? [] : [
-			'/api/version',
-			'/logout',
-			'/ifgame/monitor',
-			'/ifgame/grades',
-			'/ifgame/questions'
-		];
-
-		const debug_buttons = !ADMIN ? [] :
-			IfLevels.map( (level,i) => 
-						<li key={'iflevellistdebugcontainerbutton'+i}>
-							<a href={'/ifgame/leveldebug/'+level.code}>{level.code}</a>
-						</li>
-					);
-
 		const is_loading = this.state.isLoadingUncompletedLevels || this.state.isLoadingGrades || this.state.isLoadingSections;
 		const myProgress = is_loading ? <div/> :
 						<MyProgress 
 							sections={this.state.sections }
 							grades={this.state.grades} 
 							uncompleted_levels={this.state.levels} 
-							onClickNewCode={ (code,e)=> that.insertGame(code)}
+							onClickNewCode={ (code,e)=> this.insertGame(code)}
 							onClickContinueLevel={ (ifLevel)=> this.context.router.history.push('/ifgame/level/'+ifLevel._id+'/play') } 
 						/>;
 
-				
+
 		return (
 			<Container fluid='true'>
 				<Row>
@@ -190,21 +172,6 @@ export default class IfLevelListContainer extends React.Component<PropsType, Sta
 						<Message message={this.state.message} style={this.state.messageStyle} />
 						<Loading loading={this.state.isLoadingGrades || this.state.isLoadingUncompletedLevels } />
 						{ myProgress }
-						{ debug_buttons.length === 0 ? '' : 
-							<div>
-								<h4>Debug a tutorial</h4> 
-								<ul>{ debug_buttons }</ul>
-								<br/><br/>
-							</div>
-						}
-						<br/><br/>
-						{ links.length === 0 ? '' : 
-							<div>
-								<h4>Links</h4> 
-								<ul>{ links.map( (link,i) => (<li key={'link'+i}><Link to={link}>{link}</Link></li>) ) }</ul>
-							</div>
-						}
-						<br/><br/>
 					</Col>
 				</Row>
 			</Container>

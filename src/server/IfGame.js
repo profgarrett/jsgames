@@ -249,6 +249,7 @@ const baseifgame = {
 			harsons_randomly_on_username: this.harsons_randomly_on_username,
 			description: this.description,
 			allow_skipping_tutorial: this.allow_skipping_tutorial,
+			show_score_after_completing: this.show_score_after_completing,
 			completed: false,
 			pages: [],
 			history: [ { dt: new Date(), code: 'server_level_created' } ]

@@ -4,6 +4,7 @@ import { Container, ButtonToolbar, ButtonGroup, Row, Col, Breadcrumb, DropdownBu
 
 import IfQuestions from './IfQuestions';
 import { Message, Loading } from './../components/Misc';
+import Filter from './Filter';
 
 import { IfLevels, IfLevelSchema } from './../../shared/IfGame';
 
@@ -18,23 +19,9 @@ type QuestionsPropsType = {};
 type QuestionsContainerStateType = {
 	message: string,
 	messageStyle: string,
-
-	// Status.
-	loading_data: boolean,
-
-	// Filters
-	code: string,
-	codes: Array<string>,
-	pagetype: string, 
-
-	idsection: number,
-	sections: Array<any>,
-
-	iduser: number,
-	users: Array<any>,
-
-	output: string,
-
+	isLoading: boolean,
+	pagetype: string,
+	outputs: string,
 	levels: Array<LevelType>
 };
 
@@ -44,141 +31,36 @@ export default class IfQuestionsContainer extends React.Component<QuestionsProps
 		this.state = { 
 			message: 'Loading data from server',
 			messageStyle: '',
-
-			loading_data: true,
-
-			code: 'tutorial',
-			codes: IfLevels.map( l => l.code ),
-
-			idsection: -1,
-			sections: [], // loads to an array from server.
-			pagetype: 'IfPageChoiceSchema', //'IfPageFormulaSchema|IfPageHarsonsSchema', 
-					// filter by only include certain type of pages in results.
-					// should be either 'IfPageChoiceSchema', 'IfPageFormulaSchema|IfPageHarsonsSchema'
-					// or IfPageParsonsSchema
-
-			iduser: -1,
-			users: [], // loads to array
-
-			output: 'excel', // either table or excel.
-
+			isLoading: true,
+			pagetype: '',
+			outputs: '',
 			levels: [],
 		};
-		(this: any).refreshFilters = this.refreshFilters.bind(this);
-		(this: any).refreshLevels = this.refreshLevels.bind(this);
-
-		(this: any).handleCodeFilterChange = this.handleCodeFilterChange.bind(this);
-		(this: any).handleIdSectionFilterChange = this.handleIdSectionFilterChange.bind(this);
-		(this: any).handlePageTypeFilterChange = this.handlePageTypeFilterChange.bind(this);
-		(this: any).handleIdUserFilterChange = this.handleIdUserFilterChange.bind(this);
-		(this: any).handleOutputFilterChange = this.handleOutputFilterChange.bind(this);
-
+		(this: any).onRefreshData = this.onRefreshData.bind(this);
+		(this: any).onReady = this.onReady.bind(this);
 	}
 
-	componentDidMount() {
-		this.refreshFilters();
-	}
-	handlePageTypeFilterChange(value: string) {
-		this.setState({ pagetype: value});
-	}
-	handleCodeFilterChange(value: string) {
-		this.setState({ code: value});
-	}
-	handleIdSectionFilterChange(value: string) {
-		this.setState({ idsection: parseInt(value,10)});
-	}
-	handleIdUserFilterChange(value: string) {
-		this.setState({ iduser: parseInt(value, 10)});
-	}
-	handleOutputFilterChange(value: string) {
-		this.setState({ output: value });
+	onReady(filter: Object) {
+		this.setState({ isLoading: false, message: ''});
+		this.onRefreshData(filter);
 	}
 
+	onRefreshData(filter: Object) {
+		const args = [];
 
-	// Load the filter values.
-	refreshFilters() {
-		this.setState({ loading_data: true, message: 'loading filters' });
-		const newState = { ...this.state, loading_data: false, message: '' };
-
-		// Start with sections.
-		fetch('/api/ifgame/sections', {
-				method: 'get',
-				credentials: 'include',
-				headers: {
-					'Accept': 'application/json',
-					'Content-Type': 'application/json'
-				}
-			})
-			.then( response => response.json() )
-			.then( json => {
-				if( json.length > 0) {
-					// Set the section to the first item and load.
-					newState.sections = json;
-					newState.idsection = -1; // json[0].idsection; default to no section.
-				} else {
-					// No sections found.
-					newState.sections = [];
-				}
-
-				// Now load list of people.
-				fetch('/api/ifgame/users', {
-						method: 'get',
-						credentials: 'include',
-						headers: {
-							'Accept': 'application/json',
-							'Content-Type': 'application/json'
-						}
-					})
-					.then( response => response.json() )
-					.then( json => {
-						if( json.length > 0) {
-							newState.users = json;
-							newState.iduser = -1; // json[0].iduser; default to all users
-						} else {
-							newState.users = [];
-						}
-
-						// Now update state.
-						this.setState(newState, this.refreshLevels()); 
-
-					})
-					.catch( error => {
-						this.setState({ 
-							message: 'Error: ' + error,
-							messageStyle: 'danger',
-							loading_data: false
-						});
-					});
-
-			})
-			.catch( error => {
-				this.setState({ 
-					message: 'Error: ' + error,
-					messageStyle: 'danger',
-					loading_data: false
-				});
-			});
-	}
+		// Set server-level filters for the http request.
+		if(filter.levels !== '') args.push('code='+filter.levels);
+		if(filter.sections !== '') args.push('idsection='+filter.sections);
+		if(filter.users !== '') args.push('iduser='+filter.users);
 
 
-	refreshLevels() {
-		const params = [];
+		// Set local filters, which are applied locally.
+		if(filter.pagetypes !== '') this.setState({ pagetype: filter.pagetypes });
+		if(filter.outputs !== '') this.setState({ outputs: filter.outputs });
 
-		if(this.state.code !== null && this.state.code !== 'All') 
-				params.push('code='+ this.state.code);
+		this.setState({ isLoading: true, message: 'Loading question data'});
 
-		if(this.state.idsection !== null && this.state.idsection !== -1) 
-				params.push('idsection='+ this.state.idsection);
-
-		if(this.state.iduser !== null && this.state.iduser !== -1) 
-				params.push('iduser='+ this.state.iduser);
-
-		const q_string = params.length === 0 ? '' :
-				'?' + params.join('&');
- 
-		this.setState({ loading_data: true, message: 'Loading data from server' });
-
-		fetch('/api/ifgame/questions/'+ q_string, {
+		fetch('/api/ifgame/questions?' +args.join('&'), {
 				method: 'get',
 				credentials: 'include',
 				headers: {
@@ -193,7 +75,7 @@ export default class IfQuestionsContainer extends React.Component<QuestionsProps
 					levels: ifLevels,
 					messageStyle: '',
 					message: '',
-					loading_data: false
+					isLoading: false
 				});
 			})
 			.catch( error => {
@@ -201,7 +83,7 @@ export default class IfQuestionsContainer extends React.Component<QuestionsProps
 					levels: [],
 					message: 'Error: ' + error,
 					messageStyle: 'danger',
-					loading_data: false
+					isLoading: false
 				});
 			});
 	}
@@ -217,109 +99,30 @@ export default class IfQuestionsContainer extends React.Component<QuestionsProps
 			</Breadcrumb>
 			);
 
-		// Build filter datasets, adding a -1 option for all.
-		const levels = ['All'];
-		IfLevels.map(l => levels.push(l.code));
 
-		const sections = [{ idsection: -1, code: 'All' }];
-		if(this.state.sections !== null) 
-				this.state.sections.map( section => sections.push(section));
+		const search = new URLSearchParams(window.location.search);
+		const filter_defaults = search.has('idsection') 
+			? { pagetypes: 'IfPageFormulaSchema|IfPageHarsonsSchema', outputs: 'table', levels: 'math1', sections: search.get('idsection') }
+			: { pagetypes: 'IfPageFormulaSchema|IfPageHarsonsSchema', outputs: 'table', levels: 'math1'};
+		
 
+		const filter = <Filter 
+				onChange={this.onRefreshData} 
+				onReady={this.onReady} 
+				disabled={this.state.isLoading} 
+				defaults={filter_defaults}
+				filters={{ 
+					levels: [], 
+					sections: [], 
+					users: [], 
+					pagetypes: [], 
+					outputs: [
+						{ value: 'table', label:'Table' },
+						{ value: 'excel',  label:'Excel' }
+					]
+				}}
+			/>;
 
-
-		const users = [{ iduser: -1, username: 'All'}];
-		if(this.state.users !== null) 
-				this.state.users.map( user => users.push(user));
-
-		const section_title = this.state.idsection === -1 || this.state.idsection === null
-				? 'Pick a section' 
-				: 'Section: ' + this.state.sections.filter( 
-						s => s.idsection === this.state.idsection )[0].code;
-
-		const user_title = this.state.iduser === -1 || this.state.iduser === null
-				? 'Pick a user' 
-				: 'User: ' + this.state.users.filter( 
-						s => s.iduser === this.state.iduser )[0].username;
-
-		const pagetype_options = [
-				'IfPageChoiceSchema', 
-				'IfPageHarsonsSchema',
-				'IfPageFormulaSchema',
-				'IfPageFormulaSchema|IfPageHarsonsSchema',
-				'IfPageParsonsSchema'
-			];
-
-		const filter = (
-			<form name='c' >
-				<ButtonToolbar>
-				<ButtonGroup>
-				<DropdownButton 
-						onSelect={this.handleCodeFilterChange}
-						variant='primary' 
-						title= { this.state.code } 
-						key='select_code' id='select_code'>
-							{ levels.map( (code,i) => 
-								<Dropdown.Item
-									key={'select_code_dropdownitem'+i} 
-									eventKey={code}>{code}
-								</Dropdown.Item> 
-							)}
-				</DropdownButton>
-				<DropdownButton 
-						onSelect={this.handleIdSectionFilterChange}
-						variant='primary' 
-						title= {section_title}
-						key='select_section' id='select_section'>
-							{ sections.map( (section,i) => 
-								<Dropdown.Item key={'select_section_dropdownitem'+i} 
-								eventKey={section.idsection}>{section.code}</Dropdown.Item> )}
-				</DropdownButton>
-				<DropdownButton 
-						onSelect={this.handleIdUserFilterChange}
-						variant='primary' 
-						title={user_title}
-						key='select_user' id='select_user'>
-							{ users.map( (user,i) => 
-								<Dropdown.Item key={'select_user_dropdownitem'+i} 
-								eventKey={user.iduser}>{user.username}</Dropdown.Item> )}
-				</DropdownButton>
-				</ButtonGroup> 
-
-				<ButtonGroup>
-				<DropdownButton 
-						onSelect={this.handleOutputFilterChange}
-						variant='primary' 
-						title={this.state.output}
-						key='select_output' id='select_output'>
-							<Dropdown.Item eventKey='excel'>excel</Dropdown.Item>
-							<Dropdown.Item eventKey='table'>table</Dropdown.Item>
-				</DropdownButton>
-				</ButtonGroup>
-
-
-				<ButtonGroup>
-				<DropdownButton 
-						onSelect={this.handlePageTypeFilterChange}
-						variant='primary' 
-						title={this.state.pagetype}
-						key='select_output' id='select_output'>
-							{ pagetype_options.map( (option,i) => 
-								<Dropdown.Item key={'select_pagetype_dropdownitem'+i} 
-								eventKey={option}>{option}</Dropdown.Item> )}
-				</DropdownButton>
-				</ButtonGroup>
-
-				<ButtonGroup>
-				<Button
-						disabled={this.state.loading_data}
-						variant='primary'
-						onClick={ () => this.refreshLevels()}
-				>{ this.state.loading_data ? 'Loading...' : 'Refresh' }
-				</Button>
-				</ButtonGroup>
-				</ButtonToolbar>
-			</form>
-			);
 
 		// Filter returned values based off of pagetype filter set in state.
 		const filterpagetype = (type: string) => this.state.pagetype.split('|').includes( type ) ;
@@ -334,12 +137,12 @@ export default class IfQuestionsContainer extends React.Component<QuestionsProps
 					<Col>
 						<ForceLogin/>
 						{ crumbs }
-						<h3>Questions for { this.state.code }</h3>
+						<h3>Questions</h3>
 
 						<Message message={this.state.message} style={this.state.messageStyle} />
-						<Loading loading={this.state.loading_data } />
+						<Loading loading={this.state.isLoading } />
 						{ filter }
-						<IfQuestions levels={filtered_levels} output={this.state.output} />
+						<IfQuestions levels={filtered_levels} output={this.state.outputs} />
 					</Col>
 				</Row>
 			</Container>

@@ -1,9 +1,13 @@
 // @flow
 import React from 'react';
+import ReactTable from 'react-table';
+import { Table } from 'react-bootstrap';
+
 import type { LevelType  } from './IfTypes';
 import type { Node } from 'react';
-import ReactTable from 'react-table';
+
 import 'react-table/react-table.css';
+
 import { IfLevels } from './../../shared/IfGame';
 import { DEMO_MODE } from './../../server/secret';
 
@@ -32,7 +36,8 @@ export default class IfGrades extends React.Component<PropsType> {
 	_render_grades_table(): Node {
 
 		// Create a list of distinct columns.
-		const tutorials = IfLevels.map( l => l.code );
+		// Don't include the waivers.
+		const tutorials = IfLevels.map( l => l.code ).filter( s => s.substr(0,13) !== 'surveywaiver_' );
 
 		const columns = [{
 			id: 'username',
@@ -77,21 +82,27 @@ export default class IfGrades extends React.Component<PropsType> {
 				width: 60 }));
 
 
-		const tablestyle = {
-			borders: 'solid 1px black !important',
-			padding: 2
-		};
-		const tdstyle = {
-			borders: 'solid 1px black !important',
-			padding: 2
-		};
+// <td style={tdstyle}>{DEMO_MODE ? '*****' : t.username}</td>
 
-		const html = (<table style={tablestyle}><tbody>
-			{ this.props.data.map( (t,i) => <tr key={i}>
-					<td style={tdstyle}>{DEMO_MODE ? '*****' : t.username}</td>
-					
-				</tr>) }
-			</tbody></table>);
+		const html = (<Table striped bordered hover>
+			<thead><tr>{
+				columns.map( (c,i) => <th key={'trcode'+i}>{c.id}</th>)
+			}</tr>
+			</thead>
+			<tbody>
+			{ this.props.data.map( 
+				(t,i) => <tr key={'tr'+i}>
+					{
+						columns.map( 
+							(c,i) => ( <td key={'td'+i}> 
+								{ typeof t[c.id] === 'undefined' ? '': t[c.id] }
+								</td> )
+							)
+					}
+					</tr>) 
+			}
+			</tbody>
+		</Table>);
 		
 /*
 <td style={tdstyle}>{ avg_of(t, ['if1', 'if2', 'if3', 'if4', 'if5', 'if6', 'if7', 'if8']) }</td>
@@ -104,7 +115,7 @@ export default class IfGrades extends React.Component<PropsType> {
 					columns={columns}
 				/>
 				<br/><br/><br/>
-				<h3>Copy and Paste Table</h3>
+				<h3>Table for Copying to Excel</h3>
 				{ html }
 				</div>);
 	}

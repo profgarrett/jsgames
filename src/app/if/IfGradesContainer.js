@@ -1,6 +1,6 @@
 //@flow
 import React from 'react';
-import { Container, Row, Col, Breadcrumb, Button  } from 'react-bootstrap';
+import { Container, Row, Col, Breadcrumb  } from 'react-bootstrap';
 
 import IfGrades from './IfGrades';
 import { Message, Loading } from './../components/Misc';
@@ -17,8 +17,7 @@ type GradesContainerStateType = {
 	message: string,
 	messageStyle: string,
 	isLoading: boolean,
-	data: Array<any>,
-	filter: Object
+	data: Array<any>
 };
 
 export default class IfGradesContainer extends React.Component<GradesPropsType, GradesContainerStateType> {
@@ -28,26 +27,11 @@ export default class IfGradesContainer extends React.Component<GradesPropsType, 
 			message: 'Loading data from server',
 			messageStyle: '',
 			isLoading: true,
-			data: [],
-			filter: false
+			data: []
 		};
 		(this: any).onRefreshData = this.onRefreshData.bind(this);
 		(this: any).onReady = this.onReady.bind(this);
-		//(this: any).handleSubmit = this.handleSubmit.bind(this);
 	}
-
-	/*
-	componentDidMount() {
-		// Load data.
-		this.refreshData();
-	}
-
-
-	handleSubmit(e: ?SyntheticEvent<HTMLButtonElement>) {
-		if(e) e.preventDefault();
-		this.refreshData();
-	}
-	*/
 
 	onReady(filter: Object) {
 		this.setState({ isLoading: false, message: ''});
@@ -57,9 +41,7 @@ export default class IfGradesContainer extends React.Component<GradesPropsType, 
 	onRefreshData(filter: Object) {
 		const args = [];
 
-		if(filter.code != '') args.push('code='+filter.code);
-		if(filter.idsection !== '') args.push('idsection='+filter.idsection);
-		if(filter.iduser !== '') args.push('iduser='+filter.iduser);
+		if(filter.sections !== '') args.push('idsection='+filter.sections);
 
 		this.setState({ isLoading: true, message: 'Loading grade data'});
 		
@@ -101,6 +83,20 @@ export default class IfGradesContainer extends React.Component<GradesPropsType, 
 			</Breadcrumb>
 			);
 
+
+		const search = new URLSearchParams(window.location.search);
+		const filter_defaults = search.has('idsection') 
+			? { sections: search.get('idsection') }
+			: {};
+		
+		const filter = <Filter 
+				onChange={this.onRefreshData} 
+				onReady={this.onReady} 
+				disabled={this.state.isLoading} 
+				defaults={filter_defaults}
+				filters={{sections: [] }}
+			/>;
+
 		return (
 			<Container fluid='true'>
 			<Row>
@@ -110,7 +106,7 @@ export default class IfGradesContainer extends React.Component<GradesPropsType, 
 					<h3>Grades</h3>
 					<Message message={this.state.message} style={this.state.messageStyle} />
 					<Loading loading={this.state.isLoading } />
-					<Filter onChange={this.onRefreshData} onReady={this.onReady} disabled={this.state.isLoading} defaults={{code: 'tutorial'}} />
+					{ filter }
 					<IfGrades data={this.state.data} />
 				</Col>
 			</Row>

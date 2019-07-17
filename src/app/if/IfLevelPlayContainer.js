@@ -153,7 +153,11 @@ export default class IfLevelPlayContainer extends React.Component<PropsType, Sta
 
 				// Test to see if we're at the end of the level. If so, go to the reviw screen.
 				if(ifLevel.completed) { 
-					this.context.router.history.push('/ifgame/level/'+ifLevel._id+'/score');
+					if( ifLevel.show_score_after_completing ) {
+						this.context.router.history.push('/ifgame/level/'+ifLevel._id+'/score');
+					} else {
+						this.context.router.history.push('/ifgame');;
+					}
 					return;
 				} 
 

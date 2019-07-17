@@ -12,8 +12,6 @@ import 'url-search-params-polyfill';
 
                                   
 
-import 'url-search-params-polyfill';
-
 /*
 
 This module controls login.  
@@ -89,7 +87,7 @@ export default class LoginContainer extends React.Component                     
 		this.setState( { isLoading: true });
 
 		// Fire AJAX.
-		fetch('/api/login/', {
+		fetch('/api/users/login/', {
 				method: 'POST',
 				credentials: 'include',
 				mode: 'same-origin',
@@ -144,7 +142,7 @@ export default class LoginContainer extends React.Component                     
 		this.setState( { isLoading: true, message: 'Please wait while we create your user account...', messageStyle: 'info' });
 
 		// Fire AJAX.
-		fetch('/api/create_user/', {
+		fetch('/api/users/create_user/', {
 				method: 'POST',
 				credentials: 'include',
 				mode: 'same-origin',

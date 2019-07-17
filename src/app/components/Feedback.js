@@ -39,7 +39,7 @@ export default class Login extends React.Component<PropsType, StateType> {
 		});
 
 		// Fire AJAX.
-		fetch('/api/feedback/', {
+		fetch('/api/users/feedback/', {
 				method: 'POST',
 				credentials: 'include',
 				mode: 'same-origin',
