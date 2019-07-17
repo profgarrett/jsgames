@@ -1,0 +1,22 @@
+/* Blockly custom css by NDG */
+
+.blocklyEqual {
+	font-size: 30px;
+	color: #444;
+}
+.blocklyArith {
+	font-size: 20px;
+}
+
+.blocklyText, .blocklyHtmlInput, .blocklyTreeLabel {
+  font-family: 'Kanit', sans-serif !important;
+}
+
+.blocklyTreeLabel {
+  font-size: 24px !important;
+}
+
+.blocklyTreeRow {
+  height: 28px !important;
+  margin-top: 5px !important;
+}
