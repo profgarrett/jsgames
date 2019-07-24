@@ -84,8 +84,6 @@ export default class LoginContainer extends React.Component<PropsType, StateType
 		const token = '';
 		const url = this.state.url;
 
-		this.setState( { isLoading: true });
-
 		// Fire AJAX.
 		fetch('/api/users/login/', {
 				method: 'POST',
@@ -189,6 +187,15 @@ export default class LoginContainer extends React.Component<PropsType, StateType
 			message = <Alert variant={this.state.messageStyle}>{this.state.message}</Alert>;
 		}
 
+		// wrap functions to show that we're loading.
+		const login = (u, p) => {
+			this.setState( { isLoading: true });
+			this.login(u, p);
+		};
+		const create_user = (u, s) => {
+			this.setState( { isLoading: true });
+			this.create_user(u, s);
+		};
 
 		return (
 <Container fluid='true'>
@@ -219,7 +226,7 @@ export default class LoginContainer extends React.Component<PropsType, StateType
 									<div className='card-body'>
 										<div className='card-title h5'>Current User Login</div>
 										<div className='card-text'>
-											<LoginCurrentUser submit={this.login} disabled={this.state.isLoading} />
+											<LoginCurrentUser submit={login} disabled={this.state.isLoading} />
 
 										</div>
 									</div>
@@ -230,7 +237,7 @@ export default class LoginContainer extends React.Component<PropsType, StateType
 									<div className='card-body'>
 										<div className='card-title h6'>Create a new account</div>
 										<div className='card-text'>
-											<LoginCreateUser submit={this.create_user} disabled={this.state.isLoading} />
+											<LoginCreateUser submit={create_user} disabled={this.state.isLoading} />
 										</div>
 									</div>
 									</div>

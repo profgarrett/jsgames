@@ -314,7 +314,7 @@ router.post('/create_user',
 		if(code.length > 0) {
 			// Find section join code (if present)
 			const sql_select_idsection = 'SELECT idsection FROM sections WHERE code = ?';
-			const select_idsection_results = code.length === 0 ? [] : await run_mysql_query(sql_select_idsection, [code]) ;
+			const select_idsection_results = await run_mysql_query(sql_select_idsection, [code]) ;
 
 			const idsection = select_idsection_results.length === 0 ? '' : select_idsection_results[0].idsection;
 			if(select_idsection_results.length === 0 && code !== '') {

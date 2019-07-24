@@ -48,7 +48,7 @@ function shouldCompress (req: $Request, res: $Response): boolean {
 // Disable DEBUG as bugsnag doesn't work with passenger.
 // 	Possibly due to STDOUT issue.
 // Load bugsnag if it is defined in secret.js.
-if(!DEBUG && typeof BUGSNAG_API !== undefined && BUGSNAG_API.length > 0) {
+if(!DEBUG && typeof BUGSNAG_API !== 'undefined' && BUGSNAG_API.length > 0) {
 	let bugsnagClient = bugsnag({ apiKey: BUGSNAG_API });
 	bugsnagClient.use(bugsnagExpress);
 
@@ -189,14 +189,13 @@ app.get('*', (req: $Request, res: $Response) => {
 
 //});
 
-process.on('uncaughtException', function (er) {
+process.on('uncaughtException', function (er: any) {
   log_error(er);
   process.exit(1);
 });
 
 app.listen(DEBUG ? 3000 : 80, function(){
-	if(DEBUG) 
-		console.log('app started ' + (DEBUG ? 3000 : 80) + ' - ' + (new Date()).toString() );
+	console.log('app started ' + (DEBUG ? 3000 : 80) + ' - ' + (new Date()).toString() );
 });
 
 

@@ -29,7 +29,7 @@ const default_fetch_options = {
 // Login Tests
 ////////////////////////////////////////////////////////////////////
 
-const login_password = 'p'+Math.random(10000000, 99999999);
+const login_password = 'p'+Math.random() * 10000000;
 
 const login_tests = [
 	{

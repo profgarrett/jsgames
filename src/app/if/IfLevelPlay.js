@@ -96,7 +96,6 @@ const titleTdStyle = {  /* use a title td to center vertically */
 
 
 
-
 type PropsType = {
 	level: LevelType,
 	selected_page_index: number,
@@ -115,56 +114,9 @@ type StateType = {
 	// Last displayed index.  Used to trigger a page scroll event when we start 
 	// showing a new page.
 	lastPageI: number
+	// Event listener
+	//eventListener: any
 };
-
-/*
-	  <>
-		<Button variant="primary" onClick={this.handleShow}>
-		  Launch demo modal
-		</Button>
-		*/
-class ModalFeedback extends React.Component {
-	constructor(props, context) {
-		super(props, context);
-
-		this.handleShow = this.handleShow.bind(this);
-		this.handleClose = this.handleClose.bind(this);
-
-		this.state = {
-		show: false,
-		};
-	}
-
-	handleClose() {
-		this.setState({ show: false });
-	}
-
-	handleShow() {
-		this.setState({ show: true });
-	}
-
-	render() {
-	return (
-
-		<Modal show={this.state.show} onHide={this.handleClose}>
-			<Modal.Header closeButton>
-			<Modal.Title>{ }</Modal.Title>
-		</Modal.Header>
-		<Modal.Body>Woohoo, you're reading this text in a modal!</Modal.Body>
-		<Modal.Footer>
-		<Button variant="secondary" onClick={this.handleClose}>
-		Close
-		</Button>
-		<Button variant="primary" onClick={this.handleClose}>
-		Save Changes
-		</Button>
-		</Modal.Footer>
-		</Modal>
-
-	);
-	}
-	}
-
 
 export default class IfLevelPlay extends React.Component<PropsType, StateType> {
 
@@ -179,10 +131,14 @@ export default class IfLevelPlay extends React.Component<PropsType, StateType> {
 		(this: any).state = {
 			lastFeedbackDismissal: new Date(),
 			lastPageI: 0
+//			eventListener: eventListener
 		};
-
+		
 		document.addEventListener('keypress', this._on_keypress);
+	}
 
+	componentWillUnmount() {
+		window.removeEventListener('keypress', this._on_keypress, false);
 	}
 
 	handleChange(new_value: Object) {
@@ -317,13 +273,13 @@ export default class IfLevelPlay extends React.Component<PropsType, StateType> {
 		const that = this;
 
 		// Don't show 'validate' button if correct isn't required.
-		if(page.correct_required) return;
+		if(page.correct_required) return null;
 
 		// Don't have validate button for all types of pages.
-		if(page.type === 'IfPageTextSchema') return;
+		if(page.type === 'IfPageTextSchema') return null;
 
 		// Hide validate for pages that don't show feedback.
-		if(!page.show_feedback_on) return;
+		if(!page.show_feedback_on) return null;
 
 
 		//  Button style. If required, primary. Else secondary.
@@ -331,16 +287,14 @@ export default class IfLevelPlay extends React.Component<PropsType, StateType> {
 		let button_text = 'Check answer';
 
 		if(page.code === 'tutorial') {
-			if(page.correct_required) {
-				if(page.client_has_answered() && !page.correct) {
-					// Require a correct answer.
-					button_style = 'warning';
-				} else if(page.client_has_answered() && page.correct) {
-					button_style = 'success'; 
-				} else {
-					// No answer, or unknown if correct (e.g., on a quiz question)
-					button_style = 'primary';
-				}
+			if(page.client_has_answered() && !page.correct) {
+				// Require a correct answer.
+				button_style = 'warning';
+			} else if(page.client_has_answered() && page.correct) {
+				button_style = 'success'; 
+			} else {
+				// No answer, or unknown if correct (e.g., on a quiz question)
+				button_style = 'primary';
 			}
 		} else if (page.code ==='test') {
 			button_style = 'primary';
@@ -584,26 +538,35 @@ export default class IfLevelPlay extends React.Component<PropsType, StateType> {
 	}
 
 
+	static getDerivedStateFromProps(props: PropsType, state: StateType): StateType {
+		// Render the current page, or if we are reviewing last submission, n-1.
+		// Use previous submitted index to figure out which to shown feedback on.
+		let pageI = props.show_feedback
+				? props.show_feedback_on
+				: props.selected_page_index; // used to keep track of the page #
+
+		// If the i page has changed, then fire a scroll back to top.
+		if( state.lastPageI !== pageI) {
+			window.scrollTo(1,1);
+			return { ...state, lastPageI: pageI };
+		} else {
+			return state;
+		}
+	}
+
 	// Render 
 	render(): Node {
 		console.assert(this.props.selected_page_index < this.props.level.pages.length, 
 			'Page '+this.props.selected_page_index+' is not valid in IfLevelPlay');
 
+		const pageI = this.props.selected_page_index; // used to keep track of the page #
 		let page = this.props.level.pages[this.props.selected_page_index];
-		let pageI = this.props.selected_page_index; // used to keep track of the page #
 
 		// Render the current page, or if we are reviewing last submission, n-1.
 		// Use previous submitted index to figure out which to shown feedback on.
 		// Once show_next_feedback is cleared, then we will revert to current page.
 		if(this.props.show_feedback) {
 			page = this.props.level.pages[this.props.show_feedback_on];
-			pageI = this.props.show_feedback_on;
-		}
-
-		// If the i page has changed, then fire a scroll back to top.
-		if( this.state.lastPageI !== pageI) {
-			window.scrollTo(1,1);
-			this.setState({ lastPageI: pageI });
 		}
 		
 		const validate_button = this._render_page_validate_button(page);

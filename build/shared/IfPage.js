@@ -55,7 +55,7 @@ const bool = function(unknown     )           {
 */
 const noObjectsInArray = (i_array            )             => {
 	if(!(i_array instanceof Array)) throw new Error('noObjects can only be passed arrays.');
-	i_array.map( v => {
+	i_array.forEach( v => {
 		if(!(typeof v === 'string' || typeof v === 'number')) throw new Error('Invalid object passed to IfPageParsonsSchema._def_items');
 	});
 	return i_array;
@@ -454,7 +454,7 @@ class IfPageNumberAnswerSchema extends IfPageBaseSchema {
 	updateCorrect() {
 		if(this.completed) return; // do not update completed items.
 
-		if(!this.client === null) return; // no client submission.
+		if(this.client === null) return; // no client submission.
 
 		this.client_feedback = [];
 		this.correct = Math.round(this.client*100)/100 === Math.round(this.solution*100)/100;
@@ -538,7 +538,7 @@ class IfPageShortTextAnswerSchema extends IfPageBaseSchema {
 	updateCorrect() {
 		if(this.completed) return; // do not update completed items.
 
-		if(!this.client === '') return; // no client submission.
+		if(this.client === '') return; // no client submission.
 
 		this.client_feedback = [];
 		this.correct = true;
@@ -1100,9 +1100,9 @@ class IfPageFormulaSchema extends IfPageBaseSchema {
 			//	fragment.push(colFragment);
 			//}
 
-			if (fragment) {
+			//if (fragment) {
 				done(fragment);
-			}
+			//}
 		});
 
 		// Clean-up stuff that causes an error.

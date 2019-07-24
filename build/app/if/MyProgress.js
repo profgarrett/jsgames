@@ -253,14 +253,13 @@ export default class MyProgress extends React.Component                       {
 			}
 	*/
 	get_levels()         {
-		const levels = [];
 		const uncompleted_levels = this.props.uncompleted_levels;
 		const grades = this.props.grades.length > 0 ? this.props.grades[0] : {};
 
 		const list = this.get_list();
 
 		// Go through each tutorial and build an object 
-		list.map( code => {
+		const levels = list.map( code => {
 			let l = {
 				code: code,
 				title: '',
@@ -293,7 +292,7 @@ export default class MyProgress extends React.Component                       {
 			l.tutorial_incompleted_levels = uncompleted_levels.filter( l => l.code === code );
 			l.review_incompleted_levels = uncompleted_levels.filter( l => l.code === code+'review' );
 
-			levels.push(l);
+			return l;
 		});
 
 		return levels;

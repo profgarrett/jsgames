@@ -42,7 +42,7 @@ const CgLevelModelFactory = {
 		if(level.completed) 
 			throw new Error('Invalid: Can not update a completed level');
 
-		const dF = new DataFactory();
+		const dF = DataFactory;
 		const data = dF.random_sequence({n:5, min: 1, max:10, titles:['A', 'B', 'C', 'D', 'E']});
 		const chart = new module.exports.CgBarChartModel({ data });
 		const max_num = 9999999; // largest possible number.

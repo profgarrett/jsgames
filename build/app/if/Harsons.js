@@ -159,7 +159,7 @@ export default class Harsons extends React.Component                            
 	}
 
 	// Clean-up.
-	compomentWillUnmount() {
+	componentWillUnmount() {
 		window.removeEventListener('resize', this.state.onresize_handler, false);
 	}
 

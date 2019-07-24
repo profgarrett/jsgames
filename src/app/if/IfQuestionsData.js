@@ -81,6 +81,7 @@ function rollup_tags(pages: Array<PageType>): Array<any> {
 				}
 			});
 		});
+		return p;
 	});
 
 	return tags.filter( 

@@ -2,12 +2,12 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 import IfLevelList from './IfLevelList';
-import {PageHeader} from './../components/Misc';
+//import { PageHeader } from './../components/Misc';
 
 import { Breadcrumb, Container, Row, Col, Card, Button } from 'react-bootstrap';
-import { get_user_is_admin, get_username_or_emptystring, Message, Loading } from './../components/Misc';
+import { Message, Loading } from './../components/Misc';
 import { IfLevelSchema, IfLevels } from './../../shared/IfGame';
-import { Link } from 'react-router-dom';
+//import { Link } from 'react-router-dom';
 
 export default class IfLevelListContainer extends React.Component {
 

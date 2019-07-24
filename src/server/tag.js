@@ -740,9 +740,9 @@ console.log( parseFeedback('=sum(a1,b1,10_'));
 // Run tests.
 
 if(DEBUG) {
-	ENTRY_TESTS.map( test => {
+	ENTRY_TESTS.forEach( test => {
 		console.log('Testing '+test.tag);
-		test.tests.map( t => {
+		test.tests.forEach( t => {
 			let triggered = test.if(t.solution_f, t.client_f, t.page);
 			if( triggered !== t.triggered ) {
 				console.log(['Failed tag test', t]);

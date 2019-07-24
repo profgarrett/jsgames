@@ -10,6 +10,11 @@ const { fill_template } = require('./template');
 // to have the {v} value filled in from template_values.
 
 
+// Safely transforms any passed numbers into a strong.
+function s(a     )         {
+	if(typeof a === 'number') return ''+a;
+	return a;
+}
 
 
 // Ensure that the given page uses all of the given references.
@@ -24,7 +29,7 @@ const references = (page                 , values               )          => {
 	
 	for(let i=0; i<values.length; i++) {
 		value = fill_template(values[i].toLowerCase(), page.template_values);
-		if(lf.indexOf(value) === -1) {
+		if(s(lf).indexOf(s(value)) === -1) {
 			missing.push(value);
 		}
 	}
@@ -40,7 +45,8 @@ const references = (page                 , values               )          => {
 
 
 // Ensure that the given page has the given values in it.
-// Case sensitive.
+// This is *not* case sensitive.
+// @TODO Add case sensitivity again.
 const values = (page                 , values                        )          => {
 	let missing = [], value = null;
 
@@ -49,8 +55,9 @@ const values = (page                 , values                        )          
 	const client_f = fill_template(page.client_f, page.template_values);
 
 	for(let i=0; i<values.length; i++) {
-		value = fill_template((''+values[i]).toLowerCase(), page.template_values);
-		if(client_f.indexOf((value)) === -1) {
+		value = fill_template((s(values[i])).toLowerCase(), page.template_values);
+		// To Lower case! 
+		if((s(client_f)).toLowerCase().indexOf((s(value).toLowerCase())) === -1) {
 			missing.push(value);
 		}
 	}

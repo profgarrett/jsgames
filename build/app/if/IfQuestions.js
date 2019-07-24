@@ -8,6 +8,7 @@ import { create_summary } from './IfQuestionsData';
 import IfQuestionsExcelChoice from './IfQuestionsExcelChoice';
 import IfQuestionsExcelFormulas from './IfQuestionsExcelFormulas';
 import IfQuestionsTable from './IfQuestionsTable';
+import IfQuestionsTags from './IfQuestionsTags';
 
 
                   
@@ -22,6 +23,9 @@ export default class IfQuestions extends React.Component            {
 			return <div/>;
 
 		const levels = create_summary(this.props.levels);
+
+		if(this.props.output === 'tags')
+			return <IfQuestionsTags levels={levels} />;
 
 		if(this.props.output === 'table')
 			return <IfQuestionsTable levels={levels} />;

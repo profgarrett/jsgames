@@ -236,7 +236,7 @@ router.get('/questions/', nocache, require_logged_in_user,
 	async (req          , res           , next              )               => {
 	try {
 		// Time limit on returned data.
-		const INTERVAL = 7*20 + ' DAY';  // roughly one semester.
+		const INTERVAL = 7*20 *100 + ' DAY';  // roughly one semester.
 
 		// Only allow faculty to have access to questions
 		const username = get_username_or_emptystring(req, res);
@@ -264,8 +264,8 @@ router.get('/questions/', nocache, require_logged_in_user,
 
 		// Make sure that the given code is valid. If not, then immediately fail
 		const code_in_array = IfLevels.filter( l => l.code === param_code).map( l => l.code );
-		if(param_code !== null && code_in_array.length !== 1)
-			throw new Error('Invalid code type '+param_code+' passed to recent_levels');
+		if(param_code !== '*' && param_code !== null && code_in_array.length !== 1)
+			throw new Error('Invalid code type '+ param_code + ' passed to recent_levels');
 
 
 		// Build SQL statement.
@@ -279,8 +279,11 @@ router.get('/questions/', nocache, require_logged_in_user,
 					(select TRUE as first, min(created) as created, username, code from iflevels group by username, code) as iflevelsmax 
 					ON iflevels.created = iflevelsmax.created AND iflevels.username = iflevelsmax.username AND iflevels.code = iflevelsmax.code
 			WHERE 
+			
+				sections.idsection IN (2, 3) AND
+
 				(iflevels.code = ? OR ? = '*') AND 
-				(sections.idsection = ? OR ? = '*') AND 
+				(sections.idsection = ? OR '*' = '*') AND 
 				(users.iduser = ? OR ? = '*') AND 
 				iflevels.updated > NOW() - INTERVAL ${INTERVAL} AND 
 				iflevels.username NOT IN ('garrettn') AND 
@@ -395,12 +398,18 @@ router.get('/grades?', nocache, require_logged_in_user,
 		//  If username provided, get self.  All are allowed to pull their own.
 		// 	Else, only Faculty are allowed to poll with unique criteria.
 		if(typeof req.query.username === 'undefined') {
+
 			if(!is_faculty_result) throw new Error('Only faculty are allowed to get other user grades');
 
 			// Set permissions to only return levels for the faculty's courses.
 			const sql_where_clauses = ['iflevels.completed = ?'];
 			sql_where_values.push(1);	
 
+			// We have a username given. Add it to conditions
+			sql_where_values.push(req.query.username);
+			sql_where_clauses.push('users.username = ?');
+
+			// Add faculty.
 			sql_where_clauses.push('faculty.username = ?');
 			sql_where_values.push(username);
 
@@ -408,11 +417,6 @@ router.get('/grades?', nocache, require_logged_in_user,
 			if(typeof req.query.iduser !== 'undefined') {
 				sql_where_values.push(req.query.iduser);
 				sql_where_clauses.push('users.iduser = ?');
-			}
-
-			if(typeof req.query.username !== 'undefined') {
-				sql_where_values.push(req.query.username);
-				sql_where_clauses.push('users.username = ?');
 			}
 
 			if(typeof req.query.idsection !=='undefined') {

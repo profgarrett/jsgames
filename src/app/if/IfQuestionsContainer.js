@@ -102,8 +102,8 @@ export default class IfQuestionsContainer extends React.Component<QuestionsProps
 
 		const search = new URLSearchParams(window.location.search);
 		const filter_defaults = search.has('idsection') 
-			? { pagetypes: 'IfPageFormulaSchema|IfPageHarsonsSchema', outputs: 'table', levels: 'math1', sections: search.get('idsection') }
-			: { pagetypes: 'IfPageFormulaSchema|IfPageHarsonsSchema', outputs: 'table', levels: 'math1'};
+			? { pagetypes: 'IfPageFormulaSchema|IfPageHarsonsSchema', outputs: 'tags', levels: 'math1', sections: search.get('idsection') }
+			: { pagetypes: 'IfPageFormulaSchema|IfPageHarsonsSchema', outputs: 'tags', levels: 'math1'};
 		
 
 		const filter = <Filter 
@@ -117,6 +117,7 @@ export default class IfQuestionsContainer extends React.Component<QuestionsProps
 					users: [], 
 					pagetypes: [], 
 					outputs: [
+						{ value: 'tags', label: 'Tags'},
 						{ value: 'table', label:'Table' },
 						{ value: 'excel',  label:'Excel' }
 					]

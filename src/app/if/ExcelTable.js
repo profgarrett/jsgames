@@ -31,7 +31,8 @@ const transform_if_date = dt => {
 
 // Use the given format style to properly display the input.
 // Very flexible with input format, guessing how to respond. 
-const format = (input, format) => {
+const format = (p_input, format) => {
+	let input = p_input;
 	if(input === null) return null;
 
 	// Undefined format.  Guess!
@@ -44,7 +45,7 @@ const format = (input, format) => {
 
 	// Test to see if this is a string version of a date (i.e., json)
 	// If so, change back to date.
-	if (typeof input === 'string' && input.length === 24 && input.match( /^\d{4}\-\d{2}\-\d{2}T\d\d\:\d\d/ ).length > 0) {
+	if (typeof input === 'string' && input.length === 24 && input.match( /^\d{4}-\d{2}-\d{2}T\d\d:\d\d/ ).length > 0) {
 		input = new Date(input);
 	}
 
@@ -56,7 +57,7 @@ const format = (input, format) => {
 		}
 	}
 
-	if(format === 'text' || format === 'c' || format === '' || format === ' ' ) {
+	if(format === 'text' || format === 'c' || format === ' ' ) {
 		// Text
 		return input;
 

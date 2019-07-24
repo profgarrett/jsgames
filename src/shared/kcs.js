@@ -165,7 +165,7 @@ function get_kcs( solution_f: string ): Array<Object> {
 	
 	//console.log([ solution_f, kcs]);
 
-	RULES.map( rule => {
+	RULES.forEach( rule => {
 		if( rule.if(solution_f, parsed_f ) ) {
 			kcs.push( { tag: rule.tag } );
 		}
