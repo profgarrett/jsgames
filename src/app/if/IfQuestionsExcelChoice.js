@@ -1,8 +1,6 @@
 //@flow
 import React from 'react';
-//import {  } from './../../shared/IfGame';
 import { DEMO_MODE } from './../../server/secret';
-
 
 import type { LevelType } from './IfTypes';
 import type { Node } from 'react';
@@ -77,7 +75,7 @@ export default class IfPagesExcel extends React.Component<DetailPropsType> {
 
 		// Sort.  First by level, then user, then order in sequence.
 		rows.sort( ( a, b) => {
-			(padL(a.level, 15) + '.' + padL(a.a_username,25) + '.' + padL(a.a_sequence_in_level, 3));
+			//(padL(a.level, 15) + '.' + padL(a.a_username,25) + '.' + padL(a.a_sequence_in_level, 3));
 			
 			if((padL(a.level, 15) + '.' + padL(a.a_username,25) + '.' + padL(a.a_sequence_in_level, 3)) > 
 					(padL(b.level, 15) + '.' + padL(b.a_username,25) + '.' + padL(b.a_sequence_in_level, 3))

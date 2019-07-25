@@ -1,6 +1,6 @@
 // @flow
 import React from 'react';
-import { Popover, OverlayTrigger, Card } from 'react-bootstrap';
+import { Popover, OverlayTrigger } from 'react-bootstrap';
 
 import { HtmlDiv, IncorrectGlyphicon, CorrectGlyphicon, CompletedGlyphicon } from './../components/Misc';
 import { fill_template } from './../../shared/template.js';

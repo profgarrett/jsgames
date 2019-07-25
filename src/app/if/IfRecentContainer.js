@@ -1,6 +1,7 @@
 //@flow
 import React from 'react';
-import { Container, Row, Col, Breadcrumb  } from 'react-bootstrap';
+import Container from 'react-bootstrap/Container';
+import { Row, Col, Breadcrumb  } from 'react-bootstrap';
 
 import IfRecent from './IfRecent';
 import { Message, Loading } from './../components/Misc';

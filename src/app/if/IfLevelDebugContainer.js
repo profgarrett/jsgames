@@ -2,7 +2,6 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Container, Row, Col, Breadcrumb, Button  } from 'react-bootstrap';
 
-
 import IfLevelDebug from './IfLevelDebug';
 import { Message, Loading } from './../components/Misc';
 

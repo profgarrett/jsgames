@@ -1,9 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Container, Row, Col, Breadcrumb, Button  } from 'react-bootstrap';
-import { Link } from 'react-router-dom';
-
-
+import Container from 'react-bootstrap/Container';
+import { Row, Col, Breadcrumb, Button  } from 'react-bootstrap';
 import IfLevelScore from './IfLevelScore';
 import { Message, Loading } from './../components/Misc';
 

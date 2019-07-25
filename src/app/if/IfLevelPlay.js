@@ -1,7 +1,7 @@
 // @flow
 import React from 'react';
 import type { Node } from 'react';
-import { Card, Button, Table, Popover, Overlay, OverlayTrigger, Modal } from 'react-bootstrap';
+import { Button, Table, Card, Popover, Overlay, OverlayTrigger, Modal } from 'react-bootstrap';
 import { HtmlSpan, HtmlDiv, 
 		HandPointRightGlyphicon, IncorrectGlyphicon, CorrectGlyphicon, 
 		CompletedGlyphicon, ProgressGlyphicon} from './../components/Misc';

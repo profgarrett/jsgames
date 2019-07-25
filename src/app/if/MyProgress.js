@@ -2,7 +2,7 @@
 import React from 'react';
 import type { LevelType  } from './IfTypes';
 import type { Node } from 'react';
-import { Card, InputGroup, ButtonToolbar, DropdownButton, Dropdown, Table, Tooltip, OverlayTrigger, Button } from 'react-bootstrap';
+import { InputGroup, ButtonToolbar, DropdownButton, Dropdown, Table, Tooltip, OverlayTrigger, Button } from 'react-bootstrap';
 import { IfLevels } from './../../shared/IfGame';
 import { getUserFromBrowser } from './../components/Authentication';
 
@@ -309,7 +309,6 @@ export default class MyProgress extends React.Component<PropsType, StateType> {
 
 
 	render(): Node {
-		const list = this.get_list();
 		const grades = this.props.grades.length>0 ? this.props.grades[0] : {};
 
 		// Only a single grades entry should be returned.

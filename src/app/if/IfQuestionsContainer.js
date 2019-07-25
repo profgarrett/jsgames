@@ -1,12 +1,13 @@
 //@flow
 import React from 'react';
-import { Container, ButtonToolbar, ButtonGroup, Row, Col, Breadcrumb, DropdownButton, Dropdown, Button  } from 'react-bootstrap';
+import Container from 'react-bootstrap/Container';
+import { Row, Col, Breadcrumb } from 'react-bootstrap';
 
 import IfQuestions from './IfQuestions';
 import { Message, Loading } from './../components/Misc';
 import Filter from './Filter';
 
-import { IfLevels, IfLevelSchema } from './../../shared/IfGame';
+import { IfLevelSchema } from './../../shared/IfGame';
 
 import ForceLogin from './../components/ForceLogin';
 

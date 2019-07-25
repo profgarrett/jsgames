@@ -1,9 +1,7 @@
 //@flow
 import React from 'react';
-//import {  } from './../../shared/IfGame';
 import ReactTable from 'react-table';
 import 'react-table/react-table.css';
-
 
 import { DEMO_MODE } from './../../server/secret';
 

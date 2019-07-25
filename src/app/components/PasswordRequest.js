@@ -1,7 +1,7 @@
 /* @flow */
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Form, Alert, Button, Col, Row } from 'react-bootstrap';
+import { Form, Alert, Button } from 'react-bootstrap';
 
 import type { Node } from 'react';
 

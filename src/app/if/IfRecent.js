@@ -4,11 +4,11 @@ import { Button, Modal } from 'react-bootstrap';
 import ReactTable from 'react-table';
 import 'react-table/react-table.css';
 
-import { HtmlDiv, PrettyDate } from './../components/Misc';
+import { PrettyDate } from './../components/Misc';
 
 import IfLevelScore from './IfLevelScore';
 
-import type { LevelType, PageType } from './IfTypes';
+import type { LevelType } from './IfTypes';
 import type { Node } from 'react';
 
 /*

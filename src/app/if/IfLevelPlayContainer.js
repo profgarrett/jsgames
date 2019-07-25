@@ -3,16 +3,13 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import type { Node } from 'react';
 
-import { Breadcrumb, Container, Col, Row } from 'react-bootstrap';
-
+import Container from 'react-bootstrap/Container';
+import { Breadcrumb, Col, Row } from 'react-bootstrap';
 import IfLevelPlay from './IfLevelPlay';
 import { ErrorBoundary, Message } from './../components/Misc';
 import { IfLevelSchema } from './../../shared/IfGame';
-
-
 import ForceLogin from './../components/ForceLogin';
 import Feedback from './../components/Feedback';
-
 import type { LevelType } from './IfTypes';
 
 

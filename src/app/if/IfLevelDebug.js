@@ -1,7 +1,5 @@
 // @flow
 import React from 'react';
-import { Popover, OverlayTrigger, Card } from 'react-bootstrap';
-
 import { HtmlDiv } from './../components/Misc';
 import { fill_template } from './../../shared/template.js';
 
@@ -22,7 +20,6 @@ type ScorePropsType = {
 class IfLevelDebugPage extends React.Component<ScorePropsType> {
 	
 	render(): Node {
-		const i = this.props.i;
 		const page = this.props.page;
 
 		const t = (s) => fill_template(s, page.template_values);

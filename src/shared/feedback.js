@@ -203,8 +203,6 @@ const get_feedback = (that: PageType): ?Array<string> => {
 		if(response !== null) responses.push(response);
 	}
 
-	if(responses === null) throw new Error('Null responses in get_feedback');
-
 	return responses;
 };
 

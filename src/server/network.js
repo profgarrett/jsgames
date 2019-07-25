@@ -201,7 +201,7 @@ function hash_password(password: string): string {
 
 // See if there is a matching user in the database.
 async function is_matching_mysql_user(username: string, password: string): any {
-	const hashed_password = bcrypt.hashSync(password, 8);
+	//const hashed_password = bcrypt.hashSync(password, 8);
 
 	const select_sql = 'SELECT iduser, hashed_password FROM users WHERE username = ?';
 	const select_results = await run_mysql_query(select_sql, [username]);

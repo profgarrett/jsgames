@@ -2,16 +2,13 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-//import IfLevelList from './IfLevelList';
-//import {PageHeader} from './../components/Misc';
-import { Link } from 'react-router-dom';
-
-import { Container, Row, Col } from 'react-bootstrap';
+import Container from 'react-bootstrap/Container';
+import {  Row, Col } from 'react-bootstrap';
 
 import { Message, Loading } from './../components/Misc';
 import { getUserFromBrowser } from './../components/Authentication';
 
-import { IfLevelSchema, IfLevels } from './../../shared/IfGame';
+import { IfLevelSchema } from './../../shared/IfGame';
 
 import MyProgress from './MyProgress';
 

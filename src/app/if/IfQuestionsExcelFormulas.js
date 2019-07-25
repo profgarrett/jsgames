@@ -1,8 +1,6 @@
 //@flow
 import React from 'react';
-//import {  } from './../../shared/IfGame';
 import { DEMO_MODE } from './../../server/secret';
-
 
 import type { LevelType } from './IfTypes';
 import type { Node } from 'react';
