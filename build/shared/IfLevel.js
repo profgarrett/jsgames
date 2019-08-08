@@ -5,7 +5,7 @@ const { IfPageTextSchema, IfPageChoiceSchema,
 		IfPageParsonsSchema, IfPageHarsonsSchema,
 		IfPageNumberAnswerSchema } = require('./IfPage');
 
-                                                    
+const { IfPageBaseSchema } = require('./IfPage');
 
 /** 
 	This const is used to provide a list of available tutorials.
@@ -42,9 +42,9 @@ const IfLevels = [
 	{ code: 'surveymath1', title: 'Survey of Math Concepts 1', description: 'Review your math concepts' },
 	{ code: 'surveymath2', title: 'Survey of Math Concepts 2', description: 'Review your math concepts' },
 
-	{ code: 'surveywaiver_non_woodbury_student', title: 'Account Setup (Student)', description: 'Learn about this website and answer several questions' },
-	{ code: 'surveywaiver_non_woodbury_user', title: 'Account Setup (Anonymous user)', description: 'Learn about this website and answer several questions' },
-	{ code: 'surveywaiver_woodbury_student', title: 'Account Setup (WU student)', description: 'Learn about this website and answer several questions' },
+	{ code: 'surveywaiver_non_woodbury_student', title: 'Student Account Setup', description: 'Learn about this website and answer several questions' },
+	{ code: 'surveywaiver_non_woodbury_user', title: 'Anonymous User Account Setup', description: 'Learn about this website and answer several questions' },
+	{ code: 'surveywaiver_woodbury_student', title: 'Woodbury Student Account Setup', description: 'Learn about this website and answer several questions' },
 
 ];
 
@@ -65,6 +65,26 @@ function convert_to_date_if_string( s     )       {
 	It contains multiple pages.
 */
 class IfLevelSchema extends Schema {
+	           
+	            
+	                
+	            
+
+	            
+	                                     
+	                                 
+	                                    
+	
+	             
+	                   
+	             
+	             
+
+	                  
+
+	                              
+	                      
+	                                
 
 	get type()         {
 		return 'IfLevelSchema';
@@ -138,7 +158,7 @@ class IfLevelSchema extends Schema {
 		let pages = this.pages;
 
 		// Run some checks to validate correctness.
-		pages.map( (p          ) => {
+		pages.map( (p                  ) => {
 			if(p.correct !== true && p.correct !== false && p.correct !== null) 
 				throw new Error('score.refresh.if.p.correct.isnottrueorfalseornull');
 			});
@@ -159,14 +179,14 @@ class IfLevelSchema extends Schema {
 
 		}
 
-		this.pages.map( (p          ) => {
+		this.pages.map( (p                  ) => {
 			if(p.correct !== true && p.correct !== false && p.correct !== null) 
 				throw new Error('score.refresh.if.p.correct.isnottrueorfalseornull');
 			});
 
 
 		// Map
-		let results = this.pages.map( (p          )             => {
+		let results = this.pages.map( (p                  )             => {
 
 			if(p.correct === null) return unscored_but_completed; 
 			if(p.correct_required && p.correct) return y;
@@ -183,15 +203,6 @@ class IfLevelSchema extends Schema {
 
 		return results;
 	}
-
-/*
-	get_test_score_correct: () => number,
-	get_test_score_incorrect: () => number,
-	get_test_score_attempted: () => number,
-	get_tutorial_pages_completed: () => number,
-	get_tutorial_pages_uncompleted: () => number,
-	get_test_score_as_percent: () => number,
-*/
 
 	get_test_score_correct()         {
 		return this.pages.filter( p => p.code === 'test' && p.completed && p.correct ).length;
@@ -226,7 +237,7 @@ class IfLevelSchema extends Schema {
 		Returns an initialized object based on the correct class type.
 		Must be passed valid JSON object with type variable
 	*/
-	get_new_page(json        )           {
+	get_new_page(json        )                   {
 		//return new json.type(json);
 		let new_page = null;
 
@@ -277,6 +288,7 @@ class IfLevelSchema extends Schema {
 		const last = this.get_last_update_date();
 
 		if(first === null || last === null) return 0;
+		if(typeof first === 'undefined' || typeof last === 'undefined') return 0;
 
 		return Math.round( (last.getTime() - first.getTime()) / 60000 );
 	}
@@ -289,7 +301,7 @@ class IfLevelSchema extends Schema {
 		
 		// Update any pages with matching json.
 		// Some pages may not have matching json, as server updates level by adding new pages.
-		this.pages.map( (p          , index        ) => {
+		this.pages.map( (p                  , index        ) => {
 			if(typeof json.pages[index] !== 'undefined') {
 				p.updateUserFields(json.pages[index]);
 			}
@@ -307,4 +319,3 @@ module.exports = {
 	IfLevels,
 	IfLevelSchema
 };
-

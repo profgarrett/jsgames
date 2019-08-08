@@ -1,6 +1,6 @@
 // @flow
 import React from 'react';
-import { Popover, OverlayTrigger } from 'react-bootstrap';
+import { Popover, Card, OverlayTrigger } from 'react-bootstrap';
 
 import { HtmlDiv, IncorrectGlyphicon, CorrectGlyphicon, CompletedGlyphicon } from './../components/Misc';
 import { fill_template } from './../../shared/template.js';
@@ -12,18 +12,18 @@ import Text from './Text';
 import HistorySlider from './HistorySlider';
 import NumberAnswer from './NumberAnswer';
 
-import type { LevelType, PageType } from './IfTypes';
+import { IfLevelSchema } from './../../shared/IfLevel';
+import { IfPageBaseSchema, IfPageNumberAnswerSchema, IfPageFormulaSchema } from './../../shared/IfPage';
 import type { Node } from 'react';
 
 
-
 type ScorePropsType = {
-	level: LevelType,
-	page: PageType,
+	level: IfLevelSchema,
+	page: IfPageBaseSchema,
 	i: number
 };
 type ScoreStateType = {
-	page: PageType
+	page: IfPageBaseSchema
 };
 
 
@@ -37,13 +37,14 @@ class IfLevelScorePage extends React.Component<ScorePropsType, ScoreStateType> {
 	}
 	
 	// Update this.state to show different versions of the current page.
-	setHistory(history_i: string) {
+	setHistory(history_param: any) {
+		const history_i = parseInt(history_param, 10); // force change to int.
 		const history = this.props.page.history[history_i];
-		const json = this.props.page.toJson();
-		json.client_f = history.client_f;
+		const json = { client_f: '', created: '', ...this.props.page.toJson()};
+		json.client_f = typeof history.client_f === 'undefined' ? '' : history.client_f;
 
 		// History items have created, which we don't want in a page.
-		delete json['created'];
+		delete json.created;
 
 		const page = this.props.level.get_new_page(json);
 
@@ -67,11 +68,19 @@ class IfLevelScorePage extends React.Component<ScorePropsType, ScoreStateType> {
 
 		if(page_at.type === 'IfPageFormulaSchema' || page_at.type === 'IfPageHarsonsSchema') {
 			// Show solution?
-			if(page_final.solution_f && page_final.solution_f.length > 0) {
-				solution = (
-					<div>Solution: <code>{ page_final.solution_f}</code></div>
-				);
+
+			if(page_at.type === 'IfPageFormaSchema') {
+				page_at = page_at.toIfPageFormulaSchema();
+				page_final = page_final.toIfPageFormulaSchema();
+			} else {
+				// Assert that ( page_at.type === 'IfPageHarsonsSchema')
+				page_at = page_at.toIfPageHarsonsSchema();
+				page_final = page_final.toIfPageHarsonsSchema();
 			}
+
+			solution = page_at.solution_f && page_at.solution_f.length > 0 
+					? <div>Solution: <code>{ page_at.solution_f}</code></div>
+					: null;
 					
 			// Show problem.
 			//defaultExpanded={!page_final.correct}
@@ -81,7 +90,7 @@ class IfLevelScorePage extends React.Component<ScorePropsType, ScoreStateType> {
 						<Card.Title><div>{ page_final.client_f} </div></Card.Title>
 						<HtmlDiv className='lead' html={ inst } />
 						<HistorySlider page={page_at} handleChange={this.setHistory} />
-						<ExcelTable page={page_at} readonly={true} editable={false} />
+						<ExcelTable page={page_at} readonly={true} editable={false} handleChange={ () => {} }/>
 						<div style={{ textAlign:  'right', fontSize: 8, color: 'gray' }}>{ page_final.type }</div>
 					</Card.Body>
 				</Card>
@@ -89,30 +98,18 @@ class IfLevelScorePage extends React.Component<ScorePropsType, ScoreStateType> {
 
 
 		} else if(page_at.type === 'IfPageNumberAnswerSchema') {
-			problem = (<div>
-					<NumberAnswer page={page_at} editable={false} />
-				</div>);
-
+			problem = <div><NumberAnswer page={page_at.toIfPageNumberAnswerSchema()} readonly={false} editable={false} handleChange={()=>{}} handleSubmit={()=>{}}/></div>;
 
 		} else if(page_at.type === 'IfPageTextSchema') {
-			problem = (<div>
-					<Text page={page_at} editable={false} />
-				</div>);
-
+			problem = (<div><Text page={page_at.toIfPageTextSchema()} editable={false} /></div>);
 
 		} else if(page_at.type === 'IfPageParsonsSchema') {
-			problem = (<div>
-					<Parsons page={page_at} editable={false} show_solution={page_final.correct === false} />
-				</div>);
-
+			problem = (<div><Parsons page={page_at.toIfPageParsonsSchema()} editable={false} show_solution={page_final.correct === false} /></div>);
 
 		} else if(page_at.type === 'IfPageChoiceSchema') {
 			// Show range of choice only if the user was wrong.  If no right answer,
 			// then correct will be null.
-			problem = (<div>
-					<Choice page={page_at} editable={false} show_solution={page_final.correct === false} />
-				</div>);
-
+			problem = (<div><Choice page={page_at.toIfPageChoiceSchema()} editable={false} show_solution={page_final.correct === false} /></div>);
 
 		} else {
 			throw new Error('Invalid type in IfLevelScore '+page_at.type);
@@ -136,10 +133,11 @@ class IfLevelScorePage extends React.Component<ScorePropsType, ScoreStateType> {
 
 
 type LevelPropsType = {
-	level: LevelType
+	level: IfLevelSchema
 };
 
-export default class IfLevelScore extends React.Component<LevelPropsType, StateType> {
+
+export default class IfLevelScore extends React.Component<LevelPropsType> {
 
 	render(): Node {
 		const level = this.props.level;
@@ -180,7 +178,8 @@ export default class IfLevelScore extends React.Component<LevelPropsType, StateT
 
 
 // Build the score list at the bottom of the page.
-const build_score = (pages: Array<PageType>): any => pages.map( (p: PageType, i: number): any => {
+const build_score = (pages: Array<IfPageBaseSchema>): any => 
+		pages.map( (p: IfPageBaseSchema, i: number): any => {
 	let g = null;
 	let title = '';
 	let html = '';

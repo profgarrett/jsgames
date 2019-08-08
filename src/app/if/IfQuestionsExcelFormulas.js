@@ -2,11 +2,11 @@
 import React from 'react';
 import { DEMO_MODE } from './../../server/secret';
 
-import type { LevelType } from './IfTypes';
+import { IfLevelSchema } from './../../shared/IfLevel';
 import type { Node } from 'react';
 
 type DetailPropsType = {
-	levels: Array<LevelType>
+	levels: Array<IfLevelSchema>
 };
 
 

@@ -3,9 +3,10 @@
 	This "tag" module is used to automatically tag elements for correctness.
 
 */
-import type { LevelType, FormulaPageType } from './../app/if/IfTypes';
-
-const { /*parseFormula,*/ parseFeedback } = require('./../shared/parseFeedback');
+const { IfPageBaseSchema, IfPageFormulaSchema, IfPageHarsonsSchema } = require('./../shared/IfPage');
+const { IfLevelSchema } = require('./../shared/IfLevel');
+const { fill_template } = require('./../shared/template');
+const { parseFeedback } = require('./../shared/parseFeedback');
 
 
 // Enable DEBUG to run all tests on tagger.
@@ -284,7 +285,7 @@ if(DEBUG) {
 }
 */
 
-// Changes range refernce, such as A1:B1 into ['a1', 'b1', 'c1' ]
+// Changes range reference, such as A1:B1 into ['a1', 'b1', 'c1' ]
 // Doesn't care about C2 rows, just assumes all on row 1. 
 function convert_range_ref_into_individual_refs( parsed: Array<Object> ): Array<Object> {
 	return parsed.map( has => {
@@ -433,7 +434,7 @@ const ENTRY_TESTS = [
 		]
 	},{
 		tag: 'NON_EXISTANT_COLUMN_REFERENCE',
-		if: (solution_f: string, client_f: string, page: FormulaPageType) => {
+		if: (solution_f: string, client_f: string, page: IfPageFormulaSchema) => {
 			const parsed  = parseFeedback(client_f);
 			const references = parsed.filter( has => has.has === 'references' );
 
@@ -589,7 +590,7 @@ const ENTRY_TESTS = [
 		]
 	},{
 		tag: 'CORRECT',
-		if: (solution_f: string, client_f: string, page: FormulaPageType ) => {
+		if: (solution_f: string, client_f: string, page: IfPageFormulaSchema ) => {
 			if(page.correct && client_f == page.client_f) return true;
 			return false;
 		},
@@ -675,7 +676,7 @@ const ENTRY_TESTS = [
 		]		
 	},{
 		tag: 'USES_VALUE_NOT_IN_SOLUTION',
-		if: (solution_f: string, client_f: string, page: FormulaPageType ) => {
+		if: (solution_f: string, client_f: string, page: IfPageFormulaSchema ) => {
 			const solution_parsed = parseFeedback(solution_f);
 			const solution_values = solution_parsed.filter( has => has.has === 'values' );
 			const parsed  = parseFeedback(client_f);
@@ -754,60 +755,68 @@ if(DEBUG) {
 
 
 
-function return_tagged_level(level: LevelType): LevelType {
+function return_tagged_level(level: IfLevelSchema): IfLevelSchema {
 
-	level.pages = level.pages.map( page => {
-			// If no solution, then continue.
-			if(typeof page.solution_f === 'undefined' || typeof page.client_f === 'undefined') return page;
+	level.pages = level.pages.map( (untyped_page: IfPageBaseSchema) => {
+		const page = untyped_page.type === 'IfPageFormulaSchema' 
+			? untyped_page.toIfPageFormulaSchema()
+			: untyped_page.type === 'IfPageHarsonsSchema'
+				? untyped_page.toIfPageHarsonsSchema()
+				: untyped_page;
 
-			// Clean-up history.
-			let filtered_history = filter_history(page.history);
-			filtered_history = remove_duplicate_history(filtered_history);
-			filtered_history = add_tags(filtered_history);
-			filtered_history = tag_single_letter_typos(filtered_history);
-			filtered_history = tag_intermediate_history(filtered_history);
+		if( !(page.type === 'IfPageFormulaSchema' || page.type === 'IfPageHarsonsSchema' ) ) 
+			return page; // don't do any tags on non-formula pages.
 
-			// Only use the 'paste' tag for normal typed in solutions.
-			if(page.type === 'IfPageFormulaSchema') 
-				filtered_history = tag_paste(filtered_history);
+		// Clean-up history.
+		let filtered_history = filter_history(page.history);
+		filtered_history = remove_duplicate_history(filtered_history);
+		filtered_history = add_tags(filtered_history);
+		filtered_history = tag_single_letter_typos(filtered_history);
+		filtered_history = tag_intermediate_history(filtered_history);
 
-			page.history = filtered_history;
+		// Only use the 'paste' tag for normal typed in solutions.
+		if(page.type === 'IfPageFormulaSchema') 
+			filtered_history = tag_paste(filtered_history);
 
-			let parsed = {};
+		page.history = filtered_history;
 
-			// Run checks.
-			page.history.map( h => {
-				// Make sure we have data.
-				if( typeof h.client_f === 'undefined' ) return;
+		let parsed = {};
 
-				// Only tag non-intermediate data.
-				if( h.tags.filter( tag => tag.tag === 'INTERMEDIATE').length === 1 ) return;
+		// Fill template, so that {n} turns into 1, or {cell1_ref}  turns into A1.
+		let t_solution_f = fill_template(page.solution_f, page.template_values)
+		
+		// Run checks.
+		page.history.map( h => {
+			// Make sure we have data.
+			if( typeof h.client_f === 'undefined' ) return;
 
+			// Only tag non-intermediate data.
+			if( h.tags.filter( tag => tag.tag === 'INTERMEDIATE').length === 1 ) return;
 
-				// See if we can parse it out.
-				try {
-					parsed = parseFeedback(h.client_f);
-				} catch (e) {
-					h.tags.push( { tag: 'PARSE_ERROR'});
-					return;
+			// See if we can parse it out.
+			try {
+				parsed = parseFeedback(h.client_f);
+			} catch (e) {
+				h.tags.push( { tag: 'PARSE_ERROR'});
+				return;
+			}
+
+			ENTRY_TESTS.map( test => { 
+				if(test.if( t_solution_f, h.client_f, page, parsed )) {
+					h.tags.push( { tag: test.tag });
 				}
-
-				ENTRY_TESTS.map( test => { 
-					if(test.if( page.solution_f, h.client_f, page, parsed )) {
-						h.tags.push( { tag: test.tag });
-					}
-				});
-
-				//if(!has_tag(h.tags, 'intermediate')) 
-				//	console.log([ h.client_f, h.tags, parsed.map( p => p.has + ': ' + p.args.join(', ')) ]);
-
-				//if(has_tag(h.tags, 'USES_REFERENCE_NOT_IN_SOLUTION'))
-				//	console.log([ h, page.solution_f, h.client_f, page.tests[0] ]);
 			});
 
+			//if(!has_tag(h.tags, 'intermediate')) 
+			//	console.log([ h.client_f, h.tags, parsed.map( p => p.has + ': ' + p.args.join(', ')) ]);
 
-			return page;
+			//if(has_tag(h.tags, 'USES_REFERENCE_NOT_IN_SOLUTION'))
+			//	console.log([ h, page.solution_f, h.client_f, page.tests[0] ]);
 		});
+
+
+		return page;
+	});
 
 	return level;
 }

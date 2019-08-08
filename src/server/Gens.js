@@ -1,6 +1,19 @@
 // @flow
 const { DataFactory } = require('./DataFactory');
-import type { PageType, GenType, AdaptiveGenType } from './../app/if/IfTypes';
+const { IfPageBaseSchema } = require('./../shared/IfPage');
+
+export type GenType = {
+	gen: Function,
+	until: ?Function,
+	pages: Array<IfPageBaseSchema | GenType>
+};
+
+export type AdaptiveGenType = {
+	gen: Function,
+	until: Function,
+	tutorial_gen: GenType,
+	test_gen: GenType
+};
 
 
 /**
@@ -27,7 +40,7 @@ import type { PageType, GenType, AdaptiveGenType } from './../app/if/IfTypes';
 */
 
 // Return pages in a simple linear order.
-const LinearGen = (seed: number, pages: Array<PageType>, gen: GenType): any => {
+const LinearGen = (seed: number, pages: Array<IfPageBaseSchema>, gen: GenType): any => {
 	// Convenience function that puts pages into good order for pop().
 	let gen_pages = gen.pages.slice().reverse();
 	let last_gen_page = null;
@@ -68,7 +81,7 @@ const LinearGen = (seed: number, pages: Array<PageType>, gen: GenType): any => {
 
 
 // Pick one of the potential random sections 
-const ShuffleGen = (seed: number, pages: Array<PageType>, gen: GenType): any => {
+const ShuffleGen = (seed: number, pages: Array<IfPageBaseSchema>, gen: GenType): any => {
 	// Create a new gen that is randomized by the given seed.
 	let randomized_gen = {
 		...gen,
@@ -85,7 +98,7 @@ const ShuffleGen = (seed: number, pages: Array<PageType>, gen: GenType): any => 
 
 	If len < limit, then it will re-use items.
 */
-const ShuffleGenUntilLimit = (seed: number, pages: Array<PageType>, gen: GenType): any => {
+const ShuffleGenUntilLimit = (seed: number, pages: Array<IfPageBaseSchema>, gen: GenType): any => {
 	// Create a new gen that is randomized by the given seed.
 	
 	if(typeof gen.limit === 'undefined') 
@@ -111,7 +124,7 @@ const ShuffleGenUntilLimit = (seed: number, pages: Array<PageType>, gen: GenType
 // Continue for as long as until is false.
 // Should have only a single gen passed.  Will continue creating pages from
 // that page until the UNTIL function returns true.
-const UntilGen = (seed: number, pages: Array<PageType>, gen: GenType): any => {
+const UntilGen = (seed: number, pages: Array<IfPageBaseSchema>, gen: GenType): any => {
 	let until_results = [];
 	let last_page = null;
 
@@ -166,7 +179,7 @@ const UntilGen = (seed: number, pages: Array<PageType>, gen: GenType): any => {
 	If the test_gen list is shorter than the total numbers of test items requested, it will
 	just go back into it again after another random sort.
 */
-const AdaptiveGen = (seed: number, pages: Array<PageType>, me: AdaptiveGenType): any => {
+const AdaptiveGen = (seed: number, pages: Array<IfPageBaseSchema>, me: AdaptiveGenType): any => {
 	let result = null;
 	let original_pages = []; // pages.slice() will be run in the while looop to populate this.
 	let consumed_pages = [];

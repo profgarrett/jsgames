@@ -3,18 +3,16 @@ import React from 'react';
 import PropTypes from 'prop-types';
                                   
 
-import { Breadcrumb, Container, Col, Row } from 'react-bootstrap';
+import Container from 'react-bootstrap/Container';
+import { Breadcrumb, Col, Row } from 'react-bootstrap';
 
-import IfLevelPlay from './IfLevelPlay';
-import { ErrorBoundary, Message } from './../components/Misc';
 import { IfLevelSchema } from './../../shared/IfGame';
 
+import IfLevelPlay from './IfLevelPlay';
 
+import { ErrorBoundary, Message } from './../components/Misc';
 import ForceLogin from './../components/ForceLogin';
 import Feedback from './../components/Feedback';
-
-                                           
-
 
                   
               
@@ -24,7 +22,7 @@ import Feedback from './../components/Feedback';
                       
                     
                    
-                   
+                       
                              
                         
                           
@@ -61,27 +59,32 @@ export default class IfLevelPlayContainer extends React.Component               
 	// Get an update of the user's input.
 	// Changes is passed a json object with the updated values.
 	onChange(json        ) {
-		if(typeof this.state.level === 'undefined' || this.state.level === null) 
+
+		if(typeof this.state.level === 'undefined' || this.state.level === null) {
 			throw new Error('Invalid onChange of undefined IfLevelPlayContainer');
-		
-		// Don't accept any input if we are currently loading
-		if(this.state.isLoading) return;
 
-		const i = this.state.selected_page_index;
-		//let new_history_item = { created: new Date(), ...json };
-		//let history = [...this.state.level.pages[i].history, new_history_item];
+		} else {
+			// Don't accept any input if we are currently loading
+			let level = this.state.level;
 
-		// Create a fresh page.
-		let page_json = { ...this.state.level.pages[i].toJson()};
-		let page = this.state.level.get_new_page(page_json);
+			if(this.state.isLoading) return;
 
-		// Update fresh page with new values.
-		page.updateUserFields({ ...page_json, ...json });
-		
-		let level = new IfLevelSchema(this.state.level.toJson());
-		level.pages[i] = page;
+			const i = this.state.selected_page_index;
+			//let new_history_item = { created: new Date(), ...json };
+			//let history = [...this.state.level.pages[i].history, new_history_item];
 
-		this.setState({ level });
+			// Create a fresh page.
+			let page_json = { ...level.pages[i].toJson()};
+			let page = level.get_new_page(page_json);
+
+			// Update fresh page with new values.
+			page.updateUserFields({ ...page_json, ...json });
+			
+			level = new IfLevelSchema(level.toJson());
+			level.pages[i] = page;
+
+			this.setState({ level });
+		}
 	}
 
 
@@ -108,7 +111,7 @@ export default class IfLevelPlayContainer extends React.Component               
 
 		// If the last page is a text-only one, update last page to show that it's been viewed.
 		if(current_page.type === 'IfPageTextSchema') {
-			current_page.client_read = true;
+			current_page.toIfPageTextSchema().client_read = true;
 		}
 
 		// Make sure that the user has submitted something
@@ -144,11 +147,11 @@ export default class IfLevelPlayContainer extends React.Component               
 				body: level.toJsonString()
 			})
 			.then( (response     )         => response.json() )
-			.then( (json        )            => {
+			.then( (json        )                => {
 				if(json._error) throw new Error(json._error); 
 				return new IfLevelSchema(json);
 			})
-			.then( (ifLevel           ) => {
+			.then( (ifLevel               ) => {
 				const page = ifLevel.pages[current_page_i];
 
 				// Test to see if we're at the end of the level. If so, go to the reviw screen.

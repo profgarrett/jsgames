@@ -1,7 +1,7 @@
 //      
 import React from 'react';
 
-                                           
+import { IfLevelSchema } from './../../shared/IfLevel';
                                   
 
 import { create_summary } from './IfQuestionsData';
@@ -12,7 +12,7 @@ import IfQuestionsTags from './IfQuestionsTags';
 
 
                   
-                          
+                              
                
   
 

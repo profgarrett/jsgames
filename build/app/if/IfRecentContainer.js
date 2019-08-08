@@ -1,6 +1,7 @@
 //     
 import React from 'react';
-import { Container, Row, Col, Breadcrumb  } from 'react-bootstrap';
+import Container from 'react-bootstrap/Container';
+import { Row, Col, Breadcrumb  } from 'react-bootstrap';
 
 import IfRecent from './IfRecent';
 import { Message, Loading } from './../components/Misc';
@@ -11,7 +12,6 @@ import 'url-search-params-polyfill';
 
 import ForceLogin from './../components/ForceLogin';
 
-                                           
                                   
 
 
@@ -21,7 +21,7 @@ import ForceLogin from './../components/ForceLogin';
                  
                       
                     
-                         
+                             
   
 
 export default class IfRecentContainer extends React.Component                       {
@@ -93,15 +93,10 @@ export default class IfRecentContainer extends React.Component                  
 
 		const search = new URLSearchParams(window.location.search);
 
-		const filter_defaults = {
-			days: 1
-		};
+		const filter_defaults = search.has('idsection') 
+			? { days: 1, sections: search.get('idsection') }
+			: { days: 1 };
 
-		// Populate default for filters from URL	
-		if( search.has('idsection')) {
-			filter_defaults.sections = search.get('idsection');
-		}
-		
 
 		const filter_filters = {
 			levels: [],

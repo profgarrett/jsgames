@@ -3,7 +3,6 @@ const { Schema, isDef, isObject, isArray, revive_dates_recursively } = require('
 const { get_feedback } = require('./feedback');
 const { fill_template } = require('./template');
 var FormulaParser = require('hot-formula-parser').Parser;
-//import type { PageType } from './../app/if/IfTypes';
 
 
 
@@ -60,7 +59,6 @@ const noObjectsInArray = (i_array: Array<any>): Array<any> => {
 	});
 	return i_array;
 };
-
 
 
 // Return fields in common for all Pages.
@@ -122,11 +120,27 @@ function common_schema(): Object {
 	Common base class for shared behavior.
 */
 class IfPageBaseSchema extends Schema {
+	code: string
+	description: string
+	instruction: string
+	template_values: Object
+	client_feedback: ?Array<string>
+	feedback: Array<Function>
+	correct: ?boolean
+	correct_required: boolean
+	completed: boolean
+	show_feedback_on: boolean
+	history: Array<Object>
+	kcs: Array<Object>
+
+	// Must be implemented by inheriting classes.
+	+client_has_answered: () => boolean
+	+updateUserFields: (any) => any
+	+debug_answer: () => any
 
 	get type(): string {
 		return 'IfPageBaseSchema';
 	}
-
 
 	/*
 		When was this created?
@@ -266,6 +280,7 @@ class IfPageBaseSchema extends Schema {
 	standardize_formula_case( optional_field: string ) {
 		if(typeof optional_field !== 'undefined') {
 			// Swap out the given field.
+			// $FlowFixMe
 			let s = this[optional_field];
 			if(s === null || s === '') return;
 
@@ -286,16 +301,70 @@ class IfPageBaseSchema extends Schema {
 					s = s.replace(dirty, clean);
 				});
 			}
+			// $FlowFixMe
 			this[optional_field] = s;
 			
 		} else {
 			this.standardize_formula_case('description');
 			this.standardize_formula_case('instruction');
 			this.standardize_formula_case('helpblock');
+			// $FlowFixMe
 			if(typeof this.solution_f !== 'undefined') 
 					this.standardize_formula_case('solution_f');
 		}
 	}
+
+
+
+	// Type coercion for flow not liking subtypes.
+	toIfPageChoiceSchema(): IfPageChoiceSchema {
+		if( this.type !== 'IfPageChoiceSchema') throw new Error('Invalid type convertion to IfPageChoiceSchema');
+		// $FlowFixMe 
+		return this;
+	}
+	// Type coercion for flow not liking subtypes.
+	toIfPageFormulaSchema(): IfPageFormulaSchema {
+		if( this.type !== 'IfPageFormulaSchema') throw new Error('Invalid type convertion to IfPageFormulaSchema');
+		// $FlowFixMe 
+		return this;
+	}
+	// Type coercion for flow not liking subtypes.
+	toIfPageLongTextAnswerSchema(): IfPageLongTextAnswerSchema {
+		if( this.type !== 'IfPageLongTextAnswerSchema') throw new Error('Invalid type convertion to IfPageLongTextAnswerSchema');
+		// $FlowFixMe 
+		return this;
+	}
+	// Type coercion for flow not liking subtypes.
+	toIfPageNumberAnswerSchema(): IfPageNumberAnswerSchema {
+		if( this.type !== 'IfPageNumberAnswerSchema') throw new Error('Invalid type convertion to IfPageNumberAnswerSchema');
+		// $FlowFixMe 
+		return this;
+	}
+	// Type coercion for flow not liking subtypes.
+	toIfPageParsonsSchema(): IfPageParsonsSchema {
+		if( this.type !== 'IfPageParsonsSchema') throw new Error('Invalid type convertion to IfPageParsonsSchema');
+		// $FlowFixMe 
+		return this;
+	}
+	// Type coercion for flow not liking subtypes.
+	toIfPageShortTextAnswerSchema(): IfPageShortTextAnswerSchema {
+		if( this.type !== 'IfPageShortTextAnswerSchema') throw new Error('Invalid type convertion to IfPageShortTextAnswerSchema');
+		// $FlowFixMe 
+		return this;
+	}
+	// Type coercion for flow not liking subtypes.
+	toIfPageTextSchema(): IfPageTextSchema {
+		if( this.type !== 'IfPageTextSchema') throw new Error('Invalid type convertion to IfPageTextSchema');
+		// $FlowFixMe 
+		return this;
+	}
+	// Type coercion for flow not liking subtypes.
+	toIfPageHarsonsSchema(): IfPageHarsonsSchema {
+		if( this.type !== 'IfPageHarsonsSchema') throw new Error('Invalid type convertion to IfPageHarsonsSchema');
+		// $FlowFixMe 
+		return this;
+	}
+
 }
 
 
@@ -303,6 +372,8 @@ class IfPageBaseSchema extends Schema {
 	This pages displays information to the user.
 */
 class IfPageTextSchema extends IfPageBaseSchema {
+	client_read: bool
+
 
 	constructor(json: Object) {
 		super(json); // set passed fields.
@@ -387,6 +458,8 @@ class IfPageTextSchema extends IfPageBaseSchema {
 	Get a single-line piece of information from the user.
 */
 class IfPageNumberAnswerSchema extends IfPageBaseSchema {
+	client: number
+	solution: number
 
 	constructor(json: Object) {
 		super(json); // set passed fields.
@@ -462,8 +535,9 @@ class IfPageNumberAnswerSchema extends IfPageBaseSchema {
 
 	// Return a nicely formatted view of the client's input. 
 	toString(): string {
-		return this.client;
+		return ''+this.client;
 	}
+
 }
 
 
@@ -472,6 +546,9 @@ class IfPageNumberAnswerSchema extends IfPageBaseSchema {
 	Get a single-line piece of information from the user.
 */
 class IfPageShortTextAnswerSchema extends IfPageBaseSchema {
+	client: string
+	solution: string
+
 
 	constructor(json: Object) {
 		super(json); // set passed fields.
@@ -579,6 +656,10 @@ class IfPageLongTextAnswerSchema extends IfPageShortTextAnswerSchema {
 	If a range of choices, then solution should be a wildcard ? or *.
 */
 class IfPageChoiceSchema extends IfPageBaseSchema {
+	client: string
+	client_items: Array<string>
+	solution: string
+
 
 	constructor(json: Object) {
 		super(json); // set passed fields.
@@ -687,6 +768,11 @@ class IfPageChoiceSchema extends IfPageBaseSchema {
 	The solution fields are not sent to the client unless they have the _visible tag set.
 */
 class IfPageParsonsSchema extends IfPageBaseSchema {
+	helpblock: string
+	potential_items: Array<string>
+	solution_items: Array<string>
+	client_items: Array<string>
+
 
 	constructor(json: Object) {
 		super(json); // set passed fields.
@@ -803,6 +889,20 @@ class IfPageParsonsSchema extends IfPageBaseSchema {
 	The solution fields are not sent to the client unless they have the _visible tag set.
 */
 class IfPageFormulaSchema extends IfPageBaseSchema {
+	tests: Array<Object>
+	column_titles: Array<string>
+	column_formats: Array<string>
+
+	client_f: string
+	client_f_format: string
+	client_test_results: Array<Object>
+
+	solution_f: string
+	solution_test_results: Array<Object>
+	solution_f_visible: boolean
+	solution_test_results_visible: boolean
+
+	helpblock: string
 
 	constructor(json: Object) {
 		super(json); // set passed fields.
@@ -855,7 +955,7 @@ class IfPageFormulaSchema extends IfPageBaseSchema {
 		if(typeof this.solution_f === 'undefined') {
 			throw new Error('You can not debug answer without solution_f being present');
 		}
-		this.client_f = fill_template(this.solution_f, this.template_values);
+		this.client_f = ''+fill_template(this.solution_f, this.template_values); // make sure that we have a string here.
 		this.updateCorrect();
 	}		
 
@@ -916,7 +1016,7 @@ class IfPageFormulaSchema extends IfPageBaseSchema {
 		Make sure that we actually have a solution before generating anything.
 	*/
 	updateSolutionTestResults() {
-		const solution_f = fill_template(this.solution_f, this.template_values);
+		const solution_f = ''+fill_template(this.solution_f, this.template_values);
 		if(this.solution_f === null || this.solution_f.length < 1) return;
 
 		this.solution_test_results = this.tests.map( t => this.__parse(solution_f, t, this.client_f_format) );
@@ -1050,12 +1150,15 @@ class IfPageFormulaSchema extends IfPageBaseSchema {
 
 		@arg formula
 	*/
-	__parse(formula: string, current_test: Array<any>, s_format: string): Object {
+	__parse(formula: string, current_test: Object, s_format: string): Object {
 
 		// Update test results.
 		//let columns = Object.keys(this.tests[0]);
 		let parser = new FormulaParser();
-		let res = { result: null, error: null };
+		let res: { result: ?string, error: ?string } = { 
+				result: null,
+				error: null
+			};
 
 		// Get int position of a letter.
 		let i_to_alpha = (i: number): string => 'abcdefghijklmnopqrstuvwxyz'.substr(i, 1);
@@ -1115,7 +1218,6 @@ class IfPageFormulaSchema extends IfPageBaseSchema {
 			} catch(e) {
 				console.log(res);
 				res.error = '#ERROR!';
-
 			}
 		}
 
@@ -1135,7 +1237,7 @@ class IfPageFormulaSchema extends IfPageBaseSchema {
 		// Go through results and round any floating point numbers
 		// to 2 decimal points.
 		if(typeof res.result === 'number' && !isInteger(res.result)) {
-			res.result = Math.round(res.result*100)/100;
+			res.result = ''+Math.round(res.result*100)/100;
 		}
 
 		return res;
@@ -1158,7 +1260,7 @@ class IfPageFormulaSchema extends IfPageBaseSchema {
 	It's the same as the FormulaSchema, with the addition of a toolbox.
 */
 class IfPageHarsonsSchema extends IfPageFormulaSchema {
-
+	toolbox: Array<string>
 
 	get type(): string {
 		return 'IfPageHarsonsSchema';
@@ -1198,6 +1300,7 @@ class IfPageHarsonsSchema extends IfPageFormulaSchema {
 
 
 module.exports = {
+	IfPageBaseSchema,
 	IfPageTextSchema,
 	IfPageChoiceSchema,
 	IfPageFormulaSchema,

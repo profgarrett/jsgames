@@ -1,28 +1,26 @@
 //     
 import React from 'react';
-//import {  } from './../../shared/IfGame';
 import ReactTable from 'react-table';
 import 'react-table/react-table.css';
 
-
 import { DEMO_MODE } from './../../server/secret';
 
-                                           
+import { IfLevelSchema } from './../../shared/IfLevel';
                                   
 import { HtmlDiv } from './../components/Misc';
 
                         
-                         
+                             
   
 
 
 
-export default 
+
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 // Class used to show data in a react table that can be easily viewed.
 ////////////////////////////////////////////////////////////////////////////////
-class IfPagesTable extends React.Component                  {
+export default class IfPagesTable extends React.Component                  {
 
 
 	// Render a single summary row
@@ -40,6 +38,11 @@ class IfPagesTable extends React.Component                  {
 			style: {textAlign: 'right'},
 			width: 75
 		}, {
+			id: 'completed',
+			Header: 'completed',
+			accessor: answer => answer.completed ? '' : 'N' ,
+			width: 50
+		}, {
 			id: 'breaks',
 			Header: 'breaks',
 			accessor: answer => answer.breaks,
@@ -50,11 +53,6 @@ class IfPagesTable extends React.Component                  {
 			Header: 'Correct?',
 			accessor: answer => answer.correct ? 'Y' : '',
 			width: 80
-		}, {
-			id: 'completed',
-			Header: 'completed',
-			accessor: answer => answer.completed ? 'Y' : '' ,
-			width: 50
 		}, {
 			id: 'html',
 			Header: 'html',
@@ -128,6 +126,9 @@ class IfPagesTable extends React.Component                  {
 			Header: 'Correct',
 			accessor: q => Math.round(q.correct_average*100)+'%',
 			style: {textAlign: 'right'},
+			sortMethod: (a, b) => {
+				return parseInt(a,10) - parseInt(b,10)
+			},
 			width: 100
 		}, {
 			id: 'seconds',

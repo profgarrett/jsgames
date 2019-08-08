@@ -3,11 +3,10 @@ import React from 'react';
 import { ListGroup, ListGroupItem } from 'react-bootstrap';
 import type { Node } from 'react';
 
-import type { ChoicePageType } from './IfTypes';
-
+import { IfPageChoiceSchema } from './../../shared/IfPage';
 
 type PropsType = {
-	page: ChoicePageType,
+	page: IfPageChoiceSchema,
 	editable: boolean,
 	handleChange: (any) => void,
 	showSolution: boolean

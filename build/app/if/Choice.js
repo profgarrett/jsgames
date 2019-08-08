@@ -3,11 +3,10 @@ import React from 'react';
 import { ListGroup, ListGroupItem } from 'react-bootstrap';
                                   
 
-                                                
-
+import { IfPageChoiceSchema } from './../../shared/IfPage';
 
                   
-                      
+                          
                    
                              
                       

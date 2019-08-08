@@ -6,12 +6,12 @@ import { Table } from 'react-bootstrap';
 
 import { DEMO_MODE } from './../../server/secret';
 
-import type { LevelType } from './IfTypes';
+import { IfLevelSchema } from './../../shared/IfLevel';
 import type { Node } from 'react';
 import { HtmlDiv } from './../components/Misc';
 
 type DetailPropsType = {
-	levels: Array<LevelType>
+	levels: Array<IfLevelSchema>
 };
 
 
@@ -23,18 +23,17 @@ function array_to_object( a: Array<string> ): Object {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
 // Class used to show tag data.
 ////////////////////////////////////////////////////////////////////////////////
-export default class IfPagesTags extends React.Component<DetailPropsType> {
+export default class IfQuestionsTags extends React.Component<DetailPropsType> {
 
 
-	build_row( data: Object, columns: Object ): Node {
+	build_row( data: Object, columns: Object, i: number ): Node {
 		const tds = [];
 
 		for(let index in columns) {
 			if( columns.hasOwnProperty(index)) {
-				tds.push(<td>{ 
+				tds.push(<td key={'ifquestionstd'+index}>{ 
 						typeof data[index] !== 'undefined' 
 						? 
 							data[index] === true ? '1' : data[index]
@@ -43,7 +42,7 @@ export default class IfPagesTags extends React.Component<DetailPropsType> {
 			}
 		}
 
-		return <tr>{ tds }</tr>;
+		return <tr key={'buildrowtr'+i}>{ tds }</tr>;
 	}
 
 
@@ -110,18 +109,21 @@ export default class IfPagesTags extends React.Component<DetailPropsType> {
 			return accum;
 		}, {});
 
-		console.log(questions);
+		//console.log(questions);
 		//console.log(data);
 		//console.log(columns);
 		const ths = [];
 
 		for(let index in columns) {
 			if( columns.hasOwnProperty(index)) {
-				ths.push(<th>{ index }</th>);
+				ths.push(<th key={'thkey'+index}>{ index }</th>);
 			}
 		}		
 
-		return <Table><tbody><tr>{ ths }</tr>{ data.map( d => this.build_row(d, columns ) ) }</tbody></Table>;
+		return <Table><tbody>
+				<tr key='ifquestionstrhead'>{ ths }</tr>
+				{ data.map( (d,i) => this.build_row(d, columns,i ) ) }
+			</tbody></Table>;
 	}
 
 
@@ -136,7 +138,7 @@ export default class IfPagesTags extends React.Component<DetailPropsType> {
 		levels.map( l => l.questions.map( q => q.level = l.code ));
 
 		// Join.
-		const level = levels.reduce( (accum, level) => accum.concat(level.questions), []);
+		const level = levels.reduce( (accum, l) => accum.concat(l.questions), []);
 
 		//<h1>{ level_summary.code }</h1>
 

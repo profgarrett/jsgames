@@ -8,12 +8,13 @@ import Choice from './Choice';
 import Parsons from './Parsons';
 import Text from './Text';
 
-import type { LevelType, PageType } from './IfTypes';
+import { IfLevelSchema } from './../../shared/IfLevel';
+import { IfPageBaseSchema, IfPageFormulaSchema, IfPageHarsonsSchema, IfPageChoiceSchema } from './../../shared/IfPage';
 import type { Node } from 'react';
 
 
 type ScorePropsType = {
-	page: PageType,
+	page: IfPageBaseSchema,
 	i: number
 };
 
@@ -32,11 +33,14 @@ class IfLevelDebugPage extends React.Component<ScorePropsType> {
 
 		if(page.type === 'IfPageFormulaSchema' || page.type === 'IfPageHarsonsSchema') {
 			// Show solution?
-			if(page.solution_f && page.solution_f.length > 0) {
+
+			let page2 = page.toIfPageFormulaSchema();
+
+			if(page2.solution_f && page2.solution_f.length > 0) {
 				solution = (
 					<div>
-						Solution: <code>{ t(page.solution_f) }</code>, Correct <code>{page.correct ? 'True' : 'False'}</code>, 
-						KCs: <code>{ page.kcs.reduce( (kc,accum) => accum+ ' '+ kc, '' )}</code>
+						Solution: <code>{ t(page2.solution_f) }</code>, Correct <code>{page.correct ? 'True' : 'False'}</code>, 
+						KCs: <code>{ page2.kcs.reduce( (kc,accum) => accum+ ' '+ kc, '' )}</code>
 
 					</div>
 				);
@@ -46,7 +50,7 @@ class IfLevelDebugPage extends React.Component<ScorePropsType> {
 				<Card >
 					<Card.Body>
 						<HtmlDiv className='lead' html={ inst } />
-						<ExcelTable page={page} readonly={true} editable={false}  handleChange={ () => {} }  />
+						<ExcelTable page={page2} readonly={true} editable={false}  handleChange={ () => {} }  />
 						<div style={{ textAlign:  'right', fontSize: 8, color: 'gray' }}>{ page.type }</div>
 					</Card.Body>
 				</Card>
@@ -54,19 +58,20 @@ class IfLevelDebugPage extends React.Component<ScorePropsType> {
 
 		} else if(page.type === 'IfPageTextSchema') {
 			problem = (<div>
-					<Text page={page} editable={false} handleChange={ () => {} }/>
+					<Text page={page.toIfPageTextSchema()} editable={false} handleSubmit={()=>{}} handleChange={ () => {} }/>
 				</div>);
 
 		} else if(page.type === 'IfPageParsonsSchema') {
 			problem = (<div>
-					<Parsons page={page} editable={false} show_solution={true} handleChange={ () => {} } />
+					<Parsons page={page.toIfPageParsonsSchema()} editable={false} show_solution={true} handleChange={ () => {} } />
 				</div>);
 
 		} else if(page.type === 'IfPageChoiceSchema') {
 			// Show range of choice only if the user was wrong.  If no right answer,
 			// then correct will be null.
+			
 			problem = (<div>
-					<Choice page={page} editable={false} show_solution={page.correct === false}  handleChange={ () => {} }  />
+					<Choice page={page.toIfPageChoiceSchema()} showSolution={false} editable={false} show_solution={page.correct === false}  handleChange={ () => {} }  />
 				</div>);
 
 		} else {
@@ -85,7 +90,7 @@ class IfLevelDebugPage extends React.Component<ScorePropsType> {
 
 
 type LevelPropsType = {
-	level: LevelType
+	level: IfLevelSchema
 };
 
 export default class IfLevelDebug extends React.Component<LevelPropsType> {

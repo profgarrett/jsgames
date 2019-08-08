@@ -15,8 +15,8 @@ import NumberAnswer from './NumberAnswer';
 
 
 import { fill_template } from './../../shared/template.js';
-
-import type { LevelType, PageType } from './IfTypes';
+import { IfLevelSchema } from './../../shared/IfLevel.js';
+import { IfPageBaseSchema } from './../../shared/IfPage';
 
 // Delay put in to help avoid people double-clicking (which sometimes comes in as
 // two single clicks on iPad).
@@ -24,7 +24,7 @@ const MINIMUM_TIME_BETWEEN_SUBMIT_EVENTS = 350;
 
 
 // Build the score list at the bottom of the page.
-const build_score = (pages: Array<PageType>): any => pages.map( (p: PageType, i: number): any => {
+const build_score = (pages: Array<IfPageBaseSchema>): any => pages.map( (p: IfPageBaseSchema, i: number): any => {
 	let g = null;
 	let title = '';
 	let html = '';
@@ -97,7 +97,7 @@ const titleTdStyle = {  /* use a title td to center vertically */
 
 
 type PropsType = {
-	level: LevelType,
+	level: IfLevelSchema,
 	selected_page_index: number,
 	onChange: (Object) => void,
 	onNext: (void) => void,
@@ -174,7 +174,7 @@ export default class IfLevelPlay extends React.Component<PropsType, StateType> {
 	// If we are showing feedback, and enter/escape is hit, then dismiss feedback window.
 	_on_keypress(event: any): any {
 		const page = this.props.level.pages[this.props.level.pages.length-1];
-
+		
 		if(this.props.show_feedback) {
 			if(event.key === 'Enter' || event.key === 'Escape' || event.key === ' ') {
 				event.preventDefault(); // cancel any keypress.
@@ -213,7 +213,7 @@ export default class IfLevelPlay extends React.Component<PropsType, StateType> {
 
 
 	// Render a single page.
-	_render_page_lead(page: PageType, pageId: number): Node {
+	_render_page_lead(page: IfPageBaseSchema, pageId: number): Node {
 		if(page.code === 'test') {
 			// Do a custom animation to draw eye to the instruction
 			// Ugly hack to get stylesheet and insert keyframes.
@@ -224,6 +224,7 @@ export default class IfLevelPlay extends React.Component<PropsType, StateType> {
 					0% { color: #d9edf7; background-color: #d9edf7; } 
 					100% { color: black; background-color: white; }
 					}`;
+				// $FlowFixMe
 				stylesheet.insertRule(keyframes, stylesheet.cssRules.length);
 			} catch(e) {
 				// Ignore any errors generated here.
@@ -256,7 +257,7 @@ export default class IfLevelPlay extends React.Component<PropsType, StateType> {
 			// Make a little prettier by replacing linebreaks with div.lead.
 			// Looks better spacing-wise, as we have instructions below the lead in 
 			// a div.lead.
-			let desc = fill_template(page.description, page.template_values);
+			let desc = ''+fill_template(page.description, page.template_values);
 			let descriptions = desc.split('<br/><br/>');
 
 			descriptions = descriptions.map( (d: string, i: number): Node =>
@@ -269,7 +270,7 @@ export default class IfLevelPlay extends React.Component<PropsType, StateType> {
 
 	// Create button to validate any formula, parsons, or choice answers.
 	// This only shows if there are the proper conditions.
-	_render_page_validate_button(page: PageType): Node {
+	_render_page_validate_button(page: IfPageBaseSchema): Node {
 		const that = this;
 
 		// Don't show 'validate' button if correct isn't required.
@@ -316,7 +317,7 @@ export default class IfLevelPlay extends React.Component<PropsType, StateType> {
 
 	// Backdrop that allow us to click anywhere to dismiss pop-up or inline pop-up.
 	_render_fullpage_invisible_div(): Node {
-		if(!this.props.show_feedback) return;
+		if(!this.props.show_feedback) return null;
 
 		return <div style={{
 					position: 'fixed',
@@ -330,26 +331,30 @@ export default class IfLevelPlay extends React.Component<PropsType, StateType> {
 
 
 	// Create the pop-up or pop-over elements
-	_render_page_feedback_inline(page: PageType, button: Node, orientation: string): Node {
-		if(!(orientation == 'left' || orientation == 'right')) alert('invalid orientation ' + orientation);
+	_render_page_feedback_inline(page: IfPageBaseSchema, button: Node, orientation: string): Node {
+		if(!(orientation == 'left' || orientation == 'right')) 
+			throw Error('invalid orientation ' + orientation);
 
 		// Don't show feedback.
-		if(!this.props.show_feedback) return;
+		if(!this.props.show_feedback) return null;
 
 		// No feedback to show.
 		if(typeof page.client_feedback === 'undefined' || 
-				page.client_feedback === null ) return;
+				page.client_feedback === null ) return null;
 
 		// If feedback, then don't create inline but defer to pop-up.
-		if(page.client_feedback.length > 0) return;
+		if(page.client_feedback.length > 0) return null;
+
+		// $FlowFixMe
+		const get_target = (): any => document.getElementById(button.props.id);
 
 		//Return overlay
 		return (
 			<div>
 				<Overlay
 					show={true}
-					target={ (): any => document.getElementById(button.props.id) }
-					placement={ orientation }
+					target={ get_target }
+					placement={ orientation==='left' ? 'left' : 'right' }
 					container={document.body}
 					containerPadding={0}
 					>
@@ -370,13 +375,13 @@ export default class IfLevelPlay extends React.Component<PropsType, StateType> {
 
 	// We have one or more specific items of feedback to tell the user.
 	// Return a full-screen pop-up IF props.show_feedback
-	_render_page_feedback_popup(page: PageType): Node {
+	_render_page_feedback_popup(page: IfPageBaseSchema): Node {
 
 		// Don't render anything if there's no feedback.
 		if( !( page.client_feedback && page.client_feedback.length && page.client_feedback.length > 0) )
-			return;
+			return null;
 
-		if( !this.props.show_feedback ) return;
+		if( !this.props.show_feedback ) return null;
 
 		// Build specific feedback LIs.
 		const f_li = page.client_feedback.map( (f: string, i: number): Node => <li key={i}>{f}</li>);
@@ -403,7 +408,7 @@ export default class IfLevelPlay extends React.Component<PropsType, StateType> {
 
 
 	// Create lower 'next page' & exit buttons.
-	_render_page_submit_button(page: PageType): Node {
+	_render_page_submit_button(page: IfPageBaseSchema): Node {
 		// Use a different color for the submission button if we are test v. tutorial.
 		let button_style = 'primary';
 		let button_text = 'Next page';
@@ -435,46 +440,46 @@ export default class IfLevelPlay extends React.Component<PropsType, StateType> {
 
 
 
-	_render_exercise_panel(page: PageType, validate_button: Node ): Node {
+	_render_exercise_panel(page: IfPageBaseSchema, validate_button: Node ): Node {
 		let problem = null;
 		const instruc = fill_template(page.instruction, page.template_values);
 
 		// Build correct page.
 		if(page.type === 'IfPageFormulaSchema') {
-			problem = <ExcelTable page={page} 
+			problem = <ExcelTable page={page.toIfPageFormulaSchema()} 
 						readonly={ this.props.isLoading }
 						editable={ true } 
 						handleChange={this.handleChange} />;
 
 		} else if(page.type === 'IfPageParsonsSchema') {
-			problem = <Parsons page={page} 
+			problem = <Parsons page={page.toIfPageParsonsSchema()} 
 						readonly={ !this.props.isLoading }
 						editable={ true } 
 						handleChange={this.handleChange} />;
 
 		} else if(page.type === 'IfPageChoiceSchema') {
-			problem = <Choice page={page} 
+			problem = <Choice page={page.toIfPageChoiceSchema()} 
 						readonly={ this.props.isLoading }
 						editable={ true } 
 						showSolution={false} 
 						handleChange={this.handleChange} />;
 
 		} else if(page.type === 'IfPageHarsonsSchema') {
-			problem = <Harsons page={page} 
+			problem = <Harsons page={page.toIfPageHarsonsSchema()} 
 						readonly={ this.props.isLoading }
 						editable={ true } 
 						showSolution={ false } 
 						handleChange={this.handleChange} />;
 
 		} else if(page.type === 'IfPageTextSchema') {
-			problem = <Text page={page} 
+			problem = <Text page={page.toIfPageTextSchema()} 
 						readonly={ this.props.isLoading }
 						editable={ true } 
 						handleChange={this.handleChange} 
 						handleSubmit={ () => this.handleNext() } />;
 
 		} else if(page.type === 'IfPageNumberAnswerSchema') {
-			problem = <NumberAnswer page={page} 
+			problem = <NumberAnswer page={page.toIfPageNumberAnswerSchema()} 
 						readonly={ this.props.isLoading }
 						editable={ true } 
 						handleChange={this.handleChange} 

@@ -14,7 +14,6 @@ import MyProgress from './MyProgress';
 
 import ForceLogin from './../components/ForceLogin';
 
-
 import type { Node } from 'react';
 
 
@@ -32,7 +31,8 @@ type StateType = {
 };
 
 
-export default class IfLevelListContainer extends React.Component<PropsType, StateType>  {
+export default class MyProgressContainer extends React.Component<PropsType, StateType>  {
+	_isMounted: boolean;
 
 	constructor(props: any) {
 		super(props);
@@ -52,26 +52,36 @@ export default class IfLevelListContainer extends React.Component<PropsType, Sta
 
 	componentDidMount() {
 		const user = getUserFromBrowser();
+		this._isMounted = true;
 
-
+		// Don't even try to load until we are logged int. Redirect to login page
+		// This goes a little bit faster than if we wait until we hit the forcelogin control.
+		if(user.username === null || user.username === '') {
+			this.context.router.history.push('/login/');
+		}
+	
 		// Fetch sections.
 		fetch('/api/ifgame/sections', {
 				credentials: 'include'
 			})
 			.then( response => response.json() )
 			.then( json => {
-				this.setState({
-					sections: json,
-					isLoadingSections: false
-				});
+				if(this._isMounted) {
+					this.setState({
+						sections: json,
+						isLoadingSections: false
+					});
+				}
 			})
 			.catch( error => {
-				this.setState({ 
-					levels: [],
-					message: 'Error: ' + error,
-					messageStyle: 'danger',
-					isLoadingSections: false
-				});
+				if(this._isMounted) {
+					this.setState({ 
+						levels: [],
+						message: 'Error: ' + error,
+						messageStyle: 'danger',
+						isLoadingSections: false
+					});
+				}
 			});
 
 		// Fetch levels
@@ -81,10 +91,12 @@ export default class IfLevelListContainer extends React.Component<PropsType, Sta
 			.then( response => response.json() )
 			.then( json => {
 				let ifLevels = json.map( j => new IfLevelSchema(j) );
-				this.setState({
-					levels: ifLevels,
-					isLoadingUncompletedLevels: false
-				});
+				if(this._isMounted) {
+					this.setState({
+						levels: ifLevels,
+						isLoadingUncompletedLevels: false
+					});
+				}
 			})
 			.catch( error => {
 				this.setState({ 
@@ -106,10 +118,12 @@ export default class IfLevelListContainer extends React.Component<PropsType, Sta
 			})
 			.then( response => response.json() )
 			.then( json => {
-				this.setState({
-					grades: json,
-					isLoadingGrades: false
-				});
+				if(this._isMounted) {
+					this.setState({
+						grades: json,
+						isLoadingGrades: false
+					});
+				}
 			})
 			.catch( error => {
 				this.setState({ 
@@ -119,9 +133,12 @@ export default class IfLevelListContainer extends React.Component<PropsType, Sta
 					isLoadingGrades: false
 				});
 			});
-
-
 	}
+ 
+	componentWillUnmount() {
+		this._isMounted = false;
+	}
+
 
 	insertGame(code: string) {
 		this.setState({ isLoadingSections: true });
@@ -175,19 +192,7 @@ export default class IfLevelListContainer extends React.Component<PropsType, Sta
 		);
 	}
 
-/*
-					<div className='alert alert-warning' role='alert'>
-						This site shows you how to write Excel formulas.
-						<br/><br/>
-						Report issues to &nbsp;
-						<a className='alert-link' 
-							href='mailto:nathan.garrett@woodbury.edu'>Nathan Garrett</a>.
-					</div>
-
-*/
-
-
 }
-IfLevelListContainer.contextTypes = {
+MyProgressContainer.contextTypes = {
 	router: PropTypes.object.isRequired
 };

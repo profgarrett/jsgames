@@ -3,7 +3,8 @@ import React from 'react';
 import ReactTable from 'react-table';
 import { Table } from 'react-bootstrap';
 
-import type { LevelType  } from './IfTypes';
+import { IfLevelSchema } from './../../shared/IfLevel';
+
 import type { Node } from 'react';
 
 import 'react-table/react-table.css';
@@ -13,7 +14,7 @@ import { DEMO_MODE } from './../../server/secret';
 
 
 type PropsType = {
-	data: Array<LevelType>
+	data: Array<IfLevelSchema>
 };
 
 // Return the average of the given items.
@@ -91,7 +92,7 @@ export default class IfGrades extends React.Component<PropsType> {
 			</thead>
 			<tbody>
 			{ this.props.data.map( 
-				(t,i) => <tr key={'tr'+i}>
+				(t: Object,i) => <tr key={'tr'+i}>
 					{
 						columns.map( 
 							(c,i) => ( <td key={'td'+i}> 

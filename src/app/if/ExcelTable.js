@@ -1,8 +1,9 @@
+// @flow
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Table, FormControl } from 'react-bootstrap';
 import { HtmlSpan, SmallOkGlyphicon, BlueSpan } from './../components/Misc';
-
+import { IfPageFormulaSchema } from './../../shared/IfPage';
 
 
 // Helper functions to clean up the display of true/false, which 
@@ -106,8 +107,15 @@ const clean = (input, format_type) => format_tf(transform_if_date(format(input, 
 
 
 
+type PropsType = {
+	page: IfPageFormulaSchema,
+	editable: boolean,
+	readonly: boolean,
+	handleChange: (any) => void
+};
+
 // This is a standard table for showing excel stuff.
-export default class ExcelTable extends React.Component {
+export default class ExcelTable extends React.Component<PropsType> {
 
 
 	componentDidMount() {
@@ -128,7 +136,7 @@ export default class ExcelTable extends React.Component {
 
 
 	// Build out the input box.
-	_render_field(page) {
+	_render_field(page: IfPageFormulaSchema) {
 		const helpblockStyle = {
 			color: 'white',
 			marginBottom: 5,
@@ -140,7 +148,7 @@ export default class ExcelTable extends React.Component {
 			<div>
 				<FormControl 
 					id='ExcelTableRenderFieldInput'
-					ref={(input) => { this.client_fInput = input; }}
+					/*ref={(input) => { this.client_fInput = input; }}*/
 					type='text'
 					autoComplete='off'
 					value={ page.client_f==null ? '' : page.client_f }
@@ -333,10 +341,3 @@ export default class ExcelTable extends React.Component {
 			);
 	}
 }
-ExcelTable.propTypes = {
-	page: PropTypes.object.isRequired,
-	editable: PropTypes.bool.isRequired,
-	readonly: PropTypes.bool.isRequired,
-	handleChange: PropTypes.func
-};
-

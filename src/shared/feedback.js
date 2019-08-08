@@ -1,6 +1,6 @@
 // @flow
-import type { FormulaPageType, PageType } from './../app/if/IfTypes';
 const { fill_template } = require('./template');
+const { IfPageFormulaSchema, IfPageHarsonsSchema } = require('./../shared/IfPage');
 
 // Feedback types are used by the server to create custom feedback for page submissions.
 // They are referred to frequently inside of tutorials for validation and more useful
@@ -19,7 +19,7 @@ function s(a: any): string {
 
 // Ensure that the given page uses all of the given references.
 // Returns either null or the missing references.
-const references = (page: FormulaPageType, values: Array<string>): ?string => {
+const references = (page: IfPageFormulaSchema | IfPageHarsonsSchema, values: Array<string>): ?string => {
 	let missing = [], value = null;
 
 	if(page.client_f === null) return null;
@@ -47,7 +47,7 @@ const references = (page: FormulaPageType, values: Array<string>): ?string => {
 // Ensure that the given page has the given values in it.
 // This is *not* case sensitive.
 // @TODO Add case sensitivity again.
-const values = (page: FormulaPageType, values: Array<number | string>): ?string => {
+const values = (page: IfPageFormulaSchema | IfPageHarsonsSchema, values: Array<number | string>): ?string => {
 	let missing = [], value = null;
 
 	if(page.client_f === null) return null;
@@ -73,14 +73,14 @@ const values = (page: FormulaPageType, values: Array<number | string>): ?string 
 
 
 // Ensure that the given page has no numbers in it.  It should only use references.
-const no_values = (page: FormulaPageType): ?string => {
+const no_values = (page: IfPageFormulaSchema | IfPageHarsonsSchema): ?string => {
 
 	return null;
 };
 
 
 // Ensure that the given page has given symbols.
-const symbols = (page: FormulaPageType, symbols: Array<string>): ?string => {
+const symbols = (page: IfPageFormulaSchema | IfPageHarsonsSchema, symbols: Array<string>): ?string => {
 	let missing = [], symbol = '';
 
 	if(page.client_f === null) return null;
@@ -90,7 +90,7 @@ const symbols = (page: FormulaPageType, symbols: Array<string>): ?string => {
 
 	for(let i=0; i<symbols.length; i++) {
 		symbol = fill_template(symbols[i].toLowerCase(), page.template_values);
-		if(client_f.indexOf(symbol) === -1) {
+		if( s(client_f).indexOf(s(symbol)) === -1) {
 			missing.push(symbol);
 		}
 	}
@@ -105,7 +105,7 @@ const symbols = (page: FormulaPageType, symbols: Array<string>): ?string => {
 };
 
 // Ensure that the given page has none of the matching symbols.
-const no_symbols = (page: FormulaPageType, symbols: Array<string>): ?string => {
+const no_symbols = (page: IfPageFormulaSchema | IfPageHarsonsSchema, symbols: Array<string>): ?string => {
 	let missing = [], symbol = '';
 
 	if(page.client_f === null) return null;
@@ -114,7 +114,7 @@ const no_symbols = (page: FormulaPageType, symbols: Array<string>): ?string => {
 
 	for(let i=0; i<symbols.length; i++) {
 		symbol = fill_template(symbols[i].toLowerCase(), page.template_values);
-		if(client_f.indexOf(symbol) !== -1) {
+		if(s(client_f).indexOf(s(symbol)) !== -1) {
 			missing.push(symbol);
 		}
 	}
@@ -132,7 +132,7 @@ const no_symbols = (page: FormulaPageType, symbols: Array<string>): ?string => {
 
 
 // Ensure that the given page has the given functions in it.
-const functions = (page: FormulaPageType, functions: Array<string>): ?string => {
+const functions = (page: IfPageFormulaSchema | IfPageHarsonsSchema, functions: Array<string>): ?string => {
 	let missing = [], func = '';
  
 	if(page.client_f === null) return null;
@@ -142,7 +142,7 @@ const functions = (page: FormulaPageType, functions: Array<string>): ?string => 
 
 	for(let i=0; i<functions.length; i++) {
 		func = fill_template(functions[i].toLowerCase(), page.template_values);
-		if(lf.indexOf(func.toLowerCase()) === -1) {
+		if(s(lf).indexOf(s(func).toLowerCase()) === -1) {
 			missing.push(func);
 		}
 	}
@@ -170,7 +170,7 @@ const has = {
 
 // Return feedback for a completed answer.
 // Only used in the server-side, where we have the solution_rules populated.
-const get_feedback = (that: PageType): ?Array<string> => {
+const get_feedback = (that: IfPageFormulaSchema | IfPageHarsonsSchema): ?Array<string> => {
 	let response = '';
 	let responses = [];
 
@@ -181,11 +181,11 @@ const get_feedback = (that: PageType): ?Array<string> => {
 
 	// Always check to make sure that there is a = sign.
 	response = has['symbols'](that, ['=']);
-	if(response !== null) responses.push(response);
+	if(response) responses.push(response);
 
 	// Always check to make sure that there are no ' single quotes.
 	response = has['no_symbols'](that, ['\'']);
-	if(response !== null) responses.push(response);
+	if(response) responses.push(response);
 
 
 	// If no custom rules are defined, return any from '='.
@@ -200,7 +200,7 @@ const get_feedback = (that: PageType): ?Array<string> => {
 
 		// Run has code and save result (if not null, meaning ok).
 		response = has[that.feedback[i].has](that, that.feedback[i].args);
-		if(response !== null) responses.push(response);
+		if(response) responses.push(response);
 	}
 
 	return responses;

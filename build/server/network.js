@@ -70,7 +70,7 @@ const _strip_secrets = function(input        )         {
 // Useful for cutting down on return size.
 // Recursive.
 // For example, without [ 'dt', 'o.x' ] will turn { dt:1, o:{x:2}} into { x:{} }
-let return_level_without = (input, without) => {
+let return_level_without = (input     , without     ) => {
 
 	// if is null, then return null.  Don't convert a null value in an array into an object.
 	if(input === null) return input;
@@ -201,7 +201,7 @@ function hash_password(password        )         {
 
 // See if there is a matching user in the database.
 async function is_matching_mysql_user(username        , password        )      {
-	const hashed_password = bcrypt.hashSync(password, 8);
+	//const hashed_password = bcrypt.hashSync(password, 8);
 
 	const select_sql = 'SELECT iduser, hashed_password FROM users WHERE username = ?';
 	const select_results = await run_mysql_query(select_sql, [username]);

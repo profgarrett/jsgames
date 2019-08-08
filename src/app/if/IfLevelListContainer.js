@@ -1,26 +1,48 @@
+// @flow
 import React from 'react';
 import PropTypes from 'prop-types';
+
+import type { Node } from 'react';
+
 import IfLevelList from './IfLevelList';
 import Container from 'react-bootstrap/Container';
 import { Breadcrumb, Row, Col, Button } from 'react-bootstrap';
 import { Message, Loading } from './../components/Misc';
 import { IfLevelSchema, IfLevels } from './../../shared/IfGame';
 
-export default class IfLevelListContainer extends React.Component {
 
-	constructor(props) {
+
+type PropsType = {
+	match: Object
+};
+type StateType = {
+	code: string,
+	message: string,
+	messageStyle: string,
+	isLoadingLessons: boolean,
+	isLoadingReviews: boolean,
+	reviewUnavailable: boolean,
+	lessons: Array<any>,
+	reviews: Array<any>
+};
+
+
+export default class IfLevelListContainer extends React.Component<PropsType, StateType> {
+
+	constructor(props: PropsType) {
 		super(props);
 		this.state = { 
 			code: this.props.match.params._code,
 			message: 'Loading data from server',
-			message_style: 'info',
+			messageStyle: 'info',
 			isLoadingLessons: true,
 			isLoadingReviews: true,
 			reviewUnavailable: IfLevels.filter( l=>l.code === this.props.match.params._code+'review' ).length === 0,
 			lessons: [],
 			reviews: []
 		};
-		this.insertLevel = this.insertLevel.bind(this);
+		(this: any).insertLevel = this.insertLevel.bind(this);
+
 	}
 
 	componentDidMount() {
@@ -36,7 +58,7 @@ export default class IfLevelListContainer extends React.Component {
 				this.setState({
 					lessons: ifLevels,
 					message: '',
-					message_style: 'info',
+					messageStyle: 'info',
 					isLoadingLessons: false
 				});
 			})
@@ -44,7 +66,7 @@ export default class IfLevelListContainer extends React.Component {
 				this.setState({ 
 					lessons: [],
 					message: 'Error: ' + error,
-					message_style: 'danger',
+					messageStyle: 'danger',
 				});
 			});
 
@@ -59,11 +81,11 @@ export default class IfLevelListContainer extends React.Component {
 				})
 				.then( response => response.json() )
 				.then( json => {
-					let ifLevels = json.map( j => new IfLevelSchema(j) );
+				let ifLevels = json.map( j => new IfLevelSchema(j) );
 					this.setState({
 						reviews: ifLevels,
 						message: '',
-						message_style: 'info',
+						messageStyle: 'info',
 						isLoadingReviews: false
 					});
 				})
@@ -71,14 +93,15 @@ export default class IfLevelListContainer extends React.Component {
 					this.setState({ 
 						reviews: [],
 						message: 'Error: ' + error,
-						message_style: 'danger',
+						messageStyle: 'danger',
 					});
 				});
 			}
 	}
 
 
-	insertLevel(code) {
+
+	insertLevel(code: string) {
 		this.setState({ isLoadingReviews: true, isLoadingLessons: true });
 
 		fetch('/api/ifgame/new_level_by_code/'+code, {
@@ -103,7 +126,7 @@ export default class IfLevelListContainer extends React.Component {
 
 
 	// Return start new lesson button 
-	_render_lesson_button(code) {
+	_render_lesson_button(code: string) {
 		const uncompleted_lessons_count = this.state.lessons.filter( l=> !l.completed ).length;
 		const completed_lessons_count = this.state.lessons.filter( l=> l.completed ).length;
 		const lesson_label = completed_lessons_count > 0 ? 'Restart lesson' : 'Start lesson';
@@ -119,7 +142,7 @@ export default class IfLevelListContainer extends React.Component {
 	}
 
 	// Return start new review button
-	_render_review_button(code) {
+	_render_review_button(code: string) {
 		const completed_lessons_count = this.state.lessons.filter( l=> l.completed ).length;
 		const uncompleted_reviews_count = this.state.reviews.filter( l=> !l.completed ).length;
 		const completed_reviews_count = this.state.reviews.filter( l=> l.completed ).length;
@@ -131,13 +154,13 @@ export default class IfLevelListContainer extends React.Component {
 		if(completed_lessons_count < 1 ) return <span />;
 
 		return (<Button 
-					onClick={ e => this.insertLevel(code+'review', e) }>
+					onClick={ e => this.insertLevel(code+'review') }>
 						{review_label}
 				</Button>);
 	}
 
 
-	_get_highest_grade(levels) {
+	_get_highest_grade(levels: Array<any>) {
 
 		return levels.filter( l=> l.completed ).reduce( (max, l) => {
 			let grade = l.get_test_score_as_percent();
@@ -234,13 +257,13 @@ export default class IfLevelListContainer extends React.Component {
 				<Row>
 				<Col xs={12}>
 					{ crumbs }
-					<h5>{ page_level.label }</h5>
+					<h5>{ page_level.title }</h5>
 					<div>
 						{ this._render_highest_grade() }
 					</div>
 					<hr/>
 					<Loading loading={this.state.isLoadingReviews || this.state.isLoadingLessons } />
-					<Message message={this.state.message} style={this.state.message_style} />
+					<Message message={this.state.message} style={this.state.messageStyle} />
 					{ this._render_complete_in_progress() }
 					{ body_lesson }
 					{ body_review }
@@ -251,9 +274,6 @@ export default class IfLevelListContainer extends React.Component {
 	}
 
 }
-IfLevelListContainer.propTypes = {
-	match: PropTypes.object.isRequired
-};
 IfLevelListContainer.contextTypes = {
 	router: PropTypes.object.isRequired
 };

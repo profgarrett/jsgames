@@ -1,16 +1,16 @@
 //     
 import React from 'react';
-import { Container, ButtonToolbar, ButtonGroup, Row, Col, Breadcrumb, DropdownButton, Dropdown, Button  } from 'react-bootstrap';
+import Container from 'react-bootstrap/Container';
+import { Row, Col, Breadcrumb } from 'react-bootstrap';
 
 import IfQuestions from './IfQuestions';
 import { Message, Loading } from './../components/Misc';
 import Filter from './Filter';
 
-import { IfLevels, IfLevelSchema } from './../../shared/IfGame';
+import { IfLevelSchema } from './../../shared/IfGame';
 
 import ForceLogin from './../components/ForceLogin';
 
-                                           
                                   
 
 
@@ -22,7 +22,7 @@ import ForceLogin from './../components/ForceLogin';
                     
                   
                  
-                         
+                             
   
 
 export default class IfQuestionsContainer extends React.Component                                                  {
@@ -102,8 +102,8 @@ export default class IfQuestionsContainer extends React.Component               
 
 		const search = new URLSearchParams(window.location.search);
 		const filter_defaults = search.has('idsection') 
-			? { pagetypes: 'IfPageFormulaSchema|IfPageHarsonsSchema', outputs: 'tags', levels: 'math1', sections: search.get('idsection') }
-			: { pagetypes: 'IfPageFormulaSchema|IfPageHarsonsSchema', outputs: 'tags', levels: 'math1'};
+			? { pagetypes: 'IfPageFormulaSchema|IfPageHarsonsSchema', outputs: 'table', levels: 'math1', sections: search.get('idsection') }
+			: { pagetypes: 'IfPageFormulaSchema|IfPageHarsonsSchema', outputs: 'table', levels: 'math1'};
 		
 
 		const filter = <Filter 
@@ -127,9 +127,10 @@ export default class IfQuestionsContainer extends React.Component               
 
 		// Filter returned values based off of pagetype filter set in state.
 		const filterpagetype = (type        ) => this.state.pagetype.split('|').includes( type ) ;
-		const filtered_levels = this.state.levels.map( (level           ) => { 
-			const pages = level.pages.filter(p => filterpagetype(p.type) );
-			return { ...level, pages };
+		let filtered_levels = this.state.levels.map( (level               ) => { 
+			const new_level = new IfLevelSchema(level.toJson()); // create a new level.
+			new_level.pages = new_level.pages.filter(p => filterpagetype(p.type) ); // filter page.
+			return new_level;
 		});
 
 		return (

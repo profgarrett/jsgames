@@ -1,6 +1,19 @@
 //      
 const { DataFactory } = require('./DataFactory');
-                                                                              
+const { IfPageBaseSchema } = require('./../shared/IfPage');
+
+                       
+               
+                  
+                                         
+  
+
+                               
+               
+                 
+                       
+                  
+  
 
 
 /**
@@ -27,7 +40,7 @@ const { DataFactory } = require('./DataFactory');
 */
 
 // Return pages in a simple linear order.
-const LinearGen = (seed        , pages                 , gen         )      => {
+const LinearGen = (seed        , pages                         , gen         )      => {
 	// Convenience function that puts pages into good order for pop().
 	let gen_pages = gen.pages.slice().reverse();
 	let last_gen_page = null;
@@ -68,7 +81,7 @@ const LinearGen = (seed        , pages                 , gen         )      => {
 
 
 // Pick one of the potential random sections 
-const ShuffleGen = (seed        , pages                 , gen         )      => {
+const ShuffleGen = (seed        , pages                         , gen         )      => {
 	// Create a new gen that is randomized by the given seed.
 	let randomized_gen = {
 		...gen,
@@ -85,7 +98,7 @@ const ShuffleGen = (seed        , pages                 , gen         )      => 
 
 	If len < limit, then it will re-use items.
 */
-const ShuffleGenUntilLimit = (seed        , pages                 , gen         )      => {
+const ShuffleGenUntilLimit = (seed        , pages                         , gen         )      => {
 	// Create a new gen that is randomized by the given seed.
 	
 	if(typeof gen.limit === 'undefined') 
@@ -111,7 +124,7 @@ const ShuffleGenUntilLimit = (seed        , pages                 , gen         
 // Continue for as long as until is false.
 // Should have only a single gen passed.  Will continue creating pages from
 // that page until the UNTIL function returns true.
-const UntilGen = (seed        , pages                 , gen         )      => {
+const UntilGen = (seed        , pages                         , gen         )      => {
 	let until_results = [];
 	let last_page = null;
 
@@ -166,7 +179,7 @@ const UntilGen = (seed        , pages                 , gen         )      => {
 	If the test_gen list is shorter than the total numbers of test items requested, it will
 	just go back into it again after another random sort.
 */
-const AdaptiveGen = (seed        , pages                 , me                 )      => {
+const AdaptiveGen = (seed        , pages                         , me                 )      => {
 	let result = null;
 	let original_pages = []; // pages.slice() will be run in the while looop to populate this.
 	let consumed_pages = [];

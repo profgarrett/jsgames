@@ -26,8 +26,6 @@ const { return_tagged_level } = require('./tag.js');
 import type { $Request, $Response, NextFunction } from 'express';
 
 
-
-
 ////////////////////////////////////////////////////////////////////////
 //  If Game
 ////////////////////////////////////////////////////////////////////////
@@ -228,6 +226,18 @@ router.get('/debuglevel/:code', nocache, require_logged_in_user,
 });
 
 
+// Grab first item from query.
+function to_string_from_possible_array( s: string | Array<any>): string {
+	if( typeof s === 'string') return s;
+
+	if(typeof s.join !== 'undefined') {
+		return s[0];
+	} else {
+		throw new Error('Invalid type in to_string_from_possible_array')
+	}
+}
+
+
 /**
 	Gets a list of data useful for deeper analysis.
 	Allows retrieving solutions, as it requires admin use.
@@ -236,7 +246,7 @@ router.get('/questions/', nocache, require_logged_in_user,
 	async (req: $Request, res: $Response, next: NextFunction): Promise<any> => {
 	try {
 		// Time limit on returned data.
-		const INTERVAL = 7*20 *100 + ' DAY';  // roughly one semester.
+		const INTERVAL = 360 + ' DAY';  // roughly one year
 
 		// Only allow faculty to have access to questions
 		const username = get_username_or_emptystring(req, res);
@@ -245,9 +255,9 @@ router.get('/questions/', nocache, require_logged_in_user,
 
 		// Get cleaned-up params (string or int)
 
-		const param_code = (typeof req.query.code === 'undefined') 
+		const param_code: string = (typeof req.query.code === 'undefined') 
 				? '*' 
-				: req.query.code;
+				: to_string_from_possible_array(req.query.code);
 		const param_idsection = (typeof req.query.idsection === 'undefined') 
 				? '*' 
 				: parseInt(req.query.idsection, 10);
@@ -280,14 +290,13 @@ router.get('/questions/', nocache, require_logged_in_user,
 					ON iflevels.created = iflevelsmax.created AND iflevels.username = iflevelsmax.username AND iflevels.code = iflevelsmax.code
 			WHERE 
 			
-				sections.idsection IN (2, 3) AND
-
 				(iflevels.code = ? OR ? = '*') AND 
-				(sections.idsection = ? OR '*' = '*') AND 
+				(sections.idsection = ? OR ? = '*') AND 
 				(users.iduser = ? OR ? = '*') AND 
 				iflevels.updated > NOW() - INTERVAL ${INTERVAL} AND 
 				iflevels.username NOT IN ('garrettn') AND 
 				iflevelsmax.first = 1`;
+
 
 		let select_results = await run_mysql_query(sql, sql_params);
 
@@ -308,14 +317,13 @@ router.get('/questions/', nocache, require_logged_in_user,
 
 
 // Select object updated in the last time period..
-// Require current user to match secret.js ADMIN_USERNAME.
-// Allows retrieving solutions, as it requires admin use.
+// Allows retrieving solutions, as it requires faculty role.
 router.get('/recent/', nocache, require_logged_in_user,
 	async (req: $Request, res: $Response, next: NextFunction): Promise<any> => {
 	try {
 		const username = get_username_or_emptystring(req, res);
 		const is_faculty_result = await is_faculty(username);
-		if(!is_faculty_result) throw new Error('User do not have permission to review questions');
+		if(!is_faculty_result) throw new Error('User does not have permission to review questions');
 
 		// Set a default interval (in minutes) of 1 week. Otherwise, use passed 'updated'
 		// Assumes passed interval is in days.
@@ -401,17 +409,18 @@ router.get('/grades?', nocache, require_logged_in_user,
 
 			if(!is_faculty_result) throw new Error('Only faculty are allowed to get other user grades');
 
-			// Set permissions to only return levels for the faculty's courses.
 			const sql_where_clauses = ['iflevels.completed = ?'];
 			sql_where_values.push(1);	
 
-			// We have a username given. Add it to conditions
-			sql_where_values.push(req.query.username);
-			sql_where_clauses.push('users.username = ?');
-
-			// Add faculty.
+			// Set permissions to only return levels for the faculty's courses.
 			sql_where_clauses.push('faculty.username = ?');
 			sql_where_values.push(username);
+
+			// We have a username given. Add it to conditions
+			if(typeof req.query.username !== 'undefined') {
+				sql_where_values.push(req.query.username);
+				sql_where_clauses.push('users.username = ?');
+			}
 
 			// Build SQL values.  Only care about these params if it's a faculty user.
 			if(typeof req.query.iduser !== 'undefined') {
@@ -456,7 +465,7 @@ WHERE ` + sql_where_clauses.join(' AND ') + ' ORDER BY iflevels.updated desc ';
 		}
 
 		let select_results = await run_mysql_query(sql, sql_where_values);
-
+		console.log(sql);
 		if(select_results.length === 0) return res.json([ ]);
 
 		let iflevels = select_results.map( l => new IfLevelModel(l) );

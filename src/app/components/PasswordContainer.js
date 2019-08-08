@@ -1,6 +1,7 @@
 /* @flow */
 import React from 'react';
 import PropTypes from 'prop-types';
+import Container from 'react-bootstrap/Container';
 import { Row, Col, Navbar, Alert } from 'react-bootstrap';
 import { Loading } from './../components/Misc';
 

@@ -1,7 +1,7 @@
 // @flow
 import React from 'react';
 
-import type { LevelType } from './IfTypes';
+import { IfLevelSchema } from './../../shared/IfLevel';
 import type { Node } from 'react';
 
 import { create_summary } from './IfQuestionsData';
@@ -12,7 +12,7 @@ import IfQuestionsTags from './IfQuestionsTags';
 
 
 type PropsType = {
-	levels: Array<LevelType>,
+	levels: Array<IfLevelSchema>,
 	output: string
 };
 

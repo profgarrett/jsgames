@@ -3,20 +3,18 @@ import React from 'react';
 import { FormControl } from 'react-bootstrap';
 import { HtmlSpan } from './../components/Misc';
 import BlocklyFactory from './../../shared/BlocklyFactory';
-
-
 import ExcelTable from './ExcelTable';
+import { IfPageHarsonsSchema } from './../../shared/IfPage';
 
-                                                 
                                   
 
 
 
                          
-                       
+                           
                    
                    
-                               
+                            
   
                          
                                                                       
@@ -132,8 +130,8 @@ export default class Harsons extends React.Component                            
 			}
 			const code = Blockly.JavaScript.workspaceToCode(workspace);
 
-			if(code !== this.props.client_f) {
-				that.props.handleChange({ client_f: code });
+			if(code !== this.props.page.client_f) {
+				that.props.handleChange({ 'client_f': code });
 			}
 
 		});
@@ -164,7 +162,7 @@ export default class Harsons extends React.Component                            
 	}
 
 	// Build out the input box.
-	_render_field(page                 )       {
+	_render_field(page                     )       {
 		const helpblockStyle = {
 			color: 'white',
 			backgroundColor: '#337ab7',

@@ -257,7 +257,7 @@ function compile_template_values(page        )         {
 
 	Returns new string or number.
 **/
-function fill_template(s        , values        )                  {
+function fill_template(s                 , values        )                  {
 	
 	if(s === null) return '';
 
@@ -267,6 +267,7 @@ function fill_template(s        , values        )                  {
 	if(typeof s === 'number') return s;
 
 	if(typeof s.replace !== 'function') {
+		console.log(s);
 		debugger;
 	}
 

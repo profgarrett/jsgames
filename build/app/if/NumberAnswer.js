@@ -3,11 +3,10 @@ import React from 'react';
 import { FormControl } from 'react-bootstrap';
 
                                   
-                                                              
-
+import { IfPageNumberAnswerSchema } from './../../shared/IfPage';
 
                   
-                                    
+                                
                    
                    
                                 

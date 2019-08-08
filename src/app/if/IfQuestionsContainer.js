@@ -11,7 +11,6 @@ import { IfLevelSchema } from './../../shared/IfGame';
 
 import ForceLogin from './../components/ForceLogin';
 
-import type { LevelType } from './IfTypes';
 import type { Node } from 'react';
 
 
@@ -23,7 +22,7 @@ type QuestionsContainerStateType = {
 	isLoading: boolean,
 	pagetype: string,
 	outputs: string,
-	levels: Array<LevelType>
+	levels: Array<IfLevelSchema>
 };
 
 export default class IfQuestionsContainer extends React.Component<QuestionsPropsType, QuestionsContainerStateType> {
@@ -103,8 +102,8 @@ export default class IfQuestionsContainer extends React.Component<QuestionsProps
 
 		const search = new URLSearchParams(window.location.search);
 		const filter_defaults = search.has('idsection') 
-			? { pagetypes: 'IfPageFormulaSchema|IfPageHarsonsSchema', outputs: 'tags', levels: 'math1', sections: search.get('idsection') }
-			: { pagetypes: 'IfPageFormulaSchema|IfPageHarsonsSchema', outputs: 'tags', levels: 'math1'};
+			? { pagetypes: 'IfPageFormulaSchema|IfPageHarsonsSchema', outputs: 'table', levels: 'math1', sections: search.get('idsection') }
+			: { pagetypes: 'IfPageFormulaSchema|IfPageHarsonsSchema', outputs: 'table', levels: 'math1'};
 		
 
 		const filter = <Filter 
@@ -128,9 +127,10 @@ export default class IfQuestionsContainer extends React.Component<QuestionsProps
 
 		// Filter returned values based off of pagetype filter set in state.
 		const filterpagetype = (type: string) => this.state.pagetype.split('|').includes( type ) ;
-		const filtered_levels = this.state.levels.map( (level: LevelType) => { 
-			const pages = level.pages.filter(p => filterpagetype(p.type) );
-			return { ...level, pages };
+		let filtered_levels = this.state.levels.map( (level: IfLevelSchema) => { 
+			const new_level = new IfLevelSchema(level.toJson()); // create a new level.
+			new_level.pages = new_level.pages.filter(p => filterpagetype(p.type) ); // filter page.
+			return new_level;
 		});
 
 		return (

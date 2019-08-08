@@ -23,6 +23,30 @@ const { logout_user,
 
 import type { $Request, $Response, NextFunction } from 'express';
 
+/*
+	Take in req.body and a list of required parameters.
+	Return those in an object (and nothign else).
+	Throws an error if any of the params are not present.
+	
+	Useful for typing flow req.body argument.
+*/
+const type_params = ( body: mixed, params: Array<string> ): Object => {
+
+	if(typeof body === 'object') {
+		const new_params = {};
+		params.forEach( s => {
+			// $FlowFixMe
+			if(typeof body[s] === 'undefined') throw new Error('Undefined '+s+ 'in params');
+			new_params[s] = body[s];
+		});
+		return new_params;
+
+	} else {
+		throw new Error('Invalid type of body object');
+	}
+
+};
+
 
 ////////////////////////////////////////////////////////////////////////
 //   Authentication
@@ -45,11 +69,13 @@ router.post('/feedback',
 	nocache, require_logged_in_user,
 	async (req: $Request, res: $Response, next: NextFunction): Promise<any> => {
 	try {
+		const params: { usename: string, data: Object, message: string, code: string } = 
+			type_params(req.body, ['username', 'data', 'message', 'code']);
 		const created = from_utc_to_myql(to_utc(new Date()));
 		const username = get_username_or_emptystring(req, res);
-		const data = JSON.stringify(req.body.data);
-		const message = req.body.message;
-		const code = req.body.code;
+		const data = JSON.stringify(params.data);
+		const message = params.message;
+		const code = params.code;
 
 		const insert_sql = `INSERT INTO feedback 
 				(username, message, created, data, code) 
@@ -74,8 +100,11 @@ router.post('/passwordresetrequest',
 	nocache, 
 	async (req: $Request, res: $Response, next: NextFunction): Promise<any> => {
 	try {
+
+		const params: { username: string } = type_params(req.body, ['username']);
+
 		const created = from_utc_to_myql(to_utc(new Date()));
-		const username = req.body.username;
+		const username = params.username;
 		const code = crypto.randomBytes(12).toString('hex');
 		const message = `You have requested a password reset on Excel.fun.
 Please use the link below to reset your password.
@@ -123,9 +152,10 @@ router.post('/passwordreset',
 	async (req: $Request, res: $Response, next: NextFunction): Promise<any> => {
 	try {
 		//const username = req.body.username;
-		
-		const password = req.body.password;
-		const passwordreset = req.body.passwordreset;
+		const params: { password: string, passwordreset: string} = 
+				type_params(req.body, ['password', 'passwordreset']);
+		const password = params.password;
+		const passwordreset = params.passwordreset;
 		const hashedpassword = hash_password(password);
 
 
@@ -230,16 +260,20 @@ router.get('/login/status',
 });
 
 
-//	Login user if they match login-user.
+//	Login user.
 router.post('/login', 
 	nocache, 
 	async (req: $Request, res: $Response, next: NextFunction): Promise<any> => {
 	try {
-		const matching = await is_matching_mysql_user(req.body.username, req.body.password);
+		const params: { username: string, password: string } =
+				type_params(req.body, ['username', 'password']);
+		const matching = await is_matching_mysql_user(params.username, params.password);
 
+	console.log(params);
+	console.log(req.body);
 		if(matching) {
-			await login_user(req.body.username, req.body.password, res);
-			return res.json({ username: req.body.username, logged_in: true });
+			await login_user(params.username, params.password, res);
+			return res.json({ username: params.username, logged_in: true });
 		} else {
 			return res.sendStatus(401);
 		}
@@ -257,16 +291,18 @@ router.post('/create_user',
 	nocache, 
 	async (req: $Request, res: $Response, next: NextFunction): Promise<any> => {
 	try {
+		const params: { username: string, section_code: string } =
+				type_params( req.body, ['username', 'section_code']);
 		// If an empty username/password was passed, then create a random user and password.
-		const isAnon = req.body.username === '';
-		const username = isAnon ? 'anon' + Math.floor(Math.random()*100000000000) : req.body.username;
+		const isAnon = params.username === '';
+		const username = isAnon ? 'anon' + Math.floor(Math.random()*100000000000) : params.username;
 		const password = 'p' + Math.floor(Math.random()*100000000000);
 		const hashed_password = hash_password(password);
-		let code = req.body.section_code;
+		let code = params.section_code;
 	
 
 		// Do some basic checking on the username.
-		const BANNED = [ '<', '>', '='];
+		const BANNED = [ '<', '>', '=', '\'', '"', '/', '\\'];
 		for(let i=0; i<BANNED.length; i++) {
 			if(username.indexOf(BANNED[i]) !== -1) {
 				return res.json({ success: false, error: 'BadUsername'}); 

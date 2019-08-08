@@ -70,7 +70,7 @@ const _strip_secrets = function(input: Object): Object {
 // Useful for cutting down on return size.
 // Recursive.
 // For example, without [ 'dt', 'o.x' ] will turn { dt:1, o:{x:2}} into { x:{} }
-let return_level_without = (input, without) => {
+let return_level_without = (input: any, without: any) => {
 
 	// if is null, then return null.  Don't convert a null value in an array into an object.
 	if(input === null) return input;

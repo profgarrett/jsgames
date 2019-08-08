@@ -1,4 +1,4 @@
-//     
+//      
 import React from 'react';
 import { ButtonToolbar, ButtonGroup, DropdownButton, Dropdown, Button  } from 'react-bootstrap';
 import { IfLevels } from './../../shared/IfGame';
@@ -284,60 +284,10 @@ export default class Filter extends React.Component                             
 				buttons.push(button);
 			}
 		}
-
-		/*
-		// setup params 
-		const levels = [{ code: '', label: 'All'}];
-		IfLevels.map(l => levels.push({ code: l.code, label: l.title }));
-
-		const sections = [{ idsection: '', code: 'All' }];
-		if(this.state.sections !== null) 
-			this.state.sections.map( section => sections.push(section));
-
-		const users = [{ iduser: '', username: 'All'}];
-		if(this.state.users !== null) 
-				this.state.users.map( user => users.push(user));
-
-
-		const code_title = this.state.code === '' ? 'All Levels' : this.state.code;
-
-		const section_title = this.state.idsection === '' 
-				? 'Pick a section' 
-				: 'Section: ' + this.state.sections.filter( 
-						s => s.idsection == this.state.idsection )[0].code; // note: truthy for 4=="4"
-
-		const user_title = this.state.iduser === '' 
-				? 'Pick a user' 
-				: 'User: ' + this.state.users.filter( 
-						s => s.iduser == this.state.iduser )[0].username; // note: truthy for 4=="4"
-
-
-				<DropdownButton 
-						disabled={ this.props.disabled } 
-						onSelect={this.handleIdSectionFilterChange}
-						variant='primary' 
-						title= {section_title}
-						key='select_section' id='select_section'>
-							{ sections.map( (section,i) => 
-								<Dropdown.Item key={'select_section_dropdownitem'+i} 
-								eventKey={section.idsection}>{section.code}</Dropdown.Item> )}
-				</DropdownButton>
-
-				<DropdownButton 
-						disabled={ this.props.disabled } 
-						onSelect={this.handleIdUserFilterChange}
-						variant='primary' 
-						title={user_title}
-						key='select_user' id='select_user'>
-							{ users.map( (user,i) => 
-								<Dropdown.Item key={'select_user_dropdownitem'+i} 
-								eventKey={user.iduser}>{user.username}</Dropdown.Item> )}
-				</DropdownButton>
-*/
 		
 		const filter = (
 			<form name='c' >
-				<ButtonToolbar>
+				<ButtonToolbar aria-label="Toolbar for filter">
 				<ButtonGroup>
 				
 				{ buttons }
@@ -355,21 +305,6 @@ export default class Filter extends React.Component                             
 			</form>
 			);
 			
-			/*
-							<ButtonGroup>
-				<DropdownButton 
-						onSelect={this.handlePageTypeFilterChange}
-						variant='primary' 
-						title={this.state.pagetype}
-						key='select_output' id='select_output'>
-							{ this.state.pagetypes.map( (option,i) => 
-								<Dropdown.Item key={'select_pagetype_dropdownitem'+i} 
-								eventKey={option}>{option}</Dropdown.Item> )}
-				</DropdownButton>
-				</ButtonGroup>
-
-*/
-
 		return filter;
 	}
 }

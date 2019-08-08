@@ -8,7 +8,7 @@ import { PrettyDate } from './../components/Misc';
 
 import IfLevelScore from './IfLevelScore';
 
-import type { LevelType } from './IfTypes';
+import { IfLevelSchema } from './../../shared/IfLevel';
 import type { Node } from 'react';
 
 /*
@@ -117,7 +117,7 @@ type StateType = {
 };
 
 type PropsType = {
-	levels: Array<LevelType>
+	levels: Array<IfLevelSchema>
 };
 
 export default class IfRecent extends React.Component<PropsType,StateType> {
@@ -211,7 +211,7 @@ export default class IfRecent extends React.Component<PropsType,StateType> {
 				' ' + d.getHours()+':'+ (d.getMinutes()<10 ? '0': '') + d.getMinutes();
 	}
 
-	show(l) {
+	show(l: any) {
 		console.log(l);
 		//this.setState({ });
 		//debugger;

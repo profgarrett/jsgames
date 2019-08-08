@@ -2,10 +2,10 @@
 import React from 'react';
 import type { Node } from 'react';
 
-import type { TextPageType } from './IfTypes';
+import type { IfPageTextSchema } from './../../shared/IfPage';
 
 type PropsType = {
-	page: TextPageType,
+	page: IfPageTextSchema,
 	editable: boolean,
 	handleChange: (Object) => void,
 	handleSubmit: (void) => void

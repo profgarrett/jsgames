@@ -4,11 +4,11 @@ import { Button, Modal } from 'react-bootstrap';
 import ReactTable from 'react-table';
 import 'react-table/react-table.css';
 
-import { HtmlDiv, PrettyDate } from './../components/Misc';
+import { PrettyDate } from './../components/Misc';
 
 import IfLevelScore from './IfLevelScore';
 
-                                                     
+import { IfLevelSchema } from './../../shared/IfLevel';
                                   
 
 /*
@@ -117,7 +117,7 @@ class PersonLevel extends React.Component<PersonLevelPropsType> {
   
 
                   
-                         
+                             
   
 
 export default class IfRecent extends React.Component                      {
@@ -211,7 +211,7 @@ export default class IfRecent extends React.Component                      {
 				' ' + d.getHours()+':'+ (d.getMinutes()<10 ? '0': '') + d.getMinutes();
 	}
 
-	show(l) {
+	show(l     ) {
 		console.log(l);
 		//this.setState({ });
 		//debugger;

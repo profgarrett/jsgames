@@ -4,7 +4,6 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Row, Col, Alert } from 'react-bootstrap';
 import { ClipLoader, ScaleLoader } from 'react-spinners';
-//import secret from './../../server/secret';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faHandPointRight, faCheck, faCheckSquare, faPencilAlt, faMinusCircle } from '@fortawesome/free-solid-svg-icons';

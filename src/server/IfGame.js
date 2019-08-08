@@ -21,7 +21,7 @@ const { surveymath1, surveymath2 } = require('./tutorials/surveymath');
 const { surveywaiver_non_woodbury_student, surveywaiver_non_woodbury_user, surveywaiver_woodbury_student } = require('./tutorials/surveywaivers');
 
 const { parseFeedback } = require('./parseFeedback');
-import type { LevelType /*, PageType */ } from './../app/if/IfTypes';
+
 
 // Use model term instead of schema to clarify server v. client, and to add room 
 // for later adding server-side functionality.
@@ -240,7 +240,7 @@ const baseifgame = {
 
 
 	// Make a new level.
-	create: function(json: any): LevelType {
+	create: function(json: any): IfLevelSchema {
 		const params = {
 			type: 'IfLevelSchema',
 			title: this.title,
@@ -261,7 +261,7 @@ const baseifgame = {
 	},
 
 
-	addPageOrMarkAsComplete: function(level: LevelType): LevelType {
+	addPageOrMarkAsComplete: function(level: IfLevelSchema): IfLevelSchema {
 		if(level.completed)
 			throw new Error('IfGame.addPageOrMarkAsComplete.LevelAlreadyCompleted');
 
@@ -390,7 +390,7 @@ const IfLevelModelFactory = {
 	},
 
 	// Create and return a new level of the given code.
-	create: function(code: string, username: string): LevelType {
+	create: function(code: string, username: string): IfLevelSchema {
 		if(typeof this.levels[code] === 'undefined') throw new Error('Invalid type '+code+' passed to IfLevelModelFactory.create');
 
 		const allow_skipping_tutorial = (username === 'garrettn');
@@ -409,7 +409,7 @@ const IfLevelModelFactory = {
 	},
 
 	// Check the submission.
-	addPageOrMarkAsComplete: function(level: LevelType): LevelType {
+	addPageOrMarkAsComplete: function(level: IfLevelSchema): IfLevelSchema {
 		if(typeof this.levels[level.code] === 'undefined') throw new Error('Invalid type '+level.code+' passed to IfLevelModelFactory.processSubmission');
 
 		return this.levels[level.code].addPageOrMarkAsComplete(level);

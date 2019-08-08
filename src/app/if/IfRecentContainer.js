@@ -12,7 +12,6 @@ import 'url-search-params-polyfill';
 
 import ForceLogin from './../components/ForceLogin';
 
-import type { LevelType } from './IfTypes';
 import type { Node } from 'react';
 
 
@@ -22,7 +21,7 @@ type StateType = {
 	message: string,
 	messageStyle: string,
 	isLoading: boolean,
-	levels: Array<LevelType>
+	levels: Array<IfLevelSchema>
 };
 
 export default class IfRecentContainer extends React.Component<PropsType, StateType> {
@@ -94,15 +93,10 @@ export default class IfRecentContainer extends React.Component<PropsType, StateT
 
 		const search = new URLSearchParams(window.location.search);
 
-		const filter_defaults = {
-			days: 1
-		};
+		const filter_defaults = search.has('idsection') 
+			? { days: 1, sections: search.get('idsection') }
+			: { days: 1 };
 
-		// Populate default for filters from URL	
-		if( search.has('idsection')) {
-			filter_defaults.sections = search.get('idsection');
-		}
-		
 
 		const filter_filters = {
 			levels: [],

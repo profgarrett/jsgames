@@ -11,7 +11,7 @@ class Schema {
 		Checks to make sure that the type field matches the json.type value.
 		@arg json: Data loaded from server.
 	*/
-	constructor( json={} ) {
+	constructor( json      = {} ) {
 		let schema = this.schema;
 		//let methods = this.methods;
 
@@ -58,7 +58,7 @@ class Schema {
 		Note that dates will be converted into UTC int values.  Date init from json
 		will properly handle int initialize values.
 	*/
-	toJson(new_values_json) {
+	toJson(new_values_json     ) {
 		let schema = this.schema;
 		let json = {
 			type: this.type // make sure that we pick up the type, which is coded as getter.
@@ -124,7 +124,7 @@ class Schema {
 	}
 
 	// Update all fields.
-	updateFields(json, filter='') {
+	updateFields(json     , filter      = '') {
 		let schema = this.schema;
 
 		for(const key of Object.keys(schema)) {

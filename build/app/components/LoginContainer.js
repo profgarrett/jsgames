@@ -1,7 +1,8 @@
 /*       */
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Alert, Container, Card, Row, Col, Navbar, Button } from 'react-bootstrap';
+import Container from 'react-bootstrap/Container';
+import { Alert, Row, Col, Navbar } from 'react-bootstrap';
 //import {  } from './../components/Authentication';
 import LoginCreateUser from './LoginCreateUser';
 import LoginCurrentUser from './LoginCurrentUser';

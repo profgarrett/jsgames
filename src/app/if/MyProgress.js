@@ -1,6 +1,8 @@
 // @flow
 import React from 'react';
-import type { LevelType  } from './IfTypes';
+
+import { IfLevelSchema } from './../../shared/IfLevel';
+
 import type { Node } from 'react';
 import { InputGroup, ButtonToolbar, DropdownButton, Dropdown, Table, Tooltip, OverlayTrigger, Button } from 'react-bootstrap';
 import { IfLevels } from './../../shared/IfGame';
@@ -71,9 +73,9 @@ const glyph = score => {
 //		{ username: 'bob', tutorial: 100, math1: 23 }   <== 23 is 23%.  Undone tutorials are undefined.
 //	]
 //
-// Sections are loaded from http://localhost:8080/api/ifgame/sections/nathan.garrett@woodbury.edu
+// Sections are loaded from http://localhost:8080/api/ifgame/sections/
 // [
-//		{ idsection, code, year, term, opens, closes, require_research_waiver, levels, role }
+//		{ idsection, code, year, term, opens, closes, levels, role }
 // ]
 //
 // section.Levels are important, as they set the order and number of items to be completed.
@@ -82,7 +84,7 @@ const glyph = score => {
 type PropsType = {
 	sections: Array<any>,
 	grades: Array<any>,
-	uncompleted_levels: Array<LevelType>,
+	uncompleted_levels: Array<IfLevelSchema>,
 	onClickNewCode: Function,
 	onClickContinueLevel: Function
 };
@@ -245,7 +247,6 @@ export default class MyProgress extends React.Component<PropsType, StateType> {
 	/**
 		Used to build out a datastructure useful for this display.
 
-
 			{ 
 				highest_tutorial_grade: null/98,
 				highest_tutorial_grade: null/98,
@@ -317,6 +318,8 @@ export default class MyProgress extends React.Component<PropsType, StateType> {
 
 		const levels = this.get_levels();
 		
+		const waiver_completed = typeof grades[ levels[0].code ] !== 'undefined';
+
 		// If the user hasn't done anything, then have a friendlier title.
 		const title = typeof grades.tutorial === 'undefined' 
 				? 'Welcome to the Formula Trainer website!' 
@@ -357,13 +360,10 @@ export default class MyProgress extends React.Component<PropsType, StateType> {
 				</ButtonToolbar>);
 		}
 
-
-
 		// only show table *if* they've completed any mandatory surveys.
-		// @todo Need to re-enable this agreement after ending of Summer 2019 classes.
-		const table =  /*!waiver_completed
+		const table =  !waiver_completed
 				? null 
-				: */ this._render_table(levels);
+				: this._render_table(levels);
 
 		// Return card.
 		return (

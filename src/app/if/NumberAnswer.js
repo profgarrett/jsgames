@@ -3,11 +3,10 @@ import React from 'react';
 import { FormControl } from 'react-bootstrap';
 
 import type { Node } from 'react';
-import type { IfPageNumberAnswerSchemaType } from './IfTypes';
-
+import { IfPageNumberAnswerSchema } from './../../shared/IfPage';
 
 type PropsType = {
-	page: IfPageNumberAnswerSchemaType,
+	page: IfPageNumberAnswerSchema,
 	editable: boolean,
 	readonly: boolean,
 	handleChange: (Object) => void,

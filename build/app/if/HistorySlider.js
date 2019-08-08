@@ -4,13 +4,13 @@ import React from 'react';
 import 'rc-slider/assets/index.css';
 import 'rc-tooltip/assets/bootstrap.css';
 import Slider from 'rc-slider';
+import { IfPageBaseSchema } from './../../shared/IfPage';
 
-                                          
                                   
 
 
                          
-                
+                        
                                
   
                     

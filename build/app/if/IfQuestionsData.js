@@ -1,5 +1,7 @@
 //      
-                                                     
+import { IfPageBaseSchema, IfPageFormulaSchema, IfPageHarsonsSchema, IfPageChoiceSchema } from './../../shared/IfPage';
+import { IfLevelSchema } from './../../shared/IfLevel';
+
 import { turn_array_into_map } from './../../shared/misc';
 import he from 'he';
 
@@ -61,11 +63,11 @@ const get_first_matching_tag = (tags               , match        )          => 
 	Filters our intermediate, invalid token, and correct tags.
 	@return [ { tag: '', n: 2} ]
 */
-function rollup_tags(pages                 )             {
+function rollup_tags(pages                         )             {
 
 	const tags = [];
 
-	pages.map( (p          ) => {
+	pages.map( (p                  ) => {
 		if(typeof p.history == 'undefined') return;
 
 		p.history.map( h => {
@@ -74,9 +76,10 @@ function rollup_tags(pages                 )             {
 
 			h.tags.map( tag => {
 				let tag_summary = get_first_matching_tag(tags, tag.tag);
-				if(tag_summary === null) {
+				if(tag_summary == null) {
 					tags.push({ tag: tag.tag, n: 1});
 				} else {
+					if(typeof tag_summary.n === 'undefined') tag_summary.n = 0;
 					tag_summary.n = tag_summary.n+1;
 				}
 			});
@@ -96,7 +99,7 @@ function rollup_tags(pages                 )             {
 
 
 // Take in an array of *matching* levels and turn into properly formatted level summary
-function create_summary_level( levels                  )      {
+function create_summary_level( levels                      )      {
 	const summary_level = { 
 		code: levels[0].code,
 		n: levels.length,
@@ -117,7 +120,7 @@ function create_summary_level( levels                  )      {
 				l => l.type === 'IfPageFormulaSchema' || l.type === 'IfPageHarsonsSchema' );
 
 	const page_map = turn_array_into_map(all_formula_pages, 
-		(p          )         => 
+		(p                  )         => 
 			USE_CASE_SENSITIVE_DESCRIPTION_COMPARISONS 
 				? p.description + '\n' + p.instruction
 				: (p.description + '\n' + p.instruction).toLowerCase()
@@ -125,7 +128,7 @@ function create_summary_level( levels                  )      {
 
 	// Pull individual pages from the original objects and insert 
 	// into the question format.
-	page_map.forEach( (pages                 ) => {
+	page_map.forEach( (pages                         ) => {
 		summary_level.questions.push( create_summary_question( pages ));
 	});
 
@@ -133,7 +136,7 @@ function create_summary_level( levels                  )      {
 }
 
 // Take in an array of *matching* pages, and return a properly formatted question summary.
-function create_summary_question( pages                 )      {
+function create_summary_question( pages                         )      {
 	const summary_question = {
 		n: pages.length,
 		description: pages[0].description,
@@ -141,7 +144,7 @@ function create_summary_question( pages                 )      {
 		type: pages[0].type,
 		solution_f: '',
 		correct:
-			pages.reduce( (sum, p) => sum + (p.correct?1:0), 0 ), 
+			pages.reduce( (sum, p) => sum + (p.correct ? 1 : 0), 0 ), 
 		seconds:
 			pages.reduce((sum, p) => sum + p.get_time_in_seconds(), 0 ),
 		breaks: 
@@ -149,22 +152,33 @@ function create_summary_question( pages                 )      {
 		answers:
 			pages.map( p => create_summary_answer(p)),
 		tags: 
-			rollup_tags(pages)
+			rollup_tags(pages),
+		// fill in below items later
+		correct_average: 0, 
+		seconds_average: 0, 
+		breaks_average: 0,
+		kcs: [],
+		solution_f: ''
 	};
-
-	summary_question.kcs = 
-			typeof pages[0].solution_f !== 'undefined' 
-				? get_kcs( pages[0].solution_f ) 
-				: false;
-	summary_question.solution_f = 
-			typeof pages[0].solution_f !== 'undefined' 
-				? pages[0].solution_f 
-				: pages[0].solution;
 
 	// Averages.
 	summary_question.correct_average = summary_question.correct / summary_question.n;
 	summary_question.seconds_average = summary_question.seconds / summary_question.n;
 	summary_question.breaks_average = summary_question.breaks / summary_question.n;
+
+	// 
+	if(pages[0].type === 'IfPageFormulaSchema' || pages[0].type === 'IfPageHarsonsSchema') {
+		// $FlowFixMe
+		let p                      = pages[0]; // note 100% correct, but close enough for typing.
+
+		summary_question.kcs = get_kcs( p.solution_f );
+		summary_question.solution_f = p.solution_f 
+
+	} else if (pages[0].type === 'IfPageChoiceSchema') {
+		// $FlowFixMe
+		let p                     = pages[0];
+		summary_question.solution_f = p.solution;
+	}
 
 	// Add to exportable list of solutions.
 	if(SOLUTION_F_LIST.filter( f => f.solution_f === summary_question.solution_f ).length < 1 ) {
@@ -184,7 +198,7 @@ function increment_tag( tags            , tagname         ) {
 	tags.push({ tag: tagname, n: 1});
 }
 
-function create_summary_answer( page          , )      {
+function create_summary_answer( page                  , )      {
 	const summary_answer = {
 		username: page.username,
 		seconds: page.get_time_in_seconds(),
@@ -267,7 +281,7 @@ Output:
 */
 
 ////////////////////////////////////////////////////////////////////////////////
-export  function create_summary( levels                  )      {
+export  function create_summary( levels                      )      {
 	const summaries = [];
 
 	// Add several variables to all pages (since that data is stored in the level, not page)
@@ -280,10 +294,10 @@ export  function create_summary( levels                  )      {
 
 	// Split up array into a map of levels, each with an array of matching levels.
 	const level_map = turn_array_into_map(levels, 
-		(l           )         => l.code
+		(l               )         => l.code
 	);
 
-	level_map.forEach( (levels                   ) => {
+	level_map.forEach( (levels                       ) => {
 		summaries.push( create_summary_level( levels ) );
 	});
 

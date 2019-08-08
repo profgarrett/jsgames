@@ -3,20 +3,18 @@ import React from 'react';
 import { FormControl } from 'react-bootstrap';
 import { HtmlSpan } from './../components/Misc';
 import BlocklyFactory from './../../shared/BlocklyFactory';
-
-
 import ExcelTable from './ExcelTable';
+import { IfPageHarsonsSchema } from './../../shared/IfPage';
 
-import type { HarsonsPageType } from './IfTypes';
 import type { Node } from 'react';
 
 
 
 type HarsonsPropsType = {
-	page: HarsonsPageType,
+	page: IfPageHarsonsSchema,
 	editable: boolean,
 	readonly: boolean,
-	handleChange: (string) => void
+	handleChange: (any) => void
 };
 type HarsonsStateType = {
 	// Workspace is used to access blockly during transitions to tear and
@@ -132,8 +130,8 @@ export default class Harsons extends React.Component<HarsonsPropsType, HarsonsSt
 			}
 			const code = Blockly.JavaScript.workspaceToCode(workspace);
 
-			if(code !== this.props.client_f) {
-				that.props.handleChange({ client_f: code });
+			if(code !== this.props.page.client_f) {
+				that.props.handleChange({ 'client_f': code });
 			}
 
 		});
@@ -164,7 +162,7 @@ export default class Harsons extends React.Component<HarsonsPropsType, HarsonsSt
 	}
 
 	// Build out the input box.
-	_render_field(page: HarsonsPageType): Node {
+	_render_field(page: IfPageHarsonsSchema): Node {
 		const helpblockStyle = {
 			color: 'white',
 			backgroundColor: '#337ab7',
