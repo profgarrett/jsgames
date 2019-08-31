@@ -277,7 +277,7 @@ class IfPageBaseSchema extends Schema {
 	//	from:	"Blah <code>=IF(A1="Bob", 1, FALSE)</code> blah
 	//	to:		"Blah <code>=if(a1="Bob", 1, false)</code> blah
 	// Passing optional_field limits to a single field.  
-	standardize_formula_case( optional_field         ) {
+	standardize_formula_case( optional_field          ) {
 		if(typeof optional_field !== 'undefined') {
 			// Swap out the given field.
 			// $FlowFixMe

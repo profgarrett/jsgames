@@ -205,7 +205,7 @@ async function is_matching_mysql_user(username        , password        )      {
 
 	const select_sql = 'SELECT iduser, hashed_password FROM users WHERE username = ?';
 	const select_results = await run_mysql_query(select_sql, [username]);
-	console.log(select_results);
+	
 	if(select_results.length !== 1) return false;
 
 	// We have a user. Test password
@@ -216,7 +216,8 @@ async function is_matching_mysql_user(username        , password        )      {
 // Log the user in.
 async function login_user(username        , password        , res           )      {
 	// We have a proper user.  Continue!
-	let jwt_token = jwt.sign({ username: username }, JWT_AUTH_SECRET, { expiresIn: 864000 });
+	const un = username.trim().toLowerCase();
+	let jwt_token = jwt.sign({ username: un }, JWT_AUTH_SECRET, { expiresIn: 864000 });
 	const last = (new Date()).toString().replace(/ /g, '_').replace('(', '').replace(')', '').replace(/:/g,'_').replace(/-/g, '_');
 
 	res.cookie('x-access-token', jwt_token);

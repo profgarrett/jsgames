@@ -465,13 +465,13 @@ WHERE ` + sql_where_clauses.join(' AND ') + ' ORDER BY iflevels.updated desc ';
 		}
 
 		let select_results = await run_mysql_query(sql, sql_where_values);
-		console.log(sql);
+		
 		if(select_results.length === 0) return res.json([ ]);
 
 		let iflevels = select_results.map( l => new IfLevelModel(l) );
 
 		// Organize into a map of users.
-		const users = turn_array_into_map(iflevels, l => l.username	);
+		const users = turn_array_into_map(iflevels, l => l.username.toLowerCase().trim() );
 
 		// Grab biggest item for each user.
 		const grades = [];

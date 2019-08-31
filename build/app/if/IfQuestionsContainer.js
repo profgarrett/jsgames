@@ -99,11 +99,11 @@ export default class IfQuestionsContainer extends React.Component               
 			</Breadcrumb>
 			);
 
-
+		const default_type = 'IfPageNumberAnswerSchema'; //'IfPageFormulaSchema|IfPageHarsonsSchema'
 		const search = new URLSearchParams(window.location.search);
 		const filter_defaults = search.has('idsection') 
-			? { pagetypes: 'IfPageFormulaSchema|IfPageHarsonsSchema', outputs: 'table', levels: 'math1', sections: search.get('idsection') }
-			: { pagetypes: 'IfPageFormulaSchema|IfPageHarsonsSchema', outputs: 'table', levels: 'math1'};
+			? { pagetypes: default_type, outputs: 'excel', levels: 'surveymath1', sections: search.get('idsection') }
+			: { pagetypes: default_type, outputs: 'excel', levels: 'surveymath1'};
 		
 
 		const filter = <Filter 

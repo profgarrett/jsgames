@@ -18,6 +18,7 @@ function turn_array_into_map( a: Array<any>, get_p: any, sort_order_alpha: boole
 		index = get_p(item);
 
 		if( !m.has(index) ) m.set(index, []);
+		// $FlowFixMe
 		m.get(index).push(item);
 	});
 

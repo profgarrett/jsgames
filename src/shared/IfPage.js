@@ -277,7 +277,7 @@ class IfPageBaseSchema extends Schema {
 	//	from:	"Blah <code>=IF(A1="Bob", 1, FALSE)</code> blah
 	//	to:		"Blah <code>=if(a1="Bob", 1, false)</code> blah
 	// Passing optional_field limits to a single field.  
-	standardize_formula_case( optional_field: string ) {
+	standardize_formula_case( optional_field: ?string ) {
 		if(typeof optional_field !== 'undefined') {
 			// Swap out the given field.
 			// $FlowFixMe
@@ -364,6 +364,13 @@ class IfPageBaseSchema extends Schema {
 		// $FlowFixMe 
 		return this;
 	}
+	// Type coercion for flow not liking subtypes.
+	toIfPageSliderSchema(): IfPageSliderSchema {
+		if( this.type !== 'IfPageSliderSchema') throw new Error('Invalid type convertion to IfPageHarsonsSchema');
+		// $FlowFixMe 
+		return this;
+	}
+
 
 }
 
@@ -453,7 +460,6 @@ class IfPageTextSchema extends IfPageBaseSchema {
 
 
 
-
 /*
 	Get a single-line piece of information from the user.
 */
@@ -489,7 +495,11 @@ class IfPageNumberAnswerSchema extends IfPageBaseSchema {
 	// Automatically fill in the answer.
 	// Used for testing out on the server. 
 	debug_answer() {
-		this.client = this.solution;
+		if(this.solution !== null)  {
+			this.client = this.solution;
+		} else {
+			this.client = Math.round(Math.random()*10);
+		}
 		this.updateCorrect();
 	}
 
@@ -538,6 +548,85 @@ class IfPageNumberAnswerSchema extends IfPageBaseSchema {
 		return ''+this.client;
 	}
 
+}
+
+
+// A slider is a more specialized version of the number answer, which uses a range to 
+// give the control min/max for a slider control. Does not have a "right" answer.
+class IfPageSliderSchema extends IfPageBaseSchema {
+	client: number;
+	min: number;
+	max: number;
+
+	get type(): string {
+		return 'IfPageSliderSchema';
+	}
+
+	get schema(): Object {
+		let inherit = common_schema();
+
+		return {
+			...inherit,
+			client: { type: 'number', initialize: (i) => isDef(i) ? parseInt(i, 10) : null },
+			min: { type: 'number', initialize: (i) => isDef(i) ? parseInt(i, 10) : 0 }, // default 0
+			max: { type: 'number', initialize: (i) => isDef(i) ? parseInt(i, 10) : 100 } // default 100
+		};
+	}
+
+	// Has the user provided input?
+	client_has_answered(): boolean {
+		return this.client !== null;
+	}
+
+
+	// Automatically fill in the answer.
+	// Used for testing out on the server. 
+	debug_answer() {
+		this.client = Math.round(Math.random()*this.max);
+		this.updateCorrect();
+	}	
+
+
+	/*
+		Update any fields for which user has permissions.
+		
+		Safe to re-run, with the exception that upon changing client_items, will
+		reset this.correct (since we don't know its status).  Will re-run updateCorrect() in 
+		case this is on the server and we're updating the object.
+
+		Run upon initial obj creation.
+	*/
+	updateUserFields(json: Object) {
+		if(typeof json === 'undefined') throw new Error('IfGames.updateUserFields(json) is null');
+		if(json.type !== this.type ) throw new Error('Invalid type '+json.type+' in ' + this.type + '.updateUserFields');
+
+		// don't allow updates to finished items. Note that completed isn't set internally by this obj,
+		// but instead is set by the server code with knowledge of each tutorial's rules.
+		if(this.completed) return; 
+
+		if(this.client !== json.client ){
+			this.client = json.client;
+			//this.history = json.history; DON'T TRACK HISTORY.
+		}
+		this.updateCorrect();
+	}
+
+	/* 
+		Update correct *if* a solution is provided.
+		Don't updateFeedback, as this type never has feedback rules applied.
+	*/
+	updateCorrect() {
+		if(this.completed) return; // do not update completed items.
+		if(this.client === null) return; // no client submission.
+
+		this.client_feedback = [];
+		this.correct = true;
+	}
+
+	// Return a nicely formatted view of the client's input. 
+	toString(): string {
+		return ''+this.client;
+	}
 }
 
 
@@ -1307,6 +1396,7 @@ module.exports = {
 	IfPageParsonsSchema,
 	IfPageHarsonsSchema,
 	IfPageNumberAnswerSchema,
+	IfPageSliderSchema,
 	IfPageShortTextAnswerSchema,
 	IfPageLongTextAnswerSchema
 };

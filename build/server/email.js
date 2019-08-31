@@ -21,13 +21,22 @@ async function send_email(email        , title        , message        ) {
 		}
 	});
 
-	const info = await transporter.sendMail({
+	const info1 = await transporter.sendMail({
 		from: '"Nathan @ Excel.fun" <Nathan@Excel.fun>', // sender address
 		to: email, 
 		subject: title,
 		text: message
 	});
-	console.log(info);
+
+	// Send a copy to my email as well.
+	const info2 = await transporter.sendMail({
+		from: '"Nathan @ Excel.fun" <Nathan@Excel.fun>', // sender address
+		to: 'profgarrett@gmail.com', 
+		subject: title,
+		text: message
+	});
+
+	//console.log(info1);
 }
 
 module.exports = {

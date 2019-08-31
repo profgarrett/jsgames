@@ -1,5 +1,5 @@
 //      
-import { IfPageBaseSchema, IfPageFormulaSchema, IfPageHarsonsSchema, IfPageChoiceSchema } from './../../shared/IfPage';
+import { IfPageBaseSchema, IfPageFormulaSchema, IfPageHarsonsSchema, IfPageChoiceSchema, IfPageNumberAnswerSchema } from './../../shared/IfPage';
 import { IfLevelSchema } from './../../shared/IfLevel';
 
 import { turn_array_into_map } from './../../shared/misc';
@@ -169,16 +169,19 @@ function create_summary_question( pages                         )      {
 	// 
 	if(pages[0].type === 'IfPageFormulaSchema' || pages[0].type === 'IfPageHarsonsSchema') {
 		// $FlowFixMe
-		let p                      = pages[0]; // note 100% correct, but close enough for typing.
+		let p                      = pages[0]; // not 100% correct, but close enough for typing.
 
 		summary_question.kcs = get_kcs( p.solution_f );
 		summary_question.solution_f = p.solution_f 
 
 	} else if (pages[0].type === 'IfPageChoiceSchema') {
-		// $FlowFixMe
-		let p                     = pages[0];
+		let p                     = pages[0].toIfPageChoiceSchema();
 		summary_question.solution_f = p.solution;
+	} else if (pages[0].type === 'IfPageNumberAnswerSchema') {
+		let p                           = pages[0].toIfPageNumberAnswerSchema();
+		summary_question.solution_f = p.solution.toString();
 	}
+	
 
 	// Add to exportable list of solutions.
 	if(SOLUTION_F_LIST.filter( f => f.solution_f === summary_question.solution_f ).length < 1 ) {
@@ -249,6 +252,18 @@ function create_summary_answer( page                  , )      {
 		summary_answer.all = '';
 		summary_answer.code = page.code;
 		summary_answer.client_n = page.client_items.indexOf(page.client);
+	}
+
+	// Number
+	if( page.type === 'IfPageNumberAnswerSchema') {
+		summary_answer.breaks = page.get_break_times_in_minutes().join(', ');
+		summary_answer.type = 'number';
+		summary_answer.html = page.client;
+		summary_answer.expand = '';
+		summary_answer.client = page.client;
+		summary_answer.intermediate = '';
+		summary_answer.all = '';
+		summary_answer.code = page.code;
 	}
 
 	return summary_answer;

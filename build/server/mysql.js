@@ -189,6 +189,7 @@ async function _update_fix_bad_page_data6()               {
 
 		ifLevel.pages = ifLevel.pages.map( p => {
 			// Delete bad keys (used in earlier version of software)
+			// $FlowFixMe
 			if(p.solution_feedback) delete p.solution_feedback;
 			
 			// Delete unneeded tests to reduce file size.

@@ -134,11 +134,11 @@ export default class IfLevelPlay extends React.Component                       {
 //			eventListener: eventListener
 		};
 		
-		document.addEventListener('keypress', this._on_keypress);
+		document.addEventListener('keydown', this._on_keypress);
 	}
 
 	componentWillUnmount() {
-		window.removeEventListener('keypress', this._on_keypress, false);
+		window.removeEventListener('keydown', this._on_keypress, false);
 	}
 
 	handleChange(new_value        ) {
@@ -173,8 +173,16 @@ export default class IfLevelPlay extends React.Component                       {
 
 	// If we are showing feedback, and enter/escape is hit, then dismiss feedback window.
 	_on_keypress(event     )      {
+
 		const page = this.props.level.pages[this.props.level.pages.length-1];
 		
+		// See if this is a repeating key event, which is automatically fired if the user keeps hitting the key.
+		// If so, exit out.
+		if(event.repeat) {
+			event.preventDefault();
+			return;
+		}
+
 		if(this.props.show_feedback) {
 			if(event.key === 'Enter' || event.key === 'Escape' || event.key === ' ') {
 				event.preventDefault(); // cancel any keypress.

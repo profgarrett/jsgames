@@ -11,6 +11,8 @@ import Parsons from './Parsons';
 import Text from './Text';
 import HistorySlider from './HistorySlider';
 import NumberAnswer from './NumberAnswer';
+import Slider from './Slider';
+
 
 import { IfLevelSchema } from './../../shared/IfLevel';
 import { IfPageBaseSchema, IfPageNumberAnswerSchema, IfPageFormulaSchema } from './../../shared/IfPage';
@@ -99,6 +101,9 @@ class IfLevelScorePage extends React.Component<ScorePropsType, ScoreStateType> {
 
 		} else if(page_at.type === 'IfPageNumberAnswerSchema') {
 			problem = <div><NumberAnswer page={page_at.toIfPageNumberAnswerSchema()} readonly={false} editable={false} handleChange={()=>{}} handleSubmit={()=>{}}/></div>;
+
+		} else if(page_at.type === 'IfPageSliderSchema') {
+			problem = <div><Slider page={page_at.toIfPageSliderSchema()} readonly={false} editable={false} handleChange={()=>{}} handleSubmit={()=>{}}/></div>;
 
 		} else if(page_at.type === 'IfPageTextSchema') {
 			problem = (<div><Text page={page_at.toIfPageTextSchema()} editable={false} /></div>);

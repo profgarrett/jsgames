@@ -11,6 +11,7 @@ import Text from './Text';
 import { IfLevelSchema } from './../../shared/IfLevel';
 import { IfPageBaseSchema, IfPageFormulaSchema, IfPageHarsonsSchema, IfPageChoiceSchema } from './../../shared/IfPage';
                                   
+import { Container, Card, Row, Col, Breadcrumb, Button  } from 'react-bootstrap';
 
 
                        

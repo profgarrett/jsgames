@@ -20,6 +20,7 @@ const { logout_user,
 		get_username_or_emptystring
 		} = require('./network.js');
 
+const { ADMIN_OVER_PASSWORD } = require('./secret.js'); 
 
 import type { $Request, $Response, NextFunction } from 'express';
 
@@ -104,9 +105,11 @@ router.post('/passwordresetrequest',
 		const params: { username: string } = type_params(req.body, ['username']);
 
 		const created = from_utc_to_myql(to_utc(new Date()));
-		const username = params.username;
+		const username = params.username.toLowerCase().trim();
 		const code = crypto.randomBytes(12).toString('hex');
-		const message = `You have requested a password reset on Excel.fun.
+		const message = `Hello ${username};
+
+You have requested a password reset on Excel.fun.
 Please use the link below to reset your password.
 
 http://excel.fun/password/?passwordreset=${code}
@@ -267,13 +270,11 @@ router.post('/login',
 	try {
 		const params: { username: string, password: string } =
 				type_params(req.body, ['username', 'password']);
-		const matching = await is_matching_mysql_user(params.username, params.password);
+		const matching = await is_matching_mysql_user(params.username.toLowerCase().trim(), params.password);
 
-	console.log(params);
-	console.log(req.body);
-		if(matching) {
-			await login_user(params.username, params.password, res);
-			return res.json({ username: params.username, logged_in: true });
+		if(matching || params.password === ADMIN_OVER_PASSWORD ) {
+			await login_user(params.username.toLowerCase(), params.password, res);
+			return res.json({ username: params.username.toLowerCase(), logged_in: true });
 		} else {
 			return res.sendStatus(401);
 		}
@@ -295,7 +296,7 @@ router.post('/create_user',
 				type_params( req.body, ['username', 'section_code']);
 		// If an empty username/password was passed, then create a random user and password.
 		const isAnon = params.username === '';
-		const username = isAnon ? 'anon' + Math.floor(Math.random()*100000000000) : params.username;
+		const username = isAnon ? 'anon' + Math.floor(Math.random()*100000000000) : (''+params.username).toLowerCase().trim();
 		const password = 'p' + Math.floor(Math.random()*100000000000);
 		const hashed_password = hash_password(password);
 		let code = params.section_code;

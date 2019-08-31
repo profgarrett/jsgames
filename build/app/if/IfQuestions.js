@@ -6,6 +6,7 @@ import { IfLevelSchema } from './../../shared/IfLevel';
 
 import { create_summary } from './IfQuestionsData';
 import IfQuestionsExcelChoice from './IfQuestionsExcelChoice';
+import IfQuestionsExcelNumberAnswer from './IfQuestionsExcelNumberAnswer';
 import IfQuestionsExcelFormulas from './IfQuestionsExcelFormulas';
 import IfQuestionsTable from './IfQuestionsTable';
 import IfQuestionsTags from './IfQuestionsTags';
@@ -33,6 +34,7 @@ export default class IfQuestions extends React.Component            {
 		if(this.props.output === 'excel') {
 			return <div>
 				<IfQuestionsExcelChoice levels={levels} />
+				<IfQuestionsExcelNumberAnswer levels={levels} />
 				<IfQuestionsExcelFormulas levels={levels} />
 			</div>;
 		}

@@ -38,6 +38,7 @@ class Schema {
 		// Load each default value from schema
 		// Use the set to load the correct type of object, using json values to initialize
 		for(const key of Object.keys(schema)) {
+			// $FlowFixMe
 			this[key] = schema[key].initialize(json[key]);
 		}
 	}
@@ -66,6 +67,7 @@ class Schema {
 
 		// Copy all properties to the new item.
 		for(const key of Object.keys(schema)) {
+			// $FlowFixMe
 			if(this[key] instanceof Date) {
 				// convert date to UTC int value.
 				json[key] = this[key].getTime(); 
@@ -129,6 +131,7 @@ class Schema {
 
 		for(const key of Object.keys(schema)) {
 			if(typeof json[key] !== 'undefined' && (key==filter || filter=='')) {
+				// $FlowFixMe
 				this[key] = json[key];
 			}
 		}

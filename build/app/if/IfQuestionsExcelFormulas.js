@@ -51,7 +51,7 @@ const padL = ( s_or_n     , length         )         => {
 // Convert the data structure into a more useful approch.
 
 
-export default class IfPagesExcel extends React.Component                  {
+export default class IfPagesExcelFormula extends React.Component                  {
 
 
 	// Convert the nested structure into a flat table of common values.

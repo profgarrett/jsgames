@@ -239,6 +239,7 @@ function compile_template_values(page        )         {
 			} else if( s.substr(0,7) === 'randOf(') {
 				// Random of the list of items.
 				tempA = s.substr(7, s.length-8).split(',');
+				// $FlowFixMe
 				values[index] = DataFactory.randOf( tempA );
 
 			}

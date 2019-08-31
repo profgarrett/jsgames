@@ -41,8 +41,7 @@ const padL = ( s_or_n: any, length: number ): string => {
 
 
 
-export default class IfPagesExcelChoice extends React.Component<DetailPropsType> {
-
+export default class IfPagesExcelNumberAnswer extends React.Component<DetailPropsType> {
 
 	// Convert the nested structure into a flat table of common values.
 	flatten_levels(levels: any): any {
@@ -60,11 +59,11 @@ export default class IfPagesExcelChoice extends React.Component<DetailPropsType>
 			'q_solution',
 			'q_instruction',
 			'q_description',
-			'a_client',
-			'a_client_n'
+			'a_client', 
+            'solution_f'
 			];
 		const rows = [];
-
+        
 		levels.map( level_summary => {
 			const defaults = { 
 				level: level_summary.code
@@ -111,7 +110,7 @@ export default class IfPagesExcelChoice extends React.Component<DetailPropsType>
 		question.answers.map( answer => {
 			// Only track completed pages.
 			if(!answer.page.completed) return;
-			if(answer.page.type !== 'IfPageChoiceSchema') return;
+			if(answer.page.type !== 'IfPageNumberAnswerSchema') return;
 
 
 			const local = {
@@ -146,7 +145,6 @@ export default class IfPagesExcelChoice extends React.Component<DetailPropsType>
 			'padding': 5,
 			'textAlign': 'right'
 		};
-
 
 		// Go through each map of levels and return a table for each.
 		const trs = rows.map( 

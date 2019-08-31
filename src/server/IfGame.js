@@ -19,6 +19,7 @@ const { if1, if2, if3, if4, if5, if6, if7, if8 } = require('./tutorials/if');
 
 const { surveymath1, surveymath2 } = require('./tutorials/surveymath');
 const { surveywaiver_non_woodbury_student, surveywaiver_non_woodbury_user, surveywaiver_woodbury_student } = require('./tutorials/surveywaivers');
+const { surveycharts_turk } = require('./tutorials/surveycharts');
 
 const { parseFeedback } = require('./parseFeedback');
 
@@ -184,6 +185,21 @@ const baseifgame = {
 			// Default instruction text.
 			if(typeof json.instruction === 'undefined') 
 				json.instruction = 'Type in a number';
+
+
+
+		} else if(json.type === 'IfPageSliderSchema') {
+			// Allow the user to submit a number. This is a rough entry, so don't test for 
+			// correctness. Only allow use for surveys.
+
+			json.code = 'tutorial'
+			json.correct_required = false;
+			json.solution_test_results_visible = false;
+			json.solution_f_visible = false;
+
+			// Default instruction text.
+			if(typeof json.instruction === 'undefined') 
+				json.instruction = 'Select a number using the slider';
 
 
 
@@ -386,7 +402,8 @@ const IfLevelModelFactory = {
 		test_gens: { ...baseifgame, ...test_gens },
 		surveywaiver_non_woodbury_student: { ...baseifgame, ...surveywaiver_non_woodbury_student }, 
 		surveywaiver_non_woodbury_user: { ...baseifgame, ...surveywaiver_non_woodbury_user },
-		surveywaiver_woodbury_student: { ...baseifgame, ...surveywaiver_woodbury_student }
+		surveywaiver_woodbury_student: { ...baseifgame, ...surveywaiver_woodbury_student },
+		surveycharts_turk: { ...baseifgame, ...surveycharts_turk }
 	},
 
 	// Create and return a new level of the given code.
