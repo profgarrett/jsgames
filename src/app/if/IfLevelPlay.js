@@ -5,6 +5,8 @@ import { Button, Table, Card, Popover, Overlay, OverlayTrigger, Modal } from 're
 import { HtmlSpan, HtmlDiv, 
 		HandPointRightGlyphicon, IncorrectGlyphicon, CorrectGlyphicon, 
 		CompletedGlyphicon, ProgressGlyphicon} from './../components/Misc';
+import Timer from './../components/Timer';
+
 
 import ExcelTable from './ExcelTable';
 import Text from './Text';
@@ -13,7 +15,10 @@ import Parsons from './Parsons';
 import Harsons from './Harsons';
 import NumberAnswer from './NumberAnswer';
 import Slider from './Slider';
+import ShortTextAnswer from './ShortTextAnswer';
 
+import { buildChart } from './charts/Charts.js';
+import { ChartDef } from './../../shared/ChartDef';
 
 import { fill_template } from './../../shared/template.js';
 import { IfLevelSchema } from './../../shared/IfLevel.js';
@@ -48,6 +53,7 @@ const build_score = (pages: Array<IfPageBaseSchema>): any => pages.map( (p: IfPa
 				(p.toString().length < 1 ? '' : '<br/><div class="well well-sm">'+ p.toString()+'</div>');
 
 			g = <CompletedGlyphicon color={ p.correct ? 'black' : 'gray' } />;
+			
 		} else if (p.code === 'test') {
 
 			// Graded page
@@ -100,7 +106,7 @@ const titleTdStyle = {  /* use a title td to center vertically */
 type PropsType = {
 	level: IfLevelSchema,
 	selected_page_index: number,
-	onChange: (Object) => void,
+	onChange: (Object, ?Function) => void,
 	onNext: (void) => void,
 	onValidate: (void) => void,
 	onViewFeedback: (void) => void,
@@ -226,6 +232,8 @@ export default class IfLevelPlay extends React.Component<PropsType, StateType> {
 		if(page.code === 'test') {
 			// Do a custom animation to draw eye to the instruction
 			// Ugly hack to get stylesheet and insert keyframes.
+
+			if(page.description === '') return null;
 
 			try {
 				const stylesheet = document.styleSheets[0];
@@ -448,6 +456,29 @@ export default class IfLevelPlay extends React.Component<PropsType, StateType> {
 	}
 
 
+	// Return a timer (if needed)
+	_render_timer(page: IfPageBaseSchema): Node {
+		
+		if(page.time_limit === null) return null;
+		
+		return <Timer for_object={this.props.selected_page_index} time_limit={page.time_limit} onTimeout={ () => {
+			this.props.onChange({ time_limit_expired: true }, 
+				() => {
+					this.props.onNext();
+				})
+			}} />;
+	}
+
+	// Build out the chart
+	_render_chart(page: IfPageBaseSchema ): Node {
+		if(page.chart_def !== null && typeof page.chart_def !== 'undefined') {
+			return <div style={{height:'300px'}}>{buildChart(page.chart_def)}</div>;
+		} else {
+			return null;
+		}
+	}
+
+
 
 	_render_exercise_panel(page: IfPageBaseSchema, validate_button: Node ): Node {
 		let problem = null;
@@ -494,6 +525,13 @@ export default class IfLevelPlay extends React.Component<PropsType, StateType> {
 						handleChange={this.handleChange} 
 						handleSubmit={ () => this.handleNext() } />;
 
+		} else if(page.type === 'IfPageShortTextAnswerSchema') {
+			problem = <ShortTextAnswer page={page.toIfPageShortTextAnswerSchema()} 
+						readonly={ this.props.isLoading }
+						editable={ true } 
+						handleChange={this.handleChange} 
+						handleSubmit={ () => this.handleNext() } />;
+
 
 		} else if(page.type === 'IfPageSliderSchema') {
 			problem = <Slider page={page.toIfPageSliderSchema()} 
@@ -501,6 +539,7 @@ export default class IfLevelPlay extends React.Component<PropsType, StateType> {
 						editable={ true } 
 						handleChange={this.handleChange} 
 						handleSubmit={ () => this.handleNext() } />;
+
 
 		} else {
 			throw new Error('Invalid type in IfLevelPlay '+page.type);
@@ -608,7 +647,9 @@ export default class IfLevelPlay extends React.Component<PropsType, StateType> {
 				<div id='iflevelplay' style={{position: 'relative', opacity: this.props.show_feedback ? 0.5 : 1 }}>
 					<form name='c' onSubmit={this.handleNext}>
 						{ this._render_page_lead(page, pageI) }
+						{ this._render_chart(page) }
 						{ this._render_exercise_panel(page, validate_button) }
+						{ this._render_timer(page) }
 						<Card style={{ marginTop: '1rem' }}>
 							<Card.Body style={{ margin: 0, padding: 0 }}>
 								<Table style={{ margin: 0 }} >

@@ -16,7 +16,8 @@ class Schema {
 		//let methods = this.methods;
 
 		if(this.type !== json.type) {
-			debugger;
+			console.log(this);
+			console.log(json);
 			throw Error('Schema.constructor: json.type ('+json.type+') !== '+this.type);
 		}
 

@@ -2,6 +2,7 @@
 const { Schema, isDef, isObject, isArray, revive_dates_recursively } = require('./Schema');
 const { get_feedback } = require('./feedback');
 const { fill_template } = require('./template');
+const { ChartDef } = require('./ChartDef');
 var FormulaParser = require('hot-formula-parser').Parser;
 
 
@@ -9,6 +10,13 @@ var FormulaParser = require('hot-formula-parser').Parser;
 // Are we on the server or on the client?
 function is_server()          {
 	return ! (typeof window !== 'undefined' && window.document );
+}
+
+// Ensure that this is a string
+function s(a     )         {
+	if(typeof a === 'string') return a;
+	if(typeof a === 'number') return ''+a;
+	return ''+a;
 }
 
 
@@ -113,6 +121,14 @@ function common_schema()         {
 		// KCs.
 		// A list of strings that are used to track the type of problem.
 		kcs: { type: 'Array', initialize: (a) => isDef(a) && isArray(a) ? a : [] },
+
+		// Optional time limit.
+		// In seconds
+		time_limit: { type: 'Number', initialize: (s) => isDef(s) ? s : null },
+		time_limit_expired: { type: 'Boolean', initialize: (b) => isDef(b) ? bool(b) : false },
+
+		// Chart Definition
+		chart_def: { type: 'Object', initialize: (o) => isDef(o) && isObject(o) ? o : null },
 	};
 }
 
@@ -132,6 +148,9 @@ class IfPageBaseSchema extends Schema {
 	                         
 	                      
 	                  
+	                  
+	                           
+	                   
 
 	// Must be implemented by inheriting classes.
 	                                   
@@ -323,8 +342,10 @@ class IfPageBaseSchema extends Schema {
 		return this;
 	}
 	// Type coercion for flow not liking subtypes.
+	// Note: allow sub-typing of Harsons to Formula.
 	toIfPageFormulaSchema()                      {
-		if( this.type !== 'IfPageFormulaSchema') throw new Error('Invalid type convertion to IfPageFormulaSchema');
+		if( this.type !== 'IfPageFormulaSchema' &&
+			this.type !== 'IfPageHarsonsSchema') throw new Error('Invalid type convertion to IfPageFormulaSchema');
 		// $FlowFixMe 
 		return this;
 	}
@@ -364,6 +385,19 @@ class IfPageBaseSchema extends Schema {
 		// $FlowFixMe 
 		return this;
 	}
+	// Type coercion for flow not liking subtypes.
+	toIfPageSliderSchema()                     {
+		if( this.type !== 'IfPageSliderSchema') throw new Error('Invalid type convertion to IfPageHarsonsSchema');
+		// $FlowFixMe 
+		return this;
+	}
+	// Type coercion for flow not liking subtypes.
+	toIfPageShortTextAnswerSchema()                              {
+		if( this.type !== 'IfPageShortTextAnswerSchema') throw new Error('Invalid type convertion to IfPageShortTextAnswerSchema');
+		// $FlowFixMe 
+		return this;
+	}
+
 
 }
 
@@ -427,6 +461,10 @@ class IfPageTextSchema extends IfPageBaseSchema {
 			this.client_read = json.client_read;
 			this.history = json.history;
 		}
+		if(typeof json.time_limit_expired !== 'undefined' ){
+			this.time_limit_expired = json.time_limit_expired;
+		}
+
 
 		this.updateCorrect();
 	}
@@ -450,7 +488,6 @@ class IfPageTextSchema extends IfPageBaseSchema {
 		return '';
 	}
 }
-
 
 
 
@@ -489,7 +526,11 @@ class IfPageNumberAnswerSchema extends IfPageBaseSchema {
 	// Automatically fill in the answer.
 	// Used for testing out on the server. 
 	debug_answer() {
-		this.client = this.solution;
+		if(this.solution !== null)  {
+			this.client = this.solution;
+		} else {
+			this.client = Math.round(Math.random()*10);
+		}
 		this.updateCorrect();
 	}
 
@@ -515,6 +556,9 @@ class IfPageNumberAnswerSchema extends IfPageBaseSchema {
 			this.client = json.client;
 			this.history = json.history;
 		}
+		if(typeof json.time_limit_expired !== 'undefined' ){
+			this.time_limit_expired = json.time_limit_expired;
+		}
 
 		this.updateCorrect();
 	}
@@ -538,6 +582,90 @@ class IfPageNumberAnswerSchema extends IfPageBaseSchema {
 		return ''+this.client;
 	}
 
+}
+
+
+// A slider is a more specialized version of the number answer, which uses a range to 
+// give the control min/max for a slider control. Does not have a "right" answer.
+class IfPageSliderSchema extends IfPageBaseSchema {
+	               
+	            
+	            
+
+	get type()         {
+		return 'IfPageSliderSchema';
+	}
+
+	get schema()         {
+		let inherit = common_schema();
+
+		return {
+			...inherit,
+			client: { type: 'number', initialize: (i) => isDef(i) ? parseInt(i, 10) : null },
+			min: { type: 'number', initialize: (i) => isDef(i) ? parseInt(i, 10) : 0 }, // default 0
+			max: { type: 'number', initialize: (i) => isDef(i) ? parseInt(i, 10) : 100 } // default 100
+		};
+	}
+
+	// Has the user provided input?
+	client_has_answered()          {
+		return this.client !== null;
+	}
+
+
+	// Automatically fill in the answer.
+	// Used for testing out on the server. 
+	debug_answer() {
+		this.client = Math.round(Math.random()*this.max);
+		this.updateCorrect();
+	}	
+
+
+	/*
+		Update any fields for which user has permissions.
+		
+		Safe to re-run, with the exception that upon changing client_items, will
+		reset this.correct (since we don't know its status).  Will re-run updateCorrect() in 
+		case this is on the server and we're updating the object.
+
+		Run upon initial obj creation.
+	*/
+	updateUserFields(json        ) {
+		if(typeof json === 'undefined') throw new Error('IfGames.updateUserFields(json) is null');
+		if(json.type !== this.type ) throw new Error('Invalid type '+json.type+' in ' + this.type + '.updateUserFields');
+
+		// don't allow updates to finished items. Note that completed isn't set internally by this obj,
+		// but instead is set by the server code with knowledge of each tutorial's rules.
+		if(this.completed) return; 
+
+		if(this.client !== json.client ){
+			this.client = json.client;
+			//this.history = json.history; DON'T TRACK HISTORY.
+		}
+		if(typeof json.time_limit_expired !== 'undefined' ){
+			this.time_limit_expired = json.time_limit_expired;
+		}
+
+
+		this.updateCorrect();
+	}
+
+	/* 
+		Update correct *if* a solution is provided.
+		Don't updateFeedback, as this type never has feedback rules applied.
+	*/
+	updateCorrect() {
+		if(this.completed) return; // do not update completed items.
+		if(this.client === null) return; // no client submission.
+
+		this.client_feedback = [];
+		this.correct = true;
+	}
+
+	// Return a nicely formatted view of the client's input. 
+	toString()         {
+		return ''+this.client;
+	}
 }
 
 
@@ -603,6 +731,9 @@ class IfPageShortTextAnswerSchema extends IfPageBaseSchema {
 			this.client = json.client;
 			this.history = json.history;
 		}
+		if(typeof json.time_limit_expired !== 'undefined' ){
+			this.time_limit_expired = json.time_limit_expired;
+		}
 
 		this.updateCorrect();
 	}
@@ -648,7 +779,6 @@ class IfPageLongTextAnswerSchema extends IfPageShortTextAnswerSchema {
 
 
 
-
 /*
 	A page holds a single choice question.
 
@@ -677,7 +807,7 @@ class IfPageChoiceSchema extends IfPageBaseSchema {
 			...inherit,
 			client: { type: 'String', initialize: (s) => isDef(s) ? s : null },
 			client_items: { type: 'Array', initialize: (a) => isDef(a) && isArray(a) ? noObjectsInArray(a) : [] },
-			// Default solution to ?, which means that any answer is acceptable.
+			// The ? means that any answer is ok.
 			solution: { type: 'String', initialize: (s) => isDef(s) ? s : '?' },
 
 		};
@@ -721,6 +851,12 @@ class IfPageChoiceSchema extends IfPageBaseSchema {
 			this.client = json.client;
 			this.correct = null; // we no longer know if the solution is correct.
 			this.history = json.history;
+
+		}
+
+		// Look to see if the timer has expired.
+		if(typeof json.time_limit_expired !== 'undefined' ){
+			this.time_limit_expired = json.time_limit_expired;
 		}
 
 		this.updateCorrect();
@@ -746,7 +882,7 @@ class IfPageChoiceSchema extends IfPageBaseSchema {
 		if(this.solution === '?' || this.solution === '*') {
 			this.correct = true;			
 		} else {
-			this.correct = (this.client.trim().toLowerCase() === this.solution.trim().toLowerCase());
+			this.correct = (s(this.client).trim().toLowerCase() === s(this.solution).trim().toLowerCase());
 		}
 	}
 
@@ -756,8 +892,6 @@ class IfPageChoiceSchema extends IfPageBaseSchema {
 	}
 
 }
-
-
 
 
 /*
@@ -789,7 +923,6 @@ class IfPageParsonsSchema extends IfPageBaseSchema {
 		return {
 			...inherit,
 			helpblock: { type: 'String', initialize: (s) => isDef(s) ? s : null },
-
 			potential_items: { type: 'Array', initialize: (a) => isDef(a) && isArray(a) ? noObjectsInArray(a) : [] },
 			solution_items: { type: 'Array', initialize: (a) => isDef(a) && isArray(a) ? noObjectsInArray(a) : [] },
 			client_items: { type: 'Array', initialize: (a) => isDef(a) && isArray(a) ? noObjectsInArray(a) : null }, 
@@ -838,6 +971,11 @@ class IfPageParsonsSchema extends IfPageBaseSchema {
 
 		this.client_items = json.client_items;
 		this.history = json.history;
+
+		if(typeof json.time_limit_expired !== 'undefined' ){
+			this.time_limit_expired = json.time_limit_expired;
+		}
+
 		if(!(json.history instanceof Array)) throw new Error('Invalid history type '+typeof history);
 		
 		// Update level parsing as needed.
@@ -975,6 +1113,10 @@ class IfPageFormulaSchema extends IfPageBaseSchema {
 		const old_client_f = this.client_f;
 		this.client_f = json.client_f;
 		this.history = Array.from(json.history);
+
+		if(typeof json.time_limit_expired !== 'undefined' ){
+			this.time_limit_expired = json.time_limit_expired;
+		}
 
 		const code = is_server() ? 'server_update' : 'client_update';
 
@@ -1297,8 +1439,6 @@ class IfPageHarsonsSchema extends IfPageFormulaSchema {
 
 
 
-
-
 module.exports = {
 	IfPageBaseSchema,
 	IfPageTextSchema,
@@ -1307,6 +1447,7 @@ module.exports = {
 	IfPageParsonsSchema,
 	IfPageHarsonsSchema,
 	IfPageNumberAnswerSchema,
+	IfPageSliderSchema,
 	IfPageShortTextAnswerSchema,
 	IfPageLongTextAnswerSchema
 };

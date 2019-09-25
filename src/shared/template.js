@@ -1,7 +1,8 @@
 /*@flow */
 const { DataFactory } = require('./../server/DataFactory');
+// Note: Do not import IfLevel/IfPages here. It's nice to have the type annotations,
+//		but importing will lead to a import loop that breaks everything.
 
-//const fillTemplate = require('es6-dynamic-template');
 
 /*
 
@@ -48,6 +49,8 @@ Special values:
 	'randOf(a1|b1|c1)'
 		Returns any of the items, split by |
 
+	'level._id'
+		Returns the ID of the currently-used level.
 
 After the objects are turned into new pages, these values turn from their template form into actual data.
 This makes analysis much easier, as we don't want to split up the repsonses into 10k different unique items.
@@ -72,7 +75,9 @@ if(false) {
 	const basepage = {
 		column_titles: ['as', 'bs', 'cs']
 	};
-
+	const baselevel = { type: 'IfLevelSchema', _id: '999' };
+	//baselevel._id = '999';
+	
 
 	values = compile_template_values({ ...basepage, template_values: { n: '[1-1]' }});
 	assert(values.n === 1);
@@ -158,8 +163,13 @@ if(false) {
 	assert(values.x_ref == 'a1' || values.x_ref === 'b1' );
 
 
-
-
+	values = compile_template_values({ 
+			...basepage, 
+			template_values: { 
+				x: 'level._id' 
+			}
+		},baselevel);
+	assert(values.x == '999' );
 
 }
 
@@ -201,7 +211,9 @@ function build_random_refs(page: Object): Object {
 	Use:
 		page.template_values = compile_template_values(page);
 **/
-function compile_template_values(page: Object): Object {
+
+
+function compile_template_values(page: Object, level: ?any): Object {
 	if(typeof page.template_values === 'undefined') return {};
 
 	let values = {};
@@ -235,13 +247,22 @@ function compile_template_values(page: Object): Object {
 				// Remove cell now that we've added it to the list.
 				refs.pop();
 
-
 			} else if( s.substr(0,7) === 'randOf(') {
 				// Random of the list of items.
 				tempA = s.substr(7, s.length-8).split(',');
 				// $FlowFixMe
 				values[index] = DataFactory.randOf( tempA );
 
+			} else if ( s === 'level._id') {
+				if(typeof level === 'undefined' || level === null) {
+					throw new Error('Undefined level for compile_template');
+				} else {
+					if(typeof level._id === 'undefined' ) {
+						console.log(level);
+						throw new Error('You must pass Level to compile_template_values');
+					}
+					values[index] = level._id;
+				}
 			}
 		}
 	}
@@ -268,8 +289,7 @@ function fill_template(s: string | number, values: Object): string | number {
 	if(typeof s === 'number') return s;
 
 	if(typeof s.replace !== 'function') {
-		console.log(s);
-		debugger;
+		throw new Error('Invalid function passed to template\fill_template');
 	}
 
 	//const quoted_s = s.replace( /\{/g, '${'); // add $ to strings.

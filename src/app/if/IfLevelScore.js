@@ -71,7 +71,7 @@ class IfLevelScorePage extends React.Component<ScorePropsType, ScoreStateType> {
 		if(page_at.type === 'IfPageFormulaSchema' || page_at.type === 'IfPageHarsonsSchema') {
 			// Show solution?
 
-			if(page_at.type === 'IfPageFormaSchema') {
+			if(page_at.type === 'IfPageFormulaSchema') {
 				page_at = page_at.toIfPageFormulaSchema();
 				page_final = page_final.toIfPageFormulaSchema();
 			} else {

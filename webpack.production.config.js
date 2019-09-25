@@ -2,7 +2,7 @@ require('@babel/polyfill');
 
 const HTMLWebpackPlugin = require('html-webpack-plugin');
 const webpack = require('webpack');
-const UglifyJSPlugin = require('uglifyjs-webpack-plugin');
+const TerserPlugin = require('terser-webpack-plugin');
 const CleanWebpackPlugin = require('clean-webpack-plugin');
 //const { GOOGLEID } = require('./secret.distribution.js');
 
@@ -29,13 +29,22 @@ module.exports = {
 			filename: 'index.html',
 			inject: 'body'
 		}),
-		new UglifyJSPlugin({
-			sourceMap: true
-		}),
+		
 		new webpack.DefinePlugin({
 			'process.env.NODE_ENV': JSON.stringify('production')
 		})
 	],
+	optimization: {
+		minimize: true,
+		minimizer: [new TerserPlugin({
+			sourceMap: true,
+			terserOptions: {
+				ie8: true,
+				safari10: true,
+				ecma: 5,
+			},
+		})],
+	},
 	output: {
 		filename: '[name].[chunkhash].js',
 		publicPath: '/',

@@ -58,7 +58,8 @@ export default class IfLevelPlayContainer extends React.Component               
 
 	// Get an update of the user's input.
 	// Changes is passed a json object with the updated values.
-	onChange(json        ) {
+	// Optional callback may be passed, which is thrown into the setState.
+	onChange(json        , cb           ) {
 
 		if(typeof this.state.level === 'undefined' || this.state.level === null) {
 			throw new Error('Invalid onChange of undefined IfLevelPlayContainer');
@@ -72,7 +73,7 @@ export default class IfLevelPlayContainer extends React.Component               
 			const i = this.state.selected_page_index;
 			//let new_history_item = { created: new Date(), ...json };
 			//let history = [...this.state.level.pages[i].history, new_history_item];
-
+		
 			// Create a fresh page.
 			let page_json = { ...level.pages[i].toJson()};
 			let page = level.get_new_page(page_json);
@@ -83,7 +84,8 @@ export default class IfLevelPlayContainer extends React.Component               
 			level = new IfLevelSchema(level.toJson());
 			level.pages[i] = page;
 
-			this.setState({ level });
+			// Run the callback (if passed) after updating the state.
+			this.setState({ level }, typeof cb !== 'function' ? () => {} : cb);
 		}
 	}
 
@@ -114,8 +116,9 @@ export default class IfLevelPlayContainer extends React.Component               
 			current_page.toIfPageTextSchema().client_read = true;
 		}
 
-		// Make sure that the user has submitted something
-		if(!current_page.client_has_answered() && current_page.correct_required) {
+		// Make sure that the user has submitted something 
+		//		UNLESS the timer has expired. THen it's ok to submit, even if we don't have user input.
+		if(!current_page.client_has_answered() && current_page.correct_required && !current_page.time_limit_expired) {
 			this.setState({
 				message: 'You must provide an answer before continuing.',
 				messageStyle: 'warning'

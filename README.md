@@ -319,6 +319,8 @@ Thanks to EW for use of the formula parser.
 Thanks for Font Awesome for free Glyphs
 https://fontawesome.com/start
 
+Thanks for Visualization Literacy 101
+	Source: http://peopleviz.gforge.inria.fr/trunk/vLiteracy/home/tests/bc/
 
 
 Other credits found in NPM packages.

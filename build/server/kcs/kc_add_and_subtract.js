@@ -33,7 +33,8 @@ const _base_add_and_subtract_test_question = {
 	type: 'IfPageFormulaSchema',
 	column_titles: farm1_data.column_titles,
 	tests: farm1_data.tests,
-	instruction: 'Type in the correct formula',
+	instruction: `Type in the correct formula. Use the symbols taught in this lesson, such as  <code>+</code> and
+		<code>-</code>.  Do not use functions like <code>SUM</code>.`,
 	code: 'test',
 	kcs: [ KC_NAMES.ADD, KC_NAMES.SUBTRACT ]
 };

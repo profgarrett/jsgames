@@ -7,20 +7,20 @@ import type { Node } from 'react';
 import { IfPageSliderSchema } from './../../shared/IfPage';
 
 type PropsType = {
-	page: IfPageSliderSchema,
-	editable: boolean,
-	readonly: boolean,
-	handleChange: (Object) => void,
-	handleSubmit: (void) => void
+  page: IfPageSliderSchema,
+  editable: boolean,
+  readonly: boolean,
+  handleChange: (Object) => void,
+  handleSubmit: (void) => void
 };
-
+  
 const ID = 'SliderInput';
 
 // ************************************************************************
 // Code for Slider Component
 // ************************************************************************
 
-const sliderStyle = {  // Give the slider some width
+const sliderStyle = { // Give the slider some width
   position: 'relative',
   width: '100%',
   height: 80,
@@ -40,7 +40,7 @@ const railStyle = {
 export function Handle({
     handle: { id, value, percent }, 
     getHandleProps
-}) {
+}: any) {
     return (
         <div
         style={{
@@ -57,7 +57,6 @@ export function Handle({
         borderRadius: '50%',
         backgroundColor: '#2C4870',
         color: '#333',
-        onChange: (e) => console.log(e),
         }}
         {...getHandleProps(id)}
         >
@@ -102,7 +101,7 @@ function Tick({ tick, count }) {  // your own tick component
         style={{
           position: 'absolute',
           marginTop: 60,
-          fontSize: 10,
+          fontSize: 20,
           textAlign: 'center',
           marginLeft: `${-(100 / count) / 2}%`,
           width: `${100 / count}%`,
@@ -119,68 +118,66 @@ function Tick({ tick, count }) {  // your own tick component
 
 
 /**
-	A page shows an input for a number answer.
+  A page shows an input for a number answer.
 */
 export default class NumberSlider extends React.Component<PropsType> {
-	constructor(props: any) {
-		super(props);
-		(this: any).state = {};
-		(this: any).handleSubmit = this.handleSubmit.bind(this);
-        (this: any).handleChange = this.handleChange.bind(this);
-	}
+  constructor(props: any) {
+    super(props);
+    (this: any).state = {};
+    (this: any).handleSubmit = this.handleSubmit.bind(this);
+    (this: any).handleChange = this.handleChange.bind(this);
+  }
 
-	componentDidMount() {
-		// If there is an input field, then set its focus.
-		if(this.props.editable) {
-			let node = document.getElementById(ID);
-			if(node) node.focus();
-		}
-	}
-	componentDidUpdate() {
-		if(this.props.editable) {
-			let node = document.getElementById(ID);
-			if(node) node.focus();
-		}	
-	}
+  componentDidMount() {
+    // If there is an input field, then set its focus.
+    if(this.props.editable) {
+      let node = document.getElementById(ID);
+      if(node) node.focus();
+    }
+  }
+  componentDidUpdate() {
+    if(this.props.editable) {
+      let node = document.getElementById(ID);
+      if(node) node.focus();
+    }	
+  }
 
 
-	handleSubmit(event: any): any {
-		/*
-		if(event.key === 'Enter' ) {
-			this.props.handleSubmit(document.getElementById(ID).text);
-		}
-		event.preventDefault(); // cancel any keypress.
-		*/
-	}
+  handleSubmit(event: any): any {
+    /*
+    if(event.key === 'Enter' ) {
+      this.props.handleSubmit(document.getElementById(ID).text);
+    }
+    event.preventDefault(); // cancel any keypress.
+    */
+  }
 
-	handleChange(value: Array<number>): any {
+  handleChange(value: Array<number>): any {
         const n = value.pop(); // top number.
-
-
 
         if( typeof n !== 'number') return;
         if( Number.isNaN(n)) return;  // component sometimes returns NaN
 
-        console.log([value, n]);
 
         if(n !== this.props.page.client) {
             this.props.handleChange({ client: n});
         }
-	}
+  }
 
-	// Build out the table 
-	// Doesn't need to actually return anything, as the description will be shown 
-	// by the containing object.
-	render(): Node {
-		const value = this.props.page.client === null || typeof this.props.page.client === 'undefined' 
+  // Build out the table 
+  // Doesn't need to actually return anything, as the description will be shown 
+  // by the containing object.
+  render(): Node {
+    const value = Number.isNaN(this.props.page.client) || this.props.page.client === null || typeof this.props.page.client === 'undefined' 
             ? 0 
             : this.props.page.client;
         
-        console.log(this.props.page);
-
-		return (
-			<div>
-				<Slider
+    const disabled = !this.props.editable;
+  
+    return (
+      <div style={{ padding: 30 }}>
+        <Slider
+          disabled={disabled}
                     rootStyle={sliderStyle}
                     domain={[0, 100]}
                     step={1}
@@ -230,6 +227,6 @@ export default class NumberSlider extends React.Component<PropsType> {
                     </Ticks>
                 </Slider>
             </div>
-			);
-	}
+      );
+  }
 }

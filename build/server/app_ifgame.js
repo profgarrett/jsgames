@@ -294,7 +294,7 @@ router.get('/questions/', nocache, require_logged_in_user,
 				(sections.idsection = ? OR ? = '*') AND 
 				(users.iduser = ? OR ? = '*') AND 
 				iflevels.updated > NOW() - INTERVAL ${INTERVAL} AND 
-				iflevels.username NOT IN ('garrettn') AND 
+				iflevels.username NOT IN ('xgarrettn') AND 
 				iflevelsmax.first = 1`;
 
 

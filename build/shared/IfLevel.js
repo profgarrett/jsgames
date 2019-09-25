@@ -1,9 +1,9 @@
 //      
 const { Schema, isDef  } = require('./Schema');
 const { IfPageTextSchema, IfPageChoiceSchema, 
-		IfPageFormulaSchema,	
+		IfPageFormulaSchema, IfPageSliderSchema,
 		IfPageParsonsSchema, IfPageHarsonsSchema,
-		IfPageNumberAnswerSchema } = require('./IfPage');
+		IfPageNumberAnswerSchema, IfPageShortTextAnswerSchema } = require('./IfPage');
 
 const { IfPageBaseSchema } = require('./IfPage');
 
@@ -45,6 +45,8 @@ const IfLevels = [
 	{ code: 'surveywaiver_non_woodbury_student', title: 'Student Account Setup', description: 'Learn about this website and answer several questions' },
 	{ code: 'surveywaiver_non_woodbury_user', title: 'Anonymous User Account Setup', description: 'Learn about this website and answer several questions' },
 	{ code: 'surveywaiver_woodbury_student', title: 'Woodbury Student Account Setup', description: 'Learn about this website and answer several questions' },
+	
+	{ code: 'surveycharts_turk', title: 'Chart Survey (AMT)', description: 'Test your ability to intrepret common charts' },
 
 ];
 
@@ -251,9 +253,13 @@ class IfLevelSchema extends Schema {
 			new_page = new IfPageChoiceSchema(json);
 		} else if (json.type === 'IfPageTextSchema') {
 			new_page = new IfPageTextSchema(json);
+		} else if (json.type === 'IfPageSliderSchema') {
+			new_page = new IfPageSliderSchema(json);
 		} else if (json.type === 'IfPageNumberAnswerSchema') {
 			new_page = new IfPageNumberAnswerSchema(json);
-
+		} else if (json.type === 'IfPageShortTextAnswerSchema') {
+			new_page = new IfPageShortTextAnswerSchema(json);
+			
 		} else {
 			throw new Error('Invalid get_new_page(type) param of ' + json.type);
 		}

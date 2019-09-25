@@ -19,6 +19,7 @@ const { if1, if2, if3, if4, if5, if6, if7, if8 } = require('./tutorials/if');
 
 const { surveymath1, surveymath2 } = require('./tutorials/surveymath');
 const { surveywaiver_non_woodbury_student, surveywaiver_non_woodbury_user, surveywaiver_woodbury_student } = require('./tutorials/surveywaivers');
+const { surveycharts_turk } = require('./tutorials/surveycharts');
 
 const { parseFeedback } = require('./parseFeedback');
 
@@ -70,12 +71,14 @@ const baseifgame = {
 
 		Seed parameter is used to generate stable random sequences.
 	*/
-	_initialize_json: function(seed        , page_count        , original_json        )         {
+	_initialize_json: function(level              , original_json        )         {
 		let json = {...original_json};
 		let version_i         = 0;
 		let version         = {};
 		let randomly_sorted_versions                = [];
-
+		let seed = level.seed;
+		const page_count = level.pages.length;
+		
 		// Initialize different versions of the page based on the levels seed object.
 		// Relies upon versions being set to an array of objects or functions.
 		if(json.versions instanceof Array) {
@@ -119,7 +122,7 @@ const baseifgame = {
 		// Setup template values (if any!);
 		// This converts strings like [1-3] into numbers 1, 2, or 3.
 		// It also works with references. See templates for more information.
-		json.template_values = compile_template_values( json );
+		json.template_values = compile_template_values( json, level );
 
 
 		// Type-specific setup
@@ -157,9 +160,11 @@ const baseifgame = {
 
 
 		} else if(json.type === 'IfPageChoiceSchema') {
-			// Mark that correct is required for all. This is needed to help keep track of 
-			// submission.  If any solution is ok, then solution should be ? or *.
-			json.correct_required = true;
+			// Mark that correct is normally required for all. This is needed to help keep track of 
+			// 		submission.  If any solution is ok, then solution should be ? or *.
+			// But, we have to be able to set this to false, as when we use this as part of a survey
+			// 		the page may auto-submit or be skipped by the user.
+			json.correct_required = typeof json.correct_required === 'undefined' ? true : json.correct_required;
 
 			// Default instruction text.
 			if(typeof json.instruction === 'undefined') 
@@ -184,6 +189,21 @@ const baseifgame = {
 			// Default instruction text.
 			if(typeof json.instruction === 'undefined') 
 				json.instruction = 'Type in a number';
+
+
+
+		} else if(json.type === 'IfPageSliderSchema') {
+			// Allow the user to submit a number. This is a rough entry, so don't test for 
+			// correctness. Only allow use for surveys.
+
+			json.code = json.code || 'test';
+			json.correct_required = false;
+			json.solution_test_results_visible = false;
+			json.solution_f_visible = false;
+
+			// Default instruction text.
+			if(typeof json.instruction === 'undefined') 
+				json.instruction = 'Select a number using the slider';
 
 
 
@@ -213,6 +233,15 @@ const baseifgame = {
 				json.feedback = feedback;
 				json.toolbox = feedback;
 			}
+
+		} else if( json.type === 'IfPageShortTextAnswerSchema' ) {
+			json.correct_required = false;
+
+			// Default to *not* show feedback on this item unless set.
+			json.show_feedback_on = typeof json.show_feedback_on === 'undefined' ? false : json.show_feedback_on;
+
+			// Add a default code.
+			json.code = typeof json.code === 'undefined' ? 'tutorial' : json.code;
 
 		} else {
 			console.log(json);
@@ -327,7 +356,7 @@ const baseifgame = {
 			}
 
 			// setup new page 
-			const initialized_json = this._initialize_json(level.seed, level.pages.length, new_page_json);
+			const initialized_json = this._initialize_json(level, new_page_json);
 			const new_page = level.get_new_page(initialized_json);
 
 			// Add an initial history item for the created date using server time (not client time)
@@ -386,14 +415,15 @@ const IfLevelModelFactory = {
 		test_gens: { ...baseifgame, ...test_gens },
 		surveywaiver_non_woodbury_student: { ...baseifgame, ...surveywaiver_non_woodbury_student }, 
 		surveywaiver_non_woodbury_user: { ...baseifgame, ...surveywaiver_non_woodbury_user },
-		surveywaiver_woodbury_student: { ...baseifgame, ...surveywaiver_woodbury_student }
+		surveywaiver_woodbury_student: { ...baseifgame, ...surveywaiver_woodbury_student },
+		surveycharts_turk: { ...baseifgame, ...surveycharts_turk }
 	},
 
 	// Create and return a new level of the given code.
 	create: function(code        , username        )                {
 		if(typeof this.levels[code] === 'undefined') throw new Error('Invalid type '+code+' passed to IfLevelModelFactory.create');
 
-		const allow_skipping_tutorial = (username === 'garrettn');
+		const allow_skipping_tutorial = false; //(username === 'xgarrettn');
 
 		// If we are the admin, or 1/2th of users, then standardize the display 
 		// of formula cases.

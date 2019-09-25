@@ -3,7 +3,7 @@ const { Schema, isDef  } = require('./Schema');
 const { IfPageTextSchema, IfPageChoiceSchema, 
 		IfPageFormulaSchema, IfPageSliderSchema,
 		IfPageParsonsSchema, IfPageHarsonsSchema,
-		IfPageNumberAnswerSchema } = require('./IfPage');
+		IfPageNumberAnswerSchema, IfPageShortTextAnswerSchema } = require('./IfPage');
 
 const { IfPageBaseSchema } = require('./IfPage');
 
@@ -257,7 +257,9 @@ class IfLevelSchema extends Schema {
 			new_page = new IfPageSliderSchema(json);
 		} else if (json.type === 'IfPageNumberAnswerSchema') {
 			new_page = new IfPageNumberAnswerSchema(json);
-
+		} else if (json.type === 'IfPageShortTextAnswerSchema') {
+			new_page = new IfPageShortTextAnswerSchema(json);
+			
 		} else {
 			throw new Error('Invalid get_new_page(type) param of ' + json.type);
 		}

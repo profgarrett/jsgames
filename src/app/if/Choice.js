@@ -2,7 +2,6 @@
 import React from 'react';
 import { ListGroup, ListGroupItem } from 'react-bootstrap';
 import type { Node } from 'react';
-
 import { IfPageChoiceSchema } from './../../shared/IfPage';
 
 type PropsType = {
@@ -13,9 +12,10 @@ type PropsType = {
 };
 
 
+
+
 /**
-	A Parsons problem shows a list, allowing a user to drag and drop
-	any elements from a potential_items into user_items.
+	This problem shows a list of items, allowing a user to select any of them.
 */
 export default class Choice extends React.Component<PropsType> {
 	constructor(props: any) {
@@ -38,36 +38,37 @@ export default class Choice extends React.Component<PropsType> {
 			if(this.props.showSolution) {
 				// Give full list.
 				return (
-					<ListGroup>
+					<div className='list-group'>
 						{ page.client_items.map( 
 							(ans: string, i: number): Node => 
-								<ListGroupItem 
+								<button type="button" 
 									key={i}
-									active={ ans === page.client }
-									>{ans}</ListGroupItem>) }
-					</ListGroup>
+									className={ 'list-group-item list-group-item-action' + (ans===page.client ? ' active' : '') }
+									>{ans}</button>) }
+					</div>
 				);
 
 			} else {
 				// Only show selected.
 				return (
-					<ListGroup>
-						<ListGroupItem variant={style}>{ page.client }</ListGroupItem>
-					</ListGroup>
+					<div className='list-group'>
+						<li href='#' variant={style}>{ ''+page.client }</li>
+					</div>
 				);
 			}
 		} else {
 			return (
-				<ListGroup>
+				<div className='list-group'>
 					{ page.client_items.map( 
 						(ans: string, i: number): Node => 
-							<ListGroupItem 
+							<button type="button" 
+								className={ 'list-group-item list-group-item-action' + (ans===page.client ? ' active' : '') }
 								key={i}
-								active={ ans === page.client }
 								onClick={ (): void => this.handleChange(ans) }
-								>{ans}</ListGroupItem>) }
-				</ListGroup>
+					>{ans}</button>  )}
+				</div>
 			);
 		}
 	}
 }
+

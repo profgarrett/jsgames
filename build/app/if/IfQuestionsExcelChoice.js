@@ -147,7 +147,8 @@ export default class IfPagesExcelChoice extends React.Component                 
 			'textAlign': 'right'
 		};
 
-
+		console.log(this.props.levels);
+		
 		// Go through each map of levels and return a table for each.
 		const trs = rows.map( 
 			(answer, n) => {
