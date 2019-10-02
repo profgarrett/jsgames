@@ -14,11 +14,11 @@ const _default = {
 	pointSize: 14,
 	legends: [
 		{
-				anchor: 'bottom',
+				anchor: 'top',
 				direction: 'row',
 				justify: false,
 				translateX: -50,
-				translateY: 80,
+				translateY: -20,
 				itemsSpacing: 0,
 				itemDirection: 'left-to-right',
 				itemWidth: 140,
@@ -67,17 +67,22 @@ export function ChartLine_StockDollar(cd_param: ChartDef): Node {
 
 	// setup chart min/max/interval.
 	const min = distortion;
-	const maxValueFound = Math.max(
+	const maxValues = cd.data.map( d => Math.max( ...( d.data.map( values => values.y ) ) ) )
+	const maxValueFound = Math.max( ...maxValues);
+	/*
 		cd.data[0].data.reduce( (accum, item) => Math.max(item.y,accum), 0),
 		cd.data[1].data.reduce( (accum, item) => Math.max(item.y,accum), 0)
 	);
+	*/
 	const max = Math.ceil(maxValueFound/50)*50;
 	const tickValues = [];
 	for(let i=min; i<= max; i=i+50) {
 		tickValues.push(i);
 	}
-	console.log(tickValues);
-	
+	//console.log(tickValues);
+	// console.log( cd.data)
+	//return null;
+
 	return <ResponsiveLine
 		data={cd.data}
 		keys={cd.keys}
@@ -86,13 +91,15 @@ export function ChartLine_StockDollar(cd_param: ChartDef): Node {
 		padding={cd.padding}
 		colors={theme.colors}
 		yScale={{ type: 'linear', min: min, max: max }}
-		curve={cd.curve}
+		curve={cd.cardinal}
 		lineWidth={cd.lineWidth}
 		pointSize={cd.pointSize}
 		legends={ cd.legends }
 		axisLeft={{ tickValues: tickValues, tickPadding: 12, format: v=> `$${v}`}}
 		axisBottom={{ tickPadding: 12 }}
-		theme={{ fontSize: '20px', }}
+		theme={{ fontSize: 20, }}
 		animate={ false }
+		interactive={ true }
 	/>
 }
+

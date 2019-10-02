@@ -1,7 +1,7 @@
 // @flow
 import { IfPageBaseSchema, IfPageFormulaSchema, IfPageHarsonsSchema, IfPageChoiceSchema, IfPageNumberAnswerSchema } from './../../shared/IfPage';
 import { IfLevelSchema } from './../../shared/IfLevel';
-
+import { formatDate } from './../../shared/misc';
 import { turn_array_into_map } from './../../shared/misc';
 import he from 'he';
 
@@ -18,23 +18,7 @@ const USE_FORMULA_PAGES_ONLY = false;
 
 const SOLUTION_F_LIST = [];
 
-// toLocaleTimeString is super slow when used with a larger number of objects.
-// Create a custom little formatter to speed things up.  Changed from 6s to 
-// almost nothing.
-const formatDate = (dt: Date): string => {
 
-	if(typeof dt === 'undefined') return 'undefined';
-	if(typeof dt.getFullYear === 'undefined') return 'undefined';
-
-	return dt.getFullYear().toString().substr(2) + '/' +
-		dt.getMonth() + 1 + '/' +
-		dt.getDate() + ', ' +
-		dt.getHours() + ':' + 
-		(dt.getMinutes() + ':').padStart(3, '0') +
-		(dt.getSeconds() + '').padStart(2, '0');
-
-	//return '123'; //.toLocaleTimeString('en-US')
-};
 
 // Show a history item in an appealing fashion.
 const pretty_history = h => {
@@ -296,7 +280,7 @@ Output:
 */
 
 ////////////////////////////////////////////////////////////////////////////////
-export  function create_summary( levels: Array<IfLevelSchema>): any {
+export function create_summary( levels: Array<IfLevelSchema>): any {
 	const summaries = [];
 
 	// Add several variables to all pages (since that data is stored in the level, not page)

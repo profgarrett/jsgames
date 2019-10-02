@@ -10,7 +10,7 @@ import IfQuestionsExcelNumberAnswer from './IfQuestionsExcelNumberAnswer';
 import IfQuestionsExcelFormulas from './IfQuestionsExcelFormulas';
 import IfQuestionsTable from './IfQuestionsTable';
 import IfQuestionsTags from './IfQuestionsTags';
-
+import IfQuestionsChart from './IfQuestionsChart';
 
                   
                               
@@ -30,6 +30,9 @@ export default class IfQuestions extends React.Component            {
 
 		if(this.props.output === 'table')
 			return <IfQuestionsTable levels={levels} />;
+
+		if(this.props.output === 'chart')
+			return <IfQuestionsChart levels={this.props.levels} />;
 
 		if(this.props.output === 'excel') {
 			return <div>

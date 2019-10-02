@@ -88,6 +88,8 @@ class IfLevelSchema extends Schema {
 	                      
 	                                
 
+	                      
+
 	get type()         {
 		return 'IfLevelSchema';
 	}
@@ -143,7 +145,10 @@ class IfLevelSchema extends Schema {
 
 			// Version tracks the underlying version of the tutorial.  Used to create new versions of 
 			// tutorials and track when analyzing results.
-			version: { type: 'number', initialize: (dbl) => isDef(dbl) ? dbl : 0 }
+			version: { type: 'number', initialize: (dbl) => isDef(dbl) ? dbl : 0 },
+
+			// Should we show a progress meter while they work on the assignment?  Default to yes.
+			show_progress: { type: 'Boolean', initialize: (s) => isDef(s) ? b(s) : true },
 		};
 	}
 

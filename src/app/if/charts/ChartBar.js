@@ -58,7 +58,6 @@ export function ChartBar_TopLabelNoAxis(cd_param: ChartDef): Node {
 	//const data = cd.data;
 	let cd = { ..._default, ...cd_param };
 	const theme = THEMES[cd.theme];
-	debugger;
 	
 	// If Keys aren't defined, then go ahead and dynamically pull them out of the passed data.
 	// If "Year is present, guess that it would be the indexBy.

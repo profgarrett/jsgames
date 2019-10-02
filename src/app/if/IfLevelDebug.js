@@ -7,11 +7,15 @@ import ExcelTable from './ExcelTable';
 import Choice from './Choice';
 import Parsons from './Parsons';
 import Text from './Text';
+import Slider from './Slider';
 
 import { IfLevelSchema } from './../../shared/IfLevel';
 import { IfPageBaseSchema, IfPageFormulaSchema, IfPageHarsonsSchema, IfPageChoiceSchema } from './../../shared/IfPage';
 import type { Node } from 'react';
 import { Container, Card, Row, Col, Breadcrumb, Button  } from 'react-bootstrap';
+
+
+import { buildChart } from './charts/Charts.js';
 
 
 type ScorePropsType = {
@@ -21,6 +25,27 @@ type ScorePropsType = {
 
 class IfLevelDebugPage extends React.Component<ScorePropsType> {
 	
+	// Build out the chart
+	_render_chart(page: IfPageBaseSchema ): Node {
+
+		if(page.chart_def !== null && typeof page.chart_def !== 'undefined') {
+			return <div style={{height:'400px'}}>{buildChart(page.chart_def)}</div>;
+		} else {
+			return null;
+		}
+	}
+
+
+	// Build out the chart
+	_render_template_id(page: IfPageBaseSchema ): Node {
+
+		if(page.template_id !== null ) {
+			return <div style={{ paddingBottom: '10px'}}>template_id: <b>{ page.template_id }</b></div>;
+		} else {
+			return null;
+		}
+	}
+
 	render(): Node {
 		const page = this.props.page;
 
@@ -67,12 +92,19 @@ class IfLevelDebugPage extends React.Component<ScorePropsType> {
 					<Parsons page={page.toIfPageParsonsSchema()} editable={false} show_solution={true} handleChange={ () => {} } />
 				</div>);
 
+
+		} else if(page.type === 'IfPageSliderSchema') {
+			problem = (<div>
+					<Slider page={page.toIfPageSliderSchema()} editable={false} show_solution={true} handleChange={ () => {} } />
+				</div>);
+
+
 		} else if(page.type === 'IfPageChoiceSchema') {
 			// Show range of choice only if the user was wrong.  If no right answer,
 			// then correct will be null.
 			
 			problem = (<div>
-					<Choice page={page.toIfPageChoiceSchema()} showSolution={false} editable={false} show_solution={page.correct === false}  handleChange={ () => {} }  />
+					<Choice page={page.toIfPageChoiceSchema()} showSolution={true} editable={false} show_solution={true}  handleChange={ () => {} }  />
 				</div>);
 
 		} else {
@@ -81,7 +113,10 @@ class IfLevelDebugPage extends React.Component<ScorePropsType> {
 
 		return (<Card variant='success'>
 				<Card.Body style={{ fontSize: 12}} >
+					{ this._render_template_id(page) }
 					<HtmlDiv className='lead' html={ desc } />
+					<div>{ page.instruction }</div>
+					{ this._render_chart(page) }
 					{ problem }
 					{ solution }
 				</Card.Body>

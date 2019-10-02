@@ -113,7 +113,7 @@ export function ChartStackedBar_Plain(cd_param: ChartDef): Node {
 			}
 		}
 		theme={{ fontSize: '18px', }}
-		isInteractive={true}
+		isInteractive={false}
 		animate={false}
 	/>
 }

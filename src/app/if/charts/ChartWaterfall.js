@@ -9,64 +9,85 @@ const _default = {
 	padding: 0.3,
 	theme: 'a',
 	enableLabel: false,
-    axisLeft: {
-            tickSize: 5,
-            tickPadding: 5,
-            tickRotation: 0,
-        },
-	legends: [{
-                dataFrom: 'keys',
-                anchor: 'top',
-                direction: 'row',
-                justify: false,
-                translateX: 30,
-                translateY: -30,
-                itemsSpacing: 10,
-                itemWidth: 150,
-                itemHeight: 20,
-                itemDirection: 'left-to-right',
-                itemOpacity: 0.85,
-                symbolSize: 20,
-                effects: [
-                    {
-                        on: 'hover',
-                        style: {
-                            itemOpacity: 1
-                        }
-                    }
-                ]
-        }]
 };
 
+const borderRadius = 4;
 
 const THEMES = {
 	a: { 
-		colors: { scheme: 'nivo' },
+		color: 'blue',
+		borderRadius: 0,
+		borderWidth: 0,
 	},
 	b: { 
-		colors: { scheme: 'accent' },
+		color: '#343a40',
+		borderRadius: 0,
+		borderWidth: 0,
 	},
 	c: { 
-		colors: { scheme: 'set2' },
+		color: 'indigo',
+		borderRadius: 0,
+		borderWidth: 0,
 	},
 	d: { 
-		colors: { scheme: 'paired' },
+		color: 'cyan',
+		borderRadius: 0,
+		borderWidth: 0,
 	},
 	e: { 
-		colors: { scheme: 'category10' },
+		color: '#6c757d',
+		borderRadius: 0,
+		borderWidth: 0,
 	},
+	f: {
+		color: 'purple',
+		borderRadius: 0,
+		borderWidth: 0,
+	},
+
+	round_a: { 
+		color: 'gray',
+		borderRadius: borderRadius,
+	},
+	round_b: { 
+		color: 'purple',
+		borderRadius: borderRadius,
+	},
+	round_c: { 
+		color: 'blue',
+		borderRadius: borderRadius,
+	},
+	round_d: { 
+		color: '#17a2b8',
+		borderRadius: borderRadius,
+	},
+	round_e: { 
+		color: 'cyan',
+		borderRadius: borderRadius,
+	},
+	round_f: { 
+		color: 'blue',
+		borderRadius: borderRadius,
+	},
+
+	
 }
 
 // Return the correct color.
-const getColor = ( obj: any): string => {
+const getColor = ( obj: any, theme: object): string => {
+
     if(obj.id === 'Padding') {
-        return 'white';
-    } else if (obj.id === 'Value' ) {
-        return 'red';
+        return 'rgba(0, 0, 0, 0)'; // transparent
+    } else if (obj.id === 'Positive' ) {
+        return theme.color;
+	} else if (obj.id === 'Negative' ) {
+		return 'orange';
     } else {
         throw new Error('Invalid obj.id in ChartWaterFall');
     }
 }
+
+
 export function ChartWaterfall_Plain(cd_param: ChartDef): Node {
 	//const data = cd.data;
 	let cd = { ..._default, ...cd_param };
@@ -104,6 +125,18 @@ export function ChartWaterfall_Plain(cd_param: ChartDef): Node {
 		});
 	}
 
+	
+	const maxValue = cd.maxValue;
+	const axisValues = maxValue < 1000 
+		? [0, 200, 400, 600, 800, 1000]
+		: [0, 500, 1000, 1500, 2000, 2500];
+	const gridYValues = axisValues;
+    const axisLeft = {
+			tickValues: axisValues,
+            tickSize: 5,
+            tickPadding: 5,
+        };
+
 
 	return <ResponsiveBar
 		data={cd.data}
@@ -111,19 +144,15 @@ export function ChartWaterfall_Plain(cd_param: ChartDef): Node {
 		indexBy={cd.indexBy}
 		margin={cd.margin}
 		padding={cd.padding}
-		colors={ getColor }
+		colors={ o => getColor(o, theme) }
 		enableLabel={false}
+		borderRadius={ theme.borderRadius}
+		borderWidth={ theme.borderWidth }
+		borderColor={ theme.borderColor }
+		gridYValues={ gridYValues }
 
-        /*
-		labelFormat={ d => {
-            console.log(d);
-            return null;
-            return <tspan style={{  marginBottom: 10, fontSize: 24 }} y={ -20 }>${ d+distortion }</tspan> 
-        }}
-        */
-		enableGridY={false}
-        //legends={ cd.legends }
-		axisLeft={ cd.axisLeft}
+		enableGridY={true}
+		axisLeft={ axisLeft }
 		axisBottom={
 			{ 	tickSize: 0,
 				fontSize: 30

@@ -197,9 +197,7 @@ const baseifgame = {
 			// correctness. Only allow use for surveys.
 
 			json.code = json.code || 'test';
-			json.correct_required = false;
-			json.solution_test_results_visible = false;
-			json.solution_f_visible = false;
+			json.correct_required = json.correct_required || false;
 
 			// Default instruction text.
 			if(typeof json.instruction === 'undefined') 
@@ -280,6 +278,7 @@ const baseifgame = {
 			allow_skipping_tutorial: this.allow_skipping_tutorial,
 			show_score_after_completing: this.show_score_after_completing,
 			completed: false,
+			show_progress: this.show_progress,
 			pages: [],
 			history: [ { dt: new Date(), code: 'server_level_created' } ]
 		};

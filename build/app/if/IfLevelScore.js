@@ -13,7 +13,7 @@ import HistorySlider from './HistorySlider';
 import NumberAnswer from './NumberAnswer';
 import Slider from './Slider';
 
-
+import { buildChart } from './charts/Charts.js';
 import { IfLevelSchema } from './../../shared/IfLevel';
 import { IfPageBaseSchema, IfPageNumberAnswerSchema, IfPageFormulaSchema } from './../../shared/IfPage';
                                   
@@ -51,6 +51,17 @@ class IfLevelScorePage extends React.Component                                 {
 		const page = this.props.level.get_new_page(json);
 
 		this.setState({ page });
+	}
+
+
+	// Build out the chart
+	_render_chart(page                   )       {
+
+		if(page.chart_def !== null && typeof page.chart_def !== 'undefined') {
+			return <div style={{height:'300px'}}>{buildChart(page.chart_def)}</div>;
+		} else {
+			return null;
+		}
 	}
 
 	render()       {
@@ -106,7 +117,7 @@ class IfLevelScorePage extends React.Component                                 {
 			problem = <div><Slider page={page_at.toIfPageSliderSchema()} readonly={false} editable={false} handleChange={()=>{}} handleSubmit={()=>{}}/></div>;
 
 		} else if(page_at.type === 'IfPageTextSchema') {
-			problem = (<div><Text page={page_at.toIfPageTextSchema()} editable={false} /></div>);
+			problem = (<div><Text page={page_at.toIfPageTextSchema()} handleChange={()=> {} } handleSubmit={()=> {} } editable={false} /></div>);
 
 		} else if(page_at.type === 'IfPageParsonsSchema') {
 			problem = (<div><Parsons page={page_at.toIfPageParsonsSchema()} editable={false} show_solution={page_final.correct === false} /></div>);
@@ -114,21 +125,21 @@ class IfLevelScorePage extends React.Component                                 {
 		} else if(page_at.type === 'IfPageChoiceSchema') {
 			// Show range of choice only if the user was wrong.  If no right answer,
 			// then correct will be null.
-			problem = (<div><Choice page={page_at.toIfPageChoiceSchema()} editable={false} show_solution={page_final.correct === false} /></div>);
+			problem = (<div><Choice page={page_at.toIfPageChoiceSchema()}  handleChange={()=> {}} handleSubmit={()=> {} } showSolution={true} editable={false} show_solution={page_final.correct === false} /></div>);
 
 		} else {
 			throw new Error('Invalid type in IfLevelScore '+page_at.type);
 		}
 
-/*
-//key={i} 
-				*/
+
+
 		return (<Card variant={ page_final.correct===null ? 'info' : (page_final.correct ? 'success' : 'danger' ) }>
 				<Card.Body>
 					<Card.Title >
 						Page {i+1}
 					</Card.Title>
 					{ lead }
+					{ this._render_chart(page_final) }
 					{ problem }
 					{ solution }
 				</Card.Body>

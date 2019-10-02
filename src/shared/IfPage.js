@@ -129,6 +129,12 @@ function common_schema(): Object {
 
 		// Chart Definition
 		chart_def: { type: 'Object', initialize: (o) => isDef(o) && isObject(o) ? o : null },
+
+		// Question Unique Identifier.
+		// Used to code individual questions for later analysis. Should be consistent among
+		// questions, whether taken by the same person 2x, or multiple people. ID is generated
+		// by the question template.
+		template_id: { type: 'String', initialize: (s) => isDef(s) ? s : null },
 	};
 }
 
@@ -151,11 +157,14 @@ class IfPageBaseSchema extends Schema {
 	time_limit: number
 	time_limit_expired: boolean
 	chart_def: ChartDef
+	template_id: string
 
 	// Must be implemented by inheriting classes.
 	+client_has_answered: () => boolean
 	+updateUserFields: (any) => any
 	+debug_answer: () => any
+	+toString: () => string
+
 
 	get type(): string {
 		return 'IfPageBaseSchema';
@@ -589,6 +598,7 @@ class IfPageNumberAnswerSchema extends IfPageBaseSchema {
 // give the control min/max for a slider control. Does not have a "right" answer.
 class IfPageSliderSchema extends IfPageBaseSchema {
 	client: number;
+	solution: number;
 	min: number;
 	max: number;
 
@@ -602,6 +612,7 @@ class IfPageSliderSchema extends IfPageBaseSchema {
 		return {
 			...inherit,
 			client: { type: 'number', initialize: (i) => isDef(i) ? parseInt(i, 10) : null },
+			solution: { type: 'number', initialize: (i) => isDef(i) ? parseInt(i, 10) : null },
 			min: { type: 'number', initialize: (i) => isDef(i) ? parseInt(i, 10) : 0 }, // default 0
 			max: { type: 'number', initialize: (i) => isDef(i) ? parseInt(i, 10) : 100 } // default 100
 		};
@@ -761,7 +772,7 @@ class IfPageShortTextAnswerSchema extends IfPageBaseSchema {
 
 
 /*
-	Get a single-line piece of information from the user.
+	Get a multi-line piece of information from the user.
 */
 class IfPageLongTextAnswerSchema extends IfPageShortTextAnswerSchema {
 
@@ -826,7 +837,12 @@ class IfPageChoiceSchema extends IfPageBaseSchema {
 		if(typeof this.solution === 'undefined') {
 			throw new Error('You can not debug answer without solution being present');
 		}
-		this.client = this.client_items[0];
+		if(this.solution === '*' || this.solution === '?') {
+			this.client = this.client_items[0]; 
+		} else {
+			this.client = this.solution;
+		}
+		
 		this.updateCorrect();
 	}		
 

@@ -620,6 +620,7 @@ export default class IfLevelPlay extends React.Component<PropsType, StateType> {
 		console.assert(this.props.selected_page_index < this.props.level.pages.length, 
 			'Page '+this.props.selected_page_index+' is not valid in IfLevelPlay');
 
+		const level = this.props.level;
 		const pageI = this.props.selected_page_index; // used to keep track of the page #
 		let page = this.props.level.pages[this.props.selected_page_index];
 
@@ -656,10 +657,10 @@ export default class IfLevelPlay extends React.Component<PropsType, StateType> {
 									<tbody>
 									<tr>
 										<td style={titleTdStyle}>  
-											<span>Progress</span>
+											{ level.show_progress ? <span>Progress</span> : null }
 										</td>
 										<td style={leftTdStyle}>
-											{ build_score(this.props.level.pages) }
+											{ level.show_progress ? build_score(this.props.level.pages) : null }
 										</td>
 										<td style={rightTdStyle}>
 											

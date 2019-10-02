@@ -43,8 +43,8 @@ router.post('/new_level_by_code/:code',
 
 		const insert_sql = `INSERT INTO iflevels (type, username, code, title, description, completed, 
 			pages, history, created, updated, seed, allow_skipping_tutorial, harsons_randomly_on_username, 
-			standardize_formula_case, show_score_after_completing) 
-			VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+			standardize_formula_case, show_score_after_completing, show_progress) 
+			VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
 		level.username = username;
 
 					
@@ -59,7 +59,8 @@ router.post('/new_level_by_code/:code',
 				level.allow_skipping_tutorial,
 				level.harsons_randomly_on_username,
 				level.standardize_formula_case,
-				level.show_score_after_completing
+				level.show_score_after_completing,
+				level.show_progress,
 				];
 
 		let insert_results = await run_mysql_query(insert_sql, values);
@@ -206,7 +207,7 @@ router.get('/debuglevel/:code', nocache, require_logged_in_user,
 
 		const level = IfLevelModelFactory.create(code_in_array[0], username);
 
-		let loop_escape = 50;
+		let loop_escape = 100;
 		let last_page = {};
 
 		while(!level.completed && loop_escape > 0) {
