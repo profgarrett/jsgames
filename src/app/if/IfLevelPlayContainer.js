@@ -6,7 +6,8 @@ import type { Node } from 'react';
 import Container from 'react-bootstrap/Container';
 import { Breadcrumb, Col, Row } from 'react-bootstrap';
 
-import { IfLevelSchema } from './../../shared/IfGame';
+import { IfLevelSchema } from './../../shared/IfLevelSchema';
+import { get_page_schema_as_class } from './../../shared/IfPageSchemas';
 
 import IfLevelPlay from './IfLevelPlay';
 
@@ -76,7 +77,7 @@ export default class IfLevelPlayContainer extends React.Component<PropsType, Sta
 		
 			// Create a fresh page.
 			let page_json = { ...level.pages[i].toJson()};
-			let page = level.get_new_page(page_json);
+			let page = get_page_schema_as_class(page_json);
 
 			// Update fresh page with new values.
 			page.updateUserFields({ ...page_json, ...json });

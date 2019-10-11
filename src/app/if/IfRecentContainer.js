@@ -7,7 +7,7 @@ import IfRecent from './IfRecent';
 import { Message, Loading } from './../components/Misc';
 import Filter from './Filter';
 
-import { IfLevelSchema } from './../../shared/IfGame';
+import { IfLevelSchema } from './../../shared/IfLevelSchema';
 import 'url-search-params-polyfill';
 
 import ForceLogin from './../components/ForceLogin';

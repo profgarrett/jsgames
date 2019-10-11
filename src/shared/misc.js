@@ -13,7 +13,7 @@ function turn_array_into_map( a: Array<any>, get_p: any, sort_order_alpha: boole
 		? a.sort( (a,b) => get_p(a) < get_p(b) ? -1 : 1 )
 		: a.sort( (a,b) => get_p(a) > get_p(b) ? -1 : 1 );
 
-	sorted_a.map( item => {
+	sorted_a.forEach( item => {
 		// Add new map [] if the key doesn't exist.
 		index = get_p(item);
 
@@ -24,6 +24,13 @@ function turn_array_into_map( a: Array<any>, get_p: any, sort_order_alpha: boole
 
 	return m;
 }
+
+
+// Turn a string into a y/n value.
+const random_boolean_from_string = (s: string): boolean => {
+	const s_as_number = s.split('').reduce( (i, s) => s.charCodeAt(0) + i, 1 );
+	return (s_as_number % 2) === 1;
+};
 
 
 
@@ -54,10 +61,38 @@ const padL = ( s_or_n: any, length: number ): string => {
 	return s_or_n.padStart(length, '_');
 };
 
+// Are the arrays similar or different?
+const arrayDifferent = (a1: Array<any>, a2: Array<any>): boolean => {
+	if(a1.length !== a2.length) return true;
 
+	for(let i=0; i<a1.length; i++) {
+		if(a1[i] !== a2[i]) return true;
+	}
+
+	return false;
+};
+
+
+
+const clean_text_of_tabs_and_newlines = ( dirty: string ): string => {
+
+	// Remove tabs & newlines.
+	let clean = dirty.replace(/\t/g, ' ').replace( /\n/g, ' ');
+	let d = '';
+
+	do {
+		d = clean;
+		clean = clean.replace( / {2}/g, ' ');
+	} while( d !== clean);
+
+	return clean;
+};
 
 module.exports = {
 	turn_array_into_map,
 	formatDate,
 	padL,
+	random_boolean_from_string,
+	arrayDifferent,
+	clean_text_of_tabs_and_newlines,
 };

@@ -1,8 +1,8 @@
 //@flow
 import React from 'react';
-import { IfPageBaseSchema, IfPageFormulaSchema, IfPageHarsonsSchema, IfPageChoiceSchema, IfPageNumberAnswerSchema } from './../../shared/IfPage';
+import { IfPageBaseSchema, IfPageFormulaSchema, IfPageHarsonsSchema, IfPageChoiceSchema, IfPageNumberAnswerSchema } from './../../shared/IfPageSchemas';
 
-import { IfLevelSchema } from './../../shared/IfLevel';
+import { IfLevelSchema } from './../../shared/IfLevelSchema';
 import type { Node } from 'react';
 import { formatDate, padL } from './../../shared/misc';
 

@@ -2,7 +2,7 @@
 import React from 'react';
 import { DEMO_MODE } from './../../server/secret';
 
-import { IfLevelSchema } from './../../shared/IfLevel';
+import { IfLevelSchema } from './../../shared/IfLevelSchema';
 import type { Node } from 'react';
 
 type DetailPropsType = {

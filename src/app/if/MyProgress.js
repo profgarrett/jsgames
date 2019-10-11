@@ -1,11 +1,9 @@
 // @flow
 import React from 'react';
 
-import { IfLevelSchema } from './../../shared/IfLevel';
+import { IfLevels, IfLevelSchema } from './../../shared/IfLevelSchema';
 
-import type { Node } from 'react';
 import { InputGroup, ButtonToolbar, DropdownButton, Dropdown, Table, Tooltip, OverlayTrigger, Button } from 'react-bootstrap';
-import { IfLevels } from './../../shared/IfGame';
 import { getUserFromBrowser } from './../components/Authentication';
 
 //import type { IfLevelType } from './../../app/if/IfTypes';
@@ -13,6 +11,9 @@ import { Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faThumbsUp, faMinus } from '@fortawesome/free-solid-svg-icons';
 import { PrettyDate } from './../components/Misc';
+
+import type { Node } from 'react';
+
 
 /*
 	List of tutorials that should be shown as a row for the table
@@ -179,9 +180,12 @@ export default class MyProgress extends React.Component<PropsType, StateType> {
 		Give the next clickable lesson
 	*/
 	_render_next_lesson(levels: Array<Object>): Node {
+		let is_surveycharts_amt = false;
 
 		// Look through list of levels until we find the next that should be completed.
 		for(let i=0; i<levels.length; i++) {
+
+			is_surveycharts_amt = levels[i].code === 'surveycharts_amt';
 
 			// If we are incomplete, suggest finishing.
 			if(levels[i].tutorial_incompleted_levels.length > 0) {
@@ -194,13 +198,15 @@ export default class MyProgress extends React.Component<PropsType, StateType> {
 			}
 
 			// If we score low, suggest continuing.
-			if(levels[i].tutorial_highest_grade !== null && 
-					levels[i].tutorial_highest_grade < PASSING_GRADE) {
-				return (<span>Your <b>{levels[i].code}</b> lesson did not earn {PASSING_GRADE}%. 
-						You should redo it to get a higher grade before continuing.
-						<Button href='#' variant='primary' size='sm' style={{ marginLeft: 5, marginTop: -3 }}
-							onClick={ e=> this.props.onClickNewCode(levels[i].code, e) } >Redo level</Button>
-						</span>);
+			if(!is_surveycharts_amt) {
+				if(levels[i].tutorial_highest_grade !== null && 
+						levels[i].tutorial_highest_grade < PASSING_GRADE) {
+					return (<span>Your <b>{levels[i].code}</b> lesson did not earn {PASSING_GRADE}%. 
+							You should redo it to get a higher grade before continuing.
+							<Button href='#' variant='primary' size='sm' style={{ marginLeft: 5, marginTop: -3 }}
+								onClick={ e=> this.props.onClickNewCode(levels[i].code, e) } >Redo level</Button>
+							</span>);
+				}
 			}
 		}
 
@@ -360,10 +366,12 @@ export default class MyProgress extends React.Component<PropsType, StateType> {
 				</ButtonToolbar>);
 		}
 
+		const surveycharts_amt = (this.state.section.levels === 'surveycharts_amt');
+
 		// only show table *if* they've completed any mandatory surveys.
-		const table =  !waiver_completed
-				? null 
-				: this._render_table(levels);
+		const table =  waiver_completed && !surveycharts_amt
+				? this._render_table(levels)
+				: null;
 
 		// Return card.
 		return (

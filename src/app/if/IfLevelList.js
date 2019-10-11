@@ -1,11 +1,17 @@
+// @flow
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 import { PrettyDate } from './../components/Misc';
+import type { IfLevelSchema } from './../../shared/IfLevelSchema';
 
-export default class IfLevelList extends React.Component {
+type PropsType = {
+	levels: Array<IfLevelSchema>
+};
 
-	_render_link(level) {
+export default class IfLevelList extends React.Component<PropsType> {
+
+	_render_link(level: IfLevelSchema) {
 
 		if(level.completed) {
 			// Go to score

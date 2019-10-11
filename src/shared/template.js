@@ -1,4 +1,4 @@
-/*@flow */
+// @flow 
 const { DataFactory } = require('./../server/DataFactory');
 // Note: Do not import IfLevel/IfPages here. It's nice to have the type annotations,
 //		but importing will lead to a import loop that breaks everything.

@@ -81,7 +81,9 @@ const DataFactory = {
 		for(let i=0; i<rows; i++) {
 			results.push({ a: DataFactory.randDate( -1*DataFactory.randB(0,options.a_range) ) });	
 			// ugly/lazy hack
+			// $FlowFixMe
 			if(columns > 1) results[results.length-1]['b'] = DataFactory.randDate( -1*DataFactory.randB(0,options.b_range) );
+			// $FlowFixMe
 			if(columns > 2) results[results.length-1]['c'] = DataFactory.randDate( -1*DataFactory.randB(0,options.c_range) );
 		}
 		return results;
@@ -116,6 +118,7 @@ const DataFactory = {
 
 		for (let i = array.length - 1; i > 0; i--) {
 			let j = Math.floor(r() * (i + 1));
+			// $FlowFixMe
 			[array[i], array[j]] = [array[j], array[i]];
 		}
 		return array;

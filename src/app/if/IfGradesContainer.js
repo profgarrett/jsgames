@@ -1,4 +1,4 @@
-//@flow
+// @flow
 import React from 'react';
 import Container from 'react-bootstrap/Container';
 import { Row, Col, Breadcrumb  } from 'react-bootstrap';

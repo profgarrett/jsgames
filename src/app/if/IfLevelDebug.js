@@ -8,9 +8,10 @@ import Choice from './Choice';
 import Parsons from './Parsons';
 import Text from './Text';
 import Slider from './Slider';
+import ShortTextAnswer from './ShortTextAnswer';
 
-import { IfLevelSchema } from './../../shared/IfLevel';
-import { IfPageBaseSchema, IfPageFormulaSchema, IfPageHarsonsSchema, IfPageChoiceSchema } from './../../shared/IfPage';
+import { IfLevelSchema } from './../../shared/IfLevelSchema';
+import { IfPageBaseSchema, IfPageFormulaSchema, IfPageHarsonsSchema, IfPageChoiceSchema } from './../../shared/IfPageSchemas';
 import type { Node } from 'react';
 import { Container, Card, Row, Col, Breadcrumb, Button  } from 'react-bootstrap';
 
@@ -75,7 +76,6 @@ class IfLevelDebugPage extends React.Component<ScorePropsType> {
 			problem = (
 				<Card >
 					<Card.Body>
-						<HtmlDiv className='lead' html={ inst } />
 						<ExcelTable page={page2} readonly={true} editable={false}  handleChange={ () => {} }  />
 						<div style={{ textAlign:  'right', fontSize: 8, color: 'gray' }}>{ page.type }</div>
 					</Card.Body>
@@ -95,8 +95,11 @@ class IfLevelDebugPage extends React.Component<ScorePropsType> {
 
 		} else if(page.type === 'IfPageSliderSchema') {
 			problem = (<div>
-					<Slider page={page.toIfPageSliderSchema()} editable={false} show_solution={true} handleChange={ () => {} } />
+					<Slider page={page.toIfPageSliderSchema()} readonly={false} editable={false} show_solution={true} handleChange={ () => {} } handleSubmit={ () => {} } />
 				</div>);
+
+		} else if(page.type === 'IfPageShortTextAnswerSchema') {
+			problem = (<div><ShortTextAnswer page={page.toIfPageShortTextAnswerSchema()} readonly={true} editable={false} show_solution={false} handleChange={()=> {}} handleSubmit={()=> {} }/></div>);
 
 
 		} else if(page.type === 'IfPageChoiceSchema') {
@@ -115,7 +118,7 @@ class IfLevelDebugPage extends React.Component<ScorePropsType> {
 				<Card.Body style={{ fontSize: 12}} >
 					{ this._render_template_id(page) }
 					<HtmlDiv className='lead' html={ desc } />
-					<div>{ page.instruction }</div>
+					<HtmlDiv className='lead' html={ inst } />
 					{ this._render_chart(page) }
 					{ problem }
 					{ solution }

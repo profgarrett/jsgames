@@ -47,6 +47,7 @@ export default class PasswordChange extends React.Component<PropsType, StateType
 	}
 
 	onChange(e: SyntheticEvent<HTMLButtonElement>) {
+		// $FlowFixMe
 		const { name, value } = e.target;
 		this.setState({ [name]: value });
 	}

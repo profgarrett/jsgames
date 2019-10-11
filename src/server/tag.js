@@ -3,8 +3,8 @@
 	This "tag" module is used to automatically tag elements for correctness.
 
 */
-const { IfPageBaseSchema, IfPageFormulaSchema, IfPageHarsonsSchema } = require('./../shared/IfPage');
-const { IfLevelSchema } = require('./../shared/IfLevel');
+const { IfPageBaseSchema, IfPageFormulaSchema, IfPageHarsonsSchema } = require('./../shared/IfPageSchemas');
+const { IfLevelSchema } = require('./../shared/IfLevelSchema');
 const { fill_template } = require('./../shared/template');
 const { parseFeedback } = require('./../shared/parseFeedback');
 
@@ -801,7 +801,7 @@ function return_tagged_level(level: IfLevelSchema): IfLevelSchema {
 				return;
 			}
 
-			ENTRY_TESTS.map( test => { 
+			ENTRY_TESTS.forEach( test => { 
 				if(test.if( t_solution_f, h.client_f, page, parsed )) {
 					h.tags.push( { tag: test.tag });
 				}

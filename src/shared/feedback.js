@@ -1,6 +1,6 @@
 // @flow
 const { fill_template } = require('./template');
-const { IfPageFormulaSchema, IfPageHarsonsSchema } = require('./../shared/IfPage');
+const { IfPageFormulaSchema, IfPageHarsonsSchema } = require('./../shared/IfPageSchemas');
 
 // Feedback types are used by the server to create custom feedback for page submissions.
 // They are referred to frequently inside of tutorials for validation and more useful

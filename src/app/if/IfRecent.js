@@ -8,7 +8,7 @@ import { PrettyDate } from './../components/Misc';
 
 import IfLevelScore from './IfLevelScore';
 
-import { IfLevelSchema } from './../../shared/IfLevel';
+import { IfLevelSchema } from './../../shared/IfLevelSchema';
 import type { Node } from 'react';
 
 /*

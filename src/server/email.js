@@ -2,8 +2,6 @@
 const { EMAIL_ADDRESS, EMAIL_HOST, EMAIL_PASSWORD } = require('./secret.js'); 
 const nodemailer = require('nodemailer');
 
-
-
 async function send_email(email: string, title: string, message: string) {
 
 	// Send email.

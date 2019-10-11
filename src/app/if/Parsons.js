@@ -1,3 +1,4 @@
+// @flow
 import React from 'react';
 import PropTypes from 'prop-types';
 
@@ -5,6 +6,13 @@ import { ListGroup, ListGroupItem } from 'react-bootstrap';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 
 import { HtmlSpan } from './../components/Misc';
+
+type PropsType = {
+	page: any,
+	handleChange: Function,
+	editable: boolean
+}
+
 
 // change background colour if dragging
 const getItemStyle = (isDragging, draggableStyle) => ({
@@ -39,7 +47,9 @@ const make_draggables = (a, clickToMove, listId )=> a.map(
 							onDoubleClick={ () => clickToMove(index, listId) }
 							dangerouslySetInnerHTML={ { '__html': item.content } } />
 					</div>
-					{provided.placeholder}
+					
+					{	// $FlowFixMe
+						provided.placeholder}
 				</div>
 			)}
 		</Draggable>
@@ -107,19 +117,20 @@ const get_unused_items = (potential, used) => {
 };
 
 
+
 /**
 	A Parsons problem shows a list, allowing a user to drag and drop
 	any elements from a potential_items into user_items.
 */
-export default class Parsons extends React.Component {
-	constructor(props) {
+export default class Parsons extends React.Component<PropsType> {
+	constructor(props: PropsType) {
 		super(props);
-		this.onDragEnd = this.onDragEnd.bind(this);
-		this.clickToMove = this.clickToMove.bind(this);
+		(this: any).onDragEnd = this.onDragEnd.bind(this);
+		(this: any).clickToMove = this.clickToMove.bind(this);
 	}
 
 	// Finish drag & drop.
-	onDragEnd(result) {
+	onDragEnd(result: any) {
 		let page = this.props.page;
 		let unused_items = toObjs(get_unused_items(page.potential_items, page.client_items));
 		let client_items = [];
@@ -155,7 +166,7 @@ export default class Parsons extends React.Component {
 	}
 
 	// respond to a double-click by moving the given object to the tail of the other list.
-	clickToMove(index, listId) {
+	clickToMove(index: any, listId: any) {
 		let page = this.props.page;
 		let unused_items = toObjs(get_unused_items(page.potential_items, page.client_items));
 		let client_items = [];
@@ -207,9 +218,3 @@ export default class Parsons extends React.Component {
 		}
 	}
 }
-Parsons.propTypes = {
-	page: PropTypes.object.isRequired,
-	editable: PropTypes.bool.isRequired,
-	handleChange: PropTypes.func
-};
-

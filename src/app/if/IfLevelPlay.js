@@ -21,8 +21,8 @@ import { buildChart } from './charts/Charts.js';
 import { ChartDef } from './../../shared/ChartDef';
 
 import { fill_template } from './../../shared/template.js';
-import { IfLevelSchema } from './../../shared/IfLevel.js';
-import { IfPageBaseSchema } from './../../shared/IfPage';
+import { IfLevelSchema } from './../../shared/IfLevelSchema.js';
+import { IfPageBaseSchema } from './../../shared/IfPageSchemas';
 
 // Delay put in to help avoid people double-clicking (which sometimes comes in as
 // two single clicks on iPad).

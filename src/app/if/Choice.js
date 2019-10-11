@@ -2,7 +2,7 @@
 import React from 'react';
 import { ListGroup, ListGroupItem } from 'react-bootstrap';
 import type { Node } from 'react';
-import { IfPageChoiceSchema } from './../../shared/IfPage';
+import { IfPageChoiceSchema } from './../../shared/IfPageSchemas';
 
 type PropsType = {
 	page: IfPageChoiceSchema,

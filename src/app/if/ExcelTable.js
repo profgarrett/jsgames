@@ -3,7 +3,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Table, FormControl } from 'react-bootstrap';
 import { HtmlSpan, SmallOkGlyphicon, BlueSpan } from './../components/Misc';
-import { IfPageFormulaSchema } from './../../shared/IfPage';
+import { IfPageFormulaSchema } from './../../shared/IfPageSchemas';
 
 
 // Helper functions to clean up the display of true/false, which 

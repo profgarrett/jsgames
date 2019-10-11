@@ -3,7 +3,7 @@ import React from 'react';
 import { FormControl } from 'react-bootstrap';
 
 import type { Node } from 'react';
-import { IfPageShortTextAnswerSchema } from './../../shared/IfPage';
+import { IfPageShortTextAnswerSchema } from './../../shared/IfPageSchemas';
 
 type PropsType = {
 	page: IfPageShortTextAnswerSchema,

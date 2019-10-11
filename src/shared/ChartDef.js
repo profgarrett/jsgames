@@ -1,5 +1,6 @@
 // @flow
 
+
 export interface ChartDef {
 	type: string;
 	distortion: number;

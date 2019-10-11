@@ -1,4 +1,4 @@
-//@flow
+// @flow
 const { parseFeedback } = require('./parseFeedback');
 
 const DEBUG = false;

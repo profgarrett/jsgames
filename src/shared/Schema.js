@@ -27,9 +27,9 @@ class Schema {
 			if(typeof schema[key] === 'undefined' && key !== 'type' ) {
 				// Error.  Fail silently, unless we are on localhost. In that case,
 				// throw a message to localhost.
-				// NDG: FIXME to properly log.
+				// @TODO: properly log.
+				console.log(this);
 				console.log( 'Invalid key ' + key + ' for object');
-				//console.log( { schema, json });
 				// solution_feedback
 				// throw new Error('Invalid key "' + key + '" in ' + this['type']);
 
@@ -53,7 +53,7 @@ class Schema {
 	}
 
 	/*
-		Convert the object a JSON object, taking only valid properties.
+		Convert the object to a JSON object, taking only valid properties.
 
 		Will take an option new_values dictionary that replaces existing values.
 

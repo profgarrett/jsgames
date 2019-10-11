@@ -3,7 +3,6 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import Container from 'react-bootstrap/Container';
 import { Alert, Row, Col, Navbar } from 'react-bootstrap';
-//import {  } from './../components/Authentication';
 import LoginCreateUser from './LoginCreateUser';
 import LoginCurrentUser from './LoginCurrentUser';
 import { Loading } from './../components/Misc';
@@ -66,9 +65,17 @@ export default class LoginContainer extends React.Component<PropsType, StateType
 		(this: any).login = this.login.bind(this);
 		(this: any).create_user = this.create_user.bind(this);
 
+
 		// if we have username and password, go ahead and submit.
 		if(search.has('username') && search.has('password')) {
-			this.login(search.get('username'), search.get('password'));
+			const username = search.get('username') || '';
+			const password = search.get('password') || '';
+			this.login( username, password );
+		}
+
+		// if we are an AMT user, then go ahead and create.
+		if(search.has('amt')) {
+			this.create_user('', 'amt');
 		}
 
 		// Update to avoid showing URL params (as long as we're not locally developing).
@@ -78,7 +85,6 @@ export default class LoginContainer extends React.Component<PropsType, StateType
 		}
 
 	}
-
 
 
 	login(username: string, password: string) {
@@ -162,7 +168,7 @@ export default class LoginContainer extends React.Component<PropsType, StateType
 				});
 				setTimeout( () => {
 					that.context.router.history.push(url);
-				}, location.host === 'localhost:8080' ? 1000 : 0);  // short delay if we're developing.
+				}, location.host === 'localhost:8080' ? 0 : 0);  // short delay if we're developing.
 				
 			})
 			.catch( error => {
@@ -176,16 +182,17 @@ export default class LoginContainer extends React.Component<PropsType, StateType
 
 	render(): Node {
 		let message = null;
+		const noop = () => {};
 
 		if( this.state.message === 'ExistingUser' ) {
-			message = <Alert variant={this.state.messageStyle}>This user already exists. Do you want 
+			message = <Alert variant={this.state.messageStyle} onDismiss={noop}>This user already exists. Do you want 
 				to <Link to='/password'>reset your password</Link>?</Alert>;
 		} else if(this.state.message === 'BadUsername' ) {
-			message = <Alert variant={this.state.messageStyle}>Sorry, but your email is not valid. Please check it and try again.</Alert>;
+			message = <Alert variant={this.state.messageStyle} onDismiss={noop}>Sorry, but your email is not valid. Please check it and try again.</Alert>;
 		} else if(this.state.message === 'InvalidCode' ) {
-			message = <Alert variant={this.state.messageStyle}>Sorry, but the course join code you used is not valid.</Alert>;
+			message = <Alert variant={this.state.messageStyle} onDismiss={noop}>Sorry, but the course join code you used is not valid.</Alert>;
 		} else if(this.state.message !== '' ) {
-			message = <Alert variant={this.state.messageStyle}>{this.state.message}</Alert>;
+			message = <Alert variant={this.state.messageStyle} onDismiss={noop}>{this.state.message}</Alert>;
 		}
 
 		// wrap functions to show that we're loading.

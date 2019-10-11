@@ -4,7 +4,7 @@ import { FormControl } from 'react-bootstrap';
 import { Slider, Rail, Handles, Tracks, Ticks } from 'react-compound-slider'
 
 import type { Node } from 'react';
-import { IfPageSliderSchema } from './../../shared/IfPage';
+import { IfPageSliderSchema } from './../../shared/IfPageSchemas';
 
 type PropsType = {
   page: IfPageSliderSchema,

@@ -1,3 +1,4 @@
+// @flow
 import React from 'react';
 import PropTypes from 'prop-types';
 import Container from 'react-bootstrap/Container';
@@ -5,16 +6,27 @@ import { Row, Col, Breadcrumb, Button  } from 'react-bootstrap';
 import IfLevelScore from './IfLevelScore';
 import { Message, Loading } from './../components/Misc';
 
-import { IfLevelSchema } from './../../shared/IfGame';
+import { IfLevelSchema } from './../../shared/IfLevelSchema';
 
 import ForceLogin from './../components/ForceLogin';
 
+type PropsType = {
+	match: Object
+};
+type StateType = {
+	message: string,
+	messageStyle: string,
+	isLoading: boolean,
+	level: ?IfLevelSchema,
+	_id: number
+};
 
-export default class IfLevelScoreContainer extends React.Component {
-	constructor(props) {
+export default class IfLevelScoreContainer extends React.Component<PropsType, StateType> {
+	constructor(props: PropsType) {
 		super(props);
 		this.state = { 
 			message: 'Loading data from server',
+			messageStyle: '',
 			isLoading: true,
 			level: null,
 			_id: this.props.match.params._id
@@ -86,6 +98,3 @@ export default class IfLevelScoreContainer extends React.Component {
 		);
 	}
 }
-IfLevelScoreContainer.propTypes = {
-	match: PropTypes.object.isRequired
-};

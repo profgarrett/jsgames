@@ -145,11 +145,18 @@ export function ChartWaterfall_Plain(cd_param: ChartDef): Node {
 		margin={cd.margin}
 		padding={cd.padding}
 		colors={ o => getColor(o, theme) }
-		enableLabel={false}
 		borderRadius={ theme.borderRadius}
 		borderWidth={ theme.borderWidth }
 		borderColor={ theme.borderColor }
 		gridYValues={ gridYValues }
+
+		enableLabel={true}
+		labelFormat= { d => <tspan y={-20}> {d}</tspan> }
+		label={ d => {
+			if(d.id === 'Positive') return '$' + d.value;
+			if(d.id === 'Negative') return '-$' + d.value + '';
+			else return '';
+		}}
 
 		enableGridY={true}
 		axisLeft={ axisLeft }

@@ -2,7 +2,7 @@
 import React from 'react';
 import type { Node } from 'react';
 
-import type { IfPageTextSchema } from './../../shared/IfPage';
+import type { IfPageTextSchema } from './../../shared/IfPageSchemas';
 
 type PropsType = {
 	page: IfPageTextSchema,

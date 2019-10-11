@@ -342,10 +342,8 @@ router.post('/create_user',
 		const iduser = insert_results.insertId;
 
 
-		// If an anon user, then join to the anonymous test group.
-		if(isAnon) {
-			code = 'anonymous';
-		}
+		// If an anon user without a passed code, then join to the anonymous test group.
+		if(isAnon && code === '') code = 'anonymous'; 
 
 		// If we have any code, then create the new row.
 		if(code.length > 0) {

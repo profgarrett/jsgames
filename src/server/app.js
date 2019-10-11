@@ -62,6 +62,8 @@ if(!DEBUG && typeof BUGSNAG_API !== 'undefined' && BUGSNAG_API.length > 0) {
 // Set parsing for application/x-www-form-urlencoded
 app.use(bodyParser.json({ limit: '10mb'}));
 app.use(bodyParser.urlencoded({ limit: '10mb', extended: false }));
+
+// $FlowFixMe,  This is ok as the cookie parser has a flow type messed up.
 app.use(cookieParser());
 
 

@@ -1,7 +1,7 @@
 // @flow
 import React from 'react';
 
-import { IfLevelSchema } from './../../shared/IfLevel';
+import { IfLevelSchema } from './../../shared/IfLevelSchema';
 import type { Node } from 'react';
 
 import { create_summary } from './IfQuestionsData';

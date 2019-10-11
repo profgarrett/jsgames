@@ -5,6 +5,6 @@ import { ChartDef } from './../../../shared/ChartDef';
 
 export function ChartImage(cd: ChartDef): Node {
 
-	return <img height='400' src={cd.src} />
+	return <img height='300' src={cd.src} />
 
 }

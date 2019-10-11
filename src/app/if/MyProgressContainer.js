@@ -8,7 +8,7 @@ import {  Row, Col } from 'react-bootstrap';
 import { Message, Loading } from './../components/Misc';
 import { getUserFromBrowser } from './../components/Authentication';
 
-import { IfLevelSchema } from './../../shared/IfGame';
+import { IfLevelSchema } from './../../shared/IfLevelSchema';
 
 import MyProgress from './MyProgress';
 
@@ -167,6 +167,8 @@ export default class MyProgressContainer extends React.Component<PropsType, Stat
 
 	render(): Node {
 		const is_loading = this.state.isLoadingUncompletedLevels || this.state.isLoadingGrades || this.state.isLoadingSections;
+
+
 		const myProgress = is_loading ? <div/> :
 						<MyProgress 
 							sections={this.state.sections }

@@ -12,10 +12,12 @@ import Text from './Text';
 import HistorySlider from './HistorySlider';
 import NumberAnswer from './NumberAnswer';
 import Slider from './Slider';
+import ShortTextAnswer from './ShortTextAnswer';
 
 import { buildChart } from './charts/Charts.js';
-import { IfLevelSchema } from './../../shared/IfLevel';
-import { IfPageBaseSchema, IfPageNumberAnswerSchema, IfPageFormulaSchema } from './../../shared/IfPage';
+import { IfLevelSchema } from './../../shared/IfLevelSchema';
+
+import { get_page_schema_as_class, IfPageBaseSchema, IfPageNumberAnswerSchema, IfPageFormulaSchema } from './../../shared/IfPageSchemas';
 import type { Node } from 'react';
 
 
@@ -48,7 +50,7 @@ class IfLevelScorePage extends React.Component<ScorePropsType, ScoreStateType> {
 		// History items have created, which we don't want in a page.
 		delete json.created;
 
-		const page = this.props.level.get_new_page(json);
+		const page = get_page_schema_as_class(json);
 
 		this.setState({ page });
 	}
@@ -120,7 +122,10 @@ class IfLevelScorePage extends React.Component<ScorePropsType, ScoreStateType> {
 			problem = (<div><Text page={page_at.toIfPageTextSchema()} handleChange={()=> {} } handleSubmit={()=> {} } editable={false} /></div>);
 
 		} else if(page_at.type === 'IfPageParsonsSchema') {
-			problem = (<div><Parsons page={page_at.toIfPageParsonsSchema()} editable={false} show_solution={page_final.correct === false} /></div>);
+			problem = (<div><Parsons page={page_at.toIfPageParsonsSchema()} handleChange={()=> {} } handleSubmit={()=> {} } editable={false} show_solution={page_final.correct === false} /></div>);
+
+		} else if(page_at.type === 'IfPageShortTextAnswerSchema') {
+			problem = (<div><ShortTextAnswer page={page_at.toIfPageShortTextAnswerSchema()} readonly={true} editable={false} show_solution={page_final.correct === false} handleChange={()=> {}} handleSubmit={()=> {} }/></div>);
 
 		} else if(page_at.type === 'IfPageChoiceSchema') {
 			// Show range of choice only if the user was wrong.  If no right answer,

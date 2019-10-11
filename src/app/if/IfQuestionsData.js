@@ -1,6 +1,6 @@
 // @flow
-import { IfPageBaseSchema, IfPageFormulaSchema, IfPageHarsonsSchema, IfPageChoiceSchema, IfPageNumberAnswerSchema } from './../../shared/IfPage';
-import { IfLevelSchema } from './../../shared/IfLevel';
+import { IfPageBaseSchema, IfPageFormulaSchema, IfPageHarsonsSchema, IfPageChoiceSchema, IfPageNumberAnswerSchema } from './../../shared/IfPageSchemas';
+import { IfLevelSchema } from './../../shared/IfLevelSchema';
 import { formatDate } from './../../shared/misc';
 import { turn_array_into_map } from './../../shared/misc';
 import he from 'he';
@@ -142,7 +142,6 @@ function create_summary_question( pages: Array<IfPageBaseSchema>): any {
 		seconds_average: 0, 
 		breaks_average: 0,
 		kcs: [],
-		solution_f: ''
 	};
 
 	// Averages.

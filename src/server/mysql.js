@@ -1,7 +1,7 @@
 //@flow
 
 const { MYSQL_HOST, MYSQL_USER, MYSQL_PASSWORD, MYSQL_DATABASE } = require('./secret.js'); 
-const { IfLevelModel } = require('./IfGame');
+const { IfLevelSchema } = require('./../shared/IfLevelSchema');
 const mysql = require('promise-mysql');
 
 const { sql01 } = require('./../../sql/sql01.js');
@@ -187,7 +187,7 @@ async function _update_fix_bad_page_data6(): Promise<any> {
 
 	// Remove any solution_feedback entries
 	for(var i=0; i<select_results.length; i++) {
-		ifLevel = new IfLevelModel(select_results[i]);
+		ifLevel = new IfLevelSchema(select_results[i]);
 
 		ifLevel.pages = ifLevel.pages.map( p => {
 			// Delete bad keys (used in earlier version of software)

@@ -7,7 +7,7 @@ import IfQuestions from './IfQuestions';
 import { Message, Loading } from './../components/Misc';
 import Filter from './Filter';
 
-import { IfLevelSchema } from './../../shared/IfGame';
+import { IfLevelSchema } from './../../shared/IfLevelSchema';
 
 import ForceLogin from './../components/ForceLogin';
 

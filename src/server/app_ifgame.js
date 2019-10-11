@@ -3,15 +3,13 @@
 /**
 	Node main event loop
 */
-
 const express = require('express');
 const router = express.Router();
 
 
 const { ADMIN_USERNAME } = require('./secret.js'); 
-
-const { IfLevelModelFactory, IfLevelModel } = require('./IfGame');
-const { IfLevels } = require('./../shared/IfGame');
+const { IfLevels, IfLevelSchema } = require('./../shared/IfLevelSchema');
+const { IfLevelSchemaFactory } = require('./IfLevelSchemaFactory');
 
 const { from_utc_to_myql, run_mysql_query, is_faculty, to_utc } = require('./mysql.js');
 const { require_logged_in_user, 
@@ -38,7 +36,7 @@ router.post('/new_level_by_code/:code',
 	try {
 		const code = req.params.code;
 		const username = get_username_or_emptystring(req, res);
-		const level = IfLevelModelFactory.create(code, username);
+		const level = IfLevelSchemaFactory.create(code, username);
 		const now = from_utc_to_myql(to_utc(new Date()));
 
 		const insert_sql = `INSERT INTO iflevels (type, username, code, title, description, completed, 
@@ -145,7 +143,7 @@ router.get('/levels/byCode/:code',
 		let iflevels = await run_mysql_query(sql, [username, code, code]);
 
 		// Convert into models, and then back to JSON.
-		iflevels = iflevels.map( (l: Object): Object => (new IfLevelModel(l)) );
+		iflevels = iflevels.map( (l: Object): Object => (new IfLevelSchema(l)) );
 
 		// Remove secret fields and transmit.
 		iflevels = iflevels.map( (l: Object): Object => return_level_prepared_for_transmit(l, true));
@@ -170,7 +168,7 @@ router.get('/levels/byCompleted/:code',
 		let iflevels = await run_mysql_query(sql, [username, code, code]);
 
 		// Convert into models, and then back to JSON.
-		iflevels = iflevels.map( (l: Object): Object => (new IfLevelModel(l)) );
+		iflevels = iflevels.map( (l: Object): Object => (new IfLevelSchema(l)) );
 
 		// Remove secret fields and transmit.
 		iflevels = iflevels.map( (l: Object): Object => return_level_prepared_for_transmit(l, true));
@@ -205,7 +203,7 @@ router.get('/debuglevel/:code', nocache, require_logged_in_user,
 		if(code_in_array.length !== 1)
 			throw new Error('Invalid code type '+param_code+' passed to debuglevel');
 
-		const level = IfLevelModelFactory.create(code_in_array[0], username);
+		const level = IfLevelSchemaFactory.create(code_in_array[0], username);
 
 		let loop_escape = 100;
 		let last_page = {};
@@ -216,7 +214,7 @@ router.get('/debuglevel/:code', nocache, require_logged_in_user,
 			// Complete last page.
 			last_page = level.pages[level.pages.length-1];
 			last_page.debug_answer();
-			IfLevelModelFactory.addPageOrMarkAsComplete(level); 
+			IfLevelSchemaFactory.addPageOrMarkAsComplete(level); 
 		}
 
 		res.json(return_level_prepared_for_transmit(level, false));
@@ -303,7 +301,7 @@ router.get('/questions/', nocache, require_logged_in_user,
 
 		if(select_results.length === 0) return res.json([]);
 
-		let iflevels = select_results.map( (l: Object): Object => (new IfLevelModel(l)) );
+		let iflevels = select_results.map( (l: Object): Object => (new IfLevelSchema(l)) );
 
 		// Remove secret fields and transmit.
 		iflevels = iflevels.map( (l: Object): Object => return_tagged_level(l) );
@@ -375,7 +373,7 @@ WHERE  ` + sql_where_clauses.join(' AND ') +
 
 		if(select_results.length === 0) return res.json([]);
 
-		let iflevels = select_results.map( (l: Object): Object => (new IfLevelModel(l)) );
+		let iflevels = select_results.map( (l: Object): Object => (new IfLevelSchema(l)) );
 
 		// Remove secret fields and transmit.
 		//iflevels = iflevels.map( (l: Object): Object => return_tagged_level(l) );
@@ -398,42 +396,43 @@ router.get('/grades?', nocache, require_logged_in_user,
 	async (req: $Request, res: $Response, next: NextFunction): Promise<any> => {
 	try {
 		let sql = ''; 
+		const sql_where_values = [];
+		const sql_where_clauses = [];
 		const username = get_username_or_emptystring(req, res);
 		const is_faculty_result = await is_faculty(username);
-		const sql_where_values = [];
 
 
 		// Two main workflows:
 		//  If username provided, get self.  All are allowed to pull their own.
 		// 	Else, only Faculty are allowed to poll with unique criteria.
 		if(typeof req.query.username === 'undefined') {
-
 			if(!is_faculty_result) throw new Error('Only faculty are allowed to get other user grades');
 
-			const sql_where_clauses = ['iflevels.completed = ?'];
+			// Mandatory completed levels only
+			sql_where_clauses.push('iflevels.completed = ?');
 			sql_where_values.push(1);	
 
-			// Set permissions to only return levels for the faculty's courses.
+			// Mandatory only return levels for the faculty's courses.
 			sql_where_clauses.push('faculty.username = ?');
 			sql_where_values.push(username);
 
-			// We have a username given. Add it to conditions
-			if(typeof req.query.username !== 'undefined') {
-				sql_where_values.push(req.query.username);
-				sql_where_clauses.push('users.username = ?');
-			}
+			// Optional username
+			sql_where_values.push(req.query.username);
+			sql_where_clauses.push('users.username = ?');
 
-			// Build SQL values.  Only care about these params if it's a faculty user.
+			// Optional idUser
 			if(typeof req.query.iduser !== 'undefined') {
 				sql_where_values.push(req.query.iduser);
 				sql_where_clauses.push('users.iduser = ?');
 			}
 
+			// Optional idSection
 			if(typeof req.query.idsection !=='undefined') {
 				sql_where_values.push(req.query.idsection);
 				sql_where_clauses.push('sections.idsection = ?');
 			}
 
+			// OPtional level code
 			if(typeof req.query.code !=='undefined') {
 				sql_where_values.push(req.query.code);
 				sql_where_clauses.push('iflevels.code = ?');
@@ -469,7 +468,7 @@ WHERE ` + sql_where_clauses.join(' AND ') + ' ORDER BY iflevels.updated desc ';
 		
 		if(select_results.length === 0) return res.json([ ]);
 
-		let iflevels = select_results.map( l => new IfLevelModel(l) );
+		let iflevels = select_results.map( l => new IfLevelSchema(l) );
 
 		// Organize into a map of users.
 		const users = turn_array_into_map(iflevels, l => l.username.toLowerCase().trim() );
@@ -513,7 +512,7 @@ router.get('/level/:id', nocache, require_logged_in_user,
 
 		if(select_results.length === 0) return res.sendStatus(404);
 		
-		let iflevel = new IfLevelModel(select_results[0]); // initialize from sql
+		let iflevel = new IfLevelSchema(select_results[0]); // initialize from sql
 		
 		res.json(return_level_prepared_for_transmit(iflevel, true));
 	} catch (e) {
@@ -569,7 +568,7 @@ router.post('/level/:id',
 		if(select_results[0].completed) return res.sendStatus(401);
 
 		// update.
-		let iflevel = new IfLevelModel(select_results[0]); // initialize from sql
+		let iflevel = new IfLevelSchema(select_results[0]); // initialize from sql
 		iflevel.updateUserFields(req.body); // update client_f and history
 
 		// Make sure that there is feedback.
@@ -582,7 +581,7 @@ router.post('/level/:id',
 		// If we're just supposed to validate, don't add a new page.
 		if(!validate_only) {
 			// Update and add new page if needed.
-			IfLevelModelFactory.addPageOrMarkAsComplete(iflevel); 
+			IfLevelSchemaFactory.addPageOrMarkAsComplete(iflevel); 
 		}
 
 		// Note: Use pages.toJson() to make sure that they properly convert to json.

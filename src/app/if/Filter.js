@@ -1,7 +1,7 @@
 // @flow
 import React from 'react';
 import { ButtonToolbar, ButtonGroup, DropdownButton, Dropdown, Button  } from 'react-bootstrap';
-import { IfLevels } from './../../shared/IfGame';
+import { IfLevels } from './../../shared/IfLevelSchema';
 import { getUserFromBrowser } from './../components/Authentication';
 
 import 'url-search-params-polyfill';

@@ -3,13 +3,13 @@ import React from 'react';
 import ReactTable from 'react-table';
 import { Table } from 'react-bootstrap';
 
-import { IfLevelSchema } from './../../shared/IfLevel';
+import { IfLevelSchema } from './../../shared/IfLevelSchema';
 
 import type { Node } from 'react';
 
 import 'react-table/react-table.css';
 
-import { IfLevels } from './../../shared/IfGame';
+import { IfLevels } from './../../shared/IfLevelSchema';
 import { DEMO_MODE } from './../../server/secret';
 
 

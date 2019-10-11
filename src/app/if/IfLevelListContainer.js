@@ -8,7 +8,7 @@ import IfLevelList from './IfLevelList';
 import Container from 'react-bootstrap/Container';
 import { Breadcrumb, Row, Col, Button } from 'react-bootstrap';
 import { Message, Loading } from './../components/Misc';
-import { IfLevelSchema, IfLevels } from './../../shared/IfGame';
+import { IfLevelSchema, IfLevels } from './../../shared/IfLevelSchema';
 
 
 
@@ -136,7 +136,7 @@ export default class IfLevelListContainer extends React.Component<PropsType, Sta
 		if(uncompleted_lessons_count > 0 || uncompleted_reviews_count > 0) return <span/>;
 
 		return (<Button 
-				onClick={ e => this.insertLevel(code, e) }>
+				onClick={ e => this.insertLevel(code) }>
 					{lesson_label}
 			</Button>);
 	}

@@ -34,6 +34,7 @@ export default class LoginCurrentUser extends React.Component<PropsType, StateTy
 
 
 	onChange(e: SyntheticEvent<HTMLButtonElement>) {
+		// $FlowFixMe
 		const { name, value } = e.target;
 		this.setState({ [name]: value });
 	}

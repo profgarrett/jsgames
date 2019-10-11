@@ -4,7 +4,7 @@ import { FormControl } from 'react-bootstrap';
 import { HtmlSpan } from './../components/Misc';
 import BlocklyFactory from './../../shared/BlocklyFactory';
 import ExcelTable from './ExcelTable';
-import { IfPageHarsonsSchema } from './../../shared/IfPage';
+import { IfPageHarsonsSchema } from './../../shared/IfPageSchemas';
 
 import type { Node } from 'react';
 

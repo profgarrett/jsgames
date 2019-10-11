@@ -55,6 +55,13 @@ type StateType = {
 	url: string
 };
 
+const no_null = (s_or_null: ?string, ret: ?string): string => {
+	if(s_or_null === null || typeof s_or_null === 'undefined') {
+		return (typeof ret === 'undefined' || ret === null) ? '' : ret;
+	}
+	return s_or_null;
+}
+
 export default class PasswordContainer extends React.Component<PropsType, StateType> { 
 	constructor(props: PropsType) {
 		super(props);
@@ -64,9 +71,9 @@ export default class PasswordContainer extends React.Component<PropsType, StateT
 		
 		this.state = { 
 			isLoading: false,
-			passwordreset: search.has('passwordreset') ? search.get('passwordreset') : '',
-			username: search.has('username') ? search.get('username') : '',
-			url: search.has('url') ? search.get('url') : '/',
+			passwordreset: no_null(search.get('passwordreset')),
+			username: no_null( search.get('username')),
+			url: no_null( search.get('url'), '/'),
 			message: '',
 			messageStyle: ''
 		};
