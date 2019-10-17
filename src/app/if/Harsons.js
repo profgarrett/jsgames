@@ -193,7 +193,7 @@ export default class Harsons extends React.Component<HarsonsPropsType, HarsonsSt
 		if(page.tests.length === 0) throw new Error('Invalid length of tests for '+page.code);
 
 		const blocklyAreaStyle = {
-			height: 175,
+			height: 225,
 			//position: 'absolute',
 			backgroundColor: 'red'
 		};

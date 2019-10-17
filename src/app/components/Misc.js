@@ -211,9 +211,10 @@ export class PrettyDate extends React.Component {
 		let message = '';
 		
 		// Error condition if we can't compare.
-		if ( isNaN(day_diff) || day_diff < 0 || day_diff >= 31 )
-			message = 'Error translating date';
-		
+		if ( isNaN(day_diff) || day_diff < 0 ) {
+			return (<span>Error translating date</span>);
+		}
+
 		// Message.
 		message = day_diff == 0 && (
 				diff < 60 && 'just now' ||

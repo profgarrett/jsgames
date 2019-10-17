@@ -201,6 +201,7 @@ const if5_if_with_functions_test = ({
 							],
 					code: 'test',
 					toolbox: [
+						{ has: 'functions', args: [ 'andor2', 'IF', 'not']},
 						{ has: 'references', args: [ 'b1', 'c1', 'd1']},
 						{ has: 'symbols', args: [ 'comparison?'] },
 						{ has: 'values', args: ['Y', 'N', 'number?'] }
@@ -210,92 +211,74 @@ const if5_if_with_functions_test = ({
 						{
 							description: 'Say "Y" if we have at least 5 bald eagle sales <b>and</b> at least 50 cat sales.  Say "N" otherwise',
 							solution_f: '=IF(AND(b1>5, c1>50), "Y", "N")',
-							toolbox: tb => [ ...tb, { has: 'functions', args: ['andor2', 'if'] } ]
 						},
 						{
 							description: 'Say "Y" if we have at over 5 Bald Eagles <b>or</b> over 50 cats sold.  Say "N" otherwise',
 							solution_f: '=IF(OR(b1>5, c1>50), "Y", "N")',
-							toolbox: tb => [ ...tb, { has: 'functions', args: ['andor2', 'if'] } ]
 						},
 						{
 							description: 'Do we have either less than 10 bald eagle or 50 cat sales? If so, say "Y", or otherwise say "N"',
 							solution_f: '=IF(OR(c1<50, b1<10), "Y", "N")',
-							toolbox: tb => [ ...tb, { has: 'functions', args: ['andor2', 'if'] } ]
 						},
 						{
 							description: 'Do we have both 50 bald eagles and cats <i>each</i>? If so, return "Y", or otherwise "N"',
 							solution_f: '=IF(AND(c1>50, b1>50), "Y", "N")',
-							toolbox: tb => [ ...tb, { has: 'functions', args: ['andor2', 'if'] } ]
 						},
 						{
 							description: 'Do <i>either</i> of bald eagles or cats have less than 50 sales? If so, return "Y", or otherwise "N"',
 							solution_f: '=IF(OR(c1<50, b1<50), "Y", "N")',
-							toolbox: tb => [ ...tb, { has: 'functions', args: ['andor2', 'if'] } ]
 						},
 						{
 							description: 'Do all animals <i>each</i> number at least 20? If so, return "Y" (or "N" otherwise)',
 							solution_f: '=IF(AND(b1>=20, c1>=20), "Y", "N")',
-							toolbox: tb => [ ...tb, { has: 'functions', args: ['andor2', 'if'] } ]
 						},
 						{
 							description: 'Does <i>any one</i> of the animals have sales of 10 or under? If so, return "Y" (or "N" otherwise)',
 							solution_f: '=IF(OR(b1<10, c1<10), "Y", "N")',
-							toolbox: tb => [ ...tb, { has: 'functions', args: ['andor2', 'if'] } ]
 						},
 						{
 							description: 'Did we sell under 10 bald eagles, but still earn over 500 profit?  Say "Y" or "N"',
 							solution_f: '=IF(AND(b1<10, d1>500), "Y", "N")',
-							toolbox: tb => [ ...tb, { has: 'functions', args: ['andor2', 'if'] } ]
 						},					
 						{
 							description: 'Do we have more bald eagle sales than cat sales?  Say "Y" if so, or "N" otherwise.',
 							solution_f: '=IF(b1>c1, "Y", "N")',
-							toolbox: tb => [ ...tb, { has: 'functions', args: ['andor2', 'if'] } ]
 						},
 						{
 							description: 'Do we <b>not</b> have equal cat and bald eagle sales?  Say "Y" or "N"',
 							solution_f: '=IF(NOT(b1=c1), "Y", "N")',
-							toolbox: tb => [ ...tb, { has: 'functions', args: ['not', 'if'] } ]
 						},
 						{
 							description: 'Are bald eagle sales between 5 and 10 (inclusive)? Say "Y" or "N"',
 							solution_f: '=IF(AND(B1>=5, B1<=10), "Y", "N")',
-							toolbox: tb => [ ...tb, { has: 'functions', args: ['andor2', 'if'] } ]
 						},
 						{
 							description: 'Are bald eagle sales between 5 and 10 (exclusive)? Say "Y" or "N"',
 							solution_f: '=IF(AND(B1>5, B1<10), "Y", "N")',
-							toolbox: tb => [ ...tb, { has: 'functions', args: ['andor2', 'if'] } ]
 						},
 						{
 							description: 'Are cat sales between 50 and 100 (inclusive)? Say "Y" or "N"',
 							solution_f: '=IF(AND(c1>=50, c1<=100), "Y", "N")',
-							toolbox: tb => [ ...tb, { has: 'functions', args: ['andor2', 'if'] } ]
 						},
 						{
 							description: 'Are cat sales between 50 and 100 (exclusive)? Say "Y" or "N"',
 							solution_f: '=IF(AND(c1>50, c1<100), "Y", "N")',
-							toolbox: tb => [ ...tb, { has: 'functions', args: ['andor2', 'if'] } ]
 						},				
 						{
 							description: 'Are profits between 1,000 and 3,000 (inclusive)? Say "Y" or "N"',
 							solution_f: '=IF(AND(d1>=1000, d1<=3000), "Y", "N")',
-							toolbox: tb => [ ...tb, { has: 'functions', args: ['andor2', 'if'] } ]
 						},
 						{
 							description: 'Are profits between 1,000 and 3,000 (exclusive)? Say "Y" or "N"',
 							solution_f: '=IF(AND(d1>1000, d1<3000), "Y", "N")',
-							toolbox: tb => [ ...tb, { has: 'functions', args: ['andor2', 'if'] } ]
 						},				
 						{
 							description: 'Are profits outside of the range 1,000 and 3,000 (do not include 1000 and 3000)? Say "Y" or "N"',
 							solution_f: '=IF(OR(d1<1000, d1>3000), "Y", "N")',
-							toolbox: tb => [ ...tb, { has: 'functions', args: ['andor2', 'if'] } ]
 						},
 						{
 							description: 'Are profits outside of the range 1,000 and 3,000 (include 1000 and 3000)? Say "Y" or "N"',
 							solution_f: '=IF(OR(d1<=1000, d1>=3000), "Y", "N")',
-							toolbox: tb => [ ...tb, { has: 'functions', args: ['andor2', 'if'] } ]
 						}
 					]
 				}

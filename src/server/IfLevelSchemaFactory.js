@@ -182,8 +182,8 @@ const _initialize_json =  function(level: IfLevelSchema, original_json: Object):
 			json.correct_required = false;
 		}
 
-		json.solution_test_results_visible = true;
-		json.solution_f_visible = false;
+		//json.solution_test_results_visible = true;
+		//json.solution_f_visible = false;
 
 		// Default instruction text.
 		if(typeof json.instruction === 'undefined') 

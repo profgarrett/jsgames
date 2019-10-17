@@ -339,14 +339,18 @@ export default class MyProgress extends React.Component<PropsType, StateType> {
 		let picker = null;
 		if(this.props.sections.length > 0 && this.state.section.role === 'faculty') {
 			let p = '?idsection=' + this.state.section.idsection;	
+			
 			let course_links = (
 				<InputGroup style={{ marginLeft: 3, marginTop: 3}}>
 					View this section&apos;s&nbsp;
-					<Link key='link1' to={'/ifgame/recent'+p}>recent activity</Link>,&nbsp;
-					<Link key='link2' to={'/ifgame/grades'+p}>grades</Link>, and &nbsp;
-					<Link key='link3' to={'/ifgame/questions'+p}>questions</Link>
+					<Link key='link1' to={'/ifgame/recent'+p}>recent activity</Link>&nbsp;and&nbsp;
+					<Link key='link2' to={'/ifgame/grades'+p}>grades</Link>.
 				</InputGroup>
 				);
+
+
+			//		<Link key='link3' to={'/ifgame/questions'+p}>questions</Link>
+
 
 			picker = (<ButtonToolbar>
 					<DropdownButton 

@@ -5,8 +5,7 @@
 const { LinearGen, ShuffleGen } = require('./../Gens');
 import type { GenType } from './../Gens';
 import type { LevelSchemaFactoryType } from './../IfLevelSchemaFactory';
-
-const TIME = 20;
+const { VISLIT_TIME_PER_SLIDE, DISTORTION_MEDIUM, DISTORTION_SMALL } = require('./../secret.js');
 
 const _text_base = {
 	type: 'IfPageTextSchema',
@@ -19,7 +18,7 @@ const _slider_base = {
     min: 0,
     max: 100,
 	show_feedback_on: false,
-    time_limit: TIME,
+    time_limit: VISLIT_TIME_PER_SLIDE,
     code: 'test',
     description: '',
 };
@@ -30,7 +29,7 @@ const _choice_base = {
     code: 'test',
     solution: '*',
     correct_required: false,
-    time_limit: TIME,
+    time_limit: VISLIT_TIME_PER_SLIDE,
     description: '',
 }
 
@@ -103,9 +102,29 @@ const waterfallchart_absolute_familiarity = [
         instruction: 'Rate your agreement with the statement below. <br/><br/>I am familiar with this style of chart.',
         client_items: LIKERT_AGREE,
         template_id: 'vislit_waterfall_absolute_familiarity',
+        time_limit: null,
     }, 
 ];
 
+
+
+const waterfallchart_absolute_task = [
+    {   ..._text_base,
+        template_id: 'vislit_waterfall_absolute_task',
+        description: `The next series of pages will ask you to identify specific periods 
+            (such as the largest increase or decrease), and the ending value
+            of the data series.
+            <br/><br/>
+            Contine when you feel comfortable with this task.`,
+        chart_def: wrapGood({
+            type: 'ChartWaterfall_Plain',
+            labels: ['Profit Region A', 'Profit Region B', 'Profit Region C', 'Profit Region D', 'Profit Region E'],
+            data: [200, 300, -150, -50, 350 ],
+            max: 400,
+            theme: 'a',
+        }),
+    },
+];
 
 
 const waterfall_absolute = [
@@ -247,7 +266,26 @@ waterfall_absolute.forEach( def => def.template_id = 'vislit_Waterfall_absolute_
         instruction: 'Rate your agreement with the statement below. <br/><br/>I am familiar with this style of chart.',
         client_items: LIKERT_AGREE,
         template_id: 'vislit_waterfall_relative_familiarity',
+        time_limit: null,
     }, 
+];
+
+
+const waterfallchart_relative_task = [
+    {   ..._text_base,
+        description: `The next series of pages uses waterfall charts to show changes from one period to another.
+            You will asked to identify the largest increase, decrease, or the ending value. 
+            <br/><br/>
+            Contine when you feel comfortable with this task.`,
+        chart_def: wrapBad({
+            type: 'ChartWaterfall_Plain',
+            labels: ['Profit Year 2018', 'Sales', 'Expenses', 'Taxes', 'Profit Year 2019'],
+            data: [1200, -300, 200, -100, 1000 ],
+            max: 1500,
+            theme: 'round_a',
+        }),
+        template_id: 'vislit_waterfall_relative_task',
+    },
 ];
 
 const waterfall_relative = [
@@ -313,9 +351,9 @@ const waterfall_relative = [
             theme: 'round_e',
         },
         instruction: 'How much did the company pay in taxes this year?',
-        client_items: [-200, 100, 300, 800, 'Other/Unknown'],
+        client_items: [-200, 100, 200, 1000, 'Other/Unknown'],
         solution: 'Other/Unknown',
-        template_id: 'RelativeOrAbsolute',
+        template_id: 'RelativeOrAbsoluteA',
     },
     {   ..._choice_base,
         chart_def: {
@@ -328,7 +366,7 @@ const waterfall_relative = [
         instruction: 'How much did the company gain from operations this year?',
         client_items: [ -100, 100, 1000, 1400, 'Other/Unknown'],
         solution: 'Other/Unknown',
-        template_id: 'RelativeOrAbsolute',
+        template_id: 'RelativeOrAbsoluteB',
     },
 ];
 
@@ -346,6 +384,7 @@ const vislit_waterfall_absolute = ({
     gen_type: LinearGen,
     pages: [
 
+        ...waterfallchart_absolute_task,
         ...waterfallchart_absolute_familiarity,
         
         ({
@@ -361,6 +400,7 @@ const vislit_waterfall_relative = ({
     gen_type: LinearGen,
     pages: [
 
+        ...waterfallchart_relative_task,
         ...waterfallchart_relative_familiarity,
         
         ({   

@@ -38,13 +38,25 @@ class IfLevelDebugPage extends React.Component<ScorePropsType> {
 
 
 	// Build out the chart
-	_render_template_id(page: IfPageBaseSchema ): Node {
+	_render_tags(page: IfPageBaseSchema ): Node {
+
+		const tags = [];
 
 		if(page.template_id !== null ) {
-			return <div style={{ paddingBottom: '10px'}}>template_id: <b>{ page.template_id }</b></div>;
-		} else {
-			return null;
+			tags.push(<li key='debug_tag_1'>template_id: <b>{ page.template_id }</b></li>)
 		}
+		// $FlowFixMe
+		if(typeof page.solution !== 'undefined' && page.solution !== null) {
+			// $FlowFixMe
+			tags.push(<li key='debug_tag_2'>solution: <b>{ page.solution }</b></li>)
+		}
+		if(page.time_limit !== null ) {
+			tags.push(<li key='debug_tag_3'>time_limit: <b>{ page.time_limit } seconds</b></li>)
+		}
+
+		if(tags.length === 0) return null
+
+		return <ul style={{ listStyleType: 'none', paddingLeft: 0 }}>{ tags}</ul>;
 	}
 
 	render(): Node {
@@ -101,6 +113,9 @@ class IfLevelDebugPage extends React.Component<ScorePropsType> {
 		} else if(page.type === 'IfPageShortTextAnswerSchema') {
 			problem = (<div><ShortTextAnswer page={page.toIfPageShortTextAnswerSchema()} readonly={true} editable={false} show_solution={false} handleChange={()=> {}} handleSubmit={()=> {} }/></div>);
 
+		} else if(page.type === 'IfPageNumberAnswerSchema') {
+			problem = (<div><ShortTextAnswer page={page.toIfPageNumberAnswerSchema()} readonly={true} editable={false} show_solution={false} handleChange={()=> {}} handleSubmit={()=> {} }/></div>);
+
 
 		} else if(page.type === 'IfPageChoiceSchema') {
 			// Show range of choice only if the user was wrong.  If no right answer,
@@ -111,12 +126,12 @@ class IfLevelDebugPage extends React.Component<ScorePropsType> {
 				</div>);
 
 		} else {
-			throw new Error('Invalid type in IfLevelScore '+page.type);
+			throw new Error('Invalid type in IfLevelDebug '+page.type);
 		}
 
 		return (<Card variant='success'>
 				<Card.Body style={{ fontSize: 12}} >
-					{ this._render_template_id(page) }
+					{ this._render_tags(page) }
 					<HtmlDiv className='lead' html={ desc } />
 					<HtmlDiv className='lead' html={ inst } />
 					{ this._render_chart(page) }

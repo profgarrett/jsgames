@@ -85,7 +85,7 @@ router.get('/sections',
 		const sql = `SELECT sections.*, users_sections.role FROM users 
 				INNER JOIN users_sections on users.iduser = users_sections.iduser
 			    INNER JOIN sections on users_sections.idsection = sections.idsection
-				where users.username = ? ORDER BY opens DESC`;
+				where users.username = ? ORDER BY title`;
 		const params = [username];
 
 		const sections = await run_mysql_query(sql, params);
@@ -205,7 +205,7 @@ router.get('/debuglevel/:code', nocache, require_logged_in_user,
 
 		const level = IfLevelSchemaFactory.create(code_in_array[0], username);
 
-		let loop_escape = 100;
+		let loop_escape = 200;
 		let last_page = {};
 
 		while(!level.completed && loop_escape > 0) {
@@ -415,10 +415,6 @@ router.get('/grades?', nocache, require_logged_in_user,
 			// Mandatory only return levels for the faculty's courses.
 			sql_where_clauses.push('faculty.username = ?');
 			sql_where_values.push(username);
-
-			// Optional username
-			sql_where_values.push(req.query.username);
-			sql_where_clauses.push('users.username = ?');
 
 			// Optional idUser
 			if(typeof req.query.iduser !== 'undefined') {

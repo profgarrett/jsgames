@@ -81,10 +81,15 @@ export default class Timer extends React.Component<PropsType, StateType> {
             marginTop: 20,
             fontSize: '25px',
             color: '#006dcc',
+        };
+        const style_highlight = {
+            ...style,
+            color: 'red',
+            backgroundColor: 'black',
         }
-        
+
         if( this.state.remaining_time < 1 ) {
-            return <div style={style}>Time is up!</div>;
+            return <div style={style_highlight}>Time is up!</div>;
         }
 
         return (<div style={style}><b>{ this.state.remaining_time }</b> seconds remaining</div>);

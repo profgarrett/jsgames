@@ -55,7 +55,7 @@ export default class NumberAnswer extends React.Component<PropsType> {
 	// by the containing object.
 	render(): Node {
 		const value = this.props.page.client === null ? '' : this.props.page.client;
-
+		
 		return (
 			<div>
 				<FormControl 

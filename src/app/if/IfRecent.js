@@ -10,6 +10,7 @@ import IfLevelScore from './IfLevelScore';
 
 import { IfLevelSchema } from './../../shared/IfLevelSchema';
 import type { Node } from 'react';
+import { DEMO_MODE } from './../../server/secret';
 
 /*
 
@@ -247,7 +248,7 @@ export default class IfRecent extends React.Component<PropsType,StateType> {
 		const columns = [{
 			id: 'username',
 			Header: 'Username', 
-			accessor: l => l.username,
+			accessor: l => DEMO_MODE ? '*****' : l.username,
 			width: 200
 		}, {
 			id: 'code',

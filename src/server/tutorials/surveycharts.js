@@ -4,6 +4,9 @@ const { LinearGen, ShuffleGen } = require('./../Gens');
 const { vislit } = require('./../pages/vislit');
 const { amt_consent, use_consent } = require('./../pages/consent');
 const { amt_demographics } = require('./../pages/vislit_demographics');
+const { sns } = require('./../pages/sns');
+const { numeracy_pretest } = require('./../pages/numeracy');
+const { bnt } = require('./../pages/bnt');
 
 import type { GenType } from './../Gens';
 import type { LevelSchemaFactoryType } from './../IfLevelSchemaFactory';
@@ -13,7 +16,7 @@ const surveycharts_wu = ({
 	code: 'surveycharts_wu', 
 	title: 'Chart Survey', 
 	description: 'Measure your ability to intrepret common charts',
-	show_score_after_completing: false,
+	show_score_after_completing: true,
 	version: 1.0,
 	show_progress: false,
 
@@ -29,7 +32,7 @@ const surveycharts_wu = ({
 
 			// Tell the user thanks and give them the code for the session.
 			{	type: 'IfPageTextSchema',
-				description: `Good job! You have completed this assessment!`,
+				description: `Good job! You have completed this assignment!`,
 			},
 			
 		]
@@ -65,9 +68,21 @@ const surveycharts_amt = ({
 			
 			...amt_demographics,
 
-			// Transition
+			// Math
 			{	type: 'IfPageTextSchema',
 				description: `You have completed filling in the demographic information. 
+					<br/><br/>
+					The next section will ask you questions about your math skills, and
+					ask you to complete several math questions. Feel free to use a 
+					calculator on your computer.`,
+			},
+
+			...sns,
+			...bnt,
+
+			// Transition
+			{	type: 'IfPageTextSchema',
+				description: `You have completed answering the math questions.
 					<br/><br/>
 					The next section will start asking you questions about various charts.`,
 			},
@@ -75,7 +90,17 @@ const surveycharts_amt = ({
 			
 			vislit,
 
-			
+
+			// Hard math problems
+			{	type: 'IfPageTextSchema',
+				description: `You job!  You've finished the chart questions.
+					<br/><br/>
+					The next section will ask you several final math questions.`,
+			},
+
+			...numeracy_pretest,
+
+
 			// Ask if they want to get a copy of their results
 			{	type: 'IfPageShortTextAnswerSchema',
 				description: 'Thank you for completing this assessment!',
@@ -90,7 +115,7 @@ const surveycharts_amt = ({
 
 			// Tell the user thanks and give them the code for the session.
 			{	type: 'IfPageTextSchema',
-				description: `You have completed this assessment!
+				description: `<b>Congratulations!</b>  You have completed this assessment!
 					<br/><br/>
 					Please return to the Amazon Mechnical Turk website and input the code below.
 					<br/><br/>

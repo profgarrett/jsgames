@@ -5,9 +5,7 @@
 const { LinearGen, ShuffleGen } = require('./../Gens');
 import type { GenType } from './../Gens';
 import type { LevelSchemaFactoryType } from './../IfLevelSchemaFactory';
-
-
-const TIME = 20;
+const { VISLIT_TIME_PER_SLIDE, DISTORTION_MEDIUM, DISTORTION_SMALL } = require('./../secret.js');
 
 const _text_base = {
 	type: 'IfPageTextSchema',
@@ -20,7 +18,7 @@ const _slider_base = {
     min: 0,
     max: 100,
 	show_feedback_on: false,
-    time_limit: TIME,
+    time_limit: VISLIT_TIME_PER_SLIDE,
     code: 'test',
     description: '',
 };
@@ -32,7 +30,7 @@ const _choice_base = {
     code: 'test',
     solution: '*',
     correct_required: false,
-    time_limit: TIME,
+    time_limit: VISLIT_TIME_PER_SLIDE,
     description: '',
 }
 
@@ -69,11 +67,13 @@ const LIKERT_GROWTH = [
 ];
 
 
+// If profit, then reduce the numbers to make them harder to recognize.
 function wrap( d: Array<any>, as: string): Array<any> {
+    const adjust = (as === 'Profit' ? 1 : 0.65);
     const y1 = 2019-7;
     let a = d.map( (v, i) => { 
         let o = { 'Year': y1+i+'' };
-        o[as] =  v;
+        o[as] =  Math.round(adjust * v);
         return o;
     });
     return a;
@@ -88,7 +88,7 @@ const q = ( type: string, topic: string ): string => {
         + ' has improved from the first year to the last year?';
     
     if(type === 'qual') 
-        return `How would you rate the company's ` + topic.toLowerCase() + ' growth for the 7 year period?';
+        return `How would you rate the company's ` + topic.toLowerCase() + ' growth for the <b>entire</b> 7 year period?';
     
     throw new Error('Invalid type');
 }
@@ -112,9 +112,6 @@ d10: [536, 562, 656, 661, 651, 714],
 // Bar Chart - Unlabled Axis
 ////////////////////////////////////////////////////////////
 
-const DISTORTION_SMALL = 0.3;
-const DISTORTION_MEDIUM = 0.5;
-
 const barchart_unlabledaxis_familiarity = [
     {
         ..._choice_base,
@@ -126,9 +123,38 @@ const barchart_unlabledaxis_familiarity = [
             data: wrap( [80,70,30,50,30], 'Sales'),
             theme: 'e',
         },
+        time_limit: null,
     } 
 ];
 
+const barchart_sales_task_description = [
+        {   ..._text_base,
+        description: `The next series of pages will ask you to rate the company's sales
+            growth using this style of chart. 
+            <br/><br/>
+            Contine when you feel comfortable with this task.`,
+        chart_def: {
+            type: 'ChartBar_TopLabelNoAxis',
+            data: wrap( [80,70,30,50,30], 'Sales'),
+            theme: 'e',
+        },
+    },
+];
+
+
+const barchart_profit_task_description = [
+        {   ..._text_base,
+        description: `This series of pages will ask you to assess changes in 
+            the company's profitability using a bar chart. 
+            <br/><br/>
+            Continue when you feel comfortable with this task.`,
+        chart_def: {
+            type: 'ChartBar_TopLabelNoAxis',
+            data: wrap( [80,70,30,50,30], 'Sales'),
+            theme: 'e',
+        },        
+    },
+];
 
 const barchart_unlabledaxis_choices_a = [
     { 
@@ -199,60 +225,60 @@ const barchart_unlabledaxis_choices_b = [
     { 
         ..._choice_base,
         template_id: 'vislit_bar_unlabeled_choice_a1_ok',
-        instruction: q('qual', 'Sales'),
+        instruction: q('qual', 'Profit'),
         client_items: LIKERT_GROWTH,
         chart_def: {
             type: 'ChartBar_TopLabelNoAxis',
             distortion: 0,
-            data: wrap( DATA.d1, 'Sales'),
+            data: wrap( DATA.d1, 'Profit'),
             theme: 'a',
         },
         solution: LIKERT_GROWTH[1], // 15%
     },{ 
         ..._choice_base,
         template_id: 'vislit_bar_unlabeled_choice_b1_smalldis',
-        instruction: q('qual', 'Sales'),
+        instruction: q('qual', 'Profit'),
         client_items: LIKERT_GROWTH,
         chart_def: {
             type: 'ChartBar_TopLabelNoAxis',
             distortion: DISTORTION_SMALL, // 0
-            data: wrap( DATA.d2, 'Sales'),
+            data: wrap( DATA.d2, 'Profit'),
             theme: 'b',
         },
         solution: LIKERT_GROWTH[2], // 30%
     },{ 
         ..._choice_base,
         template_id: 'vislit_bar_unlabeled_choice_c1_ok',
-        instruction: q('qual', 'Sales'),
+        instruction: q('qual', 'Profit'),
         client_items: LIKERT_GROWTH,
         chart_def: {
             type: 'ChartBar_TopLabelNoAxis',
             distortion: 0, // SMALL
-            data: wrap( DATA.d3, 'Sales'),
+            data: wrap( DATA.d3, 'Profit'),
             theme: 'c',
         },
         solution: LIKERT_GROWTH[3], // 60%
     },{ 
         ..._choice_base,
         template_id: 'vislit_bar_unlabeled_choice_d1_meddis',
-        instruction: q('qual', 'Sales'),
+        instruction: q('qual', 'Profit'),
         client_items: LIKERT_GROWTH,
         chart_def: {
             type: 'ChartBar_TopLabelNoAxis',
             distortion: DISTORTION_MEDIUM, // 0
-            data: wrap( DATA.d4, 'Sales'),
+            data: wrap( DATA.d4, 'Profit'),
             theme: 'd',
         },
         solution: LIKERT_GROWTH[3], // 60%
     },{ 
         ..._choice_base,
         template_id: 'vislit_bar_unlabeled_choice_e1_ok',
-        instruction: q('qual', 'Sales'),
+        instruction: q('qual', 'Profit'),
         client_items: LIKERT_GROWTH,
         chart_def: {
             type: 'ChartBar_TopLabelNoAxis',
             distortion: 0, // MEDIUM
-            data: wrap( DATA.d5, 'Sales'),
+            data: wrap( DATA.d5, 'Profit'),
             theme: 'e',
         },
         solution: LIKERT_GROWTH[2], // 30%
@@ -323,55 +349,55 @@ const barchart_unlabledaxis_sliders_b = [
     {
         ..._slider_base,
         template_id: 'vislit_bar_unlabeled_slider_a2_ok',
-        instruction: q('quant', 'Sales'),
+        instruction: q('quant', 'Profit'),
         chart_def: {
             type: 'ChartBar_TopLabelNoAxis',
             distortion: 0,
-            data: wrap( DATA.d6, 'Sales'),
+            data: wrap( DATA.d6, 'Profit'),
             theme: 'a',
         },
         solution: 0.15,
     },{ 
         ..._slider_base,
         template_id: 'vislit_bar_unlabeled_slider_b2_smalldis',
-        instruction: q('quant', 'Sales'),
+        instruction: q('quant', 'Profit'),
         chart_def: {
             type: 'ChartBar_TopLabelNoAxis',
             distortion: DISTORTION_SMALL, // 0
-            data: wrap( DATA.d7, 'Sales'),
+            data: wrap( DATA.d7, 'Profit'),
             theme: 'b',
         },
         solution: 0.3,
     },{ 
         ..._slider_base,
         template_id: 'vislit_bar_unlabeled_slider_c2_ok',
-        instruction: q('quant', 'Sales'),
+        instruction: q('quant', 'Profit'),
         chart_def: {
             type: 'ChartBar_TopLabelNoAxis',
             distortion: 0, // SMALL
-            data: wrap( DATA.d8, 'Sales'),
+            data: wrap( DATA.d8, 'Profit'),
             theme: 'c',
         },
         solution: 0.6,
     },{ 
         ..._slider_base,
         template_id: 'vislit_bar_unlabeled_slider_d2_meddis',
-        instruction: q('quant', 'Sales'),
+        instruction: q('quant', 'Profit'),
         chart_def: {
             type: 'ChartBar_TopLabelNoAxis',
             distortion: DISTORTION_MEDIUM, //0
-            data: wrap( DATA.d9, 'Sales'),
+            data: wrap( DATA.d9, 'Profit'),
             theme: 'd',
         },
         solution: 0.6,
     },{ 
         ..._slider_base,
         template_id: 'vislit_bar_unlabeled_slider_e2_ok',
-        instruction: q('quant', 'Sales'),
+        instruction: q('quant', 'Profit'),
         chart_def: {
             type: 'ChartBar_TopLabelNoAxis',
             distortion: 0, // MEDIUM
-            data: wrap( DATA.d10, 'Sales'),
+            data: wrap( DATA.d10, 'Profit'),
             theme: 'e',
         },
         solution: 0.3,
@@ -391,8 +417,9 @@ const vislit_barA = ({
     gen_type: LinearGen,
     pages: [
 
+        ...barchart_sales_task_description,
         ...barchart_unlabledaxis_familiarity,
-        
+
         ({  
             gen_type: ShuffleGen,
             pages: [
@@ -411,6 +438,9 @@ const vislit_barA = ({
 const vislit_barB = ({
     gen_type: LinearGen,
     pages: [
+
+        ...barchart_profit_task_description,
+
         ({   gen_type: ShuffleGen,
             pages: [
                 ...barchart_unlabledaxis_choices_b

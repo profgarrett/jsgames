@@ -1,3 +1,4 @@
+// @flow
 const finish_questions = [
 	{
 		type: 'IfPageChoiceSchema',

@@ -70,11 +70,18 @@ export default class LoginContainer extends React.Component<PropsType, StateType
 		if(search.has('username') && search.has('password')) {
 			const username = search.get('username') || '';
 			const password = search.get('password') || '';
+
+			this.state.isLoading=true;
+			this.state.message = 'Please wait while we log you in';
+
 			this.login( username, password );
 		}
 
 		// if we are an AMT user, then go ahead and create.
 		if(search.has('amt')) {
+			this.state.isLoading=true;
+			this.state.message = 'Please wait while we log you in';
+
 			this.create_user('', 'amt');
 		}
 
@@ -144,8 +151,6 @@ export default class LoginContainer extends React.Component<PropsType, StateType
 	create_user(username: string, section_code: string) {
 		const url = this.state.url;
 
-		this.setState( { isLoading: true, message: 'Please wait while we create your user account...', messageStyle: 'info' });
-
 		// Fire AJAX.
 		fetch('/api/users/create_user/', {
 				method: 'POST',
@@ -168,7 +173,7 @@ export default class LoginContainer extends React.Component<PropsType, StateType
 				});
 				setTimeout( () => {
 					that.context.router.history.push(url);
-				}, location.host === 'localhost:8080' ? 0 : 0);  // short delay if we're developing.
+				}, location.host === 'localhost:8080' ? 1000 : 0);  // short delay if we're developing.
 				
 			})
 			.catch( error => {
@@ -197,11 +202,11 @@ export default class LoginContainer extends React.Component<PropsType, StateType
 
 		// wrap functions to show that we're loading.
 		const login = (u, p) => {
-			this.setState( { isLoading: true });
+			this.setState( { isLoading: true, message: 'Please wait while we log you in.', messageStyle: 'info' });			this.setState( { isLoading: true });
 			this.login(u, p);
 		};
 		const create_user = (u, s) => {
-			this.setState( { isLoading: true });
+			this.setState( { isLoading: true, message: 'Please wait while we create your user account...', messageStyle: 'info' });
 			this.create_user(u, s);
 		};
 

@@ -377,12 +377,6 @@ class IfPageBaseSchema extends Schema {
 		return this;
 	}
 	// Type coercion for flow not liking subtypes.
-	toIfPageShortTextAnswerSchema(): IfPageShortTextAnswerSchema {
-		if( this.type !== 'IfPageShortTextAnswerSchema') throw new Error('Invalid type convertion to IfPageShortTextAnswerSchema');
-		// $FlowFixMe 
-		return this;
-	}
-	// Type coercion for flow not liking subtypes.
 	toIfPageTextSchema(): IfPageTextSchema {
 		if( this.type !== 'IfPageTextSchema') throw new Error('Invalid type convertion to IfPageTextSchema');
 		// $FlowFixMe 
@@ -394,7 +388,6 @@ class IfPageBaseSchema extends Schema {
 		// $FlowFixMe 
 		return this;
 	}
-
 	// Type coercion for flow not liking subtypes.
 	toIfPageHarsonsSchema(): IfPageHarsonsSchema {
 		if( this.type !== 'IfPageHarsonsSchema') throw new Error('Invalid type convertion to IfPageHarsonsSchema');
@@ -628,7 +621,7 @@ class IfPageSliderSchema extends IfPageBaseSchema {
 	// Automatically fill in the answer.
 	// Used for testing out on the server. 
 	debug_answer() {
-		this.client = Math.round(Math.random()*this.max);
+		this.client = this.correct !== null ? this.correct : Math.round(Math.random()*this.max);
 		this.updateCorrect();
 	}	
 

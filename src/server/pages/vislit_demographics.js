@@ -1,3 +1,4 @@
+// @flow
 /**
 	Demographic Information
 **/

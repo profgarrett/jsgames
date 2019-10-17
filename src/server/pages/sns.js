@@ -1,3 +1,4 @@
+// @flow
 /**
 	Subject Numeracy Scale	
 
@@ -35,22 +36,27 @@ const _base = {
 
 const sns = [
 	{	..._base,
+		template_id: 'sns_1_fraction',
 		description: 'How good are you at working with fractions?',
 		client_items: good_scale
 
 	},{ ..._base,
+		template_id: 'sns_2_percentage',
 		description: 'How good are you at working with percentages?',
 		client_items: good_scale
 		
 	},{ ..._base,
+		template_id: 'sns_3_tip',
 		description: 'How good are you at calculating a 15% tip?',
 		client_items: good_scale
 		
 	},{ ..._base,
+		template_id: 'sns_4_shirt',
 		description: 'How good are you at figuring out how much a shirt will cost if it is 25% off?',
 		client_items: good_scale
 		
 	},{ ..._base,
+		template_id: 'sns_5_prefertables',
 		description: 'When reading the newspaper, how <b>helpful</b> do you find tables and graphs that are parts of a story?',
 		client_items: [
 			'1. Not at all helpful',
@@ -62,6 +68,7 @@ const sns = [
 		]
 		
 	},{ ..._base,
+		template_id: 'sns_6_prefernumbers',
 		description: `When people tell you the chance of something happening, 
 			do you prefer that they use <b>words</b> ("it rarely happens") or <b>numbers</b>
 			("there's a 1% chance)?`,
@@ -75,6 +82,7 @@ const sns = [
 		]
 
 	},{ ..._base,
+		template_id: 'sns_7_preferwords',
 		description: `When you hear a weather forecast, do you prefer predictions using <b>percentages</b> 
 			(e.g., “there will be a 20% chance of rain today”) or predictions using only <b>words</b> 
 			(e.g., “there is a small chance of rain today”)?`,
@@ -87,6 +95,7 @@ const sns = [
 			'6. Always prefer words',
 		]
 	},{ ..._base,
+		template_id: 'sns_8_numbersuseful',
 		description: 'How <b>often</b> do you find numerical information to be useful?',
 		client_items: [
 			'1. Never',
@@ -100,4 +109,4 @@ const sns = [
 	}
 ];
 
-module.exports = {sns};
+module.exports = { sns };

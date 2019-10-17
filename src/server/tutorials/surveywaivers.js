@@ -19,6 +19,7 @@ const surveywaiver_non_woodbury_student: LevelSchemaFactoryType = {
 		gen_type: LinearGen,
 		pages: [
 			use_consent,
+			/*
 			{	type: 'IfPageTextSchema',
 				description: `Before starting to complete the online exercises, the system to needs to ask you a few questions.  
 					The results will be used to tune the system to best meet your existing skill level.`
@@ -29,6 +30,11 @@ const surveywaiver_non_woodbury_student: LevelSchemaFactoryType = {
 			{	type: 'IfPageTextSchema',
 				description: 'You finished!',
 				instruction: 'Click "Next page" to finish this assesssment.',
+			}
+			*/
+			{	type: 'IfPageTextSchema',
+				description: 'Thanks! You can start working on the first tutorial now.',
+				instruction: 'Click "Next page" to close this agreement',
 			}
 		]
 	}: GenType)

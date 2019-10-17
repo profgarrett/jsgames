@@ -22,7 +22,7 @@ export default class ForceLogin extends React.Component {
 		const that = this;
 		const divStyle = { 
 			position: 'fixed',
-			right: '2px',
+			left: '2px',
 			bottom: '2px',
 			color: 'lightgray'
 		};

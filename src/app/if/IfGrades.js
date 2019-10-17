@@ -96,7 +96,8 @@ export default class IfGrades extends React.Component<PropsType> {
 					{
 						columns.map( 
 							(c,i) => ( <td key={'td'+i}> 
-								{ typeof t[c.id] === 'undefined' ? '': t[c.id] }
+								{ typeof t[c.id] === 'undefined' ? '': 
+									(DEMO_MODE && c.id === 'username' ? '****' : t[c.id]) }
 								</td> )
 							)
 					}

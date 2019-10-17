@@ -5,14 +5,12 @@
 const { LinearGen, ShuffleGen } = require('./../Gens');
 import type { GenType } from './../Gens';
 import type { LevelSchemaFactoryType } from './../IfLevelSchemaFactory';
+const { VISLIT_TIME_PER_SLIDE, DISTORTION_MEDIUM, DISTORTION_SMALL } = require('./../secret.js');
 
-
-const TIME = 20;
 
 const _text_base = {
 	type: 'IfPageTextSchema',
 	show_feedback_on: false,
-    
 };
 
 const _slider_base = {
@@ -20,7 +18,7 @@ const _slider_base = {
     min: 0,
     max: 100,
 	show_feedback_on: false,
-    time_limit: TIME,
+    time_limit: VISLIT_TIME_PER_SLIDE,
     code: 'test',
     description: '',
 };
@@ -32,7 +30,7 @@ const _choice_base = {
     code: 'test',
     solution: '*',
     correct_required: false,
-    time_limit: TIME,
+    time_limit: VISLIT_TIME_PER_SLIDE,
     description: '',
 }
 
@@ -51,11 +49,12 @@ const LIKERT_AGREE = [
     '7. Strongly agree'
 ];
 const LIKERT_GROWTH = [
-    '1. Poor growth',
-    '2. Fair growth', 
-    '3. Good growth',
-    '4. Very good growth',
-    '5. Excellent growth',
+    '1. No growth',
+    '2. Poor growth',
+    '3. Fair growth', 
+    '4. Good growth',
+    '5. Very good growth',
+    '6. Excellent growth',
 ];
 
 const DATA = {
@@ -96,8 +95,9 @@ const q = ( type: string, topic: string ): string => {
        return 'Rate your agreement with the statement below. <br/><br/>I am familiar with this style of chart.';
 
     if(type === 'grow') 
-        return `Compare the growth of the company against the overall stock market (SP500).  ` +
-            'Rate the overall growth of the firm over the 7-year period.';
+        return `Compare the growth of the company against the overall stock market (SP500). 
+            <br/><br/>
+            Rate the overall growth of the firm over the 7-year period.`;
     
     
     throw new Error('Invalid type');
@@ -110,12 +110,6 @@ const q = ( type: string, topic: string ): string => {
 // Line Chart - Unlabled Axis
 ////////////////////////////////////////////////////////////
 
-
-const DISTORTION_SMALL = 0.3;
-const DISTORTION_MEDIUM = 0.5;
-
-
-
 const linechart_dollar_familiarity = [
 
     {
@@ -125,20 +119,30 @@ const linechart_dollar_familiarity = [
         client_items: LIKERT_AGREE,
         chart_def: {
             type: 'ChartLine_StockDollar',
-            data: wrap( {'Company': [100, 120, 80, 90] }, 'Stock Price'),
+            data: wrap({
+                        "SP500": [100, 105, 110, 120, 110, 100 ], 
+                        "Company": [100, 110, 120, 130, 140, 150 ]
+                    }, 'Stock Price'),
             theme: 'e',
         },
+        time_limit: null,
     },
+
+];
+
+const linechart_dollar_task = [
     {
         ..._text_base,
         template_id: 'vislit_line_sample',
-        description: '',
-        instruction: `This chart type compares a $100 investment in the overall stock market,
+        instruction: '',
+        description: `This chart type compares a $100 investment in the overall stock market,
                 with the same investment in company stock. It helps investors see if a firm 
                 is outperforming the overall market.
                 <br/><br/>
                 In this chart, the same $100 invested in the market would end up being worth $100. 
-                If it was invested in the company's stock, it would be worth $150.`,
+                If it was invested in the company's stock, it would be worth $150.
+                <br/><br/>
+                Continue when you feel comfortable with this task.`,
         chart_def: {
             type: 'ChartLine_StockDollar',
             data: wrap({
@@ -147,7 +151,9 @@ const linechart_dollar_familiarity = [
                     }, 'Stock Price'),
             theme: 'e',
         },
-    },];
+        time_limit: null,
+    },
+]
 
 
 const linechart_dollar_a = [
@@ -221,18 +227,18 @@ const linechart_dollar_b = [
         chart_def: {
             type: 'ChartLine_StockDollar',
             distortion: 0,
-            data: wrap( DATA.d1, 'Stock Price'),
+            data: wrap( DATA.d1, 'Price'),
             theme: 'a',
         },
     },{ 
         ..._choice_base,
         template_id: 'vislit_line_dollar_b2_ok',
-        instruction: q('grow', 'Stock Price'),
+        instruction: q('grow', 'Price'),
         client_items: LIKERT_GROWTH,
         chart_def: {
             type: 'ChartLine_StockDollar',
             distortion: 0, // DISTORTION_SMALL,
-            data: wrap( DATA.d2, 'Stock Price'),
+            data: wrap( DATA.d2, 'Price'),
             theme: 'b',
         },
     },{ 
@@ -243,7 +249,7 @@ const linechart_dollar_b = [
         chart_def: {
             type: 'ChartLine_StockDollar',
             distortion: DISTORTION_SMALL, // 0
-            data: wrap( DATA.d3, 'Stock Price'),
+            data: wrap( DATA.d3, 'Price'),
             theme: 'c',
         },
     },{ 
@@ -254,7 +260,7 @@ const linechart_dollar_b = [
         chart_def: {
             type: 'ChartLine_StockDollar',
             distortion: 0, //DISTORTION_MEDIUM, 
-            data: wrap( DATA.d4, 'Stock Price'),
+            data: wrap( DATA.d4, 'Price'),
             theme: 'd',
         },
     },{ 
@@ -265,7 +271,7 @@ const linechart_dollar_b = [
         chart_def: {
             type: 'ChartLine_StockDollar',
             distortion: DISTORTION_MEDIUM, // 0, 
-            data: wrap( DATA.d5, 'Stock Price'),
+            data: wrap( DATA.d5, 'Price'),
             theme: 'e',
         },
     }
@@ -281,8 +287,9 @@ const vislit_lineA = ({
     gen_type: LinearGen,
     pages: [
 
+        ...linechart_dollar_task,
         ...linechart_dollar_familiarity,
-        
+
         ({   gen_type: ShuffleGen,
             pages: [
                 ...linechart_dollar_a
@@ -294,6 +301,7 @@ const vislit_lineA = ({
 const vislit_lineB = ({
     gen_type: LinearGen,
     pages: [
+        ...linechart_dollar_task,
         ({
             gen_type: ShuffleGen,
             pages: [

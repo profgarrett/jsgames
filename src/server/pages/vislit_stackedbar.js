@@ -5,14 +5,12 @@
 const { LinearGen, ShuffleGen } = require('./../Gens');
 import type { GenType } from './../Gens';
 import type { LevelSchemaFactoryType } from './../IfLevelSchemaFactory';
+const { VISLIT_TIME_PER_SLIDE } = require('./../secret.js');
 
-
-const TIME = 20;
 
 const _text_base = {
 	type: 'IfPageTextSchema',
 	show_feedback_on: false,
-    
 };
 
 const _slider_base = {
@@ -20,7 +18,7 @@ const _slider_base = {
     min: 0,
     max: 100,
 	show_feedback_on: false,
-    time_limit: TIME,
+    time_limit: VISLIT_TIME_PER_SLIDE,
     code: 'test',
     description: '',
 };
@@ -32,7 +30,7 @@ const _choice_base = {
     code: 'test',
     solution: '*',
     correct_required: false,
-    time_limit: TIME,
+    time_limit: VISLIT_TIME_PER_SLIDE,
     description: '',
 }
 
@@ -102,10 +100,6 @@ const q = ( type: string ): string => {
 // Stacked Bar Chart - Label Axis
 ////////////////////////////////////////////////////////////
 
-
-//const DISTORTION_SMALL = 0.5;
-//const DISTORTION_MEDIUM = 0.9;
-
 const stackedbarchart_familiarity = [
     {
         ..._choice_base,
@@ -117,9 +111,25 @@ const stackedbarchart_familiarity = [
             data: wrap( {"Product A": [109, 102, 90, 102, 102, 104], "Product B": [113, 108, 114, 97, 104, 112], "Product C": [93, 102, 96, 111, 102, 117]},  ),
             theme: 'e',
         },
+        time_limit: null,
     } 
 ];
 
+
+const barchart_sales_task_description = [
+    {   ..._text_base,
+        template_id: 'vislit_stackedbar_task',
+        description: `The next series of pages will ask you questions about sales data.
+            You will be asked to identify largest <i>product</i> or <i>year</i>.
+            <br/><br/>
+            Contine when you feel comfortable with this task.`,
+        chart_def: {
+            type: 'ChartStackedBar_Plain',
+            data: wrap( {"Product A": [109, 102, 90, 102, 102, 104], "Product B": [113, 108, 114, 97, 104, 112], "Product C": [93, 102, 96, 111, 102, 117]},  ),
+            theme: 'e',
+        },     
+    },
+];
 
 const stackedbarchart_choices = [
     { 
@@ -179,8 +189,9 @@ const vislit_stackedbar = ({
     gen_type: LinearGen,
     pages: [
 
+        ...barchart_sales_task_description,
         ...stackedbarchart_familiarity,
-        
+
         ({
             gen_type: ShuffleGen,
             pages: [
