@@ -20,10 +20,11 @@ import type { Node } from 'react';
 	Only used if it's not defined by the section.
 */
 const DEFAULT_TUTORIAL_LEVEL_LIST = [
-	'tutorial', 'math1', 'math2', 'math3',
+	'tutorial', 'math1', 'math2', 'math3','math4',
 	'functions1', 'functions2', 
 	'if1', 'if2', 'if3', 'if4', 'if5', 'if6', 'if7', 'if8',
-	'math4'];
+	'surveycharts_wu',
+	];
 
 
 

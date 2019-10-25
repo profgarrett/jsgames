@@ -289,13 +289,16 @@ router.get('/questions/', nocache, require_logged_in_user,
 					ON iflevels.created = iflevelsmax.created AND iflevels.username = iflevelsmax.username AND iflevels.code = iflevelsmax.code
 			WHERE 
 			
-				(iflevels.code = ? OR ? = '*') AND 
+				(
+				(iflevels.code = ? OR ? = '*') 
+				OR left(iflevels.code,2) = 'XXXXXXXif'
+				) AND
+
 				(sections.idsection = ? OR ? = '*') AND 
 				(users.iduser = ? OR ? = '*') AND 
 				iflevels.updated > NOW() - INTERVAL ${INTERVAL} AND 
 				iflevels.username NOT IN ('xgarrettn') AND 
 				iflevelsmax.first = 1`;
-
 
 		let select_results = await run_mysql_query(sql, sql_params);
 
@@ -500,9 +503,11 @@ WHERE ` + sql_where_clauses.join(' AND ') + ' ORDER BY iflevels.updated desc ';
 router.get('/level/:id', nocache, require_logged_in_user,
 	async (req: $Request, res: $Response, next: NextFunction): Promise<any> => {
 	try {
-		const sql = 'SELECT * FROM iflevels WHERE _id = ? AND username = ?';
-		const _id = req.params.id;
 		const username = get_username_or_emptystring(req, res);
+		const sql = username === 'garrettn' 
+			? 'SELECT * FROM iflevels WHERE _id = ? '   // allow admin access to any item
+			: 'SELECT * FROM iflevels WHERE _id = ? AND username = ?';
+		const _id = req.params.id;
 
 		let select_results = await run_mysql_query(sql, [_id, username]);
 

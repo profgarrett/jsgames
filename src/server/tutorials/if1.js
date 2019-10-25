@@ -297,7 +297,7 @@ const if1 = ({
 	code: 'if1',
 	title: 'IF1: Logical number comparisons',
 	description: 'Compare numbers',
-	harsons_randomly_on_username: true,
+	harsons_randomly_on_username: false,
 	version: 1.1,
 
 	gen: ({

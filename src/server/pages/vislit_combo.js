@@ -26,15 +26,16 @@ const _choice_base = {
 }
 
 const TREND = [
-    'Decreased',
-    'Not changing',
-    'Increased',
-    'Unknown',
+    '1. Decreased',
+    '2. Not changing',
+    '3. Increased',
+    '4. Unknown',
 ]
 const LIKERT_IMPORTANCE = [ 
     '1. Unimportant',
     '2. Neutral',
     '3. Important',
+    '4. Can not tell from chart',
 ];
 const LIKERT_AGREE = [ 
     '1. Strongly disagree', 
@@ -99,7 +100,7 @@ const combo = [
             src: '/static/vislit/combo_a.png',
             data: [ ],
         },
-        solution: 'Decreased'
+        solution: '1. Decreased'
     },{
         ..._choice_base,
         template_id: 'vislit_combo_trend_b',
@@ -110,7 +111,7 @@ const combo = [
             src: '/static/vislit/combo_b.png',
             data: [  ],
         },
-        solution: 'Increased', 
+        solution: '3. Increased', 
     },{
         ..._choice_base,
         template_id: 'vislit_combo_cause_c',

@@ -163,7 +163,7 @@ const pie3d_familiarity = [
 const pie3d_task = [
     {
         ..._text_base,
-        template_id: 'vislit_pie2d_task',
+        template_id: 'vislit_pie3d_task',
         description: `This next series of chart shows the distribution of sales a company has in different regions.
                 <br/><br/>
                 You will be asked to rate how important you feel each area is to the company's success.
@@ -171,7 +171,7 @@ const pie3d_task = [
         instruction: `Continue when you feel comfortable with this task.`,
         chart_def: {
             type: 'ChartImage',
-            src: '/static/vislit/pie_2d_familiar.png',
+            src: '/static/vislit/pie_3d_familiar.png',
             data: null,
         },
         time_limit: null,

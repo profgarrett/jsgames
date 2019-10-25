@@ -335,7 +335,7 @@ const if3 = ({
 	code: 'if3',
 	title: 'IF3: the IF function',
 	description: 'Create simple formulas with IF',
-	harsons_randomly_on_username: true,
+	harsons_randomly_on_username: false,
 	version: 1.0,
 
 	

@@ -129,6 +129,7 @@ const barchart_unlabledaxis_familiarity = [
 
 const barchart_sales_task_description = [
         {   ..._text_base,
+        template_id: 'vislit_bar_taskorientation_sales',
         description: `The next series of pages will ask you to rate the company's sales
             growth using this style of chart. 
             <br/><br/>
@@ -144,6 +145,7 @@ const barchart_sales_task_description = [
 
 const barchart_profit_task_description = [
         {   ..._text_base,
+        template_id: 'vislit_bar_taskorientation_profit',
         description: `This series of pages will ask you to assess changes in 
             the company's profitability using a bar chart. 
             <br/><br/>
@@ -224,7 +226,7 @@ const barchart_unlabledaxis_choices_a = [
 const barchart_unlabledaxis_choices_b = [
     { 
         ..._choice_base,
-        template_id: 'vislit_bar_unlabeled_choice_a1_ok',
+        template_id: 'vislit_bar_unlabeled_choice_a2_ok',
         instruction: q('qual', 'Profit'),
         client_items: LIKERT_GROWTH,
         chart_def: {
@@ -236,7 +238,7 @@ const barchart_unlabledaxis_choices_b = [
         solution: LIKERT_GROWTH[1], // 15%
     },{ 
         ..._choice_base,
-        template_id: 'vislit_bar_unlabeled_choice_b1_smalldis',
+        template_id: 'vislit_bar_unlabeled_choice_b2_smalldis',
         instruction: q('qual', 'Profit'),
         client_items: LIKERT_GROWTH,
         chart_def: {
@@ -248,7 +250,7 @@ const barchart_unlabledaxis_choices_b = [
         solution: LIKERT_GROWTH[2], // 30%
     },{ 
         ..._choice_base,
-        template_id: 'vislit_bar_unlabeled_choice_c1_ok',
+        template_id: 'vislit_bar_unlabeled_choice_c2_ok',
         instruction: q('qual', 'Profit'),
         client_items: LIKERT_GROWTH,
         chart_def: {
@@ -260,7 +262,7 @@ const barchart_unlabledaxis_choices_b = [
         solution: LIKERT_GROWTH[3], // 60%
     },{ 
         ..._choice_base,
-        template_id: 'vislit_bar_unlabeled_choice_d1_meddis',
+        template_id: 'vislit_bar_unlabeled_choice_d2_meddis',
         instruction: q('qual', 'Profit'),
         client_items: LIKERT_GROWTH,
         chart_def: {
@@ -272,7 +274,7 @@ const barchart_unlabledaxis_choices_b = [
         solution: LIKERT_GROWTH[3], // 60%
     },{ 
         ..._choice_base,
-        template_id: 'vislit_bar_unlabeled_choice_e1_ok',
+        template_id: 'vislit_bar_unlabeled_choice_e2_ok',
         instruction: q('qual', 'Profit'),
         client_items: LIKERT_GROWTH,
         chart_def: {
@@ -297,7 +299,7 @@ const barchart_unlabledaxis_sliders_a = [
             data: wrap( DATA.d6, 'Sales'),
             theme: 'a',
         },
-        solution: 0.15,
+        solution: 15,
     },{ 
         ..._slider_base,
         template_id: 'vislit_bar_unlabeled_slider_b1_ok',
@@ -308,7 +310,7 @@ const barchart_unlabledaxis_sliders_a = [
             data: wrap( DATA.d7, 'Sales'),
             theme: 'b',
         },
-        solution: 0.3,
+        solution: 30,
     },{ 
         ..._slider_base,
         template_id: 'vislit_bar_unlabeled_slider_c1_smalldis',
@@ -319,7 +321,7 @@ const barchart_unlabledaxis_sliders_a = [
             data: wrap( DATA.d8, 'Sales'),
             theme: 'c',
         },
-        solution: 0.6,
+        solution: 60,
     },{ 
         ..._slider_base,
         template_id: 'vislit_bar_unlabeled_slider_d1_ok',
@@ -330,7 +332,7 @@ const barchart_unlabledaxis_sliders_a = [
             data: wrap( DATA.d9, 'Sales'),
             theme: 'd',
         },
-        solution: 0.6,
+        solution: 60,
     },{ 
         ..._slider_base,
         template_id: 'vislit_bar_unlabeled_slider_e1_meddis',
@@ -341,7 +343,7 @@ const barchart_unlabledaxis_sliders_a = [
             data: wrap( DATA.d10, 'Sales'),
             theme: 'd',
         },
-        solution: 0.3,
+        solution: 30,
     }
 ];
 
@@ -356,7 +358,7 @@ const barchart_unlabledaxis_sliders_b = [
             data: wrap( DATA.d6, 'Profit'),
             theme: 'a',
         },
-        solution: 0.15,
+        solution: 15,
     },{ 
         ..._slider_base,
         template_id: 'vislit_bar_unlabeled_slider_b2_smalldis',
@@ -367,7 +369,7 @@ const barchart_unlabledaxis_sliders_b = [
             data: wrap( DATA.d7, 'Profit'),
             theme: 'b',
         },
-        solution: 0.3,
+        solution: 30,
     },{ 
         ..._slider_base,
         template_id: 'vislit_bar_unlabeled_slider_c2_ok',
@@ -378,7 +380,7 @@ const barchart_unlabledaxis_sliders_b = [
             data: wrap( DATA.d8, 'Profit'),
             theme: 'c',
         },
-        solution: 0.6,
+        solution: 60,
     },{ 
         ..._slider_base,
         template_id: 'vislit_bar_unlabeled_slider_d2_meddis',
@@ -389,7 +391,7 @@ const barchart_unlabledaxis_sliders_b = [
             data: wrap( DATA.d9, 'Profit'),
             theme: 'd',
         },
-        solution: 0.6,
+        solution: 60,
     },{ 
         ..._slider_base,
         template_id: 'vislit_bar_unlabeled_slider_e2_ok',
@@ -400,7 +402,7 @@ const barchart_unlabledaxis_sliders_b = [
             data: wrap( DATA.d10, 'Profit'),
             theme: 'e',
         },
-        solution: 0.3,
+        solution: 30,
     }
 ];
 

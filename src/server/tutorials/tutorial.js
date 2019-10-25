@@ -228,7 +228,8 @@ const tutorial: LevelSchemaFactoryType = {
 				]
 			}: GenType),
 			
-			gen_on_harsons,
+			//gen_on_harsons,
+			
 			gen_on_choices,
 			gen_on_interface, 
 			gen_closing

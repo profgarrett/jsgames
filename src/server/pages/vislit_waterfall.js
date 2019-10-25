@@ -41,11 +41,11 @@ const _choice_base = {
 const LIKERT_AGREE = [ 
     '1. Strongly disagree', 
     '2. Disagree',
+    '3. Somewhat disagree',
     '4. Neither agree nor disagree',
     '5. Somewhat agree',
-    '3. Somewhat disagree',
     '6. Agree',
-    '7. Strongly agree',
+    '7. Strongly agree'
 ];
 
 
@@ -364,7 +364,7 @@ const waterfall_relative = [
             theme: 'round_f',
         },
         instruction: 'How much did the company gain from operations this year?',
-        client_items: [ -100, 100, 1000, 1400, 'Other/Unknown'],
+        client_items: [ -100, 100, 900, 1000, 'Other/Unknown'],
         solution: 'Other/Unknown',
         template_id: 'RelativeOrAbsoluteB',
     },

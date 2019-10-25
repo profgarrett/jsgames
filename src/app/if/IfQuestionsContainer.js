@@ -99,14 +99,16 @@ export default class IfQuestionsContainer extends React.Component<QuestionsProps
 			</Breadcrumb>
 			);
 
-		const default_level = 'math2';
 		const default_type =  'IfPageFormulaSchema|IfPageHarsonsSchema';
+		const default_output = 'tags';
+		const default_level = 'if1';
+
 			//'IfPageChoice'; 
 			//'IfPageNumberAnswerSchema'; //'IfPageFormulaSchema|IfPageHarsonsSchema'
 		const search = new URLSearchParams(window.location.search);
 		const filter_defaults = search.has('idsection') 
-			? { pagetypes: default_type, outputs: 'chart', levels: 'math2', sections: search.get('idsection') }
-			: { pagetypes: default_type, outputs: 'chart', levels: 'math2'};
+			? { pagetypes: default_type, outputs: default_output, levels: default_level, sections: search.get('idsection') }
+			: { pagetypes: default_type, outputs: default_output, levels: default_level };
 		
 
 		const filter = <Filter 

@@ -347,7 +347,7 @@ const if2 = ({
 	code: 'if2',
 	title: 'IF2: Logical text comparisons',
 	description: 'Compare words',
-	harsons_randomly_on_username: true,
+	harsons_randomly_on_username: false,
 	version: 1.1,
 
 	gen: ({

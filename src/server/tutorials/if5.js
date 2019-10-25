@@ -292,7 +292,7 @@ const if5 = ({
 	code: 'if5',
 	title: 'IF5: Logical functions and IF',
 	description: 'Use AND, OR, & NOT inside of IF',
-	harsons_randomly_on_username: true,
+	harsons_randomly_on_username: false,
 	version: 1,
 
 	gen: ({

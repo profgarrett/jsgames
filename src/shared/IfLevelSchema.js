@@ -45,8 +45,8 @@ const IfLevels = [
 	{ code: 'surveywaiver_non_woodbury_user', title: 'Anonymous User Account Setup', description: 'Learn about this website and answer several questions' },
 	{ code: 'surveywaiver_woodbury_student', title: 'Woodbury Student Account Setup', description: 'Learn about this website and answer several questions' },
 	
-	{ code: 'surveycharts_amt', title: 'Chart Survey (AMT)', description: 'Test your ability to intrepret common charts' },
-	{ code: 'surveycharts_wu', title: 'Chart Survey', description: 'Assess your ability to intrepret common charts' },
+	{ code: 'surveycharts_amt', title: 'Chart Survey (AMT)', description: 'Test your ability to interpret common charts' },
+	{ code: 'surveycharts_wu', title: 'Chart Survey', description: 'Assess your ability to interpret common charts' },
 
 ];
 

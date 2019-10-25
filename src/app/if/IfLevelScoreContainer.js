@@ -4,6 +4,7 @@ import PropTypes from 'prop-types';
 import Container from 'react-bootstrap/Container';
 import { Row, Col, Breadcrumb, Button  } from 'react-bootstrap';
 import IfLevelScore from './IfLevelScore';
+import { IfLevelScoreChart } from './IfLevelScoreChart';
 import { Message, Loading } from './../components/Misc';
 
 import { IfLevelSchema } from './../../shared/IfLevelSchema';
@@ -78,6 +79,19 @@ export default class IfLevelScoreContainer extends React.Component<PropsType, St
 			</Button>
 			: <span />;
 
+		const level = this.state.level;
+		let score = null;
+		
+		// If we are looking at a chart, then show the specially-designed 
+		// chart screen. Otherwise, go to the normal score.
+		if(typeof level === 'undefined' || level == null) {
+			score = null;
+		} else if( level.code === 'surveycharts_amt' || level.code === 'surveycharts_wu') {
+			score = <IfLevelScoreChart level={level} />;
+		} else {
+			score = <IfLevelScore level={level} />;
+		}
+
 		return (
 			<Container>
 				<Row>
@@ -89,7 +103,7 @@ export default class IfLevelScoreContainer extends React.Component<PropsType, St
 						<Message message={this.state.message} style={this.state.messageStyle} />
 						<Loading loading={this.state.isLoading } />
 						<div style={{ textAlign: 'center' }}>{ back }</div>
-						{ this.state.level ? <IfLevelScore level={this.state.level} /> : '' }
+						{ score }
 						<div style={{ textAlign: 'center' }}>{ back }</div>
 						<br/>
 					</Col>

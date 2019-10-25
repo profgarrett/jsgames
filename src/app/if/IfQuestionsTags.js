@@ -111,7 +111,7 @@ export default class IfQuestionsTags extends React.Component<DetailPropsType> {
 
 		//console.log(questions);
 		//console.log(data);
-		//console.log(columns);
+		console.log(columns);
 		const ths = [];
 
 		for(let index in columns) {

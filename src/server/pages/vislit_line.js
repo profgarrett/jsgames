@@ -171,7 +171,7 @@ const linechart_dollar_a = [
         },
     },{ 
         ..._choice_base,
-        template_id: 'vislit_line_dollar_a2_smalldis',
+        template_id: 'vislit_line_dollar_b1_smalldis',
         instruction: q('grow', 'Stock Price'),
         client_items: LIKERT_GROWTH,
         chart_def: {
@@ -182,7 +182,7 @@ const linechart_dollar_a = [
         },
     },{ 
         ..._choice_base,
-        template_id: 'vislit_line_dollar_a3_ok',
+        template_id: 'vislit_line_dollar_c1_ok',
         instruction: q('grow', 'Stock Price'),
         client_items: LIKERT_GROWTH,
         chart_def: {
@@ -193,7 +193,7 @@ const linechart_dollar_a = [
         },
     },{ 
         ..._choice_base,
-        template_id: 'vislit_line_dollar_a4_meddis',
+        template_id: 'vislit_line_dollar_d1_meddis',
         instruction: q('grow', 'Stock Price'),
         client_items: LIKERT_GROWTH,
         chart_def: {
@@ -204,7 +204,7 @@ const linechart_dollar_a = [
         },
     },{ 
         ..._choice_base,
-        template_id: 'vislit_line_dollar_a5_ok',
+        template_id: 'vislit_line_dollar_e1_ok',
         instruction: q('grow', 'Stock Price'),
         client_items: LIKERT_GROWTH,
         chart_def: {
@@ -221,7 +221,7 @@ const linechart_dollar_a = [
 const linechart_dollar_b = [
     {
         ..._choice_base,
-        template_id: 'vislit_line_dollar_b1_ok',
+        template_id: 'vislit_line_dollar_a2_ok',
         instruction: q('grow', 'Stock Price'),
         client_items: LIKERT_GROWTH,
         chart_def: {
@@ -243,7 +243,7 @@ const linechart_dollar_b = [
         },
     },{ 
         ..._choice_base,
-        template_id: 'vislit_line_dollar_b3_smalldis',
+        template_id: 'vislit_line_dollar_c2_smalldis',
         instruction: q('grow', 'Stock Price'),
         client_items: LIKERT_GROWTH,
         chart_def: {
@@ -254,7 +254,7 @@ const linechart_dollar_b = [
         },
     },{ 
         ..._choice_base,
-        template_id: 'vislit_line_dollar_b4_ok',
+        template_id: 'vislit_line_dollar_d2_ok',
         instruction: q('grow', 'Stock Price'),
         client_items: LIKERT_GROWTH,
         chart_def: {
@@ -265,7 +265,7 @@ const linechart_dollar_b = [
         },
     },{ 
         ..._choice_base,
-        template_id: 'vislit_line_dollar_b5_meddis',
+        template_id: 'vislit_line_dollar_e2_meddis',
         instruction: q('grow', 'Stock Price'),
         client_items: LIKERT_GROWTH,
         chart_def: {

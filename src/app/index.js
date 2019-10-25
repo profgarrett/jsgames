@@ -2,8 +2,8 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import '@babel/polyfill'; // IE11 compatability.
 import 'url-search-params-polyfill'; // yeah for IE!
-
 import { BrowserRouter, Switch, Route } from 'react-router-dom';
+
 
 //  Old browser compatability.
 import Promise from 'promise-polyfill';

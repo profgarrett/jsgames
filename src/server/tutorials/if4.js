@@ -398,7 +398,7 @@ const if4 = ({
 	code: 'if4',
 	title: 'IF4: Logical functions',
 	description: 'Learn about AND, OR, & NOT',
-	harsons_randomly_on_username: true,
+	harsons_randomly_on_username: false,
 	version: 1,
 
 	gen: ({

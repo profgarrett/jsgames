@@ -15,7 +15,7 @@ import type { LevelSchemaFactoryType } from './../IfLevelSchemaFactory';
 const surveycharts_wu = ({
 	code: 'surveycharts_wu', 
 	title: 'Chart Survey', 
-	description: 'Measure your ability to intrepret common charts',
+	description: 'Measure your ability to interpret common charts',
 	show_score_after_completing: true,
 	version: 1.0,
 	show_progress: false,
@@ -45,7 +45,7 @@ const surveycharts_wu = ({
 const surveycharts_amt = ({
 	code: 'surveycharts_amt', 
 	title: 'Chart Survey (AMT)', 
-	description: 'Test your ability to intrepret common charts',
+	description: 'Test your ability to interpret common charts',
 	show_score_after_completing: false,
 	version: 1.0,
 	show_progress: false,

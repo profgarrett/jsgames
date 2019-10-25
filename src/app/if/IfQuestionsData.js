@@ -186,6 +186,8 @@ function increment_tag( tags: Array<any>, tagname: string ) {
 
 function create_summary_answer( page: IfPageBaseSchema, ): any {
 	const summary_answer = {
+		template_id: page.template_id,
+		type: page.type,
 		username: page.username,
 		seconds: page.get_time_in_seconds(),
 		breaks: page.get_break_times_in_minutes().join(', '),
