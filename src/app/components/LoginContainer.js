@@ -7,6 +7,7 @@ import LoginCreateUser from './LoginCreateUser';
 import LoginCurrentUser from './LoginCurrentUser';
 import { Loading } from './../components/Misc';
 import { Link } from 'react-router-dom';
+import { CacheBuster } from './CacheBuster';
 
 import 'url-search-params-polyfill';
 
@@ -149,7 +150,12 @@ export default class LoginContainer extends React.Component<PropsType, StateType
 
 
 	create_user(username: string, section_code: string) {
-		const url = this.state.url;
+		let url = this.state.url;
+
+		// See if we should prompt the user to create a password after creating (i.e., for non-anon users)
+		if(username.length > 0 && username.indexOf('@') !== -1) {
+			url = '/profile';
+		}
 
 		// Fire AJAX.
 		fetch('/api/users/create_user/', {
@@ -214,6 +220,7 @@ export default class LoginContainer extends React.Component<PropsType, StateType
 <Container fluid='true'>
 	<Row>
 		<Col>
+			<CacheBuster/>
 			<div style={{ paddingTop: 10}} />
 
 			<Loading loading={this.state.isLoading } />

@@ -371,7 +371,7 @@ export default class MyProgress extends React.Component<PropsType, StateType> {
 				</ButtonToolbar>);
 		}
 
-		const surveycharts_amt = (this.state.section.levels === 'surveycharts_amt');
+		const surveycharts_amt = (this.state.section !== null && this.state.section.levels === 'surveycharts_amt');
 
 		// only show table *if* they've completed any mandatory surveys.
 		const table =  waiver_completed && !surveycharts_amt

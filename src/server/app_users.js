@@ -200,6 +200,48 @@ router.post('/passwordreset',
 });
 
 
+
+/*
+	Reset and login in the user, provided they give the right password reset code.
+*/
+router.post('/profileupdate', 
+	nocache, require_logged_in_user,
+	async (req: $Request, res: $Response, next: NextFunction): Promise<any> => {
+	try {
+		const username = get_username_or_emptystring(req, res);
+		const params: { password: string } = 
+				type_params(req.body, ['password']);
+		const password = params.password;
+		const hashedpassword = hash_password(password);
+
+		// Check length of password.
+		if(password.length < 8) return res.json({ error: 'Invalid password, it must be at least 8 characters', logged_in: true });
+		if(password === username) return res.json({ error: 'Invalid password, it can not be the same as your username', logged_in: true });
+
+		// See if we have matching information.
+		const sql_select_user = `SELECT distinct users.iduser, users.username FROM users where username = ?`;
+
+		const select_user_results = await run_mysql_query(sql_select_user, [username]);
+		if(select_user_results.length !== 1) return res.json({ error: 'No matching users found.', logged_in: false });
+		const iduser = select_user_results[0].iduser;
+
+		// Change password on user 
+		const sql_update_user = 'UPDATE users SET hashed_password = ? WHERE iduser = ?';
+		const sql_update_user_results = await run_mysql_query(sql_update_user, [hashedpassword, iduser]);
+		if(sql_update_user_results.changedRows !== 1) return res.sendStatus(500);
+		
+		// Login the user.
+		const user = await login_user( username, password, res );
+
+		return res.json({ username: username, logged_in: true });
+	}
+	catch (e) {
+		log_error(e);
+		next(e);
+	}
+});
+
+
 // Delete the test user
 router.post('/login_clear_test_user', 
 	nocache,

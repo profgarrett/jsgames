@@ -5,47 +5,17 @@ import Container from 'react-bootstrap/Container';
 import { Row, Col, Navbar, Alert } from 'react-bootstrap';
 import { Loading } from './../components/Misc';
 
-
-//import {  } from './../components/Authentication';
 import PasswordChange from './PasswordChange';
 import PasswordRequest from './PasswordRequest';
-
 
 import 'url-search-params-polyfill';
 
 import type { Node } from 'react';
 
-//import 'url-search-params-polyfill';
 
-/*
 
-This module controls login.  
+type PropsType = {};
 
-It handles a variety of needed tasks, ranging from 
-
-1) Login
-2) Password reset
-3) New user registration.
-
-Passing URL parameters can influence the behavior, telling the system to redirect to a particular page.
-
-Process:
-* Input information
-	Email (auto-fill as username)
-	First/Last
-	Username 
-
-	If email/username already in use, redirect to recover email
-
-* Join class section (optional)
-* Email confirmation
-* Auto login with new account.
-
-*/
-
-type PropsType = {
-	
-};
 type StateType = {
 	isLoading: boolean,
 	message: string,
@@ -61,6 +31,8 @@ const no_null = (s_or_null: ?string, ret: ?string): string => {
 	}
 	return s_or_null;
 }
+
+
 
 export default class PasswordContainer extends React.Component<PropsType, StateType> { 
 	constructor(props: PropsType) {
@@ -141,11 +113,9 @@ export default class PasswordContainer extends React.Component<PropsType, StateT
 				if(json.error) throw new Error(json.error); 
 				that.setState({ message: 'Password changed successfully!', isLoading: false, messageStyle: 'success' });
 
-				
 				setTimeout( () => {
 					that.context.router.history.push(url);
 				}, 1000);
-
 
 			})
 			.catch( error => {

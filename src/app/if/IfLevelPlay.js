@@ -17,6 +17,8 @@ import NumberAnswer from './NumberAnswer';
 import Slider from './Slider';
 import ShortTextAnswer from './ShortTextAnswer';
 
+import { CacheBuster } from './../components/CacheBuster';
+
 import { buildChart } from './charts/Charts.js';
 import { ChartDef } from './../../shared/ChartDef';
 
@@ -645,6 +647,7 @@ export default class IfLevelPlay extends React.Component<PropsType, StateType> {
 
 		return (
 			<div>
+				<CacheBuster />
 				<div id='iflevelplay' style={{position: 'relative', opacity: this.props.show_feedback ? 0.5 : 1 }}>
 					<form name='c' onSubmit={this.handleNext}>
 						{ this._render_page_lead(page, pageI) }

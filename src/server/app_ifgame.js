@@ -74,6 +74,7 @@ router.post('/new_level_by_code/:code',
 
 
 // List a list of classes that the logged in user has access to.
+// Allow access to all by garrettn (admin)
 router.get('/sections', 
 	nocache, require_logged_in_user, 
 	async (req: $Request, res: $Response, next: NextFunction): Promise<any> => {
@@ -82,10 +83,11 @@ router.get('/sections',
 
 		if(username === '') throw new Error('Invalid username '+username+' for sections');
 
-		const sql = `SELECT sections.*, users_sections.role FROM users 
+		const sql = `SELECT distinct sections.*, users_sections.role FROM users 
 				INNER JOIN users_sections on users.iduser = users_sections.iduser
 			    INNER JOIN sections on users_sections.idsection = sections.idsection
-				where users.username = ? ORDER BY title`;
+				WHERE (users.username = ?)
+				ORDER BY title`;
 		const params = [username];
 
 		const sections = await run_mysql_query(sql, params);

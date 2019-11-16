@@ -1,9 +1,9 @@
 // @flow
 import React, {useState } from 'react';
-import { Popover, Card, OverlayTrigger, Modal, Button } from 'react-bootstrap';
-
+import { Table, Popover, Card, OverlayTrigger, Modal, Button } from 'react-bootstrap';
 import { HtmlDiv, IncorrectGlyphicon, CorrectGlyphicon, CompletedGlyphicon } from './../components/Misc';
 import { fill_template } from './../../shared/template.js';
+import { getUserFromBrowser } from './../components/Authentication';
 
 import ExcelTable from './ExcelTable';
 import Choice from './Choice';
@@ -39,7 +39,7 @@ function Popup(props) {
 	const handleShow = () => setShow(true);
 
 	return (
-		<>
+		<div>
 		<Button variant="link" onClick={handleShow}>
 		{props.title}
 		</Button>
@@ -55,7 +55,7 @@ function Popup(props) {
 			</Button>
 		</Modal.Footer>
 		</Modal>
-		</>
+		</div>
 	);
 }
 
@@ -133,7 +133,7 @@ const choicePagePopup = ( (title: string, p1: IfPageChoiceSchema, p2: ?IfPageCho
 	let content = null;
 
 	if(typeof p2 !== 'undefined' && p2 !== null) {
-		content = (<table style={{ fontSize: '60%' }}><tbody>
+		content = (<Table style={{ fontSize: '60%' }}><tbody>
 			<tr>
 				<td>
 					<p>{ p1.template_id }</p>
@@ -152,7 +152,7 @@ const choicePagePopup = ( (title: string, p1: IfPageChoiceSchema, p2: ?IfPageCho
 					<Choice page={p2} editable={false} handleChange={()=>{}} showSolution={true}/>
 				</td>
 			</tr>
-		</tbody></table>);
+		</tbody></Table>);
 		
 	} else {
 		content = (<div>
@@ -170,7 +170,7 @@ const choicePagePopup = ( (title: string, p1: IfPageChoiceSchema, p2: ?IfPageCho
 
 
 const sliderPagePopup = ( (title: string, p1: IfPageSliderSchema, p2: IfPageSliderSchema) => {
-	const content = <table style={{ fontSize: '60%' }}><tbody>
+	const content = <Table style={{ fontSize: '60%' }}><tbody>
 		<tr>
 			<td>
 				<p>{ p1.template_id }</p>
@@ -187,7 +187,7 @@ const sliderPagePopup = ( (title: string, p1: IfPageSliderSchema, p2: IfPageSlid
 				<p>Answered { p2.client } for { p2.solution }</p>
 			</td>
 		</tr>
-		</tbody></table>;
+		</tbody></Table>;
 
 	return <Popup title={title} content={content} />;
 });
@@ -250,6 +250,41 @@ export class IfLevelScoreChart extends React.Component<LevelPropsType> {
 				distortion: DISTORTION_MEDIUM,
 				one: find_slider(pages, 'vislit_bar_unlabeled_slider_e1_meddis'),
 				two: find_slider(pages, 'vislit_bar_unlabeled_slider_e2_ok'),
+			},{
+				title: 'How similar were your two values?',
+				distortion: 0,
+				one: find_slider(pages, 'vislit_bar_unlabeled_slider_f1_ok'),
+				two: find_slider(pages, 'vislit_bar_unlabeled_slider_f2_ok'),
+			},{
+				title: 'How similar were your two values (with a small distortion)?',
+				distortion: DISTORTION_SMALL,
+				one: find_slider(pages, 'vislit_bar_unlabeled_slider_g1_ok'),
+				two: find_slider(pages, 'vislit_bar_unlabeled_slider_g2_smalldis')
+			},{
+				title: 'How similar were your two values (with a small distortion)?',
+				distortion: DISTORTION_SMALL,
+				one: find_slider(pages, 'vislit_bar_unlabeled_slider_h1_smalldis'),
+				two: find_slider(pages, 'vislit_bar_unlabeled_slider_h2_ok'),
+			},{
+				title: 'How similar were your two values (with a medium distortion)?',
+				distortion: DISTORTION_MEDIUM,
+				one: find_slider(pages, 'vislit_bar_unlabeled_slider_i1_ok'),
+				two: find_slider(pages, 'vislit_bar_unlabeled_slider_i2_meddis'),
+			},{
+				title: 'How similar were your two values (with a medium distortion)?',
+				distortion: DISTORTION_MEDIUM,
+				one: find_slider(pages, 'vislit_bar_unlabeled_slider_j1_meddis'),
+				two: find_slider(pages, 'vislit_bar_unlabeled_slider_j2_ok'),
+			},{
+				title: 'How similar were your two values?',
+				distortion: 0,
+				one: find_slider(pages, 'vislit_bar_unlabeled_slider_k1_ok'),
+				two: find_slider(pages, 'vislit_bar_unlabeled_slider_k2_ok'),
+			},{
+				title: 'How similar were your two values?',
+				distortion: 0,
+				one: find_slider(pages, 'vislit_bar_unlabeled_slider_l1_ok'),
+				two: find_slider(pages, 'vislit_bar_unlabeled_slider_l2_ok'),
 			}
 		];
 
@@ -303,7 +338,7 @@ export class IfLevelScoreChart extends React.Component<LevelPropsType> {
 
 		const choice_pairs = [
 			{
-				title: 'Did you pick the same value',
+				title: 'How similar were your two values?',
 				distortion: 0,
 				one: find_choice(pages, 'vislit_bar_unlabeled_choice_a1_ok'),
 				two: find_choice(pages, 'vislit_bar_unlabeled_choice_a2_ok'),
@@ -327,6 +362,41 @@ export class IfLevelScoreChart extends React.Component<LevelPropsType> {
 				distortion: DISTORTION_MEDIUM,
 				one: find_choice(pages, 'vislit_bar_unlabeled_choice_e1_meddis'),
 				two: find_choice(pages, 'vislit_bar_unlabeled_choice_e2_ok'),
+			},{
+				title: 'How similar were your two values?',
+				distortion: 0,
+				one: find_choice(pages, 'vislit_bar_unlabeled_choice_f1_ok'),
+				two: find_choice(pages, 'vislit_bar_unlabeled_choice_f2_ok'),
+			},{
+				title: 'Were were you unaffected by a small distortion?',
+				distortion: DISTORTION_SMALL,
+				one: find_choice(pages, 'vislit_bar_unlabeled_choice_g1_ok'),
+				two: find_choice(pages, 'vislit_bar_unlabeled_choice_g2_smalldis')
+			},{
+				title: 'Were were you unaffected by a small distortion?',
+				distortion: DISTORTION_SMALL,
+				one: find_choice(pages, 'vislit_bar_unlabeled_choice_h1_smalldis'),
+				two: find_choice(pages, 'vislit_bar_unlabeled_choice_h2_ok'),
+			},{
+				title: 'Were were you unaffected by a medium distortion?',
+				distortion: DISTORTION_MEDIUM,
+				one: find_choice(pages, 'vislit_bar_unlabeled_choice_i1_ok'),
+				two: find_choice(pages, 'vislit_bar_unlabeled_choice_i2_meddis'),
+			},{
+				title: 'Were were you unaffected by a medium distortion?',
+				distortion: DISTORTION_MEDIUM,
+				one: find_choice(pages, 'vislit_bar_unlabeled_choice_j1_meddis'),
+				two: find_choice(pages, 'vislit_bar_unlabeled_choice_j2_ok'),
+			},{
+				title: 'How similar were your two values?',
+				distortion: 0,
+				one: find_choice(pages, 'vislit_bar_unlabeled_choice_k1_ok'),
+				two: find_choice(pages, 'vislit_bar_unlabeled_choice_k2_ok'),
+			},{
+				title: 'How similar were your two values?',
+				distortion: 0,
+				one: find_choice(pages, 'vislit_bar_unlabeled_choice_l1_ok'),
+				two: find_choice(pages, 'vislit_bar_unlabeled_choice_l2_ok'),
 			}
 		];
 
@@ -482,6 +552,41 @@ export class IfLevelScoreChart extends React.Component<LevelPropsType> {
 				distortion: DISTORTION_MEDIUM,
 				one: find_choice(pages, 'vislit_line_dollar_e1_ok'),
 				two: find_choice(pages, 'vislit_line_dollar_e2_meddis'),
+			},{
+				title: 'Did you pick the same value?',
+				distortion: 0,
+				one: find_choice(pages, 'vislit_line_dollar_f1_ok'),
+				two: find_choice(pages, 'vislit_line_dollar_f2_ok'),
+			},{
+				title: 'Were were you unaffected by a small distortion?',
+				distortion: DISTORTION_SMALL,
+				one: find_choice(pages, 'vislit_line_dollar_g1_smalldis'),
+				two: find_choice(pages, 'vislit_line_dollar_g2_ok')
+			},{
+				title: 'Were were you unaffected by a small distortion?',
+				distortion: DISTORTION_SMALL,
+				one: find_choice(pages, 'vislit_line_dollar_h1_ok'),
+				two: find_choice(pages, 'vislit_line_dollar_h2_smalldis'),
+			},{
+				title: 'Were were you unaffected by a medium distortion?',
+				distortion: DISTORTION_MEDIUM,
+				one: find_choice(pages, 'vislit_line_dollar_i1_meddis'),
+				two: find_choice(pages, 'vislit_line_dollar_i2_ok'),
+			},{
+				title: 'Were were you unaffected by a medium distortion?',
+				distortion: DISTORTION_MEDIUM,
+				one: find_choice(pages, 'vislit_line_dollar_j1_ok'),
+				two: find_choice(pages, 'vislit_line_dollar_j2_meddis'),
+			},{
+				title: 'Did you pick the same value?',
+				distortion: DISTORTION_MEDIUM,
+				one: find_choice(pages, 'vislit_line_dollar_k1_ok'),
+				two: find_choice(pages, 'vislit_line_dollar_k2_ok'),
+			},{
+				title: 'Did you pick the same value?',
+				distortion: DISTORTION_MEDIUM,
+				one: find_choice(pages, 'vislit_line_dollar_l1_ok'),
+				two: find_choice(pages, 'vislit_line_dollar_l2_ok'),
 			}
 		];
 
@@ -901,7 +1006,6 @@ export class IfLevelScoreChart extends React.Component<LevelPropsType> {
 			this._render_vislit_combo_choice(vislit_combo),
 			this._render_vislit_bar_choice(vislit_bar),
 			this._render_vislit_bar_sliders(vislit_bar),
-			
 		];
 
 		/*
@@ -933,24 +1037,32 @@ export class IfLevelScoreChart extends React.Component<LevelPropsType> {
 			</div>);
 		*/
 
+		const user = getUserFromBrowser();
+
+		console.log(user);
+
+		const details = (user.username === 'garrettn')
+			? <div><h3>Detailed Results</h3>
+						{ results.map( r => r.divs ) }</div>
+			: null;
+
 		return (
 			<div>
 				<Card>
 					<Card.Body>
-						<table style={{ border: 'solid 1px black'}}>
-						<tbody style={{ border: 'solid 1px black'}}>
+						<Table>
+						<tbody>
 							<tr>
-								<th>Code</th>
-								<th>Title</th>
-								<th>Yes</th>
-								<th>No</th>
+								<th>Chart Type</th>
+								<th>Task</th>
+								<th>Correct Answer</th>
+								<th>Incorrect Answer</th>
 								<th>Avg. Error</th>
 							</tr>
 							{ results.map( r => r.trs  ) }
 						</tbody>
-						</table>
-						<h3>Detailed Results</h3>
-						{ results.map( r => r.divs ) }
+						</Table>
+						{ details }
 					</Card.Body>
 				</Card>
 			</div>

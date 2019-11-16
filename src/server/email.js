@@ -1,8 +1,14 @@
 // @flow
-const { EMAIL_ADDRESS, EMAIL_HOST, EMAIL_PASSWORD } = require('./secret.js'); 
+const { DEBUG, EMAIL_ADDRESS, EMAIL_HOST, EMAIL_PASSWORD } = require('./secret.js'); 
 const nodemailer = require('nodemailer');
 
 async function send_email(email: string, title: string, message: string) {
+
+	// If we are in dev mode, then don't actually send. Sending only works on the server.
+	if(DEBUG) {
+		console.log({ email, title, message });
+		return;
+	}
 
 	// Send email.
 	const transporter = nodemailer.createTransport({

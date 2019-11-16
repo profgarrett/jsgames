@@ -92,6 +92,7 @@ if (!Array.prototype.includes) {
 import IfHome from './if/IfHome';
 import { Menu, PageNotFound } from './components/Misc';
 import LoginContainer from './components/LoginContainer';
+import { ProfileContainer } from './components/ProfileContainer';
 import Logout from './components/Logout';
 import Homepage from './components/Homepage';
 import PasswordContainer from './components/PasswordContainer';
@@ -135,6 +136,7 @@ if(window.location.hostname !== 'localhost') {
           <Route path='/password' component={PasswordContainer}></Route>
 					<Route path='/logout' component={Logout}></Route>
 					<Route path='/ifgame' component={IfHome}></Route>
+					<Route path='/profile' component={ProfileContainer}></Route>
 					<Route component={PageNotFound}></Route>
 				</Switch>
 			</ErrorBoundary>
@@ -151,6 +153,7 @@ if(window.location.hostname !== 'localhost') {
           <Route path='/password' component={PasswordContainer}></Route>
 					<Route path='/logout' component={Logout}></Route>
 					<Route path='/ifgame' component={IfHome}></Route>
+					<Route path='/profile' component={ProfileContainer}></Route>
 					<Route component={PageNotFound}></Route>
 				</Switch>
 			</BrowserRouter>);

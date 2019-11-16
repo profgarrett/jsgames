@@ -257,7 +257,7 @@ const test_pages = [
 		solution_f: '=now()',
 	}, {
 		...base,
-		description: 'What is the current month?',
+		description: 'What is the current month? Hint: you will need two functions, one of which is NOW()',
 		solution_f: '=MONTH(NOW())',
 	}, {
 		...base,
@@ -268,16 +268,24 @@ const test_pages = [
 	}, {
 		...base,
 		description: `Three years after the sale, buyers can still get a refund. 
-					Write a formula to give the year in which the refund option expires.`,
+					Write a formula to give the year in which the refund option expires. Hint: find the year, and add to it!`,
 		solution_f: '=YEAR(a1)+3',
 	}, {
 		...base,
-		description: 'What is the current year?',
+		description: 'What is the current year?  Hint: you will need two functions, one of which is NOW()',
 		solution_f: '=YEAR(NOW())',
 	}, {
 		...base,
 		description: 'What is the month of the sale date?',
 		solution_f: '=month(a1)',
+	}, {
+		...base,
+		description: 'What is the year of the sale date?',
+		solution_f: '=year(a1)',
+	}, {
+		...base,
+		description: 'If we give a five year warranty, what year will each warranty be good until? Hint: Find the year, and add to it...',
+		solution_f: '=year(a1)+5',
 	}
 ];
 

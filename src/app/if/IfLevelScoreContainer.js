@@ -22,6 +22,8 @@ type StateType = {
 	_id: number
 };
 
+const DEBUG = true; // load a sample debug score result?
+
 export default class IfLevelScoreContainer extends React.Component<PropsType, StateType> {
 	constructor(props: PropsType) {
 		super(props);
@@ -36,8 +38,11 @@ export default class IfLevelScoreContainer extends React.Component<PropsType, St
 
 	componentDidMount() {
 		let _id = this.props.match.params._id;
+		const url = DEBUG 
+			? '/api/ifgame/debuglevel/surveycharts_wu/'
+			: '/api/ifgame/level/'+_id;
 
-		fetch('/api/ifgame/level/'+_id, {
+		fetch(url, {
 				method: 'get',
 				credentials: 'include',
 				headers: {

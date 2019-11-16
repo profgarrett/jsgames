@@ -83,20 +83,28 @@ export function ChartBar_TopLabelNoAxis(cd_param: ChartDef): Node {
 	// This simulated cutting off the bottom of the chart by setting the min
 	// axis value to MaxValue*Distortion.  Each chart automatically sets the max
 	// axis value to the max data value.
-	const max_value = cd.data.reduce( (accum, d) => {
+	const min_value = cd.data.reduce( (accum, d) => {
 		let keys = Object.keys(d).filter( d => d !== 'Year'); // look in all values but the year
-		let new_max = accum;
+		let new_min = accum;
 
 		keys.forEach( key => {
-			if(d[key] > new_max) new_max = d[key];
+			if(d[key] < new_min) new_min = d[key];
 		})
-		return new_max;
+		return new_min;
+	}, 99999);
+
+	const sum_value = cd.data.reduce( (accum, d) => {
+		let keys = Object.keys(d).filter( d => d !== 'Year'); // look in all values but the year
+
+		return d[keys[0]] + accum;
 	}, 0);
 
+	const avg_value = Math.round(sum_value / cd.data.length);
+
 	if(distortion !== 0) {
-		// If decimal, adjust to the % of first value.
+		// If decimal, adjust to the % of min value.
 		if(distortion < 1) {
-			distortion = Math.round(distortion * max_value);
+			distortion = Math.round(distortion * min_value);
 		}
 		// Create a new data map that adjusts the data to cut off the {distortion} portion.
 		cd.data = cd.data.map( d => {

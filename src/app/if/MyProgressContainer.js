@@ -13,6 +13,7 @@ import { IfLevelSchema } from './../../shared/IfLevelSchema';
 import MyProgress from './MyProgress';
 
 import ForceLogin from './../components/ForceLogin';
+import { CacheBuster } from './../components/CacheBuster';
 
 import type { Node } from 'react';
 
@@ -184,6 +185,7 @@ export default class MyProgressContainer extends React.Component<PropsType, Stat
 				<Row>
 					<Col>
 						<ForceLogin />
+						<CacheBuster/>
 						<div style={{ paddingTop: 10}} />
 						<Message message={this.state.message} style={this.state.messageStyle} />
 						<Loading loading={this.state.isLoadingGrades || this.state.isLoadingUncompletedLevels } />

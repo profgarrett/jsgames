@@ -23,11 +23,16 @@ const _text_base = {
 	show_feedback_on: false,
 };
 
+const vislit_debug = ({
+    gen_type: LinearGen,
+    pages: [
+
+    ]
+});
 
 const vislit = ({
     gen_type: LinearGen,
-    pages: [
-        
+    pages: [        
         {   ..._text_base, 
             description: `There are 11 different parts in this module.  Each focuses on a different chart type.
                 <br/><br/>

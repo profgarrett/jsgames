@@ -346,7 +346,10 @@ class IfPageBaseSchema extends Schema {
 
 	// Type coercion for flow not liking subtypes.
 	toIfPageChoiceSchema(): IfPageChoiceSchema {
-		if( this.type !== 'IfPageChoiceSchema') throw new Error('Invalid type convertion to IfPageChoiceSchema');
+		if( this.type !== 'IfPageChoiceSchema') {
+			debugger;
+			throw new Error('Invalid type convertion to IfPageChoiceSchema')
+		};
 		// $FlowFixMe 
 		return this;
 	}

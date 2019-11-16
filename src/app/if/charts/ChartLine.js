@@ -79,9 +79,7 @@ export function ChartLine_StockDollar(cd_param: ChartDef): Node {
 	for(let i=min; i<= max; i=i+50) {
 		tickValues.push(i);
 	}
-	//console.log(tickValues);
-	// console.log( cd.data)
-	//return null;
+
 
 	return <ResponsiveLine
 		data={cd.data}
