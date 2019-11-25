@@ -25,6 +25,10 @@ const tutorial_pages = [
 		tests: [ { 'a': 0, } ],
 		solution_f: '=2^6', 
 		client_f_format: '',
+		feedback: [
+			{ has: 'values', args: [2, 6] },
+			{ has: 'symbols', args: ['^'] },
+		],
 		code: 'tutorial'
 	},
 	{	type: 'IfPageFormulaSchema',
@@ -42,7 +46,9 @@ const tutorial_pages = [
 		solution_f: '=a1*10^6', 
 		client_f_format: '$',
 		feedback: [
+			{ has: 'values', args: [10, 6] },
 			{ has: 'symbols', args: ['^'] },
+			{ has: 'references', args: ['a1'] }
 		],
 		code: 'tutorial'
 	},

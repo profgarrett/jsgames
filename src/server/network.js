@@ -113,7 +113,7 @@ const return_level_prepared_for_transmit = (level: Object, secure: boolean): Obj
 	if(typeof secure === 'undefined') throw Error('Secure level network/return_level_prepared_for_transmit?');
 
 	const json = level.toJson();
-	let clean_json = secure ? _strip_secrets(json) : json ;
+	let clean_json = false /*secure*/ ? _strip_secrets(json) : json ;
 
 	clean_json.updated = from_mysql_to_utc(clean_json.updated); 
 	clean_json.created = from_mysql_to_utc(clean_json.created); 

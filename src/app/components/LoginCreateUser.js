@@ -1,4 +1,4 @@
-/* @flow */
+// @flow
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Form, Row, Col, Button } from 'react-bootstrap';

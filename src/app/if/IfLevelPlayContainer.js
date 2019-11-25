@@ -72,14 +72,16 @@ export default class IfLevelPlayContainer extends React.Component<PropsType, Sta
 			if(this.state.isLoading) return;
 
 			const i = this.state.selected_page_index;
-			//let new_history_item = { created: new Date(), ...json };
+			//let new_history_item = { dt: new Date(), ...json };
 			//let history = [...this.state.level.pages[i].history, new_history_item];
-		
+			
+
 			// Create a fresh page.
 			let page_json = { ...level.pages[i].toJson()};
 			let page = get_page_schema_as_class(page_json);
 
 			// Update fresh page with new values.
+			
 			page.updateUserFields({ ...page_json, ...json });
 			
 			level = new IfLevelSchema(level.toJson());
@@ -119,7 +121,12 @@ export default class IfLevelPlayContainer extends React.Component<PropsType, Sta
 
 		// Make sure that the user has submitted something 
 		//		UNLESS the timer has expired. THen it's ok to submit, even if we don't have user input.
-		if(!current_page.client_has_answered() && current_page.correct_required && !current_page.time_limit_expired) {
+		if(
+				!current_page.client_has_answered() 
+				&& current_page.correct_required 
+				&& !current_page.time_limit_expired
+				&& !validate_only // allow hints without a submission
+			) {
 			this.setState({
 				message: 'You must provide an answer before continuing.',
 				messageStyle: 'warning'

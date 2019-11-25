@@ -1,7 +1,10 @@
+// @flow
 import React from 'react';
 import PropTypes from 'prop-types';
 import { getUserFromBrowser } from './../components/Authentication';
 import { Modal, Button } from 'react-bootstrap';
+
+import type { Node } from 'react';
 
 const DEBUG = false;
 
@@ -29,7 +32,7 @@ export class CacheBuster extends React.Component<PropsType, StateType> {
 
         this.state = { 
             localhost: document.location.href.substr(0, 'http://localhost'.length) ==='http://localhost',
-            build: null,
+            build: '',
             href: this.get_href(),
         };
 
@@ -71,7 +74,7 @@ export class CacheBuster extends React.Component<PropsType, StateType> {
 	}
 
     // Trigger a hard refresh for the page.
-    reload() {
+    reload(): boolean {
         if (caches) {
             // Service worker cache should be cleared with caches.delete()
             caches.keys().then(function(names) {
@@ -81,6 +84,8 @@ export class CacheBuster extends React.Component<PropsType, StateType> {
 
         // Tell browser to reload from server.
         window.location.reload(true);
+
+        return true;
     }
 
 

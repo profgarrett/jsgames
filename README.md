@@ -3,7 +3,6 @@
 This project provides a set of Javascript games and tutorials.
 
 
-
 ## Getting Started
 
 Requires a server with Node.js installed and a MySql server.
@@ -287,24 +286,6 @@ Called with { has: 'references', args: [ 'a1' ]}
 	references(args): Make sure that references are in answer
 	symbols(args): Make sure that the symbosl are included.  Use ? to include dropdown.
 	functions
-
-### DataFactory
-
-DataFactory is used to generate random data.
-```
-	randDate(plus_or_minus_dats, seed)
-	randPercent(from, to, seed)
-	randB(from, to, seed)
-	randOf([], seed)
-	randNumbers(rows, cols, max_n, seed)
-	randDates(rows, columns, { a_range, b_range, c_range })
-	randName(seed)
-	randPeople(rows)
-	randNumbersAndColors( rows)
-	randomizeList([], seed)
-```
-
-
 
 ## Author
 

@@ -135,6 +135,12 @@ function common_schema(): Object {
 		// questions, whether taken by the same person 2x, or multiple people. ID is generated
 		// by the question template.
 		template_id: { type: 'String', initialize: (s) => isDef(s) ? s : null },
+
+		// Did the viewer look at any hints along the way?
+		// If so, record the number of times.
+		hints_parsed: { type: 'Number', initialize: (s) => isDef(s) ? s : 0 },
+		hints_viewsolution: { type: 'Number', initialize: (s) => isDef(s) ? s : 0 },
+
 	};
 }
 
@@ -158,6 +164,8 @@ class IfPageBaseSchema extends Schema {
 	time_limit_expired: boolean
 	chart_def: ChartDef
 	template_id: string
+	hints_parsed: number
+	hints_viewsolution: number
 
 	// Must be implemented by inheriting classes.
 	+client_has_answered: () => boolean
@@ -1114,6 +1122,12 @@ class IfPageFormulaSchema extends IfPageBaseSchema {
 	// Update any fields for which user has permissions.
 	// Save to re-run.  Can also run upon initial obj creation.
 	updateUserFields(json: Object) {
+		let update = false;
+		let history = {
+			dt: new Date(),
+			code: is_server() ? 'server_update' : 'client_update'
+		};
+
 		if(typeof json === 'undefined') throw new Error('IfGames.updateUserFields(json) is null');
 		if(json.type !== this.type ) throw new Error('Invalid type '+json.type+' in ' + this.type + '.updateUserFields');
 
@@ -1123,37 +1137,50 @@ class IfPageFormulaSchema extends IfPageBaseSchema {
 		if(this.completed && this.client_f !== json.client_f) throw new Error('Invalid attempt to update completed client_f');
 		if(this.completed) return;
 
-		const old_client_f = this.client_f;
-		this.client_f = json.client_f;
-		this.history = Array.from(json.history);
 
+		// Update expired status.  Don't generate a history for this.
 		if(typeof json.time_limit_expired !== 'undefined' ){
 			this.time_limit_expired = json.time_limit_expired;
 		}
 
-		const code = is_server() ? 'server_update' : 'client_update';
 
+		// Update hints
+		if(this.hints_parsed !== json.hints_parsed) {
+			history.hints_parsed = json.hints_parsed;
+			this.hints_parsed = json.hints_parsed;
+			update = true;
+		}
+		if(this.hints_viewsolution !== json.hints_viewsolution) {
+			history.hints_viewsolution = json.hints_viewsolution;
+			this.hints_viewsolution = json.hints_viewsolution;
+			update = true;
+		}
+
+
+		// Update client_f
 		// If the old and new solutions don't match, the null out the correct variable and the client feedback.
 		// We do this as it no longer pertains to the solution.
-		if(old_client_f !== json.client_f) {
+		if(this.client_f !== json.client_f) {
+			this.client_f = json.client_f;
 			this.correct = null;
 			this.client_feedback = null;
-
-			// Update history.
-			this.history.push({
-					dt: new Date(),
-					code: code,
-					client_f: json.client_f, 
-					correct: this.correct
-			});
 
 			// Update level parsing as needed.
 			this.updateSolutionTestResults();
 			this.updateClientTestResults();
 			this.updateCorrect();
+
+			history.client_f = this.client_f;
+			history.correct = this.correct;
+			update = true;
 		}
 
 
+		// Update history.
+		if(update) {
+			this.history = Array.from(json.history);
+			this.history.push(history);
+		}
 	}
 
 

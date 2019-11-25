@@ -64,7 +64,7 @@ const build_score = (pages: Array<IfPageBaseSchema>): any => pages.map( (p: IfPa
 				html = desc + '<br/><div class="well well-sm">'+p.toString()+'</div>'; // style={background} 
 				g = <CorrectGlyphicon />;
 			} else {
-				title = 'Incorrect answer';
+				title = "Sorry, but that's not correct";
 				html = desc + '<br/><div class="well well-sm">'+p.toString()+'</div>';
 				g = <IncorrectGlyphicon />;
 			}
@@ -80,7 +80,9 @@ const build_score = (pages: Array<IfPageBaseSchema>): any => pages.map( (p: IfPa
 					placement='top' 
 					overlay={
 						<Popover title={title} id={'iflevelplayrenderscore_id_'+i}>
+							<Popover.Content>
 							<HtmlDiv html={html} />
+							</Popover.Content>
 						</Popover>}>
 					<span>{g}</span>
 			</OverlayTrigger>);
@@ -101,7 +103,6 @@ const titleTdStyle = {  /* use a title td to center vertically */
 	paddingRight: 0,
 	paddingLeft: 15
 };
-
 
 
 
@@ -134,13 +135,13 @@ export default class IfLevelPlay extends React.Component<PropsType, StateType> {
 		(this: any).handleChange = this.handleChange.bind(this);
 		(this: any).handleNext = this.handleNext.bind(this);
 		(this: any).handleValidate = this.handleValidate.bind(this);
+		(this: any).handleHint = this.handleHint.bind(this);
 		(this: any)._on_keypress = this._on_keypress.bind(this);
 		(this: any)._on_click = this._on_click.bind(this);
-
+		
 		(this: any).state = {
 			lastFeedbackDismissal: new Date(),
 			lastPageI: 0
-//			eventListener: eventListener
 		};
 		
 		document.addEventListener('keydown', this._on_keypress);
@@ -157,7 +158,6 @@ export default class IfLevelPlay extends React.Component<PropsType, StateType> {
 
 	handleValidate(e: ?SyntheticEvent<HTMLButtonElement>) {
 		if(e) e.preventDefault();
-
 
 		// Do not allow submissions within 1/2s of previous ones.
 		// Keeps users who double-click from accidentally re-submitting.
@@ -178,6 +178,16 @@ export default class IfLevelPlay extends React.Component<PropsType, StateType> {
 		this.props.onNext();
 	}
 
+	handleHint() {
+		// Increment the numbers of hints, which generates a history entry.
+		const page = this.props.level.pages[this.props.selected_page_index];
+		const hints_parsed = page.hints_parsed + 1;
+
+		this.props.onChange({ hints_parsed }, () => {
+			// Push to server for feedback.
+			this.handleValidate();
+		});
+	} 
 
 
 	// If we are showing feedback, and enter/escape is hit, then dismiss feedback window.
@@ -351,6 +361,9 @@ export default class IfLevelPlay extends React.Component<PropsType, StateType> {
 
 	// Create the pop-up or pop-over elements
 	_render_page_feedback_inline(page: IfPageBaseSchema, button: Node, orientation: string): Node {
+		return null;
+
+
 		if(!(orientation == 'left' || orientation == 'right')) 
 			throw Error('invalid orientation ' + orientation);
 
@@ -381,42 +394,125 @@ export default class IfLevelPlay extends React.Component<PropsType, StateType> {
 						id='_render_page_feedback_inline'
 						onClick={ this._on_click }
 						>
+						<Popover.Content>
 						{ page.correct ? 
 							<div style={{color: 'rgb(60, 118, 61)'}}>Correct!</div> : 
-							<div style={{color: 'rgb(169, 68, 66)'}}>Incorrect answer</div>
+							<div style={{color: 'rgb(169, 68, 66)'}}>Sorry, that's not correct</div>
 						}
-						Click or press <kbd>enter</kbd>
+						{ page.correct ? null : <p>Try asking for a hint!</p> }
+						</Popover.Content>
 					</Popover>
 				</Overlay>
 			</div>
 		);
 	}
 
-	// We have one or more specific items of feedback to tell the user.
-	// Return a full-screen pop-up IF props.show_feedback
-	_render_page_feedback_popup(page: IfPageBaseSchema): Node {
+	/** 
+		We have one or more specific items of feedback to tell the user.
+		Return a full-screen pop-up IF props.show_feedback
 
-		// Don't render anything if there's no feedback.
-		if( !( page.client_feedback && page.client_feedback.length && page.client_feedback.length > 0) )
-			return null;
+
+		This has several different possible display states.
+		
+		page.complete 
+			page.correct - we have the right answer.
+			!page.correct - wrong
+		page.complete 
+			page.correct - good job
+			!page.correct
+				Feedback.length > 0
+					Solution
+					!Solution
+				!Feedback
+					Solution
+					!Solution
+	 */
+	_render_page_feedback_popup(page: IfPageBaseSchema): Node {
+		const feedback = typeof page.client_feedback === 'undefined' || page.client_feedback === null 
+				? [] 
+				: page.client_feedback;
+		
+		const title = 'Problem Feedback';
+		let body = [];
+		let typedPage = null;
 
 		if( !this.props.show_feedback ) return null;
 
-		// Build specific feedback LIs.
-		const f_li = page.client_feedback.map( (f: string, i: number): Node => <li key={i}>{f}</li>);
+		if(page.completed) {
+			if(page.correct) {
+				// Complete & right
+				body.push(<div>Great job! Go onto the next problem.</div>);
+			} else {
+				// Complete but wrong
+				body.push(<div>Sorry, but that is not the correct answer.</div>);
 
-//style={{ textAlign: 'left', zIndex: 100000 }} 
-//					onClick={ this._on_click }
+				if(	page.type === 'IfPageFormulaSchema' || 
+					page.type === 'IfPageHarsonsSchema') {
+					// Formula page.
+					typedPage = page.toIfPageFormulaSchema();
+
+					body.push(<div>The right answer was <code>{ fill_template(typedPage.solution_f, typedPage.template_values)}</code></div>);
+				}
+
+			}
+
+		} else if(!page.completed){
+			if(page.correct) {
+				// Correct, but not submitted.
+				body.push(<div>Your answer is correct! Go ahead and click the next page button to submit it.</div>);
+
+			} else {
+				// Wrong, but not submitted.
+				if(	page.type === 'IfPageFormulaSchema' || 
+					page.type === 'IfPageHarsonsSchema') {
+
+					// Formula page
+					typedPage = page.toIfPageFormulaSchema();
+					
+					// Item feedback
+					if( feedback.length > 0) {
+						// Add feedback to the page.
+						body.push( <ul>
+							{ feedback.map( (f: string, i: number): Node => <li key={i}>{f}</li>) }
+						</ul>);
+					}
+
+					// Show correct solution
+					if(typedPage.solution_f !== null && typedPage.solution_f.length > 0) {
+
+						// Should we show the solution to the user?
+						if(feedback.length > 0) {
+							// No, still feedback.
+							body.push(<div>Try to resolve the problems above. Once you do that, and if you're still stuck, you can come back here for the solution</div>);
+
+						} else if( typedPage.get_time_in_seconds() < 60 ) {
+							// No, haven't  tried for at least 2 minutes.
+							console.log(typedPage.get_time_in_seconds());
+							body.push(<div>Try to solve the problem on your own for at least a minute. If you're still stuck, come back here for the solution</div>);
+						
+						} else {
+							// Yes, give the solution.
+							body.push(<div>The solution is &nbsp;
+								<code>{ fill_template(typedPage.solution_f, typedPage.template_values)}</code>
+								</div>);
+
+						}
+					}
+
+				} else {
+					// Non formula page.
+					body.push(<div>Sorry, but that is not the correct answer. Please try again</div>);
+				}
+			}
+		}
 
 		// Return full-screen feedback.
 		return (<Modal show={this.props.show_feedback} onHide={this._on_click}>
 					<Modal.Header closeButton>
-						<Modal.Title>Incorrect answer</Modal.Title>
+						<Modal.Title>{ title }</Modal.Title>
 					</Modal.Header>
 					<Modal.Body>
-						<ul>
-							{ f_li }
-						</ul>
+						{ body.map( (d,i) => <div key={'pagefeedbackmodal'+i}>{d}</div>) }
 					</Modal.Body>
 					<Modal.Footer>
 						<Button variant='link' size='sm' >Press <kbd>enter</kbd> or </Button>
@@ -456,6 +552,30 @@ export default class IfLevelPlay extends React.Component<PropsType, StateType> {
 				disabled={button_disabled}
 				>{button_text}</Button>;
 	}
+
+
+	// Create lower 'hint ' button.
+	_render_page_hint_button(page: IfPageBaseSchema): Node {
+		// Use a different color.
+		let button_disabled = this.props.isLoading;
+		
+		// Hint for formula.
+		if(page.type === 'IfPageFormulaSchema' || page.type ==='IfPageHarsonsSchema') {
+			// No hints for test pages.
+			if (page.code !== 'tutorial') return null;
+			
+			return <Button id='_render_page_hint_button' 
+				style={{ marginRight: '5px' }}
+				onClick={this.handleHint}
+				variant='warning'
+				disabled={button_disabled}
+				>Get a hint</Button>;
+		}
+
+		// No hint for other types of pages.
+		return null;
+	}
+
 
 
 	// Return a timer (if needed)
@@ -635,6 +755,7 @@ export default class IfLevelPlay extends React.Component<PropsType, StateType> {
 		
 		const validate_button = this._render_page_validate_button(page);
 		const next_button = this._render_page_submit_button(page);
+		const hint_button = this._render_page_hint_button(page);
 
 		// Setup inline options for pop-up.
 		let button = next_button;
@@ -666,7 +787,7 @@ export default class IfLevelPlay extends React.Component<PropsType, StateType> {
 											{ level.show_progress ? build_score(this.props.level.pages) : null }
 										</td>
 										<td style={rightTdStyle}>
-											
+											{ hint_button }
 											{ next_button }
 										</td>
 									</tr>

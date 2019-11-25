@@ -234,7 +234,9 @@ const build_score = (pages: Array<IfPageBaseSchema>): any =>
 
 	const pop = (
 		<Popover title={title} id={'iflevelplayrenderscore_id_'+i}>
+			<Popover.Content>
 			<HtmlDiv html={html} />
+			</Popover.Content>
 		</Popover>
 	);
 
