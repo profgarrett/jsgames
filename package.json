@@ -21,6 +21,7 @@
     "build6": "ssh profgarrett@excel.fun \"cd excel.fun; rm log.txt; touch tmp/restart.txt\"",
     "startflow": "./node_modules/flow-bin/flow-osx-v0.69.0/flow",
     "startreact": "webpack-dev-server --hot --inline --watch",
+    "startnodeprofile": "nodemon src/server/app.js --prof --watch src --exec babel-node --presets @babel/preset-env --inspect",
     "startnode": "nodemon src/server/app.js --watch src --exec babel-node --presets @babel/preset-env --inspect",
     "startsublime": "open /Applications/Sublime\\ Text.app/Contents/SharedSupport/bin/subl"
   },

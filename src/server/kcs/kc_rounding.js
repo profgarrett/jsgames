@@ -18,7 +18,7 @@ const tutorial = [
 				number is still 1.368</b>.
 				`
 	},
-	{	type: 'IfPageHarsonsSchema',
+	{	type: 'IfPageFormulaSchema',
 		description: `The <code>FLOOR</code> function takes a number and discards any
 			decimals after the <code>.</code> (period or decimal point).`,
 		instruction: `Use <code>=FLOOR(c1)</code> to drop off the pennies from 
@@ -56,7 +56,7 @@ const tutorial = [
 		client_f_format: '$.',
 		code: 'tutorial'
 	},
-	{	type: 'IfPageHarsonsSchema',
+	{	type: 'IfPageFormulaSchema',
 		description: `If we give the <code>ROUND</code> function a different second parameter, 
 			it will round to a different position.  
 			<ul>
@@ -80,7 +80,7 @@ const tutorial = [
 		client_f_format: '$.',
 		code: 'tutorial'
 	},
-	{	type: 'IfPageHarsonsSchema',
+	{	type: 'IfPageFormulaSchema',
 		description: `<code>ROUND</code> has one more trick!  If we give a <i>negative</i>
 			parameter, it rounds to the <i>left</i> of the decimal point!
 			<br/><br/>
@@ -119,7 +119,7 @@ const tutorial = [
 			so on.`
 	},
 	/*
-	{	type: 'IfPageHarsonsSchema',
+	{	type: 'IfPageFormulaSchema',
 		description: `Try some more <code>ROUND</code> practice.
 			`,
 		instruction: `Use <code>ROUND</code> to round the profit to 
@@ -140,7 +140,7 @@ const tutorial = [
 		client_f_format: '$.',
 		code: 'tutorial'
 	},
-	{	type: 'IfPageHarsonsSchema',
+	{	type: 'IfPageFormulaSchema',
 		description: 'Keep going!',
 		instruction: `Use <code>ROUND</code> to round the profit to 
 			the nearest <i>100s</i> (hundreds) of a dollar.`,
@@ -161,7 +161,7 @@ const tutorial = [
 		code: 'tutorial'
 	},
 	*/
-	{	type: 'IfPageHarsonsSchema',
+	{	type: 'IfPageFormulaSchema',
 		description: `We can do math inside of the <code>ROUND</code> function. 
 			For example, if we use 
 			<code>=ROUND(123/100, 0)</code>, it will first calculate 123/100 (which is 1.23),
@@ -185,7 +185,7 @@ const tutorial = [
 		client_f_format: '$.',
 		code: 'tutorial'
 	},
-	{	type: 'IfPageHarsonsSchema',
+	{	type: 'IfPageFormulaSchema',
 		description: 'Now try another example with <code>ROUND</code>.',
 		instruction: `Calculate profit, and then <code>ROUND</code> it to
 			the hundreds of dollars.`,
@@ -207,7 +207,7 @@ const tutorial = [
 		code: 'tutorial'
 	},
 	/*
-	{	type: 'IfPageHarsonsSchema',
+	{	type: 'IfPageFormulaSchema',
 		description: 'Keep going!',
 		instruction: `Calculate profit, and then <code>ROUND</code> it to
 			the nearest hundreds of dollars.`,
@@ -229,7 +229,7 @@ const tutorial = [
 		code: 'tutorial'
 	},
 	*/
-	{	type: 'IfPageHarsonsSchema',
+	{	type: 'IfPageFormulaSchema',
 		description: 'You can do the same type of math with <code>FLOOR</code>!',
 		instruction: 'Use <code>FLOOR</code> to return profit in dollars (with no rounding)',
 		column_formats: [ '$.', '$.'],
@@ -255,7 +255,7 @@ const tutorial = [
 
 const _base = {
 	kcs: [ KC_NAMES.ROUNDING ],
-	type: 'IfPageHarsonsSchema',
+	type: 'IfPageFormulaSchema',
 	instruction: 'Type in the correct formula',
 	column_formats: [ '$.', '$.' ],
 	column_titles: ['Revenue', 'Cost' ],

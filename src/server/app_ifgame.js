@@ -392,6 +392,89 @@ WHERE  ` + sql_where_clauses.join(' AND ') +
 });
 
 
+
+
+/**
+	Get progress for a list of users.
+	Normally passed a section id.
+*/
+router.get('/progress?', nocache, require_logged_in_user,
+	async (req: $Request, res: $Response, next: NextFunction): Promise<any> => {
+	try {
+		const username = get_username_or_emptystring(req, res);
+		const is_faculty_result = await is_faculty(username);
+		if(!is_faculty_result) throw new Error('User does not have permission to see class progress');
+
+		const param_idsection = (typeof req.query.idsection === 'undefined') 
+				? '*' 
+				: parseInt(req.query.idsection, 10);
+
+		const sql_where_values = [username, param_idsection, param_idsection];
+
+		const sql = `
+SELECT DISTINCT iflevels.* 
+FROM iflevels
+INNER JOIN users ON iflevels.username = users.username
+INNER JOIN users_sections 
+	ON users.iduser = users_sections.iduser
+    AND users_sections.role = 'student'
+INNER JOIN sections ON users_sections.idsection = sections.idsection
+INNER JOIN users_sections as faculty_sections 
+	ON faculty_sections.idsection = sections.idsection
+	AND faculty_sections.role = 'faculty'
+INNER JOIN users as faculty 
+	ON faculty.iduser = faculty_sections.iduser
+WHERE 
+	faculty.username = ? 
+	AND (faculty_sections.idsection = ? OR ? = '*') 
+ORDER BY iflevels.updated desc `;
+
+		const select_results = await run_mysql_query(sql, sql_where_values);
+		
+		if(select_results.length === 0) return res.json([ ]);
+
+		const iflevels = select_results.map( l => new IfLevelSchema(l) );
+
+		// Organize into a map of users.
+		const users = turn_array_into_map(iflevels, l => l.username.toLowerCase().trim() );
+
+		// Create a map of user progress.
+		const progress = [];
+		users.forEach( (levels, user) => {
+			// Build user object.
+			const u = { username: user, levels: [] };
+			const level_map = turn_array_into_map(levels, (l) => l.code );
+
+			// Add details for each level.
+			level_map.forEach( (levels, code) => {
+				const completed_levels = levels.filter( l => l.completed );
+				const uncompleted_levels = levels.filter( l => !l.completed );
+
+				u.levels.push({ 
+					code: code, 
+					max: completed_levels.reduce( (max, l) => 
+						max > l.get_test_score_as_percent() 
+						? max 
+						: l.get_test_score_as_percent()
+						, 0),
+					uncompleted: uncompleted_levels.length,
+					completed: completed_levels.length,
+				});
+			});
+
+
+			progress.push(u);
+		});
+
+		return res.json(progress);
+	} catch (e) {
+		log_error(e);
+		next(e);
+	}
+});
+
+
+
 /**
 	Get grades for registered users.
 	
@@ -443,12 +526,15 @@ router.get('/grades?', nocache, require_logged_in_user,
 SELECT DISTINCT iflevels.* 
 FROM iflevels
 INNER JOIN users ON iflevels.username = users.username
-INNER JOIN users_sections ON users.iduser = users_sections.iduser
-INNER JOIN sections ON users_sections.idsection = sections.idsection
+INNER JOIN users_sections 
+	ON users.iduser = users_sections.iduser
+    AND users_sections.role = 'student'
+INNER JOIN sections 
+	ON users_sections.idsection = sections.idsection
 INNER JOIN users_sections as faculty_sections 
 	ON faculty_sections.idsection = sections.idsection
 	AND faculty_sections.role = 'faculty'
-INNER JOIN users as faculty 
+INNER JOIN users as faculty
 	ON faculty.iduser = faculty_sections.iduser
 WHERE ` + sql_where_clauses.join(' AND ') + ' ORDER BY iflevels.updated desc ';
 

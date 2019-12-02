@@ -100,6 +100,7 @@ export default class MyProgressContainer extends React.Component<PropsType, Stat
 				}
 			})
 			.catch( error => {
+				console.log(error);
 				this.setState({ 
 					levels: [],
 					message: 'Error: ' + error,
@@ -127,6 +128,7 @@ export default class MyProgressContainer extends React.Component<PropsType, Stat
 				}
 			})
 			.catch( error => {
+				console.log(error);
 				this.setState({ 
 					grades: [],
 					message: 'Error: ' + error,

@@ -232,7 +232,7 @@ export default class IfLevelPlay extends React.Component<PropsType, StateType> {
 
 	// Universal click handler to dismiss feedback.
 	_on_click(event: any): any {
-		event.stopPropagation();
+		if(typeof event !== 'undefined') event.stopPropagation();
 		this.setState({ lastFeedbackDismissal: new Date() });
 		this.props.onViewFeedback();
 	}
@@ -363,7 +363,7 @@ export default class IfLevelPlay extends React.Component<PropsType, StateType> {
 	_render_page_feedback_inline(page: IfPageBaseSchema, button: Node, orientation: string): Node {
 		return null;
 
-
+		/*
 		if(!(orientation == 'left' || orientation == 'right')) 
 			throw Error('invalid orientation ' + orientation);
 
@@ -405,6 +405,7 @@ export default class IfLevelPlay extends React.Component<PropsType, StateType> {
 				</Overlay>
 			</div>
 		);
+		*/
 	}
 
 	/** 

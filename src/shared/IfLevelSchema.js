@@ -58,15 +58,42 @@ function convert_to_date_if_string( s: any): Date {
 		return s;
 }
 
+// Ensure that any given strings (from JSON.stringify) are parsed into their actual objects.
+const a = (unknown: any): any => typeof unknown === 'string' ? JSON.parse(unknown) : unknown;
+
+// Convert 0/1 to true/false.
+const b = (unknown: any): boolean => unknown === 0 ? false : (unknown === 1 ? true : unknown);
+
+// Convert from UTC int into a date.
+const from_int_dt = (unknown: any): any => {
+	if(typeof unknown === 'string') {
+		throw new Error('Invalid type ' + typeof unknown + ' "'+unknown+'" used in IfLevelSchema');
+	}
+	return new Date(unknown);
+};
+
+class IfLevelSuccess extends Schema {
+	tutorial_pages: number
+	test_pages: number
+	test_pages_correct: number
+
+	get type(): string {
+		return 'IfLevelSuccess';
+	}
+
+	get schema(): Object {
+		return {
+			// The seed value is used to initialize random behavior for pages.
+			// Declaring it in the level allows for predictable behavior as pages are generated.
+			tutorial_pages: { type: 'number', initialize: (i) => isDef(i) ? i : null },
+			test_pages: { type: 'number', initialize: (i) => isDef(i) ? i : null },
+			test_pages_correct: { type: 'number', initialize: (i) => isDef(i) ? i : null },
+		}
+	};
+}
 
 
-
-
-/*
-	A level is the owner object which can be created and used.
-	It contains multiple pages.
-*/
-class IfLevelSchema extends Schema {
+class IfLevelBaseSchema extends Schema {
 	_id: string
 	code: string
 	username: string
@@ -83,39 +110,19 @@ class IfLevelSchema extends Schema {
 
 	completed: boolean
 
-	pages: Array<IfPageBaseSchema>
 	history: Array<Object>
 	allow_skipping_tutorial: boolean
 
 	show_progress: boolean
 
 	get type(): string {
-		return 'IfLevelSchema';
+		return 'IfLevelBaseSchema';
 	}
 
 
-	get schema(): Object {
-		return this._level_schema();
-	}
-
-	
-	// Keep most functionality here, as we will over-ride schema in inheriting IfLevelModel class.
-	_level_schema(): Object {
+	// Keep most functionality here, as we will over-ride schema in inheriting class.
+	_level_schema_no_pages(): Object {
 		// clean-up functions
-
-		// Ensure that any given strings (from JSON.stringify) are parsed into their actual objects.
-		const a = (unknown: any): any => typeof unknown === 'string' ? JSON.parse(unknown) : unknown;
-		
-		// Convert 0/1 to true/false.
-		const b = (unknown: any): boolean => unknown === 0 ? false : (unknown === 1 ? true : unknown);
-
-		// Convert from UTC int into a date.
-		const from_int_dt = (unknown: any): any => {
-			if(typeof unknown === 'string') {
-				throw new Error('Invalid type ' + typeof unknown + ' "'+unknown+'" used in IfLevelSchema');
-			}
-			return new Date(unknown);
-		};
 
 		return {
 			_id: { type: 'String', initialize: (s) => isDef(s) ? s : null },
@@ -141,9 +148,6 @@ class IfLevelSchema extends Schema {
 
 			show_score_after_completing: { type: 'Boolean', initialize: (i) => isDef(i) ? b(i) : true },
 
-			pages: { type: 'Array', initialize: (aJ) => isDef(aJ) ? a(aJ).map(j => {
-						return get_page_schema_as_class(j);
-					}) : [] },
 			history: { type: 'Array', initialize: (aH) => isDef(aH) ? a(aH) : [] },
 
 			updated: { type: 'Date', initialize: (dt) => isDef(dt) ? from_int_dt(dt) : Date() }, 
@@ -155,7 +159,45 @@ class IfLevelSchema extends Schema {
 
 			// Should we show a progress meter while they work on the assignment?  Default to yes.
 			show_progress: { type: 'Boolean', initialize: (s) => isDef(s) ? b(s) : true },
+
+			// Success
+			/*
+			success: { 
+				type: 'String', 
+				initialize: (o_as_string) => isDef(o_as_string) 
+					? new IfLevelSuccess(JSON.parse(o_as_string)) 
+					: null 
+			}
+			*/
 		};
+	}
+}
+
+
+
+/*
+	A level is the owner object which can be created and used.
+	It contains multiple pages.
+*/
+class IfLevelSchema extends IfLevelBaseSchema {
+	pages: Array<IfPageBaseSchema>
+
+	get type(): string {
+		return 'IfLevelSchema';
+	}
+
+	get schema(): Object {
+		return this._level_schema();
+	}
+
+	// Actual called object. Includes pages.
+	_level_schema(): Object {
+		const schema = this._level_schema_no_pages();
+		schema.pages = { type: 'Array', initialize: (aJ) => isDef(aJ) ? a(aJ).map(j => {
+						return get_page_schema_as_class(j);
+					}) : [] };
+		
+		return schema;
 	}
 
 
@@ -296,7 +338,23 @@ class IfLevelSchema extends Schema {
 }
 
 
+/**
+	This is a reduced class, which doesn't include any pages data.
+	Reduces the impact on the server when we are just fetching a few key field.
+*/
+class IfLevelSchema_NoPages extends IfLevelBaseSchema {
+	get type(): string {
+		return 'IfLevelSchema_NoPages'
+	}
+
+	_level_schema(): Object {
+		return this._level_schema_no_pages();
+	}
+}
+
+
 module.exports = {
 	IfLevels,
-	IfLevelSchema
-};
+	IfLevelSchema,
+	IfLevelSchema_NoPages,
+};	

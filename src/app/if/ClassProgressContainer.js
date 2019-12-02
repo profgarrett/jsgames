@@ -1,10 +1,9 @@
 // @flow
-/*
 import React from 'react';
 import Container from 'react-bootstrap/Container';
 import { Row, Col, Breadcrumb  } from 'react-bootstrap';
 
-import IfProgress from './IfProgress';
+import { ClassProgress } from './ClassProgress';
 import { Message, Loading } from './../components/Misc';
 import Filter from './Filter';
 import { DEMO_MODE } from './../../server/secret';
@@ -23,7 +22,7 @@ type ProgressContainerStateType = {
 	data: Array<any>
 };
 
-export default class IfProgressContainer extends React.Component<ProgressPropsType, ProgressContainerStateType> {
+export default class ClassProgressContainer extends React.Component<ProgressPropsType, ProgressContainerStateType> {
 	constructor(props: any) {
 		super(props);
 		this.state = { 
@@ -48,7 +47,7 @@ export default class IfProgressContainer extends React.Component<ProgressPropsTy
 
 		this.setState({ isLoading: true, message: 'Loading progress data'});
 		
-		fetch('/api/ifgame/Progress?'+args.join('&'), {
+		fetch('/api/ifgame/progress?'+args.join('&'), {
 				method: 'get',
 				credentials: 'include',
 				headers: {
@@ -82,7 +81,7 @@ export default class IfProgressContainer extends React.Component<ProgressPropsTy
 		const crumbs = (
 			<Breadcrumb>
 				<Breadcrumb.Item title='home' href='/ifgame/'>If Games</Breadcrumb.Item>
-				<Breadcrumb.Item title='Progress' active>Progress</Breadcrumb.Item>
+				<Breadcrumb.Item title='Progress' active>Class Progress</Breadcrumb.Item>
 			</Breadcrumb>
 			);
 
@@ -110,12 +109,10 @@ export default class IfProgressContainer extends React.Component<ProgressPropsTy
 					<Message message={this.state.message} style={this.state.messageStyle} />
 					<Loading loading={this.state.isLoading } />
 					{ filter }
-					<IfProgress data={this.state.data} />
+					<ClassProgress data={this.state.data} />
 				</Col>
 			</Row>
 			</Container>
 		);
 	}
 }
-
-*/

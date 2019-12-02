@@ -77,7 +77,6 @@ export class ProfileContainer extends React.Component<PropsType, StateType> {
 
 				this.setState({ message: 'Success updating your information!', messageStyle: 'success', isLoading: false});
 				setTimeout( () => {
-					debugger;
 					that.context.router.history.push(url);
 				}, location.host === 'localhost:8080' ? 1000 : 0);  // add a short delay if on dev.
 
