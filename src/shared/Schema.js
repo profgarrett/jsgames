@@ -32,7 +32,6 @@ class Schema {
 				console.log( 'Invalid key ' + key + ' for object');
 				// solution_feedback
 				// throw new Error('Invalid key "' + key + '" in ' + this['type']);
-
 			}
 		}
 

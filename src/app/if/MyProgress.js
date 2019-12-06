@@ -1,7 +1,7 @@
 // @flow
 import React from 'react';
 
-import { IfLevels, IfLevelSchema } from './../../shared/IfLevelSchema';
+import { IfLevels, IfLevelSchema, DEFAULT_TUTORIAL_LEVEL_LIST, GREEN_GRADE, PASSING_GRADE } from './../../shared/IfLevelSchema';
 
 import { InputGroup, ButtonToolbar, DropdownButton, Dropdown, Table, Tooltip, OverlayTrigger, Button } from 'react-bootstrap';
 import { getUserFromBrowser } from './../components/Authentication';
@@ -13,23 +13,6 @@ import { faThumbsUp, faMinus } from '@fortawesome/free-solid-svg-icons';
 import { PrettyDate } from './../components/Misc';
 
 import type { Node } from 'react';
-
-
-/*
-	List of tutorials that should be shown as a row for the table
-	Only used if it's not defined by the section.
-*/
-const DEFAULT_TUTORIAL_LEVEL_LIST = [
-	'tutorial', 'math1', 'math2', 'math3','math4',
-	'functions1', 'functions2', 
-	'if1', 'if2', 'if3', 'if4', 'if5', 'if6', 'if7', 'if8',
-	'surveycharts_wu',
-	];
-
-
-
-const GREEN_GRADE = 85;
-const PASSING_GRADE = 74;
 
 
 

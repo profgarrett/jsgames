@@ -220,6 +220,8 @@ const tutorial: LevelSchemaFactoryType = {
 		pages: [
 			gen_opening,
 			
+			//gen_on_harsons,
+
 			gen_on_references,
 			({
 				gen_type: ShuffleGen,
@@ -228,7 +230,6 @@ const tutorial: LevelSchemaFactoryType = {
 				]
 			}: GenType),
 			
-			//gen_on_harsons,
 			
 			gen_on_choices,
 			gen_on_interface, 

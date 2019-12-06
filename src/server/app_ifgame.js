@@ -403,8 +403,12 @@ router.get('/progress?', nocache, require_logged_in_user,
 	try {
 		const username = get_username_or_emptystring(req, res);
 		const is_faculty_result = await is_faculty(username);
+
+		// Simple perm check.  
 		if(!is_faculty_result) throw new Error('User does not have permission to see class progress');
 
+		// SQL later on will also check to make sure that the user has permission
+		// to see the given course id.
 		const param_idsection = (typeof req.query.idsection === 'undefined') 
 				? '*' 
 				: parseInt(req.query.idsection, 10);
@@ -433,7 +437,10 @@ ORDER BY iflevels.updated desc `;
 		
 		if(select_results.length === 0) return res.json([ ]);
 
-		const iflevels = select_results.map( l => new IfLevelSchema(l) );
+		let iflevels = select_results.map( l => new IfLevelSchema(l) );
+		iflevels = iflevels.map( (l: Object): Object => return_level_prepared_for_transmit(l, true));
+
+		/* temporarily move this to the client side.
 
 		// Organize into a map of users.
 		const users = turn_array_into_map(iflevels, l => l.username.toLowerCase().trim() );
@@ -464,9 +471,12 @@ ORDER BY iflevels.updated desc `;
 
 
 			progress.push(u);
+			
 		});
+		*/
 
-		return res.json(progress);
+		//return res.json(progress);
+		return res.json(iflevels);
 	} catch (e) {
 		log_error(e);
 		next(e);

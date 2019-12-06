@@ -1065,10 +1065,18 @@ class IfPageFormulaSchema extends IfPageBaseSchema {
 
 	constructor(json: Object) {
 		super(json); // set passed fields.
+		
+		/*
+		Only do updates if needed, tested by seeing if .length === 0.
 
-		this.updateSolutionTestResults();
-		this.updateClientTestResults();
+		Note that this means that these need to be manually run when the client or
+		solution values are changed.
+		*/
+		if(this.solution_test_results.length === 0)	this.updateSolutionTestResults();
+		if(this.client_test_results.length === 0) this.updateClientTestResults();
+		
 		this.updateCorrect();
+		
 	}
 
 	get type(): string {
@@ -1187,20 +1195,20 @@ class IfPageFormulaSchema extends IfPageBaseSchema {
 	// Parse each test with the client code.
 	updateClientTestResults() {
 		if(this.client_f === null || this.client_f.length < 1) return;
-		const client_f = this.client_f; //fill_template(this.client_f, this.template_values);
+		const client_f = this.client_f;
 
 		this.client_test_results = this.tests.map( t => this.__parse(client_f, t, this.client_f_format));
 	}
 
 
 	/**
-		If needed, update solutions. This happens upon creation of a new page.
+		Update solutions. This happens upon creation of a new page.
 		Make sure that we actually have a solution before generating anything.
 	*/
 	updateSolutionTestResults() {
-		const solution_f = ''+fill_template(this.solution_f, this.template_values);
 		if(this.solution_f === null || this.solution_f.length < 1) return;
 
+		const solution_f = ''+fill_template(this.solution_f, this.template_values);
 		this.solution_test_results = this.tests.map( t => this.__parse(solution_f, t, this.client_f_format) );
 	}
 

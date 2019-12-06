@@ -19,7 +19,7 @@ export default class IfHome extends React.Component {
 		return (
 				<Switch>
 					<Route exact path='/ifgame/' component={MyProgressContainer} />
-					<Route exact path='/ifgame/class' component={ClassProgressContainer} />
+					<Route exact path='/ifgame/progress' component={ClassProgressContainer} />
 					<Route exact path='/ifgame/grades' component={IfGradesContainer} />
 					<Route exact path='/ifgame/questions' component={IfQuestionsContainer} />
 					<Route exact path='/ifgame/recent' component={IfRecentContainer} /> 

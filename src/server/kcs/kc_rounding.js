@@ -34,7 +34,7 @@ const tutorial = [
 		client_f_format: '$.',
 		code: 'tutorial'
 	},
-	{	type: 'IfPageHarsonsSchema',
+	{	type: 'IfPageFormulaSchema',
 		description: `The <code>ROUND</code> function allows you to choose <i>where</i> to round.
 			It looks like this: <code>=ROUND(1.23, 0)</code>
 			<ul>

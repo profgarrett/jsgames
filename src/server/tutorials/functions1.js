@@ -40,6 +40,7 @@ const functions1 = ({
 					This tutorial also covers the <code>round</code> function.
 					`
 			}, 
+			
 			makeTutorialGenFromKC(kc_summary),
 			makeTutorialNextConcept(),
 			makeTutorialGenFromKC(kc_summary_limit),

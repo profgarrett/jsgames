@@ -307,6 +307,14 @@ class IfLevelSchema extends IfLevelBaseSchema {
 
 	// Return the time from the first edit to the last edit.
 	get_time_in_minutes(): number {
+
+		const time_in_seconds = this.pages.reduce( (accum, p) => p.get_time_in_seconds()+accum, 0);
+		const time_in_minutes = Math.round(time_in_seconds/60);
+		return time_in_minutes;
+		
+		/* Older code uses history items from level, not pages. Has some issues
+			with gaps.
+
 		const first = this.get_first_update_date();
 		const last = this.get_last_update_date();
 
@@ -314,6 +322,7 @@ class IfLevelSchema extends IfLevelBaseSchema {
 		if(typeof first === 'undefined' || typeof last === 'undefined') return 0;
 
 		return Math.round( (last.getTime() - first.getTime()) / 60000 );
+		*/
 	}
 
 	updateUserFields(json: Object) {
@@ -353,8 +362,30 @@ class IfLevelSchema_NoPages extends IfLevelBaseSchema {
 }
 
 
+
+/*
+	List of tutorials that should be shown as a row for the table
+	Only used if it's not defined by the section.
+*/
+const DEFAULT_TUTORIAL_LEVEL_LIST = [
+	'tutorial', 'math1', 'math2', 'math3','math4',
+	'functions1', 'functions2', 
+	'if1', 'if2', 'if3', 'if4', 'if5', 'if6', 'if7', 'if8',
+	'surveycharts_wu',
+	];
+
+
+// Common setting to establish passing grades.
+const GREEN_GRADE = 85;
+const PASSING_GRADE = 74;
+
+
+
 module.exports = {
 	IfLevels,
 	IfLevelSchema,
 	IfLevelSchema_NoPages,
+	DEFAULT_TUTORIAL_LEVEL_LIST,
+	GREEN_GRADE,
+	PASSING_GRADE,
 };	

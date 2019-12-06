@@ -205,28 +205,7 @@ export class PrettyDate extends React.Component {
 		if(typeof this.props.date !== 'object') 
 			throw new Error('Invalid object prop passed to PrettyDate');
 
-		let diff = (((new Date()).getTime() - this.props.date.getTime()) / 1000),
-			day_diff = Math.floor(diff / 86400);
-
-		let message = '';
-		
-		// Error condition if we can't compare.
-		if ( isNaN(day_diff) || day_diff < 0 ) {
-			return (<span>Error translating date</span>);
-		}
-
-		// Message.
-		message = day_diff == 0 && (
-				diff < 60 && 'just now' ||
-				diff < 120 && '1 minute ago' ||
-				diff < 3600 && Math.floor( diff / 60 ) + ' minutes ago' ||
-				diff < 7200 && '1 hour ago' ||
-				diff < 86400 && Math.floor( diff / 3600 ) + ' hours ago') ||
-			day_diff == 1 && 'yesterday' ||
-			day_diff < 7 && day_diff + ' days ago' ||
-			(this.props.date.getMonth()+1) + '/' + this.props.date.getDate() + '/'+ this.props.date.getFullYear();
-			//day_diff < 31 && Math.ceil( day_diff / 7 ) + ' weeks ago' ||
-			//Math.ceil( day_diff / 30 ) + ' months ago';
+		const message = prettyDateAsString(this.props.date);
 			
 		return (
 			<span>{ message}</span>
@@ -237,6 +216,33 @@ PrettyDate.propTypes = {
 	date: PropTypes.object.isRequired
 };
 
+export function prettyDateAsString(d: Object): string {
+
+	let diff = (((new Date()).getTime() - d.getTime()) / 1000),
+		day_diff = Math.floor(diff / 86400);
+
+	let message = '';
+	
+	// Error condition if we can't compare.
+	if ( isNaN(day_diff) || day_diff < 0 ) {
+		return (d.getMonth()+1) + '/' + d.getDate() + '/'+ d.getFullYear();
+	}
+
+	// Message.
+	message = day_diff == 0 && (
+			diff < 60 && 'just now' ||
+			diff < 120 && '1 minute ago' ||
+			diff < 3600 && Math.floor( diff / 60 ) + ' minutes ago' ||
+			diff < 7200 && '1 hour ago' ||
+			diff < 86400 && Math.floor( diff / 3600 ) + ' hours ago') ||
+		day_diff == 1 && 'yesterday' ||
+		day_diff < 7 && day_diff + ' days ago' ||
+		(d.getMonth()+1) + '/' + d.getDate() + '/'+ d.getFullYear();
+		//day_diff < 31 && Math.ceil( day_diff / 7 ) + ' weeks ago' ||
+		//Math.ceil( day_diff / 30 ) + ' months ago';
+
+	return message;
+}
 
 export class PageNotFound extends React.Component {
 	render() {
