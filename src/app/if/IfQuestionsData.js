@@ -154,7 +154,7 @@ function create_summary_question( pages: Array<IfPageBaseSchema>): any {
 		// $FlowFixMe
 		let p: IfPageFormulaSchema = pages[0]; // not 100% correct, but close enough for typing.
 
-		summary_question.kcs = get_kcs( p.solution_f );
+		summary_question.kcs = get_kcs( p );
 		summary_question.solution_f = p.solution_f 
 
 	} else if (pages[0].type === 'IfPageChoiceSchema') {

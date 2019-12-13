@@ -159,7 +159,14 @@ if(DEBUG) {
 
 
 // Return a complexity analysis of the ideal solution.
-function get_kcs( solution_f: string ): Array<Object> {
+function get_kcs( page: any  ): Array<Object> {
+
+	//console.log(page.kcs);
+	return page.kcs;
+
+	/* 
+		Don't use parsing rules, rely on built-in KCs
+	const solution_f = page.solution_f;
 	const kcs = get_function_kcs(solution_f);
 	const parsed_f = parseFeedback( solution_f );
 	
@@ -170,7 +177,7 @@ function get_kcs( solution_f: string ): Array<Object> {
 			kcs.push( { tag: rule.tag } );
 		}
 	});
-
+	*/
 	
 
 	/*
@@ -184,7 +191,7 @@ function get_kcs( solution_f: string ): Array<Object> {
 	});
 	*/
 
-	return kcs;
+	//return kcs;
 }
 
 module.exports = { get_kcs };

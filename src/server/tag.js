@@ -744,6 +744,7 @@ if(DEBUG) {
 	ENTRY_TESTS.forEach( test => {
 		console.log('Testing '+test.tag);
 		test.tests.forEach( t => {
+			// $FlowFixMe
 			let triggered = test.if(t.solution_f, t.client_f, t.page);
 			if( triggered !== t.triggered ) {
 				console.log(['Failed tag test', t]);
@@ -802,6 +803,7 @@ function return_tagged_level(level: IfLevelSchema): IfLevelSchema {
 			}
 
 			ENTRY_TESTS.forEach( test => { 
+				// $FlowFixMe
 				if(test.if( t_solution_f, h.client_f, page, parsed )) {
 					h.tags.push( { tag: test.tag });
 				}

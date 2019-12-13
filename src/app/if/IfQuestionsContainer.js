@@ -100,8 +100,8 @@ export default class IfQuestionsContainer extends React.Component<QuestionsProps
 			);
 
 		const default_type =  'IfPageFormulaSchema|IfPageHarsonsSchema';
-		const default_output = 'tags';
-		const default_level = 'if1';
+		const default_output = 'excel';
+		const default_level = 'math1';
 
 			//'IfPageChoice'; 
 			//'IfPageNumberAnswerSchema'; //'IfPageFormulaSchema|IfPageHarsonsSchema'
@@ -110,7 +110,6 @@ export default class IfQuestionsContainer extends React.Component<QuestionsProps
 			? { pagetypes: default_type, outputs: default_output, levels: default_level, sections: search.get('idsection') }
 			: { pagetypes: default_type, outputs: default_output, levels: default_level };
 		
-
 		const filter = <Filter 
 				onChange={this.onRefreshData} 
 				onReady={this.onReady} 

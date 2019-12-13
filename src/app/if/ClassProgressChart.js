@@ -17,6 +17,12 @@ import { IfLevels } from './../../shared/IfLevelSchema';
 import { DEMO_MODE } from './../../server/secret';
 
 
+const colors = {
+    Completed: 'rgb(102, 166, 30)',
+    "Needs repeating": 'rgb(230, 171, 2)',
+    Uncompleted: 'rgb(231, 41, 138)',
+}
+
 type PropsType = {
 	data: Array<any>,
     show_modal: function,
@@ -104,12 +110,9 @@ export class ClassProgressChart extends React.Component<PropsType, StateType> {
 
 
 
-        const colors = {
-            Completed: 'rgb(102, 166, 30)',
-            "Needs repeating": 'rgb(230, 171, 2)',
-            Uncompleted: 'rgb(231, 41, 138)',
-        }
-
+        // The responsive bar isn't setting width, so grab the width of the screen and use that.
+        // Breaks if the screen is resized, but otherwise ok.
+        // @TODO: Fix responsive bar for screen refreshes.
         // $FlowFixMe
         const width = document.body.clientWidth;
 
@@ -124,7 +127,6 @@ export class ClassProgressChart extends React.Component<PropsType, StateType> {
             margin={{ top: 20, right: 25, left: 25, bottom: 50 }}
             colorBy={ c => c.id }
             colors={ c => colors[c.id] }
-            axisBottom={{      }}
             tooltip={
                 o => {
                     // Show a tooltip with the people.
@@ -153,10 +155,23 @@ export class ClassProgressChart extends React.Component<PropsType, StateType> {
                 itemHeight: 30,
                 itemDirection: 'left-to-right',
                 symbolSize: 20,
+                effects: [
+                    {
+                        on: 'hover',
+                        style: {
+                            itemOpacity: 0.5
+                        }
+                    }
+                ]
             }]}
             isInteractive={true}
             animate={true}
-            
+            onMouseEnter={(data, event) => {
+                event.target.style.opacity = 0.75;
+            }}
+            onMouseLeave={(data, event) => {
+                event.target.style.opacity = 1;
+            }}
         />
         </div>);
     }
@@ -166,7 +181,6 @@ export class ClassProgressChart extends React.Component<PropsType, StateType> {
         if(this.state.code === '') return <div style={{ textAlign:'center'}}><i>Click on a bar to see detailed student progress</i></div>;
         
         const row_data = summaries.filter( s => s.code === this.state.code && s.classification === this.state.classification  );
-        console.log(row_data);
 
 		const columns = [{
 			id: 'username',
@@ -208,7 +222,10 @@ export class ClassProgressChart extends React.Component<PropsType, StateType> {
 
         const pageSize = Math.min(30, row_data.length+1);
 
-        return (<div><h3>Progress for <kbd>{ this.state.classification.toLowerCase() }</kbd> <kbd>{ this.state.code}</kbd></h3><ReactTable
+        return (<div><h3>Progress for &nbsp;
+                    { this.state.classification.toLowerCase() }
+                    &nbsp;
+                    <kbd style={{ backgroundColor: colors[this.state.classification] }}>{ this.state.code}</kbd></h3><ReactTable
 						data={row_data} 
 						filterable={true}
 						columns={columns}
@@ -242,6 +259,7 @@ function create_summaries(levels: Array<Object>): Array<Object>{
 
     // Organize each user into a map of levels.
     const user_levels = {};
+
     users.forEach( (levels, user) => {
         // Sort into buckets by code.
         user_levels[user] = turn_array_into_map(levels, l => l.code);
@@ -269,7 +287,8 @@ function create_summaries(levels: Array<Object>): Array<Object>{
                 return;
             }
 
-            debugger; // error! Shouldn't get here.
+            // Error! Shouldn't get here.
+            throw new Error('ClassProgressChart create_summaries problem, should not get here.');
         });
 
     });
@@ -277,24 +296,9 @@ function create_summaries(levels: Array<Object>): Array<Object>{
     return ret;
 }
 
-
-
-
-function classify(level: IfLevelSchema): string {
-    const score_nullable = level.completed ? level.get_test_score_as_percent() : null;
-    
-    if( !level.completed ) return 'Uncompleted';
-
-    if( level.completed && score_nullable !== null && score_nullable >= PASSING_GRADE) return 'Completed';
-
-    if( level.completed && score_nullable !== null && score_nullable < PASSING_GRADE ) return 'Needs repeating';
-
-
-    throw new Error('Invalid type! classify in ClassProgressChart');
-}
-
-function create_summary(level: IfLevelSchema): Object {
-    const ret = {
+// Return a simplified version of the level for use in the chart.
+function create_summary(level: IfLevelSchema) {
+    return {
         _id: level._id,
         username: level.username,
         created: level.created,
@@ -304,8 +308,6 @@ function create_summary(level: IfLevelSchema): Object {
         completed: level.completed,
         score: level.completed ? level.get_test_score_as_percent() : null,
         pages_length: level.pages.length,
-        classification: classify(level)
+        classification: level.get_completion_status(),
     }
-
-    return ret;
 }

@@ -72,25 +72,7 @@ const from_int_dt = (unknown: any): any => {
 	return new Date(unknown);
 };
 
-class IfLevelSuccess extends Schema {
-	tutorial_pages: number
-	test_pages: number
-	test_pages_correct: number
 
-	get type(): string {
-		return 'IfLevelSuccess';
-	}
-
-	get schema(): Object {
-		return {
-			// The seed value is used to initialize random behavior for pages.
-			// Declaring it in the level allows for predictable behavior as pages are generated.
-			tutorial_pages: { type: 'number', initialize: (i) => isDef(i) ? i : null },
-			test_pages: { type: 'number', initialize: (i) => isDef(i) ? i : null },
-			test_pages_correct: { type: 'number', initialize: (i) => isDef(i) ? i : null },
-		}
-	};
-}
 
 
 class IfLevelBaseSchema extends Schema {
@@ -102,7 +84,8 @@ class IfLevelBaseSchema extends Schema {
 	harsons_randomly_on_username: boolean
 	standardize_formula_case: boolean
 	show_score_after_completing: boolean
-	
+	test_score_as_percent: number
+
 	title: string
 	description: string
 	updated: Date
@@ -131,6 +114,8 @@ class IfLevelBaseSchema extends Schema {
 			// The seed value is used to initialize random behavior for pages.
 			// Declaring it in the level allows for predictable behavior as pages are generated.
 			seed: { type: 'number', initialize: (dbl) => isDef(dbl) ? dbl : Math.round(100000*Math.random()) },
+			
+			test_score_as_percent: { type: 'number', initialize: (int) => isDef(int) ? int : null },
 
 			// Should half of users get Harsons instead of formula pages?
 			harsons_randomly_on_username: { type: 'Boolean', initialize: (i) => isDef(i) ? b(i) : false },
@@ -160,17 +145,9 @@ class IfLevelBaseSchema extends Schema {
 			// Should we show a progress meter while they work on the assignment?  Default to yes.
 			show_progress: { type: 'Boolean', initialize: (s) => isDef(s) ? b(s) : true },
 
-			// Success
-			/*
-			success: { 
-				type: 'String', 
-				initialize: (o_as_string) => isDef(o_as_string) 
-					? new IfLevelSuccess(JSON.parse(o_as_string)) 
-					: null 
-			}
-			*/
 		};
 	}
+
 }
 
 
@@ -287,7 +264,28 @@ class IfLevelSchema extends IfLevelBaseSchema {
 		return Math.round(100 * this.get_test_score_correct() / attempted); 
 	}
 
+	get_completion_status(): string {
+		const level = this;
+		const score_nullable = level.completed ? level.get_test_score_as_percent() : null;
+		let classification = '';
 
+		if(     !level.completed ) {
+			classification = 'Uncompleted';
+
+		} else if( 
+				level.completed && score_nullable !== null 
+				&& score_nullable >= PASSING_GRADE) {
+			classification = 'Completed';
+
+		} else if( 
+				level.completed && score_nullable !== null 
+				&& score_nullable < PASSING_GRADE ) {
+			classification = 'Needs repeating';
+		} else {
+			throw new Error('Invalid type! classify in IfLevelSchema');
+		} 
+		return classification;
+	}
 
 	/*
 		When was this created?
@@ -371,7 +369,7 @@ const DEFAULT_TUTORIAL_LEVEL_LIST = [
 	'tutorial', 'math1', 'math2', 'math3','math4',
 	'functions1', 'functions2', 
 	'if1', 'if2', 'if3', 'if4', 'if5', 'if6', 'if7', 'if8',
-	'surveycharts_wu',
+	//'surveycharts_wu',
 	];
 
 

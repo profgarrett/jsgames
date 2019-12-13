@@ -438,6 +438,7 @@ ORDER BY iflevels.updated desc `;
 		if(select_results.length === 0) return res.json([ ]);
 
 		let iflevels = select_results.map( l => new IfLevelSchema(l) );
+		iflevels = iflevels.map( (l: Object): Object => return_tagged_level(l) );
 		iflevels = iflevels.map( (l: Object): Object => return_level_prepared_for_transmit(l, true));
 
 		/* temporarily move this to the client side.

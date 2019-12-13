@@ -144,6 +144,69 @@ function common_schema(): Object {
 	};
 }
 
+
+/**
+	Class used to quickly transmit essential information to summarize the success / failure of a page.
+	Used to reduce the amount of data to be transmitted across the wire when profs want to see
+	a quick summary of how their class is doing.
+ */
+class IfPageAnswer {
+    username: string
+    sequence_in_level: number
+    kcs: Array<string>
+    answers: Array<string>
+    solution: string
+    solution_pretty: string
+    correct: boolean
+    seconds: number
+
+	// Initialize from a page.
+	build_answers_from_level( level: IfPageLevelSchema ) {
+		const username = level.username;
+		const answers = [];
+		let a = null;
+
+		level.pages.forEach( (p,i)=> {
+			a = new IfPageAnswer();
+			a.username = username;
+			a.sequence_in_level = i;
+			a.kcs = p.kcs;
+			a.answers = this._get_page_history_answers(p);
+			a.solution = p.get_solution();
+			a.solution_pretty = fill_template( a.solution, p.template_values )
+			a.correct = p.correct;
+			a.seconds = p.get_time_in_seconds();
+
+			answers.push(a)
+		});
+
+		return answers;
+	}
+
+	// Grab all of the answers in the given page and return as an array of an array of strings.
+	// [  ['=1', '=23'], ['=32'], ...]
+	_get_page_history_answers(page: IfPageBaseSchema): Array<Array<string>> {
+		
+		const histories = typeof p.history  === 'undefined' || p.history.length == 0 
+			? []
+			: p.history.filter( history => {
+				if( typeof history.tags === 'undefined') return false;
+
+				// If this history has an INTERMEDIATE, no!
+				if( history.tags.filter( t => t.tag === 'INTERMEDIATE' ).length !== 0)  return false;
+
+				// Only give histories for thing we understand, like client_f
+				if( typeof history.client_f === 'undefined') return false;
+
+				return true;
+			});
+		
+		return histories.map( h => h.client_f );
+	}
+
+}
+
+
 /**
 	Common base class for shared behavior.
 */
@@ -172,7 +235,7 @@ class IfPageBaseSchema extends Schema {
 	+updateUserFields: (any) => any
 	+debug_answer: () => any
 	+toString: () => string
-
+	+get_solution: () => string
 
 	get type(): string {
 		return 'IfPageBaseSchema';
@@ -453,6 +516,10 @@ class IfPageTextSchema extends IfPageBaseSchema {
 		this.updateCorrect();
 	}
 
+	// There is no solution for text fields.
+	get_solution() {
+		return '';
+	}
 
 	/*
 		Update any fields for which user has permissions.
@@ -548,6 +615,11 @@ class IfPageNumberAnswerSchema extends IfPageBaseSchema {
 		this.updateCorrect();
 	}
 
+	// Return solution (after changing to string)
+	get_solution() {
+		if(this.solution === null) return '';
+		return ''+this.solution;
+	}
 
 	/*
 		Update any fields for which user has permissions.
@@ -635,6 +707,12 @@ class IfPageSliderSchema extends IfPageBaseSchema {
 		this.client = this.correct !== null ? this.correct : Math.round(Math.random()*this.max);
 		this.updateCorrect();
 	}	
+
+	// Return solution (after changing to string)
+	get_solution() {
+		if(this.solution === null) return '';
+		return ''+this.solution;
+	}
 
 
 	/*
@@ -725,6 +803,11 @@ class IfPageShortTextAnswerSchema extends IfPageBaseSchema {
 		this.updateCorrect();
 	}
 
+	// No solution, return empty string.
+	get_solution() {
+		return '';
+	}
+
 
 	/*
 		Update any fields for which user has permissions.
@@ -791,6 +874,8 @@ class IfPageLongTextAnswerSchema extends IfPageShortTextAnswerSchema {
 		this.client = 'LongText';
 		this.updateCorrect();
 	}
+	
+
 }
 
 
@@ -834,6 +919,11 @@ class IfPageChoiceSchema extends IfPageBaseSchema {
 		return this.client !== null;
 	}
 
+	// If we have one, return teh solution.
+	get_solution() {
+		if(this.solution === '?') return '';
+		return this.solution;
+	}
 
 	// Automatically fill in the answer.
 	// Used for testing out on the server.  Not usable on client side, as 
@@ -955,6 +1045,11 @@ class IfPageParsonsSchema extends IfPageBaseSchema {
 	// Has the user provided input?
 	client_has_answered(): boolean {
 		return this.client_items !== null && this.client_items.length > 0;
+	}
+
+	// Turn solution into a string and return.
+	get_solution() {
+		return this.solution_items.join(', ');
 	}
 
 	// Automatically fill in the answer.
@@ -1082,6 +1177,13 @@ class IfPageFormulaSchema extends IfPageBaseSchema {
 	get type(): string {
 		return 'IfPageFormulaSchema';
 	}
+
+	// Return solution
+	get_solution() {
+		if(this.solution_f === null) return '';
+		return this.solution_f;
+	}
+
 
 	get schema(): Object {
 		let inherit = common_schema();

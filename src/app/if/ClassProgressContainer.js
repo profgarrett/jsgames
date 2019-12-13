@@ -4,6 +4,8 @@ import Container from 'react-bootstrap/Container';
 import { Row, Col, Breadcrumb  } from 'react-bootstrap';
 
 import { ClassProgressChart } from './ClassProgressChart';
+import { ClassProgressKCs } from './ClassProgressKCs';
+import { ClassProgressStudent } from './ClassProgressStudent';
 import { ClassProgressModal } from './ClassProgressModal';
 import { Message, Loading } from './../components/Misc';
 import Filter from './Filter';
@@ -157,9 +159,14 @@ export default class ClassProgressContainer extends React.Component<ProgressProp
 					{ filter }
 					{ empty }
 					<ClassProgressChart data={this.state.data} show_modal={ id => this.show_modal(id) } />
+					<ClassProgressKCs data={this.state.data} />
+
 				</Col>
 			</Row>
 			</Container>
 		);
+		//										
+		//										
+
 	}
 }

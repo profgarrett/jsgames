@@ -66,6 +66,8 @@ export default class IfQuestionsPagesExcelFormula extends React.Component<Detail
 			*/
 			//'a_tag_USES_NUMBER_IN_QUOTES',
 			
+			"a_history_nonintermediate_length",
+
 			//'a_tag_INTERMEDIATE',
 			'a_history_length', 
 			//'a_tag_TYPO', 'a_tag_CORRECT',
@@ -115,7 +117,7 @@ export default class IfQuestionsPagesExcelFormula extends React.Component<Detail
 				q_code: question.description + '. ' + question.instruction,
 				q_solution_f: question.solution_f ? "'" + question.solution_f : '',
 				q_solution_f_length: question.solution_f ? question.solution_f.length : '',
-				q_kcs: question.kcs.map( kc => kc.tag ).join(','),
+				q_kcs: question.kcs.join(','),
 				/*
 				q_complexity: complexity.map( c => c.tag).join(', '),
 				
@@ -154,7 +156,9 @@ export default class IfQuestionsPagesExcelFormula extends React.Component<Detail
 		question.answers.map( answer => {
 			// Only track completed pages.
 			if(!answer.page.completed) return;
-			if(answer.page.type === 'IfPageChoiceSchema') return;
+			if(answer.page.type === 'IfPageChoiceSchema' || answer.page.type === 'IfPageTextSchema' || answer.page.type === 'IfPageParsonsSchema') return;
+
+			console.log(answer);
 
 			const local = {
 				a_standardize_formula_case: answer.page.standardize_formula_case ? 1 : 0,
@@ -178,6 +182,11 @@ export default class IfQuestionsPagesExcelFormula extends React.Component<Detail
 				'a_tag_TYPO': get_tag_n(answer.tags, 'TYPO'),
 				'a_tag_CORRECT': get_tag_n(answer.tags, 'CORRECT'),
 				a_history_length: answer.page.history.length,
+				
+				a_history_nonintermediate_length: answer.page.history.filter(
+						h => get_tag_n(h.tags, 'INTERMEDIATE') === 0
+					).length,
+				
 				a_tutorial: answer.page.code === 'tutorial' ? 1 : 0,
 
 				a_type: answer.page.type.substr(6),
@@ -189,6 +198,8 @@ export default class IfQuestionsPagesExcelFormula extends React.Component<Detail
 				a_answer_all: "'" + this.replace_spans(answer.all),
 				a_sequence_in_level: answer.sequence_in_level,
 				a_history_first_dt: answer.page.history.length > 0 ? formatDate(answer.page.history[0].dt) : null,
+
+				
 				...defaults
 			};
 
@@ -254,6 +265,7 @@ export default class IfQuestionsPagesExcelFormula extends React.Component<Detail
 
 	render(): Node {
 		const levels = this.props.levels;
+		if(levels) console.log(levels[0].questions[4]);
 		const flat = this.flatten_levels(levels);
 		const rows = flat.rows;
 		const columns = flat.columns;

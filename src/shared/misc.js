@@ -26,6 +26,31 @@ function turn_array_into_map( a: Array<any>, get_p: any, sort_order_alpha: boole
 }
 
 
+
+
+function turn_object_keys_into_array( o: any): Array<any> {
+    const results_a = [];
+    for( let key in o ) {
+        if(o.hasOwnProperty(key)) {
+            results_a.push(key);
+        }
+    }
+
+    return results_a;
+}
+
+
+function turn_object_values_into_array( o: any): Array<any> {
+    const results_a = [];
+    for( let key in o ) {
+        if(o.hasOwnProperty(key)) {
+            results_a.push(o[key]);
+        }
+    }
+
+    return results_a;
+}
+
 // Turn a string into a y/n value.
 const random_boolean_from_string = (s: string): boolean => {
 	const s_as_number = s.split('').reduce( (i, s) => s.charCodeAt(0) + i, 1 );
@@ -95,4 +120,6 @@ module.exports = {
 	random_boolean_from_string,
 	arrayDifferent,
 	clean_text_of_tabs_and_newlines,
+	turn_object_keys_into_array,
+	turn_object_values_into_array,
 };

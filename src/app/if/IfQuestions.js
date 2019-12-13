@@ -35,9 +35,10 @@ export default class IfQuestions extends React.Component<PropsType> {
 			return <IfQuestionsChart levels={this.props.levels} />;
 
 		if(this.props.output === 'excel') {
+			//<IfQuestionsExcelChoice levels={levels} />
+			//<IfQuestionsExcelNumberAnswer levels={levels} />
 			return <div>
-				<IfQuestionsExcelChoice levels={levels} />
-				<IfQuestionsExcelNumberAnswer levels={levels} />
+				
 				<IfQuestionsExcelFormulas levels={levels} />
 			</div>;
 		}
