@@ -10,7 +10,8 @@ const { finish_questions } = require('./../pages/finish_questions');
 
 const { kc_exponent } = require('./../kcs/kc_exponent.js');
 const { kc_orderofoperation } = require('./../kcs/kc_orderofoperation.js');
-const { kc_orderofoperation_and_arithmetic } = require('./../kcs/kc_orderofoperation_and_arithmetic.js');
+//const { kc_orderofoperation_and_arithmetic } = require('./../kcs/kc_orderofoperation_and_arithmetic.js');
+const { kc_orderofoperation_and_fractions } = require('./../kcs/kc_orderofoperation_and_fractions.js');
 
 // Definitions.
 const REVIEW_MINIMUM_CORRECT = 3;
@@ -41,8 +42,10 @@ const math3: LevelSchemaFactoryType = {
 			makeTutorialGenFromKC(kc_exponent),
 			makeTutorialNextConcept(),
 			makeTutorialGenFromKC(kc_orderofoperation),
+			//makeTutorialNextConcept(),
+			//makeTutorialGenFromKC(kc_orderofoperation_and_arithmetic),
 			makeTutorialNextConcept(),
-			makeTutorialGenFromKC(kc_orderofoperation_and_arithmetic),
+			makeTutorialGenFromKC(kc_orderofoperation_and_fractions),
 			...finish_questions
 		]
 	}: GenType)
@@ -61,8 +64,10 @@ const math3review: LevelSchemaFactoryType = {
 			makeAdaptiveReviewGenFromKC(kc_exponent, REVIEW_MINIMUM_CORRECT, REVIEW_LIMIT),
 			makeReviewNextConcept(),
 			makeAdaptiveReviewGenFromKC(kc_orderofoperation, REVIEW_MINIMUM_CORRECT, REVIEW_LIMIT),
-			makeReviewNextConcept(),
-			makeAdaptiveReviewGenFromKC(kc_orderofoperation_and_arithmetic, REVIEW_MINIMUM_CORRECT, REVIEW_LIMIT),
+			//makeReviewNextConcept(),
+			//makeAdaptiveReviewGenFromKC(kc_orderofoperation_and_arithmetic, REVIEW_MINIMUM_CORRECT, REVIEW_LIMIT),
+			makeReviewCompleted(),
+			makeAdaptiveReviewGenFromKC(kc_orderofoperation_and_fractions, REVIEW_MINIMUM_CORRECT, REVIEW_LIMIT),
 			makeReviewCompleted(),
 			...finish_questions
 		]

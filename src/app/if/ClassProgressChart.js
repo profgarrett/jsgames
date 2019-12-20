@@ -2,11 +2,11 @@
 import React from 'react';
 import ReactTable from 'react-table';
 import { Table, Modal, Button } from 'react-bootstrap';
-import { turn_array_into_map } from './../../shared/misc.js';
+import { turn_array_into_map, turn_object_keys_into_array } from './../../shared/misc.js';
 import { ResponsiveBar, Bar } from '@nivo/bar'
-import IfLevelScore from './IfLevelScore';
+import { LevelModal } from './LevelModal';
 import { prettyDateAsString } from './../components/Misc';
-import { IfLevelSchema, GREEN_GRADE, PASSING_GRADE, DEFAULT_TUTORIAL_LEVEL_LIST } from './../../shared/IfLevelSchema';
+import { IfLevelSchema, IfLevelPagelessSchema, GREEN_GRADE, PASSING_GRADE, DEFAULT_TUTORIAL_LEVEL_LIST } from './../../shared/IfLevelSchema';
 import { IfPageBaseSchema, IfPageFormulaSchema } from './../../shared/IfPageSchemas';
 
 import type { Node } from 'react';
@@ -24,14 +24,15 @@ const colors = {
 }
 
 type PropsType = {
-	data: Array<any>,
-    show_modal: function,
+	data: Array<IfLevelPagelessSchema>,
 };
 
 type StateType = {
 	// what info are we currently viewing in the table below?
 	code: string,
     classification: string,
+    // are we looking at a particular modal item?
+    modal_id: ?string,
 };
 
 
@@ -41,15 +42,23 @@ export class ClassProgressChart extends React.Component<PropsType, StateType> {
         this.state = {
             code: '',
             classification: '',
+            modal_id: null,
         };
         (this: any)._on_click_to_show_code = this._on_click_to_show_code.bind(this);
         (this: any)._on_click_to_show_modal = this._on_click_to_show_modal.bind(this);
+        (this: any)._on_click_to_hide_modal = this._on_click_to_hide_modal.bind(this);
 	}
 
     // Tell the container to load a modal for the given item.
-    _on_click_to_show_modal( code: string ) {
-        this.props.show_modal( code );
+    _on_click_to_show_modal( modal_id: string ) {
+        this.setState({ modal_id} );
     }
+
+   // Tell the container to load a modal for the given item.
+    _on_click_to_hide_modal( ) {
+        this.setState({ modal_id: null } );
+    }
+
 
     // Focus on a specific item.
     _on_click_to_show_code(code: string, classification: string) {
@@ -67,48 +76,46 @@ export class ClassProgressChart extends React.Component<PropsType, StateType> {
             + (o.length > 15 ? ', and...' : '');
     }
 
-    _render_bar(data: Array<Object>): Node {
+    _render_bar(levels: Array<IfLevelPagelessSchema>): Node {
         const keys = DEFAULT_TUTORIAL_LEVEL_LIST;
+        const map_classifications = turn_array_into_map( levels, l => l.props.classification );
+        const a_classifications = turn_object_keys_into_array(map_classifications);
+
         let c_data = [];
         let code_levels = [];
         let completed = [];
         let uncompleted = [];
         let needs_repeating = [];
 
-        if( true ) {
-            // Build by code and completion
+        // Build by code and completion
 
-            // Break down each item.
-            keys.forEach(key => {
-                // Build lists for each category.
-                code_levels = data.filter( d => d.code === key );
+        // Break down each item.
+        keys.forEach(key => {
+            // Build lists for each category.
+            code_levels = levels.filter( l => l.code === key ).sort( (a, b) => a.username > b.username ? 1 : -1 );
 
-                completed = code_levels.filter( 
-                        d => d.completed && d.score >= PASSING_GRADE );
-                needs_repeating = code_levels.filter( 
-                        d => d.completed && d.score < PASSING_GRADE)
-                uncompleted = code_levels.filter( 
-                        d => !d.completed );
-                
+            // Return object for the chart.
+            let o = {};
+            o.key = key;
 
-                let o = {
-                    key: key,
+            // Build classification for 'Completed' as a higher priority than all others.
+            const completed_users = code_levels.filter( l=> l.props.classification === 'Completed').map( l => l.username );
 
-                    Completed: completed.length,
-                    CompletedTooltip: 'Completed: '+this._render_bar_popup(completed),
+            a_classifications.forEach( classification => {
+                let matching_levels = code_levels.filter( l => l.props.classification === classification );
 
-                    "Needs repeating": needs_repeating.length,
-                    "Needs repeatingTooltip": 'Completed, but with a low grade: ' + this._render_bar_popup(needs_repeating),
+                if(classification !== 'Completed') {
+                    matching_levels = matching_levels
+                            .filter( 
+                                l => typeof completed_users.find( user => user === l.username ) === 'undefined' )
+                }
 
-                    Uncompleted: uncompleted.length,
-                    UncompletedTooltip: 'Incomplete: ' + this._render_bar_popup(uncompleted),
-                };
-                c_data.push(o);
+                o[classification] = matching_levels.length;
+                o[classification+'Tooltip'] = classification + ': ' + this._render_bar_popup(matching_levels);
             });
 
-        }
-
-
+            c_data.push(o);
+        });
 
         // The responsive bar isn't setting width, so grab the width of the screen and use that.
         // Breaks if the screen is resized, but otherwise ok.
@@ -119,7 +126,7 @@ export class ClassProgressChart extends React.Component<PropsType, StateType> {
         return (<div>
             <Bar
             data={ c_data}
-            keys={['Needs repeating', 'Uncompleted', 'Completed', ]}
+            keys={a_classifications}
             indexBy='key'
             height={400}
             width={width*.9}
@@ -176,11 +183,11 @@ export class ClassProgressChart extends React.Component<PropsType, StateType> {
         </div>);
     }
     
-    _render_details(summaries: Array<Object>): Node {
+    _render_details(levels: Array<IfLevelPagelessSchema>): Node {
 
         if(this.state.code === '') return <div style={{ textAlign:'center'}}><i>Click on a bar to see detailed student progress</i></div>;
         
-        const row_data = summaries.filter( s => s.code === this.state.code && s.classification === this.state.classification  );
+        const row_data = levels.filter( l => l.code === this.state.code && l.props.classification === this.state.classification  );
 
 		const columns = [{
 			id: 'username',
@@ -196,19 +203,19 @@ export class ClassProgressChart extends React.Component<PropsType, StateType> {
         },{
 			id: 'minutes',
 			Header: 'Time (minutes)',
-			accessor: l => l.minutes,
+			accessor: (l: IfLevelPagelessSchema) => l.props.minutes,
 			style: {textAlign: 'right'},
 			width: 150
 		}, {
 			id: 'pages',
 			Header: 'Pages Completed',
-			accessor: l => l.pages_length,
+			accessor: l => l.props.pages_length,
 			style: {textAlign: 'right'},
 			width: 200
 		}, {
 			id: 'score',
 			Header: 'Score',
-			accessor: l => !l.completed ? 'Unfinished' : (l.score == null ? '' : l.score + '%'),
+			accessor: l => !l.completed ? 'Unfinished' : (l.props.test_score_as_percent == null ? '' : l.props.test_score_as_percent + '%'),
 			style: {textAlign: 'right'},
 			width: 120
 		}, {
@@ -220,7 +227,7 @@ export class ClassProgressChart extends React.Component<PropsType, StateType> {
 		},
         ];
 
-        const pageSize = Math.min(30, row_data.length+1);
+        const pageSize = 30;
 
         return (<div><h3>Progress for &nbsp;
                     { this.state.classification.toLowerCase() }
@@ -236,78 +243,16 @@ export class ClassProgressChart extends React.Component<PropsType, StateType> {
 	render(): Node {
 		if(this.props.data.length < 1) return null;
         
-        const summaries = create_summaries(this.props.data);
-
+        //const summaries = create_summaries(this.props.data);
+        const modal = this.state.modal_id === null
+            ? null
+            : <LevelModal level={null} level_id={this.state.modal_id} hide={ () => this._on_click_to_hide_modal() } />;
+        
 		return (<div>
-            { this._render_bar(summaries) }
-            { this._render_details(summaries) } 
+            { modal }
+            { this._render_bar(this.props.data) }
+            { this._render_details(this.props.data) } 
         </div>);
 	}
 
-}
-
-
-function create_summaries(levels: Array<Object>): Array<Object>{
-    const iflevels = levels.map( l => new IfLevelSchema(l) );
-    const summaries = iflevels.map( l => create_summary(l) );
-    const ret = [];
-
-    // See if there are any dups, meaning that a student has retaken a level.
-
-    // Organize into a map of users.
-    const users = turn_array_into_map(summaries, l => l.username.toLowerCase().trim() );
-
-    // Organize each user into a map of levels.
-    const user_levels = {};
-
-    users.forEach( (levels, user) => {
-        // Sort into buckets by code.
-        user_levels[user] = turn_array_into_map(levels, l => l.code);
-
-        // Take the "best" item out of each bucket.
-        user_levels[user].forEach( (levels, code) => {
-            // Completed.
-            if( levels.filter(l => l.classification === 'Completed' ).length > 0) {
-                //user_levels[user][code] = [ levels.filter(l => l.completed && l.score >= PASSING_GRADE )[0] ]
-                ret.push(levels.filter(l => l.completed && l.score >= PASSING_GRADE )[0])
-                return;
-            }
-
-            // In progress.
-            if( levels.filter(l => l.classification === 'Uncompleted' ).length > 0) {
-                //user_levels[user][code] = [ levels.filter(l => !l.completed )[0] ]
-                ret.push( levels.filter(l => !l.completed )[0] )
-                return;
-            }
-
-            // Completed, but low grade.
-            if( levels.filter(l => l.classification === 'Needs repeating' ).length > 0) {
-                //user_levels[user][code] = [ levels.filter(l => l.completed && l.score < PASSING_GRADE )[0] ]
-                ret.push(levels.filter(l => l.completed && l.score < PASSING_GRADE )[0])
-                return;
-            }
-
-            // Error! Shouldn't get here.
-            throw new Error('ClassProgressChart create_summaries problem, should not get here.');
-        });
-
-    });
-
-    return ret;
-}
-
-// Return a simplified version of the level for use in the chart.
-function create_summary(level: IfLevelSchema) {
-    return {
-        _id: level._id,
-        username: level.username,
-        created: level.created,
-        updated: level.updated,
-        minutes: level.get_time_in_minutes(),
-        code: level.code, 
-        completed: level.completed,
-        score: level.completed ? level.get_test_score_as_percent() : null,
-        pages_length: level.pages.length,
-        classification: level.get_completion_status(),
-    }
 }

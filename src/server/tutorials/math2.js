@@ -42,17 +42,25 @@ const math2: LevelSchemaFactoryType = {
 				description: `This tutorial shows more uses for multiplication and division.
 						`
 			},
+			
 			makeTutorialGenFromKC(kc_percent_to_decimal),
 			makeTutorialNextConcept(),
+			
 			makeTutorialGenFromKC(kc_percent_to_decimal_over1),
 			makeTutorialNextConcept(),
+			
+			
 			makeTutorialGenFromKC(kc_percent_to_decimal_withdecimal),
 			makeTutorialNextConcept(),
+			
 			makeTutorialGenFromKC(kc_multiply_increase),
 			makeTutorialNextConcept(),
+			
 			makeTutorialGenFromKC(kc_multiply_decrease),
 			makeTutorialNextConcept(),
+			
 			makeTutorialGenFromKC(kc_divide_ratio),
+			
 			...finish_questions
 		]
 	}: GenType)

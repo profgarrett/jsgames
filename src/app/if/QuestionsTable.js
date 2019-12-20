@@ -20,7 +20,7 @@ type DetailPropsType = {
 ////////////////////////////////////////////////////////////////////////////////
 // Class used to show data in a react table that can be easily viewed.
 ////////////////////////////////////////////////////////////////////////////////
-export default class IfPagesTable extends React.Component<DetailPropsType> {
+export default class PagesTable extends React.Component<DetailPropsType> {
 
 
 	// Render a single summary row

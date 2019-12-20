@@ -120,6 +120,7 @@ const _initialize_json =  function(level: IfLevelSchema, original_json: Object):
 	json.template_values = compile_template_values( json, level );
 
 
+
 	// Type-specific setup
 	if( json.type === 'IfPageTextSchema' ) {
 		// Mark that correct is required for all.
@@ -229,6 +230,11 @@ const _initialize_json =  function(level: IfLevelSchema, original_json: Object):
 			const feedback = parseFeedback( json.solution_f );
 			json.feedback = feedback;
 			json.toolbox = feedback;
+		}
+
+		// Pull the setting from level to see if we should allow skipping a tutorial page.
+		if(json.code === 'tutorial' && level.allow_skipping_tutorial) {
+			json.correct_required = false;
 		}
 
 	} else if( json.type === 'IfPageShortTextAnswerSchema' ) {

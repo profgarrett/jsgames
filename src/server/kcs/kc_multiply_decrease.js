@@ -33,7 +33,7 @@ const tutorial_pages = [
 				<br/><br/>
 				Let's show the number of animals after 10% of them run away. Two formulas can do this:
 				<ul>
-					<li><code>=a1*0.9</code>: This approach multiplies the original number of Alpacas by 90%, or 
+					<li><code>=a1*(1-0.9)</code>: This approach multiplies the original number of Alpacas by 90%, or 
 						the original 100% - the 10% leaving.</li>
 					<li><code>=a1-a1*0.1</code>: This approach subtracts the change (10%) from the original number (a1).</li>
 				</ul>
@@ -43,7 +43,7 @@ const tutorial_pages = [
 		column_titles: farm4_data.column_titles,
 		column_formats: farm4_data.column_formats,
 		tests: farm4_data.tests,
-		solution_f: '={cell1_ref}*(1-{n}/100)',
+		solution_f: '={cell1_ref}*(1-0.{n})',
 		instruction: 'If {n}% of the {cell1_title} {sold}, how many <i>total</i> animals will we have?',
 		template_values: {
 			'cell1': 'popCell()',
@@ -54,7 +54,9 @@ const tutorial_pages = [
 			{ 'has': 'no_symbols', args: ['%'] },
 			{ 'has': 'symbols', args: ['*'] },
 		],
-		code: 'tutorial'
+		code: 'tutorial',
+		kcs: [KC_NAMES.PERCENT_TO_DECIMAL, KC_NAMES.MULTIPLY_DECREASE],
+
 	},
 ];
 
@@ -72,7 +74,7 @@ const _multiply_decrease_test_pages_base = {
 	code: 'test',
 	template_values: {
 		'cell1': 'popCell()',
-		'n': '[10-50]',
+		'n': '[10-89]',
 		'sell': 'randOf(sell,lose)',
 		'buy': 'randOf(buy,acquire,get)'
 	},
@@ -81,20 +83,14 @@ const _multiply_decrease_test_pages_base = {
 const test_pages = [
 	{
 		..._multiply_decrease_test_pages_base,
-		solution_f: '={cell1_ref}*(1-{n}/100)', 
+		solution_f: '={cell1_ref}*(1-0.{n})', 
 		description: 'Show the <b>total</b> of {cell1_title} if we {sell} {n}%. Use <b>multiplication</b>.',
-		kcs: ['multiply', 'percentile_to_decimal', 'multiply_decrease']
-	},{
-		// Dup to increase likihood.
-		..._multiply_decrease_test_pages_base,
-		solution_f: '={cell1_ref}*(1-{n}/100)', 
-		description: 'Show the <b>total</b> of {cell1_title} if we {sell} {n}%. Use <b>multiplication</b>.',
-		kcs: ['multiply', 'percentile_to_decimal', 'multiply_decrease']
+		kcs: [KC_NAMES.PERCENT_TO_DECIMAL, KC_NAMES.MULTIPLY_DECREASE]
 	},{
 		..._multiply_decrease_test_pages_base,
-		solution_f: '={cell1_ref}*{n}/100', 
+		solution_f: '={cell1_ref}*0.{n}', 
 		description: 'Show the <b>decrease</b> of {cell1_title} if we {sell} {n}%. Use <b>multiplication</b>.',
-		kcs: ['multiply', 'percentile_to_decimal', 'multiply_decrease']
+		kcs: [KC_NAMES.PERCENT_TO_DECIMAL, KC_NAMES.MULTIPLY_DECREASE]
 	}
 ];
 

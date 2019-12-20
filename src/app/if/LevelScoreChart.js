@@ -207,7 +207,7 @@ const averageNumbers = ( arr: Array<number>): number => {
 
 
 
-export class IfLevelScoreChart extends React.Component<LevelPropsType> {
+export class LevelScoreChart extends React.Component<LevelPropsType> {
 	constructor(props: any) {
 		super(props);
 		(this: any)._render_vislit_bar_sliders = this._render_vislit_bar_sliders.bind(this);

@@ -58,7 +58,7 @@ const glyph = score => {
 //		{ username: 'bob', tutorial: 100, math1: 23 }   <== 23 is 23%.  Undone tutorials are undefined.
 //	]
 //
-// Sections are loaded from http://localhost:8080/api/ifgame/sections/
+// Sections are loaded from http://localhost:8080/api/sections/sections/
 // [
 //		{ idsection, code, year, term, opens, closes, levels, role }
 // ]
@@ -327,8 +327,10 @@ export default class MyProgress extends React.Component<PropsType, StateType> {
 			let course_links = (
 				<InputGroup style={{ marginLeft: 3, marginTop: 3}}>
 					View this section&apos;s&nbsp;
-					<Link key='link1' to={'/ifgame/recent'+p}>recent activity</Link>&nbsp;and&nbsp;
-					<Link key='link2' to={'/ifgame/grades'+p}>grades</Link>.
+					<Link key='link1' to={'/ifgame/kcs'+p}>learning</Link>,&nbsp;
+					<Link key='link2' to={'/ifgame/progress'+p}>progress</Link>,&nbsp;
+					<Link key='link3' to={'/ifgame/recent'+p}>recent activity</Link>&nbsp;and&nbsp;
+					<Link key='link4' to={'/ifgame/grades'+p}>grades</Link>.
 				</InputGroup>
 				);
 

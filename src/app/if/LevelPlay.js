@@ -182,8 +182,9 @@ export default class IfLevelPlay extends React.Component<PropsType, StateType> {
 		// Increment the numbers of hints, which generates a history entry.
 		const page = this.props.level.pages[this.props.selected_page_index];
 		const hints_parsed = page.hints_parsed + 1;
+		const hints_viewsolution = page.hints_viewsolution + 1;
 
-		this.props.onChange({ hints_parsed }, () => {
+		this.props.onChange({ hints_parsed, hints_viewsolution }, () => {
 			// Push to server for feedback.
 			this.handleValidate();
 		});
@@ -486,14 +487,19 @@ export default class IfLevelPlay extends React.Component<PropsType, StateType> {
 							// No, still feedback.
 							body.push(<div>Try to resolve the problems above. Once you do that, and if you're still stuck, you can come back here for the solution</div>);
 
+						} else if ( typedPage.correct ) {
+							body.push(<div>Correct answer!</div>);
+						
 						} else if( typedPage.get_time_in_seconds() < 60 ) {
 							// No, haven't  tried for at least 2 minutes.
-							console.log(typedPage.get_time_in_seconds());
-							body.push(<div>Try to solve the problem on your own for at least a minute. If you're still stuck, come back here for the solution</div>);
+							//console.log(typedPage.get_time_in_seconds());
+							body.push(<div>You have only spent {typedPage.get_time_in_seconds()} seconds
+								trying to solve the problem on your own. Once you try for a minute you 
+								can come back here for the solution.</div>);
 						
 						} else {
 							// Yes, give the solution.
-							body.push(<div>The solution is &nbsp;
+							body.push(<div>Sorry, but your solution is not correct. The correct answer is &nbsp;
 								<code>{ fill_template(typedPage.solution_f, typedPage.template_values)}</code>
 								</div>);
 

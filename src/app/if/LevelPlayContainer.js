@@ -9,7 +9,7 @@ import { Breadcrumb, Col, Row } from 'react-bootstrap';
 import { IfLevelSchema } from './../../shared/IfLevelSchema';
 import { get_page_schema_as_class } from './../../shared/IfPageSchemas';
 
-import IfLevelPlay from './IfLevelPlay';
+import LevelPlay from './LevelPlay';
 
 import { ErrorBoundary, Message } from './../components/Misc';
 import ForceLogin from './../components/ForceLogin';
@@ -31,7 +31,7 @@ type StateType = {
 };
 
 
-export default class IfLevelPlayContainer extends React.Component<PropsType, StateType> {
+export default class LevelPlayContainer extends React.Component<PropsType, StateType> {
 	constructor(props: PropsType) {
 		super(props);
 		this.state = { 
@@ -63,7 +63,7 @@ export default class IfLevelPlayContainer extends React.Component<PropsType, Sta
 	onChange(json: Object, cb: ?Function) {
 
 		if(typeof this.state.level === 'undefined' || this.state.level === null) {
-			throw new Error('Invalid onChange of undefined IfLevelPlayContainer');
+			throw new Error('Invalid onChange of undefined LevelPlayContainer');
 
 		} else {
 			// Don't accept any input if we are currently loading
@@ -102,11 +102,11 @@ export default class IfLevelPlayContainer extends React.Component<PropsType, Sta
 
 		// Make sure that we have a level.		
 		if(typeof this.state.level === 'undefined' || this.state.level === null) 
-			throw new Error('Invalid onSubmit of undefined IfLevelPlayContainer');
+			throw new Error('Invalid onSubmit of undefined LevelPlayContainer');
 
 		// Make sure that we don't already have a future page loaded in front of the current page.
 		if( this.state.selected_page_index < this.state.level.pages.length-1 )
-			throw new Error('current_page_i < this.state.level.pages.length-1 in IfLevelPlayContainer.onSubmit');
+			throw new Error('current_page_i < this.state.level.pages.length-1 in LevelPlayContainer.onSubmit');
 
 		let id = this.state.level._id, 
 			level = this.state.level,
@@ -145,7 +145,7 @@ export default class IfLevelPlayContainer extends React.Component<PropsType, Sta
 
 		// User is allowed to just check the answer.  If they do, set URL
 		// to pass this behavior to the server.
-		const url = '/api/ifgame/level/'+id+'?validate_only=' + (validate_only ? '1': '0'); 
+		const url = '/api/levels/level/'+id+'?validate_only=' + (validate_only ? '1': '0'); 
 
 		// Fire AJAX.
 		fetch(url, {
@@ -238,7 +238,7 @@ export default class IfLevelPlayContainer extends React.Component<PropsType, Sta
 		let _id = this.props.match.params._id;
 
 		// After the screen loads, fire off the initial request populate the level.
-		fetch('/api/ifgame/level/'+_id, {
+		fetch('/api/levels/level/'+_id, {
 				credentials: 'include'
 			})
 			.then( response => response.json() )
@@ -284,8 +284,8 @@ export default class IfLevelPlayContainer extends React.Component<PropsType, Sta
 						<Message spinner={this.state.isLoading } message={this.state.message} style={this.state.messageStyle} />
 						<ErrorBoundary>
 						{ !this.state.level ? '' :
-							<div id='iflevelplaycontainer'>
-								<IfLevelPlay 
+							<div id='levelplaycontainer'>
+								<LevelPlay 
 									level={this.state.level} 
 									selected_page_index={this.state.selected_page_index }
 									onNext={ ()=>this.onNext(false) }
@@ -310,7 +310,7 @@ export default class IfLevelPlayContainer extends React.Component<PropsType, Sta
 	}
 }
 
-IfLevelPlayContainer.contextTypes = {
+LevelPlayContainer.contextTypes = {
 	router: PropTypes.object.isRequired
 };
 

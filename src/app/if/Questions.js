@@ -4,13 +4,13 @@ import React from 'react';
 import { IfLevelSchema } from './../../shared/IfLevelSchema';
 import type { Node } from 'react';
 
-import { create_summary } from './IfQuestionsData';
-import IfQuestionsExcelChoice from './IfQuestionsExcelChoice';
-import IfQuestionsExcelNumberAnswer from './IfQuestionsExcelNumberAnswer';
-import IfQuestionsExcelFormulas from './IfQuestionsExcelFormulas';
-import IfQuestionsTable from './IfQuestionsTable';
-import IfQuestionsTags from './IfQuestionsTags';
-import IfQuestionsChart from './IfQuestionsChart';
+import { create_summary } from './QuestionsData';
+import QuestionsExcelChoice from './QuestionsExcelChoice';
+import QuestionsExcelNumberAnswer from './QuestionsExcelNumberAnswer';
+import QuestionsExcelFormulas from './QuestionsExcelFormulas';
+import QuestionsTable from './QuestionsTable';
+import QuestionsTags from './QuestionsTags';
+import QuestionsChart from './QuestionsChart';
 
 type PropsType = {
 	levels: Array<IfLevelSchema>,
@@ -26,20 +26,20 @@ export default class IfQuestions extends React.Component<PropsType> {
 		const levels = create_summary(this.props.levels);
 
 		if(this.props.output === 'tags')
-			return <IfQuestionsTags levels={levels} />;
+			return <QuestionsTags levels={levels} />;
 
 		if(this.props.output === 'table')
-			return <IfQuestionsTable levels={levels} />;
+			return <QuestionsTable levels={levels} />;
 
 		if(this.props.output === 'chart')
-			return <IfQuestionsChart levels={this.props.levels} />;
+			return <QuestionsChart levels={this.props.levels} />;
 
 		if(this.props.output === 'excel') {
 			//<IfQuestionsExcelChoice levels={levels} />
 			//<IfQuestionsExcelNumberAnswer levels={levels} />
 			return <div>
 				
-				<IfQuestionsExcelFormulas levels={levels} />
+				<QuestionsExcelFormulas levels={levels} />
 			</div>;
 		}
 

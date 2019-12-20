@@ -15,10 +15,29 @@ const farm4_data = {
 };
 
 
+const _base = {
+	type: 'IfPageFormulaSchema',
+	column_titles: farm4_data.column_titles,
+	column_formats: farm4_data.column_formats,
+	tests: farm4_data.tests,
+	client_f_format: '',
+	feedback: [
+		{ 'has': 'no_symbols', args: ['%'] },
+		{ 'has': 'symbols', args: ['*'] },
+	],
+	template_values: {
+		'cell1': 'popCell(a1,b1,c1)',
+		'n': '[14-91]',
+		'n_small': '[2-9]',
+	},	
+	kcs: [ KC_NAMES.PERCENT_TO_DECIMAL_OVER1, KC_NAMES.MULTIPLY ],
+}
+
 
 // Addition
 const tutorial_pages = [
-	{	type: 'IfPageFormulaSchema',
+	{	..._base,
+		code: 'tutorial',
 		description: `We often use talk about percentages, such as 10%. However, Excel does better
 				when we use 0.1, which is the decimal form of a percentage.
 				<br/><br/>
@@ -27,22 +46,20 @@ const tutorial_pages = [
 				<br/><br/>
 				So, if you want to find 20% of a number, use <code>=a1*0.2</code>.
 				`,
-		column_titles: farm4_data.column_titles,
-		column_formats: farm4_data.column_formats,
-		tests: farm4_data.tests,
 		instruction: 'What would {n}% of our {cell1_title} be?',
-		solution_f: '={cell1_ref}*{n}/100',
-		template_values: {
-			'cell1': 'popCell()',
-			'n': '[5-40]'
-		},
-		feedback: [
-			{ 'has': 'no_symbols', args: ['%'] },
-			{ 'has': 'symbols', args: ['*'] },
-		],
+		solution_f: '={cell1_ref}*0.{n}',
 		kcs: [ KC_NAMES.PERCENT_TO_DECIMAL, KC_NAMES.MULTIPLY ],
-		code: 'tutorial'
+	},{	..._base,
+		code: 'tutorial',
+		description: `If the percentage is less than 10%, you will need to add a leading zero. 
+				So, 8% would turn into 0.08. 
+				`,
+		instruction: 'What would {n_small}% of our {cell1_title} be?',
+		solution_f: '={cell1_ref}*0.0{n_small}',
+		kcs: [ KC_NAMES.PERCENT_TO_DECIMAL, KC_NAMES.MULTIPLY ],
 	}
+
+
 ];
 
 
@@ -52,30 +69,20 @@ const tutorial_pages = [
 // 
 
 const _percentile_test_pages_base = {
-	type: 'IfPageFormulaSchema',
-	column_titles: farm4_data.column_titles,
-	column_formats: farm4_data.column_formats,
-	tests: farm4_data.tests,
+	..._base,
 
 	instruction: 'Type in the correct formula. You must use <b>multiplication</b> to solve this problem.',
-	client_f_format: '',
 	code: 'test',
-	feedback: [
-		{ 'has': 'no_symbols', args: ['%'] },
-		{ 'has': 'symbols', args: ['*'] },
-	],
-	template_values: {
-		'cell1': 'popCell(a1,b1,c1)',
-		'n': '[5-35]'
-	},
-	kcs: [ KC_NAMES.PERCENT_TO_DECIMAL, KC_NAMES.MULTIPLY ],
 };
 
 
 const test_pages = [
 	{	..._percentile_test_pages_base,
-		solution_f: '={cell1_ref}*{n}/100', 
+		solution_f: '={cell1_ref}*0.{n}', 
 		description: 'What is {n}% of our {cell1_title}? Use <b>multiplication</b>.',
+	},{	..._percentile_test_pages_base,
+		solution_f: '={cell1_ref}*0.0{n_small}', 
+		description: 'What is {n_small}% of our {cell1_title}? Use <b>multiplication</b>.',
 	}
 ];
 

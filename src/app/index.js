@@ -89,7 +89,7 @@ if (!Array.prototype.includes) {
 }
 
 // Import app components.
-import IfHome from './if/IfHome';
+import Home from './if/Home';
 import { Menu, PageNotFound } from './components/Misc';
 import LoginContainer from './components/LoginContainer';
 import { ProfileContainer } from './components/ProfileContainer';
@@ -152,7 +152,7 @@ if(window.location.hostname !== 'localhost') {
 					<Route path='/login' component={LoginContainer}></Route>
           <Route path='/password' component={PasswordContainer}></Route>
 					<Route path='/logout' component={Logout}></Route>
-					<Route path='/ifgame' component={IfHome}></Route>
+					<Route path='/ifgame' component={Home}></Route>
 					<Route path='/profile' component={ProfileContainer}></Route>
 					<Route component={PageNotFound}></Route>
 				</Switch>

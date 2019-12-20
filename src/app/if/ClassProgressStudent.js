@@ -6,7 +6,6 @@ import { turn_array_into_map } from './../../shared/misc.js';
 import { HtmlDiv } from './../components/Misc.js';
 import { ResponsiveBar, Bar } from '@nivo/bar'
 import { Pie } from '@nivo/pie'
-import IfLevelScore from './IfLevelScore';
 import { prettyDateAsString } from './../components/Misc';
 import { IfLevelSchema, GREEN_GRADE, PASSING_GRADE, DEFAULT_TUTORIAL_LEVEL_LIST } from './../../shared/IfLevelSchema';
 import { IfPageBaseSchema, IfPageFormulaSchema } from './../../shared/IfPageSchemas';
@@ -39,7 +38,7 @@ const colors = {
 
 const MAX_VALUE_FOR_CHART = 120;
 
-export class ClassProgressKCs extends React.Component<PropsType, StateType> {
+export class ClassProgressStudent extends React.Component<PropsType, StateType> {
 	constructor(props: any) {
 		super(props);
         this.state = {

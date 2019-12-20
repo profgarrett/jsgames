@@ -30,12 +30,21 @@ function turn_array_into_map( a: Array<any>, get_p: any, sort_order_alpha: boole
 
 function turn_object_keys_into_array( o: any): Array<any> {
     const results_a = [];
-    for( let key in o ) {
-        if(o.hasOwnProperty(key)) {
-            results_a.push(key);
-        }
-    }
 
+	// Test for map.
+	if( o instanceof Map) {
+		o.forEach( (values, key) => results_a.push(key))
+
+	} else {
+		// Assume regular object.
+		for( let key in o ) {
+			if(o.hasOwnProperty(key)) {
+				results_a.push(key);
+			}
+		}
+		
+
+	}
     return results_a;
 }
 

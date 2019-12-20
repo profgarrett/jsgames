@@ -25,7 +25,7 @@ const avg_of = function(obj: Object, arr: Array<any>): number {
 };
 
 
-export default class IfGrades extends React.Component<PropsType> {
+export default class Grades extends React.Component<PropsType> {
 	constructor(props: any) {
 		super(props);
 	}

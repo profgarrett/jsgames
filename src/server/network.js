@@ -1,6 +1,6 @@
 //@flow
 const { JWT_AUTH_SECRET } = require('./secret.js'); 
-const { IfLevelSchema } = require('./../shared/IfLevelSchema');
+const { IfLevelSchema, IfLevelPagelessSchema } = require('./../shared/IfLevelSchema');
 const { from_mysql_to_utc, run_mysql_query } = require('./mysql');
 const bcrypt = require('bcryptjs');
 
@@ -107,7 +107,7 @@ let return_level_without = (input: any, without: any) => {
 // @level_or_levels can deal with being either an array or a single item.
 const return_level_prepared_for_transmit = (level: Object, secure: boolean): Object => {
 	// Do not accept IfLevels. Instead, need json.
-	if(!(level instanceof IfLevelSchema)) {
+	if(!(level instanceof IfLevelSchema || level instanceof IfLevelPagelessSchema)) {
 		throw new Error('Should submit IfLevel, not JSON');
 	}
 	if(typeof secure === 'undefined') throw Error('Secure level network/return_level_prepared_for_transmit?');

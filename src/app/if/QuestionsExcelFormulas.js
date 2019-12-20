@@ -28,7 +28,7 @@ function get_tag_n( tags: Array<any>, tag: string): number {
 // Convert the data structure into a more useful approch.
 
 
-export default class IfQuestionsPagesExcelFormula extends React.Component<DetailPropsType> {
+export default class QuestionsPagesExcelFormula extends React.Component<DetailPropsType> {
 
 
 	// Convert the nested structure into a flat table of common values.

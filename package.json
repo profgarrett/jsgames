@@ -22,6 +22,7 @@
     "startflow": "./node_modules/flow-bin/flow-osx-v0.69.0/flow",
     "startreact": "webpack-dev-server --hot --inline --watch",
     "startnodeprofile": "nodemon src/server/app.js --prof --watch src --exec babel-node --presets @babel/preset-env --inspect",
+    "convert_nodeprofit": "node --prof-process isolate-0xnnnnnnnnnnnn-v8.log > processed.txt",
     "startnode": "nodemon src/server/app.js --watch src --exec babel-node --presets @babel/preset-env --inspect",
     "startsublime": "open /Applications/Sublime\\ Text.app/Contents/SharedSupport/bin/subl"
   },
@@ -36,6 +37,7 @@
     "@babel/cli": "^7.6.4",
     "@babel/core": "^7.6.4",
     "@babel/node": "^7.6.3",
+    "@babel/plugin-proposal-class-properties": "^7.7.4",
     "@babel/plugin-proposal-object-rest-spread": "^7.6.2",
     "@babel/plugin-transform-flow-strip-types": "^7.6.3",
     "@babel/polyfill": "^7.6.0",

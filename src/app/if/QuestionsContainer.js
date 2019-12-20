@@ -3,7 +3,7 @@ import React from 'react';
 import Container from 'react-bootstrap/Container';
 import { Row, Col, Breadcrumb } from 'react-bootstrap';
 
-import IfQuestions from './IfQuestions';
+import Questions from './Questions';
 import { Message, Loading } from './../components/Misc';
 import Filter from './Filter';
 
@@ -25,7 +25,7 @@ type QuestionsContainerStateType = {
 	levels: Array<IfLevelSchema>
 };
 
-export default class IfQuestionsContainer extends React.Component<QuestionsPropsType, QuestionsContainerStateType> {
+export default class QuestionsContainer extends React.Component<QuestionsPropsType, QuestionsContainerStateType> {
 	constructor(props: any) {
 		super(props);
 		this.state = { 
@@ -60,7 +60,7 @@ export default class IfQuestionsContainer extends React.Component<QuestionsProps
 
 		this.setState({ isLoading: true, message: 'Loading question data'});
 
-		fetch('/api/ifgame/questions?' +args.join('&'), {
+		fetch('/api/reports/questions?' +args.join('&'), {
 				method: 'get',
 				credentials: 'include',
 				headers: {
@@ -149,7 +149,7 @@ export default class IfQuestionsContainer extends React.Component<QuestionsProps
 						<Message message={this.state.message} style={this.state.messageStyle} />
 						<Loading loading={this.state.isLoading } />
 						{ filter }
-						<IfQuestions levels={filtered_levels} output={this.state.outputs} />
+						<Questions levels={filtered_levels} output={this.state.outputs} />
 					</Col>
 				</Row>
 			</Container>

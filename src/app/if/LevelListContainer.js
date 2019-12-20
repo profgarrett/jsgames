@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 
 import type { Node } from 'react';
 
-import IfLevelList from './IfLevelList';
+import LevelList from './LevelList';
 import Container from 'react-bootstrap/Container';
 import { Breadcrumb, Row, Col, Button } from 'react-bootstrap';
 import { Message, Loading } from './../components/Misc';
@@ -27,7 +27,7 @@ type StateType = {
 };
 
 
-export default class IfLevelListContainer extends React.Component<PropsType, StateType> {
+export default class LevelListContainer extends React.Component<PropsType, StateType> {
 
 	constructor(props: PropsType) {
 		super(props);
@@ -49,7 +49,7 @@ export default class IfLevelListContainer extends React.Component<PropsType, Sta
 		const code = this.props.match.params._code ? this.props.match.params._code : 'all';
 		
 		// Fetch lessons
-		fetch('/api/ifgame/levels/byCode/'+code, {
+		fetch('/api/levels/levels/byCode/'+code, {
 				credentials: 'include'
 			})
 			.then( response => response.json() )
@@ -76,7 +76,7 @@ export default class IfLevelListContainer extends React.Component<PropsType, Sta
 			this.setState({ reviews: [], isLoadingReviews: false}); 
 		} else {
 			// Fetch reviews
-			fetch('/api/ifgame/levels/byCode/'+code+'review', {
+			fetch('/api/levels/levels/byCode/'+code+'review', {
 					credentials: 'include'
 				})
 				.then( response => response.json() )
@@ -104,7 +104,7 @@ export default class IfLevelListContainer extends React.Component<PropsType, Sta
 	insertLevel(code: string) {
 		this.setState({ isLoadingReviews: true, isLoadingLessons: true });
 
-		fetch('/api/ifgame/new_level_by_code/'+code, {
+		fetch('/api/levels/new_level_by_code/'+code, {
 				method: 'post',
 				credentials: 'include',
 				headers: {
@@ -237,7 +237,7 @@ export default class IfLevelListContainer extends React.Component<PropsType, Sta
 				: <div>
 					<h5 style={{marginTop:'2rem'}}>Lesson</h5>
 					<p style={p_style} >{ page_level.description }</p>
-					<IfLevelList levels={this.state.lessons} />
+					<LevelList levels={this.state.lessons} />
 					{ this._render_lesson_button(code) }
 				</div>;
 
@@ -247,7 +247,7 @@ export default class IfLevelListContainer extends React.Component<PropsType, Sta
 					<h5 style={{marginTop:'2rem'}}>Review</h5>
 					<p style={p_style}>This review will help you remember the outcomes from the lesson.
 						Wait a week after completing the lesson before starting it.</p>
-					<IfLevelList levels={this.state.reviews} />
+					<LevelList levels={this.state.reviews} />
 					{ this._render_review_button(code) }		
 				</div>;
 
@@ -274,6 +274,6 @@ export default class IfLevelListContainer extends React.Component<PropsType, Sta
 	}
 
 }
-IfLevelListContainer.contextTypes = {
+LevelListContainer.contextTypes = {
 	router: PropTypes.object.isRequired
 };

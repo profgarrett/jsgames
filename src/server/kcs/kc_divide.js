@@ -8,13 +8,13 @@ import type { AdaptiveKC } from './kc';
 // Common Data
 
 const farm3_data = {
-	column_titles: ['Alpacas', 'Baboons', 'Camels', 'Total Animals' ],
+	column_titles: ['Alpacas', 'Baboons', 'Camels', 'Dogs' ],
 	column_formats: [ ',', ',', ',', ''],
 	tests: [
-			{ 'a': 70, 'b': 11, 'c': 19, 'd': 100 }, 
-			{ 'a': 30, 'b': 4, 'c': 10, 'd': 44 }, 
-			{ 'a': 0, 'b': 4, 'c': 0, 'd': 4 }, 
-			{ 'a': 60, 'b': 4, 'c': 0, 'd': 64 }, 
+			{ 'a': 70, 'b': 11, 'c': 19, 'd': 10 }, 
+			{ 'a': 30, 'b': 4, 'c': 10, 'd': 14 }, 
+			{ 'a': 0, 'b': 4, 'c': 0, 'd': 14 }, 
+			{ 'a': 60, 'b': 4, 'c': 0, 'd': 61 }, 
 		]
 };
 
@@ -41,7 +41,8 @@ const tutorial_pages = [
 			{ 'has': 'references', args: ['a1'] },
 			{ 'has': 'symbols', args: ['/']}
 		],
-		code: 'tutorial'
+		code: 'tutorial',
+		kcs: [KC_NAMES.DIVIDE]
 	},
 	{	type: 'IfPageTextSchema',
 		description: `There are a lot of words that show you should use division.  
@@ -69,7 +70,8 @@ const _divide_test_pages_base = {
 	column_formats: farm3_data.column_formats,
 	tests: farm3_data.tests,
 
-	instruction: 'Type in the correct formula using <b>division</b>',
+	instruction: `Type in the correct formula using <b>division</b>. 
+		The computer will not give credit for solutions using multiplication.`,
 	client_f_format: '',
 	template_values: {
 		'n': '[2-10]',
@@ -82,15 +84,19 @@ const _divide_test_pages_base = {
 const test_pages = [
 	{	..._divide_test_pages_base,
 		solution_f: '={cell1_ref}/2', 
-		description: 'What is half of the {cell1_title}?',
+		description: 'What is half of the {cell1_title} column?',
 	},{
 		..._divide_test_pages_base,
 		solution_f: '={cell1_ref}/4', 
-		description: 'What is a quarter of the {cell1_title}?',
+		description: 'What is a third of the {cell1_title} column?',
+	},{
+		..._divide_test_pages_base,
+		solution_f: '={cell1_ref}/4', 
+		description: 'What is a quarter of the {cell1_title} column?',
 	},{
 		..._divide_test_pages_base,
 		solution_f: '={cell1_ref}/10', 
-		description: 'What is a tenth of the {cell1_title}?',
+		description: 'What is a tenth of the {cell1_title} column?',
 	},{
 		..._divide_test_pages_base,
 		solution_f: '={cell1_ref}/{n}', 

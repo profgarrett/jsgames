@@ -37,7 +37,8 @@ const tutorial_pages = [
 			{ 'has': 'symbols', args: ['/'] },
 			{ 'has': 'references', args: ['{cell1_ref}', 'd1'] },
 		],
-		code: 'tutorial'
+		code: 'tutorial',
+		kcs: [KC_NAMES.DIVIDE, KC_NAMES.DIVIDE_RATIO],
 	},
 	{	type: 'IfPageFormulaSchema',
 		description: `Note that division gives us a decimal number, which Excel can be told to
@@ -57,7 +58,8 @@ const tutorial_pages = [
 			{ 'has': 'references', args: ['{cell1_ref}', 'd1'] },
 		],
 		client_f_format: '%',
-		code: 'tutorial'
+		code: 'tutorial',
+		kcs: [KC_NAMES.DIVIDE, KC_NAMES.DIVIDE_RATIO],
 	},
 ];
 

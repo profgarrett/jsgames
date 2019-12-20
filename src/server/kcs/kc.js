@@ -39,6 +39,7 @@ const KC_NAMES = {
 	EXPONENT: 'kc_exponent',
 	ORDEROFOPERATION: 'kc_orderofoperation',
 	ORDEROFOPERATION_AND_ARITHMETIC: 'kc_orderofoperation_and_arithmetic',
+	ORDEROFOPERATION_AND_FRACTIONS: 'kc_orderofoperation_and_fractions',
 
 	// Math4
 	EXPONENT_GROWTH: 'kc_exponent_growth',

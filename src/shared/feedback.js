@@ -1,6 +1,7 @@
 // @flow
 const { fill_template } = require('./template');
 const { IfPageFormulaSchema, IfPageHarsonsSchema } = require('./../shared/IfPageSchemas');
+const { parseFeedback } = require('./parseFeedback');
 
 // Feedback types are used by the server to create custom feedback for page submissions.
 // They are referred to frequently inside of tutorials for validation and more useful
@@ -72,8 +73,17 @@ const values = (page: IfPageFormulaSchema | IfPageHarsonsSchema, values: Array<n
 };
 
 
-// Ensure that the given page has no numbers in it.  It should only use references.
+// Ensure that the given page has no numbers in it.  It should only use references and symbols.
 const no_values = (page: IfPageFormulaSchema | IfPageHarsonsSchema): ?string => {
+	if(page.client_f === null || page.client_f === '' || page.client_f.length < 2 ) return null;
+
+	const feedback = parseFeedback(page.client_f);
+	
+	const values = feedback.filter( f => f.has === 'values');
+	if(values.length < 1) return null;
+
+	if(values[0].args.length === 1) return 'You should not have "' + values[0].args[0] + '" in your formula. Use references instead.';
+	if(values[0].args.length > 1) return 'You should not have the following values: "' + values[0].args.join('", "') + '". Use references instead.';
 
 	return null;
 };
@@ -83,7 +93,7 @@ const no_values = (page: IfPageFormulaSchema | IfPageHarsonsSchema): ?string => 
 const symbols = (page: IfPageFormulaSchema | IfPageHarsonsSchema, symbols: Array<string>): ?string => {
 	let missing = [], symbol = '';
 
-	if(page.client_f === null) return null;
+	if(page.client_f === null || page.client_f === '' || page.client_f.length < 2 ) return null;
 
 	const client_f = fill_template(page.client_f.toLowerCase(), page.template_values);
 

@@ -62,7 +62,7 @@ export default class MyProgressContainer extends React.Component<PropsType, Stat
 		}
 	
 		// Fetch sections.
-		fetch('/api/ifgame/sections', {
+		fetch('/api/sections/sections', {
 				credentials: 'include'
 			})
 			.then( response => response.json() )
@@ -86,7 +86,7 @@ export default class MyProgressContainer extends React.Component<PropsType, Stat
 			});
 
 		// Fetch levels
-		fetch('/api/ifgame/levels/byCompleted/false', {
+		fetch('/api/levels/levels/byCompleted/false', {
 				credentials: 'include'
 			})
 			.then( response => response.json() )
@@ -110,7 +110,7 @@ export default class MyProgressContainer extends React.Component<PropsType, Stat
 			});
 
 		// Fetch grades
-		fetch('/api/ifgame/grades?username=' + user.username, {
+		fetch('/api/reports/grades?username=' + user.username, {
 				method: 'get',
 				credentials: 'include',
 				headers: {
@@ -146,7 +146,7 @@ export default class MyProgressContainer extends React.Component<PropsType, Stat
 	insertGame(code: string) {
 		this.setState({ isLoadingSections: true });
 
-		fetch('/api/ifgame/new_level_by_code/'+code, {
+		fetch('/api/levels/new_level_by_code/'+code, {
 				method: 'post',
 				credentials: 'include',
 				headers: {

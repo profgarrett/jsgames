@@ -45,7 +45,7 @@ function is_valid_reference( ref ) {
   Note that the sequence of the functions matters.  They will be in this
   order for the toolbox.
 
-  This parseFeedback function is heavily used. Do not chagne w/o doing a large 
+  This parseFeedback function is heavily used. Do not change w/o doing a large 
   search for toolbox construction and feedback to the user.
 */
 function parseFeedback(formula) {

@@ -18,12 +18,10 @@ const add_tutorial_pages = [
 	{	type: 'IfPageFormulaSchema',
 		description: `We use the <code>+</code> symbol to add values.
 				<br/><br/>
-				Be sure to use references, such as <code>A1</code> or <code>B1</code>, 
-				instead of typing in numbers that exist in our table.
-				<br/><br/>
-				Formulas with references can be copied down, and Excel will automatically
-				update the references to apply to the new row.
-				This saves a lot of time.`,
+				<i>Be sure to use references</i>, such as <code>A1</code> or <code>B1</code>. 
+				Do not type in numbers that exist in the table, as that will keep your formula from working
+				on other rows.
+				`,
 		helpblock: 'Hint: Your answer should look like <span style="white-space: nowrap;">=__+__</span>',
 		column_titles: farm1_data.column_titles,
 		tests: farm1_data.tests,
@@ -49,10 +47,10 @@ const add_tutorial_pages = [
 		column_titles: farm1_data.column_titles,
 		tests: farm1_data.tests,
 		versions: [
-			{ instruction: 'If we bought {n} new {cell_title}, how many would we have in total?' }, 
-			{ instruction: 'If the {cell_title} had {n} new babies, how many would we have all together?' },
+			{ instruction: 'If we bought {n} new {cell_title}, how many {cell_title} would we have in total?' }, 
+			{ instruction: 'If the {cell_title} had {n} new babies, how many {cell_title} would we have all together?' },
 		],
-		solution_f: '={n} + {cell_ref}',
+		solution_f: '={n}+{cell_ref}',
 		template_values: {
 			'n': '[2-5]',
 			'cell': 'popCell()'
@@ -139,7 +137,7 @@ const add_test_pages = [
 	},{
 		..._base_add_test_question,
 		solution_f: '={cell1_ref}+{cell2_ref}+{n}', 
-		description: 'How many {cell1_title} and {cell2_title} would we have if we bought {n} more?',
+		description: 'How many {cell1_title} and {cell2_title} would we have if we bought {n} {cell2_title} more?',
 		template_values: {
 			'n': '[3-9]',
 			'cell1': 'popCell()',
@@ -152,7 +150,7 @@ const add_test_pages = [
 		]
 	},{
 		..._base_add_test_question,
-		solution_f: '={cell1_ref} + {n}', 
+		solution_f: '={cell1_ref}+{n}', 
 		description: 'How many {cell1_title} would we have if we bought {n} more?',
 		template_values: {
 			'n': '[3-9]',

@@ -3,7 +3,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Container, Card, Row, Col, Breadcrumb, Button  } from 'react-bootstrap';
 
-import IfLevelDebug from './IfLevelDebug';
+import LevelDebug from './LevelDebug';
 import { Message, Loading } from './../components/Misc';
 
 import { IfLevelSchema } from './../../shared/IfLevelSchema';
@@ -36,7 +36,7 @@ export default class IfLevelScoreContainer extends React.Component<PropsType, St
 	componentDidMount() {
 		let _id = this.props.match.params._id;
 
-		fetch('/api/ifgame/debuglevel/'+_id, {
+		fetch('/api/levels/debuglevel/'+_id, {
 				method: 'get',
 				credentials: 'include',
 				headers: {
@@ -89,7 +89,7 @@ export default class IfLevelScoreContainer extends React.Component<PropsType, St
 						<Message message={this.state.message} style={this.state.messageStyle} />
 						<Loading loading={this.state.isLoading } />
 						<div style={{ textAlign: 'center' }}>{ back }</div>
-						{ this.state.level ? <IfLevelDebug level={this.state.level} /> : '' }
+						{ this.state.level ? <LevelDebug level={this.state.level} /> : '' }
 						<div style={{ textAlign: 'center' }}>{ back }</div>
 						<br/>
 					</Col>

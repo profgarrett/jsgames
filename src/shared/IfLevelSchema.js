@@ -75,7 +75,38 @@ const from_int_dt = (unknown: any): any => {
 
 
 
-class IfLevelBaseSchema extends Schema {
+/*
+	This class is used as a way of storing a strongly-typed pre-computed
+	object of expensive properties.
+
+	It should be created by the IfLevelSchema.refresh_derived_props method
+*/
+class IfLevelDerivedProps extends Schema {
+	pages_length: number
+	test_score_as_percent: ?number // in form of 0-100 or null
+	minutes: number
+	classification: ?string
+
+	get type() {
+		return 'IfLevelDerivedProps'
+	}
+
+	get schema() {
+		return {
+			pages_length: { type: 'number', initialize: (i) => isDef(i) ? i : null },
+			test_score_as_percent: { type: 'number', initialize: (i) => isDef(i) ? i : null },
+			minutes: { type: 'number', initialize: (i) => isDef(i) ? i : null },
+			classification: { type: 'string', initialize: (s) => isDef(s) ? s : null },
+		};
+	}
+}
+
+// Number to increment after updating props. Will cause a refresh of all pages when
+// the next api sql update is hit.
+const LEVEL_DERIVED_PROPS_VERSION = 1;
+
+
+class IfLevelPagelessSchema extends Schema {
 	_id: string
 	code: string
 	username: string
@@ -84,7 +115,6 @@ class IfLevelBaseSchema extends Schema {
 	harsons_randomly_on_username: boolean
 	standardize_formula_case: boolean
 	show_score_after_completing: boolean
-	test_score_as_percent: number
 
 	title: string
 	description: string
@@ -97,14 +127,16 @@ class IfLevelBaseSchema extends Schema {
 	allow_skipping_tutorial: boolean
 
 	show_progress: boolean
+	
+	props: IfLevelDerivedProps
+	props_version: number
 
 	get type(): string {
-		return 'IfLevelBaseSchema';
+		return 'IfLevelPagelessSchema';
 	}
 
-
 	// Keep most functionality here, as we will over-ride schema in inheriting class.
-	_level_schema_no_pages(): Object {
+	static _level_schema_no_pages(): Object {
 		// clean-up functions
 
 		return {
@@ -115,8 +147,6 @@ class IfLevelBaseSchema extends Schema {
 			// Declaring it in the level allows for predictable behavior as pages are generated.
 			seed: { type: 'number', initialize: (dbl) => isDef(dbl) ? dbl : Math.round(100000*Math.random()) },
 			
-			test_score_as_percent: { type: 'number', initialize: (int) => isDef(int) ? int : null },
-
 			// Should half of users get Harsons instead of formula pages?
 			harsons_randomly_on_username: { type: 'Boolean', initialize: (i) => isDef(i) ? b(i) : false },
 
@@ -140,14 +170,20 @@ class IfLevelBaseSchema extends Schema {
 
 			// Version tracks the underlying version of the tutorial.  Used to create new versions of 
 			// tutorials and track when analyzing results.
-			version: { type: 'number', initialize: (dbl) => isDef(dbl) ? dbl : 0 },
+			// version: { type: 'number', initialize: (dbl) => isDef(dbl) ? dbl : 0 },
 
 			// Should we show a progress meter while they work on the assignment?  Default to yes.
 			show_progress: { type: 'Boolean', initialize: (s) => isDef(s) ? b(s) : true },
 
+			// Props are used to store derrived (expensive) properties.
+			props: { type: 'Object', initialize: (o) => isDef(o) && o !== null ? new IfLevelDerivedProps( o ) : null },
+			props_version: { type: 'number', initialize: (i) => isDef(i) ? i : null },
 		};
 	}
 
+	get schema(): Object {
+		return IfLevelPagelessSchema._level_schema_no_pages();
+	}
 }
 
 
@@ -156,7 +192,7 @@ class IfLevelBaseSchema extends Schema {
 	A level is the owner object which can be created and used.
 	It contains multiple pages.
 */
-class IfLevelSchema extends IfLevelBaseSchema {
+class IfLevelSchema extends IfLevelPagelessSchema {
 	pages: Array<IfPageBaseSchema>
 
 	get type(): string {
@@ -169,12 +205,34 @@ class IfLevelSchema extends IfLevelBaseSchema {
 
 	// Actual called object. Includes pages.
 	_level_schema(): Object {
-		const schema = this._level_schema_no_pages();
+		const schema = IfLevelPagelessSchema._level_schema_no_pages();
+
 		schema.pages = { type: 'Array', initialize: (aJ) => isDef(aJ) ? a(aJ).map(j => {
 						return get_page_schema_as_class(j);
 					}) : [] };
-		
+
 		return schema;
+	}
+
+
+	// Build out the derived properties from this object.
+	// Saves the new props in this classes' derived_props object.
+	// Should be hit before saving to the database.
+	refresh_derived_props(): Object {
+		let props = new IfLevelDerivedProps({
+			type: 'IfLevelDerivedProps',
+			pages_length: this.pages.length,
+			test_score_as_percent: this.completed ? this.get_test_score_as_percent() : null,
+			minutes: this.get_time_in_minutes(),
+			classification: this.get_completion_status(),
+		});
+
+		this.props = props;
+		
+		// Update props version after updating this code.
+		// Hitting the db api for a SQL update will automatically go through and update
+		// all outdated props.
+		this.props_version = LEVEL_DERIVED_PROPS_VERSION; 
 	}
 
 
@@ -345,22 +403,6 @@ class IfLevelSchema extends IfLevelBaseSchema {
 }
 
 
-/**
-	This is a reduced class, which doesn't include any pages data.
-	Reduces the impact on the server when we are just fetching a few key field.
-*/
-class IfLevelSchema_NoPages extends IfLevelBaseSchema {
-	get type(): string {
-		return 'IfLevelSchema_NoPages'
-	}
-
-	_level_schema(): Object {
-		return this._level_schema_no_pages();
-	}
-}
-
-
-
 /*
 	List of tutorials that should be shown as a row for the table
 	Only used if it's not defined by the section.
@@ -382,8 +424,9 @@ const PASSING_GRADE = 74;
 module.exports = {
 	IfLevels,
 	IfLevelSchema,
-	IfLevelSchema_NoPages,
+	IfLevelPagelessSchema,
 	DEFAULT_TUTORIAL_LEVEL_LIST,
 	GREEN_GRADE,
 	PASSING_GRADE,
+	LEVEL_DERIVED_PROPS_VERSION,
 };	

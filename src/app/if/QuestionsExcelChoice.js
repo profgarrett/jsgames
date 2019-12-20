@@ -4,7 +4,6 @@ import { DEMO_MODE } from './../../server/secret';
 
 import { IfLevelSchema } from './../../shared/IfLevelSchema';
 import type { Node } from 'react';
-import { formatDate, padL } from './../../shared/misc';
 
 type DetailPropsType = {
 	levels: Array<IfLevelSchema>
@@ -13,10 +12,37 @@ type DetailPropsType = {
 
 
 
+// toLocaleTimeString is super slow when used with a larger number of objects.
+// Create a custom little formatter to speed things up.  Changed from 6s to 
+// almost nothing.
+const formatDate = (dt: Date): string => {
+
+	if(typeof dt === 'undefined') return 'undefined';
+	if(typeof dt.getFullYear === 'undefined') return 'undefined';
+
+	return dt.getFullYear().toString() + '/' +
+		(1+parseInt(dt.getMonth(),10)) + '/' +
+		dt.getDate() + ' ' +
+		dt.getHours() + ':' + 
+		(dt.getMinutes() + ':').padStart(3, '0') +
+		(dt.getSeconds() + '').padStart(2, '0');
+
+	//return '123'; //.toLocaleTimeString('en-US')
+};
+
+
+const padL = ( s_or_n: any, length: number ): string => {
+	// If n, convert to string and return.
+	if(typeof s_or_n === 'number') {
+		return padL(s_or_n.toString(), length);
+	}
+	return s_or_n.padStart(length, '_');
+};
 
 
 
-export default class IfQuestionsPagesExcelNumberAnswer extends React.Component<DetailPropsType> {
+export default class QuestionsPagesExcelChoice extends React.Component<DetailPropsType> {
+
 
 	// Convert the nested structure into a flat table of common values.
 	flatten_levels(levels: any): any {
@@ -34,11 +60,11 @@ export default class IfQuestionsPagesExcelNumberAnswer extends React.Component<D
 			'q_solution',
 			'q_instruction',
 			'q_description',
-			'a_client', 
-            'solution_f'
+			'a_client',
+			'a_client_n'
 			];
 		const rows = [];
-        
+
 		levels.map( level_summary => {
 			const defaults = { 
 				level: level_summary.code
@@ -85,7 +111,7 @@ export default class IfQuestionsPagesExcelNumberAnswer extends React.Component<D
 		question.answers.map( answer => {
 			// Only track completed pages.
 			if(!answer.page.completed) return;
-			if(answer.page.type !== 'IfPageNumberAnswerSchema') return;
+			if(answer.page.type !== 'IfPageChoiceSchema') return;
 
 
 			const local = {
@@ -121,6 +147,8 @@ export default class IfQuestionsPagesExcelNumberAnswer extends React.Component<D
 			'textAlign': 'right'
 		};
 
+		console.log(this.props.levels);
+		
 		// Go through each map of levels and return a table for each.
 		const trs = rows.map( 
 			(answer, n) => {

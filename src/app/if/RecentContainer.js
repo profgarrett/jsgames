@@ -1,35 +1,37 @@
-// @flow
+//@flow
 import React from 'react';
 import Container from 'react-bootstrap/Container';
 import { Row, Col, Breadcrumb  } from 'react-bootstrap';
 
-import IfGrades from './IfGrades';
+import Recent from './Recent';
 import { Message, Loading } from './../components/Misc';
 import Filter from './Filter';
-import { DEMO_MODE } from './../../server/secret';
+
+import { IfLevelPagelessSchema } from './../../shared/IfLevelSchema';
+import 'url-search-params-polyfill';
 
 import ForceLogin from './../components/ForceLogin';
 
 import type { Node } from 'react';
 
 
-type GradesPropsType = {};
+type PropsType = {};
 
-type GradesContainerStateType = {
+type StateType = {
 	message: string,
 	messageStyle: string,
 	isLoading: boolean,
-	data: Array<any>
+	levels: Array<IfLevelPagelessSchema>
 };
 
-export default class IfGradesContainer extends React.Component<GradesPropsType, GradesContainerStateType> {
+export default class IfRecentContainer extends React.Component<PropsType, StateType> {
 	constructor(props: any) {
 		super(props);
 		this.state = { 
-			message: 'Loading data from server',
+			message: 'Loading filter data',
 			messageStyle: '',
 			isLoading: true,
-			data: []
+			levels: [],
 		};
 		(this: any).onRefreshData = this.onRefreshData.bind(this);
 		(this: any).onReady = this.onReady.bind(this);
@@ -42,12 +44,15 @@ export default class IfGradesContainer extends React.Component<GradesPropsType, 
 
 	onRefreshData(filter: Object) {
 		const args = [];
-
-		if(filter.sections !== '') args.push('idsection='+filter.sections);
-
-		this.setState({ isLoading: true, message: 'Loading grade data'});
 		
-		fetch('/api/ifgame/grades?'+args.join('&'), {
+		if(filter.levels != '') args.push('code='+filter.levels);
+		if(filter.sections !== '') args.push('idsection='+filter.sections);
+		if(filter.users !== '') args.push('iduser='+filter.users);
+		if(filter.days !== '') args.push('updated='+filter.days);
+
+		this.setState({ isLoading: true, message: 'Loading data' });
+
+		fetch('/api/reports/recent?'+args.join('&'), {
 				method: 'get',
 				credentials: 'include',
 				headers: {
@@ -56,9 +61,10 @@ export default class IfGradesContainer extends React.Component<GradesPropsType, 
 				}
 			})
 			.then( response => response.json() )
-			.then( json => {
+			.then( json => json.map( j => new IfLevelPagelessSchema(j) ) )
+			.then( ifLevels => {
 				this.setState({
-					data: json,
+					levels: ifLevels,
 					messageStyle: '',
 					message: '',
 					isLoading: false
@@ -66,7 +72,7 @@ export default class IfGradesContainer extends React.Component<GradesPropsType, 
 			})
 			.catch( error => {
 				this.setState({ 
-					data: [],
+					levels: [],
 					message: 'Error: ' + error,
 					messageStyle: 'Error',
 					isLoading: false
@@ -81,22 +87,37 @@ export default class IfGradesContainer extends React.Component<GradesPropsType, 
 		const crumbs = (
 			<Breadcrumb>
 				<Breadcrumb.Item title='home' href='/ifgame/'>If Games</Breadcrumb.Item>
-				<Breadcrumb.Item title='Grades' active>Grades</Breadcrumb.Item>
+				<Breadcrumb.Item title='Recent activity' active>Recent activity</Breadcrumb.Item>
 			</Breadcrumb>
 			);
 
-
 		const search = new URLSearchParams(window.location.search);
+
 		const filter_defaults = search.has('idsection') 
-			? { sections: search.get('idsection') }
-			: {};
-		
+			? { days: 1, sections: search.get('idsection') }
+			: { days: 1 };
+
+
+		const filter_filters = {
+			levels: [],
+			sections: [],
+			users: [],
+			days: [ 
+				{ value: 1, label: '1 day'} , 
+				{ value: 3, label: '3 days'}, 
+				{ value: 7, label: '1 week' },
+				{ value: 14, label: '2 weeks' },
+				{ value: 21, label: '3 weeks' },
+				{ value: 28, label: '4 weeks' },
+			]
+		};
+
 		const filter = <Filter 
 				onChange={this.onRefreshData} 
 				onReady={this.onReady} 
 				disabled={this.state.isLoading} 
 				defaults={filter_defaults}
-				filters={{sections: [] }}
+				filters={filter_filters}
 			/>;
 
 		return (
@@ -105,11 +126,12 @@ export default class IfGradesContainer extends React.Component<GradesPropsType, 
 				<Col>
 					<ForceLogin/>
 					{ crumbs }
-					<h3>Grades</h3>
+					<h3>Recent Activity</h3>
+
 					<Message message={this.state.message} style={this.state.messageStyle} />
 					<Loading loading={this.state.isLoading } />
 					{ filter }
-					<IfGrades data={this.state.data} />
+					<Recent levels={this.state.levels} />
 				</Col>
 			</Row>
 			</Container>

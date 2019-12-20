@@ -1,37 +1,35 @@
-//@flow
+// @flow
 import React from 'react';
 import Container from 'react-bootstrap/Container';
 import { Row, Col, Breadcrumb  } from 'react-bootstrap';
 
-import IfRecent from './IfRecent';
+import Grades from './Grades';
 import { Message, Loading } from './../components/Misc';
 import Filter from './Filter';
-
-import { IfLevelSchema } from './../../shared/IfLevelSchema';
-import 'url-search-params-polyfill';
+import { DEMO_MODE } from './../../server/secret';
 
 import ForceLogin from './../components/ForceLogin';
 
 import type { Node } from 'react';
 
 
-type PropsType = {};
+type GradesPropsType = {};
 
-type StateType = {
+type GradesContainerStateType = {
 	message: string,
 	messageStyle: string,
 	isLoading: boolean,
-	levels: Array<IfLevelSchema>
+	data: Array<any>
 };
 
-export default class IfRecentContainer extends React.Component<PropsType, StateType> {
+export default class GradesContainer extends React.Component<GradesPropsType, GradesContainerStateType> {
 	constructor(props: any) {
 		super(props);
 		this.state = { 
-			message: 'Loading filter data',
+			message: 'Loading data from server',
 			messageStyle: '',
 			isLoading: true,
-			levels: [],
+			data: []
 		};
 		(this: any).onRefreshData = this.onRefreshData.bind(this);
 		(this: any).onReady = this.onReady.bind(this);
@@ -44,15 +42,12 @@ export default class IfRecentContainer extends React.Component<PropsType, StateT
 
 	onRefreshData(filter: Object) {
 		const args = [];
-		
-		if(filter.levels != '') args.push('code='+filter.levels);
+
 		if(filter.sections !== '') args.push('idsection='+filter.sections);
-		if(filter.users !== '') args.push('iduser='+filter.users);
-		if(filter.days !== '') args.push('updated='+filter.days);
 
-		this.setState({ isLoading: true, message: 'Loading data' });
-
-		fetch('/api/ifgame/recent?'+args.join('&'), {
+		this.setState({ isLoading: true, message: 'Loading grade data'});
+		
+		fetch('/api/reports/grades?'+args.join('&'), {
 				method: 'get',
 				credentials: 'include',
 				headers: {
@@ -61,10 +56,9 @@ export default class IfRecentContainer extends React.Component<PropsType, StateT
 				}
 			})
 			.then( response => response.json() )
-			.then( json => json.map( j => new IfLevelSchema(j) ) )
-			.then( ifLevels => {
+			.then( json => {
 				this.setState({
-					levels: ifLevels,
+					data: json,
 					messageStyle: '',
 					message: '',
 					isLoading: false
@@ -72,7 +66,7 @@ export default class IfRecentContainer extends React.Component<PropsType, StateT
 			})
 			.catch( error => {
 				this.setState({ 
-					levels: [],
+					data: [],
 					message: 'Error: ' + error,
 					messageStyle: 'Error',
 					isLoading: false
@@ -87,37 +81,22 @@ export default class IfRecentContainer extends React.Component<PropsType, StateT
 		const crumbs = (
 			<Breadcrumb>
 				<Breadcrumb.Item title='home' href='/ifgame/'>If Games</Breadcrumb.Item>
-				<Breadcrumb.Item title='Recent activity' active>Recent activity</Breadcrumb.Item>
+				<Breadcrumb.Item title='Grades' active>Grades</Breadcrumb.Item>
 			</Breadcrumb>
 			);
 
+
 		const search = new URLSearchParams(window.location.search);
-
 		const filter_defaults = search.has('idsection') 
-			? { days: 1, sections: search.get('idsection') }
-			: { days: 1 };
-
-
-		const filter_filters = {
-			levels: [],
-			sections: [],
-			users: [],
-			days: [ 
-				{ value: 1, label: '1 day'} , 
-				{ value: 3, label: '3 days'}, 
-				{ value: 7, label: '1 week' },
-				{ value: 14, label: '2 weeks' },
-				{ value: 21, label: '3 weeks' },
-				{ value: 28, label: '4 weeks' },
-			]
-		};
-
+			? { sections: search.get('idsection') }
+			: {};
+		
 		const filter = <Filter 
 				onChange={this.onRefreshData} 
 				onReady={this.onReady} 
 				disabled={this.state.isLoading} 
 				defaults={filter_defaults}
-				filters={filter_filters}
+				filters={{sections: [] }}
 			/>;
 
 		return (
@@ -126,12 +105,11 @@ export default class IfRecentContainer extends React.Component<PropsType, StateT
 				<Col>
 					<ForceLogin/>
 					{ crumbs }
-					<h3>Recent Activity</h3>
-
+					<h3>Grades</h3>
 					<Message message={this.state.message} style={this.state.messageStyle} />
 					<Loading loading={this.state.isLoading } />
 					{ filter }
-					<IfRecent levels={this.state.levels} />
+					<Grades data={this.state.data} />
 				</Col>
 			</Row>
 			</Container>

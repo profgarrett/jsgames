@@ -24,12 +24,16 @@ export default class HistorySlider extends React.Component<HistoryPropsType, Sta
 
 		if(page.history.length === 0) throw new Error('HistorySlider needs history.length > 0');
 
-		const first = page.history[0].dt.getTime();
-		const last = page.history[page.history.length-1].dt.getTime();
+		// Some old errored pages doesn't have a time. Ignore those entries.
+		const history = page.history.filter( h => typeof h.dt !== 'undefined'); 
+		if(history.length == 0) return null;
+
+		const first = history[0].dt.getTime();
+		const last = history[page.history.length-1].dt.getTime();
 
 		// Convert history to an obj keyed by index.
 		let i = 0;
-		const marks = page.history.reduce( (marks: Object /*, history_item: Object*/): any => {
+		const marks = history.reduce( (marks: Object /*, history_item: Object*/): any => {
 			marks[i] = ''; // history_item.created.toLocaleTimeString();
 			i++;
 			return marks;

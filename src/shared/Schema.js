@@ -13,7 +13,14 @@ class Schema {
 	*/
 	constructor( json: any = {} ) {
 		let schema = this.schema;
-		//let methods = this.methods;
+
+		if(typeof json === 'string') {
+			// If a schema has an object as a field, it sometimes will be passed the stringified version (if loading from a db)
+			//	or a json version (if being transmitted over the wire).
+			// Go ahead and parse.
+			json = JSON.parse(json);
+			//throw new Error('Schema.constructor should not be passed a string. "' + json + '"');
+		}
 
 		if(this.type !== json.type) {
 			console.log(this);
@@ -72,6 +79,11 @@ class Schema {
 				// convert date to UTC int value.
 				json[key] = this[key].getTime(); 
 				
+
+			} else if(this[key] instanceof Object && typeof this[key].toJson !== 'undefined') {
+				// See if this is an object, which has a toJson property. If so, use that.
+				json[key] = this[key].toJson();
+
 			} else if(this[key] instanceof Array) {
 				// If a contained array of objects have toJson function, use them
 

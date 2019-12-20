@@ -1,7 +1,7 @@
 //@flow
 
 const { MYSQL_HOST, MYSQL_USER, MYSQL_PASSWORD, MYSQL_DATABASE } = require('./secret.js'); 
-const { IfLevelSchema } = require('./../shared/IfLevelSchema');
+const { IfLevelSchema, LEVEL_DERIVED_PROPS_VERSION } = require('./../shared/IfLevelSchema');
 const mysql = require('promise-mysql');
 
 const { sql01 } = require('./../../sql/sql01.js');
@@ -16,6 +16,7 @@ const { sql09 } = require('./../../sql/sql09.js');
 const { sql10 } = require('./../../sql/sql10.js');
 const { sql11 } = require('./../../sql/sql11.js');
 const { sql12 } = require('./../../sql/sql12.js');
+const { sql13 } = require('./../../sql/sql13.js');
 
 /**
 	Initialize MYSQL with credentials from secret.js.
@@ -125,8 +126,10 @@ async function update_mysql_database_schema(): Promise<any> {
 	if(old_version < 10 ) await _update_update_version( sql10 );
 	if(old_version < 11 ) await _update_update_version( sql11 );
 	if(old_version < 12 ) await _update_update_version( sql12 );
+	if(old_version < 13 ) await _update_update_version( sql13 );
 
-
+	await _update_all_levels_to_latest_props();
+	
 	return { 'old_version': old_version, 'up_to_date': true };
 }
 
@@ -173,7 +176,64 @@ async function _update_get_version(): Promise<any> {
 		if(e.code === 'ER_NO_SUCH_TABLE') return 0; 
 		throw new Error(e.code);
 	}
+}
 
+
+
+/*
+	Used to update a single level in the database.
+*/
+async function update_level_in_db(level: IfLevelSchema): Promise<any> {
+	const sql_update = `UPDATE iflevels 
+			SET completed = ?, 
+				pages = ?, 
+				history = ?, 
+				updated = ?,
+				props = ?,
+				props_version = ?
+			WHERE _id = ? AND username = ?`;
+	
+	level.refresh_derived_props();
+
+	const props = JSON.stringify(level.props.toJson());
+
+	// Note: Use pages.toJson() to make sure that they properly convert to json.
+	let values = [
+		level.completed ? 1 : 0, 
+		JSON.stringify(level.pages.map( (p: Object ): Object => p.toJson() )), 
+		JSON.stringify(level.history), 
+		from_utc_to_myql(to_utc(level.updated)), 
+		props,
+		level.props_version,
+		level._id,
+		level.username
+	];
+
+	return await run_mysql_query(sql_update, values);
+}
+
+
+/*
+	Retrieve all levels with old versions of the props.
+	Update to latest version. May take a long time during upgrades.
+*/
+async function _update_all_levels_to_latest_props(): Promise<any> {
+	console.log('Updating old props');
+	const sql_old_levels = false
+		? 'select * from iflevels WHERE props_version = 1 '
+		: 'select * from iflevels WHERE props_version is null or props_version < ?';
+	
+	let level = null;
+
+	const select_results = await run_mysql_query(sql_old_levels, [ LEVEL_DERIVED_PROPS_VERSION ]);
+	console.log(`Beginning to update ${select_results.length} records`);
+
+	for(let i=0; i<select_results.length; i++ ) {
+		level = new IfLevelSchema(select_results[i]);
+		console.log(`Updating ${level._id}`)
+		await update_level_in_db(level);
+	};
+	console.log('Ended update');
 }
 
 
@@ -220,11 +280,9 @@ async function _update_fix_bad_page_data6(): Promise<any> {
 
 
 module.exports = {
-	to_utc, 
-	from_mysql_to_utc,
-	from_utc_to_myql,
+	to_utc, from_mysql_to_utc, from_utc_to_myql,
 	is_faculty,
 	get_mysql_connection, run_mysql_query,
-	update_mysql_database_schema
-
+	update_mysql_database_schema,
+	update_level_in_db,
 };

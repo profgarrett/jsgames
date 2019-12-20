@@ -145,66 +145,6 @@ function common_schema(): Object {
 }
 
 
-/**
-	Class used to quickly transmit essential information to summarize the success / failure of a page.
-	Used to reduce the amount of data to be transmitted across the wire when profs want to see
-	a quick summary of how their class is doing.
- */
-class IfPageAnswer {
-    username: string
-    sequence_in_level: number
-    kcs: Array<string>
-    answers: Array<string>
-    solution: string
-    solution_pretty: string
-    correct: boolean
-    seconds: number
-
-	// Initialize from a page.
-	build_answers_from_level( level: IfPageLevelSchema ) {
-		const username = level.username;
-		const answers = [];
-		let a = null;
-
-		level.pages.forEach( (p,i)=> {
-			a = new IfPageAnswer();
-			a.username = username;
-			a.sequence_in_level = i;
-			a.kcs = p.kcs;
-			a.answers = this._get_page_history_answers(p);
-			a.solution = p.get_solution();
-			a.solution_pretty = fill_template( a.solution, p.template_values )
-			a.correct = p.correct;
-			a.seconds = p.get_time_in_seconds();
-
-			answers.push(a)
-		});
-
-		return answers;
-	}
-
-	// Grab all of the answers in the given page and return as an array of an array of strings.
-	// [  ['=1', '=23'], ['=32'], ...]
-	_get_page_history_answers(page: IfPageBaseSchema): Array<Array<string>> {
-		
-		const histories = typeof p.history  === 'undefined' || p.history.length == 0 
-			? []
-			: p.history.filter( history => {
-				if( typeof history.tags === 'undefined') return false;
-
-				// If this history has an INTERMEDIATE, no!
-				if( history.tags.filter( t => t.tag === 'INTERMEDIATE' ).length !== 0)  return false;
-
-				// Only give histories for thing we understand, like client_f
-				if( typeof history.client_f === 'undefined') return false;
-
-				return true;
-			});
-		
-		return histories.map( h => h.client_f );
-	}
-
-}
 
 
 /**
@@ -348,6 +288,7 @@ class IfPageBaseSchema extends Schema {
 		let last_ms_time = 0;
 		let current_ms_time = 0;
 
+		// Go thru times, adding on periods IF they are positive.
 		for(let i = 0; i < history.length; i++) {
 			current_ms_time = convert_to_date_if_string( history[i].dt ).getTime();
 
@@ -1608,6 +1549,89 @@ function get_page_schema_as_class(json: Object): IfPageBaseSchema {
 	return new p(json);
 }
 
+
+
+/**
+	Class used to quickly transmit essential information to summarize the success / failure of a page.
+	Used to reduce the amount of data to be transmitted across the wire when profs want to see
+	a quick summary of how their class is doing.
+ */
+class IfPageAnswer {
+    username: string
+	level_id: string
+    level_code: string // level code, math1, math2, etc...
+    sequence_in_level: number
+    kcs_as_string: string // comma delimited list.
+    answers: Array<string>
+    solution: string
+    solution_pretty: string
+    correct: ?boolean
+    seconds: number
+    classification: string
+
+	page_code: string // page code, such as test, tutorial, ...
+	
+	constructor(json) {
+		if(typeof json === 'undefined') return;
+		
+		for(key in json) {
+			if(json.hasOwnProperty(key)) {
+				this[key] = json[key];
+			}
+		}
+	}
+}
+
+
+// Initialize from a page.
+function build_answers_from_level( level: IfLevelSchema ): Array<IfPageAnswer> {
+    const username = level.username;
+    const answers = [];
+    let a = null;
+
+    level.pages.forEach( (p,i)=> {
+        if(p.type !== 'IfPageFormulaSchema' && p.type !== 'IfPageHarsonsSchema') return;
+
+        a = new IfPageAnswer();
+        a.level_code = level.code;
+		a.level_id = level._id;
+        a.username = username;
+        a.sequence_in_level = i;
+        a.kcs_as_string = p.kcs.join(',');
+        a.solution = p.get_solution();
+        a.solution_pretty = ''+fill_template( a.solution, p.template_values )
+        a.correct = p.correct;
+        a.seconds = p.get_time_in_seconds();
+		a.page_code = p.code;
+		a.sequence_in_level = i;
+
+        // Grab all of the answers in the given page and return as an array of an array of strings.
+        // [  ['=1', '=23'], ['=32'], ...]
+        const non_intermediate_histories = typeof p.history  === 'undefined' || p.history.length == 0 
+            ? []
+            : p.history.filter( history => {
+                if( typeof history.tags === 'undefined') return false;
+
+                // If this history has an INTERMEDIATE, no!
+                if( history.tags.filter( t => t.tag === 'INTERMEDIATE' ).length !== 0)  return false;
+
+                // Only give histories for thing we understand, like client_f
+                if( typeof history.client_f === 'undefined') return false;
+
+                return true;
+            });
+        
+        a.answers = non_intermediate_histories.map( h => h.client_f );
+        a.classification = !p.correct 
+            ? 'Incorrect' 
+            : a.seconds > 60 ? 'Correct, but slow' : 'Correct';
+        
+        answers.push(a)
+    });
+
+    return answers;
+}
+
 module.exports = {
 	get_page_schema_as_class,
 	IfPageBaseSchema,
@@ -1619,6 +1643,8 @@ module.exports = {
 	IfPageNumberAnswerSchema,
 	IfPageSliderSchema,
 	IfPageShortTextAnswerSchema,
-	IfPageLongTextAnswerSchema
+	IfPageLongTextAnswerSchema,
+	IfPageAnswer,
+	build_answers_from_level,
 };
 

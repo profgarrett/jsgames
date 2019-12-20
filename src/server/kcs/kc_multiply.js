@@ -33,9 +33,9 @@ const tutorial_pages = [
 				<br/><br/>
 				Excel uses <code>*</code> (asterisk), which is created when you press 
 				<kbd>shift</kbd> and <kbd>8</kbd>.`,
-		instruction: `Each year, the farm's Alpacas have babies. Use the 
-				Birthrate column to find out how many babies they will have this year.
-				Use multiplication to figure out the answer.`,
+		instruction: `Each year, the farm's Alpacas have babies. Use multiplication and the
+				Birthrate column to find out how many babies they will have this year; <i>don't 
+				type in the number</i>.`,
 		helpblock: 'Hint: Your answer should look something like =__*__',
 		solution_f: '=a1*b1', 
 		column_titles: farm2_data.column_titles,

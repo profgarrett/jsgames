@@ -23,7 +23,7 @@ const tutorial_pages = [
 			As you create your formulas, remember that the computer works from left to right.
 			<br/><br/>
 			So, for example, <code>=3-2+1</code> would be 2 (since we would subtract 2 
-			before adding 1.`,
+			before adding 1).`,
 		code: 'tutorial'
 	},
 ];
@@ -57,7 +57,7 @@ const add_and_subtract_test_pages = [
 		]
 	},{
 		..._base_add_and_subtract_test_question,
-		solution_f: '={cell1_ref} + {cell2_ref} + {cell3_ref} - {n}', 
+		solution_f: '={cell1_ref}+{cell2_ref}+{cell3_ref}-{n}', 
 		description: 'How many {cell1_title}, {cell2_title}, and {cell3_title} would we have if {n} {lost}?',
 		template_values: {
 			'n': '[3-9]',

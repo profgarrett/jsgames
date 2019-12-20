@@ -14,34 +14,39 @@ const farm4_data = {
 };
 
 
+const _base = {
+	type: 'IfPageFormulaSchema',
+	column_titles: farm4_data.column_titles,
+	column_formats: farm4_data.column_formats,
+	tests: farm4_data.tests,
+	client_f_format: '',
+	feedback: [
+		{ 'has': 'no_symbols', args: ['%'] },
+		{ 'has': 'symbols', args: ['*'] },
+	],
+	template_values: {
+		'cell1': 'popCell(a1,b1,c1)',
+		'n1': '[1-4]',
+		'n2': '[1-4]',
+		'n3': '[10-90]',
+	},	
+	kcs: [ KC_NAMES.PERCENT_TO_DECIMAL_OVER1, KC_NAMES.MULTIPLY ],
+
+}
+
 
 // Addition
 const tutorial_pages = [
-	{	type: 'IfPageFormulaSchema',
+	{	..._base,
 		description: `The same rule applies for percentages over 100%.
 				<br/><br/>
 				For example, 425% would be converted into a decimal by dividing it by 100,
 				and dropping the % symbol. So, it would turn into 4.25.
+				<br/><br/>
+				Or, as a shorthand, just remember to move the decimal point over twice to the left.
 				`,
-		column_titles: farm4_data.column_titles,
-		column_formats: farm4_data.column_formats,
-		tests: farm4_data.tests,
-		versions: [
-			{	instruction: 'If we increase our {cell1_title} by 240%, how many <i>more</i> would we have?',
-				solution_f: '={cell1_ref}*2.4',
-			},
-			{	instruction: 'How many <i>more</i> {cell1_title} would we have if we increase them by 305%?',
-				solution_f: '={cell1_ref}*3.05', 
-			},
-		],
-		template_values: {
-			'cell1': 'popCell()'
-		},
-		feedback: [
-			{ 'has': 'no_symbols', args: ['%'] },
-			{ 'has': 'symbols', args: ['*'] },
-		],
-		kcs: [ KC_NAMES.PERCENT_TO_DECIMAL_OVER1, KC_NAMES.MULTIPLY ],
+		instruction: 'What is {n1}{n3}% of our {cell1_title}?',
+		solution_f: '={cell1_ref}*{n1}.{n3}',
 		code: 'tutorial'
 	}
 ];
@@ -52,30 +57,16 @@ const tutorial_pages = [
 // 
 
 const _percentile_test_pages_over1_base = {
-	type: 'IfPageFormulaSchema',
-	column_titles: farm4_data.column_titles,
-	column_formats: farm4_data.column_formats,
-	tests: farm4_data.tests,
-
+	..._base,
 	instruction: 'Type in the correct formula. You must use <b>multiplication</b> to solve this problem.',
-	client_f_format: '',
 	code: 'test',
-	feedback: [
-		{ 'has': 'no_symbols', args: ['%'] },
-		{ 'has': 'symbols', args: ['*'] },
-	],
-	template_values: {
-		'cell1': 'popCell(a1,b1,c1)',
-		'n': '[105-235]'
-	},	
-	kcs: [ KC_NAMES.PERCENT_TO_DECIMAL_OVER1, KC_NAMES.MULTIPLY ],
 };
 
 
 const test_pages = [
 	{	..._percentile_test_pages_over1_base,
-		solution_f: '={cell1_ref}*{n}/100', 
-		description: 'What is {n}% of our {cell1_title}? Use <b>multiplication</b>.',
+		solution_f: '={cell1_ref}*{n1}.{n3}', 
+		description: 'What is {n1}{n3}% of our {cell1_title}? Use <b>multiplication</b>.',
 	}
 ];
 

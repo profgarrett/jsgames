@@ -34,7 +34,8 @@ const tutorial_pages = [
 				</ul>
 				<br/><br/>
 				As a result, people have decided that we should <b>work from left to right</b>.
-				`
+				`,
+		kcs: [KC_NAMES.ORDEROFOPERATION]
 	},
 	{	type: 'IfPageTextSchema',
 		description: `Going from left-to-right works well in most cases, but there is 
@@ -53,7 +54,8 @@ const tutorial_pages = [
 					<li>=1 - <kbd>2</kbd></li>
 					<li>=1 <kbd>-</kbd> 2</li>
 					<li>=<kbd>-1</kbd></li>
-				</ul>`
+				</ul>`,
+		kcs: [KC_NAMES.ORDEROFOPERATION]
 	},
 	{	type: 'IfPageTextSchema',
 		description: `Exponents have an even higher priority than the other symbols.
@@ -65,7 +67,8 @@ const tutorial_pages = [
 					<li>=1 - 1 <kbd>*</kbd> 4</li>
 					<li>=1 - <kbd>4</kbd></li>
 					<li>=<kbd>-3</kbd></li>
-				</ul>`
+				</ul>`,
+		kcs: [KC_NAMES.ORDEROFOPERATION]
 	},
 	{	type: 'IfPageFormulaSchema',
 		description: `Parentheses have the highest priority, "beating" all other operators.
@@ -85,7 +88,8 @@ const tutorial_pages = [
 				],
 		solution_f: '=(a1+b1)*c1', 
 		client_f_format: '$',
-		code: 'tutorial'
+		code: 'tutorial',
+		kcs: [KC_NAMES.ORDEROFOPERATION]
 	},
 	{	type: 'IfPageTextSchema',
 		description: `We can summarize the rules as PEMDAS.
@@ -98,14 +102,16 @@ const tutorial_pages = [
 				Note that <code>*</code> and <code>/</code> have the same precedence level,
 				just like <code>+</code> and <code>-</code>.  When you go through an expression,
 				work from left to right, solving parentheses, then exponents, then multiplication 
-				and division, and finally addition and subtraction.`
+				and division, and finally addition and subtraction.`,
+		kcs: [KC_NAMES.ORDEROFOPERATION]
 	},
 	{	type: 'IfPageTextSchema',
 		description: `If you're not clear on these rules, take a couple of minutes and visit 
 				the Khan Academy website on this example.
 				<br/><br/>
 				<a href="https://www.khanacademy.org/math/pre-algebra/pre-algebra-arith-prop/pre-algebra-order-of-operations/v/introduction-to-order-of-operations"
-					target="_blank">Khan Academy Tutorial on Order of Operations</a>`
+					target="_blank">Khan Academy Tutorial on Order of Operations</a>`,
+		kcs: [KC_NAMES.ORDEROFOPERATION]
 	},
 	{	type: 'IfPageParsonsSchema',
 		description: `Use PEMDAS to arrange the following expression in order.
@@ -119,7 +125,8 @@ const tutorial_pages = [
 				'=1 + (2 <kbd>-</kbd> 3) - 1', 
 				'=1 <kbd>+</kbd> (2 - 3) - 1', 
 				'=1 + (2 - 3) <kbd>-</kbd> 1', 
-			]
+			],
+		kcs: [KC_NAMES.ORDEROFOPERATION]
 	},
 	{	type: 'IfPageParsonsSchema',
 		description: `Use PEMDAS to arrange the following expression in order.
@@ -133,7 +140,8 @@ const tutorial_pages = [
 				'=(2 <kbd>-</kbd> 3) * 4 ^ 2', 
 				'=(2 - 3) * 4 <kbd>^</kbd> 2', 
 				'=(2 - 3) <kbd>*</kbd> 4 ^ 2'
-			]
+			],
+		kcs: [KC_NAMES.ORDEROFOPERATION]
 	},
 	{	type: 'IfPageParsonsSchema',
 		description: `Use PEMDAS to arrange the following expression in order.
@@ -148,7 +156,8 @@ const tutorial_pages = [
 				'=2 ^ 3 * 4 <kbd>^</kbd> 2 / 4', 
 				'=2 ^ 3 <kbd>*</kbd> 4 ^ 2 / 4', 
 				'=2 ^ 3 * 4 ^ 2 <kbd>/</kbd> 4', 
-			]
+			],
+		kcs: [KC_NAMES.ORDEROFOPERATION]
 	},
 	{	type: 'IfPageParsonsSchema',
 		description: `Use PEMDAS to arrange the following expression in order.
@@ -163,7 +172,9 @@ const tutorial_pages = [
 				'=1 + (2 - 3) * 4 <kbd>^</kbd> 2 / 5', 
 				'=1 + (2 - 3) <kbd>*</kbd> 4 ^ 2 / 5', 
 				'=1 + (2 - 3) * 4 ^ 2 <kbd>/</kbd> 5', 
-				'=1 <kbd>+</kbd> (2 - 3 ) * 4 ^ 2 / 5']
+				'=1 <kbd>+</kbd> (2 - 3 ) * 4 ^ 2 / 5'
+			],
+		kcs: [KC_NAMES.ORDEROFOPERATION]
 	},
 	{	type: 'IfPageParsonsSchema',
 		description: `Keep using PEMDAS to arrange the following expression in order.
@@ -178,7 +189,9 @@ const tutorial_pages = [
 				'=8 + (10 - 2) <kbd>^</kbd> 2 * 2 + 3', 
 				'=8 + (10 - 2) ^ 2 <kbd>*</kbd> 2 + 3', 
 				'=8 <kbd>+</kbd> (10 - 2) ^ 2 * 2 + 3', 
-				'=8 + (10 - 2) ^ 2 * 2 <kbd>+</kbd> 3']
+				'=8 + (10 - 2) ^ 2 * 2 <kbd>+</kbd> 3'
+				],
+		kcs: [KC_NAMES.ORDEROFOPERATION]
 	},
 	{	type: 'IfPageFormulaSchema',
 		description: `Why don't you try some problems?
@@ -195,7 +208,8 @@ const tutorial_pages = [
 				],
 		solution_f: '=(b1+c1)/10', 
 		client_f_format: '$',
-		code: 'tutorial'
+		code: 'tutorial',
+		kcs: [KC_NAMES.ORDEROFOPERATION]
 	}
 ];
 

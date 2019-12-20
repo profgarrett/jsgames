@@ -3,8 +3,8 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import Container from 'react-bootstrap/Container';
 import { Row, Col, Breadcrumb, Button  } from 'react-bootstrap';
-import IfLevelScore from './IfLevelScore';
-import { IfLevelScoreChart } from './IfLevelScoreChart';
+import { LevelScore } from './LevelScore';
+import { LevelScoreChart } from './LevelScoreChart';
 import { Message, Loading } from './../components/Misc';
 
 import { IfLevelSchema } from './../../shared/IfLevelSchema';
@@ -24,7 +24,7 @@ type StateType = {
 
 const DEBUG = true; // load a sample debug score result?
 
-export default class IfLevelScoreContainer extends React.Component<PropsType, StateType> {
+export default class LevelScoreContainer extends React.Component<PropsType, StateType> {
 	constructor(props: PropsType) {
 		super(props);
 		this.state = { 
@@ -39,8 +39,8 @@ export default class IfLevelScoreContainer extends React.Component<PropsType, St
 	componentDidMount() {
 		let _id = this.props.match.params._id;
 		const url = /* DEBUG 
-			? '/api/ifgame/debuglevel/surveycharts_wu/'
-			: */ '/api/ifgame/level/'+_id;
+			? '/api/levels/debuglevel/surveycharts_wu/'
+			: */ '/api/levels/level/'+_id;
 
 		fetch(url, {
 				method: 'get',
@@ -92,9 +92,9 @@ export default class IfLevelScoreContainer extends React.Component<PropsType, St
 		if(typeof level === 'undefined' || level == null) {
 			score = null;
 		} else if( level.code === 'surveycharts_amt' || level.code === 'surveycharts_wu') {
-			score = <IfLevelScoreChart level={level} />;
+			score = <LevelScoreChart level={level} />;
 		} else {
-			score = <IfLevelScore level={level} />;
+			score = <LevelScore level={level} />;
 		}
 
 		return (

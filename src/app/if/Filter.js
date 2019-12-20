@@ -132,7 +132,7 @@ export default class Filter extends React.Component<PropsType, ContainerStateTyp
 			});
 
 			// Request.
-			fetch('/api/ifgame/sections', {
+			fetch('/api/sections/sections', {
 					method: 'get',
 					credentials: 'include',
 					headers: {
@@ -189,7 +189,7 @@ export default class Filter extends React.Component<PropsType, ContainerStateTyp
 			});
 
 			// Request.
-			fetch('/api/ifgame/users/', {
+			fetch('/api/sections/users/', {
 					method: 'get',
 					credentials: 'include',
 					headers: {

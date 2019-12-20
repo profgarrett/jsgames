@@ -25,7 +25,7 @@ function array_to_object( a: Array<string> ): Object {
 ////////////////////////////////////////////////////////////////////////////////
 // Class used to show tag data.
 ////////////////////////////////////////////////////////////////////////////////
-export default class IfQuestionsTags extends React.Component<DetailPropsType> {
+export default class QuestionsTags extends React.Component<DetailPropsType> {
 
 
 	build_row( data: Object, columns: Object, i: number ): Node {
@@ -145,7 +145,7 @@ export default class IfQuestionsTags extends React.Component<DetailPropsType> {
 		// Go through each map of levels and return a table for each.
 		const html = [level].map( 
 			(level_summary,i) => 
-				<div key={'IfPagesTableRender' + i}>
+				<div key={'PagesTableRender' + i}>
 					{ this._render_a_levels_questions(level_summary) }
 				</div>
 			);

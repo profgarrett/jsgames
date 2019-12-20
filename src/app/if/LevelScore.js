@@ -31,7 +31,7 @@ type ScoreStateType = {
 };
 
 
-class IfLevelScorePage extends React.Component<ScorePropsType, ScoreStateType> {
+export class LevelScorePage extends React.Component<ScorePropsType, ScoreStateType> {
 	constructor(props: any) {
 		super(props);
 		this.state = {
@@ -158,7 +158,7 @@ type LevelPropsType = {
 };
 
 
-export default class IfLevelScore extends React.Component<LevelPropsType> {
+export class LevelScore extends React.Component<LevelPropsType> {
 
 	render(): Node {
 		const level = this.props.level;
@@ -191,7 +191,7 @@ export default class IfLevelScore extends React.Component<LevelPropsType> {
 					</div>
 					</Card.Body>
 				</Card>
-				{ level.pages.map( (p,i) => <IfLevelScorePage level={level} page={p} i={i} key={i} /> ) }
+				{ level.pages.map( (p,i) => <LevelScorePage level={level} page={p} i={i} key={i} /> ) }
 			</div>
 		);
 	}
@@ -226,8 +226,9 @@ const build_score = (pages: Array<IfPageBaseSchema>): any =>
 			g = <IncorrectGlyphicon/>;
 		}
 	} else {
+		console.log('Problem without code. Most likely an older page')
 		console.log(p);
-		throw new Error('what?');
+		return null;
 	}
 
 
@@ -239,6 +240,8 @@ const build_score = (pages: Array<IfPageBaseSchema>): any =>
 			</Popover.Content>
 		</Popover>
 	);
+
+
 
 	return (
 		<span key={'iflevelplayrenderscore'+i}>

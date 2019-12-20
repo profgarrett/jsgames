@@ -2,13 +2,13 @@
 const { KC_NAMES } = require('./../kcs/kc.js');
 import type { AdaptiveKC } from './kc';
 
-const farm1_data = {
-	column_titles: ['Alpacas', 'Baboon', 'Camels' ],
-	column_formats: [ ',', ',', '$','%' ],
-	client_f_format: ',',
+const sales_data = {
+	column_titles: ['Region A Sales', 'Region B Sales', 'Region C Sales' ],
+	column_formats: [ '$', '$', '$', ],
+	client_f_format: '$',
 	tests: [
-			{ 'a': 54, 'b': 83, 'c': 10 }, 
-			{ 'a': 57, 'b': 94, 'c': 1 }, 
+			{ 'a': 14, 'b': 83, 'c': 10 }, 
+			{ 'a': 27, 'b': 84, 'c': 12 }, 
 			{ 'a': 14, 'b': 99, 'c': 8 }, 
 			{ 'a': 68, 'b': 91, 'c': 0 }, 
 		]
@@ -21,17 +21,22 @@ const farm1_data = {
 
 	Concepts:
 		Order of operation
+	
+	=(a1+b1) * c1
+	=a1 * (b1+c1)
+	=(a1-b1) / c1
+	=a1 * (1 + b1)
+
 */
 const tutorial_pages = [
+	/*
 	{	type: 'IfPageTextSchema',
 		description: `When working on a problem, you may have to use order of operations
 				to get the right numbers.
 				<br/><br/>
-				For example, a question may ask what proportion of your animals are Alpacas.
-				But, if it may not give you the total number of Alpacas and Baboons. 
+				This section asks some business questions that require you to use order of operations.
 				<br/><br/>
-				You would use <code>=A1/(A1+B1)</code> to divide the number of Alpacas in <code>A1</code>
-				by the total number of Alpacas and Baboons. 
+				When in doubt, use parentheses to force portion of a formula to be evaluated first.
 				`
 	},
 	{	type: 'IfPageFormulaSchema',
@@ -59,6 +64,7 @@ const tutorial_pages = [
 		solution_f: '=(a1+b1+c1)*2/3', 
 		code: 'tutorial'
 	},
+	*/
 ];
 
 
@@ -74,6 +80,7 @@ const tutorial_pages = [
 	Words converted into numbers
 */
 
+/*
 const _base = {
 	type: 'IfPageFormulaSchema',
 	column_titles: farm1_data.column_titles,
@@ -90,6 +97,7 @@ const _base = {
 };
 
 const test_pages = [
+	
 	// Ratio
 
 	{
@@ -137,9 +145,8 @@ const test_pages = [
 		description: 'If a tenth of our animals run away, how many will have escaped?',
 	}
 
-
 ];
-
+*/
 
 
 module.exports = { 

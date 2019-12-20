@@ -96,13 +96,16 @@ if(DEBUG)
 ////////////////////////////////////////////////////////////////////////
 
 
-const app_ifgame = require('./app_ifgame');
+const app_levels = require('./app_levels');
+app.use('/api/levels', app_levels);
 
-app.use('/api/ifgame', app_ifgame);
+const app_reports = require('./app_reports');
+app.use('/api/reports',app_reports);
 
+const app_sections = require('./app_sections');
+app.use('/api/sections',app_sections);
 
 const app_users = require('./app_users');
-
 app.use('/api/users', app_users);
 
 
