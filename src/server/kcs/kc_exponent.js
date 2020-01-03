@@ -6,7 +6,6 @@ import type { AdaptiveKC } from './kc';
 
 const _base = {
 	type: 'IfPageFormulaSchema',
-	column_formats: [ '' ],
 	column_titles: [ 'Region A Sales', 'Region B Sales', 'Region C Sales' ],
 	tests: [ 
 		{ a: 1, b: 4.2, c: 8},

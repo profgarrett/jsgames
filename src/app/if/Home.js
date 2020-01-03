@@ -13,7 +13,7 @@ import MyProgressContainer from './MyProgressContainer';
 import ClassProgressContainer from './ClassProgressContainer';
 import {KCContainer} from './KCContainer';
 
-export default class IfHome extends React.Component {
+export default class Home extends React.Component {
 
 	render() {
 		

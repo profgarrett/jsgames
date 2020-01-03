@@ -14,7 +14,7 @@ import { DEMO_MODE } from './../../server/secret';
 type PropsType = {
 	level: ?IfLevelSchema,
 	level_id: ?string,
-    hide: function,
+    hide: Function,
 	sequence_in_level: ?number,
 };
 

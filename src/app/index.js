@@ -135,7 +135,7 @@ if(window.location.hostname !== 'localhost') {
 					<Route path='/login' component={LoginContainer}></Route>
           <Route path='/password' component={PasswordContainer}></Route>
 					<Route path='/logout' component={Logout}></Route>
-					<Route path='/ifgame' component={IfHome}></Route>
+					<Route path='/ifgame' component={Home}></Route>
 					<Route path='/profile' component={ProfileContainer}></Route>
 					<Route component={PageNotFound}></Route>
 				</Switch>

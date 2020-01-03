@@ -386,7 +386,7 @@ function Expandable(props) {
   const [open, setOpen] = useState(false);
 
   return (
-    <>
+    <div>
       <kbd
         onClick={() => setOpen(!open)}
         aria-controls="example-collapse-text"
@@ -400,6 +400,6 @@ function Expandable(props) {
             <br/>
         </div>
       </Collapse>
-    </>
+    </div>
   );
 }

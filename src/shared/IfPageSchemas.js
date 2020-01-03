@@ -1574,7 +1574,7 @@ class IfPageAnswer {
 	constructor(json) {
 		if(typeof json === 'undefined') return;
 		
-		for(key in json) {
+		for(let key in json) {
 			if(json.hasOwnProperty(key)) {
 				this[key] = json[key];
 			}
