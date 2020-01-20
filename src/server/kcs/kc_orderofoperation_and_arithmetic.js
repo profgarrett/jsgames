@@ -146,7 +146,7 @@ const test_pages = [
 	}
 
 ];
-*/
+
 
 
 module.exports = { 
@@ -156,3 +156,4 @@ module.exports = {
 		test_pages: test_pages
 	}: AdaptiveKC)
 };
+*/

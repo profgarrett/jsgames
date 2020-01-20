@@ -70,8 +70,8 @@ router.post('/feedback',
 	nocache, require_logged_in_user,
 	async (req: $Request, res: $Response, next: NextFunction): Promise<any> => {
 	try {
-		const params: { usename: string, data: Object, message: string, code: string } = 
-			type_params(req.body, ['username', 'data', 'message', 'code']);
+		const params: { data: Object, message: string, code: string } = 
+			type_params(req.body, ['data', 'message', 'code']);
 		const created = from_utc_to_myql(to_utc(new Date()));
 		const username = get_username_or_emptystring(req, res);
 		const data = JSON.stringify(params.data);

@@ -87,12 +87,16 @@ const test_pages = [
 		description: 'What is half of the {cell1_title} column?',
 	},{
 		..._divide_test_pages_base,
-		solution_f: '={cell1_ref}/4', 
+		solution_f: '={cell1_ref}/3', 
 		description: 'What is a third of the {cell1_title} column?',
 	},{
 		..._divide_test_pages_base,
 		solution_f: '={cell1_ref}/4', 
 		description: 'What is a quarter of the {cell1_title} column?',
+	},{
+		..._divide_test_pages_base,
+		solution_f: '={cell1_ref}/8', 
+		description: 'What is an eighth of the {cell1_title} column?',
 	},{
 		..._divide_test_pages_base,
 		solution_f: '={cell1_ref}/10', 

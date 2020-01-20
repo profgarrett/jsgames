@@ -1,6 +1,6 @@
 // @flow
 import React from 'react';
-import { FormControl, FormGroup, Button } from 'react-bootstrap';
+import { Form, Button } from 'react-bootstrap';
 
 import type { Node } from 'react';
 
@@ -10,6 +10,7 @@ type PropsType = {
 };
 
 type StateType = {
+	error: boolean,
 	message: string,
 	submitting: boolean,
 	expanded: boolean
@@ -20,6 +21,7 @@ export default class Login extends React.Component<PropsType, StateType> {
 		super(props);
 
 		this.state = {
+			error: false,
 			message: '',
 			submitting: false,
 			expanded: false
@@ -55,9 +57,15 @@ export default class Login extends React.Component<PropsType, StateType> {
 				)
 			})
 			.then( response => {
-				this.setState({ submitting: false, message: '', expanded: false });
+				console.log(response);
+				if(response.status === 500) {
+					this.setState({ submitting: false, error: true });
+				} else {
+					this.setState({ submitting: false, message: '', expanded: false });
+				}
 			})
 			.catch( error => {
+				this.setState({ submitting: false, error: true });
 				console.log(error);
 			});
 	}
@@ -95,30 +103,42 @@ export default class Login extends React.Component<PropsType, StateType> {
 			cursor: 'pointer'
 		};
 
+		const label = !this.state.error 
+			? 'Have a problem or input?'
+			: 'Error submitting, please email your feedback to profgarrett@gmail.com';
+
+		const button = !this.state.error 
+			? 	<Button 
+					type='submit' 
+					variant='primary'
+					disabled={this.state.submitting}
+					>
+					Submit</Button>
+			: 	<Button 
+					variant='secondary'	
+					onClick={ () => this.setState({ expanded: false, message: '', error: false })} 
+					>
+					Close
+					</Button>;
+
 		if(this.state.expanded) {
 			return (<div style={expandedStyle}>
-						<div style={{ fontSize: 24, marginBottom: 10 }}>
-							Have a problem or input?</div>
-						<form name='feedbackform' onSubmit={this.onSubmit} >
-							<FormGroup style={{ marginBottom: 0}}>
-								<FormControl 
+						<div style={{ fontSize: 24, marginBottom: 10 }}>{ label }</div>
+						<Form name='feedbackform' onSubmit={this.onSubmit} >
+							<Form.Group style={{ marginBottom: 0}}>
+								<Form.Control 
 									id='feedback'
 									onChange={ e => this.onMessageChange( e.target.value ) }
 									value={this.state.message }
-									componentClass='textarea'
+									as="textarea"
 									style={{ height: 100 }}
 									placeholder='Type in your feedback'
 								/>
 								<div style={{ textAlign: 'right', marginTop: 10 }}>
-									<Button type='submit' 
-										variant='primary'
-										disabled={this.state.submitting}
-										>
-										Submit</Button>
+									{ button }
 								</div>
-							</FormGroup>
-
-						</form>
+							</Form.Group>
+						</Form>
 					</div>
 				);
 		} else {
