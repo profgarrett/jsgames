@@ -327,10 +327,10 @@ export default class MyProgress extends React.Component<PropsType, StateType> {
 			let course_links = (
 				<InputGroup style={{ marginLeft: 3, marginTop: 3}}>
 					View this section&apos;s&nbsp;
-					<Link key='link1' to={'/ifgame/kcs'+p}>learning</Link>,&nbsp;
 					<Link key='link2' to={'/ifgame/progress'+p}>progress</Link>,&nbsp;
-					<Link key='link3' to={'/ifgame/recent'+p}>recent activity</Link>&nbsp;and&nbsp;
-					<Link key='link4' to={'/ifgame/grades'+p}>grades</Link>.
+					<Link key='link3' to={'/ifgame/recent'+p}>recent activity</Link>,&nbsp;
+					<Link key='link4' to={'/ifgame/grades'+p}>grades</Link>&nbsp;and&nbsp;
+					<Link key='link1' to={'/ifgame/kcs'+p}>learning</Link>&nbsp;
 				</InputGroup>
 				);
 

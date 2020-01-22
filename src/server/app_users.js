@@ -374,6 +374,22 @@ router.post('/create_user',
 			return res.json({ success: false, error: 'ExistingUser'});
 		}
 
+		// If we have any code, make sure that it works and is valid.
+		let idsection = '';
+		if(code.length > 0) {
+			// Find section join code (if present)
+			const sql_select_idsection = 'SELECT idsection FROM sections WHERE LOWER(code) = ?';
+			const select_idsection_results = await run_mysql_query(sql_select_idsection, [code.toLowerCase()]) ;
+
+			if(select_idsection_results.length === 0 && code !== '') {
+				return res.json({ success: false, error: 'InvalidCode'});
+			} else {
+				idsection = select_idsection_results[0].idsection;
+			}
+		}
+
+
+		// All validation is passed! Create records.
 
 		// Create the user account.
 		let user = { username: username, hashed_password: hashed_password };
@@ -389,15 +405,6 @@ router.post('/create_user',
 
 		// If we have any code, then create the new row.
 		if(code.length > 0) {
-			// Find section join code (if present)
-			const sql_select_idsection = 'SELECT idsection FROM sections WHERE code = ?';
-			const select_idsection_results = await run_mysql_query(sql_select_idsection, [code]) ;
-
-			const idsection = select_idsection_results.length === 0 ? '' : select_idsection_results[0].idsection;
-			if(select_idsection_results.length === 0 && code !== '') {
-				return res.json({ success: false, error: 'InvalidCode'});
-			}
-
 			// Add id section
 			const insert_section_id_sql = `INSERT INTO users_sections (iduser, idsection, role) 
 				VALUES (?, ?, ?)`;
@@ -413,28 +420,30 @@ router.post('/create_user',
 
 		// setup email
 		if( !isAnon) {
-				const reset_code = crypto.randomBytes(12).toString('hex');
-				const message = `You created an account on Excel.fun.
-Please use the link below to setup your password.
+				//const reset_code = crypto.randomBytes(12).toString('hex');
+				const message = `Hello ${username};
 
-http://excel.fun/password/?passwordreset=${reset_code}
+Thanks for creating an account on Excel.fun. If you ever need help logging in, please visit http://excel.fun/password
 
-
-Thank you for using the Excel.fun website! If you have any questions, feel free to email me.
+If you have any questions, feel free to email me.
 
 Nathan Garrett, 
 Excel.fun Administrator
 		`;
+
+			/*
+			Removed 1/21/2020, as we don't need a password reset anymore for new account creation.
 
 			const insert_reset_sql = 'INSERT INTO passwordresets (created, email, iduser, code, used ) VALUES (?, ?, ?, ?, ?)';
 			const insert_reset_results = await run_mysql_query(insert_reset_sql, [ created, username, iduser, reset_code, 0 ]);
 			if(insert_reset_results.affectedRows < 1) {
 				return res.sendStatus(500);
 			}
+			*/
 
 			// Send email to setup password as long as have a @ symbol.
 			if(user.username.indexOf('@') !== -1) {
-				await send_email( user.username, 'Setup Password for Excel.fun', message);
+				await send_email( user.username, 'New account at Excel.fun', message);
 			}
 		}
 

@@ -9,7 +9,7 @@ import 'url-search-params-polyfill';
 import type { Node } from 'react';
 
 
-// onChagne will be passed an object with the filter values includ3ed.
+// onChange will be passed an object with the filter values includ3ed.
 type PropsType = {
 	disabled: boolean, // provide a way to make it readonly, such as when data is being loaded externally.
 	onChange: (Object) => void,
@@ -96,6 +96,21 @@ export default class Filter extends React.Component<PropsType, ContainerStateTyp
 
 		newState.selection[name] = value[0].value;
 		
+		// Update filter args.
+		/*
+		const search = new URLSearchParams(window.location.search);
+		if( name === 'sections') {
+			if(value[0].value === '') {
+				search.delete('idsection'); 
+			} else {
+				search.set('idsection', value[0].value);	
+			}
+			window.location.search = search.toString();
+			console.log([ name, value[0].value]);
+			console.log( newState );
+		}
+		*/
+
 		this.setState(newState);
 	}
 

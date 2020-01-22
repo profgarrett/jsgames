@@ -3,7 +3,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 import Container from 'react-bootstrap/Container';
-import {  Row, Col } from 'react-bootstrap';
+import { Row, Col } from 'react-bootstrap';
 
 import { Message, Loading } from './../components/Misc';
 import { getUserFromBrowser } from './../components/Authentication';
