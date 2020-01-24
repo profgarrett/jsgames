@@ -67,7 +67,7 @@ function Popup(props) {
 function find_choice(pages: Array<IfPageBaseSchema>, s: string ): IfPageChoiceSchema {
 	const matching_pages = pages.filter( p => p.template_id === s);
 	if(matching_pages.length !== 1) {
-		console.log(pages)
+		//console.log(pages)
 		throw new Error('Invalid length of '+s+', found ' + matching_pages.length);
 	}
 	return matching_pages[0].toIfPageChoiceSchema();
@@ -77,7 +77,7 @@ function find_choice(pages: Array<IfPageBaseSchema>, s: string ): IfPageChoiceSc
 function find_slider(pages: Array<IfPageBaseSchema>, s: string ): IfPageSliderSchema {
 	const matching_pages = pages.filter( p => p.template_id === s);
 	if(matching_pages.length !== 1) {
-		console.log(pages)
+		//console.log(pages)
 		throw new Error('Invalid length of '+s+', found ' + matching_pages.length);
 	}
 	return matching_pages[0].toIfPageSliderSchema();
@@ -98,12 +98,19 @@ const differenceBetween = (d => {
 	return Math.abs(diff);
 });
 
+
+// Convert a potentially null string into ''
+const nz = (s_or_null: string | null ): string => {
+	if(s_or_null === null) return '';
+	return s_or_null;
+}
+
 // Find the difference between two numbers, using choice.
 // Relies on choice to have int as first character.
 const differenceBetweenChoice = (d => {
 	const max = d.one.client_items.length;
-	const one =  parseInt( d.one.client.substr(0,1), 10);
-	const two = parseInt( d.one.client.substr(0,1), 10);
+	const one =  parseInt( nz(d.one.client).substr(0,1), 10);
+	const two = parseInt( nz(d.one.client).substr(0,1), 10);
 	const diff = Math.max(one, two) - Math.min(one, two);
 	return Math.round( (diff *100) / max);
 });
@@ -201,7 +208,12 @@ const countFalse = ( arr: Array<boolean>): number => {
 	return c;
 }
 const averageNumbers = ( arr: Array<number>): number => {
-	const sum = arr.reduce( (sum, i) => i, 0);
+	console.log(arr);
+
+	const sum = arr
+			.filter( i => !isNaN(i) )
+			.reduce( (sum, i) => sum+i, 0);
+	
 	return Math.round( sum / arr.length );
 }
 
@@ -287,6 +299,7 @@ export class LevelScoreChart extends React.Component<LevelPropsType> {
 				two: find_slider(pages, 'vislit_bar_unlabeled_slider_l2_ok'),
 			}
 		];
+		console.log(slider_pairs);
 
 		const slider_detailed_results = slider_pairs.map( (d,i) => {
 			return (<div key={'vislitbar_'+i}>
@@ -305,6 +318,7 @@ export class LevelScoreChart extends React.Component<LevelPropsType> {
 				}
 			}
 			// None found. Add first.
+			console.log(pair);
 			accum.push({
 				title: pair.title, 
 				results: [ differenceBetween(pair)] 
@@ -312,6 +326,8 @@ export class LevelScoreChart extends React.Component<LevelPropsType> {
 
 			return accum;
 		}, []);
+
+		console.log(slider_summary);
 
 	
 		const slider_summary_results = slider_summary.map( (result,i) => {
@@ -1039,8 +1055,6 @@ export class LevelScoreChart extends React.Component<LevelPropsType> {
 
 		const user = getUserFromBrowser();
 
-		console.log(user);
-
 		const details = (user.username === 'garrettn')
 			? <div><h3>Detailed Results</h3>
 						{ results.map( r => r.divs ) }</div>
@@ -1055,8 +1069,8 @@ export class LevelScoreChart extends React.Component<LevelPropsType> {
 							<tr>
 								<th>Chart Type</th>
 								<th>Task</th>
-								<th>Correct Answer</th>
-								<th>Incorrect Answer</th>
+								<th>Correct Answers</th>
+								<th>Incorrect Answers</th>
 								<th>Avg. Error</th>
 							</tr>
 							{ results.map( r => r.trs  ) }

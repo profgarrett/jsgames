@@ -9,7 +9,7 @@ import { getUserFromBrowser } from './../components/Authentication';
 //import type { IfLevelType } from './../../app/if/IfTypes';
 import { Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faThumbsUp, faMinus } from '@fortawesome/free-solid-svg-icons';
+import { faThumbsUp, faMinus, faCheck } from '@fortawesome/free-solid-svg-icons';
 import { PrettyDate } from './../components/Misc';
 
 import type { Node } from 'react';
@@ -17,8 +17,13 @@ import type { Node } from 'react';
 
 
 // Make a pretty glyph for success / failure.
-const glyph = score => {
+const glyph = (score: number, is_survey: boolean): Node => {
 	if( score === null || typeof score === 'undefined') return '';
+
+	// Survey, we don't care if they hit a certain score level or not.
+	if(is_survey) {
+		return <FontAwesomeIcon icon={faCheck} style={{ color: 'green'}} />
+	}
 
 	if( score >= GREEN_GRADE ) return (<span>
 		<OverlayTrigger 
@@ -115,15 +120,26 @@ export default class MyProgress extends React.Component<PropsType, StateType> {
 				<th key={'MyProgressRowTD'+counter++} style={td_l}>Description</th>
 			</tr>);
 
+		let is_survey = false; 
+		
+
 		// Add individual rows for each tutorial.
 		for(let i=0; i<levels.length; i++) {
 			tds = [];
 
+			// If this is a survey, always show a green thumb. We don't want to show information on failed
+			// survey setup questions.
+			is_survey = levels[i].code.substr(0, 6) === 'survey';
+
 			// Build TDS
-			tds.push(<td key={'MyProgressRowTD'+counter++} style={td_c}>{ glyph( levels[i].tutorial_highest_grade ) }</td>);
+			tds.push(<td key={'MyProgressRowTD'+counter++} style={td_c}>{ 
+					glyph( levels[i].tutorial_highest_grade, is_survey ) 
+				}</td>);
 
 			if(levels[i].review_available) {
-				tds.push(<td key={'MyProgressRowTD'+counter++} style={td_c}>{ glyph( levels[i].review_highest_grade ) }</td>);
+				tds.push(<td key={'MyProgressRowTD'+counter++} style={td_c}>{ 
+						glyph( levels[i].review_highest_grade, is_survey )
+					}</td>);
 			} else {
 				tds.push(<td key={'MyProgressRowTD'+counter++} style={td_disabled}>NA</td>);
 			}
@@ -164,12 +180,12 @@ export default class MyProgress extends React.Component<PropsType, StateType> {
 		Give the next clickable lesson
 	*/
 	_render_next_lesson(levels: Array<Object>): Node {
-		let is_surveycharts_amt = false;
+		let is_survey = false;
 
 		// Look through list of levels until we find the next that should be completed.
 		for(let i=0; i<levels.length; i++) {
 
-			is_surveycharts_amt = levels[i].code === 'surveycharts_amt';
+			is_survey = levels[i].code.substr(0, 6) === 'survey';
 
 			// If we are incomplete, suggest finishing.
 			if(levels[i].tutorial_incompleted_levels.length > 0) {
@@ -182,7 +198,8 @@ export default class MyProgress extends React.Component<PropsType, StateType> {
 			}
 
 			// If we score low, suggest continuing.
-			if(!is_surveycharts_amt) {
+			// Note: Don't show for the any surveys or waivers.
+			if(!is_survey) {
 				if(levels[i].tutorial_highest_grade !== null && 
 						levels[i].tutorial_highest_grade < PASSING_GRADE) {
 					return (<span>Your <b>{levels[i].code}</b> lesson did not earn {PASSING_GRADE}%. 

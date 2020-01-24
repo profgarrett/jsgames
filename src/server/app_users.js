@@ -376,6 +376,10 @@ router.post('/create_user',
 
 		// If we have any code, make sure that it works and is valid.
 		let idsection = '';
+
+		// If an anon user without a passed code, we want to find the anonyouse group.
+		if(isAnon && code === '') code = 'anonymous'; 
+
 		if(code.length > 0) {
 			// Find section join code (if present)
 			const sql_select_idsection = 'SELECT idsection FROM sections WHERE LOWER(code) = ?';
@@ -399,9 +403,6 @@ router.post('/create_user',
 		if(insert_results.affectedRows !== 1) return res.sendStatus(500);
 		const iduser = insert_results.insertId;
 
-
-		// If an anon user without a passed code, then join to the anonymous test group.
-		if(isAnon && code === '') code = 'anonymous'; 
 
 		// If we have any code, then create the new row.
 		if(code.length > 0) {

@@ -13,25 +13,20 @@ const surveywaiver_non_woodbury_student: LevelSchemaFactoryType = {
 	title: 'Student Account Setup', 
 	description: 'Learn about this website and answer several questions',
 	show_score_after_completing: false,
+	show_progress: false,
 	version: 1.0,
 
 	gen: ({
 		gen_type: LinearGen,
 		pages: [
 			use_consent,
-			/*
 			{	type: 'IfPageTextSchema',
 				description: `Before starting to complete the online exercises, the system to needs to ask you a few questions.  
-					The results will be used to tune the system to best meet your existing skill level.`
+					The results will help tune the system for your skill level.`
 			},
 			({	gen_type: ShuffleGen,
 				pages: sns
 			}: GenType),
-			{	type: 'IfPageTextSchema',
-				description: 'You finished!',
-				instruction: 'Click "Next page" to finish this assesssment.',
-			}
-			*/
 			{	type: 'IfPageTextSchema',
 				description: 'Thanks! You can start working on the first tutorial now.',
 				instruction: 'Click "Next page" to close this agreement',
@@ -46,6 +41,7 @@ const surveywaiver_non_woodbury_user: LevelSchemaFactoryType = {
 	title: 'Anonymous User Account Setup ', 
 	description: 'Learn about this website and answer several questions',
 	show_score_after_completing: false,
+	show_progress: false,
 	version: 1.0,
 
 	gen: ({
@@ -66,22 +62,25 @@ const surveywaiver_non_woodbury_user: LevelSchemaFactoryType = {
 const surveywaiver_woodbury_student: LevelSchemaFactoryType = {
 	code: 'surveywaiver_woodbury_student', 
 	title: 'Woodbury Student Account Setup', 
-	description: 'Get your website accoutn setup.',
+	description: 'Get your website account setup.',
 	show_score_after_completing: false,
-	version: 1.0,
+	show_progress: false,
+	version: 1.2,
 
 	gen: ({
 		gen_type: LinearGen,
 		pages: [
 			wu_consent,
-			/*
-			{	gen: ShuffleGen,
+			{	type: 'IfPageTextSchema',
+				description: `Before starting to complete the online exercises, the system to needs to ask you a few questions.  
+					The results will help tune the system for your skill level.`
+			},
+			({	gen_type: ShuffleGen,
 				pages: sns
-			},
-			{	gen: ShuffleGen,
+			}: GenType),
+			({	gen_type: ShuffleGen,
 				pages: numeracy_pretest
-			},
-			*/
+			}: GenType),
 			{	type: 'IfPageTextSchema',
 				description: 'Thanks! You can start working on the first tutorial now.',
 				instruction: 'Click "Next page" to finish this assesssment! You can start working on the first tutorial now.',
