@@ -208,8 +208,6 @@ const countFalse = ( arr: Array<boolean>): number => {
 	return c;
 }
 const averageNumbers = ( arr: Array<number>): number => {
-	console.log(arr);
-
 	const sum = arr
 			.filter( i => !isNaN(i) )
 			.reduce( (sum, i) => sum+i, 0);

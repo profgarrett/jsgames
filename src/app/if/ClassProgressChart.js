@@ -77,9 +77,19 @@ export class ClassProgressChart extends React.Component<PropsType, StateType> {
     }
 
     _render_bar(levels: Array<IfLevelPagelessSchema>): Node {
-        const keys = DEFAULT_TUTORIAL_LEVEL_LIST;
+        const keys = [ ...DEFAULT_TUTORIAL_LEVEL_LIST];
         const map_classifications = turn_array_into_map( levels, l => l.props.classification );
         const a_classifications = turn_object_keys_into_array(map_classifications);
+
+        // Grab any completed levels that don't show in the default list, and add them.
+        // But, only for surveycharts_wu
+        const keys_obj = turn_array_into_map( keys, s => s );
+        levels.forEach( (l: IfLevelPagelessSchema) => {
+            if(!keys_obj.has(l.code) && l.code === 'surveycharts_wu') {
+                keys_obj.set(l.code, true);
+                keys.push(l.code);
+            }
+        });
 
         let c_data = [];
         let code_levels = [];

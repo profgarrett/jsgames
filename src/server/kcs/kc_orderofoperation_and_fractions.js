@@ -96,39 +96,39 @@ const _test_base = {
 const test_pages = [
 	{
 	// Simple problems
-		..._base,
+		..._test_base,
 		solution_f: '=(a1+b1+c1) * 2/3', 
 		description: 'If a third of our animals run away, how many will we still have?',
 	}, {
-		..._base,
+		..._test_base,
 		solution_f: '=(a1+b1+c1) * 3/4', 
 		description: 'If a fourth of our animals run away, how many will we have remaining?',
 	}, {
-		..._base,
+		..._test_base,
 		solution_f: '=(a1+b1+c1) * 7/8', 
 		description: 'If an eighth of our animals run away, how many will we have remaining?',
 	}, {
-		..._base,
+		..._test_base,
 		solution_f: '=(a1+b1+c1) * 9/10', 
 		description: 'If a tenth of our animals run away, how many will we have still have?',
 	}, {
-		..._base,
+		..._test_base,
 		solution_f: '=(a1+b1+c1) * 1/2', 
 		description: 'If half of our animals run away, how many are gone?',
 	}, {
-		..._base,
-		solution_f: '=(a1+b1+c1) * 2/3', 
+		..._test_base,
+		solution_f: '=(a1+b1+c1) * 1/3', 
 		description: 'If a third of our animals run away, how many will we have lost?',
 	}, {
-		..._base,
-		solution_f: '=(a1+b1+c1) * 3/4', 
+		..._test_base,
+		solution_f: '=(a1+b1+c1) * 1/4', 
 		description: 'If a fourth of our animals run away, how many will we have lost?',
 	}, {
-		..._base,
+		..._test_base,
 		solution_f: '=(a1+b1+c1) * 1/8', 
 		description: 'If an eighth of our animals run away, how many will have escaped?',
 	}, {
-		..._base,
+		..._test_base,
 		solution_f: '=(a1+b1+c1) * 1/10', 
 		description: 'If a tenth of our animals run away, how many will have escaped?',
 	}

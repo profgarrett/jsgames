@@ -193,6 +193,8 @@ async function update_level_in_db(level: IfLevelSchema): Promise<any> {
 				props_version = ?
 			WHERE _id = ? AND username = ?`;
 	
+	// need to refresh before saving. Otherwise, this will be set to the old mysql version.
+	// Derived props are only updated by MYSQL functions prior to saving, not by the object itself during updates.
 	level.refresh_derived_props();
 
 	const props = JSON.stringify(level.props.toJson());

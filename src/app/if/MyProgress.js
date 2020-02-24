@@ -237,7 +237,7 @@ export default class MyProgress extends React.Component<PropsType, StateType> {
 		default.
 	*/
 	get_list(): Array<string> {
-
+		
 		const list = this.props.sections.length === 0 || this.state.section.levels === null || this.state.section.levels === ''
 			? DEFAULT_TUTORIAL_LEVEL_LIST 
 			: this.state.section.levels.split(',');

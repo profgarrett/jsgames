@@ -86,6 +86,9 @@ export default class Recent extends React.Component<PropsType,StateType> {
 				} >View</Button>
 		}];
 
+		// Fixes old bug, where some people's levels didn't have a props value.
+		const data = this.props.levels.filter( l => l.props !== null ); 
+
 		const modal = this.state.level_id === null 
 			? null
 			: <LevelModal level={null} level_id={this.state.level_id} hide={ () => this.hide_modal() } />
@@ -93,7 +96,7 @@ export default class Recent extends React.Component<PropsType,StateType> {
 		return (<div>
 				{ modal }
 				<ReactTable 
-					data={this.props.levels} 
+					data={data}
 
 					filterable={true}
 					columns={columns} 

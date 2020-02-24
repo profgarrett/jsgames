@@ -52,7 +52,7 @@ router.get('/questions/', nocache, require_logged_in_user,
 	async (req: $Request, res: $Response, next: NextFunction): Promise<any> => {
 	try {
 		// Time limit on returned data.
-		const INTERVAL = 360 + ' DAY';  // roughly one year
+		const INTERVAL = 99999 + ' DAY';
 
 		// Only allow faculty to have access to questions
 		const username = get_username_or_emptystring(req, res);
@@ -98,7 +98,6 @@ router.get('/questions/', nocache, require_logged_in_user,
 			
 				(
 				(iflevels.code = ? OR ? = '*') 
-				OR left(iflevels.code,2) = 'XXXXXXXif'
 				) AND
 
 				(sections.idsection = ? OR ? = '*') AND 

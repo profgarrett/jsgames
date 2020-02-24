@@ -220,10 +220,10 @@ const if3_if_tutorial = ({
 				Any formula that be in a cell could be used as part of an <code>IF</code> function.
 				These can even include embedding other functions.
 				<br/><br/>
-				For example, <code>=IF(C1="C", FLOOR(c1), "Ok")</code> uses the <code>FLOOR()</code> function to
+				For example, <code>=IF(C1="C", Round(c1,0), "Ok")</code> uses the <code>Round()</code> function to
 				round down C1 to the nearest integer.  Otherwise
 				it returns "Ok".`,
-			instruction: 'Have the North region return "expired", while all others should use <code>FLOOR()</code> to round down the sales.',
+			instruction: 'Have the North region return "expired", while all others should use <code>Round()</code> to round down the sales.',
 			column_titles: ['Region', 'Sales', 'Rating' ],
 			column_formats: [ '', '.',''],
 			client_f_format: 'date',
@@ -233,10 +233,10 @@ const if3_if_tutorial = ({
 						{ 'a': 'East', 'b': 23.1, c: 'A'},
 						{ 'a': 'West', 'b': 10.9, c: 'C'},
 					],
-			solution_f: '=if(a1="North", "expired", floor(b1))', 
+			solution_f: '=if(a1="North", "expired", Round(b1,0))', 
 			feedback: [
 				{ 'has': 'references', args: ['a1'] },
-				{ 'has': 'functions', args: ['if', 'floor'] },
+				{ 'has': 'functions', args: ['if', 'round'] },
 				{ 'has': 'values', args: ['north', 'expired'] }
 			],
 			code: 'tutorial'

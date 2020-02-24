@@ -15,7 +15,7 @@ type DetailPropsType = {
     Recursive function that takes in any datatype and returns a nicely formatted string.
 */
 const to_string = ( a: any ): string => {
-
+    if(a === null) return '';
     if(typeof a === 'number') return ''+a;
     if(typeof a === 'string') return a;
     if(typeof a === 'object') {
@@ -33,8 +33,10 @@ const to_string = ( a: any ): string => {
     throw new Error('Invalud type ' + typeof a + ' passed to to_string in if questions chart');
 }
 
+// Test to_string with various inputs. 
 if(false) {
     console.log( to_string('a'));
+    console.log( to_string(null));
     console.log( to_string(1));
     console.log( to_string([1,2,3]));
     console.log( to_string({ x: 1, y: 2} ));
@@ -133,11 +135,12 @@ export default class IfQuestionsChart extends React.Component<DetailPropsType> {
 
         levels.forEach( l => {
             l.pages.forEach( p => {
-                console.log(p);
+                //console.log(p);
                 // Build question information.
                 if(p.template_id !== null) {
                     if( typeof templates[p.template_id] === 'undefined') {
                         // We haven't built it yet.
+                        console.log(p);
                         templates[p.template_id] = {
                             template_id: p.template_id,
                             type: p.type,
@@ -195,6 +198,12 @@ export default class IfQuestionsChart extends React.Component<DetailPropsType> {
         const oKeys = this.get_keys_from_levels(this.props.levels);
         const aKeys = Object.keys(oKeys).sort( (a, b) => a>b ? 1 : 0 );
 		const flat_levels = this.flatten_levels(this.props.levels, oKeys);
+
+        // Add a couple of additional columns to aKeys in the correct positions.
+        aKeys.push( '_id' );
+        aKeys.push('created');
+        aKeys.push('updated');
+        aKeys.push('username');
 
         /*
         console.log({

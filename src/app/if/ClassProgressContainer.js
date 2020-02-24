@@ -105,6 +105,9 @@ export default class ClassProgressContainer extends React.Component<ProgressProp
 				? <p>No students in this section have yet started completing lessons. Once they get started, you'll see a chart here with their progress</p>
 				: null;
 
+		// Fixes old bug, where some people's levels didn't have a props value.
+		const data = this.state.data.filter( l => l.props !== null ); 
+
 		return (
 			<Container fluid='true'>
 			<Row>
@@ -116,7 +119,7 @@ export default class ClassProgressContainer extends React.Component<ProgressProp
 					<Loading loading={ this.state.data_loading } />
 					{ filter }
 					{ empty }
-					<ClassProgressChart data={this.state.data}  />
+					<ClassProgressChart data={data}  />
 				</Col>
 			</Row>
 			</Container>

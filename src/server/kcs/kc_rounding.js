@@ -18,6 +18,8 @@ const tutorial = [
 				number is still 1.368</b>.
 				`
 	},
+	/*
+	INCORRECT: online acts differently than Excel function.
 	{	type: 'IfPageFormulaSchema',
 		description: `The <code>FLOOR</code> function takes a number and discards any
 			decimals after the <code>.</code> (period or decimal point).`,
@@ -34,6 +36,7 @@ const tutorial = [
 		client_f_format: '$.',
 		code: 'tutorial'
 	},
+	*/
 	{	type: 'IfPageFormulaSchema',
 		description: `The <code>ROUND</code> function allows you to choose <i>where</i> to round.
 			It looks like this: <code>=ROUND(1.23, 0)</code>
@@ -228,7 +231,7 @@ const tutorial = [
 		client_f_format: '$.',
 		code: 'tutorial'
 	},
-	*/
+	
 	{	type: 'IfPageFormulaSchema',
 		description: 'You can do the same type of math with <code>FLOOR</code>!',
 		instruction: 'Use <code>FLOOR</code> to return profit in dollars (with no rounding)',
@@ -248,6 +251,7 @@ const tutorial = [
 		client_f_format: '$.',
 		code: 'tutorial'
 	}
+	*/
 ];
 
 
@@ -266,7 +270,7 @@ const _base = {
 			],
 	client_f_format: '$.',
 	toolbox: [
-		{ has: 'functions', args: [ 'floor', 'round' ] },
+		{ has: 'functions', args: [ 'round' ] },
 		{ has: 'references', args: [ 'a1', 'b1' ] },
 		{ has: 'symbols', args: [ '-'] },
 		{ has: 'values', args: ['number?'] }
@@ -281,10 +285,6 @@ const _base = {
 
 
 const test = [
-		{	..._base,
-			description: 'Return the profit in whole dollars without any cents. Use the floor function.',
-			solution_f: '=floor(a1-b1)'
-		},
 		{	..._base,
 			description: 'Return the profit in dollars. Round to the nearest dollar.',
 			solution_f: '=round(a1-b1,0)'
