@@ -57,7 +57,6 @@ export default class Login extends React.Component<PropsType, StateType> {
 				)
 			})
 			.then( response => {
-				console.log(response);
 				if(response.status === 500) {
 					this.setState({ submitting: false, error: true });
 				} else {

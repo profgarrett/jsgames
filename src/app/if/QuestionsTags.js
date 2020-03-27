@@ -109,9 +109,6 @@ export default class QuestionsTags extends React.Component<DetailPropsType> {
 			return accum;
 		}, {});
 
-		//console.log(questions);
-		//console.log(data);
-		console.log(columns);
 		const ths = [];
 
 		for(let index in columns) {

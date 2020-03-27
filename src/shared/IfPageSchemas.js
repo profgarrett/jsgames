@@ -122,6 +122,10 @@ function common_schema(): Object {
 		// A list of strings that are used to track the type of problem.
 		kcs: { type: 'Array', initialize: (a) => isDef(a) && isArray(a) ? a : [] },
 
+		// Optional time minimum. Keeps people from clicking through too quickly.
+		// In seconds
+		time_minimum: { type: 'Number', initialize: (s) => isDef(s) ? s : null },
+
 		// Optional time limit.
 		// In seconds
 		time_limit: { type: 'Number', initialize: (s) => isDef(s) ? s : null },
@@ -163,6 +167,7 @@ class IfPageBaseSchema extends Schema {
 	show_feedback_on: boolean
 	history: Array<Object>
 	kcs: Array<Object>
+	time_minimum: number
 	time_limit: number
 	time_limit_expired: boolean
 	chart_def: ChartDef
@@ -252,6 +257,29 @@ class IfPageBaseSchema extends Schema {
 		}
 
 		return abandoned;
+	}
+
+	// Return the time in seconds from server initialization to server completion.
+	// Since it only runs on the server side, it can't tell if a user abandons an entry
+	// or is actively working. But, for questions that generate no client-side updates, 
+	// it is a better option.
+	// Has a standard timeout of 5 minutes, in which case null is returned.
+	get_server_time_in_seconds(): ?number {
+		// Filter history to only have server updates.
+		const h_init = this.history.filter( h => h.code === 'server_initialized' );
+		const h_comp = this.history.filter( h => h.code === 'server_page_completed' );
+
+		if(h_init.length !== 1 || h_comp.length !== 1) return null;
+
+		const d_init = convert_to_date_if_string( h_init[0].dt ).getTime();
+		const d_comp = convert_to_date_if_string( h_comp[0].dt ).getTime();
+
+		const diff_in_ms = d_comp - d_init;
+
+		// 5 min timeout.
+		if(diff_in_ms > 5*60*1000) return null;
+
+		return Math.round( diff_in_ms / 1000 );
 	}
 
 	// Return the time from the first edit to the last edit.

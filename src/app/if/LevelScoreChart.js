@@ -297,7 +297,6 @@ export class LevelScoreChart extends React.Component<LevelPropsType> {
 				two: find_slider(pages, 'vislit_bar_unlabeled_slider_l2_ok'),
 			}
 		];
-		console.log(slider_pairs);
 
 		const slider_detailed_results = slider_pairs.map( (d,i) => {
 			return (<div key={'vislitbar_'+i}>
@@ -316,7 +315,6 @@ export class LevelScoreChart extends React.Component<LevelPropsType> {
 				}
 			}
 			// None found. Add first.
-			console.log(pair);
 			accum.push({
 				title: pair.title, 
 				results: [ differenceBetween(pair)] 
@@ -325,9 +323,6 @@ export class LevelScoreChart extends React.Component<LevelPropsType> {
 			return accum;
 		}, []);
 
-		console.log(slider_summary);
-
-	
 		const slider_summary_results = slider_summary.map( (result,i) => {
 			return (<tr key={'vislitbarsummary'+i}>
 					<td>Bar</td>

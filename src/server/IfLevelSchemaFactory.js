@@ -119,8 +119,6 @@ const _initialize_json =  function(level: IfLevelSchema, original_json: Object):
 	// It also works with references. See templates for more information.
 	json.template_values = compile_template_values( json, level );
 
-
-
 	// Type-specific setup
 	if( json.type === 'IfPageTextSchema' ) {
 		// Mark that correct is required for all.

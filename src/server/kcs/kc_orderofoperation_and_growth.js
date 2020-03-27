@@ -88,7 +88,7 @@ const _base = {
 		Type in the correct formula. The ending amount will be:
 		<ul>
 			<li>Compound growth: <code>Starting Amount * (1 + Rate) ^ Years</code></li>
-			<li>Regular growth: <code>=Starting Amount * (1 + Rate * Years)</code></li>
+			<li>Regular growth: <code>=Starting Amount * (1 + Rate) * Years</code></li>
 		</ul>
 		`,
 	template_values: {

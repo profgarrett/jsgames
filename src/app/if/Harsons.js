@@ -116,7 +116,6 @@ export default class Harsons extends React.Component<HarsonsPropsType, HarsonsSt
 				const block = workspace.getBlockById(event.blockId);
 
 
-				//console.log({ block, event});
 				// Make sure that we still have a block (ie, it hasnt' been deleted)
 				// and that it isn't the equal (root of the tree)
 				if(block !== null && block.type !== 'equal') {

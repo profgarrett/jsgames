@@ -36,6 +36,10 @@ Process:
 * Email confirmation
 * Auto login with new account.
 
+For Amazon Mechanical Turk, use
+	.../login/amt=1
+
+This will automatically setup the account and join to the AMT group.
 */
 
 type PropsType = {
@@ -76,14 +80,17 @@ export default class LoginContainer extends React.Component<PropsType, StateType
 			this.state.message = 'Please wait while we log you in';
 
 			this.login( username, password );
+			return;
 		}
 
 		// if we are an AMT user, then go ahead and create.
 		if(search.has('amt')) {
+
 			this.state.isLoading=true;
 			this.state.message = 'Please wait while we log you in';
 
 			this.create_user('', 'amt');
+			return;
 		}
 
 		// Update to avoid showing URL params (as long as we're not locally developing).

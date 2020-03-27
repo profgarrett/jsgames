@@ -396,9 +396,12 @@ router.post('/create_user',
 		// All validation is passed! Create records.
 
 		// Create the user account.
-		let user = { username: username, hashed_password: hashed_password };
-		const insert_sql = 'INSERT INTO users (username, hashed_password) VALUES (?, ?)';
-		let insert_results = await run_mysql_query(insert_sql, [user.username, user.hashed_password]);
+		const ip =  typeof req.connection.remoteAddress === 'string' 
+			? req.connection.remoteAddress.substr(0, 255)
+			: '';
+		let user = { username: username, hashed_password: hashed_password, ip: ip };
+		const insert_sql = 'INSERT INTO users (username, hashed_password, ip) VALUES (?, ?, ?)';
+		let insert_results = await run_mysql_query(insert_sql, [user.username, user.hashed_password, ip]);
 			
 		if(insert_results.affectedRows !== 1) return res.sendStatus(500);
 		const iduser = insert_results.insertId;

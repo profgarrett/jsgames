@@ -5,7 +5,7 @@
 const { LinearGen, ShuffleGen } = require('./../Gens');
 import type { GenType } from './../Gens';
 import type { LevelSchemaFactoryType } from './../IfLevelSchemaFactory';
-const { VISLIT_TIME_PER_SLIDE, DISTORTION_MEDIUM, DISTORTION_SMALL } = require('./../secret.js');
+const { VISLIT_MIN_TIME_PER_SLIDE, VISLIT_TIME_PER_SLIDE, DISTORTION_MEDIUM, DISTORTION_SMALL } = require('./../secret.js');
 
 const _text_base = {
 	type: 'IfPageTextSchema',
@@ -19,6 +19,7 @@ const _slider_base = {
     max: 100,
 	show_feedback_on: false,
     time_limit: VISLIT_TIME_PER_SLIDE,
+    time_minimum: VISLIT_MIN_TIME_PER_SLIDE,
     code: 'test',
     description: '',
 };
@@ -30,6 +31,7 @@ const _choice_base = {
     solution: '*',
     correct_required: false,
     time_limit: VISLIT_TIME_PER_SLIDE,
+    time_minimum: VISLIT_MIN_TIME_PER_SLIDE,
     description: '',
 }
 

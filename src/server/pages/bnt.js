@@ -16,6 +16,8 @@ const _base = {
 	code: 'test',
 	type: 'IfPageNumberAnswerSchema',
 	show_feedback_on: false,
+    time_minimum: 3,
+	time_limit: 120,
 	instruction: `You may want to use a calculator for this task. If you do not have one handy,
 			you can use the one built into your computer, or open 
 			<a target='_blank' href='https://calculator-1.com/'>Calculator1</a> in another tab.`,
@@ -25,12 +27,10 @@ const _base = {
 const bnt = [
 	{	..._base,
 		template_id: 'bnt_1',
-		
 		description: `Imagine that we flip a fair coin 1,000 times. 
 			What is your best guess about how many times the coin 
 			would come up heads in 1,000 flips? `,
 		solution: 500,
-		time_limit: 60,
 
 	},{	..._base,
 		template_id: 'bnt_2',
@@ -38,7 +38,6 @@ const bnt = [
 			On average, out of these 50
 			throws how many times would this five-sided die show an odd number (1, 3 or 5)?`,
 		solution: 30,
-		time_limit: 60,
 
 	},{ ..._base,
 		template_id: 'bnt_3',
@@ -48,7 +47,6 @@ const bnt = [
 			probability that a randomly drawn man is a member
 			of the choir? (please write your answer as a percent)`,
 		solution: 0.25,
-		time_limit: 60,
 
 	},{ ..._base,
 		template_id: 'bnt_4',
@@ -57,7 +55,6 @@ const bnt = [
 			6 is twice as high as the probability of each of the other numbers. On average, out of
 			these 70 throws, how many times would the die show the number 6? `,
 		solution: 20,
-		time_limit: 60,
 
 	},{ ..._base,
 		template_id: 'bnt_5',
@@ -66,7 +63,6 @@ const bnt = [
 			poisonous with probability of 5%. What is the probability that a poisonous
 			mushroom in the forest is red?`,
 		solution: 50,
-		time_limit: 60,
 
 	},{ ..._base,
 		template_id: 'bnt_6',
@@ -75,7 +71,6 @@ const bnt = [
 			<br/><br/>
 			Write your answer as a '12%', with a % at the end.`,
 		solution: '0.1%',
-		time_limit: 60,
 
 	},{ ..._base,
 		template_id: 'bnt_7',
@@ -83,7 +78,6 @@ const bnt = [
 			best guess about how many people would win a $10 prize if 1000 people each buy a
 			single ticket to BIG BUCKS?`,
 		solution: 10,
-		time_limit: 60,
 	}
 ];
 

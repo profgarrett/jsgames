@@ -140,7 +140,7 @@ const tutorial_pages = [
 			<code>A</code>.
 			<br/><br/>
 				You will look in <code>A1</code>, find <code>"Z-"</code>, and replace them with <code>"A-"</code>.`,
-		instruction: 'Replace Z- with AA.',
+		instruction: 'Replace Z- with AA-.',
 		tests: [
 				{ a: 'Z-1234'},
 				{ a: 'Z-123234'},
@@ -148,7 +148,7 @@ const tutorial_pages = [
 				{ a: 'Z-14234'},
 			],
 		column_titles: [ 'Product Code' ],
-		solution_f: '=Substitute(a1, "Z-", "A-")',
+		solution_f: '=Substitute(a1, "Z-", "AA-")',
 		code: 'tutorial'
 
 	}, {

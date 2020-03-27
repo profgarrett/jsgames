@@ -73,7 +73,6 @@ export class ClassProgressStudent extends React.Component<PropsType, StateType> 
             tooltip={
                 o => {
                     // Show a tooltip with the people.
-                    //console.log(caption);
                     return o.data.caption;
                     //caption.props.children = caption;
 
@@ -88,7 +87,6 @@ export class ClassProgressStudent extends React.Component<PropsType, StateType> 
             }}
             onClick={
                 o => { // Show a focus on that item.
-                    //console.log(o);
                     //this._on_hover_to_show( o.data.caption );
                 }
             }
@@ -139,8 +137,6 @@ export class ClassProgressStudent extends React.Component<PropsType, StateType> 
         const level_map = turn_array_into_map( levels, l => l.code );
         const html = [];
         let temp = [];
-
-        console.log( IfLevels.map( l => l.code ));
 
         IfLevels.forEach( level => {
             if(level.code === 'tutorial'

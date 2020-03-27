@@ -123,9 +123,10 @@ type StateType = {
 	lastFeedbackDismissal: Object,
 	// Last displayed index.  Used to trigger a page scroll event when we start 
 	// showing a new page.
-	lastPageI: number
-	// Event listener
-	//eventListener: any
+	lastPageI: number,
+	// When when the page first showed? Used for minimum time requird before allowing
+	// moving to a new page.
+	lastPageI_displayed_at_time: Object
 };
 
 export default class IfLevelPlay extends React.Component<PropsType, StateType> {
@@ -138,10 +139,13 @@ export default class IfLevelPlay extends React.Component<PropsType, StateType> {
 		(this: any).handleHint = this.handleHint.bind(this);
 		(this: any)._on_keypress = this._on_keypress.bind(this);
 		(this: any)._on_click = this._on_click.bind(this);
+		(this: any)._on_tick = this._on_tick.bind(this);
 		
 		(this: any).state = {
 			lastFeedbackDismissal: new Date(),
-			lastPageI: 0
+			lastPageI: 0,
+			lastPageI_displayed_at_time: new Date(),
+			handle: setInterval( this._on_tick, 500),
 		};
 		
 		document.addEventListener('keydown', this._on_keypress);
@@ -149,6 +153,7 @@ export default class IfLevelPlay extends React.Component<PropsType, StateType> {
 
 	componentWillUnmount() {
 		window.removeEventListener('keydown', this._on_keypress, false);
+		window.clearTimeout(this.state.handle);
 	}
 
 	handleChange(new_value: Object) {
@@ -190,6 +195,11 @@ export default class IfLevelPlay extends React.Component<PropsType, StateType> {
 		});
 	} 
 
+	// Tick is a way of regularly updating things on the page.
+	// Needed to update the timer even for the 'don't submit too fast' feature.
+	_on_tick() {
+		this.setState( (s, p) => { return {} } );
+	}
 
 	// If we are showing feedback, and enter/escape is hit, then dismiss feedback window.
 	_on_keypress(event: any): any {
@@ -529,12 +539,30 @@ export default class IfLevelPlay extends React.Component<PropsType, StateType> {
 	}
 
 
-	// Create lower 'next page' & exit buttons.
+	/*
+		Create lower 'next page' & exit buttons.
+		The next button respects the time_minimum setting, being disabled until the timer runs from page load
+	*/
 	_render_page_submit_button(page: IfPageBaseSchema): Node {
 		// Use a different color for the submission button if we are test v. tutorial.
 		let button_style = 'primary';
 		let button_text = 'Next page';
 		let button_disabled = this.props.isLoading;
+
+		// Disable button if the user needs to take longer on a problem.
+		console.log({
+			loading: this.props.isLoading,
+			time_min: page.time_minimum,
+			displayed: this.state.lastPageI_displayed_at_time,
+			time: new Date().getTime() - this.state.lastPageI_displayed_at_time.getTime()
+		});
+
+		if(!button_disabled) {
+			if( page.time_minimum !== null && page.time_minimum > 0) {
+				button_disabled = page.time_minimum*1000 > new Date().getTime() - this.state.lastPageI_displayed_at_time.getTime();
+			}
+		}
+				
 
 		// if a tutorial that allows skipping questions, then change to skip instead of submit.
 		if(page.code === 'tutorial' && !page.correct_required && page.type !== 'IfPageTextSchema') {
@@ -738,7 +766,7 @@ export default class IfLevelPlay extends React.Component<PropsType, StateType> {
 		// If the i page has changed, then fire a scroll back to top.
 		if( state.lastPageI !== pageI) {
 			window.scrollTo(1,1);
-			return { ...state, lastPageI: pageI };
+			return { ...state, lastPageI: pageI, lastPageI_displayed_at_time: new Date() };
 		} else {
 			return state;
 		}

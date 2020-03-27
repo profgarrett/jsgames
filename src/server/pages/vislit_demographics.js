@@ -5,10 +5,11 @@
 
 
 const _number_base = {
-        type: 'IfPageShortTextAnswerSchema',
-        description: 'Demographic Information',
-        show_feedback_on: false,
-        code: 'test',
+    type: 'IfPageShortTextAnswerSchema',
+    description: 'Demographic Information',
+    show_feedback_on: false,
+    code: 'test',
+    time_mimimum: 2,
 };
 
 const _choice_base = {
@@ -18,6 +19,7 @@ const _choice_base = {
     solution: '*',
     correct_required: false,
     description: '',
+    time_mimimum: 2,
 };
 
 

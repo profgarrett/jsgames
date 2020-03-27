@@ -98,7 +98,12 @@ export default class IfQuestionsChart extends React.Component<DetailPropsType> {
             // Update values with the results of each item.
             l.pages.forEach( (p: IfPageBaseSchema) => {
                 if(p.template_id !== null) {
-                    result[p.template_id] = p.toString();
+                    if(p.time_limit_expired) {
+                        // User ran out of time to answer.
+                        result[p.template_id] = '';    
+                    } else {
+                        result[p.template_id] = p.get_server_time_in_seconds() ; // p.toString();
+                    }
                 }
             });
 
@@ -108,6 +113,7 @@ export default class IfQuestionsChart extends React.Component<DetailPropsType> {
         return results;
     }
 
+    // Return a table showing a list of questions.
     render_questions(oKeys: Object, aKeys: Array<Object>, levels: Array<Object>): Node {
 
 		const td_style = {
@@ -135,12 +141,10 @@ export default class IfQuestionsChart extends React.Component<DetailPropsType> {
 
         levels.forEach( l => {
             l.pages.forEach( p => {
-                //console.log(p);
                 // Build question information.
                 if(p.template_id !== null) {
                     if( typeof templates[p.template_id] === 'undefined') {
                         // We haven't built it yet.
-                        console.log(p);
                         templates[p.template_id] = {
                             template_id: p.template_id,
                             type: p.type,
@@ -167,6 +171,8 @@ export default class IfQuestionsChart extends React.Component<DetailPropsType> {
             </table>);
     }
 
+    // return a table of results, with one row per user, showing what they actually answered.
+    // Uses aKeys to figure out with properties to include as columns.
 	render_results(oKeys: Object, aKeys: Array<Object>, levels: Array<Object>): Node {
 
 		const td_style = {

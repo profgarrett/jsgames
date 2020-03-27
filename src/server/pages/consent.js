@@ -48,6 +48,7 @@ I understand the above information and have had all of my questions about partic
 const amt_consent = {
 	..._base,
 	template_id: 'consent_amt_use',
+	time_minimum: 5,
 	description: `
 You are asked to participate in a research study conducted by Nathan Garrett, PhD, from Woodbury University. You were selected as a possible participant in this study because you have a high-quality user rating on Amazon Mechanical Turk’s online platform. Your decision to participate in this research study is entirely up to you; please read the following carefully before agreeing to proceed.
 <br/><br/>
@@ -61,7 +62,7 @@ COSTS/RISKS<br/>
 There are no risks of participating in this research study.
 <br/><br/>
 BENEFITS/COMPENSATION<br/>
-You will be paid a total of $5.00 for completing this research study. The top 50% of participants (as measured by accuracy) will also receive a bonus of $2.00.
+You will be paid for completing this research study. The top 50% of participants (as measured by accuracy) will also receive a bonus.
 <br/><br/>
 CONFIDENTIALITY AND PROTECTION OF DATA<br/>
 Participant data will be carefully safeguarded by the researcher. Any personally-identifiable data you provide for the study will remain confidential, and will be disclosed only with your permission, or as required by law.

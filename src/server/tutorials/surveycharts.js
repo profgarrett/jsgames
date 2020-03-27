@@ -62,6 +62,7 @@ const surveycharts_amt = ({
 				description: '', //Welcome to the survey site!',
 				instruction: 'Please input your Amazon Mechanical Turk user account',
 				show_feedback_on: false,
+				time_minimum: 1,
 				code: 'test',
 				template_id: 'mechanicalturk_username',
 			},
@@ -70,6 +71,7 @@ const surveycharts_amt = ({
 
 			// Math
 			{	type: 'IfPageTextSchema',
+				time_minimum: 2,
 				description: `You have completed filling in the demographic information. 
 					<br/><br/>
 					The next section will ask you questions about your math skills, and
@@ -82,6 +84,7 @@ const surveycharts_amt = ({
 
 			// Transition
 			{	type: 'IfPageTextSchema',
+				time_minimum: 2,
 				description: `You have completed answering the math questions.
 					<br/><br/>
 					The next section will start asking you questions about various charts.`,
@@ -93,6 +96,7 @@ const surveycharts_amt = ({
 
 			// Hard math problems
 			{	type: 'IfPageTextSchema',
+				time_minimum: 2,
 				description: `You job!  You've finished the chart questions.
 					<br/><br/>
 					The next section will ask you several final math questions.`,
@@ -103,6 +107,7 @@ const surveycharts_amt = ({
 
 			// Ask if they want to get a copy of their results
 			{	type: 'IfPageShortTextAnswerSchema',
+				time_minimum: 1,
 				description: 'Thank you for completing this assessment!',
 				instruction: `If you would like to receive an emailed copy of your results,
 					please type an email address below. You should receive an email in 
@@ -115,6 +120,7 @@ const surveycharts_amt = ({
 
 			// Tell the user thanks and give them the code for the session.
 			{	type: 'IfPageTextSchema',
+				time_minimum: 1,
 				description: `<b>Congratulations!</b>  You have completed this assessment!
 					<br/><br/>
 					Please return to the Amazon Mechnical Turk website and input the code below.

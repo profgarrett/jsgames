@@ -210,7 +210,7 @@ const if5_if_with_functions_test = ({
 
 						{
 							description: 'Say "Y" if we have at least 5 bald eagle sales <b>and</b> at least 50 cat sales.  Say "N" otherwise',
-							solution_f: '=IF(AND(b1>5, c1>50), "Y", "N")',
+							solution_f: '=IF(AND(b1>=5, c1>=50), "Y", "N")',
 						},
 						{
 							description: 'Say "Y" if we have at over 5 Bald Eagles <b>or</b> over 50 cats sold.  Say "N" otherwise',
@@ -229,7 +229,7 @@ const if5_if_with_functions_test = ({
 							solution_f: '=IF(OR(c1<50, b1<50), "Y", "N")',
 						},
 						{
-							description: 'Do all animals <i>each</i> number at least 20? If so, return "Y" (or "N" otherwise)',
+							description: 'Do we have at least 20 of <i>each</i> animal? If so, return "Y" (or "N" otherwise)',
 							solution_f: '=IF(AND(b1>=20, c1>=20), "Y", "N")',
 						},
 						{

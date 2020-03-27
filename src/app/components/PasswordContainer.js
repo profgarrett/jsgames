@@ -77,7 +77,6 @@ export default class PasswordContainer extends React.Component<PropsType, StateT
 				body: JSON.stringify({ username })
 			})
 			.then( (x) => {
-				console.log(x);
 				this.setState({ 
 					message: 'An email has been sent to you with a reset link. Please check your inbox. ', 
 					messageStyle: 'success', 

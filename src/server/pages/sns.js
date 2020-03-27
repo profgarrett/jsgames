@@ -28,9 +28,10 @@ const good_scale = [
 
 
 const _base = {
-		type: 'IfPageChoiceSchema',
-		solution: '*',
-		show_feedback_on: false
+	type: 'IfPageChoiceSchema',
+	solution: '*',
+	show_feedback_on: false,
+	time_minimum: 2,
 };
 
 

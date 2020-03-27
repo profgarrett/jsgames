@@ -115,15 +115,12 @@ if(window.location.hostname !== 'localhost') {
 	const ErrorBoundary = bugsnagClient.getPlugin('react');
 
 
-  //<!-- Global site tag (gtag.js) - Google Analytics -->
-  /*
-  <script async src='https://www.googletagmanager.com/gtag/js?id=UA-85531294-2'></script>;
+  // Load Google Analytics
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
 
   gtag('config', 'UA-85531294-2');
-  */
 
 
 	Root = () => (
