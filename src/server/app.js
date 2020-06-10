@@ -66,7 +66,8 @@ app.use(bodyParser.urlencoded({ limit: '10mb', extended: false }));
 // $FlowFixMe,  This is ok as the cookie parser has a flow type messed up.
 app.use(cookieParser());
 
-
+// Allow trusting the IP from the proxy forwarding
+app.set('trust proxy', true); //'loopback, linklocal');
 
 
 // Log requests and arguments to the console for easier debugging.
@@ -129,9 +130,15 @@ app.get('/api/sql/',
 });
 
 app.get('/api/version', nocache, (req: $Request, res: $Response) => {
+	const ip = req.connection.remoteAddress;
+	const os = require( 'os' );
+	const ipheader = req.headers['x-forwarded-for'];
+
 	res.json({ version: VERSION, 
 		environment: process.env.NODE_ENV, 
-		debug: DEBUG 
+		debug: DEBUG,
+		ip: ip,
+		ipheader: ipheader,
 	});
 });
 
@@ -146,7 +153,6 @@ app.get('/api/error', nocache,
 		next(e);
 	}
 });
-
 
 
 ////////////////////////////////////////////////////////////////////////
@@ -187,6 +193,9 @@ app.get('*', (req: $Request, res: $Response) => {
 	log_error( build_path('index.html'));
 	res.sendFile(build_path('index.html'));
 });
+
+
+
 
 
 //app.use(function (err, req, res, next) {

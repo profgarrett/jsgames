@@ -767,12 +767,14 @@ const vislit_barA = ({
                 ...barchart_unlabledaxis_choices_a
             ]
         }: GenType),
+        /*
         ({
             gen_type: ShuffleGen,
             pages: [
                 ...barchart_unlabledaxis_sliders_a
             ]
         }: GenType),
+        */
     ]
 }: GenType);
 
@@ -787,11 +789,13 @@ const vislit_barB = ({
                 ...barchart_unlabledaxis_choices_b
             ]
         }: GenType),
+        /*
         ({   gen_type: ShuffleGen,
             pages: [
                 ...barchart_unlabledaxis_sliders_b
             ]
         }: GenType),
+        */
     ]
 }: GenType);
 

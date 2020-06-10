@@ -102,7 +102,8 @@ export default class IfQuestionsChart extends React.Component<DetailPropsType> {
                         // User ran out of time to answer.
                         result[p.template_id] = '';    
                     } else {
-                        result[p.template_id] = p.get_server_time_in_seconds() ; // p.toString();
+                        //result[p.template_id] = p.get_server_time_in_seconds() ;
+                        result[p.template_id] = p.toString();
                     }
                 }
             });

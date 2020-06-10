@@ -60,13 +60,25 @@ const surveycharts_amt = ({
 			{ 
 				type: 'IfPageShortTextAnswerSchema',
 				description: '', //Welcome to the survey site!',
-				instruction: 'Please input your Amazon Mechanical Turk user account',
+				instruction: 'Please input your Amazon Mechanical Turk user account. We will use this information to record that you completed the survey.',
 				show_feedback_on: false,
-				time_minimum: 1,
+				time_minimum: 2,
 				code: 'test',
 				template_id: 'mechanicalturk_username',
 			},
-			
+
+			// Optional email
+			{ 
+				type: 'IfPageShortTextAnswerSchema',
+				description: '', //Welcome to the survey site!',
+				instruction: 'Optionally, please input your email address. We will this email only to contact you if there is a problem with your survey or payment.',
+				show_feedback_on: false,
+				time_minimum: 1,
+				code: 'test',
+				template_id: 'mechanicalturk_email',
+			},
+
+
 			...amt_demographics,
 
 			// Math
@@ -80,7 +92,7 @@ const surveycharts_amt = ({
 			},
 
 			...sns,
-			...bnt,
+			//...bnt,
 
 			// Transition
 			{	type: 'IfPageTextSchema',
