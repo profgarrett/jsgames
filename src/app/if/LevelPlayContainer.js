@@ -273,8 +273,15 @@ export default class LevelPlayContainer extends React.Component<PropsType, State
 			</Breadcrumb>
 			: <span></span>;
 
+
+		if(this.state.isLoading) {
+			(document.body) ? document.body.style.cursor = "wait" : false;
+		} else {
+			(document.body) ? document.body.style.cursor = "default" : false;
+		}
+
 		return (
-			<Container fluid='true'>
+			<Container fluid>
 				<Row>
 					<Col>
 						<ForceLogin />

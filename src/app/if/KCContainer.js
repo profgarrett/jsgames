@@ -154,7 +154,7 @@ export class KCContainer extends React.Component<ProgressPropsType, ProgressCont
 				: <LevelModal level={this.state.modal_level} level_id={null} hide={ () => this.setState({ modal_level: null }) }/>;
 
 		return (
-			<Container fluid='true'>
+			<Container fluid>
 			<Row>
 				<Col>
 					<ForceLogin/>

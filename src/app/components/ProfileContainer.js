@@ -110,7 +110,7 @@ export class ProfileContainer extends React.Component<PropsType, StateType> {
 		
 
 		return (
-            <Container fluid='true'>
+            <Container fluid>
                 <ForceLogin />
                 <Row>
                     <Col>

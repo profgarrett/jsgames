@@ -76,7 +76,7 @@ export default class Logout extends React.Component {
 
 	render() {
 		return (
-			<Container fluid='true'>
+			<Container fluid>
 			<Row>
 				<Col>
 					<Message message={this.state.message} style={this.state.messageStyle} />

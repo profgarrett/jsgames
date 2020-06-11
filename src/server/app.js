@@ -195,14 +195,6 @@ app.get('*', (req: $Request, res: $Response) => {
 });
 
 
-
-
-
-//app.use(function (err, req, res, next) {
-  // handle error
-
-//});
-
 process.on('uncaughtException', function (er: any) {
   log_error(er);
   process.exit(1);

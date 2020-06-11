@@ -98,7 +98,7 @@ export default class LevelScoreContainer extends React.Component<PropsType, Stat
 		}
 
 		return (
-			<Container>
+			<Container fluid>
 				<Row>
 					<Col>
 						<ForceLogin/>

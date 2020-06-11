@@ -109,7 +109,7 @@ export default class ClassProgressContainer extends React.Component<ProgressProp
 		const data = this.state.data.filter( l => l.props !== null ); 
 
 		return (
-			<Container fluid='true'>
+			<Container fluid>
 			<Row>
 				<Col>
 					<ForceLogin/>

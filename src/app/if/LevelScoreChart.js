@@ -1014,7 +1014,7 @@ export class LevelScoreChart extends React.Component<LevelPropsType> {
 			this._render_vislit_line_choice(vislit_line),
 			this._render_vislit_combo_choice(vislit_combo),
 			this._render_vislit_bar_choice(vislit_bar),
-			this._render_vislit_bar_sliders(vislit_bar),
+			//this._render_vislit_bar_sliders(vislit_bar),
 		];
 
 		/*

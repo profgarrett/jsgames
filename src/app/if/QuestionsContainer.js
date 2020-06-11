@@ -139,7 +139,7 @@ export default class QuestionsContainer extends React.Component<QuestionsPropsTy
 		});
 
 		return (
-			<Container fluid='true'>
+			<Container fluid>
 				<Row>
 					<Col>
 						<ForceLogin/>

@@ -6,7 +6,7 @@ import { HtmlSpan, HtmlDiv,
 		HandPointRightGlyphicon, IncorrectGlyphicon, CorrectGlyphicon, 
 		CompletedGlyphicon, ProgressGlyphicon} from './../components/Misc';
 import Timer from './../components/Timer';
-
+import { CSSTransitionGroup } from 'react-transition-group';
 
 import ExcelTable from './ExcelTable';
 import Text from './Text';
@@ -548,21 +548,18 @@ export default class IfLevelPlay extends React.Component<PropsType, StateType> {
 		let button_style = 'primary';
 		let button_text = 'Next page';
 		let button_disabled = this.props.isLoading;
+		let time_page_displayed_in_ms = new Date().getTime() - this.state.lastPageI_displayed_at_time.getTime();
 
 		// Disable button if the user needs to take longer on a problem.
+		/*
 		console.log({
 			loading: this.props.isLoading,
 			time_min: page.time_minimum,
 			displayed: this.state.lastPageI_displayed_at_time,
 			time: new Date().getTime() - this.state.lastPageI_displayed_at_time.getTime()
 		});
+		*/
 
-		if(!button_disabled) {
-			if( page.time_minimum !== null && page.time_minimum > 0) {
-				button_disabled = page.time_minimum*1000 > new Date().getTime() - this.state.lastPageI_displayed_at_time.getTime();
-			}
-		}
-				
 
 		// if a tutorial that allows skipping questions, then change to skip instead of submit.
 		if(page.code === 'tutorial' && !page.correct_required && page.type !== 'IfPageTextSchema') {
@@ -575,6 +572,18 @@ export default class IfLevelPlay extends React.Component<PropsType, StateType> {
 			}
 		} 
 
+		// If there is a timer on the page, add it to the button_text.
+		if(!button_disabled) {
+			if( page.time_minimum !== null && page.time_minimum > 0) {
+				if(page.time_minimum*1000 > time_page_displayed_in_ms) {
+					button_disabled = true;
+					button_text += " ("+ Math.ceil( (page.time_minimum*1000 - time_page_displayed_in_ms)/1000) + ")";
+				} else {
+					button_disabled = false;
+				}
+			}
+		}
+				
 		// If a test, make sure that they've submitted something.
 		if (page.code ==='test' && !page.client_has_answered()) {
 			button_disabled = true;
@@ -803,41 +812,48 @@ export default class IfLevelPlay extends React.Component<PropsType, StateType> {
 
 		return (
 			<div>
+				<div key={'iflevelplay'+this.props.selected_page_index} id='iflevelplay' style={{position: 'relative', opacity: this.props.show_feedback ? 0.5 : 1 }}>
 				<CacheBuster />
-				<div id='iflevelplay' style={{position: 'relative', opacity: this.props.show_feedback ? 0.5 : 1 }}>
-					<form name='c' onSubmit={this.handleNext}>
-						{ this._render_page_lead(page, pageI) }
-						{ this._render_chart(page) }
-						{ this._render_exercise_panel(page, validate_button) }
-						{ this._render_timer(page) }
-						<Card style={{ marginTop: '1rem' }}>
-							<Card.Body style={{ margin: 0, padding: 0 }}>
-								<Table style={{ margin: 0 }} >
-									<tbody>
-									<tr>
-										<td style={titleTdStyle}>  
-											{ level.show_progress ? <span>Progress</span> : null }
-										</td>
-										<td style={leftTdStyle}>
-											{ level.show_progress ? build_score(this.props.level.pages) : null }
-										</td>
-										<td style={rightTdStyle}>
-											{ hint_button }
-											{ next_button }
-										</td>
-									</tr>
-									</tbody>
-								</Table>
-							</Card.Body>
-						</Card>
-						<div style={{ textAlign: 'center', paddingTop: 20 }}>
-							<Button 
-								style={{ color: 'gray' }}
-								variant='link' disabled={this.props.isLoading}
-								href={'/ifgame/' } 
-								>Exit</Button>
-						</div>
-					</form>
+					<CSSTransitionGroup 
+							transitionName="levelplay-transition"
+							transitionAppear={true}
+							transitionAppearTimeout={1000}
+							transitionEnterTimeout={1000}
+							transitionLeaveTimeout={1}>
+						<form key={'formkey' + this.state.lastPageI} name='c' onSubmit={this.handleNext}>
+							{ this._render_page_lead(page, pageI) }
+							{ this._render_chart(page) }
+							{ this._render_exercise_panel(page, validate_button) }
+							{ this._render_timer(page) }
+							<Card style={{ marginTop: '1rem' }}>
+								<Card.Body style={{ margin: 0, padding: 0 }}>
+									<Table style={{ margin: 0 }} >
+										<tbody>
+										<tr>
+											<td style={titleTdStyle}>  
+												{ level.show_progress ? <span>Progress</span> : null }
+											</td>
+											<td style={leftTdStyle}>
+												{ level.show_progress ? build_score(this.props.level.pages) : null }
+											</td>
+											<td style={rightTdStyle}>
+												{ hint_button }
+												{ next_button }
+											</td>
+										</tr>
+										</tbody>
+									</Table>
+								</Card.Body>
+							</Card>
+							<div style={{ textAlign: 'center', paddingTop: 20 }}>
+								<Button 
+									style={{ color: 'gray' }}
+									variant='link' disabled={this.props.isLoading}
+									href={'/ifgame/' } 
+									>Exit</Button>
+							</div>
+						</form>
+					</CSSTransitionGroup>
 				</div>
 				{ this._render_fullpage_invisible_div() }
 				{ this._render_page_feedback_popup(page) }

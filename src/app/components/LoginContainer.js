@@ -224,7 +224,7 @@ export default class LoginContainer extends React.Component<PropsType, StateType
 		};
 
 		return (
-<Container fluid='true'>
+<Container fluid>
 	<Row>
 		<Col>
 			<CacheBuster/>

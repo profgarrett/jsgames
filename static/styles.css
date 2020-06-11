@@ -1,0 +1,27 @@
+.levelplay-transition-enter {
+  color: white;
+}
+
+.levelplay-transition-enter.levelplay-transition-enter-active {
+  transition: color 1000ms linear;
+  color: black;
+} 
+
+.levelplay-transition-appear {
+  color: white;
+}
+
+.levelplay-transition-appear.levelplay-transition-appear-active {
+  transition: color 1000ms linear;
+  color: black;
+}
+/*
+.example-leave {
+  color: black;
+}
+  */
+  /*
+  .example-leave.example-leave-active {
+    
+  }
+  */

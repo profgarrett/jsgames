@@ -148,7 +148,7 @@ export default class PasswordContainer extends React.Component<PropsType, StateT
 		}
 
 		return (
-			<Container fluid='true'>
+			<Container fluid>
 				<Row>
 					<Col>
 						<div style={{ paddingTop: 10}} />

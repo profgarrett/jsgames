@@ -100,7 +100,7 @@ export default class GradesContainer extends React.Component<GradesPropsType, Gr
 			/>;
 
 		return (
-			<Container fluid='true'>
+			<Container fluid>
 			<Row>
 				<Col>
 					<ForceLogin/>

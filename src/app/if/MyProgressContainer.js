@@ -183,7 +183,7 @@ export default class MyProgressContainer extends React.Component<PropsType, Stat
 
 
 		return (
-			<Container fluid='true'>
+			<Container fluid>
 				<Row>
 					<Col>
 						<ForceLogin />

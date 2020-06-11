@@ -121,7 +121,7 @@ export default class IfRecentContainer extends React.Component<PropsType, StateT
 			/>;
 
 		return (
-			<Container fluid='true'>
+			<Container fluid>
 			<Row>
 				<Col>
 					<ForceLogin/>

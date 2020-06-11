@@ -109,7 +109,7 @@ const surveycharts_amt = ({
 			// Hard math problems
 			{	type: 'IfPageTextSchema',
 				time_minimum: 2,
-				description: `You job!  You've finished the chart questions.
+				description: `Good job!  You've finished the chart questions.
 					<br/><br/>
 					The next section will ask you several final math questions.`,
 			},

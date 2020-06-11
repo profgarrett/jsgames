@@ -79,7 +79,7 @@ export default class IfLevelScoreContainer extends React.Component<PropsType, St
 			: <span />;
 
 		return (
-			<Container>
+			<Container fluid>
 				<Row>
 					<Col>
 						<ForceLogin/>

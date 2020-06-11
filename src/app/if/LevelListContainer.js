@@ -253,7 +253,7 @@ export default class LevelListContainer extends React.Component<PropsType, State
 
 
 		return (
-			<Container fluid='true'>
+			<Container fluid>
 				<Row>
 				<Col xs={12}>
 					{ crumbs }
