@@ -94,6 +94,3 @@ export default class LoginCurrentUser extends React.Component<PropsType, StateTy
 		);
 	}
 }
-LoginCurrentUser.contextTypes = {
-	router: PropTypes.object.isRequired
-};

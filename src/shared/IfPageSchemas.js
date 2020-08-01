@@ -2,10 +2,10 @@
 const { Schema, isDef, isObject, isArray, revive_dates_recursively } = require('./Schema');
 const { get_feedback } = require('./feedback');
 const { fill_template } = require('./template');
-const { ChartDef } = require('./ChartDef');
+//const { ChartDef } = require('./ChartDef');
 var FormulaParser = require('hot-formula-parser').Parser;
-
-
+import type { ChartDef } from './ChartDef';
+import type { IfLevelSchema } from './IfLevelSchema';
 
 // Are we on the server or on the client?
 function is_server(): boolean {
@@ -175,12 +175,30 @@ class IfPageBaseSchema extends Schema {
 	hints_parsed: number
 	hints_viewsolution: number
 
+	// Apply json to this obj, signally no parent classes to do the setting for us.
+	constructor( json?: any) {
+		super(true);
+		if(json === true) return;
+		this.initialize(json, this.schema);
+	}
+
 	// Must be implemented by inheriting classes.
-	+client_has_answered: () => boolean
-	+updateUserFields: (any) => any
-	+debug_answer: () => any
-	+toString: () => string
-	+get_solution: () => string
+	client_has_answered(): boolean {
+		throw new Error('Inheriting classes must implement client_has_answered')
+	}
+	updateUserFields(a: any): any {
+		throw new Error('Inheriting classes must implement updateUserFields')
+	}
+	debug_answer(): any {
+		throw new Error('Inheriting classes must implement debug_answer')
+	}
+	toString(): string {
+		throw new Error('Inheriting classes must implement toString')
+	}
+	get_solution(): string {
+		throw new Error('Inheriting classes must implement get_solution')
+	}
+
 
 	get type(): string {
 		return 'IfPageBaseSchema';
@@ -387,17 +405,24 @@ class IfPageBaseSchema extends Schema {
 	// Type coercion for flow not liking subtypes.
 	toIfPageChoiceSchema(): IfPageChoiceSchema {
 		if( this.type !== 'IfPageChoiceSchema') {
-			debugger;
 			throw new Error('Invalid type convertion to IfPageChoiceSchema')
 		};
 		// $FlowFixMe 
 		return this;
 	}
+
+	toIfPagePredictFormulaSchema(): IfPagePredictFormulaSchema { 
+		if( this.type !== 'IfPagePredictFormulaSchema') throw new Error('Invalid type convertion to IfPagePredictFormulaSchema');
+		// $FlowFixMe 
+		return this;
+	}
+
 	// Type coercion for flow not liking subtypes.
 	// Note: allow sub-typing of Harsons to Formula.
 	toIfPageFormulaSchema(): IfPageFormulaSchema {
 		if( this.type !== 'IfPageFormulaSchema' &&
-			this.type !== 'IfPageHarsonsSchema') throw new Error('Invalid type convertion to IfPageFormulaSchema');
+			this.type !== 'IfPageHarsonsSchema' &&
+			this.type !== 'IfPagePredictFormulaSchema' ) throw new Error('Invalid type convertion to IfPageFormulaSchema');
 		// $FlowFixMe 
 		return this;
 	}
@@ -454,9 +479,11 @@ class IfPageBaseSchema extends Schema {
 class IfPageTextSchema extends IfPageBaseSchema {
 	client_read: bool
 
-
-	constructor(json: Object) {
-		super(json); // set passed fields.
+	// Apply json to this obj, signally no parent classes to do the setting for us.
+	constructor( json?: any) {
+		super(true);
+		if(json === true) return;
+		this.initialize(json, this.schema);
 		this.updateCorrect();
 	}
 
@@ -548,10 +575,14 @@ class IfPageNumberAnswerSchema extends IfPageBaseSchema {
 	client: number
 	solution: number
 
-	constructor(json: Object) {
-		super(json); // set passed fields.
+	// Apply json to this obj, signally no parent classes to do the setting for us.
+	constructor( json?: any) {
+		super(true);
+		if(json === true) return;
+		this.initialize(json, this.schema);
 		this.updateCorrect();
 	}
+
 
 	get type(): string {
 		return 'IfPageNumberAnswerSchema';
@@ -648,6 +679,14 @@ class IfPageSliderSchema extends IfPageBaseSchema {
 	min: number;
 	max: number;
 
+	// Apply json to this obj, signally no parent classes to do the setting for us.
+	constructor( json?: any) {
+		super(true);
+		if(json === true) return;
+		this.initialize(json, this.schema);
+	}
+
+
 	get type(): string {
 		return 'IfPageSliderSchema';
 	}
@@ -673,7 +712,10 @@ class IfPageSliderSchema extends IfPageBaseSchema {
 	// Automatically fill in the answer.
 	// Used for testing out on the server. 
 	debug_answer() {
-		this.client = this.correct !== null ? this.correct : Math.round(Math.random()*this.max);
+		this.client = typeof this.solution !== 'undefined' && this.solution !== null 
+			? this.solution
+			: Math.round(Math.random()*this.max);
+		
 		this.updateCorrect();
 	}	
 
@@ -740,9 +782,11 @@ class IfPageShortTextAnswerSchema extends IfPageBaseSchema {
 	client: string
 	solution: string
 
-
-	constructor(json: Object) {
-		super(json); // set passed fields.
+	// Apply json to this obj, signally no parent classes to do the setting for us.
+	constructor( json?: any) {
+		super(true);
+		if(json === true) return;
+		this.initialize(json, this.schema);
 		this.updateCorrect();
 	}
 
@@ -833,6 +877,14 @@ class IfPageShortTextAnswerSchema extends IfPageBaseSchema {
 */
 class IfPageLongTextAnswerSchema extends IfPageShortTextAnswerSchema {
 
+
+	// Apply json to this obj, signally no parent classes to do the setting for us.
+	constructor( json?: any) {
+		super(true);
+		if(json === true) return;
+		this.initialize(json, this.schema);
+	}
+
 	get type(): string {
 		return 'IfPageLongTextAnswerSchema';
 	}
@@ -860,9 +912,11 @@ class IfPageChoiceSchema extends IfPageBaseSchema {
 	client_items: Array<string>
 	solution: string
 
-
-	constructor(json: Object) {
-		super(json); // set passed fields.
+	// Apply json to this obj, signally no parent classes to do the setting for us.
+	constructor( json?: any) {
+		super(true);
+		if(json === true) return;
+		this.initialize(json, this.schema);
 		this.updateCorrect();
 	}
 
@@ -987,9 +1041,11 @@ class IfPageParsonsSchema extends IfPageBaseSchema {
 	solution_items: Array<string>
 	client_items: Array<string>
 
-
-	constructor(json: Object) {
-		super(json); // set passed fields.
+	// Apply json to this obj, signally no parent classes to do the setting for us.
+	constructor( json?: any) {
+		super(true);
+		if(json === true) return;
+		this.initialize(json, this.schema);
 		this.updateCorrect();
 	}
 
@@ -1127,20 +1183,16 @@ class IfPageFormulaSchema extends IfPageBaseSchema {
 
 	helpblock: string
 
-	constructor(json: Object) {
-		super(json); // set passed fields.
+	// Apply json to this obj, signally no parent classes to do the setting for us.
+	constructor( json?: any) {
+		super(true);
 		
-		/*
-		Only do updates if needed, tested by seeing if .length === 0.
-
-		Note that this means that these need to be manually run when the client or
-		solution values are changed.
-		*/
+		if(json === true) return;
+		
+		this.initialize(json, this.schema);
 		if(this.solution_test_results.length === 0)	this.updateSolutionTestResults();
 		if(this.client_test_results.length === 0) this.updateClientTestResults();
-		
 		this.updateCorrect();
-		
 	}
 
 	get type(): string {
@@ -1153,7 +1205,7 @@ class IfPageFormulaSchema extends IfPageBaseSchema {
 		return this.solution_f;
 	}
 
-
+	// NOTE: This is copied into the child classes. Don't modify w/o updating children.
 	get schema(): Object {
 		let inherit = common_schema();
 
@@ -1180,6 +1232,8 @@ class IfPageFormulaSchema extends IfPageBaseSchema {
 		};
 	}
 
+
+
 	// Has the user provided input?
 	client_has_answered(): boolean {
 		return this.client_f !== null && this.client_f.length > 0;
@@ -1202,10 +1256,10 @@ class IfPageFormulaSchema extends IfPageBaseSchema {
 	// Save to re-run.  Can also run upon initial obj creation.
 	updateUserFields(json: Object) {
 		let update = false;
-		let history = {
-			dt: new Date(),
-			code: is_server() ? 'server_update' : 'client_update'
-		};
+		let history = {};
+		
+		history.dt = new Date();
+		history.code = is_server() ? 'server_update' : 'client_update'
 
 		if(typeof json === 'undefined') throw new Error('IfGames.updateUserFields(json) is null');
 		if(json.type !== this.type ) throw new Error('Invalid type '+json.type+' in ' + this.type + '.updateUserFields');
@@ -1381,7 +1435,8 @@ class IfPageFormulaSchema extends IfPageBaseSchema {
 
 		// Issue 2: Excel isn't case sensitive, but string comparisons with parser are.
 		// Lowercase everything.
-		formula = formula.toLowerCase();
+		// @TODO: This was removed to make comparisons case sensitive again.
+		//formula = formula.toLowerCase();
 
 
 		// Issue 3: Change true=>TRUE, and false=>FALSE.
@@ -1436,7 +1491,7 @@ class IfPageFormulaSchema extends IfPageBaseSchema {
 				throw new Error('#REF' + coor);
 			}
 			let res = current_test[coor.substr(0,1)];
-			done(typeof res ==='string' ? res.toLowerCase() : res );
+			done(typeof res ==='string' ? res /*. NDG toLowerCase()*/ : res );
 		});
 
 
@@ -1523,10 +1578,24 @@ class IfPageFormulaSchema extends IfPageBaseSchema {
 class IfPageHarsonsSchema extends IfPageFormulaSchema {
 	toolbox: Array<string>
 
+
+	// Apply json to this obj, signally no parent classes to do the setting for us.
+	constructor( json?: any) {
+		super(true);
+
+		if(json === true) return;
+		
+		this.initialize(json, this.schema);
+		if(this.solution_test_results.length === 0)	this.updateSolutionTestResults();
+		if(this.client_test_results.length === 0) this.updateClientTestResults();
+		this.updateCorrect();
+	}
+
 	get type(): string {
 		return 'IfPageHarsonsSchema';
 	}
 
+	// NOTE: This is copied from the parent class. Don't modify w/o updating parent.
 	get schema(): Object {
 		let inherit = common_schema();
 
@@ -1557,6 +1626,107 @@ class IfPageHarsonsSchema extends IfPageFormulaSchema {
 }
 
 
+/**
+	Holds a sub-type of formula page.
+	Used to trigger different interface
+*/
+class IfPagePredictFormulaSchema extends IfPageFormulaSchema {
+	predicted_answers_used: Array<number>
+
+
+	// Apply json to this obj, signally no parent classes to do the setting for us.
+	constructor( json?: any) {
+		super(true);
+
+		if(json === true) return;
+
+		this.initialize(json, this.schema);
+		if(this.solution_test_results.length === 0)	this.updateSolutionTestResults();
+		if(this.client_test_results.length === 0) this.updateClientTestResults();
+		this.updateCorrect();
+	}
+
+	get type(): string {
+		return 'IfPagePredictFormulaSchema';
+	}
+	
+
+	// NOTE: This is copied from the parent class. Don't modify w/o updating parent.
+	get schema(): Object {
+		let inherit = common_schema();
+
+		return {
+			...inherit,
+
+			// Used by this.parse to test client_f against solution_f.
+			tests: { type: 'Array', initialize: (a) => isDef(a) && isArray(a) ? revive_dates_recursively(a) : [] },
+			column_titles: { type: 'Array', initialize: (a) => isDef(a) && isArray(a) ? noObjectsInArray(a) : [] },
+			column_formats: { type: 'Array', initialize: (a) => isDef(a) && isArray(a) ? noObjectsInArray(a) : [] },
+			
+			client_f: { type: 'Javascript', initialize: (s) => isDef(s) ? s : null },
+			client_f_format: { type: 'String', initialize: (s) => isDef(s) ? s : '' },
+			client_test_results: { type: 'Array', initialize: (a) => isDef(a) && isArray(a) ? a : [] },
+
+			solution_f: { type: 'Javascript', initialize: (s) => isDef(s) ? s : null },
+			solution_test_results: { type: 'Array', initialize: (a) => isDef(a) && isArray(a) ? a : [] },
+
+			// Should we show students the results of the solutions, or the solutions themselves?
+			solution_f_visible: { type: 'Boolean', initialize: (s) => isDef(s) ? bool(s) : false },
+			solution_test_results_visible: { type: 'Boolean', initialize: (s) => isDef(s) ? s : false },
+
+			// What answers should be shown to the user to match?
+			// This should be an array of strings.
+			predicted_answers_used: { type: 'Array', initialize: (a) => isDef(a) && isArray(a) ? a : [] },
+		};
+		//console.log(inherit);
+	}
+	
+	// Loop through predictions to see if the correct items have been chosen.
+	predictions_correct(): boolean {
+		let answer_index = -1;
+		//if(this.predicted_answers_correct.length !== this.tests.length) 
+		//		throw new Error("Predicted answers not equal to tests in IfPagePredictFormulaSchema");
+
+		// If the lengths don't match, then we haven't initialized this by the client yet.
+		if(this.predicted_answers_used.length !== this.solution_test_results.length) return false;
+
+		// Go through the items to make sure that the numbers match the current row.
+		// Note that we can have duplicate items, in which case we don't care about the row index,
+		// 	but instead about the actual value for each row.
+		for(let i=0; i<this.predicted_answers_used.length; i++) {
+			answer_index = this.predicted_answers_used[i];
+
+			// Unset answer option.
+			if(answer_index === -1 ) return false; 
+
+			// See if the answer for the given index matches the answer
+			// for that row. 
+			if(	this.solution_test_results[answer_index].result !== 
+				 this.solution_test_results[i].result) return false;
+		}
+		return true;
+	}
+
+
+	// Update fields 
+	updateUserFields(json: Object) {
+		super.updateUserFields(json);
+		
+		// Also look at updating the predicted answers (if they have changed)
+		if(typeof json.predicted_answers_used !== 'undefined' ) {
+			let history = {};
+			
+			history.dt = new Date();
+			history.code = is_server() ? 'server_update' : 'client_update'
+
+			this.predicted_answers_used = json.predicted_answers_used;
+			
+			this.history = Array.from(json.history);
+			this.history.push(history);
+		}
+	}
+}
+
 // Used to correctly instantiate a class based on the json .type property.
 function get_page_schema_as_class(json: Object): IfPageBaseSchema {
 	const type = json.type;
@@ -1570,6 +1740,7 @@ function get_page_schema_as_class(json: Object): IfPageBaseSchema {
 		'IfPageSliderSchema': IfPageSliderSchema,
 		'IfPageShortTextAnswerSchema': IfPageShortTextAnswerSchema,
 		'IfPageLongTextAnswerSchema': IfPageLongTextAnswerSchema,
+		'IfPagePredictFormulaSchema': IfPagePredictFormulaSchema,
 	}[type];
 
 	if(typeof p === 'undefined') throw new Error('Invalid type passed to IfPageSchemas.get_page_schema_class')
@@ -1599,11 +1770,12 @@ class IfPageAnswer {
 
 	page_code: string // page code, such as test, tutorial, ...
 	
-	constructor(json) {
+	constructor(json: any) {
 		if(typeof json === 'undefined') return;
 		
 		for(let key in json) {
 			if(json.hasOwnProperty(key)) {
+				//$FlowFixMe
 				this[key] = json[key];
 			}
 		}
@@ -1668,6 +1840,7 @@ module.exports = {
 	IfPageFormulaSchema,
 	IfPageParsonsSchema,
 	IfPageHarsonsSchema,
+	IfPagePredictFormulaSchema,
 	IfPageNumberAnswerSchema,
 	IfPageSliderSchema,
 	IfPageShortTextAnswerSchema,

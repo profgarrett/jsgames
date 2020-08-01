@@ -7,6 +7,7 @@ import type { Node } from 'react';
 
 
 type PropsType = {
+	history: any,
 	disabled: boolean,
 	submit: (username: string, section_code: string) => void
 };
@@ -94,6 +95,3 @@ export default class LoginCreateUser extends React.Component<PropsType, StateTyp
 		);
 	}
 }
-LoginCreateUser.contextTypes = {
-	router: PropTypes.object.isRequired
-};

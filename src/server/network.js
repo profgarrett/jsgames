@@ -171,14 +171,18 @@ function logout_user(req: $Request, res: $Response) {
 */
 function require_logged_in_user(req: $Request, res: $Response, next: NextFunction): any {
 	const username = get_username_or_emptystring(req, res);
-	
+	const options = {
+		maxAge: 3*2600000, /* 3 months */
+		sameSite: 'Strict',
+	};
+
 	// Refresh login token
 	if(username !== '') {
 		const token = jwt.sign({ username: username }, JWT_AUTH_SECRET, { expiresIn: JWT_EXPIRE_SECONDS });
 		const last = (new Date()).toString().replace(/ /g, '_').replace('(', '').replace(')', '').replace(/:/g,'_').replace(/-/g, '_');
-		res.cookie('x-access-token', token);
-		res.cookie('x-access-token-username', username);
-		res.cookie('x-access-token-refreshed', last);
+		res.cookie('x-access-token', token, options);
+		res.cookie('x-access-token-username', username, options);
+		res.cookie('x-access-token-refreshed', last, options);
 
 		// Perms. Used on client side to enable/hide information.
 		// @TODO Permissions
@@ -215,15 +219,18 @@ async function is_matching_mysql_user(username: string, password: string): any {
 
 // Log the user in.
 async function login_user(username: string, password: string, res: $Response): any {
+	const options = {
+		maxAge: 3*2600000, /* 3 months */
+		sameSite: 'Strict',
+	};
 	// We have a proper user.  Continue!
 	const un = username.trim().toLowerCase();
 	let jwt_token = jwt.sign({ username: un }, JWT_AUTH_SECRET, { expiresIn: 864000 });
 	const last = (new Date()).toString().replace(/ /g, '_').replace('(', '').replace(')', '').replace(/:/g,'_').replace(/-/g, '_');
 
-	res.cookie('x-access-token', jwt_token);
-	res.cookie('x-access-token-username', username);
-	res.cookie('x-access-token-refreshed', last);
-
+	res.cookie('x-access-token', jwt_token, options);
+	res.cookie('x-access-token-username', username, options);
+	res.cookie('x-access-token-refreshed', last, options);
 
 	// Perms. Used on client side to enable/hide information.
 	//res.cookie('iduser', '?');
@@ -252,7 +259,9 @@ const log_error = function (arg?: any) {
 		console.log(arg);
 	} else {
 		let logFile = fs.createWriteStream('log.txt', { flags: 'a' });
-		logFile.write(util.format.apply(null, arguments) + '\n');
+		let maybe = JSON.stringify(arg);
+		let s = typeof maybe !== 'string' ? 'Unknown error' : maybe + '\n\n';
+		logFile.write(s );
 		//ogStdout.write(util.format.apply(null, arguments) + '\n');
 	}
 };

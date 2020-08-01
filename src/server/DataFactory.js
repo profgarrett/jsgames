@@ -8,6 +8,16 @@ const NAMES = {
 		'Brady', 'Marshall', 'Sorrel', 'Grooters']
 };
 
+
+const STATES = [ 'Idaho', 'California', 'Texas', 'New York', 'Oregon', 'Nevada', 'New Jersey', 'Arkansas',
+	'Florida', 'West Virginia', 'Maine'];
+
+const STREET_NAMES = ['Main', 'West', 'North', 'South', 'East', 'Upper', 'Lower', 
+	'Elk', 'Deer', 'Squirrel', 'Rabbit'
+	];
+
+const CITY_NAMES = ['Elmsdale', 'Oakland', 'Birchland', 'Flowerville', 'Bog City', 'Swamptown'];
+
 const DataFactory = {
 
 	// Return a date before or after today by a certain range.
@@ -106,6 +116,18 @@ const DataFactory = {
 		for(let i=0; i<rows; i++)
 			result.push({ a: DataFactory.randB(0, 10), b: DataFactory.randOf(['red', 'blue', 'yellow', 'green']) });
 		return result;
+	},
+
+	randAddress: (rows: number): Array<Object> => {
+		const results = [];
+		for(let i=0; i<rows; i++)
+			results.push({ 
+				a: DataFactory.randB(100, 1000).toString() + ' ' + DataFactory.randOf(STREET_NAMES),
+				b: DataFactory.randOf(CITY_NAMES),
+				c: DataFactory.randOf(STATES),
+			});
+		return results;
+
 	},
 
 	// Randomize a given array in place.

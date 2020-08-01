@@ -1,8 +1,6 @@
 // @flow
 import React from 'react';
 import { Button, Modal } from 'react-bootstrap';
-import ReactTable from 'react-table';
-import 'react-table/react-table.css';
 
 import { PrettyDate } from './../components/Misc';
 

@@ -4,6 +4,7 @@ const { DataFactory } = require('./DataFactory');
 const { IfPageBaseSchema } = require('./../shared/IfPageSchemas');
 // $FlowFixMe
 const assert = require('assert').strict;
+const util = require('util')
 
 export type GenType = {|
 	gen_type: string,
@@ -24,8 +25,11 @@ export type AdaptiveGenType = {|
 	test_gen: GenType
 |};
 
-const TEST = false;
 
+
+// TEST variable is used to run all test for the gen functions.
+// Useful to make sure that they still work properly.
+const TEST = false;
 
 
 
@@ -62,7 +66,7 @@ const TEST = false;
 	will remove 0, 1, or more elements from the pages array passed in.
 		0, if it's the first time this gen has been run (or all of the pages have been consumed)
 		1 or more, gen will remove matching pages until all are consumed. It then returns new JSON. 
-			If this gen hits the exit condition, it will return null as well, signalling that it's time for the 
+			If this gen hits the exit condition, it will return null, signalling that it's time for the 
 			next gen to work on any remaining pages.
 
 */
@@ -74,11 +78,15 @@ const LinearGen = (seed: number, pages: Array<IfPageBaseSchema>, gen: GenType): 
 	const gen_pages = gen.pages.slice(); // build a unique generator page set to work with, as we don't want to modify the original.
 	let next_gen_page = null;
 	let result = null;
+	let total = 0;
+	let correct = 0;
+	let last_page = null;
 
-	if(typeof gen.until_correct !=='undefined' || typeof gen.until_total !== 'undefined')
-			throw new Error('Using until_correct or until_total require UntilGen');
+	//if(typeof gen.until_correct !=='undefined' || typeof gen.until_total !== 'undefined')
+	//		throw new Error('Using until_correct or until_total require UntilGen');
 
 	//console.log({ at: 'ENTERING LINEARGEN', 'g': gen_pages, 'pages': pages });
+	//console.log(pages);
 
 	// Start removing matching elements.
 	while(result === null) {
@@ -86,7 +94,26 @@ const LinearGen = (seed: number, pages: Array<IfPageBaseSchema>, gen: GenType): 
 		//console.log(gen_pages);
 		if(gen_pages.length < 1) return null;
 
+		// If we've processed the max number of items, then return.
+		if(typeof gen.until_total === 'number' && total >= gen.until_total) {
+			//console.log([ 'until', total, pages, gen]);
+			//console.log(util.inspect( pages, false, null, true));
+			return null;
+		}
+
+		// If we've processed the max number of correct items, then return.
+		if(typeof gen.until_correct === 'number' && correct >= gen.until_correct) {
+			//console.log([ 'until correct', correct, pages, gen]);
+			//console.log(util.inspect( pages, false, null, true));
+			return null;
+		}
+
+		// Temp reference to a popped page.
+		last_page = null;
+
+
 		next_gen_page = gen_pages[0];
+
 		if(typeof next_gen_page.gen_type !== 'undefined') {
 			// The top item for gen_pages is a generator.
 			// Throw the results into the generator for it to consume as needed.
@@ -97,7 +124,7 @@ const LinearGen = (seed: number, pages: Array<IfPageBaseSchema>, gen: GenType): 
 			// $FlowFixMe
 			result = runGen_nocopy(seed, pages, next_gen_page);
 
-			// Remove the top gen, but not any of the pages.  The gen should pop pages as needed.
+			// Remove the first generator-page.
 			gen_pages.shift();
 
 		} else {
@@ -105,7 +132,7 @@ const LinearGen = (seed: number, pages: Array<IfPageBaseSchema>, gen: GenType): 
 
 			if( pages.length > 0) {
 				// We have previous data. Pull off one previous item from pages and the gen templates.
-				pages.shift();
+				last_page = pages.shift();
 				gen_pages.shift();
 
 			} else {
@@ -113,6 +140,15 @@ const LinearGen = (seed: number, pages: Array<IfPageBaseSchema>, gen: GenType): 
 				result = gen_pages.shift();
 			}
 		}
+
+		// Increment counters to track the number of pages processed, and the last correct page.
+		total++;
+		if(last_page !== null && last_page.correct === true) {
+			correct++;
+			//console.log( last_page )
+		}
+		//console.log( '\nCorrect: ' + correct + ', Total: ' + total );
+		//console.log( last_page );
 
 	}
 	return result;
@@ -138,6 +174,7 @@ const ShuffleGen = (seed: number, pages: Array<IfPageBaseSchema>, gen: GenType):
 
 /**
 	Randomly shuffle a list until we reach limit.
+	We don't know if it's hit unit_correct or until_total. Either one will jump us out of the gen.
 
 	If len < limit, then it will re-use items.
 
@@ -149,29 +186,29 @@ const ShuffleGenUntilLimit = (seed: number, pages: Array<IfPageBaseSchema>, gen:
 	if(typeof gen.until_total === 'undefined' || gen.until_total === null) 
 		throw new Error('Must give a limit value to ShuffleGenUntilLimit');
 
-	// Not programmed to handle until_correct.
-	if(typeof gen.until_correct !== 'undefined' && gen.until_correct !== null) 
-		throw new Error('You can not run until_correct in ShuffleGenUntilLimit');
-
-	const until_total = gen.until_total;
-
-	// Default until correct to either the passed value, or until_total (since that won't change any behavior).
-	//const until_correct = (typeof gen.until_correct !== 'undefined' && gen.until_correct !== null)
-	//		? gen.until_correct
-	//		: until_total;
+	const until_total = typeof gen.until_total === 'number' ? gen.until_total : 999999;
+	const until_correct = typeof gen.until_correct === 'number' ? gen.until_correct : 999999;
 
 	// Create a new linear gen with the randomized list of items limited to @until_total.
-	let randomized_gen = {
+	let randomized_gen = ({
 		gen_type: 'LinearGen',
-		pages: DataFactory.randomizeList(gen.pages.slice(), seed).slice(0, until_total)
-	};
+		pages: DataFactory.randomizeList(gen.pages.slice(), seed).slice(0, until_total),
+		until_correct: (typeof gen.until_correct === 'number') ? gen.until_correct : null,
+		until_total: (typeof gen.until_total === 'number') ? gen.until_total : null, 
+	}: GenType);
 	
-	// See if we need additional pages. If so, keep adding to the new gen until it matches the right length.
-	while(randomized_gen.pages.length < until_total ) {
-		randomized_gen.pages.push( gen.pages[ DataFactory.randB(0, gen.pages.length-1 ) ] );
-	}
+	//let correct = 0;
 
-	// Treat this as a Linear Gen.
+	// See if we need additional pages. If so, keep adding to the new gen until it matches the right length.
+	// Will stop adding pages if we hit either until_total or until_correct
+	while(randomized_gen.pages.length < until_total /*&& correct < until_correct */) {
+		randomized_gen.pages.push( gen.pages[ DataFactory.randB(0, gen.pages.length-1 ) ] );
+		//if( randomized_gen.pages[randomized_gen.pages.length-1].correct === true ) correct++;
+	}
+	//console.log( randomized_gen.pages );
+	//console.log(pages);
+
+	// Return this as a Linear Gen.
 	return LinearGen(seed, pages, randomized_gen);
 };
 
@@ -290,7 +327,7 @@ const AdaptiveGen = (seed: number, pages: Array<IfPageBaseSchema>, gen: Adaptive
 
 		//console.log('RESULT')
 		//console.log(pages);
-	//	console.log(result);
+		//	console.log(result);
 
 		// See if test gen returned a new json page to give to the user. Done!
 		if(result !== null) return result;
@@ -331,7 +368,7 @@ const AdaptiveGen = (seed: number, pages: Array<IfPageBaseSchema>, gen: Adaptive
 		// Escape value
 		escape_on_loop--;
 	}
-	console.log( consumed_pages);
+	//console.log( consumed_pages );
 	throw new Error('AdaptiveGen should not exit loop');
 };
 
@@ -450,8 +487,104 @@ if(TEST) (() => {
 	results.pop();
 
 	results.push(runGen_copy(1, results, test_linear_gen)); // try to add.
-	assert.ok( results[3].description === 'LinearChild', 'Gen.LinearChild: Didnot add child' );
+	assert.ok( results[3].description === 'LinearChild', 'Gen.LinearChild: Did not add child' );
 	
+
+	// Test the until features.
+	results = [];
+
+	test_linear_gen.until_total = 2;
+
+	results.push(runGen_copy(1, results, test_linear_gen)); // try to add first item.
+	results.push(runGen_copy(1, results, test_linear_gen)); // try to add first item.
+	assert.ok( results[1].description === 'LinearB', 'Gen.LinearChild: UntilTotal good test' );
+
+	results.push(runGen_copy(1, results, test_linear_gen)); // try to add first item.
+	assert.ok( results.pop() === null, 'Gen.LinearChild: UntilTotal Bad test' );
+
+	// Test the until_correct feature.
+	results = [];
+	test_linear_gen.until_correct = 1;
+	test_linear_gen.until_total = 5;
+
+	results.push(runGen_copy(1, results, test_linear_gen)); // try to add first item.
+	results[0].correct = false;
+	results.push(runGen_copy(1, results, test_linear_gen)); // try to add first item.
+	results[1].correct = true;
+	assert.ok( results[1].description === 'LinearB', 'Gen.LinearChild: UntilCorrect good test' );
+
+	results.push(runGen_copy(1, results, test_linear_gen)); // try to add first item.
+	assert.ok( results.pop() === null, 'Gen.LinearChild: UntilCorrect Bad test' );
+
+	// Test a structure where two linear gens are in order.
+	let test_linear_gen1 = ({
+		gen_type: 'LinearGen',
+		pages: [
+			{ ...testPage, description: 'Linear1' }
+		],
+	}: GenType );
+
+	let test_linear_gen2 = ({
+		gen_type: 'LinearGen',
+		until_total: 2,
+		pages: [
+			{ ...testPage, description: 'Linear2' },
+			{ ...testPage, description: 'Linear3' },
+			{ ...testPage, description: 'Linear4' },
+		],
+	}: GenType);
+
+	let test_linear_genparent = ({
+		gen_type: 'LinearGen',
+		pages: [
+			test_linear_gen1, test_linear_gen2
+		]
+	}: GenType );
+
+	results = []
+
+	results.push(runGen_copy(1, results, test_linear_genparent))
+	results.push(runGen_copy(1, results, test_linear_genparent))
+	results.push(runGen_copy(1, results, test_linear_genparent))
+	assert.ok( results[2] !== null, 'Gen.Linear: Sequence 1');
+
+	results.push(runGen_copy(1, results, test_linear_genparent))
+	assert.ok( results[3] === null, 'Gen.Linear: Sequence 2');
+
+
+	// Test until correct
+	test_linear_gen2 = ({
+		gen_type: 'LinearGen',
+		until_total: 3,
+		until_correct: 2,
+		pages: [
+			{ ...testPage, description: 'Linear2' },
+			{ ...testPage, description: 'Linear3' },
+			{ ...testPage, description: 'Linear4' },
+			{ ...testPage, description: 'Linear5' },
+		],
+	}: GenType);
+	test_linear_genparent.pages[1] = test_linear_gen2;
+
+	results = []
+
+	results.push(runGen_copy(1, results, test_linear_genparent))
+	results[0].correct = true;
+	
+	results.push(runGen_copy(1, results, test_linear_genparent))
+	results[1].correct = true;
+	assert.ok( results[1].description === 'Linear2', 'Gen.Linear: Dual Seq 1');
+	
+	results.push(runGen_copy(1, results, test_linear_genparent))
+	results[2].correct = true;
+	assert.ok( results[2].description === 'Linear3', 'Gen.Linear: Dual Seq 2');
+	
+	results.push(runGen_copy(1, results, test_linear_genparent))
+	assert.ok( results[3] === null, 'Gen.Linear: Dual Seq 3');
+
+	console.log(results);
+
+
 })();
 
 
@@ -518,7 +651,6 @@ if(TEST) (() => {
 	results.push(runGen_copy(1, results, test_until_gen));
 	assert.ok( results.pop() === null, 'Gen.UntilE: Test until_total was not null' );
 
-
 })();
 
 
@@ -582,14 +714,16 @@ if(TEST) (() => {
 	}
 
 	
-	console.log('\nTesting ShuffleGen');
+	console.log('\nTesting ShuffleUntilLimitGen');
 
 	// Test normal add
 	let escape = 1000;
-	let result = runGen_copy(1, [], test_gen);;
 	let results = [];
-
+	let result = runGen_copy(1, results, test_gen);;
+	
+	// Test the randomization.
 	// Try 1000 times to get a result that doesn't have A in position 1.
+	// If it doesn't happen, then we can be pretty confident that randomization isn't happening.
 	while( escape > 0) {
 		escape--;
 
@@ -623,31 +757,53 @@ if(TEST) (() => {
 	assert.ok( results.pop() === null, 'Gen.ShufleC: Added too few items4' );
 	assert.ok( results.length === test_gen.until_total , 'Gen.ShufleC: Added too few items5' );
 
-	/*
-	Below is not yet coded.
 
-	// Test for correctness.
-	test_gen.until_correct = 1;
-	test_gen.until_total = 10;
+	// Test to make sure that until_total works properly.
+	test_gen.until_total = 4;
+	// Note: make sure to have fewer pages than the until_total to make sure that it can add multiple versions
+	// of the same page.
+	test_gen.pages = [
+		{ description: 'ShuffleUntilLimitA', correct: false  },
+		{ description: 'ShuffleUntilLimitB', correct: false  },
+		
+	];
 
-	results.push(runGen_copy(1, results, test_gen));
-	results.push(runGen_copy(1, results, test_gen));
-	results.push(runGen_copy(1, results, test_gen));
-	results.push(runGen_copy(1, results, test_gen));
-
-	assert.ok( results.pop() !== null, 'Gen.ShufleD: Add until correct1' );
-
-	// Add correct.
 	results = [];
+	results.push(runGen_copy(1, results, test_gen));
+	results.push(runGen_copy(1, results, test_gen));
+	results.push(runGen_copy(1, results, test_gen));
+	results.push(runGen_copy(1, results, test_gen));
+	
+	// Successfully added 4 incorrect items.
+	assert.ok( results[3] !== null, 'Gen.ShuffleUntilLimit: Add until end failed1' );
+	
+	// Add one more, Should return null.
+	results.push(runGen_copy(1, results, test_gen));
+	assert.ok( results[4] === null, 'Gen.ShuffleUntilLimit: Add until end failed2' );
+
+	// Test the 'until correct' feature.
+	test_gen.until_correct = 3;
+
+	// Reset, and try to add correct
+	results = [];
+	test_gen.pages = [ 	
+		{ description: 'ShuffleUntilLimitUntilTest' } 
+	];
 	results.push(runGen_copy(1, results, test_gen));
 	results[0].correct = true;
 	results.push(runGen_copy(1, results, test_gen));
+	results[1].correct = false;
+	results.push(runGen_copy(1, results, test_gen));
+	results[2].correct = false;
 
-	console.log(results);
-	assert.ok( results.pop() === null, 'Gen.ShufleD: Add until correct2' );
+	// Successfully added 2 incorrect and 1 correct items.
+	assert.ok( results[2] !== null, 'Gen.ShuffleUntilLimit: Add until correct failed1' );
 
-	*/
+	results.push(runGen_copy(1, results, test_gen));
+	results[3].correct = true;
 
+	results.push(runGen_copy(1, results, test_gen));
+	assert.ok( results.pop() === null, 'Gen.ShuffleUntilLimit: Add until correct failed2' );
 })();
 
 

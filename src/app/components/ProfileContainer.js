@@ -19,7 +19,7 @@ import type { Node } from 'react';
 */
 
 type PropsType = {
-	
+	history: any
 };
 type StateType = {
 	message: string,
@@ -77,7 +77,7 @@ export class ProfileContainer extends React.Component<PropsType, StateType> {
 
 				this.setState({ message: 'Success updating your information!', messageStyle: 'success', isLoading: false});
 				setTimeout( () => {
-					that.context.router.history.push(url);
+					this.props.history.push(url);
 				}, location.host === 'localhost:8080' ? 1000 : 0);  // add a short delay if on dev.
 
 			})
@@ -137,8 +137,3 @@ export class ProfileContainer extends React.Component<PropsType, StateType> {
 	}
 
 }
-
-
-ProfileContainer.contextTypes = {
-	router: PropTypes.object.isRequired
-};

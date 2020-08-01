@@ -8,10 +8,11 @@ const path = require('path');
 const bodyParser = require('body-parser');
 const compression = require('compression');
 const cookieParser = require('cookie-parser');
-const bugsnag = require('@bugsnag/js');
-const bugsnagExpress = require('@bugsnag/plugin-express');
 
-const { BUGSNAG_API, DEBUG, VERSION } = require('./secret.js'); 
+const Bugsnag = require('@bugsnag/js')
+const BugsnagPluginExpress = require('@bugsnag/plugin-express')
+
+let { BUGSNAG_API, DEBUG, VERSION } = require('./secret.js'); 
 
 const DEBUG_DELAY = DEBUG ? 500 : 0;
 
@@ -22,6 +23,8 @@ import type { $Request, $Response, NextFunction } from 'express';
 // import type { Connection } from 'mysql';
 
 const app = express();
+
+
 
 /////////////////////////////////////////////////////////////////////////////////////////
 // Setup app
@@ -45,18 +48,25 @@ function shouldCompress (req: $Request, res: $Response): boolean {
 }
 
 
-// Disable DEBUG as bugsnag doesn't work with passenger.
-// 	Possibly due to STDOUT issue.
 // Load bugsnag if it is defined in secret.js.
-if(!DEBUG && typeof BUGSNAG_API !== 'undefined' && BUGSNAG_API.length > 0) {
-	let bugsnagClient = bugsnag({ apiKey: BUGSNAG_API });
-	bugsnagClient.use(bugsnagExpress);
-
-	let bugsnagMiddleware = bugsnagClient.getPlugin('express');
-	app.use(bugsnagMiddleware.requestHandler);
-	app.use(bugsnagMiddleware.errorHandler);
+if(DEBUG === false && typeof BUGSNAG_API !== 'undefined' && BUGSNAG_API.length > 0) {
 	console.log('loading bugsnag');
+
+	Bugsnag.start({
+		apiKey: BUGSNAG_API,
+		plugins: [BugsnagPluginExpress],
+	})
+
+	var middleware = Bugsnag.getPlugin('express')
+
+	// This must be the first piece of middleware in the stack.
+	// It can only capture errors in downstream middleware
+	app.use(middleware.requestHandler)
+
+	/* all other middleware and application routes go here */
+
 }
+
 
 
 // Set parsing for application/x-www-form-urlencoded
@@ -154,20 +164,12 @@ app.get('/api/error', nocache,
 	}
 });
 
-
-////////////////////////////////////////////////////////////////////////
-//  Setup Express
-////////////////////////////////////////////////////////////////////////
-
-
-
 const build_path = (filename: string): string => {
 	if(DEBUG) 
 		return path.join(__dirname, '../../build/public/'+filename);
 	else
 		return path.join(__dirname, '../public/'+filename);
 };
-///home/profgarrett/excel.fun/jsgames/build/server/index.html
 
 // Build files. Note that the paths don't work on :3000 when developing,
 // but they do work when deployed due to passenger on dreamhost using that folder.
@@ -195,6 +197,15 @@ app.get('*', (req: $Request, res: $Response) => {
 });
 
 
+// Load bugsnag if it is defined in secret.js.
+if(DEBUG === false && typeof BUGSNAG_API !== 'undefined' && BUGSNAG_API.length > 0) {
+	var middleware = Bugsnag.getPlugin('express')
+
+	// This handles any errors that Express catches. This needs to go before any
+	// other error handlers. Bugsnag will call the `next` error handler they exist
+	app.use(middleware.errorHandler)
+}
+
 process.on('uncaughtException', function (er: any) {
   log_error(er);
   process.exit(1);
@@ -203,5 +214,3 @@ process.on('uncaughtException', function (er: any) {
 app.listen(DEBUG ? 3000 : 80, function(){
 	console.log('app started ' + (DEBUG ? 3000 : 80) + ' - ' + (new Date()).toString() );
 });
-
-

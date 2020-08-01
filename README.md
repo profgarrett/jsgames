@@ -57,8 +57,8 @@ The react application is contained the build folder.  The backend is handled by 
 
 I find it easiest to create an alias to the build folder and the app.js file.
 ```
-ln -s jsgames/build/ public/
-ln -s jsgames/server/app.js app.js
+ln -s jsgames/build/public/ public
+ln -s jsgames/build/server/app.js app.js
 ```
 
 If you're having trouble getting npm packages to update, npm-install-missing is very useful.
@@ -286,6 +286,17 @@ Called with { has: 'references', args: [ 'a1' ]}
 	references(args): Make sure that references are in answer
 	symbols(args): Make sure that the symbosl are included.  Use ? to include dropdown.
 	functions
+
+## Test Plan
+
+Authorization
+	New user (anon and join class)
+	Forgot password
+	Reset password
+	Logout
+Website introduction
+	Run through all pages as normal user (not admin)
+	Each tutorial
 
 ## Author
 

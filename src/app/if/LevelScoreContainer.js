@@ -27,6 +27,7 @@ const DEBUG = true; // load a sample debug score result?
 export default class LevelScoreContainer extends React.Component<PropsType, StateType> {
 	constructor(props: PropsType) {
 		super(props);
+		console.log(this.props.match);
 		this.state = { 
 			message: 'Loading data from server',
 			messageStyle: '',

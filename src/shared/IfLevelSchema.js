@@ -24,10 +24,16 @@ const IfLevels = [
 	{ code: 'math4', title: 'Math 4', description: 'Learn growth and rounding functions' },
 	{ code: 'math4review', title: 'Math 4 Review', description: 'Review growth and rounding functions' },
 
+	
 	{ code: 'functions1', title: 'Functions 1', description: 'Learn how to use range and rounding functions.' },
 	{ code: 'functions1review', title: 'Functions 1 Review', description: 'Review basic functions.' },
-	{ code: 'functions2', title: 'Functions 2', description: 'Learn date and text functions.' },
-	{ code: 'functions2review', title: 'Functions 2 Review', description: 'Review more functions.' },
+	{ code: 'functions2', title: 'Functions 2', description: 'Learn how to use date and text functions.' },
+	{ code: 'functions2review', title: 'Functions 2 Review', description: 'Review date and text functions.' },
+
+	// Revised focused function tutorials.
+	{ code: 'functionsdates', title: 'Functions - Dates', description: 'Learn about date functions.' },
+	{ code: 'functionstext1', title: 'Functions - Text 1', description: 'Learn about basic text functions.' },
+	{ code: 'functionstext2', title: 'Functions - Text 2', description: 'Use advanced text functions.' },
 
 	{ code: 'if1', title: 'IF1: Logical number comparisons', description: 'Compare numbers' },
 	{ code: 'if2', title: 'IF2: Logical text comparisons', description: 'Compare words' },
@@ -75,6 +81,12 @@ const from_int_dt = (unknown: any): any => {
 
 
 
+
+// Number to increment after updating props. Will cause a refresh of all pages when
+// the next api sql update is hit.
+const LEVEL_DERIVED_PROPS_VERSION = 1;
+
+
 /*
 	This class is used as a way of storing a strongly-typed pre-computed
 	object of expensive properties.
@@ -83,9 +95,15 @@ const from_int_dt = (unknown: any): any => {
 */
 class IfLevelDerivedProps extends Schema {
 	pages_length: number
-	test_score_as_percent: ?number // in form of 0-100 or null
+	test_score_as_percent: ?number
 	minutes: number
 	classification: ?string
+
+	// Apply json to this obj, signally no parent classes to do the setting for us.
+	constructor( json?: any) {
+		super(true);
+		if(json !== true) this.initialize(json, this.schema);
+	}
 
 	get type() {
 		return 'IfLevelDerivedProps'
@@ -93,18 +111,13 @@ class IfLevelDerivedProps extends Schema {
 
 	get schema() {
 		return {
-			pages_length: { type: 'number', initialize: (i) => isDef(i) ? i : null },
-			test_score_as_percent: { type: 'number', initialize: (i) => isDef(i) ? i : null },
-			minutes: { type: 'number', initialize: (i) => isDef(i) ? i : null },
-			classification: { type: 'string', initialize: (s) => isDef(s) ? s : null },
+			pages_length: { type: 'number', initialize: (i: any) => isDef(i) ? i : null },
+			test_score_as_percent: { type: 'number', initialize: (i: any) => isDef(i) ? i : null },
+			minutes: { type: 'number', initialize: (i: any) => isDef(i) ? i : null },
+			classification: { type: 'string', initialize: (s: any) => isDef(s) ? s : null },
 		};
 	}
 }
-
-// Number to increment after updating props. Will cause a refresh of all pages when
-// the next api sql update is hit.
-const LEVEL_DERIVED_PROPS_VERSION = 1;
-
 
 class IfLevelPagelessSchema extends Schema {
 	_id: string
@@ -130,6 +143,12 @@ class IfLevelPagelessSchema extends Schema {
 	
 	props: IfLevelDerivedProps
 	props_version: number
+
+	// Apply json to this obj, signally no parent classes to do the setting for us.
+	constructor( json?: any) {
+		super(true);
+		if(json !== true) this.initialize(json, this.schema);
+	}
 
 	get type(): string {
 		return 'IfLevelPagelessSchema';
@@ -194,6 +213,13 @@ class IfLevelPagelessSchema extends Schema {
 */
 class IfLevelSchema extends IfLevelPagelessSchema {
 	pages: Array<IfPageBaseSchema>
+
+	// Apply json to this obj, signally no parent classes to do the setting for us.
+	constructor( json?: any) {
+		super(true);
+		if(json !== true) this.initialize(json, this.schema);
+	}
+
 
 	get type(): string {
 		return 'IfLevelSchema';
@@ -408,10 +434,9 @@ class IfLevelSchema extends IfLevelPagelessSchema {
 	Only used if it's not defined by the section.
 */
 const DEFAULT_TUTORIAL_LEVEL_LIST = [
-	'tutorial', 'math1', 'math2', 'math3','math4',
-	'functions1', 'functions2', 
+	'math1', 'math2', 'math3','math4',
+	'functions1', 'functionsdates','functionstext1', 'functionstext2',
 	'if1', 'if2', 'if3', 'if4', 'if5', 'if6', 'if7', 'if8',
-	//'surveycharts_wu',
 	];
 
 

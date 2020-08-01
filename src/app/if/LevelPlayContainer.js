@@ -16,6 +16,7 @@ import ForceLogin from './../components/ForceLogin';
 import Feedback from './../components/Feedback';
 
 type PropsType = {
+	history: any,
 	match: Object
 };
 type StateType = {
@@ -167,11 +168,17 @@ export default class LevelPlayContainer extends React.Component<PropsType, State
 
 				// Test to see if we're at the end of the level. If so, go to the reviw screen.
 				if(ifLevel.completed) {
+					// Hide the cursor, if the previous render has it showing loading,
+					//  it needs to be reset.
+					if(document.body) {
+						document.body.style.cursor = "default"
+					}
+
 					if( ifLevel.show_score_after_completing ) {
-						this.context.router.history.push('/ifgame/level/'+ifLevel._id+'/score');
+						this.props.history.push('/ifgame/level/'+ifLevel._id+'/score');
 					} else {
 						// Back to home page w/o any results shown.
-						this.context.router.history.push('/ifgame');;
+						this.props.history.push('/ifgame');;
 					}
 					return;
 				} 
@@ -316,8 +323,3 @@ export default class LevelPlayContainer extends React.Component<PropsType, State
 		);
 	}
 }
-
-LevelPlayContainer.contextTypes = {
-	router: PropTypes.object.isRequired
-};
-

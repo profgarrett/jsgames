@@ -67,9 +67,9 @@ if (!Array.prototype.includes) {
       //  b. If k < 0, let k be 0.
       var k = Math.max(n >= 0 ? n : len - Math.abs(n), 0);
 
-      function sameValueZero(x, y) {
+      const sameValueZero = (x, y) => {
         return x === y || (typeof x === 'number' && typeof y === 'number' && isNaN(x) && isNaN(y));
-      }
+      };
 
       // 7. Repeat, while k < len
       while (k < len) {
@@ -97,23 +97,20 @@ import Logout from './components/Logout';
 import Homepage from './components/Homepage';
 import PasswordContainer from './components/PasswordContainer';
 
-import bugsnag from '@bugsnag/js';
-import bugsnagReact from '@bugsnag/plugin-react';
+import Bugsnag from '@bugsnag/js'
+import BugsnagPluginReact from '@bugsnag/plugin-react'
 
 let Root = null;
 
 if(window.location.hostname !== 'localhost') {
 
-	const bugsnagClient = bugsnag({
-		apiKey: '9b68269d9ba2d11171ecafa393afbb8e',
-		autoCaptureSessions: true,
-		releaseStage: 'production',
-		notifyReleaseStages: [ 'development', 'production' ]
-	});
+  Bugsnag.start({
+    apiKey: '9b68269d9ba2d11171ecafa393afbb8e',
+    plugins: [new BugsnagPluginReact()],
+  })
 
-  bugsnagClient.use(bugsnagReact, React);
-	const ErrorBoundary = bugsnagClient.getPlugin('react');
-
+  var ErrorBoundary = Bugsnag.getPlugin('react')
+    .createErrorBoundary(React)
 
   // Load Google Analytics
   window.dataLayer = window.dataLayer || [];

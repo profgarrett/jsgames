@@ -87,9 +87,27 @@ export default class MyProgress extends React.Component<PropsType, StateType> {
 
 	constructor(props: any) {
 		super(props);
-		this.state = { 
-			section: this.props.sections.length > 0 ? this.props.sections[0] : null
-		};
+
+		const sticky_section =  JSON.parse(window.localStorage.getItem('ExcelFunMyProgressSection'));
+		const a_of_matching = sticky_section ? props.sections.filter( s => s.idsection === sticky_section.idsection) : [];
+
+		if(sticky_section !== null) {
+			// Look to see if we've got a matching item.
+			if(a_of_matching.length === 1) {
+				// Set to that section.
+				this.state = { section: a_of_matching[0] };
+			} else {
+				// Has a default, but isn't present in the list. Default to top
+				this.state = { 
+					section: props.sections.length > 0 ? props.sections[0] : null
+				};		
+			}
+		} else {
+			// No matching item. Use default on top.
+			this.state = { 
+				section: props.sections.length > 0 ? props.sections[0] : null
+			};
+		}
 
 		(this: any).handleSectionChange = this.handleSectionChange.bind(this);
 	}
@@ -282,6 +300,9 @@ export default class MyProgress extends React.Component<PropsType, StateType> {
 			};
 
 			// Build out information on the level.
+			//console.log( l);
+			//console.log( IfLevels );
+
 			l.title = IfLevels.filter( l => l.code === code)[0].title;
 			l.description = IfLevels.filter( l => l.code === code)[0].description;
 
@@ -310,6 +331,10 @@ export default class MyProgress extends React.Component<PropsType, StateType> {
 		const sections = this.props.sections.filter( s => s.code === value);
 
 		if(sections.length === 0) throw new Error('Invalid value section');
+
+		// Save the current selected to localstorage. Useful for loading the page
+		// to the last chosen item.
+		window.localStorage.setItem('ExcelFunMyProgressSection', JSON.stringify(sections[0]));
 
 		this.setState({ section: sections[0]});
 	}

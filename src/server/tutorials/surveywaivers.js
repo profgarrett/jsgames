@@ -3,6 +3,7 @@ const { LinearGen, ShuffleGen } = require('./../Gens');
 const { sns } = require('./../pages/sns');
 const { wu_consent, use_consent } = require('./../pages/consent');
 const { numeracy_pretest, numeracy_posttest } = require('./../pages/numeracy');
+const { tutorial } = require('./tutorial');
 
 import type { GenType } from './../Gens';
 import type { LevelSchemaFactoryType } from './../IfLevelSchemaFactory';
@@ -28,9 +29,10 @@ const surveywaiver_non_woodbury_student: LevelSchemaFactoryType = {
 				pages: sns
 			}: GenType),
 			{	type: 'IfPageTextSchema',
-				description: 'Thanks! You can start working on the first tutorial now.',
-				instruction: 'Click "Next page" to close this agreement',
-			}
+				description: 'Good job! You finished with the initial intake assessment.',
+				instruction: 'Click <code>Next page</code> to continue.',
+			},
+			tutorial.gen,
 		]
 	}: GenType)
 };
@@ -48,10 +50,13 @@ const surveywaiver_non_woodbury_user: LevelSchemaFactoryType = {
 		gen_type: LinearGen,
 		pages: [
 			use_consent,
+			/*
 			{	type: 'IfPageTextSchema',
-				description: 'Thanks! You can start working on the first tutorial now.',
-				instruction: 'Click "Next page" to close this agreement',
-			}
+				description: 'Thanks! You will now complete a short tut.',
+				instruction: 'Click <code>Next page</code> to continue.',
+			},
+			*/
+			tutorial.gen,
 
 		]
 	}: GenType)
@@ -83,8 +88,9 @@ const surveywaiver_woodbury_student: LevelSchemaFactoryType = {
 			}: GenType),
 			{	type: 'IfPageTextSchema',
 				description: 'Thanks! You can start working on the first tutorial now.',
-				instruction: 'Click "Next page" to finish this assesssment! You can start working on the first tutorial now.',
-			}
+				instruction: 'Click <code>Next page</code> to finish this assesssment! You can start working on the first tutorial now.',
+			},
+			tutorial.gen,
 
 		]
 	}: GenType)

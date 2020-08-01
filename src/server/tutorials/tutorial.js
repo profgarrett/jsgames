@@ -1,6 +1,6 @@
 // @flow
 const {  LinearGen, ShuffleGen } = require('./../Gens');
-const { IfPageFormulaSchema } = require( './../../shared/IfPageSchemas');
+const { IfPageFormulaSchema, IfPagePredictFormulaSchema } = require( './../../shared/IfPageSchemas');
 import type { GenType } from './../Gens';
 import type { LevelSchemaFactoryType } from './../IfLevelSchemaFactory';
 
@@ -28,7 +28,7 @@ const gen_opening: GenType = {
 				{	type: 'IfPageTextSchema',
 					description: `This module teaches you about this tutorial system. 
 							It should take you around {minutes} minutes to complete.`,
-					instruction: `Click the 'Next page' button on 
+					instruction: `Click the <code>Next page</code> button on 
 						the bottom-right of the screen.`,
 					template_values: {
 						'minutes': '[4-6]'
@@ -195,6 +195,41 @@ const gen_on_interface: GenType = {
 };
 
 
+const gen_on_predict: GenType = {
+	gen_type: LinearGen,
+	pages: [
+		{	type: 'IfPagePredictFormulaSchema',
+			description: `Some formulas ask you to predict the right answer for 
+					each row <i>before</i> typing the formula. 
+					
+					<br/><br/>
+					To answer these questions, you will:
+					<ol>
+						<li>Drag each answer into the right row.</li>
+						<li>Type in the actual formula.</li>
+					<ol>
+					<br/><br/>
+					You can also double-click each answer to put it in the next available slot.`,
+			instruction: 'For the formula <code>=a1+b1</code>, drag each answer into the right row, and then type in the formula.',
+			column_titles: ['Year 1', 'Year 2' ],
+			tests: [
+				{ 'a': 100, 'b': 100, },
+				{ 'a': 200, 'b': 200, },
+				{ 'a': 400, 'b': 400, },
+			],
+			solution_f: '=a1+b1',
+			feedback: [
+				{ 'has': 'no_values' },
+				{ 'has': 'symbols', args: ['+'] },
+				{ 'has': 'references', args: ['a1', 'b1'] }
+			],
+			code: 'tutorial'
+		}
+	]
+};
+
+
+
 const gen_closing: GenType = {
 	gen_type: LinearGen,
 	pages: [
@@ -223,6 +258,7 @@ const tutorial: LevelSchemaFactoryType = {
 			//gen_on_harsons,
 
 			gen_on_references,
+			gen_on_predict,
 			({
 				gen_type: ShuffleGen,
 				pages: [

@@ -2,6 +2,10 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { getUserFromBrowser } from './../components/Authentication';
 
+//$FlowFixMe
+//import { useHistory } from "react-router-dom";
+
+
 // Force any pages containing this one to log in first.
 export default class ForceLogin extends React.Component {
 
@@ -9,11 +13,13 @@ export default class ForceLogin extends React.Component {
 		super(props);
 	}
 
-	componentWillMount() {
+	componentDidMount() {
 		const user = getUserFromBrowser();
+		//const history = useHistory();
 
 		if(user.username ===null || user.username === '') {
-			this.context.router.history.push('/login/');
+			//history.push('/login/');
+			window.location.href = '/login/'
 		}
 	}
 	
@@ -26,13 +32,13 @@ export default class ForceLogin extends React.Component {
 			bottom: '2px',
 			color: 'lightgray'
 		};
+		//const history = useHistory
 
 		return <div 
-			onClick={ ()=> that.context.router.history.push('/logout/') } 
+			onClick={ ()=> 
+				//history.push('/logout/') 
+				window.location.href = '/login/'
+				} 
 			style={ divStyle}>{ user.username }</div>;
 	}
 }
-
-ForceLogin.contextTypes = {
-	router: PropTypes.object.isRequired
-};

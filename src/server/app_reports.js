@@ -414,7 +414,33 @@ WHERE ` + sql_where_clauses.join(' AND ') + ' ORDER BY iflevels.updated desc ';
 		let iflevels = select_results.map( l => new IfLevelPagelessSchema(l) );
 
 		// Organize into a map of users.
-		const users = turn_array_into_map(iflevels, l => l.username.toLowerCase().trim() );
+		/*
+		NDG
+		log_error(iflevels);
+		log_error(sql);
+		log_error(sql_where_values);
+		log_error(select_results);
+		log_error(iflevels);
+		log_error('Hey!');
+
+		console.log("\n\n\nxxxxxxxxxxxx\n\n\n");
+		console.log("IfLevelPagelessSchema")
+		console.log(IfLevelPagelessSchema);
+		console.log("new")
+		console.log(new IfLevelPagelessSchema(select_results[0]));
+		console.log("data")
+		console.log(select_results[0]);
+
+		debugger;
+		let if1 = new IfLevelPagelessSchema(select_results[0]);
+		console.log(if1);
+		throw new Error('stop');
+*/
+		const users = turn_array_into_map(iflevels, l => {
+			if(!l.username) log_error(l);
+			if(!l) log_error(l);
+			l.username.toLowerCase().trim() 
+		});
 
 		// Grab biggest item for each user.
 		const grades = [];

@@ -1,5 +1,5 @@
 //@flow
-const { LinearGen, AdaptiveGen, ShuffleGenUntilLimit } = require('./../Gens');
+const { LinearGen, AdaptiveGen, UntilGen, ShuffleGenUntilLimit } = require('./../Gens');
 import type { AdaptiveGenType, GenType } from './../Gens';
 import type { LevelSchemaFactoryType } from './../IfLevelSchemaFactory';
 
@@ -8,6 +8,16 @@ export type AdaptiveKC = {
 	tutorial_pages: Array<any>,
 	test_pages: Array<any>
 }
+export type InertiaKC = {
+	kc: string,
+	tutorial_pages: Array<any>,
+	test_pages: Array<any>,
+	until_correct?: number,
+	until_total?: number,
+}
+
+const INERTIA_QUESTIONS_CORRECT_GOAL_COUNT = 5; // how many questions do the inertia qs need to pass?
+const INERTIA_MAX_QUESTIONS_UNTIL_REVIEW_COUNT = 10; // if we hit this many questions, then exit.
 
 const REVIEW_QUESTIONS_COUNT = 4; // how many questions do tutorials common use as practice?
 
@@ -53,6 +63,14 @@ const KC_NAMES = {
 
 	DATES: 'kc_dates',
 	TEXT: 'kc_text',
+	TEXT_SEARCH: 'kc_text_search',
+	TEXT_QUOTES: 'kc_text_quotes',
+	TEXT_FORMAT: 'kc_text_format',
+	TEXT_LEFTRIGHT: 'kc_text_leftright',
+	TEXT_MID: 'kc_text_mid',
+	TEXT_CONCAT: 'kc_text_concat',
+	TEXT_SUBSTITUTE: 'kc_text_substitute',
+	TEXT_COMBINE: 'kc_text_combine',
 	
 	ROUNDING: 'kc_rounding',
 
@@ -143,6 +161,68 @@ const makeAdaptiveReviewGenFromKC = (kc: AdaptiveKC, min_correct: number, limit:
 
 
 
+/*
+	Create an Interia Gen using a standing KC object.
+	Starts showng the tutorial.
+	Then, after tutorial, shows the correct number of test questions.
+
+	Eventually, todo, should re-show tutorial if test is failed.
+		So, best case, Tutorial => Test
+		Worst case, Tutorial => Test => Tutorial => ...
+*/
+const makeInertiaGenFromKC = (kc: InertiaKC): GenType => {
+	if(typeof kc.tutorial_pages !== 'object' || typeof kc.test_pages !== 'object' )
+		throw new Error('Invalid KC object passed to makeInertiaGenFromKC');
+
+	const tutorial_pages = kc.tutorial_pages;
+
+	// Convert to IfPagePredictSchema?
+	/*
+	if(true) {	
+		tutorial_pages
+			.filter( p => p.type === 'IfPageFormulaSchema' )
+			.forEach( p => p.type = 'IfPagePredictFormulaSchema' )
+	}
+	*/
+
+	// Setup initial params.
+	const pages = [	...tutorial_pages ];
+	const until_correct = typeof kc.until_correct !== 'number' ? INERTIA_QUESTIONS_CORRECT_GOAL_COUNT : kc.until_correct;
+	const until_total = typeof kc.until_total !== 'number' ? INERTIA_MAX_QUESTIONS_UNTIL_REVIEW_COUNT : kc.until_total;
+	
+
+	// Only add the 'time to practice' if tutorial pages were added.
+	if(kc.test_pages.length > 0) {
+		if(pages.length > 0) pages.push({
+				type: 'IfPageTextSchema',
+				description: `Great!  Now it's time to practice some problems. 
+					<br/><br/>
+					You will need to successfully complete a total of ${until_correct} 
+					questions before continuing.`
+			});
+
+		// Add test questions.
+		pages.push(({
+				gen_type: ShuffleGenUntilLimit,
+				until_total: until_total,
+				until_correct: until_correct,
+				pages: [
+					...kc.test_pages,
+				]
+			}: GenType));
+
+		
+	}
+
+
+	return ({
+		gen_type: LinearGen,
+		pages: pages
+	}: GenType);
+};
+
+
+
 const makeReviewIntroduction = (args: Object) => {
 
 	if(typeof args.label === 'undefined' ) throw new Error('makeReviewIntroduction requires label');
@@ -188,7 +268,7 @@ const makeTutorialNextConcept = () => {
 
 module.exports = { 
 	KC_NAMES, 
-	makeTutorialGenFromKC, makeAdaptiveReviewGenFromKC,
+	makeTutorialGenFromKC, makeAdaptiveReviewGenFromKC, makeInertiaGenFromKC,
 	makeReviewIntroduction,
 	makeReviewNextConcept,
 	makeReviewCompleted,

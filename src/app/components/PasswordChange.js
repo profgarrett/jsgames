@@ -96,6 +96,4 @@ export default class PasswordChange extends React.Component<PropsType, StateType
 		);
 	}
 }
-PasswordChange.contextTypes = {
-	router: PropTypes.object.isRequired
-};
+

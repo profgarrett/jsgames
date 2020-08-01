@@ -3,7 +3,7 @@ require('@babel/polyfill');
 const HTMLWebpackPlugin = require('html-webpack-plugin');
 const webpack = require('webpack');
 const TerserPlugin = require('terser-webpack-plugin');
-const CleanWebpackPlugin = require('clean-webpack-plugin');
+const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 //const { GOOGLEID } = require('./secret.distribution.js');
 
 module.exports = {
@@ -23,7 +23,7 @@ module.exports = {
 		]
 	},
 	plugins: [
-		new CleanWebpackPlugin(['build/public']), // wipe out all bad files.
+		new CleanWebpackPlugin(), // wipe out all bad files.
 		new HTMLWebpackPlugin({
 			template: __dirname + '/src/app/index.html',
 			filename: 'index.html',
@@ -34,6 +34,7 @@ module.exports = {
 			'process.env.NODE_ENV': JSON.stringify('production')
 		})
 	],
+	
 	optimization: {
 		minimize: true,
 		minimizer: [new TerserPlugin({
@@ -45,6 +46,7 @@ module.exports = {
 			},
 		})],
 	},
+	
 	output: {
 		filename: '[name].[chunkhash].js',
 		publicPath: '/',

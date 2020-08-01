@@ -1,6 +1,5 @@
 // @flow
 import React from 'react';
-import ReactTable from 'react-table';
 import { Table, Modal, Button } from 'react-bootstrap';
 import { turn_array_into_map, turn_object_keys_into_array } from './../../shared/misc.js';
 import { ResponsiveBar, Bar } from '@nivo/bar'
@@ -11,7 +10,7 @@ import { IfPageBaseSchema, IfPageFormulaSchema } from './../../shared/IfPageSche
 
 import type { Node } from 'react';
 
-import 'react-table/react-table.css';
+//import 'react-table/react-table.css';
 
 import { IfLevels } from './../../shared/IfLevelSchema';
 import { DEMO_MODE } from './../../server/secret';
@@ -239,16 +238,36 @@ export class ClassProgressChart extends React.Component<PropsType, StateType> {
 
         const pageSize = 30;
 
+        const cell = (t, c, i) => {
+            return c.accessor(t);
+        }
+
+        const table = <Table striped bordered hover>
+			<thead><tr>{
+				columns.map( (c,i) => <th key={'trcode'+i}>{c.id}</th>)
+			}</tr>
+			</thead>
+			<tbody>
+			{ row_data.map( 
+				(t: Object,i) => <tr key={'tr'+i}>
+					{
+						columns.map( 
+							(c,i) => ( <td key={'td'+i}>{ cell(t, c, i)}</td> )
+						)
+					}
+					</tr>) 
+			}
+			</tbody>
+		</Table>;		
+
         return (<div><h3>Progress for &nbsp;
                     { this.state.classification.toLowerCase() }
                     &nbsp;
-                    <kbd style={{ backgroundColor: colors[this.state.classification] }}>{ this.state.code}</kbd></h3><ReactTable
-						data={row_data} 
-						filterable={true}
-						columns={columns}
-						defaultPageSize={pageSize}
-                /></div>);
+                    <kbd style={{ backgroundColor: colors[this.state.classification] }}>{ this.state.code}</kbd></h3>
+                    { table }
+                    </div>);
     }
+
 
 	render(): Node {
 		if(this.props.data.length < 1) return null;

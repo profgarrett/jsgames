@@ -17,8 +17,14 @@ import { CacheBuster } from './../components/CacheBuster';
 
 import type { Node } from 'react';
 
+//$FlowFixMe
+//import { BrowserRouter, useHistory } from "react-router-dom";
+import { withRouter } from "react-router";
 
-type PropsType = {};
+
+type PropsType = {
+	history: any,
+};
 
 type StateType = {
 	message: string,
@@ -28,11 +34,12 @@ type StateType = {
 	isLoadingUncompletedLevels: boolean,
 	levels: Array<Object>,
 	grades: Array<Object>,
-	sections: Array<Object>
+	sections: Array<Object>,
+	
 };
 
 
-export default class MyProgressContainer extends React.Component<PropsType, StateType>  {
+export default withRouter(class MyProgressContainer extends React.Component<PropsType, StateType>  {
 	_isMounted: boolean;
 
 	constructor(props: any) {
@@ -58,7 +65,7 @@ export default class MyProgressContainer extends React.Component<PropsType, Stat
 		// Don't even try to load until we are logged int. Redirect to login page
 		// This goes a little bit faster than if we wait until we hit the forcelogin control.
 		if(user.username === null || user.username === '') {
-			this.context.router.history.push('/login/');
+			this.props.history.push('/login/');
 		}
 	
 		// Fetch sections.
@@ -158,7 +165,7 @@ export default class MyProgressContainer extends React.Component<PropsType, Stat
 			.then( json => {
 
 				let newLevel = new IfLevelSchema(json);
-				this.context.router.history.push('/ifgame/level/'+newLevel._id+'/play');
+				this.props.history.push('/ifgame/level/'+newLevel._id+'/play');
 
 			}).catch( error => {
 				console.log(error);
@@ -169,8 +176,8 @@ export default class MyProgressContainer extends React.Component<PropsType, Stat
 
 
 	render(): Node {
+		const history = this.props.history;
 		const is_loading = this.state.isLoadingUncompletedLevels || this.state.isLoadingGrades || this.state.isLoadingSections;
-
 
 		const myProgress = is_loading ? <div/> :
 						<MyProgress 
@@ -178,27 +185,24 @@ export default class MyProgressContainer extends React.Component<PropsType, Stat
 							grades={this.state.grades} 
 							uncompleted_levels={this.state.levels} 
 							onClickNewCode={ (code,e)=> this.insertGame(code)}
-							onClickContinueLevel={ (ifLevel)=> this.context.router.history.push('/ifgame/level/'+ifLevel._id+'/play') } 
+							onClickContinueLevel={ (ifLevel)=> history.push('/ifgame/level/'+ifLevel._id+'/play') } 
 						/>;
 
 
 		return (
-			<Container fluid>
-				<Row>
-					<Col>
-						<ForceLogin />
-						<CacheBuster/>
-						<div style={{ paddingTop: 10}} />
-						<Message message={this.state.message} style={this.state.messageStyle} />
-						<Loading loading={this.state.isLoadingGrades || this.state.isLoadingUncompletedLevels } />
-						{ myProgress }
-					</Col>
-				</Row>
-			</Container>
+				<Container fluid>
+					<Row>
+						<Col>
+							<ForceLogin />
+							<CacheBuster/>
+							<div style={{ paddingTop: 10}} />
+							<Message message={this.state.message} style={this.state.messageStyle} />
+							<Loading loading={this.state.isLoadingGrades || this.state.isLoadingUncompletedLevels } />
+							{ myProgress }
+						</Col>
+					</Row>
+				</Container>
 		);
 	}
 
-}
-MyProgressContainer.contextTypes = {
-	router: PropTypes.object.isRequired
-};
+});

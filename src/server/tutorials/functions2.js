@@ -1,4 +1,5 @@
 // @flow
+// DEPRECIATED - MOVED CONTENT TO INDIVIDUAL functionXYZ.
 const { LinearGen } = require('./../Gens');
 const { 
 	makeTutorialGenFromKC, makeAdaptiveReviewGenFromKC,
@@ -10,7 +11,7 @@ const {
 const { finish_questions } = require('./../pages/finish_questions');
 
 const { kc_dates } = require('./../kcs/kc_dates.js');
-const { kc_text } = require('./../kcs/kc_text.js');
+//const { kc_text } = require('./../kcs/kc_text.js');
 
 import type { GenType } from './../Gens';
 import type { LevelSchemaFactoryType } from './../IfLevelSchemaFactory';
@@ -35,8 +36,8 @@ const functions2 = ({
 					`
 			}, 
 			makeTutorialGenFromKC(kc_dates),
-			makeTutorialNextConcept(),
-			makeTutorialGenFromKC(kc_text),
+			//makeTutorialNextConcept(),
+			//makeTutorialGenFromKC(kc_text),
 			...finish_questions
 		]
 	}: GenType)
@@ -55,8 +56,8 @@ const functions2review = ({
 		pages: [
 			makeReviewIntroduction({ label: 'Functions 2'}),
 			makeAdaptiveReviewGenFromKC(kc_dates, REVIEW_MINIMUM_CORRECT, REVIEW_LIMIT),
-			makeReviewNextConcept(),
-			makeAdaptiveReviewGenFromKC(kc_text, REVIEW_MINIMUM_CORRECT, REVIEW_LIMIT),
+			//makeReviewNextConcept(),
+			//makeAdaptiveReviewGenFromKC(kc_text, REVIEW_MINIMUM_CORRECT, REVIEW_LIMIT),
 			makeReviewCompleted(),
 			...finish_questions
 		]

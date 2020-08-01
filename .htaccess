@@ -1,7 +1,8 @@
 # Forces passenger to use correct node version.
 # See https://help.dreamhost.com/hc/en-us/articles/215769578-Passenger-overview
-PassengerNodejs /home/profgarrett/.nvm/versions/node/v9.4.0/bin/node
-
+# PassengerNodejs /home/profgarrett/.nvm/versions/node/v9.4.0/bin/node
+PassengerNodejs /home/profgarrett/.nvm/versions/node/v12.18.3/bin/node
+PassengerFriendlyErrorPages on
 
 # Force use of https.
 RewriteCond %{HTTPS} !=on

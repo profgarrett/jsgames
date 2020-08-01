@@ -1,13 +1,10 @@
 // @flow
 import React from 'react';
-import ReactTable from 'react-table';
 import { Table } from 'react-bootstrap';
 
 import { IfLevelSchema } from './../../shared/IfLevelSchema';
 
 import type { Node } from 'react';
-
-import 'react-table/react-table.css';
 
 import { IfLevels } from './../../shared/IfLevelSchema';
 import { DEMO_MODE } from './../../server/secret';
@@ -30,15 +27,30 @@ export default class Grades extends React.Component<PropsType> {
 		super(props);
 	}
 
+	_get_columns(): Array<any> {
+		// Create a list of distinct columns.
+		// Don't include the waivers.
+		const tutorials = IfLevels.map( l => l.code ).filter( s => s.substr(0,13) !== 'surveywaiver_' );
+
+		return tutorials;
+	}
+
+	/* 
+		Return table
+	*/
+	_render_rich_grades_table(): Node {
+		const columnsx = this._get_columns();
+		return <h1></h1>;
+
+	}
+
+
 	/**
 		Return historical information
 
 	*/
 	_render_grades_table(): Node {
-
-		// Create a list of distinct columns.
-		// Don't include the waivers.
-		const tutorials = IfLevels.map( l => l.code ).filter( s => s.substr(0,13) !== 'surveywaiver_' );
+		const tutorials = this._get_columns();
 
 		const columns = [{
 			id: 'username',
@@ -74,7 +86,6 @@ export default class Grades extends React.Component<PropsType> {
 			accessor: l => avg_of(l, tutorials) + '%'
 		});
 
-
 		tutorials.map( t => columns.push({ 
 				id: t, 
 				Header: t, 
@@ -83,9 +94,7 @@ export default class Grades extends React.Component<PropsType> {
 				width: 60 }));
 
 
-// <td style={tdstyle}>{DEMO_MODE ? '*****' : t.username}</td>
-
-		const html = (<Table striped bordered hover>
+		return <Table striped bordered hover>
 			<thead><tr>{
 				columns.map( (c,i) => <th key={'trcode'+i}>{c.id}</th>)
 			}</tr>
@@ -104,31 +113,22 @@ export default class Grades extends React.Component<PropsType> {
 					</tr>) 
 			}
 			</tbody>
-		</Table>);
-		
-/*
-<td style={tdstyle}>{ avg_of(t, ['if1', 'if2', 'if3', 'if4', 'if5', 'if6', 'if7', 'if8']) }</td>
-					<td style={tdstyle}>{ avg_of(t, ['tutorial', 'math1', 'math2', 'dates', 'rounding', 'summary', 'text']) }</td>
-					*/
-		return (<div>
-				<ReactTable 
-					data={this.props.data} 
-					filterable={true}
-					columns={columns}
-				/>
-				<br/><br/><br/>
-				<h3>Table for Copying to Excel</h3>
-				{ html }
-				</div>);
+		</Table>;		
 	}
 
 
 
 	render(): Node {
+		
 		if(this.props.data.length < 1) 
 			return <div/>;
 
-		return this._render_grades_table();
+		return (<div>
+				{this._render_rich_grades_table()}
+				<br/><br/><br/>
+				<h3>Table for Copying to Excel</h3>
+					{this._render_grades_table()}
+				</div>);
 	}
 
 }

@@ -10,11 +10,16 @@ import { Breadcrumb, Row, Col, Button } from 'react-bootstrap';
 import { Message, Loading } from './../components/Misc';
 import { IfLevelSchema, IfLevels } from './../../shared/IfLevelSchema';
 
+import { withRouter } from "react-router";
 
 
 type PropsType = {
-	match: Object
+	match: Object,
+	history: any,
 };
+
+
+
 type StateType = {
 	code: string,
 	message: string,
@@ -27,7 +32,7 @@ type StateType = {
 };
 
 
-export default class LevelListContainer extends React.Component<PropsType, StateType> {
+export default withRouter( class LevelListContainer extends React.Component<PropsType, StateType> {
 
 	constructor(props: PropsType) {
 		super(props);
@@ -116,7 +121,7 @@ export default class LevelListContainer extends React.Component<PropsType, State
 			.then( json => {
 
 				let newLevel = new IfLevelSchema(json);
-				this.context.router.history.push('/ifgame/level/'+newLevel._id+'/play');
+				this.props.history.push('/ifgame/level/'+newLevel._id+'/play');
 
 			}).catch( error => {
 				console.log(error);
@@ -204,7 +209,7 @@ export default class LevelListContainer extends React.Component<PropsType, State
 
 		if(in_progress_lessons.length > 0) {
 			return <div><Button 
-							onClick={ () => this.context.router.history.push(
+							onClick={ () => this.props.history.push(
 								'/ifgame/level/'+in_progress_lessons[0]._id +'/play') }
 						>Continue your current lesson</Button>
 					</div>;
@@ -212,7 +217,7 @@ export default class LevelListContainer extends React.Component<PropsType, State
 
 		if(in_progress_reviews.length > 0) {
 			return <div><Button 
-							onClick={ () => this.context.router.history.push(
+							onClick={ () => this.props.history.push(
 								'/ifgame/level/'+in_progress_reviews[0]._id +'/play') }
 						>Continue your current review</Button>
 					</div>;
@@ -273,7 +278,4 @@ export default class LevelListContainer extends React.Component<PropsType, State
 		);		
 	}
 
-}
-LevelListContainer.contextTypes = {
-	router: PropTypes.object.isRequired
-};
+});

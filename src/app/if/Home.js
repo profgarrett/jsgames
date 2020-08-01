@@ -1,5 +1,5 @@
 import React from 'react';
-import { Switch, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Switch, Route, Link } from 'react-router-dom';
 
 
 import LevelListContainer from './LevelListContainer';
@@ -18,18 +18,20 @@ export default class Home extends React.Component {
 	render() {
 		
 		return (
+			<Router>
 				<Switch>
 					<Route exact path='/ifgame/' component={MyProgressContainer} />
 					<Route exact path='/ifgame/progress' component={ClassProgressContainer} />
 					<Route exact path='/ifgame/kcs' component={KCContainer} />
 					<Route exact path='/ifgame/grades' component={GradesContainer} />
 					<Route exact path='/ifgame/questions' component={QuestionsContainer} />
-					<Route exact path='/ifgame/recent' component={RecentContainer} /> 
+					<Route exact path='/ifgame/recent' component={RecentContainer} />
 					<Route exact path='/ifgame/levels/:_code' component={LevelListContainer} />
 					<Route exact path='/ifgame/level/:_id/play' component={LevelPlayContainer} />
 					<Route exact path='/ifgame/level/:_id/score' component={LevelScoreContainer} />
 					<Route exact path='/ifgame/leveldebug/:_id' component={LevelDebugContainer} />
 				</Switch>
+			</Router>
 		);
 	}
 }

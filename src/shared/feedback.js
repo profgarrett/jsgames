@@ -1,6 +1,6 @@
 // @flow
 const { fill_template } = require('./template');
-const { IfPageFormulaSchema, IfPageHarsonsSchema } = require('./../shared/IfPageSchemas');
+const { IfPageFormulaSchema, IfPageHarsonsSchema, IfPagePredictFormulaSchema } = require('./../shared/IfPageSchemas');
 const { parseFeedback } = require('./parseFeedback');
 
 // Feedback types are used by the server to create custom feedback for page submissions.
@@ -180,7 +180,7 @@ const has = {
 
 // Return feedback for a completed answer.
 // Only used in the server-side, where we have the solution_rules populated.
-const get_feedback = (that: IfPageFormulaSchema | IfPageHarsonsSchema): ?Array<string> => {
+const get_feedback = (that: IfPageFormulaSchema | IfPageHarsonsSchema | IfPagePredictFormulaSchema): ?Array<string> => {
 	let response = '';
 	let responses = [];
 

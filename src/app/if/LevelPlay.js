@@ -6,16 +6,16 @@ import { HtmlSpan, HtmlDiv,
 		HandPointRightGlyphicon, IncorrectGlyphicon, CorrectGlyphicon, 
 		CompletedGlyphicon, ProgressGlyphicon} from './../components/Misc';
 import Timer from './../components/Timer';
-import { CSSTransitionGroup } from 'react-transition-group';
+import { CSSTransition } from 'react-transition-group';
 
-import ExcelTable from './ExcelTable';
-import Text from './Text';
-import Choice from './Choice';
-import Parsons from './Parsons';
-import Harsons from './Harsons';
-import NumberAnswer from './NumberAnswer';
-import Slider from './Slider';
-import ShortTextAnswer from './ShortTextAnswer';
+import ExcelTable from './IfPlayComponents/ExcelTable';
+import Text from './IfPlayComponents/Text';
+import Choice from './IfPlayComponents/Choice';
+import Parsons from './IfPlayComponents/Parsons';
+import Harsons from './IfPlayComponents/Harsons';
+import NumberAnswer from './IfPlayComponents/NumberAnswer';
+import Slider from './IfPlayComponents/Slider';
+import ShortTextAnswer from './IfPlayComponents/ShortTextAnswer';
 
 import { CacheBuster } from './../components/CacheBuster';
 
@@ -76,7 +76,7 @@ const build_score = (pages: Array<IfPageBaseSchema>): any => pages.map( (p: IfPa
 
 	return (<OverlayTrigger 
 					key={'iflevelplayrenderscore'+i}
-					trigger='hover'
+					/*trigger='hover'*/
 					placement='top' 
 					overlay={
 						<Popover title={title} id={'iflevelplayrenderscore_id_'+i}>
@@ -126,7 +126,9 @@ type StateType = {
 	lastPageI: number,
 	// When when the page first showed? Used for minimum time requird before allowing
 	// moving to a new page.
-	lastPageI_displayed_at_time: Object
+	lastPageI_displayed_at_time: Object,
+	// handle, used to track js event.
+	handle: any,
 };
 
 export default class IfLevelPlay extends React.Component<PropsType, StateType> {
@@ -198,7 +200,12 @@ export default class IfLevelPlay extends React.Component<PropsType, StateType> {
 	// Tick is a way of regularly updating things on the page.
 	// Needed to update the timer even for the 'don't submit too fast' feature.
 	_on_tick() {
-		this.setState( (s, p) => { return {} } );
+		const pageI = this.props.selected_page_index; // used to keep track of the page #
+		const page = this.props.level.pages[this.props.selected_page_index];
+		
+		if(page.time_limit !== null || typeof page.time_minimum === 'number') {
+			this.setState( (s, p) => { return {} } );
+		}
 	}
 
 	// If we are showing feedback, and enter/escape is hit, then dismiss feedback window.
@@ -227,7 +234,9 @@ export default class IfLevelPlay extends React.Component<PropsType, StateType> {
 					&& page.code === 'tutorial' 
 					&& page.correct_required === false
 					&& page.correct !== true 
-					&& page.type === 'IfPageFormulaSchema') {
+					&& 
+						(page.type === 'IfPageFormulaSchema'
+						 || page.type === 'IfPagePredictFormulaSchema')) {
 				event.preventDefault(); // cancel any keypress.
 				this.handleValidate(event);
 			}
@@ -459,7 +468,8 @@ export default class IfLevelPlay extends React.Component<PropsType, StateType> {
 				body.push(<div>Sorry, but that is not the correct answer.</div>);
 
 				if(	page.type === 'IfPageFormulaSchema' || 
-					page.type === 'IfPageHarsonsSchema') {
+					page.type === 'IfPagePredictFormulaSchema' || 
+					page.type === 'IfPageHarsonsSchema' ) {
 					// Formula page.
 					typedPage = page.toIfPageFormulaSchema();
 
@@ -471,11 +481,13 @@ export default class IfLevelPlay extends React.Component<PropsType, StateType> {
 		} else if(!page.completed){
 			if(page.correct) {
 				// Correct, but not submitted.
-				body.push(<div>Your answer is correct! Go ahead and click the next page button to submit it.</div>);
+				body.push(<div>Your answer is correct! Click 
+					the&nbsp; <kbd>next page</kbd> &nbsp;button to submit it.</div>);
 
 			} else {
 				// Wrong, but not submitted.
 				if(	page.type === 'IfPageFormulaSchema' || 
+					page.type === 'IfPagePredictFormulaSchema' ||
 					page.type === 'IfPageHarsonsSchema') {
 
 					// Formula page
@@ -503,9 +515,11 @@ export default class IfLevelPlay extends React.Component<PropsType, StateType> {
 						} else if( typedPage.get_time_in_seconds() < 60 ) {
 							// No, haven't  tried for at least 2 minutes.
 							//console.log(typedPage.get_time_in_seconds());
-							body.push(<div>You have only spent {typedPage.get_time_in_seconds()} seconds
-								trying to solve the problem on your own. Once you try for a minute you 
-								can come back here for the solution.</div>);
+							body.push(<div>Sorry, but that answer is not correct.<br/><br/>
+								You have spent around {typedPage.get_time_in_seconds()} seconds
+								trying to solve the problem on your own. Please try for 
+								at least a minute. You can then 
+								come back here for the solution.</div>);
 						
 						} else {
 							// Yes, give the solution.
@@ -604,7 +618,9 @@ export default class IfLevelPlay extends React.Component<PropsType, StateType> {
 		let button_disabled = this.props.isLoading;
 		
 		// Hint for formula.
-		if(page.type === 'IfPageFormulaSchema' || page.type ==='IfPageHarsonsSchema') {
+		if(	page.type === 'IfPageFormulaSchema' || 
+			page.type === 'IfPagePredictFormulaSchema' || 
+			page.type ==='IfPageHarsonsSchema') {
 			// No hints for test pages.
 			if (page.code !== 'tutorial') return null;
 			
@@ -653,6 +669,12 @@ export default class IfLevelPlay extends React.Component<PropsType, StateType> {
 		// Build correct page.
 		if(page.type === 'IfPageFormulaSchema') {
 			problem = <ExcelTable page={page.toIfPageFormulaSchema()} 
+						readonly={ this.props.isLoading }
+						editable={ true } 
+						handleChange={this.handleChange} />;
+
+		} else if(page.type === 'IfPagePredictFormulaSchema') {
+			problem = <ExcelTable page={page.toIfPagePredictFormulaSchema()} 
 						readonly={ this.props.isLoading }
 						editable={ true } 
 						handleChange={this.handleChange} />;
@@ -723,7 +745,7 @@ export default class IfLevelPlay extends React.Component<PropsType, StateType> {
 
 
 		// Don't use embedded panels for required problems.
-		if(page.code === 'tutorial' && page.correct_required) {
+		if(page.code === 'tutorial' /*&& page.correct_required */) {
 			return (
 				<div>
 				<div className='lead' >
@@ -814,12 +836,11 @@ export default class IfLevelPlay extends React.Component<PropsType, StateType> {
 			<div>
 				<div key={'iflevelplay'+this.props.selected_page_index} id='iflevelplay' style={{position: 'relative', opacity: this.props.show_feedback ? 0.5 : 1 }}>
 				<CacheBuster />
-					<CSSTransitionGroup 
-							transitionName="levelplay-transition"
-							transitionAppear={true}
-							transitionAppearTimeout={1000}
-							transitionEnterTimeout={1000}
-							transitionLeaveTimeout={1}>
+					<CSSTransition 
+							timeout={20}
+							classNames="levelplay-transition"
+							in={true}
+							>
 						<form key={'formkey' + this.state.lastPageI} name='c' onSubmit={this.handleNext}>
 							{ this._render_page_lead(page, pageI) }
 							{ this._render_chart(page) }
@@ -853,7 +874,7 @@ export default class IfLevelPlay extends React.Component<PropsType, StateType> {
 									>Exit</Button>
 							</div>
 						</form>
-					</CSSTransitionGroup>
+					</CSSTransition>
 				</div>
 				{ this._render_fullpage_invisible_div() }
 				{ this._render_page_feedback_popup(page) }

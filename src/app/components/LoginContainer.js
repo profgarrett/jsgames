@@ -43,7 +43,7 @@ This will automatically setup the account and join to the AMT group.
 */
 
 type PropsType = {
-	
+	history: any,
 };
 type StateType = {
 	message: string,
@@ -130,7 +130,7 @@ export default class LoginContainer extends React.Component<PropsType, StateType
 
 				this.setState({ message: 'Success logging in!', messageStyle: 'success', isLoading: false});
 				setTimeout( () => {
-					that.context.router.history.push(url);
+					this.props.history.push(url);
 				}, location.host === 'localhost:8080' ? 1000 : 0);  // add a short delay if on dev.
 
 			})
@@ -185,7 +185,7 @@ export default class LoginContainer extends React.Component<PropsType, StateType
 					messageStyle: 'success', 
 				});
 				setTimeout( () => {
-					that.context.router.history.push(url);
+					this.props.history.push(url);
 				}, location.host === 'localhost:8080' ? 1000 : 0);  // short delay if we're developing.
 				
 			})
@@ -203,14 +203,14 @@ export default class LoginContainer extends React.Component<PropsType, StateType
 		const noop = () => {};
 
 		if( this.state.message === 'ExistingUser' ) {
-			message = <Alert variant={this.state.messageStyle} onDismiss={noop}>This user already exists. Do you want 
+			message = <Alert variant={this.state.messageStyle} >This user already exists. Do you want 
 				to <Link to='/password'>reset your password</Link>?</Alert>;
 		} else if(this.state.message === 'BadUsername' ) {
-			message = <Alert variant={this.state.messageStyle} onDismiss={noop}>Sorry, but your email is not valid. Please check it and try again.</Alert>;
+			message = <Alert variant={this.state.messageStyle} >Sorry, but your email is not valid. Please check it and try again.</Alert>;
 		} else if(this.state.message === 'InvalidCode' ) {
-			message = <Alert variant={this.state.messageStyle} onDismiss={noop}>Sorry, but the course join code you used is not valid.</Alert>;
+			message = <Alert variant={this.state.messageStyle} >Sorry, but the course join code you used is not valid.</Alert>;
 		} else if(this.state.message !== '' ) {
-			message = <Alert variant={this.state.messageStyle} onDismiss={noop}>{this.state.message}</Alert>;
+			message = <Alert variant={this.state.messageStyle} >{this.state.message}</Alert>;
 		}
 
 		// wrap functions to show that we're loading.
@@ -264,7 +264,7 @@ export default class LoginContainer extends React.Component<PropsType, StateType
 									<div className='card-body'>
 										<div className='card-title h6'>Create a new account</div>
 										<div className='card-text'>
-											<LoginCreateUser submit={create_user} disabled={this.state.isLoading} />
+											<LoginCreateUser submit={create_user} history={this.props.history} disabled={this.state.isLoading} />
 										</div>
 									</div>
 									</div>
@@ -281,6 +281,3 @@ export default class LoginContainer extends React.Component<PropsType, StateType
 	}
 
 }
-LoginContainer.contextTypes = {
-	router: PropTypes.object.isRequired
-};

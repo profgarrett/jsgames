@@ -14,7 +14,9 @@ import type { Node } from 'react';
 
 
 
-type PropsType = {};
+type PropsType = {
+	history: any,
+};
 
 type StateType = {
 	isLoading: boolean,
@@ -78,7 +80,7 @@ export default class PasswordContainer extends React.Component<PropsType, StateT
 			})
 			.then( (x) => {
 				this.setState({ 
-					message: 'An email has been sent to you with a reset link. Please check your inbox. ', 
+					message: 'An email has been sent to you with a reset link. It usually takes around 5 minutes to arrive, so please be patient. ', 
 					messageStyle: 'success', 
 					isLoading: false
 				});
@@ -113,7 +115,7 @@ export default class PasswordContainer extends React.Component<PropsType, StateT
 				that.setState({ message: 'Password changed successfully!', isLoading: false, messageStyle: 'success' });
 
 				setTimeout( () => {
-					that.context.router.history.push(url);
+					that.props.history.push(url);
 				}, 1000);
 
 			})
@@ -175,6 +177,3 @@ export default class PasswordContainer extends React.Component<PropsType, StateT
 	}
 
 }
-PasswordContainer.contextTypes = {
-	router: PropTypes.object.isRequired
-};

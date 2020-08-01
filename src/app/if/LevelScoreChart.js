@@ -5,14 +5,14 @@ import { HtmlDiv, IncorrectGlyphicon, CorrectGlyphicon, CompletedGlyphicon } fro
 import { fill_template } from './../../shared/template.js';
 import { getUserFromBrowser } from './../components/Authentication';
 
-import ExcelTable from './ExcelTable';
-import Choice from './Choice';
-import Parsons from './Parsons';
-import Text from './Text';
-import HistorySlider from './HistorySlider';
-import NumberAnswer from './NumberAnswer';
-import Slider from './Slider';
-import ShortTextAnswer from './ShortTextAnswer';
+import ExcelTable from './IfPlayComponents/ExcelTable';
+import Text from './IfPlayComponents/Text';
+import Choice from './IfPlayComponents/Choice';
+import Parsons from './IfPlayComponents/Parsons';
+import Harsons from './IfPlayComponents/Harsons';
+import NumberAnswer from './IfPlayComponents/NumberAnswer';
+import Slider from './IfPlayComponents/Slider';
+import ShortTextAnswer from './IfPlayComponents/ShortTextAnswer';
 
 import { buildChart } from './charts/Charts.js';
 import { IfLevelSchema } from './../../shared/IfLevelSchema';

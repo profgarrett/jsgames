@@ -1,6 +1,5 @@
 // @flow
 import React from 'react';
-import ReactTable from 'react-table';
 import { Popover, Table, Modal, Button } from 'react-bootstrap';
 import { turn_array_into_map } from './../../shared/misc.js';
 import { HtmlDiv } from './../components/Misc.js';
@@ -12,8 +11,6 @@ import { IfPageBaseSchema, IfPageFormulaSchema } from './../../shared/IfPageSche
 import { fill_template } from './../../shared/template.js';
 
 import type { Node } from 'react';
-
-import 'react-table/react-table.css';
 
 import { IfLevels } from './../../shared/IfLevelSchema';
 import { DEMO_MODE } from './../../server/secret';
@@ -157,7 +154,7 @@ export class ClassProgressStudent extends React.Component<PropsType, StateType> 
 
     // Return an array of charts, one per KC in the passed levels array.
     _render_kc_charts(levels: Array<IfLevelSchema>): Array<Node> {
-        if(levels.length === 0) return;
+        if(levels.length === 0) return [];
         const els = [];
         const answers = [];
         let data = [];

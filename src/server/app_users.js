@@ -338,12 +338,11 @@ router.post('/create_user',
 				type_params( req.body, ['username', 'section_code']);
 		// If an empty username/password was passed, then create a random user and password.
 		const isAnon = params.username === '';
-		const username = isAnon ? 'anon' + Math.floor(Math.random()*100000000000) : (''+params.username).toLowerCase().trim();
-		const password = 'p' + Math.floor(Math.random()*100000000000);
+		const username = isAnon ? 'anon' + Math.floor(Math.random()*900000000000) : (''+params.username).toLowerCase().trim();
+		const password = 'p' + Math.floor(Math.random()*900000000000);
 		const hashed_password = hash_password(password);
 		let code = params.section_code;
-	
-
+		
 		// Do some basic checking on the username.
 		const BANNED = [ '<', '>', '=', '\'', '"', '/', '\\'];
 		for(let i=0; i<BANNED.length; i++) {
@@ -365,6 +364,7 @@ router.post('/create_user',
 			}
 		}
 
+		
 		// Make sure that that user doesn't already exists.
 		const sql_select_user = `SELECT distinct iduser, username FROM users 
 			where username = ? `; //and used = 0
@@ -377,8 +377,9 @@ router.post('/create_user',
 		// If we have any code, make sure that it works and is valid.
 		let idsection = '';
 
-		// If an anon user without a passed code, we want to find the anonyouse group.
-		if(isAnon && code === '') code = 'anonymous'; 
+		// If a  user was passed without a code, add to find the anonymous group.
+		
+		if(code === '') code = 'anonymous'; 
 
 		if(code.length > 0) {
 			// Find section join code (if present)
@@ -392,6 +393,7 @@ router.post('/create_user',
 			}
 		}
 
+//return res.json({ success: false, error: '?', u: username, c: code, p: password, i: isAnon, idsection: idsection });
 
 		// All validation is passed! Create records.
 
@@ -442,23 +444,13 @@ Nathan Garrett,
 Excel.fun Administrator
 		`;
 
-			/*
-			Removed 1/21/2020, as we don't need a password reset anymore for new account creation.
-
-			const insert_reset_sql = 'INSERT INTO passwordresets (created, email, iduser, code, used ) VALUES (?, ?, ?, ?, ?)';
-			const insert_reset_results = await run_mysql_query(insert_reset_sql, [ created, username, iduser, reset_code, 0 ]);
-			if(insert_reset_results.affectedRows < 1) {
-				return res.sendStatus(500);
-			}
-			*/
-
 			// Send email to setup password as long as have a @ symbol.
 			if(user.username.indexOf('@') !== -1) {
 				await send_email( user.username, 'New account at Excel.fun', message);
 			}
 		}
 
-		return res.json({ success: true, username: username, logged_in: true });
+		return res.json({ success: false, username: username, logged_in: true, 'test': true });
 
 	}
 	catch (e) {

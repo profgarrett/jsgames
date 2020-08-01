@@ -27,7 +27,7 @@ const if1_number_comparison_tutorial = ({
 						<li><b>0</b> is returned if the test is false.</li>
 					</ul>
 					Like most functions in Excel, we separate each part with a comma.`,
-			instruction: 'Why don’t you try inputing the formula?',
+			instruction: 'Why don’t you try inputting the formula?',
 			column_titles: ['Pig Name', 'Pig Age' ],
 			tests: [
 						{ 'a': 'Anna', 'b': 2 }, 

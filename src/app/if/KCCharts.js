@@ -1,6 +1,5 @@
 // @flow
 import React, { useState } from 'react';
-import ReactTable from 'react-table';
 import { Collapse, Accordion, Card, Popover, Table, Modal, Button } from 'react-bootstrap';
 import { turn_array_into_map, turn_object_keys_into_array, turn_object_values_into_array } from './../../shared/misc.js';
 import { HtmlDiv } from './../components/Misc.js';
@@ -14,7 +13,7 @@ import { fill_template } from './../../shared/template.js';
 import { LevelModal } from './LevelModal';
 import type { Node } from 'react';
 
-import 'react-table/react-table.css';
+//import 'react-table/react-table.css';
 
 import { IfLevels } from './../../shared/IfLevelSchema';
 import { DEMO_MODE } from './../../server/secret';

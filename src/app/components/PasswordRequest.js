@@ -92,6 +92,3 @@ export default class PasswordRequest extends React.Component<PropsType, StateTyp
 		);
 	}
 }
-PasswordRequest.contextTypes = {
-	router: PropTypes.object.isRequired
-};

@@ -3,12 +3,14 @@ import React from 'react';
 import { HtmlDiv } from './../components/Misc';
 import { fill_template } from './../../shared/template.js';
 
-import ExcelTable from './ExcelTable';
-import Choice from './Choice';
-import Parsons from './Parsons';
-import Text from './Text';
-import Slider from './Slider';
-import ShortTextAnswer from './ShortTextAnswer';
+import ExcelTable from './IfPlayComponents/ExcelTable';
+import Text from './IfPlayComponents/Text';
+import Choice from './IfPlayComponents/Choice';
+import Parsons from './IfPlayComponents/Parsons';
+import Harsons from './IfPlayComponents/Harsons';
+import NumberAnswer from './IfPlayComponents/NumberAnswer';
+import Slider from './IfPlayComponents/Slider';
+import ShortTextAnswer from './IfPlayComponents/ShortTextAnswer';
 
 import { IfLevelSchema } from './../../shared/IfLevelSchema';
 import { IfPageBaseSchema, IfPageFormulaSchema, IfPageHarsonsSchema, IfPageChoiceSchema } from './../../shared/IfPageSchemas';
@@ -70,7 +72,9 @@ class IfLevelDebugPage extends React.Component<ScorePropsType> {
 		// Figure out which control to use for the page.
 		let problem, solution;
 
-		if(page.type === 'IfPageFormulaSchema' || page.type === 'IfPageHarsonsSchema') {
+		if(page.type === 'IfPageFormulaSchema' 
+				|| page.type === 'IfPageHarsonsSchema' 
+				|| page.type === 'IfPagePredictFormulaSchema') {
 			// Show solution?
 
 			let page2 = page.toIfPageFormulaSchema();
@@ -126,7 +130,9 @@ class IfLevelDebugPage extends React.Component<ScorePropsType> {
 				</div>);
 
 		} else {
+			console.log( page );
 			throw new Error('Invalid type in IfLevelDebug '+page.type);
+			
 		}
 
 		return (<Card variant='success'>

@@ -5,14 +5,29 @@
 */
 
 class Schema {
+
+	/* 
+		Put in an error that will trigger unless TRUE is passed to the constructor.
+		Used when transitioning from constructor to initialize due ot error described below.
+	*/
+	constructor( test: boolean ) {
+		if(test !== true) throw new Error('You must over-ride constructor for schema to manually initialize all data.')
+	}
+
+
 	/**
 		Initialize model, using any JSON properties as pre-load the this value
 		
+		Note: Used to use this as a constructor. However, ran into an issue on Dreamhost's version 
+		of Node 12.18.3 (not replicated on my person laptop) where "this" in a constructor 
+		for an extended class is only done for the parent, and isn't done on the sub-class. Results
+		in undefined on all of the properties, even though they are properly set in the construction.
+		Many hours down the drain trying to narrow that one down...
+
 		Checks to make sure that the type field matches the json.type value.
 		@arg json: Data loaded from server.
 	*/
-	constructor( json: any = {} ) {
-		let schema = this.schema;
+	initialize( json: any = {}, schema: any ) {
 
 		if(typeof json === 'string') {
 			// If a schema has an object as a field, it sometimes will be passed the stringified version (if loading from a db)
@@ -42,12 +57,25 @@ class Schema {
 			}
 		}
 
+		let v = null;
 		// Load each default value from schema
 		// Use the set to load the correct type of object, using json values to initialize
 		for(const key of Object.keys(schema)) {
-			// $FlowFixMe
-			this[key] = schema[key].initialize(json[key]);
+			if(typeof key !== 'undefined') {
+				Object.defineProperty(this, key, {
+						value : schema[key].initialize(json[key]),
+						writable : true,
+						enumerable : true,
+						configurable : true});
+				//console.log( 'Key: ' + key);
+				//console.log( json[key] );
+				//console.log(this[key]);
+			}
 		}
+
+		//console.log('\nReturning from Schema.constructor\n');
+		//console.log(this);
+		return this;
 	}
 
 	get type() {

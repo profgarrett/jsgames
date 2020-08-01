@@ -6,7 +6,11 @@ import { getUserFromBrowser } from './../components/Authentication';
 
 
 
-export default class Logout extends React.Component { 
+type PropsType = {
+	history: any,
+};
+
+export default class Logout extends React.Component<PropsType> { 
 	constructor(props) {
 		super(props);
 
@@ -18,13 +22,12 @@ export default class Logout extends React.Component {
 	}
 
 	componentDidMount() {
-		const history = this.context.router.history;
 		const user = getUserFromBrowser();
 
 		// Test to see if we're actually logged in. 
 		if(user.username.length < 1) {
 			console.log('not logged in!');
-			history.push('/');
+			this.props.history.push('/');
 			return;
 		}
 
@@ -47,7 +50,7 @@ export default class Logout extends React.Component {
 				// Success!  Go ahead and log out, redirecting in 1.5s to homepage.
 				this.setState({ message: 'Success logging out!', messageStyle: 'success', isLoading: false});
 				setTimeout( () => {
-					that.context.router.history.push('/');
+					that.props.history.push('/');
 				}, 1500);
 
 			})
@@ -87,7 +90,3 @@ export default class Logout extends React.Component {
 		);
 	}
 }
-
-Logout.contextTypes = {
-	router: PropTypes.object.isRequired
-};

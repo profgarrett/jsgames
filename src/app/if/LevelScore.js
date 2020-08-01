@@ -5,14 +5,15 @@ import { Popover, Card, OverlayTrigger } from 'react-bootstrap';
 import { HtmlDiv, IncorrectGlyphicon, CorrectGlyphicon, CompletedGlyphicon } from './../components/Misc';
 import { fill_template } from './../../shared/template.js';
 
-import ExcelTable from './ExcelTable';
-import Choice from './Choice';
-import Parsons from './Parsons';
-import Text from './Text';
+import ExcelTable from './IfPlayComponents/ExcelTable';
+import Text from './IfPlayComponents/Text';
+import Choice from './IfPlayComponents/Choice';
+import Parsons from './IfPlayComponents/Parsons';
+import Harsons from './IfPlayComponents/Harsons';
+import NumberAnswer from './IfPlayComponents/NumberAnswer';
+import Slider from './IfPlayComponents/Slider';
+import ShortTextAnswer from './IfPlayComponents/ShortTextAnswer';
 import HistorySlider from './HistorySlider';
-import NumberAnswer from './NumberAnswer';
-import Slider from './Slider';
-import ShortTextAnswer from './ShortTextAnswer';
 
 import { buildChart } from './charts/Charts.js';
 import { IfLevelSchema } from './../../shared/IfLevelSchema';
@@ -48,7 +49,8 @@ export class LevelScorePage extends React.Component<ScorePropsType, ScoreStateTy
 		json.client_f = typeof history.client_f === 'undefined' ? '' : history.client_f;
 
 		// History items have created, which we don't want in a page.
-		delete json.created;
+		// $FlowFixMe
+		if(typeof json.created !== 'undefined') delete json.created;
 
 		const page = get_page_schema_as_class(json);
 
@@ -81,10 +83,10 @@ export class LevelScorePage extends React.Component<ScorePropsType, ScoreStateTy
 		let problem, solution;
 
 
-		if(page_at.type === 'IfPageFormulaSchema' || page_at.type === 'IfPageHarsonsSchema') {
+		if(page_at.type === 'IfPageFormulaSchema' || page_at.type === 'IfPageHarsonsSchema' || page_at.type === 'IfPagePredictFormulaSchema') {
 			// Show solution?
 
-			if(page_at.type === 'IfPageFormulaSchema') {
+			if(page_at.type === 'IfPageFormulaSchema' || page_at.type === 'IfPagePredictFormulaSchema') {
 				page_at = page_at.toIfPageFormulaSchema();
 				page_final = page_final.toIfPageFormulaSchema();
 			} else {

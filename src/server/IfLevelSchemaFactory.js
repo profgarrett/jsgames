@@ -4,6 +4,7 @@ const { get_page_schema_as_class, IfPageBaseSchema,
 		IfPageTextSchema, IfPageChoiceSchema, 
 		IfPageFormulaSchema, IfPageSliderSchema,
 		IfPageParsonsSchema, IfPageHarsonsSchema,
+		IfPagePredictFormulaSchema,
 		IfPageNumberAnswerSchema, IfPageShortTextAnswerSchema } = require('./../shared/IfPageSchemas');
 const { runGen } = require('./Gens');
 const { DataFactory } = require('./DataFactory');
@@ -21,6 +22,8 @@ const { math4, math4review } = require('./tutorials/math4');
 
 const { functions1, functions1review } = require('./tutorials/functions1');
 const { functions2, functions2review } = require('./tutorials/functions2');
+const { functionsdates } = require('./tutorials/functionsdates');
+const { functionstext1, functionstext2 } = require('./tutorials/functionstext');
 
 const { if1, if2, if3, if4, if5, if6, if7, if8 } = require('./tutorials/if');
 
@@ -50,6 +53,8 @@ const LEVEL_GENS = {
 	math4, math4review,
 	functions1, functions1review,
 	functions2, functions2review,
+	functionsdates, 
+	functionstext1, functionstext2,
 	if1, if2, if3, if4, if5, if6, if7, if8, 
 	surveymath1, surveymath2,
 	surveywaiver_non_woodbury_student, surveywaiver_non_woodbury_user, surveywaiver_woodbury_student,
@@ -203,7 +208,9 @@ const _initialize_json =  function(level: IfLevelSchema, original_json: Object):
 
 
 
-	} else if(json.type === 'IfPageFormulaSchema' || json.type === 'IfPageHarsonsSchema') {
+	} else if(json.type === 'IfPageFormulaSchema' 
+				|| json.type === 'IfPageHarsonsSchema'
+				|| json.type === 'IfPagePredictFormulaSchema') {
 		// Setup the major important fields based off of type.
 		if(json.code === 'tutorial') {
 			// Allow over-riding correct_required if set by the json object.
@@ -218,6 +225,7 @@ const _initialize_json =  function(level: IfLevelSchema, original_json: Object):
 			json.solution_f_visible = false;
 
 		} else {
+			console.log(json);
 			throw new Error('Invalid formula code '+json.code+' in baseifgame');
 		}
 
@@ -229,6 +237,16 @@ const _initialize_json =  function(level: IfLevelSchema, original_json: Object):
 			json.feedback = feedback;
 			json.toolbox = feedback;
 		}
+
+		// If we have the right type, then set the potential answers.
+		/*
+		if( json.type === 'IfPagePredictFormulaSchema') {
+			json.predicted_answers_correct = [];
+			json.predicted_answers_unused = [];
+			console.log(json);
+			debugger;
+		}
+		*/
 
 		// Pull the setting from level to see if we should allow skipping a tutorial page.
 		if(json.code === 'tutorial' && level.allow_skipping_tutorial) {
@@ -339,8 +357,9 @@ const IfLevelSchemaFactory = {
 		// Create a new array of pages that can be modified with slice()
 		// Put in reverse order to simplify pop() operation.  Modified by gen function.
 		// Then use this to create the new json for the new page.
-		const reversed_pages = level.pages.slice().reverse();
-		const new_page_json = runGen(level.seed, reversed_pages, LEVEL_GENS[level.code].gen);
+		// REVERSE REMOVED BY NDG
+		//const reversed_pages = level.pages.slice().reverse();
+		const new_page_json = runGen(level.seed, level.pages, LEVEL_GENS[level.code].gen);
 
 		// Check result of gen function.
 		if(new_page_json !== null) {
