@@ -211,6 +211,7 @@ const _initialize_json =  function(level: IfLevelSchema, original_json: Object):
 	} else if(json.type === 'IfPageFormulaSchema' 
 				|| json.type === 'IfPageHarsonsSchema'
 				|| json.type === 'IfPagePredictFormulaSchema') {
+					
 		// Setup the major important fields based off of type.
 		if(json.code === 'tutorial') {
 			// Allow over-riding correct_required if set by the json object.
@@ -237,16 +238,6 @@ const _initialize_json =  function(level: IfLevelSchema, original_json: Object):
 			json.feedback = feedback;
 			json.toolbox = feedback;
 		}
-
-		// If we have the right type, then set the potential answers.
-		/*
-		if( json.type === 'IfPagePredictFormulaSchema') {
-			json.predicted_answers_correct = [];
-			json.predicted_answers_unused = [];
-			console.log(json);
-			debugger;
-		}
-		*/
 
 		// Pull the setting from level to see if we should allow skipping a tutorial page.
 		if(json.code === 'tutorial' && level.allow_skipping_tutorial) {
@@ -379,6 +370,22 @@ const IfLevelSchemaFactory = {
 					&& level.username === 'garrettn') {
 				new_page_json.type = 'IfPageHarsonsSchema';
 			}
+
+
+			if(level.predict_randomly_on_username 
+					&& new_page_json.type === 'IfPageFormulaSchema' 
+					&& random_boolean_from_string(level.username) ) {
+
+				new_page_json.type = 'IfPagePredictFormulaSchema';
+			}
+
+			// If we're the admin (garrettn), then switch to Predict to better test.
+			if(level.predict_randomly_on_username 
+					&& new_page_json.type === 'IfPageFormulaSchema' 
+					&& level.username === 'garrettn') {
+				new_page_json.type = 'IfPagePredictFormulaSchema';
+			}
+
 
 			// Harsons uses toolboxes, but ifPageFormulaSchemas do not.  Since some types automatically change
 			// back and forth from Formula pages to Harsons, we need to delete the toolbox if it's not

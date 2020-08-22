@@ -10,6 +10,14 @@ const randB = DataFactory.randB;
 import type { GenType } from './../Gens';
 import type { LevelSchemaFactoryType } from './../IfLevelSchemaFactory';
 
+/*
+
+	Dealing with ORs and NOTs inside
+	Having a comma in a number
+	Return $ or with commas
+	Text as number
+	
+*/
 
 const if8_boolean_if_tutorial = ({
 	gen_type: LinearGen,
@@ -224,14 +232,17 @@ const if8 = ({
 	code: 'if8',
 	title: 'IF8: Booleans with AND/OR',
 	description: 'Use booleans with the AND & OR functions',
+
 	harsons_randomly_on_username: false,
+	predict_randomly_on_username: true,
+	
 	version: 1,
 
 	gen: ({
 		gen_type: LinearGen,
 		pages: [
-			if8_boolean_if_tutorial,
-			if8_boolean_if_test,
+//			if8_boolean_if_tutorial,
+//			if8_boolean_if_test,
 			...finish_questions
 		]
 	}: GenType)

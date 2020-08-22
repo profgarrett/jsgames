@@ -3,109 +3,97 @@ const { DataFactory } = require('./../DataFactory');
 const { LinearGen, UntilGen } = require('./../Gens');
 const { finish_questions } = require('./../pages/finish_questions');
 
+const { kc_if_or_boolean, kc_if_or_boolean_logic,
+		kc_if_and_boolean, kc_if_and_boolean_logic 
+		} = require('./../kcs/kc_if_boolean');
+
 const { IfPageFormulaSchema } = require( './../../shared/IfPageSchemas');
 
-const randB = DataFactory.randB;
+const { makeInertiaGenFromKC } = require('./../kcs/kc.js');
 
 import type { GenType } from './../Gens';
 import type { LevelSchemaFactoryType } from './../IfLevelSchemaFactory';
 
 
 
-const if6_if_with_math_tutorial = ({
+const introduction_gen = ({
 	gen_type: LinearGen,
 	pages: [
-		{	type: 'IfPageTextSchema',
-			description: `A common approach with <code>IF</code> is to embed simple math expressions inside of the test or results. 
-					<br/><br/>
-					While you can always split formulas into multiple columns, embedding simple math expressions can keep related logic together.`
-		},
-		{	type: 'IfPageFormulaSchema',
-			description: `The first place to embed simple math expressions is in the logical test.
-					<br/><br/>
-					For example, if we are trying to find find apartments that have at least 1 pet, 
-					we would write <code>=IF(B1+C1+D1>0, "Pets", "None")</code>.`,
-			instruction: 'Write the formula above below.',
-			column_titles: ['Apartment', 'Birds', 'Cats', 'Dogs' ],
-			tests: [
-						{ 'a': 'A', b: 0, c: 0, d: 0 }, 
-						{ 'a': 'B', b: 2, c: 0, d: 1 }, 
-						{ 'a': 'C', b: 1, c: 1, d: 1 }, 
-						{ 'a': 'D', b: 0, c: 0, d: 0 }, 
-						{ 'a': 'E', b: 0, c: 2, d: 0 }, 
-						{ 'a': 'F', b: 2, c: 2, d: 2 }, 
-					],
-			solution_f: '=IF(B1+C1+D1>0, "Pets", "None")',
-			feedback: [
-				{ 'has': 'references', args: ['b1', 'C1', 'D1'] }
-			],
-			code: 'tutorial'
-		},
-		{	type: 'IfPageFormulaSchema',
-			description: 'Why don\'t you try this now?',
-			instruction: 'Write a function that says "Ok" for apartments with more than 2 cats & dogs (combined), or "NA" otherwise.',
-			column_titles: ['Apartment', 'Birds', 'Cats', 'Dogs' ],
-			tests: [
-						{ 'a': 'A', b: 0, c: 0, d: 0 }, 
-						{ 'a': 'B', b: 2, c: 0, d: 1 }, 
-						{ 'a': 'C', b: 1, c: 1, d: 1 }, 
-						{ 'a': 'D', b: 0, c: 0, d: 0 }, 
-						{ 'a': 'E', b: 0, c: 2, d: 0 }, 
-						{ 'a': 'F', b: 2, c: 2, d: 2 }, 
-					],
-			solution_f: '=if(c1+d1>2, "Ok", "NA")',
-			feedback: [
-				{ 'has': 'references', args: ['d1', 'c1'] }
-			],
-			code: 'tutorial'
-		},
-		{	type: 'IfPageFormulaSchema',
-			description: `We can also do math in the return values.
-					<br/><br/>
-					For example, let's say we were trying to calculate the pet fee for a set of apartments.
-					We want to charge owners with over 1 dog an extra $10 multiplied by the number of dogs.
-					We would write <code>=IF(D1>1, D1*20, 0)</code>.`,
-			instruction: 'Write the a formula that charges owners with over 2 cats 10*the number of cats (and 0 otherwise)',
-			column_titles: ['Apartment', 'Birds', 'Cats', 'Dogs' ],
-			tests: [
-						{ 'a': 'A', b: 0, c: 0, d: 0 }, 
-						{ 'a': 'B', b: 2, c: 0, d: 3 }, 
-						{ 'a': 'C', b: 1, c: 3, d: 1 }, 
-						{ 'a': 'D', b: 0, c: 0, d: 0 }, 
-						{ 'a': 'E', b: 0, c: 5, d: 0 }, 
-						{ 'a': 'F', b: 2, c: 1, d: 2 }, 
-					],
-			solution_f: '=IF(C1>1, C1*10, 0)',
-			feedback: [
-				{ 'has': 'references', args: ['C1'] }
-			],
-			code: 'tutorial'
-		},
-		{	type: 'IfPageFormulaSchema',
-			description: `These techniques can also be combined together in a single <code>IF</code> function.
-					<br/><br/>
-					For example, we may want charge owners with over 4 cats and dogs, the number of cats & dogs, or zero otherwise.
-					This function would do that: <code>=IF(C1+D1>4, C1+D1, 0)</code>.`,
-			instruction: 'Write the a formula that charges owners with over 4 animals the number of animals (and 0 otherwise)',
-			column_titles: ['Apartment', 'Birds', 'Cats', 'Dogs' ],
-			tests: [
-						{ 'a': 'A', b: 0, c: 0, d: 0 }, 
-						{ 'a': 'B', b: 2, c: 0, d: 3 }, 
-						{ 'a': 'C', b: 1, c: 3, d: 1 }, 
-						{ 'a': 'D', b: 0, c: 0, d: 0 }, 
-						{ 'a': 'E', b: 0, c: 5, d: 0 }, 
-						{ 'a': 'F', b: 2, c: 1, d: 2 }, 
-					],
-			solution_f: '=IF(d1+B1+C1>4, d1+B1+C1, 0)',
-			feedback: [
-				{ 'has': 'references', args: ['d1', 'B1', 'C1'] }
-			],
-			code: 'tutorial'
+		{
+			type: 'IfPageTextSchema',
+			description: `
+				This tutorial has you practice booleans inside of <code>AND</code> and <code>OR</code> functions.
+				<ul>
+					<li>Use booleans inside of <code>AND</code> / <code>OR</code> </li>
+					<li>Use booleans inside of <code>AND</code> / <code>OR</code> embedded into an <code>IF</code></li>
+				</ul>
+				`
 		}
 	]
 }: GenType);
 
 
+const ReviewNextConcept = {
+	type: 'IfPageTextSchema',
+	description: `
+		Excellent! You have completed this section of the tutorial.
+		<br/><br/>
+		The system will now start you on the next concept.`
+};
+
+const donePage = {
+	type: 'IfPageTextSchema',
+	description: `
+		Excellent! You have completed this entire tutorial! 
+		<br/><br/>
+		You can now go onto the next IF tutorial.`
+};
+
+
+
+const if6 = ({
+	code: 'if6',
+	title: 'IF6: AND/OR Booleans',
+	description: 'Use booleans inside of AND/OR',
+	harsons_randomly_on_username: false,
+	predict_randomly_on_username: true,
+	
+	version: 2.0,
+
+	
+	gen: ({
+		gen_type: LinearGen,
+		pages: [
+			
+			//introduction_gen,
+			makeInertiaGenFromKC(kc_if_and_boolean_logic),
+			
+			ReviewNextConcept,
+			makeInertiaGenFromKC(kc_if_and_boolean),
+/*
+			ReviewNextConcept,
+			
+			makeInertiaGenFromKC(kc_if_or_boolean_logic),
+			
+			ReviewNextConcept,
+			makeInertiaGenFromKC(kc_if_or_boolean),
+
+			donePage,
+
+			...finish_questions
+			*/
+		]
+	}: GenType)
+	
+}: LevelSchemaFactoryType);
+
+
+module.exports = { if6 };
+
+
+
+
+/*
 
 const if6_if_with_math_test = ({
 	gen_type: LinearGen,
@@ -173,26 +161,4 @@ const if6_if_with_math_test = ({
 }: GenType);
 
 
-
-
-const if6 = ({
-	code: 'if6',
-	title: 'IF6: IF and Math',
-	description: 'Embed math inside of IF',
-	harsons_randomly_on_username: false,
-	version: 1,
-
-	gen: ({
-		gen_type: LinearGen,
-		pages: [
-			if6_if_with_math_tutorial,
-			if6_if_with_math_test,
-			...finish_questions
-		]
-	}: GenType)
-}: LevelSchemaFactoryType);
-
-
-
-
-module.exports = { if6 };
+*/

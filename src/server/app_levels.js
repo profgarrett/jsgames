@@ -46,8 +46,9 @@ router.post('/new_level_by_code/:code',
 
 		const insert_sql = `INSERT INTO iflevels (type, username, code, title, description, completed, 
 			pages, history, created, updated, seed, allow_skipping_tutorial, harsons_randomly_on_username, 
+			predict_randomly_on_username, version,
 			standardize_formula_case, show_score_after_completing, show_progress, props_version, props) 
-			VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+			VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
 		level.username = username;
 
 					
@@ -61,6 +62,8 @@ router.post('/new_level_by_code/:code',
 				level.seed,
 				level.allow_skipping_tutorial,
 				level.harsons_randomly_on_username,
+				level.predict_randomly_on_username,
+				level.version,
 				level.standardize_formula_case,
 				level.show_score_after_completing,
 				level.show_progress,

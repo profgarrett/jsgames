@@ -294,9 +294,12 @@ Authorization
 	Forgot password
 	Reset password
 	Logout
+	Ensure that only current user has access to its own page (and no others)
+	Ensure that logged in status is required for any subfolder access
 Website introduction
 	Run through all pages as normal user (not admin)
 	Each tutorial
+
 
 ## Author
 

@@ -29,9 +29,9 @@ const randomizeListInPlace = (a: Array<any>, seed: number): void => {
 // Add. a little bit of color to help show the difference.
 const format_tf = tf => {
 	if (tf === true ) {
-		return <span style={{color: '#3c763d'}}>True</span>;
+		return <span style={{color: '#3c763d'}}>TRUE</span>;
 	} else if( tf === false ) {
-		return <span style={{color: 'black'}}>False</span>;
+		return <span style={{color: 'black'}}>FALSE</span>;
 	}
 	return tf; // string result.
 };
@@ -53,6 +53,7 @@ const transform_if_date = dt => {
 const format = (p_input, format) => {
 	let input = p_input;
 	if(input === null) return null;
+	if(input === '') return '';
 
 	// Undefined format.  Guess!
 	if(typeof format === 'undefined' || format === null || format === '') {
@@ -79,7 +80,8 @@ const format = (p_input, format) => {
 		}
 	}
 
-	if(format === 'text' || format === 'c' || format === ' ' ) {
+
+	if(format === 'text' || format === 'string' || format === 'c' || format === ' ' ) {
 		// Text
 		return input;
 
@@ -93,10 +95,10 @@ const format = (p_input, format) => {
 		}
 
 	} else if( format === '0' ) {
-		// Format without any decimal numbers.
-		return Math.round(Number.parseFloat(input));
+		// Format without any decimal numbers, but include commas as needed.
+		return input.toLocaleString();
 
-	} else if( format === ',' || format === '.' ) {
+	} else if( format === ',' || format === '.' || format === '0') {
 		// Decimal
 		//$FlowFixMe
 		return input.toLocaleString('en-US', {style:'decimal'});
@@ -116,17 +118,24 @@ const format = (p_input, format) => {
 		//$FlowFixMe
 		return input.toLocaleString('en-US', {style:'percent'});
 
+	} else if(format === 'boolean') {
+		// Percent.
+		//$FlowFixMe
+		return input;
+
 	} else {
 		throw Error('Invalid format type '+format+' in ExcelTable');
 	}
 };
 
-const is_text_format = (format) => {
-	return (format === 'text');
-};
 
 const clean = (input, format_type) => format_tf(transform_if_date(format(input, format_type)));
 
+const tdBooleanStyle = {
+	textAlign: 'center',
+	paddingLeft: 10,
+	verticalAlign: 'middle',
+};
 const tdStringStyle = {
 	textAlign: 'left',
 	paddingLeft: 10,
@@ -149,6 +158,36 @@ const tdFirstColumnStyle = {
 	paddingLeft: '15px',
 	paddingRight: '15px'
 };
+
+/*
+	Return the proper TD for the given format code.
+*/
+const tdStyle = (format: string ): any => {
+
+	// Number
+	if(format === '$' || format === '$.' || format === ',' || format === '0' || format === '.') {
+		return tdNumberStyle;
+	}
+
+	// String
+	if(format === '' || format === 'text' || format === 'c' ) {
+		return tdStringStyle;
+	}
+
+	// Date
+	if(format === 'date' || format === 'shortdate') {
+		return tdStringStyle;
+	}
+
+	// Boolean
+	if(format === 'boolean' ) {
+		return tdBooleanStyle;
+	}
+	
+	return tdNumberStyle;
+};
+
+
 
 const addInfoColor = e => {
 	return { backgroundColor: '#d9edf7', ...e};
@@ -250,12 +289,15 @@ class PredictExcelTable extends React.Component<PredictPropsType, StateType> {
 	// Convert an answer (number) into the string value for display
 	_answer_to_string(page: IfPagePredictFormulaSchema, answer_index: number): string {
 		if(answer_index === -1) return 'Drag answer here';
+		if(page.solution_test_results[answer_index].result === true) return "True";
+		if(page.solution_test_results[answer_index].result === false) return "False";
 		return page.solution_test_results[answer_index].result;
 	}
 
 	// What are the possible test answers?
 	_get_answers_as_string(page: IfPagePredictFormulaSchema): Array<string> {
-		const answers = page.solution_test_results.map( o => o.result );
+		const answers = page.solution_test_results.map( 
+			(o, index: number): string => this._answer_to_string(page, index) );
 		return answers;
 	}
 
@@ -358,6 +400,7 @@ class PredictExcelTable extends React.Component<PredictPropsType, StateType> {
 			used[destRow] = answer_index
 		}
 
+		// Both update predicted answers, as well as reset the timer.
 		this.props.handleChange( { 'predicted_answers_used': used });
     };
 
@@ -414,13 +457,12 @@ class PredictExcelTable extends React.Component<PredictPropsType, StateType> {
 												{ this._answer_to_string(page, answer_index) }
 											</Button>
 										</div></OverlayTrigger>
-											{ provided.placeholder }
 										</div>
 										
                                     )}
                                 </Draggable>
                             ))}
-                            
+							{ provided.placeholder }                            
                         </div>
                     )}
 				</Droppable>);
@@ -437,6 +479,10 @@ class PredictExcelTable extends React.Component<PredictPropsType, StateType> {
 			used.push( answer_index);
 		}
 
+		const showCorrectAnswers = window.location.toString().substr(0, 
+			'ttp://localhost:8080'.length ) === 'http://localhost:8080';
+
+
 		return (
                 <Droppable droppableId={'DroppablePredictExcelTable_Row' + i}>
                     {(provided, snapshot) => (
@@ -450,9 +496,9 @@ class PredictExcelTable extends React.Component<PredictPropsType, StateType> {
                                     index={index}>
                                     {(provided, snapshot) => (
                                         <Button 
-											variant={ answer_correct 
+											variant={ showCorrectAnswers && answer_correct 
 													? 'success'
-													: 'warning' }
+													: 'info' }
 											as='div'
                                             ref={provided.innerRef}
                                             {...provided.draggableProps}
@@ -467,7 +513,7 @@ class PredictExcelTable extends React.Component<PredictPropsType, StateType> {
                                     )}
                                 </Draggable>
                             ))}
-                            
+                            { provided.placeholder }
                         </div>
                     )}
                 </Droppable>
@@ -506,7 +552,7 @@ class PredictExcelTable extends React.Component<PredictPropsType, StateType> {
 			// Add columns used for test.
 			if(columns.length > 0 ) {
 				test = columns.map( (c,c_index) => (
-						<td style={ is_text_format(page.column_formats[c_index]) ? tdStringStyle : tdNumberStyle } 
+						<td style={ tdStyle(page.column_formats[c_index]) }
 							key={'test'+i+'column'+c}>
 							{clean(tests[i][c], page.column_formats[c_index])}
 						</td>) );
@@ -654,7 +700,9 @@ class FormulaExcelTable extends React.Component<PropsType> {
 			}
 			
 			// Figure out if the cell is a string or a number.
-			style = is_text_format(page.client_f_format) ? tdStringStyle : tdNumberStyle;
+			style = tdStyle( page.client_f_format);
+
+			//if( page.client_f === '=') debugger;
 
 			// set fieldResult showing the output of the formula.
 			if( page.client_f === null || page.client_f === '' ) {
@@ -674,9 +722,11 @@ class FormulaExcelTable extends React.Component<PropsType> {
 				
 				// See if it matches. Works for either text or numbers.
 				// Check precision to .00 only - as we have floating point errors.
-				if(	page.client_test_results[i].result === page.solution_test_results[i].result ||
+				// Only show matches on localhost. Don't show to server.
+				if(		page.client_test_results[i].result === page.solution_test_results[i].result ||
 						Math.round(page.client_test_results[i].result * 100) === 
-						Math.round(page.solution_test_results[i].result * 100 )) {
+						Math.round(page.solution_test_results[i].result * 100 )
+				 	) {
 					// Render the field with a checkbox showing success.
 					fieldResult = <td style={addCorrectColor(style)}>{ clean(page.client_test_results[i].result, page.client_f_format) }</td>;
 				} else {
@@ -684,6 +734,7 @@ class FormulaExcelTable extends React.Component<PropsType> {
 					fieldResult = <td style={(style)}>{ clean(page.client_test_results[i].result, page.client_f_format) }</td>;
 				}
 			}
+
 
 			// set fieldSolution to the results for the formula.
 			if(page.solution_test_results !== null && page.solution_test_results.length > 0) {
@@ -696,7 +747,7 @@ class FormulaExcelTable extends React.Component<PropsType> {
 			// Add columns used for test.
 			if(columns.length > 0 ) {
 				test = columns.map( (c,c_index) => (
-						<td style={ is_text_format(page.column_formats[c_index]) ? tdStringStyle : tdNumberStyle } 
+						<td style={ tdStyle( page.column_formats[c_index] ) } 
 							key={'test'+i+'column'+c}>
 							{clean(tests[i][c], page.column_formats[c_index])}
 						</td>) );

@@ -74,7 +74,34 @@ const KC_NAMES = {
 	
 	ROUNDING: 'kc_rounding',
 
-	GEOMETRY: 'kc_geometry'
+	GEOMETRY: 'kc_geometry',
+
+	// If
+	KC_IF_COMPARISON_TEXT: 'kc_if_comparison_text',
+	KC_IF_COMPARISON_NUMBER: 'kc_if_comparison_number',
+	KC_IF_COMPARISON_BOOLEAN: 'kc_if_comparison_boolean',
+
+	KC_IF_RETURN_TEXT: 'kc_if_return_text',
+	KC_IF_RETURN_NUMBER: 'kc_if_return_number',
+
+	KC_IF_MATH_LOGIC: 'kc_if_math_logic',
+	KC_IF_MATH_RETURN: 'kc_if_math_return',
+	
+	KC_IF_AND: 'kc_if_and',
+	KC_IF_AND_LOGIC: 'kc_if_and_logic',
+	KC_IF_AND_BOOLEAN_LOGIC: 'kc_if_and_boolean_logic',
+	KC_IF_AND_BOOLEAN: 'kc_if_and_boolean',
+	KC_IF_AND_NOT: 'kc_if_and_not',
+	KC_IF_AND_NOT_LOGIC: 'kc_if_and_not_logic',
+
+	KC_IF_OR: 'kc_if_or',
+	KC_IF_OR_LOGIC: 'kc_if_or_logic',
+	KC_IF_OR_BOOLEAN_LOGIC: 'kc_if_or_boolean_logic',
+	KC_IF_OR_BOOLEAN: 'kc_if_or_boolean',
+
+	KC_IF_AMBIGUOUS_LOGIC: 'kc_if_ambiguous_logic',
+	KC_IF_AMBIGUOUS: 'kc_if_ambiguous',
+
 };
 
 
@@ -266,11 +293,36 @@ const makeTutorialNextConcept = () => {
 };
 
 
+
+/**
+	Handy formula used to adding KC properties to a list of pages.
+	
+	Use as 
+		add_if_undefined(kc_text_quotes.tutorial_pages, { kcs: [ KC_NAMES.TEXT_QUOTES ] } );
+	
+	Add properties *from* json to *object* if they're undefined.
+ 	Can handle being passed an array, in which case it recurses.
+*/
+const add_if_undefined = (json: any, o: any) => {
+	if(Array.isArray(o) ) {
+		// recurse
+		o.forEach( o => add_if_undefined(json, o));
+	} else {
+		// Add property.
+		for(const property in json) {
+			if( typeof o[property] === 'undefined') {
+				o[property] = json[property];
+			}
+		}
+	}
+}
+
 module.exports = { 
 	KC_NAMES, 
 	makeTutorialGenFromKC, makeAdaptiveReviewGenFromKC, makeInertiaGenFromKC,
 	makeReviewIntroduction,
 	makeReviewNextConcept,
 	makeReviewCompleted,
-	makeTutorialNextConcept
+	makeTutorialNextConcept,
+	add_if_undefined,
 };

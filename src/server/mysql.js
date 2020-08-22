@@ -18,6 +18,8 @@ const { sql11 } = require('./../../sql/sql11.js');
 const { sql12 } = require('./../../sql/sql12.js');
 const { sql13 } = require('./../../sql/sql13.js');
 const { sql14 } = require('./../../sql/sql14.js');
+const { sql15 } = require('./../../sql/sql15.js');
+const { sql16 } = require('./../../sql/sql16.js');
 
 /**
 	Initialize MYSQL with credentials from secret.js.
@@ -129,6 +131,8 @@ async function update_mysql_database_schema(): Promise<any> {
 	if(old_version < 12 ) await _update_update_version( sql12 );
 	if(old_version < 13 ) await _update_update_version( sql13 );
 	if(old_version < 14 ) await _update_update_version( sql14 );
+	if(old_version < 15 ) await _update_update_version( sql15 );
+	if(old_version < 16 ) await _update_update_version( sql16 );
 
 	await _update_all_levels_to_latest_props();
 	

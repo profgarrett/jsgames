@@ -2,364 +2,242 @@
 const { LinearGen, UntilGen } = require('./../Gens');
 const { finish_questions } = require('./../pages/finish_questions');
 
+const { kc_if_return_number, kc_if_return_text } = require('./../kcs/kc_if_return');
+
 const { IfPageFormulaSchema } = require( './../../shared/IfPageSchemas');
+
+const { makeInertiaGenFromKC } = require('./../kcs/kc.js');
 
 import type { GenType } from './../Gens';
 import type { LevelSchemaFactoryType } from './../IfLevelSchemaFactory';
 
 
-const if2_text_comparison_tutorial = ({
+
+const introduction_gen = ({
 	gen_type: LinearGen,
 	pages: [
-		{	type: 'IfPageFormulaSchema',
-			description: `So far we have been using numbers, but we can also compare words.
-					<br/><br/>
-					The <code>=</code> symbol will return <code>TRUE</code> 
-					if the words on each side are the same.
-					<br/><br/>
-					So, <code>=A1=C1</code> will be <code>TRUE</code> if the cells match, or 
-					<code>FALSE</code> if they are different.`,
-			instruction: `The table below shows the rating for the parents of each pig.
-						Write a formula to see if the Dad’s rating is the same as the Mom’s.`,
-			column_titles: ['Mom Pig Rating', 'Dad Pig Rating' ],
-			tests: [
-						{ 'a': 'A', 'b': 'B' }, 
-						{ 'a': 'B', 'b': 'B' }, 
-						{ 'a': 'C', 'b': 'D' }, 
-						{ 'a': 'A', 'b': 'A' }
-					],
-			solution_f: '=a1=b1', 
-			feedback: [
-				{ 'has': 'references', args: ['a1', 'b1'] }
-			],
-			code: 'tutorial'
-		},
-		{	type: 'IfPageFormulaSchema',
-			description: `If we want to see whether A1 has the word <code>cat</code>,
-					we have to write it like <code>=A1="cat"</code>.  Wrapping the word in quotes tells 
-					Excel that <code>"cat"</code> isn't a formula or cell reference.
-					<br/><br/>
-					Wrapping a word in single quotes (apostrophes) will not work.  
-					So, never write <code>=A1='cat'</code>.
-					<br/><br/>
-					Like most of Excel, <code>=</code> does not care about capitalization.
-					So, <code>=A1="A"</code> and <code>=A1="a"</code> have the same result.`,
-			instruction: 'Write the formula to see if the Mom\'s rating is an "A".',
-			column_titles: ['Mom Pig Rating', 'Dad Pig Rating' ],
-			tests: [
-						{ 'a': 'A', 'b': 'B' }, 
-						{ 'a': 'B', 'b': 'B' }, 
-						{ 'a': 'C', 'b': 'D' }, 
-						{ 'a': 'A', 'b': 'A' }
-					],
-			solution_f: '=a1="A"', 
-			feedback: [
-				{ 'has': 'references', args: ['a1'] }
-			],
-			code: 'tutorial'
-		},
-		{	type: 'IfPageFormulaSchema',
-			description: `We can use also
-					<code>&gt</code> and <code>&lt</code> to compare two values alphabetically.
-					<br/><br/>
-					Letters that come first in the alphabet are <b>less than</b> letters that come later on.
-					So, "A" is less than "B", which is less than "C".  
-					<br/><br/>
-					If the first letter of each word matches, we move onto the second letter. If that matches, we keep
-					going to the right. If one word runs out of letters before the other, it comes first.
-					<br/><br/>
-					As an example, "Aden" <code>&lt</code> "Bob", but "Aden"<code>&gt</code>"Ada".`,
-			instruction: 'Write a formula to see if the Dad’s rating is further along in the alphabet than the Mom’s rating.',
-			column_titles: ['Mom Pig Rating', 'Dad Pig Rating' ],
-			tests: [
-						{ 'a': 'A', 'b': 'B' }, 
-						{ 'a': 'B', 'b': 'A' }, 
-						{ 'a': 'C', 'b': 'D' }, 
-						{ 'a': 'B', 'b': 'A' }
-					],
-			solution_f: '=b1>a1', 
-			feedback: [
-				{ 'has': 'no_values' },
-				{ 'has': 'references', args: ['a1', 'b1'] },
-			],
-			code: 'tutorial'
-		},
-		{	type: 'IfPageFormulaSchema',
-			description: `We can also use <code>≤</code> and <code>≥</code> to compare words.  
-					<br/><br/>
-					Just like with numbers, those symbols don't appear on the keyboard.  Use 
-					<code>&gt=</code> or <code>&lt=</code>. Always put the <code>=</code> sign last.`,
-			instruction: 'Write a formula to see if the Dad’s rating is greater (later in the alphabet) than or equal to the Mom’s rating.',
-			column_titles: ['Mom Pig Rating', 'Dad Pig Rating' ],
-			tests: [
-						{ 'a': 'A', 'b': 'B' }, 
-						{ 'a': 'B', 'b': 'A' }, 
-						{ 'a': 'C', 'b': 'D' }, 
-						{ 'a': 'B', 'b': 'A' }
-					],
-			solution_f: '=b1>=a1', 
-			feedback: [
-				{ 'has': 'no_values' },
-				{ 'has': 'references', args: ['a1', 'b1'] },
-			],
-			code: 'tutorial'
+		{
+			type: 'IfPageTextSchema',
+			description: `
+				This tutorial introduces you to the <code>IF</code> function.
+				<ul>
+					<li>How does the formula work?</li>
+					<li>Returning numbers</li>
+					<li>Returning text</li>
+				</ul>
+				After finishing this section, you'll have a solid grounding in simple 
+				<code>IF</code> functions!`
 		}
 	]
 }: GenType);
 
 
-const sandwiches = {
-	column_titles: ['Meat', 'Bread', 'Cheese Rating', 'Deliciousness Rating'],
-	tests: [
-				{ 'a': 'Bacon', 'b': 'Rye', c: 'A', d: 'A' }, 
-				{ 'a': 'None', 'b': 'Rye', c: 'B', d: 'A' }, 
-				{ 'a': 'Ham', 'b': 'Regular', c: 'A', d: 'B' }, 
-				{ 'a': 'None', 'b': 'Regular', c: 'C', d: 'C' }, 
-				{ 'a': 'Ham', 'b': 'Regular', c: 'D', d: 'D' }, 
-				{ 'a': 'Ham', 'b': 'Rye', c: 'B', d: 'A' }, 
-			],
+
+
+const ReviewNextConcept = {
+	type: 'IfPageTextSchema',
+	description: `
+		Excellent! You have completed this section of the tutorial.
+		<br/><br/>
+		The system will now start you on the next concept.`
 };
 
-
-
-const pigs = {
-	column_titles: ['Pig Breed', 'Weight Rating', 'Taste Rating' ],
-	tests: [
-				{ 'a': 'Spotted', 'b': 'A', c: 'D' }, 
-				{ 'a': 'Spotted', 'b': 'E', c: 'A' }, 
-				{ 'a': 'Yorkshire', 'b': 'D', c: 'A' }, 
-				{ 'a': 'Spotted', 'b': 'A', c: 'E' }, 
-				{ 'a': 'Spotted', 'b': 'C', c: 'B' }, 
-				{ 'a': 'Poland China', 'b': 'B', c: 'A' }, 
-				{ 'a': 'Spotted', 'b': 'C', c: 'D' }, 
-				{ 'a': 'Poland China', 'b': 'C', c: 'B' }, 
-				{ 'a': 'Yorkshire', 'b': 'A', c: 'C' }, 
-			],
+const donePage = {
+	type: 'IfPageTextSchema',
+	description: `
+		Excellent! You have completed this entire tutorial! 
+		<br/><br/>
+		You can now go onto the next IF tutorial.`
 };
-
-
-
-
-const if2_text_comparison_test = ({
-	gen_type: LinearGen,
-	pages: [
-		{	type: 'IfPageTextSchema',
-			description: `It's time to take on some problems on text comparisons.
-					You will be given six problems to solve.
-					<br/><br/>
-					The questions will require you to carefully read the problem, and use
-					the correct comparisons. You do not have to use every column.`
-		},
-		({
-			gen_type: UntilGen,
-			until_total: 6,
-			pages: [
-				{	type: 'IfPageFormulaSchema',
-					instruction: 'Input the correct formula',
-					
-					code: 'test',
-					toolbox: [
-						{ has: 'references', args: ['a1', 'b1', 'c1', 'd1'] },
-						{ has: 'values', args: ['string?'] },
-						{ has: 'symbols', args: ['comparison?'] }
-					],
-					versions: [
-						{
-							...pigs,
-							description: 'Which pigs have a breed of "Spotted"?',
-							solution_f: '=a1="Spotted"',
-						},
-						{
-							...pigs,
-							description: 'Which pigs have a breed of "Yorkshire"?',
-							solution_f: '=a1="Yorkshire"',
-						},
-						{
-							...pigs,
-							description: 'Which pigs have a breed of "Poland China"?',
-							solution_f: '=a1="Poland China"',
-						},
-						{
-							...pigs,
-							description: 'Which pigs have a <b>weight</b> rating of A or B?',
-							solution_f: '=b1<"C"', 
-						},
-						{
-							...pigs,
-							description: 'Which pigs have a <b>weight</b> rating of B?',
-							solution_f: '=b1="B"', 
-						},
-						{
-							...pigs,
-							description: 'Which pigs have a <b>weight</b> rating of D or E?',
-							solution_f: '=b1>"C"', 
-						},
-						{
-							...pigs,
-							description: 'Which pigs have a <b>weight</b> rating of A?',
-							solution_f: '=b1="a"', 
-						},
-						{
-							...pigs,
-							description: 'Which pigs have a <b>taste</b> rating of A or B?',
-							solution_f: '=c1<="B"', 
-						},
-						{
-							...pigs,
-							description: 'Which pigs have a B <b>taste</b> rating?',
-							solution_f: '=c1="B"', 
-						},
-						{
-							...pigs,
-							description: 'Which pigs have a taste rating of B, C, E, or E?',
-							solution_f: '=c1>="B"', 
-						},
-						{
-							...pigs,
-							description: 'Which pigs have a taste rating of B or greater (such as C, D, ...)?',
-							solution_f: '=c1>="B"', 
-						},						{
-							...pigs,
-							description: 'Which pigs have a taste rating of A?',
-							solution_f: '=c1="a"', 
-						},
-						{
-							...pigs,
-							description: 'Which pigs have an equal weight and taste rating?',
-							solution_f: '=b1=c1', 
-						},
-						{
-							...pigs,
-							description: 'Which pigs have a weight rating further in the alphabet than their taste rating?',
-							solution_f: '=b1>c1', 
-						},
-						{
-							...pigs,
-							description: 'Which pigs have a weight rating before (in the alphabet) than their taste rating?',
-							solution_f: '=b1<c1', 
-						},
-						{
-							...pigs,
-							description: 'Which pigs have a weight rating later (in the alphabet) than <i>or equal to</i> their taste rating?',
-							solution_f: '=b1>=c1', 
-						},
-						{
-							...pigs,
-							description: 'Which pigs have a weight rating less (in the alphabet) <i>or equal to</i> than their taste rating?',
-							solution_f: '=b1<=c1', 
-						},
-
-
-
-					// Sandwiches
-
-					// equal
-						{
-							...sandwiches,
-							description: 'Which sandwiches have a meat of "Bacon"?',
-							solution_f: '=a1="Bacon"',
-						},
-						{
-							...sandwiches,
-							description: 'Which sandwiches have a meat of "Ham"?',
-							solution_f: '=a1="Ham"',
-						},
-						{
-							...sandwiches,
-							description: 'Which sandwiches have a meat of "None"?',
-							solution_f: '=a1="None"',
-						},
-						{
-							...sandwiches,
-							description: 'Which sandwiches have Rye <b>bread</b>?',
-							solution_f: '=b1="Rye"', 
-						},
-						{
-							...sandwiches,
-							description: 'Which sandwiches have regular <b>bread</b>?',
-							solution_f: '=b1="regular"', 
-						},
-
-					// compare value to ref lt / gt / lt-gt-eq
-						{
-							...sandwiches,
-							description: 'Which sandwiches have a <b>delicious</b> rating of A or B?',
-							solution_f: '=d1<="B"', 
-						},
-						{
-							...sandwiches,
-							description: 'Which sandwiches have a B, C, D, or E <b>delicious</b> rating?',
-							solution_f: '=d1>="B"', 
-						},
-						{
-							...sandwiches,
-							description: 'Which sandwiches have a delicious rating of A or B?',
-							solution_f: '=d1<="B"', 
-						},
-						{
-							...sandwiches,
-							description: 'Which sandwiches have a cheese rating of B, C, D, or E?',
-							solution_f: '=c1>="B"', 
-						},						{
-							...sandwiches,
-							description: 'Which sandwiches have a cheese below D (i.e., A, B, or C)?',
-							solution_f: '=c1<"a"', 
-						},
-
-					// compare ref to ref
-						{
-							...sandwiches,
-							description: 'Which sandwiches have an equal cheese and delicious rating?',
-							solution_f: '=c1=d1', 
-						},
-						{
-							...sandwiches,
-							description: 'Which sandwiches have a cheese rating further along in the alphabet than their delicious rating?',
-							solution_f: '=c1>d1', 
-						},
-						{
-							...sandwiches,
-							description: 'Which sandwiches have a cheese rating earlier in the alphabet than their delicious rating?',
-							solution_f: '=c1<d1', 
-						},
-						{
-							...sandwiches,
-							description: 'Which sandwiches have a cheese rating later in the alphabet than <i>or equal to</i> their delicious rating?',
-							solution_f: '=c1>=d1', 
-						},
-						{
-							...sandwiches,
-							description: 'Which sandwiches have a cheese rating earlier in the alphabet <i>or equal to</i> than their delicious rating?',
-							solution_f: '=c1<=d1', 
-						},
-
-
-					]
-				}
-			]
-		}: GenType)
-	]
-}: GenType);
 
 
 
 const if2 = ({
 	code: 'if2',
-	title: 'IF2: Logical text comparisons',
-	description: 'Compare words',
+	title: 'IF2: Returns',
+	description: 'Returning numbers and text',
 	harsons_randomly_on_username: false,
-	version: 1.1,
+	predict_randomly_on_username: true,
+	version: 2,
 
 	gen: ({
 		gen_type: LinearGen,
 		pages: [
-			if2_text_comparison_tutorial,
-			if2_text_comparison_test,
+			introduction_gen,
+			
+			makeInertiaGenFromKC(kc_if_return_number),
+			ReviewNextConcept, 
+			
+			makeInertiaGenFromKC(kc_if_return_text),
+			donePage, 
+
 			...finish_questions
 		]
 	}: GenType)
-
 }: LevelSchemaFactoryType);
 
 
 module.exports = { if2 };
+
+
+/*
+
+
+
+=====
+{	type: 'IfPageFormulaSchema',
+					instruction: 'Input the correct formula',
+					column_titles: ['Pig Breed', 'Weight', 'Rating' ],
+					tests: [
+								{ 'a': 'Spotted', 'b': 100, c: 'B' }, 
+								{ 'a': 'Spotted', 'b': 200, c: 'A' }, 
+								{ 'a': 'Yorkshire', 'b': 340, c: 'A' }, 
+								{ 'a': 'Spotted', 'b': 30, c: 'A' }, 
+								{ 'a': 'Spotted', 'b': 230, c: 'B' }, 
+								{ 'a': 'Poland China', 'b': 100, c: 'A' }, 
+								{ 'a': 'Spotted', 'b': 32, c: 'C' }, 
+								{ 'a': 'Poland China', 'b': 0, c: 'B' }, 
+								{ 'a': 'Yorkshire', 'b': 234, c: 'C' }, 
+							],
+					code: 'test',
+					toolbox: [
+						{ has: 'functions', args: ['if'] },
+						{ has: 'symbols', args: ['comparison?', 'arithmetic?'] },
+						{ has: 'references', args: ['a1', 'b1', 'c1'] },
+						{ has: 'values', args: ['string?', 'number?'] },
+					],
+					versions: [
+						{
+							description: 'Spotted pigs should return their weight; other pigs should return 0.',
+							solution_f: '=if(a1="Spotted", b1,0)',
+						},
+						{
+							description: 'Return "Good" for Yorkshire pigs, or "sell" for other pigs',
+							solution_f: '=if(a1="Yorkshire", "Good", "Sell")',
+						},
+						{
+							description: '"A" pigs should return their rating; other pigs should return "X".',
+							solution_f: '=if(c1="A", c1, "X")',
+						},
+						{
+							description: 'Return "A" for Spotted pigs, or "X" for other pigs',
+							solution_f: '=if(a1="Spotted", "A", "X")',
+						},
+						{
+							description: 'Yorkshire pigs should return "Half", or "Quarter" for other pigs',
+							solution_f: '=if(a1="Yorkshire", "half", "Quarter")',
+						},
+						{
+							description: 'Return "Discount" for "C" pigs, or "Normal" for other pigs',
+							solution_f: '=if(c1="C", "Discount", "Normal")',
+						},
+						{
+							description: 'Return "Young" for pigs with a weight under 100, or "Sell" for other pigs',
+							solution_f: '=if(b1<100, "Young", "Sell")',
+						},
+						{
+							description: 'Pigs with a weight of 200 or over should return "Heavy"; other pigs should return "No sale"',
+							solution_f: '=if(b1>=200, "Heavy", "No sale")',
+						},
+						{
+							description: 'Return 100 for "C" pigs, or 150 for other pigs',
+							solution_f: '=if(c1="C", 100, 150)',
+						},
+						{
+							description: '"B" rating pigs should return the pig breed, or "N/A" for any others',
+							solution_f: '=if(c1="B", a1, "N/A")', 
+						},
+
+					]
+
+
+
+
+        ======
+        {   ...pig_test,
+            description: `Which pigs have their <code>{cell1_title}</code> {over} {n}?
+                    <br/><br/>
+                    You must use the <code>&gt</code> symbol.`,
+
+			solution_f: '={cell1_ref}>{n}', 
+            template_values: {
+                'cell1': 'popCell(b1,c1)',
+                'n': '[2-3]',
+                'over': 'randOf(greater than,over,more than)'
+            },
+            feedback: [
+                { 'has': 'values', args: ['{n}'] },
+                { 'has': 'symbols', args: ['>']},
+                { 'has': 'references', args: ['{cell1_ref}'] }
+            ],
+
+        },{ ...pig_test,
+            description: `Which pigs have their <code>{cell1_title}</code> {under} {n}?
+                    <br/><br/>
+                    You must use the <code>&lt</code> symbol.`,
+
+			solution_f: '={cell1_ref}<{n}', 
+            template_values: {
+                'cell1': 'popCell(b1,c1)',
+                'n': '[2-3]',
+                'under': 'randOf(less than,under)'
+            },
+            feedback: [
+                { 'has': 'values', args: ['{n}'] },
+                { 'has': 'symbols', args: ['<']},
+                { 'has': 'references', args: ['{cell1_ref}'] }
+            ],
+
+        },{ ...pig_test,
+            description: `Which pigs have their <code>{cell1_title}</code> {gte} {n}?
+                    <br/><br/>
+                    You must use the <code>&gt=</code> symbol.`,
+
+			solution_f: '={cell1_ref}>={n}', 
+            template_values: {
+                'cell1': 'popCell(b1,c1)',
+                'n': '[2-3]',
+                'gte': 'randOf(greater than or equal to,equal to or over,at least)'
+            },
+            feedback: [
+                { 'has': 'values', args: ['{n}'] },
+                { 'has': 'symbols', args: ['>=']},
+                { 'has': 'references', args: ['{cell1_ref}'] }
+            ],
+
+        },{ ...pig_test,
+            description: `Which pigs have their <code>{cell1_title}</code> {lte} {n}?
+                    <br/><br/>
+                    You must use the <code>&lt;=</code> symbol.`,
+
+			solution_f: '={cell1_ref}<={n}', 
+            template_values: {
+                'cell1': 'popCell(b1,c1)',
+                'n': '[2-3]',
+                'lte': 'randOf(less than or equal to,at or under,at most)'
+            },
+            feedback: [
+                { 'has': 'values', args: ['{n}'] },
+                { 'has': 'symbols', args: ['<=']},
+                { 'has': 'references', args: ['{cell1_ref}'] }
+            ],
+
+        },{ ...pig_test,
+            description: 'Which pigs have their <code>{cell1_title}</code> {eq} {n}?',
+
+			solution_f: '={cell1_ref}={n}', 
+            template_values: {
+                'cell1': 'popCell(b1,c1)',
+                'n': '[1-4]',
+                'eq': 'randOf(equal to,the same as)'
+            },
+            feedback: [
+                { 'has': 'values', args: ['{n}'] },
+                { 'has': 'symbols', args: ['=']},
+                { 'has': 'references', args: ['{cell1_ref}'] }
+            ],
+
+
+
+
+			*/

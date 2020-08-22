@@ -1,4 +1,3 @@
-
 // @flow
 const { DataFactory } = require('./DataFactory');
 const { IfPageBaseSchema } = require('./../shared/IfPageSchemas');
@@ -189,12 +188,19 @@ const ShuffleGenUntilLimit = (seed: number, pages: Array<IfPageBaseSchema>, gen:
 	const until_total = typeof gen.until_total === 'number' ? gen.until_total : 999999;
 	const until_correct = typeof gen.until_correct === 'number' ? gen.until_correct : 999999;
 
+	if(!(typeof gen.until_correct === 'number' || gen.until_correct === null))
+			throw new Error('Invalid gen.until_correct, should be number or null');
+
+	if(!(typeof gen.until_total === 'number' || gen.until_correct === null))
+			throw new Error('Invalid gen.until_total, should be number or null');
+
+
 	// Create a new linear gen with the randomized list of items limited to @until_total.
 	let randomized_gen = ({
 		gen_type: 'LinearGen',
 		pages: DataFactory.randomizeList(gen.pages.slice(), seed).slice(0, until_total),
-		until_correct: (typeof gen.until_correct === 'number') ? gen.until_correct : null,
-		until_total: (typeof gen.until_total === 'number') ? gen.until_total : null, 
+		until_correct: gen.until_correct,
+		until_total: gen.until_total,
 	}: GenType);
 	
 	//let correct = 0;

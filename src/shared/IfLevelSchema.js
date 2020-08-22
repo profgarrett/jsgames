@@ -35,14 +35,14 @@ const IfLevels = [
 	{ code: 'functionstext1', title: 'Functions - Text 1', description: 'Learn about basic text functions.' },
 	{ code: 'functionstext2', title: 'Functions - Text 2', description: 'Use advanced text functions.' },
 
-	{ code: 'if1', title: 'IF1: Logical number comparisons', description: 'Compare numbers' },
-	{ code: 'if2', title: 'IF2: Logical text comparisons', description: 'Compare words' },
-	{ code: 'if3', title: 'IF3: the IF function', description: 'Create simple formulas with IF' },
-	{ code: 'if4', title: 'IF4: Logical functions', description: 'Learn about AND, OR, & NOT' },
-	{ code: 'if5', title: 'IF5: Logical functions and IF', description: 'Use AND, OR, & NOT inside of IF' },
-	{ code: 'if6', title: 'IF6: IF and Math', description: 'Embed math inside of an IF' },
-	{ code: 'if7', title: 'IF7: Booleans 1', description: 'Figure out TRUE and FALSE' },
-	{ code: 'if8', title: 'IF8: Booleans 2', description: 'Use booleans with the AND & OR functions' },
+	{ code: 'if1', title: 'IF1: Logical comparisons', description: 'Compare numbers and text' },
+	{ code: 'if2', title: 'IF2: Returns', description: 'Return numbers and text' },
+	{ code: 'if3', title: 'IF3: Math', description: 'Embed math into the IF function' },
+	{ code: 'if4', title: 'IF4: AND', description: 'Use the AND function' },
+	{ code: 'if5', title: 'IF5: OR', description: 'Use the OR function' },
+	{ code: 'if6', title: 'IF6: AND/OR Booleans', description: 'Use booleans inside of AND/OR' },
+	{ code: 'if7', title: 'IF7: Logic', description: 'Figure out which function to use' },
+	{ code: 'if8', title: 'IF8: TBD', description: 'TBD' },
 
 	{ code: 'surveymath1', title: 'Survey of Math Concepts 1', description: 'Review your math concepts' },
 	{ code: 'surveymath2', title: 'Survey of Math Concepts 2', description: 'Review your math concepts' },
@@ -126,6 +126,7 @@ class IfLevelPagelessSchema extends Schema {
 
 	seed: number
 	harsons_randomly_on_username: boolean
+	predict_randomly_on_username: boolean
 	standardize_formula_case: boolean
 	show_score_after_completing: boolean
 
@@ -143,6 +144,7 @@ class IfLevelPagelessSchema extends Schema {
 	
 	props: IfLevelDerivedProps
 	props_version: number
+	version: number
 
 	// Apply json to this obj, signally no parent classes to do the setting for us.
 	constructor( json?: any) {
@@ -168,6 +170,9 @@ class IfLevelPagelessSchema extends Schema {
 			
 			// Should half of users get Harsons instead of formula pages?
 			harsons_randomly_on_username: { type: 'Boolean', initialize: (i) => isDef(i) ? b(i) : false },
+
+			// Should half of users get Predict instead of formula pages?
+			predict_randomly_on_username: { type: 'Boolean', initialize: (i) => isDef(i) ? b(i) : false },
 
 			// should we go through the instructions and standardize formula sentence case?
 			standardize_formula_case: { type: 'Boolean', initialize: (i) => isDef(i) ? b(i) : false },
@@ -197,6 +202,9 @@ class IfLevelPagelessSchema extends Schema {
 			// Props are used to store derrived (expensive) properties.
 			props: { type: 'Object', initialize: (o) => isDef(o) && o !== null ? new IfLevelDerivedProps( o ) : null },
 			props_version: { type: 'number', initialize: (i) => isDef(i) ? i : null },
+			
+			// What version of the level is this version?
+			version : { type: 'number', initialize: (dbl) => isDef(dbl) ? dbl : null },
 		};
 	}
 

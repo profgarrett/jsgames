@@ -3,174 +3,89 @@ const { DataFactory } = require('./../DataFactory');
 const { LinearGen, UntilGen } = require('./../Gens');
 const { finish_questions } = require('./../pages/finish_questions');
 
+const { kc_if_or_logic, 
+		kc_if_or } = require('./../kcs/kc_if_or');
+
 const { IfPageFormulaSchema } = require( './../../shared/IfPageSchemas');
 
-const randB = DataFactory.randB;
+const { makeInertiaGenFromKC } = require('./../kcs/kc.js');
 
 import type { GenType } from './../Gens';
 import type { LevelSchemaFactoryType } from './../IfLevelSchemaFactory';
 
 
-const if5_if_with_functions_tutorial = ({
+
+const introduction_gen = ({
 	gen_type: LinearGen,
 	pages: [
-		{	type: 'IfPageTextSchema',
-			description: `The previous tutorials taught you how to compare values, create simple
-					IF formulas, and use the <code>AND</code>, <code>OR</code> & <code>NOT</code> functions.
-					<br/><br/>
-					This tutorial asks you to put all of these concepts together.
-					`
-		},
-		{	type: 'IfPageTextSchema',
-			description: `One of the first things to clearly understand is how to nest functions.
-					It's tempting to read a formula like a book, starting at the left and moving to the right.
-					However, the computer works differently.  
-					<br/><br/>
-					Think about how to solve the math problem <code>1 + 2 * 3</code>.  If we read it
-					left to right, then we would calculate <code>1 + 2</code> and then <code>3 * 3</code>. 
-					But, this would end up with the wrong result!
-					<br/><br/>
-					When we do a math problem, we follow order of operations.  That says that we should
-					multiply before we add.  So, we would multiply <code>2 * 3</code>, and then add 
-					the result to <code>1</code>.
-					<br/><br/>
-					Excel has a similar approach.  Simply stated, it tries to do the inner operations first.
-					So, if we were to write <code>=YEAR(NOW())</code>, it first runs <code>NOW()</code>. 
-					Once this result is found, it then gives that output as input to the <code>YEAR()</code> function.
-					<br/><br/>
-					When creating Excel <code>IF</code> functions, we will regularly do this nesting operation.`
-		},
-		{	type: 'IfPageFormulaSchema',
-			description: `Let's start with a fairly simple nesting function with the <code>NOT</code> function.  
-					<br/><br/>
-					When you enter <code>=IF(NOT(C1=0), "No kids", "Kids")</code>, Excel first
-					looks at the condition, <code>NOT(C1=0)</code>.  After it finds the result of that function,
-					it passes the result into the <code>IF</code> function.`,
-			instruction: 'Enter the formula from above.',
-			column_titles: ['Animal Breed', 'Cost', 'Kids'],
-			tests: [
-						{ 'a': 'Arabian', 'b': randB(100, 1000), 'c': 0 }, 
-						{ 'a': 'Mixed', 'b': randB(10, 100), 'c': 1 }, 
-						{ 'a': 'Persian', 'b': randB(10, 100), 'c': 2 }, 
-						{ 'a': 'Mustang', 'b': randB(10, 100), 'c': 2 }, 
-						{ 'a': 'Quarter', 'b': randB(10, 100), 'c': 0 }
-					],
-			solution_f: '=if(not(c1=0), "no kids", "kids")', 
-			feedback: [
-				{ 'has': 'references', args: ['c1'] },
-				{ 'has': 'functions', args: ['not']}
-			],
-			code: 'tutorial'
-		},
-		{	type: 'IfPageFormulaSchema',
-			description: `Let's try another example.
-					<br/><br/>
-					Consider <code>=IF(NOT(A1="Horses"), "Sell", "Hide")</code>.  
-					This checks to see if A1 has the value of "Horses", and then flips the result.
-					The flipped result is then used to decide between "Sell" and "Hide".`,
-			instruction: `Use the IF and NOT functions to return "Water" for anything that's
-				not a Cow.  Cows should return "Farm"`,
-			column_titles: ['Animal Type', 'Count', 'Ranking'],
-			tests: [
-						{ 'a': 'Ducks', 'b': randB(10, 100), 'c': 'B' }, 
-						{ 'a': 'Chickens', 'b': randB(10, 100), 'c': 'A' }, 
-						{ 'a': 'Fish', 'b': randB(10, 100), 'c': 'C' }, 
-						{ 'a': 'Cow', 'b': randB(10, 100), 'c': 'A' }
-					],
-			solution_f: '=IF(NOT(a1="Cow"), "Water", "Farm")', 
-			feedback: [
-				{ 'has': 'values', args: ['Cow', 'Water', 'Farm'] },
-				{ 'has': 'references', args: ['a1'] },
-				{ 'has': 'functions', args: ['if', 'NOt']}
-			],
-			code: 'tutorial'
-		},
-		{	type: 'IfPageFormulaSchema',
-			description: `The <code>AND</code> function is extremely useful when combined with <code>IF</code>.
-					As a reminder, this only returns <code>TRUE</code> if all of the values passed to it are <code>TRUE</code>.
-					<br/><br/>
-					So, if we write <code>=IF(AND(A1&gt50, B1&lt50), 'a', 'b')</code>, it will check to see if the
-					values in <code>A1</code> and <code>B1</code> are over 50.  
-					If so, then it will return 'a' (and otherwise 'b').`,
-			instruction: 'Write a formula that will say "Bad" if sales in both regions are under 50, or "Ok" otherwise.',
-			column_formats: [ '$', '$' ],
-			column_titles: ['Sales NY', 'Sales TX' ],
-			tests: [
-						{ 'a': 0, 'b': 12 }, 
-						{ 'a': 80, 'b': 80 }, 
-						{ 'a': randB(10, 100), 'b': randB(80, 100) }, 
-						{ 'a': randB(10, 100), 'b': randB(80, 100) }, 
-						{ 'a': 61, 'b': 61 }, 
-						{ 'a': randB(80, 100), 'b': 0 }, 
-					],
-			solution_f: '=IF(and(a1<50, b1<50), "bad", "ok")', 
-			feedback: [
-				{ 'has': 'values', args: [ 50 ] },
-				{ 'has': 'references', args: ['a1', 'b1'] },
-				{ 'has': 'functions', args: ['and', 'if'] }
-			],
-			code: 'tutorial'
-		},
-		{	type: 'IfPageFormulaSchema',
-			description: `We can pass in an unlimited number of values to <code>AND</code>, as long as they are 
-					each separated by a comma.`,
-			instruction: 'Are sales in all regions over 10? If so, say "y", or otherwise "n"',
-			column_formats: [ '$', '$', '$' ],
-			column_titles: ['Sales NY', 'Sales TX', 'Sales CA' ],
-			tests: [
-						{ 'a': 0, 'b': randB(10, 100), 'c': randB(3, 40) }, 
-						{ 'a': 20, 'b': 10, 'c': 23 }, 
-						{ 'a': randB(10, 100), 'b': randB(80, 100), 'c': randB(3, 40) }, 
-						{ 'a': randB(10, 100), 'b': randB(80, 100), 'c': randB(3, 40) }, 
-						{ 'a': 61, 'b': 61, 'c': 58 }, 
-						{ 'a': 0, 'b': 4, 'c': 1 }
-					],
-			solution_f: '=IF(and(a1>10, b1>10, c1>10), "Y", "N")', 
-			feedback: [
-				{ 'has': 'values', args: [10, 'y', 'n'] },
-				{ 'has': 'references', args: ['a1', 'b1', 'c1'] },
-				{ 'has': 'functions', args: ['if'] }
-			],
-			toolbox: [
-				{ 'has': 'values', args: [10, 'y', 'n'] },
-				{ 'has': 'references', args: ['a1', 'b1', 'c1'] },
-				{ 'has': 'functions', args: ['and3', 'if'] },
-				{ 'has': 'symbols', args: ['>'] }
-			],
-			code: 'tutorial'
-		},
-		{	type: 'IfPageFormulaSchema',
-			description: `We can also use the <code>OR</code> function with <code>IF</code>.
-					As a reminder, if <i>any</i> of the values passed to <code>OR</code> are <code>TRUE</code>, 
-					then the entire function returns <code>TRUE</code>.
-					<br/><br/>
-					So, if we write <code>=IF(OR(A1&gt50, B1&gt50), "A", "B")</code>, it will check to see if
-					either A1 or B1 are over 50.  As long as one of those is <code>TRUE</code>, the function then
-					 will return <code>A</code>.  Otherwise, it will return <code>B</code>.`,
-			instruction: 'Write a formula that will say "Good" if either region\'s sales are over 50 (or "Bad" otherwise)',
-			column_formats: [ '$', '$' ],
-			column_titles: ['Sales NY', 'Sales TX' ],
-			tests: [
-						{ 'a': randB(80, 100), 'b': randB(10, 100) }, 
-						{ 'a': 80, 'b': 80 }, 
-						{ 'a': randB(10, 100), 'b': randB(80, 40) }, 
-						{ 'a': randB(10, 100), 'b': randB(8, 10) }, 
-						{ 'a': 61, 'b': 61 }, 
-						{ 'a': randB(80, 100), 'b': randB(80, 100) }, 
-					],
-			solution_f: '=IF(OR(a1>50, b1>50), "Good", "Bad")', 
-			feedback: [
-				{ 'has': 'values', args: [ 50 ] },
-				{ 'has': 'references', args: ['a1', 'b1'] },
-				{ 'has': 'functions', args: ['OR', 'IF'] }
-			],
-			code: 'tutorial'
+		{
+			type: 'IfPageTextSchema',
+			description: `
+				This tutorial introduces you to the <code>OR</code> function.
+				<ul>
+					<li>Use <code>OR</code> inside of logical tests</li>
+					<li>Use <code>OR</code> inside of a <code>IF</code></li>
+				</ul>
+				`
 		}
 	]
 }: GenType);
 
 
+const ReviewNextConcept = {
+	type: 'IfPageTextSchema',
+	description: `
+		Excellent! You have completed this section of the tutorial.
+		<br/><br/>
+		The system will now start you on the next concept.`
+};
 
+const donePage = {
+	type: 'IfPageTextSchema',
+	description: `
+		Excellent! You have completed this entire tutorial! 
+		<br/><br/>
+		You can now go onto the next IF tutorial.`
+};
+
+
+
+
+
+const if5 = ({
+	code: 'if5',
+	title: 'IF5: OR',
+	description: 'Use OR',
+	harsons_randomly_on_username: false,
+	predict_randomly_on_username: true,
+	
+	version: 2.0,
+
+	
+	gen: ({
+		gen_type: LinearGen,
+		pages: [
+			introduction_gen,
+			makeInertiaGenFromKC(kc_if_or_logic),
+			
+			ReviewNextConcept,
+			makeInertiaGenFromKC(kc_if_or),
+
+			donePage,
+
+			...finish_questions
+		]
+	}: GenType)
+	
+}: LevelSchemaFactoryType);
+
+
+module.exports = { if5 };
+
+
+
+
+/*
 const if5_if_with_functions_test = ({
 	gen_type: LinearGen,
 	pages: [
@@ -287,25 +202,4 @@ const if5_if_with_functions_test = ({
 	]
 }: GenType);
 
-
-const if5 = ({
-	code: 'if5',
-	title: 'IF5: Logical functions and IF',
-	description: 'Use AND, OR, & NOT inside of IF',
-	harsons_randomly_on_username: false,
-	version: 1,
-
-	gen: ({
-		gen_type: LinearGen,
-		pages: [
-			if5_if_with_functions_tutorial,
-			if5_if_with_functions_test,
-			...finish_questions
-		]
-	}: GenType)
-
-}: LevelSchemaFactoryType);
-
-
-
-module.exports = { if5 };
+*/

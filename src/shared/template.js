@@ -46,7 +46,7 @@ Special values:
 		If you don't pass anything, then assumes all columns are included.
 		If you pass, split by commas. No quotes or array.
 
-	'randOf(a1|b1|c1)'
+	'randOf(a1,b1,c1)'
 		Returns any of the items, split by |
 
 	'level._id'
@@ -238,9 +238,15 @@ function compile_template_values(page: Object, level: ?any): Object {
 
 				// Remove any refs that don't match something in the filter.
 				if(s !== 'popCell()') {
-					filter_refs = s.substr(8, s.length-9).split(',');
+					filter_refs = s.substr(8, s.length-9).toLowerCase().split(',');
 					refs = refs.filter( ref => filter_refs.includes(ref.ref));
 				}
+				
+				if(typeof refs[refs.length-1] === 'undefined')  {
+					throw new Error('Invalid reference in template.compile_template_values');
+				}
+				
+
 				values[index+'_ref'] = refs[refs.length-1].ref; 
 				values[index+'_title'] = refs[refs.length-1].title; 
 

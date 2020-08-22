@@ -1,7 +1,6 @@
 // @flow
-const { KC_NAMES } = require('./../kcs/kc.js');
+const { KC_NAMES, add_if_undefined } = require('./../kcs/kc.js');
 const { DataFactory } = require('./../DataFactory');
-
 import type { InertiaKC } from './kc';
 
 
@@ -15,21 +14,6 @@ const test = {
 	instruction: 'Type in the correct formula',
 };
 
-// Add properties from json to object if they're undefined.
-// Can handle being passed an array, in which case it recurses.
-const add_if_undefined = (o: any, json: any) => {
-	if(Array.isArray(o) ) {
-		// recurse
-		o.forEach( o => add_if_undefined(o, json));
-	} else {
-		// Add property.
-		for(const property in json) {
-			if( typeof o[property] === 'undefined') {
-				o[property] = json[property];
-			}
-		}
-	}
-}
 
 // Standard bases for  questions.
 const name_base = {
@@ -209,8 +193,8 @@ const kc_text_quotes = ({
 }: InertiaKC);
 
 
-add_if_undefined(kc_text_quotes.tutorial_pages, { kcs: [ KC_NAMES.TEXT_QUOTES ] } );
-add_if_undefined(kc_text_quotes.test_pages, { kcs: [ KC_NAMES.TEXT_QUOTES ] } );
+add_if_undefined( { kcs: [ KC_NAMES.TEXT_QUOTES ] }, kc_text_quotes.tutorial_pages );
+add_if_undefined( { kcs: [ KC_NAMES.TEXT_QUOTES ] }, kc_text_quotes.test_pages );
 
 
 
@@ -282,9 +266,8 @@ const kc_text_format = ({
 	]
 }: InertiaKC);
 
-add_if_undefined(kc_text_format.tutorial_pages, { kcs: [ KC_NAMES.TEXT_FORMAT ] } );
-add_if_undefined(kc_text_format.test_pages, { kcs: [ KC_NAMES.TEXT_FORMAT ] } );
-
+add_if_undefined( { kcs: [ KC_NAMES.TEXT_FORMAT ] }, kc_text_format.tutorial_pages );
+add_if_undefined( { kcs: [ KC_NAMES.TEXT_FORMAT ] }, kc_text_format.test_pages );
 
 
 
@@ -410,8 +393,8 @@ const kc_text_concat = ({
 	]
 }: InertiaKC);
 
-add_if_undefined(kc_text_concat.tutorial_pages, { kcs: [ KC_NAMES.TEXT_CONCAT ] } );
-add_if_undefined(kc_text_concat.test_pages, { kcs: [ KC_NAMES.TEXT_CONCAT ] } );
+add_if_undefined( { kcs: [ KC_NAMES.TEXT_CONCAT ] }, kc_text_concat.tutorial_pages, );
+add_if_undefined( { kcs: [ KC_NAMES.TEXT_CONCAT ] }, kc_text_concat.test_pages );
 
 
 
@@ -542,8 +525,8 @@ const kc_text_substitute = ({
 		}
 ]}: InertiaKC);
 
-add_if_undefined(kc_text_substitute.tutorial_pages, { kcs: [ KC_NAMES.TEXT_SUBSTITUTE ] } );
-add_if_undefined(kc_text_substitute.test_pages, { kcs: [ KC_NAMES.TEXT_SUBSTITUTE ] } );
+add_if_undefined( { kcs: [ KC_NAMES.TEXT_SUBSTITUTE ] }, kc_text_substitute.tutorial_pages );
+add_if_undefined( { kcs: [ KC_NAMES.TEXT_SUBSTITUTE ] }, kc_text_substitute.test_pages );
 
 
 
@@ -650,8 +633,8 @@ const kc_text_leftright = ({
 	]
 }: InertiaKC);
 
-add_if_undefined(kc_text_leftright.tutorial_pages, { kcs: [ KC_NAMES.TEXT_LEFTRIGHT ] } );
-add_if_undefined(kc_text_leftright.test_pages, { kcs: [ KC_NAMES.TEXT_LEFTRIGHT ] } );
+add_if_undefined( { kcs: [ KC_NAMES.TEXT_LEFTRIGHT ] }, kc_text_leftright.tutorial_pages );
+add_if_undefined( { kcs: [ KC_NAMES.TEXT_LEFTRIGHT ] }, kc_text_leftright.test_pages );
 
 
 //
@@ -813,8 +796,8 @@ const kc_text_mid = ({
 	]
 }: InertiaKC);
 
-add_if_undefined(kc_text_mid.tutorial_pages, { kcs: [ KC_NAMES.TEXT_MID ] } );
-add_if_undefined(kc_text_mid.test_pages, { kcs: [ KC_NAMES.TEXT_MID ] } );
+add_if_undefined( { kcs: [ KC_NAMES.TEXT_MID ] }, kc_text_mid.tutorial_pages );
+add_if_undefined( { kcs: [ KC_NAMES.TEXT_MID ] }, kc_text_mid.test_pages );
 
 
 
@@ -1084,8 +1067,8 @@ const kc_text_search = ({
 	]
 }: InertiaKC);
 
-add_if_undefined(kc_text_search.tutorial_pages, { kcs: [ KC_NAMES.TEXT_SEARCH ] } );
-add_if_undefined(kc_text_search.test_pages, { kcs: [ KC_NAMES.TEXT_SEARCH ] } );
+add_if_undefined( { kcs: [ KC_NAMES.TEXT_SEARCH ] }, kc_text_search.tutorial_pages );
+add_if_undefined( { kcs: [ KC_NAMES.TEXT_SEARCH ] }, kc_text_search.test_pages );
 
 
 

@@ -62,7 +62,7 @@ function turn_object_values_into_array( o: any): Array<any> {
 // Turn a string into a y/n value.
 const random_boolean_from_string = (s: string): boolean => {
 	const s_as_number = s.split('').reduce( (i, s) => s.charCodeAt(0) + i, 1 );
-	return (s_as_number % 2) === 1;
+	return (s_as_number % 2) === 0;
 };
 
 

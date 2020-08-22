@@ -512,13 +512,13 @@ export default class IfLevelPlay extends React.Component<PropsType, StateType> {
 						} else if ( typedPage.correct ) {
 							body.push(<div>Correct answer!</div>);
 						
-						} else if( typedPage.get_time_in_seconds() < 60 ) {
-							// No, haven't  tried for at least 2 minutes.
+						} else if( typedPage.get_time_in_seconds() < 60*3 ) {
+							// No, haven't  tried for at least 3 minutes.
 							//console.log(typedPage.get_time_in_seconds());
 							body.push(<div>Sorry, but that answer is not correct.<br/><br/>
 								You have spent around {typedPage.get_time_in_seconds()} seconds
 								trying to solve the problem on your own. Please try for 
-								at least a minute. You can then 
+								at least three minutes. You can then 
 								come back here for the solution.</div>);
 						
 						} else {
@@ -623,6 +623,11 @@ export default class IfLevelPlay extends React.Component<PropsType, StateType> {
 			page.type ==='IfPageHarsonsSchema') {
 			// No hints for test pages.
 			if (page.code !== 'tutorial') return null;
+			
+			// no hints for predict pages that haven't yet been solved.
+			if(page.type === 'IfPagePredictFormulaSchema' &&
+					!page.toIfPagePredictFormulaSchema().predictions_correct())
+					return null;
 			
 			return <Button id='_render_page_hint_button' 
 				style={{ marginRight: '5px' }}

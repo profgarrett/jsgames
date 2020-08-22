@@ -3,129 +3,97 @@ const { DataFactory } = require('./../DataFactory');
 const { LinearGen, UntilGen } = require('./../Gens');
 const { finish_questions } = require('./../pages/finish_questions');
 
+const { kc_if_ambiguous_logic, 
+		kc_if_ambiguous } = require('./../kcs/kc_if_ambiguous');
+
 const { IfPageFormulaSchema } = require( './../../shared/IfPageSchemas');
 
-const randB = DataFactory.randB;
+const { makeInertiaGenFromKC } = require('./../kcs/kc.js');
 
 import type { GenType } from './../Gens';
 import type { LevelSchemaFactoryType } from './../IfLevelSchemaFactory';
 
 
-const if7_boolean_tutorial = ({
+
+const introduction_gen = ({
 	gen_type: LinearGen,
 	pages: [
-		{	type: 'IfPageTextSchema',
-			description: `As we use these functions, you can sometimes run into trouble with 
-					the difference	between <code>TRUE</code> and <code>"TRUE"</code> (true wrapped in quotes).  
-					<br/><br/>
-					<code>TRUE</code>is a special type called a <b>boolean</b>.  A boolean can only be <code>TRUE</code> or <code>FALSE</code>.
-					This is different from <code>"TRUE"</code>, which has quotes around it turning it into 
-					a word (also called text, or a string).
-					<br/><br/>
-					The quotes matter, because <code>TRUE</code> doesn't always equal <code>"TRUE"</code>.
-					Even though they look the same, they are actually two different values.
-					<br/><br/>
-					All of our tests (like <code>=</code> or <code><=</code>) return a boolean, and not <code>"TRUE"</code>.`
-		},
-		{	type: 'IfPageFormulaSchema',
-			description: `You sometimes see booleans in tables.
-					<br/><br/>
-					For example, the table below has a list of pigs.  
-					The <b>Had Kids</b> and <b>Meat Pig</b> columns have boolean values 
-					(<code>TRUE</code> or <code>FALSE</code>).  
-					<br/><br/>
-					If you want to find pigs with kids,
-					write <code>=B1=TRUE</code>.  Do not write <code>=B1="TRUE"</code>!`,
-			instruction: 'Write a formula that returns TRUE for pigs <b>with</b> kids.',
-			column_titles: ['Pig Name', 'Had Kids', 'Meat Pig' ],
-			tests: [
-						{ 'a': 'Anna', b: false, c: true }, 
-						{ 'a': 'Bernice', b: false, c: false }, 
-						{ 'a': 'Charlie', b: true, c: false }, 
-						{ 'a': 'Dennis', b: true, c: true }
-					],
-			solution_f: '=b1=true',
-			feedback: [
-				{ 'has': 'references', args: ['b1'] }
-			],
-			code: 'tutorial'
-		},
-		{	type: 'IfPageFormulaSchema',
-			description: `You can also test if a field is <code>FALSE</code>.
-						For example, writing <code>=B1=FALSE</code> would test to see if a pig has <i>no</i> kids.
-						<br/><br/>
-						Do not write write "FALSE" with quotes!`,
-			instruction: 'Return TRUE for pigs without kids.',
-			column_titles: ['Pig Name', 'Had Kids', 'Meat Pig' ],
-			tests: [
-						{ 'a': 'Anna', b: false, c: true }, 
-						{ 'a': 'Bernice', b: false, c: false }, 
-						{ 'a': 'Charlie', b: true, c: false }, 
-						{ 'a': 'Dennis', b: true, c: true }
-					],
-			solution_f: '=b1=false',
-			feedback: [
-				{ 'has': 'references', args: ['b1'] }
-			],
-			code: 'tutorial'
-		},
-		{	type: 'IfPageFormulaSchema',
-			description: `When you have a boolean column, you can see if it is <code>TRUE</code>
-					by writing <code>=A1=TRUE</code>.  But, it's simpler to just write <code>=A1</code>.
-					<br/><br/>
-					So, writing <code>=IF(B1, 1, 0)</code> has the same result as
-					<code>=IF(B1=TRUE, 1, 0)</code>`,
-			instruction: 'Write an IF statement that shows 1 for meat pigs, or 0 otherwise.',
-			helpblock: 'Use C1 as the condition instead of C1=TRUE',
-			column_titles: ['Pig Name', 'Had Kids', 'Meat Pig' ],
-			tests: [
-						{ 'a': 'Anna', b: false, c: true }, 
-						{ 'a': 'Bernice', b: false, c: false }, 
-						{ 'a': 'Charlie', b: true, c: false }, 
-						{ 'a': 'Dennis', b: true, c: true }
-					],
-			solution_f: '=if(c1, 1, 0)',
-			feedback: [
-				{ 'has': 'functions', args: ['if'] },
-				{ 'has': 'references', args: ['c1'] }
-			],
-			code: 'tutorial'
-		},
-		{	type: 'IfPageFormulaSchema',
-			description: `You can do the same simple comparisons with <code>FALSE</code> values.
-					Instead of writing <code>=A1=FALSE</code>, you can write <code>=NOT(A1)</code>.
-					`,
-			instruction: 'Write an IF statement using NOT that shows 1 for pigs <b>without</b> kids, or 0 otherwise.',
-			helpblock: 'Use NOT(B1) as the condition instead of NOT(B1=FALSE)',
-			column_titles: ['Pig Name', 'Had Kids', 'Meat Pig' ],
-			tests: [
-						{ 'a': 'Anna', b: false, c: true }, 
-						{ 'a': 'Bernice', b: false, c: false }, 
-						{ 'a': 'Charlie', b: true, c: false }, 
-						{ 'a': 'Dennis', b: true, c: true }
-					],
-			solution_f: '=if(NOT(b1), 1, 0)',
-			feedback: [
-				{ 'has': 'functions', args: ['not', 'if'] },
-				{ 'has': 'references', args: ['b1'] }
-			],
-			code: 'tutorial'
+		{
+			type: 'IfPageTextSchema',
+			description: `
+				This tutorial has you practice figuring out which logical functions work best in 
+				different situations.
+				<ul>
+					<li>Decide when to use <code>AND</code> / <code>OR</code> </li>
+					<li>Use <code>AND</code> / <code>OR</code> inside of the <code>IF</code></li>
+				</ul>
+				`
 		}
 	]
 }: GenType);
 
 
+const ReviewNextConcept = {
+	type: 'IfPageTextSchema',
+	description: `
+		Excellent! You have completed this section of the tutorial.
+		<br/><br/>
+		The system will now start you on the next concept.`
+};
 
-const if7_boolean_test = ({
+const donePage = {
+	type: 'IfPageTextSchema',
+	description: `
+		Excellent! You have completed this entire tutorial! 
+		<br/><br/>
+		You can now go onto the next IF tutorial.`
+};
+
+
+
+const if7 = ({
+	code: 'if7',
+	title: 'IF7: Logic',
+	description: 'Figure out which function to use',
+	harsons_randomly_on_username: false,
+	predict_randomly_on_username: true,
+	
+	version: 2.0,
+
+	
+	gen: ({
+		gen_type: LinearGen,
+		pages: [
+			/*
+			introduction_gen,
+			makeInertiaGenFromKC(kc_if_ambiguous_logic),
+			
+			ReviewNextConcept,
+			makeInertiaGenFromKC(kc_if_ambiguous),
+
+			donePage,
+
+			...finish_questions
+			*/
+		]
+	}: GenType)
+	
+}: LevelSchemaFactoryType);
+
+
+module.exports = { if7 };
+
+
+
+
+/*
+
+const if6_if_with_math_test = ({
 	gen_type: LinearGen,
 	pages: [
 		{	type: 'IfPageTextSchema',
 			description: `It's time to take on some problems.
 					You must complete six problems before moving on.
-					<br/><br/>
-					Note that <i>some</i> of the problems will ask you to use <code>AND</code>, 
-					<code>OR</code>, and <code>NOT</code>. You do not need to use these functions
-					on every problem.
 					<br/><br/>
 					You do not have to use every column.`
 		},
@@ -134,42 +102,50 @@ const if7_boolean_test = ({
 			until_total: 6,
 			pages: [
 				{	type: 'IfPageFormulaSchema',
-					column_titles: ['Apartment Letter', 'Has Bird', 'Has Cats', 'Has Dogs' ],
+					column_titles: ['Region', 'Bald Eagle Sales', 'Cats Sales', 'Profit' ],
+					column_formats: [ '', ',', ',', '$' ],
 					instruction: 'Input the correct formula',
 					tests: [
-								{ 'a': 'A', 'b': false, 'c': false, 'd': false }, 
-								{ 'a': 'B', 'b': true, 'c': true, 'd': true }, 
-								{ 'a': 'C', 'b': false, 'c': false, 'd': true }, 
-								{ 'a': 'D', 'b': false, 'c': true, 'd': true }, 
-								{ 'a': 'E', 'b': true, 'c': true, 'd': false }, 
-								{ 'a': 'F', 'b': true, 'c': false, 'd': false }, 
+								{ 'a': 'North', 'b': randB(0, 10), 'c': randB(50,70), 'd': 90000 }, 
+								{ 'a': 'South', 'b': 5, 'c': 0, 'd': 1000 }, 
+								{ 'a': 'East' , 'b': 21, 'c': 100, 'd': randB(1000,2000) }, 
+								{ 'a': 'West', 'b': 0, 'c': randB(180, 200), 'd': 3000 },
+								{ 'a': 'Other', 'b': 10, 'c': 10, 'd': 500}
 							],
 					code: 'test',
 					versions: [
 						{
-							description: 'Say "Birds" for apartments with a bird, Otherwise, say "None"',
-							solution_f: '=if(b1, "Birds", "None")',
+							description: 'Say "Yes" if we have over 55 animal sales. Say "No" otherwise',
+							solution_f: '=IF(b1+c1>55, "Yes", "No")',
 						},
 						{
-							description: 'Say "Dogs" for apartments with a dog, Otherwise, say "None"',
-							solution_f: '=if(d1, "Dogs", "None")',
+							description: 'Say "Yes" if we have under 100 animal sales in total. Say "No" otherwise',
+							solution_f: '=IF(b1+c1<100, "Yes", "No")',
 						},
 						{
-							description: 'Say "Cats" for apartments with a cat, Otherwise, say "None"',
-							solution_f: '=if(c1, "Cats", "None")',
+							description: 'Are profits over 500?  If so, give the sum of the animals.  If not, say "Need to improve"',
+							solution_f: '=IF(d1>500, B1+C1, "Need to improve")',
+						},					
+						{
+							description: 'Are the combined animal sales over 50?  If so, give the profit.  If not, say "Need to improve"',
+							solution_f: '=IF(B1+C1>50, d1, "Need to improve")',
+						},										
+						{
+							description: 'If we are in the North region, calculate a quarter (1/4) of profit. Otherwise, it should give 1/8 (an eighth).',
+							solution_f: '=IF(a1="North", d1/4, d1/8)',
 						},
 						{
-							description: 'Return the apartment letter for apartments with no dogs, or "Hair" otherwise.',
-							solution_f: '=if(not(d1), a1, "Hair")',
+							description: 'If we are in the South region, return half of of our profit. Otherwise, return 0',
+							solution_f: '=IF(a1="South", d1/2, 0)',
 						},
 						{
-							description: 'If an appartment has no cats, then return "Yes".  Otherwise, return "No"',
-							solution_f: '=if(not(c1), "Yes", "No")',
+							description: 'If we are in the East region, give the number of animals. Otherwise, give the number of cats divided by 2.',
+							solution_f: '=IF(a1="East", b1+c1, c1/2)',
 						},
 						{
-							description: 'If an appartment has no birds, then return "Yes".  Otherwise, return "No"',
-							solution_f: '=if(not(b1), "Yes", "No")',
-						}
+							description: 'If our profit is over 1000, return half of profit. Otherwise, return profit doubled',
+							solution_f: '=IF(d1>1000, d1/2, d1*2)',
+						}						
 					]
 				}
 			]
@@ -178,27 +154,4 @@ const if7_boolean_test = ({
 }: GenType);
 
 
-
-
-
-const if7 = ({
-	code: 'if7',
-	title: 'IF7: Booleans',
-	description: 'Figure out TRUE and FALSE',
-	harsons_randomly_on_username: false,
-	version: 1,
-
-	gen: ({
-		gen_type: LinearGen,
-		pages: [
-			if7_boolean_tutorial,
-			if7_boolean_test,
-			...finish_questions
-		]
-	}: GenType)
-}: LevelSchemaFactoryType);
-
-
-
-
-module.exports = {  if7 };
+*/
