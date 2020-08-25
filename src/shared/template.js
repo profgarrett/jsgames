@@ -222,6 +222,7 @@ function compile_template_values(page: Object, level: ?any): Object {
 	let refs = build_random_refs( page );
 	let filter_refs = [];
 
+
 	for(var index in page.template_values) {
 		if(page.template_values.hasOwnProperty(index)) {
 			s = page.template_values[index];

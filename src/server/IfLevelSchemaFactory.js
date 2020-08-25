@@ -345,11 +345,7 @@ const IfLevelSchemaFactory = {
 			last_page.history.push({ dt: new Date(), code: 'server_page_completed' });
 		}
 
-		// Create a new array of pages that can be modified with slice()
-		// Put in reverse order to simplify pop() operation.  Modified by gen function.
-		// Then use this to create the new json for the new page.
-		// REVERSE REMOVED BY NDG
-		//const reversed_pages = level.pages.slice().reverse();
+		// Create the new json page.
 		const new_page_json = runGen(level.seed, level.pages, LEVEL_GENS[level.code].gen);
 
 		// Check result of gen function.
@@ -384,7 +380,14 @@ const IfLevelSchemaFactory = {
 					&& new_page_json.type === 'IfPageFormulaSchema' 
 					&& level.username === 'garrettn') {
 				new_page_json.type = 'IfPagePredictFormulaSchema';
+
 			}
+
+			if(new_page_json.type === 'IfPagePredictFormulaSchema') {
+				// Randomize the tests. Prevents people from sharing row/by/row solutions.
+				DataFactory.randomizeListInPlace(new_page_json.tests);
+			}
+				
 
 
 			// Harsons uses toolboxes, but ifPageFormulaSchemas do not.  Since some types automatically change

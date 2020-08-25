@@ -22,7 +22,8 @@ function s(a: any): string {
 // Returns either null or the missing references.
 const references = (page: IfPageFormulaSchema | IfPageHarsonsSchema, values: Array<string>): ?string => {
 	let missing = [], value = null;
-
+	
+	
 	if(page.client_f === null) return null;
 
 	// References are case insensitive.

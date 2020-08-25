@@ -130,7 +130,25 @@ const DataFactory = {
 
 	},
 
+
+
 	// Randomize a given array in place.
+	// Slightly modified version of that given 
+	// in an answer at https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array
+	// May be identical to original list.
+	randomizeListInPlace: (array: Array<any>, seed?: number) => {
+		const r = typeof seed !== 'undefined' ? seedrandom(seed) : Math.random;
+
+		for (let i = array.length - 1; i > 0; i--) {
+			let j = Math.floor(r() * (i + 1));
+			// $FlowFixMe
+			[array[i], array[j]] = [array[j], array[i]];
+		}
+	},
+
+
+
+	// Randomize a given array. 
 	// Slightly modified version of that given 
 	// in an answer at https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array
 	// May be identical to original list.

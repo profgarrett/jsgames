@@ -107,9 +107,10 @@ const kc_if_and_logic = ({
                 'n1': 'randOf(0,10)',
             },
             feedback: [
-                { 'has': 'values', args: ['{n1}', "{n2}"] },
+                { 'has': 'values', args: ['{n1}'] },
                 { 'has': 'symbols', args: ['=']},
-                { 'has': 'functions', args: ['AND'] }
+                { 'has': 'functions', args: ['AND'] },
+                { 'has': 'references', args: ['B1', 'C1'] },
             ],
 
         },{	...tutorial,
@@ -120,10 +121,10 @@ const kc_if_and_logic = ({
 					<ul>
 						<li><code>=AND(A1="West")</code></li>
 						<li><code>=AND(A1="West", B1=2)</code></li>
-						<li><code>=AND(A1="West", B1=2, C1=3)</code></li>.
+						<li><code>=AND(A1="West", B1=2, C1=3)</code></li>
 					</ul>
                     You should also recognize that each test is completely separate. Each must have
-                    its own comparison (such as <code>=</code>).`,
+                    its own comparison (i.e., <code>=</code> or <code>></code>).`,
 			instruction: 'Use <code>AND</code> to test if {cell1_title} and {cell2_title} are both over {n}.',
 
             client_f_format: 'boolean',
@@ -131,7 +132,7 @@ const kc_if_and_logic = ({
             ...product_data,
 
             template_values: {
-                'n': '[4-7]',
+                'n': '[2-5]',
                 'cell1': 'popCell(b1,c1,d1)',
                 'cell2': 'popCell(b1,c1,d1)',
             },
@@ -139,7 +140,7 @@ const kc_if_and_logic = ({
                 { 'has': 'values', args: ['{n}'] },
                 { 'has': 'symbols', args: ['>']},
                 { 'has': 'functions', args: ['AND'] },
-                { 'has': 'references', args: ['{cell1_ref}', '{cell2_ref'] },
+                { 'has': 'references', args: ['{cell1_ref}', '{cell2_ref}'] },
             ],
 
 
@@ -147,8 +148,8 @@ const kc_if_and_logic = ({
 
 			description: `Let's try using <code>AND</code> with three different logical tests!
                     <br/><br/>
-                    This will be the same as before, but just make sure to add another comma after the
-                    previous logical test.
+                    This will be very similar to earlier formulas, but you will need to to add 
+                    another comma and logical test.
                     <br/><br/>
                     As an example, <code>=AND(B1=5, C1=5, D1=5)</code> would test to see if each region 
                     has sales of exactly $5.`,
@@ -191,7 +192,7 @@ const kc_if_and_logic = ({
                 'cell1': 'popCell(B1,C1,D1)',
             },
             feedback: [
-                { 'has': 'values', args: ['{n1}', '{n2}'] },
+                { 'has': 'values', args: ['3', '{n2}'] },
                 { 'has': 'symbols', args: ['<', '>']},
                 { 'has': 'functions', args: ['AND'] },
                 { 'has': 'references', args: ['{cell1_ref}'] },
@@ -208,13 +209,12 @@ const kc_if_and_logic = ({
             ...product_data,
 
             template_values: {
-                'n1': '[4-6]',
+                'n1': '[2-4]',
                 'n2': '[8-9]',
-                'cell1': 'popCell(B1,C1,D1)',
+                'cell1': 'popCell(B1,C1)',
             },
             feedback: [
                 { 'has': 'values', args: ['{n1}', '{n2}'] },
-                { 'has': 'symbols', args: ['<', '>']},
                 { 'has': 'functions', args: ['AND'] },
                 { 'has': 'references', args: ['{cell1_ref}'] },
             ],
@@ -232,10 +232,10 @@ const kc_if_and_logic = ({
 						<li><b>Exclusive</b> means to exclude the top & bottom numbers. (i.e., 2, 3)</li>
 					</ul>
 					So, if you were asked to test if A1 was between 1 and 4 <i>inclusive</i>, write<br/>
-						<code>=AND(A1>=1, A1<=4)</code>
+						<code>=AND(1<=A1, A1<=4)</code>
 					</br><br/>
 					If you were asked to see if A1 was between 1 and 4 <i>exclusive</i>, <br/> use
-						<code>=AND(A1>1, A1<4)</code>
+						<code>=AND(1<A1, A1<4)</code>
 					<br/><br/>
 					If you have any trouble remembering this, remember that <i>inclu</i>sive means to <i>inclu</i>de
 						the numbers in the problem, and <i>exclu</i>sive means to <i>exclu</i>de them.`,
@@ -247,7 +247,7 @@ const kc_if_and_logic = ({
                 ...product2_data,
 
                 template_values: {
-                    'cell1': 'popCell(B1,C1,D1)',
+                    'cell1': 'popCell(B1,C1)',
                 },
                 feedback: [
                     { 'has': 'symbols', args: ['<=', '>=']},
@@ -326,24 +326,22 @@ const kc_if_and_logic = ({
             
 			description: `Do {cell1_title} number between {n1} and {n2} (inclusive)?`,
 
-			solution_f: '=AND({cell1_ref}>={n1}, {cell1_ref}<={n2})',
+			solution_f: '=AND({cell1_ref}>={n1}, {cell1_ref}<=3)',
             template_values: {
                 'cell1': 'popCell(b1,c1,d1)',
                 'n1': '[1-2]',
-                'n2': '[3-4]',
             },
 
 
         },{ ...test,
             ...animals2_data,
             
-			description: `Do {cell1_title} number between {n1} and {n2} (exclusive)?`,
+			description: `Do {cell1_title} number between {n1} and 4 (exclusive)?`,
 
-			solution_f: '=AND({cell1_ref}>{n1}, {cell1_ref}<{n2})',
+			solution_f: '=AND({cell1_ref}>{n1}, {cell1_ref}<4)',
             template_values: {
                 'cell1': 'popCell(b1,c1,d1)',
                 'n1': '[1-2]',
-                'n2': '[3-4]',
             },
 
 
@@ -446,9 +444,9 @@ const kc_if_and_not_logic = ({
 			description: `Let's combine <code>AND</code> and <code>NOT</code>
                     <br/><br/>
                     
-                    Write a function that returns <code>TRUE</code> when 
-                     both {cell1_title} and {cell2_title}
-                    are not equal to {n1}. 
+                    Use <code>AND</code> to test 
+                    when {cell1_title} is <b>not</b> equal to {n1}, 
+                    as well as when {cell2_title} is <b>not</b> equal to {n1}. 
                     `,
             
             instruction: 'Your function should look something like <code>=AND( NOT(...), NOT(...) )</code>',
@@ -629,7 +627,7 @@ const kc_if_and = ({
             },
 			feedback: [
 				{ 'has': 'values', args: ['{ok}', 0 ] },
-				{ 'has': 'references', args: ['{cell1_ref'] },
+				{ 'has': 'references', args: ['{cell1_ref}'] },
 				{ 'has': 'functions', args: ['if', 'NOT']}
 			],
 
@@ -664,9 +662,9 @@ const kc_if_and = ({
 
 			description: `Let's try another <code>AND</code> function inside of an <code>IF</code>.
 					<br/><br/>
-					Look to see if {cell1_title} is under or equal to {n}, 
-                    and {cell2_title} is equal to or greater than {n}.
-                    If these are both true, they say <code>{iftrue}</code>, otherwise say <code>{iffalse}</code>.`,
+					Look to see if {cell1_title} are <i>less</i> than or equal to {n}, 
+                    and {cell2_title} are <i>greater</i> than or equal to {n}.
+                    If these are both true, return <code>{iftrue}</code>, otherwise <code>{iffalse}</code>.`,
 
 			instruction: 'Write the formula described above.',
 			
@@ -709,10 +707,9 @@ const kc_if_and = ({
             },
 			feedback: [
 				{ 'has': 'values', args: [ '{n}', '{iftrue}', '{iffalse}' ] },
-				{ 'has': 'references', args: ['{cell1_ref}', '{cell2_ref}', '{cell3_ref'] },
+				{ 'has': 'references', args: ['{cell1_ref}', '{cell2_ref}', '{cell3_ref}'] },
 				{ 'has': 'functions', args: ['and', 'if'] }
 			],
-
 
         }
 

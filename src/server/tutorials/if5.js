@@ -24,7 +24,7 @@ const introduction_gen = ({
 				This tutorial introduces you to the <code>OR</code> function.
 				<ul>
 					<li>Use <code>OR</code> inside of logical tests</li>
-					<li>Use <code>OR</code> inside of a <code>IF</code></li>
+					<li>Use <code>OR</code> inside of an <code>IF</code> function.</li>
 				</ul>
 				`
 		}

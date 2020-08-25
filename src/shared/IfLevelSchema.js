@@ -40,8 +40,8 @@ const IfLevels = [
 	{ code: 'if3', title: 'IF3: Math', description: 'Embed math into the IF function' },
 	{ code: 'if4', title: 'IF4: AND', description: 'Use the AND function' },
 	{ code: 'if5', title: 'IF5: OR', description: 'Use the OR function' },
-	{ code: 'if6', title: 'IF6: AND/OR Booleans', description: 'Use booleans inside of AND/OR' },
-	{ code: 'if7', title: 'IF7: Logic', description: 'Figure out which function to use' },
+	{ code: 'if6', title: 'IF6: AND Booleans', description: 'Use booleans inside of AND' },
+	{ code: 'if7', title: 'IF7: OR Booleans', description: 'Use booleans inside of OR' },
 	{ code: 'if8', title: 'IF8: TBD', description: 'TBD' },
 
 	{ code: 'surveymath1', title: 'Survey of Math Concepts 1', description: 'Review your math concepts' },
@@ -444,7 +444,7 @@ class IfLevelSchema extends IfLevelPagelessSchema {
 const DEFAULT_TUTORIAL_LEVEL_LIST = [
 	'math1', 'math2', 'math3','math4',
 	'functions1', 'functionsdates','functionstext1', 'functionstext2',
-	'if1', 'if2', 'if3', 'if4', 'if5', 'if6', 'if7', 'if8',
+	'if1', 'if2', 'if3', 'if4', 'if5', 'if6', 'if7',
 	];
 
 

@@ -24,7 +24,7 @@ const test = {
 
 
 const product_data = {
-    column_titles: ['Region', 'NY Sales', 'CA Sales', 'NV Sales' ],
+    column_titles: ['Region', 'Boston sales', 'Columbus sales', 'Dallas sales' ],
     tests: [
                 { 'a': 'West', b: 10, c: 10, d: 0 }, 
                 { 'a': 'North', b: 5, c: 10, d: 10 }, 
@@ -36,7 +36,7 @@ const product_data = {
 
 
 const product2_data = {
-    column_titles: ['Region', 'NY Sales', 'CA Sales', 'NV Sales' ],
+    column_titles: ['Region', 'Baltimore sales', 'Chicago sales', 'Denver sales' ],
     tests: [
                 { 'a': 'West', b: 1, c: 9, d: 1 }, 
                 { 'a': 'North', b: 3, c: 6, d: 6 }, 
@@ -78,35 +78,40 @@ const kc_if_or_logic = ({
 	tutorial_pages: [
 
         {	type: 'IfPageTextSchema',
-			description: `The previous tutorials taught you how to use <code>AND</code>. 
-					<br/><br/>
-					This requires us to use the <code>OR</code> function.`
+			description: `You should have already completed the tutorial for <code>AND</code>, and be
+                    comfortable using it both as a
+                    logical test (by itself), as well as in the <code>IF</code> function.
+                    <br/><br/>
+                    This section introducts a very similar function:  <code>OR</code>. By the end, you
+                    should be confident about using it by itself, as well as inside of <code>IF</code>.`
 					
 		},{	...tutorial,
 
-			description: `For now, we will start by focusing just on the logical test, returning either
-                <code>TRUE</code> or <code>FALSE</code>.
-                <br/><br/>
+			description: `
                 <code>OR</code> is a function, just like <code>LEN</code> or <code>SUM</code>.  It takes in 
                 one or more arguments (parameters), and checks to see if any single one is <code>TRUE</code>. 
-                If any value passed is <code>TRUE</code>, then the function returns <code>TRUE</code>. Otherwise, 
-                it returns <code>FALSE</code>.
-
+                If one more more values passed are <code>TRUE</code>, then the function returns <code>TRUE</code>. 
+                Otherwise, it returns <code>FALSE</code>.
                 <br/><br/>
                 So, if we write <code>=OR(B1=5, C1=5)</code>, Excel will check to see if at least one of the 
-                values in <code>B1</code> and <code>C1</code> are equal to 5.`,
-			instruction: 'Write a formula that will say TRUE if sales in NY or CA are equal to {n1}.',
+                values in <code>B1</code> and <code>C1</code> are equal to 5.
+                <br/><br/>
+                Eventually, we will want to use this in <code>IF</code> 
+                But, for now, focus only on the logical test, returning either <code>TRUE</code> or <code>FALSE</code>.
+                `,
+			instruction: 'Write a formula that will say <code>TRUE</code> if sales in Boson or Columbus are equal to {n1}.',
 
-			solution_f: '=OR(B1={n1}, C1={n1})',
+			solution_f: '=OR(B1={n1}, D1={n1})',
             ...product_data,
 
             template_values: {
                 'n1': 'randOf(0,10)',
             },
             feedback: [
-                { 'has': 'values', args: ['{n1}', "{n2}"] },
+                { 'has': 'values', args: ['{n1}'] },
                 { 'has': 'symbols', args: ['=']},
-                { 'has': 'functions', args: ['OR'] }
+                { 'has': 'functions', args: ['OR'] },
+                { 'has': 'references', args: ['B1', 'D1'] },
             ],
 
         },{	...tutorial,
@@ -118,7 +123,7 @@ const kc_if_or_logic = ({
 					<ul>
 						<li><code>=OR(A1="West")</code></li>
 						<li><code>=OR(A1="West", B1=2)</code></li>
-						<li><code>=OR(A1="West", B1=2, C1=3)</code></li>.
+						<li><code>=OR(A1="West", B1=2, C1=3)</code></li>
 					</ul>
                     You should also recognize that each test is completely separate. Each must have
                     its own comparison (such as <code>=</code>).`,
@@ -137,7 +142,7 @@ const kc_if_or_logic = ({
                 { 'has': 'values', args: ['{n}'] },
                 { 'has': 'symbols', args: ['>']},
                 { 'has': 'functions', args: ['OR'] },
-                { 'has': 'references', args: ['{cell1_ref}', '{cell2_ref'] },
+                { 'has': 'references', args: ['{cell1_ref}', '{cell2_ref}'] },
             ],
 
 
@@ -148,9 +153,9 @@ const kc_if_or_logic = ({
                     This will be the same as before, but just make sure to add another comma after the
                     previous logical test.
                     <br/><br/>
-                    As an example, <code>=OR(B1=5, C1=5, D1=5)</code> would test to see if each region 
-                    has sales of exactly $5.`,
-			instruction: 'Are sales in any of the regions under {n}?',
+                    As an example, <code>=OR(B1=5, C1=5, D1=5)</code> would test to see if one or more of
+                    the regions have sales of exactly $5.`,
+			instruction: 'Are sales in any of the regions <i>under</i> {n}?',
 
             client_f_format: 'boolean',
 			solution_f: '=OR(b1<{n}, c1<{n}, d1<{n})',
@@ -173,24 +178,19 @@ const kc_if_or_logic = ({
 					a complete logical test.
 					<br/><br/>
 					So, if wanted to see if <code>A1</code> is <b>outside</b> of the range from 10 to 20, we would need to
-					write <code>=OR(a1&lt10, a1&gt20)</code>.  
-					<br/><br/>
-					In most math problems, you can write
-					10&lta1&lt20.  However, that doesn't work in Excel.  You must split the comparison 
-					into two separate tests: <code>a1&lt10</code>, and <code>a1&gt20</code>.`,
-            instruction: 'Are {cell1_title} greater than 3 or less than {n2}?',
+					write <code>=OR(a1&lt10, a1&gt20)</code>.`,
+            instruction: 'Are {cell1_title} less than 3 or greater than {n2}?',
 
             client_f_format: 'boolean',
-			solution_f: '=OR({cell1_ref}>3, {cell1_ref}<{n2})',
+			solution_f: '=OR({cell1_ref}<3, {cell1_ref}>{n2})',
             ...product_data,
 
             template_values: {
                 'n2': '[8-9]',
-                'cell1': 'popCell(B1,C1,D1)',
+                'cell1': 'popCell(B1,C1)',
             },
             feedback: [
-                { 'has': 'values', args: ['{n1}', '{n2}'] },
-                { 'has': 'symbols', args: ['<', '>']},
+                { 'has': 'values', args: ['3', '{n2}'] },
                 { 'has': 'functions', args: ['OR'] },
                 { 'has': 'references', args: ['{cell1_ref}'] },
             ],
@@ -202,17 +202,16 @@ const kc_if_or_logic = ({
             instruction: 'Are {cell1_title} outside of the range from {n1} to {n2}? (excluding each number)',
 
             client_f_format: 'boolean',
-			solution_f: '=OR({cell1_ref}>{n1}, {cell1_ref}<{n2})',
+			solution_f: '=OR({cell1_ref}<{n1}, {cell1_ref}>{n2})',
             ...product_data,
 
             template_values: {
                 'n1': '[4-6]',
                 'n2': '[8-9]',
-                'cell1': 'popCell(B1,C1,D1)',
+                'cell1': 'popCell(B1)',
             },
             feedback: [
                 { 'has': 'values', args: ['{n1}', '{n2}'] },
-                { 'has': 'symbols', args: ['<', '>']},
                 { 'has': 'functions', args: ['OR'] },
                 { 'has': 'references', args: ['{cell1_ref}'] },
             ],
@@ -234,10 +233,10 @@ const kc_if_or_logic = ({
 					If you have any trouble remembering this, remember that <i>inclu</i>sive means to <i>inclu</i>de
 						the numbers in the problem, and <i>exclu</i>sive means to <i>exclu</i>de them.`,
                 
-                instruction: 'Are {cell1_title} not between 3 and 6 (inclusive)?',
+                instruction: 'Are {cell1_title} outside of the range between 3 and 6 (inclusive)?',
 
                 client_f_format: 'boolean',
-                solution_f: '=OR({cell1_ref}>=3, {cell1_ref}<=6)',
+                solution_f: '=OR({cell1_ref}<=3, {cell1_ref}>=6)',
                 ...product2_data,
 
                 template_values: {
@@ -317,7 +316,7 @@ const kc_if_or_logic = ({
         },{ ...test,
             ...animals2_data,
             
-			description: `Do {cell1_title} not number between {n1} and {n2} (inclusive)?`,
+			description: `Are {cell1_title} outside of {n1} and {n2} (inclusive)?`,
 
 			solution_f: '=OR({cell1_ref}<={n1}, {cell1_ref}>={n2})',
             template_values: {
@@ -330,7 +329,7 @@ const kc_if_or_logic = ({
         },{ ...test,
             ...animals2_data,
             
-			description: `Do {cell1_title} fall outside of the range {n1} and {n2} (exclusive)?`,
+			description: `Do {cell1_title} fall outside of the range from {n1} to {n2} (exclusive)?`,
 
 			solution_f: '=OR({cell1_ref}<{n1}, {cell1_ref}>{n2})',
             template_values: {
@@ -400,11 +399,12 @@ const kc_if_or = ({
 		},{	...tutorial,
 
 			description: `Let's start by embedding the <code>OR</code> inside of an <code>IF</code>. 
-                    If we write <code>=IF(OR(A1&gt5, B1&lt5), 'a', 'b')</code>, 
+                    If we write <code>=IF(OR(A1&gt5, B1&gt5), 'a', 'b')</code>, 
                     Excel will check to see if the
 					values in <code>A1</code> or <code>B1</code> are over 5.  
 					If so, then it will return 'a' (and otherwise 'b').`,
-			instruction: 'Write a formula that will say "Bad" if {cell1_title} or {cell2_title} are under {n}, or "Ok" otherwise.',
+			instruction: `Write a formula that will say "Bad" if {cell1_title} or {cell2_title} 
+                    are under {n}, or "Ok" otherwise.`,
 			
             ...animals_data,
 
@@ -425,15 +425,15 @@ const kc_if_or = ({
 
 			description: `Let's try another <code>OR</code> function inside of an <code>IF</code>.
 					<br/><br/>
-					Look to see if {cell1_title} is under or equal to {n}, 
-                    or {cell2_title} is equal to or greater than {n}.
+					Test to see if {cell1_title} are equal to or greater than {n}, 
+                    <i>or</i> {cell2_title} are equal to or greater than {n}.
                     If either of these are true, say <code>{iftrue}</code>, otherwise say <code>{iffalse}</code>.`,
 
 			instruction: 'Write the formula described above.',
 			
             ...animals_data,
 
-			solution_f: '=IF(OR({cell1_ref}<={n}, {cell2_ref}>={n}), "{iftrue}", "{iffalse}")', 
+			solution_f: '=IF(OR({cell1_ref}>={n}, {cell2_ref}>={n}), "{iftrue}", "{iffalse}")', 
             template_values: {
                 'cell1': 'popCell(a1,b1,c1,d1)',
                 'cell2': 'popCell(a1,b1,c1,d1)',
@@ -452,7 +452,7 @@ const kc_if_or = ({
 
 			description: `As another test, try creating a <code>OR</code> that uses three logical tests.
 					<br/><br/>
-					Look to see if one of {cell1_title}, {cell2_title}, and {cell3_title} are equal to or greater than {n}.
+					Look to see if at least one of {cell1_title}, {cell2_title}, and {cell3_title} are equal to or greater than {n}.
                     Say <code>{iftrue}</code> if one of these conditions are <code>TRUE</code>, or <code>{iffalse}</code> otherwise.`,
 
 			instruction: 'Write the formula described above.',
@@ -470,7 +470,7 @@ const kc_if_or = ({
             },
 			feedback: [
 				{ 'has': 'values', args: [ '{n}', '{iftrue}', '{iffalse}' ] },
-				{ 'has': 'references', args: ['{cell1_ref}', '{cell2_ref}', '{cell3_ref'] },
+				{ 'has': 'references', args: ['{cell1_ref}', '{cell2_ref}', '{cell3_ref}'] },
 				{ 'has': 'functions', args: ['OR', 'IF'] }
 			],
 
@@ -529,7 +529,7 @@ const kc_if_or = ({
         },{ ...test,
             ...animals2_data,
             
-			description: `Do {cell1_title} number outside of the range {n1} and {n2} (inclusive)?
+			description: `Do {cell1_title} fall outside of the range {n1} and {n2} (inclusive)?
                 <br/><br/>
                 Return <code>{iftrue}</code> if this is correct, or <code>{iffalse}</code> if not.`,
 
@@ -538,24 +538,23 @@ const kc_if_or = ({
                 'cell1': 'popCell(b1,c1,d1)',
                 'n1': '[1-2]',
                 'n2': '[3-4]',
-                'iftrue': 'randOf(Between,Inside,Yes)',
-                'iffalse': 'randOf(Outside,No)',
+                'iftrue': 'randOf(Yes,Correct,Right)',
+                'iffalse': 'randOf(Incorrect,No,Wrong)',
             },
 
 
         },{ ...test,
             ...animals2_data,
             
-			description: `Do {cell1_title} not fall between 1 and {n2} (exclusive)?
+			description: `Do {cell1_title} fall outside of the range from 2 to 3 (exclusive)?
                 <br/><br/>
                 Return <code>{iftrue}</code> if this is correct, or <code>{iffalse}</code> if not.`,
 
-			solution_f: '=IF(OR({cell1_ref}<2, {cell1_ref}>{n2}), "{iftrue}", "{iffalse}")',
+			solution_f: '=IF(OR({cell1_ref}<2, {cell1_ref}>3), "{iftrue}", "{iffalse}")',
             template_values: {
                 'cell1': 'popCell(b1,c1,d1)',
-                'n2': '[2-3]',
-                'iftrue': 'randOf(Between,Inside,Yes)',
-                'iffalse': 'randOf(Outside,No)',
+                'iffalse': 'randOf(Between,Inside,Yes)',
+                'iftrue': 'randOf(Outside,No)',
             },
 
 
@@ -579,7 +578,7 @@ const kc_if_or = ({
         },{ ...test,
             ...animals2_data,
             
-			description: `Are {cell1_title} under or less than {n1}, or {cell2_title} over or greater than {n2}?
+			description: `Are either {cell1_title} equal to or less than {n1}, or {cell2_title} greater or equal to {n2}?
                 <br/><br/>
                 Return <code>{iftrue}</code> if this is correct, or <code>{iffalse}</code> if not.`,
 
@@ -587,8 +586,8 @@ const kc_if_or = ({
             template_values: {
                 'cell1': 'popCell(b1,c1,d1)',
                 'cell2': 'popCell(b1,c1,d1)',
-                'n1': '[2-3]',
-                'n2': '[2-3]',
+                'n1': '1',
+                'n2': '[3-4]',
                 'iftrue': 'randOf(Yes,Good,Correct)',
                 'iffalse': 'randOf(No,Bad,Incorrect)',            },
 

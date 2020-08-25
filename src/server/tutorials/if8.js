@@ -16,6 +16,7 @@ import type { LevelSchemaFactoryType } from './../IfLevelSchemaFactory';
 	Having a comma in a number
 	Return $ or with commas
 	Text as number
+	Between numbers with and (comma).
 	
 */
 

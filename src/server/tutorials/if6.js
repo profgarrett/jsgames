@@ -3,9 +3,7 @@ const { DataFactory } = require('./../DataFactory');
 const { LinearGen, UntilGen } = require('./../Gens');
 const { finish_questions } = require('./../pages/finish_questions');
 
-const { kc_if_or_boolean, kc_if_or_boolean_logic,
-		kc_if_and_boolean, kc_if_and_boolean_logic 
-		} = require('./../kcs/kc_if_boolean');
+const { kc_if_and_boolean, kc_if_and_boolean_logic } = require('./../kcs/kc_if_boolean');
 
 const { IfPageFormulaSchema } = require( './../../shared/IfPageSchemas');
 
@@ -22,10 +20,10 @@ const introduction_gen = ({
 		{
 			type: 'IfPageTextSchema',
 			description: `
-				This tutorial has you practice booleans inside of <code>AND</code> and <code>OR</code> functions.
+				This tutorial has you practice <b>booleans</b> inside of the <code>AND</code> function.
 				<ul>
-					<li>Use booleans inside of <code>AND</code> / <code>OR</code> </li>
-					<li>Use booleans inside of <code>AND</code> / <code>OR</code> embedded into an <code>IF</code></li>
+					<li>Use booleans inside of <code>AND</code> </li>
+					<li>Use booleans inside of <code>AND</code> embedded into an <code>IF</code></li>
 				</ul>
 				`
 		}
@@ -53,8 +51,8 @@ const donePage = {
 
 const if6 = ({
 	code: 'if6',
-	title: 'IF6: AND/OR Booleans',
-	description: 'Use booleans inside of AND/OR',
+	title: 'IF6: AND Booleans',
+	description: 'Use booleans inside of AND',
 	harsons_randomly_on_username: false,
 	predict_randomly_on_username: true,
 	
@@ -65,23 +63,15 @@ const if6 = ({
 		gen_type: LinearGen,
 		pages: [
 			
-			//introduction_gen,
+			introduction_gen,
 			makeInertiaGenFromKC(kc_if_and_boolean_logic),
 			
 			ReviewNextConcept,
 			makeInertiaGenFromKC(kc_if_and_boolean),
-/*
-			ReviewNextConcept,
-			
-			makeInertiaGenFromKC(kc_if_or_boolean_logic),
-			
-			ReviewNextConcept,
-			makeInertiaGenFromKC(kc_if_or_boolean),
 
 			donePage,
 
 			...finish_questions
-			*/
 		]
 	}: GenType)
 	
