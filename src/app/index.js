@@ -113,12 +113,13 @@ if(window.location.hostname !== 'localhost') {
     .createErrorBoundary(React)
 
   // Load Google Analytics
+  /*
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
 
   gtag('config', 'UA-85531294-2');
-
+*/
 
 	Root = () => (
 		<BrowserRouter>

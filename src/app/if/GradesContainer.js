@@ -1,5 +1,5 @@
 // @flow
-import React from 'react';
+import React, { useState } from 'react';
 import Container from 'react-bootstrap/Container';
 import { Row, Col, Breadcrumb  } from 'react-bootstrap';
 
@@ -22,30 +22,25 @@ type GradesContainerStateType = {
 	data: Array<any>
 };
 
-export default class GradesContainer extends React.Component<GradesPropsType, GradesContainerStateType> {
-	constructor(props: any) {
-		super(props);
-		this.state = { 
-			message: 'Loading data from server',
-			messageStyle: '',
-			isLoading: true,
-			data: []
-		};
-		(this: any).onRefreshData = this.onRefreshData.bind(this);
-		(this: any).onReady = this.onReady.bind(this);
-	}
+export default function GradesContainer(props: GradesPropsType): Node {
+	const [ message, setMessage ] = useState('Loading data from server');
+	const [ messageStyle, setMessageStyle ] = useState('');
+	const [ isLoading, setIsLoading ] = useState(true);
+	const [ data, setData ] = useState([]);
 
-	onReady(filter: Object) {
-		this.setState({ isLoading: false, message: ''});
-		this.onRefreshData(filter);
-	}
+	const onReady = (filter: Object) => {
+		setIsLoading(false);
+		setMessage('');
+		onRefreshData(filter);
+	};
 
-	onRefreshData(filter: Object) {
+	const onRefreshData = (filter: Object) => {
 		const args = [];
 
 		if(filter.sections !== '') args.push('idsection='+filter.sections);
 
-		this.setState({ isLoading: true, message: 'Loading grade data'});
+		setIsLoading(true);
+		setMessage('Loading grade data');
 		
 		fetch('/api/reports/grades?'+args.join('&'), {
 				method: 'get',
@@ -57,62 +52,55 @@ export default class GradesContainer extends React.Component<GradesPropsType, Gr
 			})
 			.then( response => response.json() )
 			.then( json => {
-				this.setState({
-					data: json,
-					messageStyle: '',
-					message: '',
-					isLoading: false
-				});
+				setData(json);
+				setMessageStyle('');
+				setMessage('');
+				setIsLoading(false);
 			})
 			.catch( error => {
-				this.setState({ 
-					data: [],
-					message: 'Error: ' + error,
-					messageStyle: 'Error',
-					isLoading: false
-				});
+				setData([]);
+				setMessageStyle('Error');
+				setMessage('Error: ' + error);
+				setIsLoading(false);
 			});
-	}
+	};
 
 
-
-	render(): Node {
-
-		const crumbs = (
-			<Breadcrumb>
-				<Breadcrumb.Item title='home' href='/ifgame/'>If Games</Breadcrumb.Item>
-				<Breadcrumb.Item title='Grades' active>Grades</Breadcrumb.Item>
-			</Breadcrumb>
-			);
-
-
-		const search = new URLSearchParams(window.location.search);
-		const filter_defaults = search.has('idsection') 
-			? { sections: search.get('idsection') }
-			: {};
-		
-		const filter = <Filter 
-				onChange={this.onRefreshData} 
-				onReady={this.onReady} 
-				disabled={this.state.isLoading} 
-				defaults={filter_defaults}
-				filters={{sections: [] }}
-			/>;
-
-		return (
-			<Container fluid>
-			<Row>
-				<Col>
-					<ForceLogin/>
-					{ crumbs }
-					<h3>Grades</h3>
-					<Message message={this.state.message} style={this.state.messageStyle} />
-					<Loading loading={this.state.isLoading } />
-					{ filter }
-					<Grades data={this.state.data} />
-				</Col>
-			</Row>
-			</Container>
+	// Render
+	const crumbs = (
+		<Breadcrumb>
+			<Breadcrumb.Item title='home' href='/ifgame/'>If Games</Breadcrumb.Item>
+			<Breadcrumb.Item title='Grades' active>Grades</Breadcrumb.Item>
+		</Breadcrumb>
 		);
-	}
+
+
+	const search = new URLSearchParams(window.location.search);
+	const filter_defaults = search.has('idsection') 
+		? { sections: search.get('idsection') }
+		: {};
+	
+	const filter = <Filter 
+			onChange={onRefreshData} 
+			onReady={onReady} 
+			disabled={isLoading} 
+			defaults={filter_defaults}
+			filters={{sections: [] }}
+		/>;
+
+	return (
+		<Container fluid>
+		<Row>
+			<Col>
+				<ForceLogin/>
+				{ crumbs }
+				<h3>Grades</h3>
+				<Message message={message} style={messageStyle} />
+				<Loading loading={isLoading } />
+				{ filter }
+				<Grades data={data} />
+			</Col>
+		</Row>
+		</Container>
+	);
 }

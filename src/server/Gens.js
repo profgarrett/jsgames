@@ -188,13 +188,6 @@ const ShuffleGenUntilLimit = (seed: number, pages: Array<IfPageBaseSchema>, gen:
 	const until_total = typeof gen.until_total === 'number' ? gen.until_total : 999999;
 	const until_correct = typeof gen.until_correct === 'number' ? gen.until_correct : 999999;
 
-	if(!(typeof gen.until_correct === 'number' || gen.until_correct === null))
-			throw new Error('Invalid gen.until_correct, should be number or null');
-
-	if(!(typeof gen.until_total === 'number' || gen.until_correct === null))
-			throw new Error('Invalid gen.until_total, should be number or null');
-
-
 	// Create a new linear gen with the randomized list of items limited to @until_total.
 	let randomized_gen = ({
 		gen_type: 'LinearGen',
@@ -720,7 +713,7 @@ if(TEST) (() => {
 	}
 
 	
-	console.log('\nTesting ShuffleUntilLimitGen');
+	console.log('\nTesting ShuffleGenUntilLimit');
 
 	// Test normal add
 	let escape = 1000;
@@ -745,7 +738,7 @@ if(TEST) (() => {
 
 	while( results[results.length-1] !== null) {
 		results.push(runGen_copy(1, results, test_gen));
-
+		//$FlowFixMe
 		assert.ok( results.length <= test_gen.until_total + 1, 'Gen.ShufleB: Added too many items1' );
 	}
 	assert.ok( results.pop() === null, 'Gen.ShufleB: Added too many items2' );
@@ -757,7 +750,7 @@ if(TEST) (() => {
 
 	while( results[results.length-1] !== null) {
 		results.push(runGen_copy(1, results, test_gen));
-
+		//$FlowFixMe
 		assert.ok( results.length <= test_gen.until_total +1 , 'Gen.ShufleC: Added too few items3' );
 	}
 	assert.ok( results.pop() === null, 'Gen.ShufleC: Added too few items4' );

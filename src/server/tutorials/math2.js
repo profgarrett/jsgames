@@ -21,7 +21,7 @@ import type { LevelSchemaFactoryType } from './../IfLevelSchemaFactory';
 
 // Definitions.
 const REVIEW_MINIMUM_CORRECT = 3;
-const REVIEW_LIMIT = 4;
+const REVIEW_LIMIT = 5;
 
 
 //////////////////////////////////////////////////////////////
@@ -38,6 +38,7 @@ const math2: LevelSchemaFactoryType = {
 	gen: ({
 		gen_type: LinearGen,
 		pages: [
+			
 			{	type: 'IfPageTextSchema',
 				description: `This tutorial shows more uses for multiplication and division.
 						`
@@ -60,7 +61,6 @@ const math2: LevelSchemaFactoryType = {
 			makeTutorialNextConcept(),
 			
 			makeTutorialGenFromKC(kc_divide_ratio),
-			
 			...finish_questions
 		]
 	}: GenType)

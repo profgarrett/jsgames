@@ -74,7 +74,7 @@ const _divide_ratio_test_pages_base = {
 	column_formats: farm3_data.column_formats,
 	tests: farm3_data.tests,
 	instruction: 'Type in the correct formula using <b>division</b>',
-	client_f_format: '',
+	client_f_format: '0',
 	code: 'test',
 	kcs: [KC_NAMES.DIVIDE, KC_NAMES.DIVIDE_RATIO]
 };
@@ -92,6 +92,7 @@ const test_pages = [
 			{ 'has': 'references', args: ['{cell1_ref}', 'd1'] },
 		],
 		description: 'What percent of our animals are {cell1_title}?',
+		client_f_format: '%',
 	},{
 		..._divide_ratio_test_pages_base,
 		solution_f: '={cell1_ref}/{cell2_ref}',

@@ -185,14 +185,15 @@ const gen_on_interface: GenType = {
 			description: `
 				There is a "Feedback" button on the top-right corner of the screen. If you 
 				have any trouble, feel free to leave a comment.
-				<br/><br/>
-				On the bottom of the screen, you can also hover your cursor over the "Progress" 
-				checkboxes to review the instructions on each page.
 			`,
 			instruction: 'Click "Next page"',
 		}
 	]
 };
+
+//				<br/><br/>
+//				On the bottom of the screen, you can also hover your cursor over the "Progress" 
+//				checkboxes to review the instructions on each page.
 
 
 const gen_on_predict: GenType = {

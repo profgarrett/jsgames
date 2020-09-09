@@ -30,6 +30,12 @@ import { IfPageBaseSchema } from './../../shared/IfPageSchemas';
 // two single clicks on iPad).
 const MINIMUM_TIME_BETWEEN_SUBMIT_EVENTS = 350;
 
+// How long before we show students the solution to the problem?
+// NOTE: Also update in LevelPlayContainer.js - present in both places.
+const TIME_BEFORE_SHOWING_SOLUTION = 60*3; 
+
+
+
 
 // Build the score list at the bottom of the page.
 const build_score = (pages: Array<IfPageBaseSchema>): any => pages.map( (p: IfPageBaseSchema, i: number): any => {
@@ -186,15 +192,7 @@ export default class IfLevelPlay extends React.Component<PropsType, StateType> {
 	}
 
 	handleHint() {
-		// Increment the numbers of hints, which generates a history entry.
-		const page = this.props.level.pages[this.props.selected_page_index];
-		const hints_parsed = page.hints_parsed + 1;
-		const hints_viewsolution = page.hints_viewsolution + 1;
-
-		this.props.onChange({ hints_parsed, hints_viewsolution }, () => {
-			// Push to server for feedback.
-			this.handleValidate();
-		});
+		this.handleValidate();
 	} 
 
 	// Tick is a way of regularly updating things on the page.
@@ -512,7 +510,7 @@ export default class IfLevelPlay extends React.Component<PropsType, StateType> {
 						} else if ( typedPage.correct ) {
 							body.push(<div>Correct answer!</div>);
 						
-						} else if( typedPage.get_time_in_seconds() < 60*3 ) {
+						} else if( typedPage.get_time_in_seconds() < TIME_BEFORE_SHOWING_SOLUTION ) {
 							// No, haven't  tried for at least 3 minutes.
 							//console.log(typedPage.get_time_in_seconds());
 							body.push(<div>Sorry, but that answer is not correct.<br/><br/>

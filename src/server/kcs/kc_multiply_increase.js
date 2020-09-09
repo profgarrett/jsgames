@@ -30,7 +30,6 @@ const _page_base = {
 		'buy': 'randOf(buy,acquire,get)'
 	},
 	feedback: [
-		{ 'has': 'values', args: ['{n}'] },
 		{ 'has': 'no_symbols', args: ['%'] },
 		{ 'has': 'symbols', args: ['*'] },
 		{ 'has': 'references', args: ['{cell1_ref}'] },

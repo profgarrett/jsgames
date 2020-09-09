@@ -261,12 +261,16 @@ router.post('/level/:id',
 
 		// update.
 		let iflevel = new IfLevelSchema(select_results[0]); // initialize from sql
-		iflevel.updateUserFields(req.body); // update client_f and history
+		iflevel.updateUserFields(req.body); // update all properties from client that can be changed.
 
 		// Make sure that there is feedback.
 		iflevel.pages.filter( p => p.client_feedback === null).filter( p=> p.type === 'IfPageFormulaSchema').map( p => {
 			throw new Error('Client feedback should not be null');
 		});
+
+		// Look to see if there is client_feedback. If so, then create a history event showing this and 
+		// increment the hints
+		//iflevel.pages.forEach( p:  => )
 
 		// If we're just supposed to validate, don't add a new page.
 		if(!validate_only) {

@@ -150,7 +150,6 @@ function common_schema(): Object {
 
 
 
-
 /**
 	Common base class for shared behavior.
 */
@@ -182,12 +181,13 @@ class IfPageBaseSchema extends Schema {
 		this.initialize(json, this.schema);
 	}
 
+	get type(): string {
+		return 'IfPageBaseSchema';
+	}
+
 	// Must be implemented by inheriting classes.
 	client_has_answered(): boolean {
 		throw new Error('Inheriting classes must implement client_has_answered')
-	}
-	updateUserFields(a: any): any {
-		throw new Error('Inheriting classes must implement updateUserFields')
 	}
 	debug_answer(): any {
 		throw new Error('Inheriting classes must implement debug_answer')
@@ -198,10 +198,116 @@ class IfPageBaseSchema extends Schema {
 	get_solution(): string {
 		throw new Error('Inheriting classes must implement get_solution')
 	}
+	updateCorrect(): void {
+		throw new Error('Inheriting classes must implement updateCorrect')
+	}
 
 
-	get type(): string {
-		return 'IfPageBaseSchema';
+	// This is a placeholder. It's called by IfLevleSchema to update all of the json
+	// blobs of it's contained pages. This shouldn't actually be called, as the instantiated classes
+	// all over-ride this method.
+	updateUserFields(json: any): void {
+		throw new Error('Inheriting classes must implement updateUserFields and call _updateUserFields')
+	}
+
+
+	/*
+		Used by inheriting items to update self with any matching items in passed JSON.
+		Will not update a completed item.
+
+		@json: Either updated fields, OR an entire json object from the client sent to the server.
+		@valid_fields: which fields should be updated. Mandatory. Set by each different type of class.
+		@update_correct: default true
+		@generate_history: Will generate a history action for any updates. Default true.
+	*/
+	_updateUserFields(json: any, valid_fields: Array<string>, update_correct: boolean = true, generate_history: boolean = true): void {
+		const changes = [];
+
+		// Make sure that we have a json
+		if(typeof json === 'undefined') throw new Error('IfGames.updateUserFields(json) is null');
+
+		// If a type, make sure it matches.
+		if(typeof json.type !== 'undefined' &&
+			json.type !== this.type ) throw new Error('Invalid type '+json.type+' in ' + this.type + '.updateUserFields');
+
+
+		// Make sure that all passed valid_fields are present in the current object. If not true,
+		// probably means that json should be called on some other object.
+		valid_fields.forEach( (field: string) => {
+			//$FlowFixMe
+			if(typeof this[field] === 'undefined') {
+				throw new Error('Invalid field "'+field+'" passed to _updateUserFields');
+			}
+		});
+
+
+		// don't allow updates to finished items. Note that completed isn't set internally by this obj,
+		// but instead is set by the server code with knowledge of each tutorial's rules.
+		// Don't throw an error upon this, as it's run by server on all pages upon receiving info from user.
+		if(this.completed) return; 
+
+
+		// Make sure that we have 'history' as an editable item. Otherwise, sending client back to server
+		// will lose all of the updates.
+		if(valid_fields.filter( s => s === 'history').length === 0) {
+			valid_fields.push('history');
+		}
+
+		// Go through each valid field change to see if a change has happened.
+		valid_fields.forEach( (field: string) => {
+			if(typeof json[field] !== 'undefined') {
+
+				// Is array and is different array by contents?
+			 	if(Array.isArray(json[field])) {
+
+					//$FlowFixMe
+					if(arrayDifferent(this[field], json[field])) {
+						//$FlowFixMe
+						changes.push({ field: field, from: this[field], to: json[field] });
+						//$FlowFixMe
+						this[field] = json[field];
+					}
+
+				// Or, is not an array and is different?
+				//$FlowFixMe
+				} else if (json[field] !== this[field]) {
+					//$FlowFixMe
+					changes.push({ field: field, from: this[field], to: json[field] });
+					//$FlowFixMe
+					this[field] = json[field];
+				}
+			}
+		});
+
+		// If not changes, then exit.
+		if(changes.length === 0) return;
+
+		// If asked, then update the correct and add to log.
+		if(update_correct) {
+			changes.push({ field: 'correct', from: this.correct, to: null});
+			this.updateCorrect();
+			//$FlowFixMe
+			changes[changes.length-1].to = this.correct;
+		}
+
+		// If no history, then return.
+		if(!generate_history) return;
+
+		let history = { };
+
+		// Filter changes to avoid having history save all previous history changes as a change.
+		// and then record each change in the new history item.
+		changes
+			.filter( change => change.field !== 'history')   
+			.forEach( change => history[change.field] = change.to );
+		
+		// Reference fields.
+		history.dt = new Date();
+		history.code = is_server() ? 'server_update' : 'client_update';
+
+		// Update history.
+		this.history = Array.from(this.history);
+		this.history.push(history);
 	}
 
 	/*
@@ -527,23 +633,7 @@ class IfPageTextSchema extends IfPageBaseSchema {
 		Run upon initial obj creation.
 	*/
 	updateUserFields(json: Object) {
-		if(typeof json === 'undefined') throw new Error('IfGames.updateUserFields(json) is null');
-		if(json.type !== this.type ) throw new Error('Invalid type '+json.type+' in ' + this.type + '.updateUserFields');
-
-		// don't allow updates to finished items. Note that completed isn't set internally by this obj,
-		// but instead is set by the server code with knowledge of each tutorial's rules.
-		if(this.completed) return; 
-
-		if(this.client_read !== json.client_read ){
-			this.client_read = json.client_read;
-			this.history = json.history;
-		}
-		if(typeof json.time_limit_expired !== 'undefined' ){
-			this.time_limit_expired = json.time_limit_expired;
-		}
-
-
-		this.updateCorrect();
+		this._updateUserFields(json, ['client_read']);
 	}
 
 	/* 
@@ -631,22 +721,7 @@ class IfPageNumberAnswerSchema extends IfPageBaseSchema {
 		Run upon initial obj creation.
 	*/
 	updateUserFields(json: Object) {
-		if(typeof json === 'undefined') throw new Error('IfGames.updateUserFields(json) is null');
-		if(json.type !== this.type ) throw new Error('Invalid type '+json.type+' in ' + this.type + '.updateUserFields');
-
-		// don't allow updates to finished items. Note that completed isn't set internally by this obj,
-		// but instead is set by the server code with knowledge of each tutorial's rules.
-		if(this.completed) return; 
-
-		if(this.client !== json.client ){
-			this.client = json.client;
-			this.history = json.history;
-		}
-		if(typeof json.time_limit_expired !== 'undefined' ){
-			this.time_limit_expired = json.time_limit_expired;
-		}
-
-		this.updateCorrect();
+		this._updateUserFields(json, ['client', 'time_limit_expired']);
 	}
 
 	/* 
@@ -726,33 +801,8 @@ class IfPageSliderSchema extends IfPageBaseSchema {
 	}
 
 
-	/*
-		Update any fields for which user has permissions.
-		
-		Safe to re-run, with the exception that upon changing client_items, will
-		reset this.correct (since we don't know its status).  Will re-run updateCorrect() in 
-		case this is on the server and we're updating the object.
-
-		Run upon initial obj creation.
-	*/
 	updateUserFields(json: Object) {
-		if(typeof json === 'undefined') throw new Error('IfGames.updateUserFields(json) is null');
-		if(json.type !== this.type ) throw new Error('Invalid type '+json.type+' in ' + this.type + '.updateUserFields');
-
-		// don't allow updates to finished items. Note that completed isn't set internally by this obj,
-		// but instead is set by the server code with knowledge of each tutorial's rules.
-		if(this.completed) return; 
-
-		if(this.client !== json.client ){
-			this.client = json.client;
-			//this.history = json.history; DON'T TRACK HISTORY.
-		}
-		if(typeof json.time_limit_expired !== 'undefined' ){
-			this.time_limit_expired = json.time_limit_expired;
-		}
-
-
-		this.updateCorrect();
+		this._updateUserFields(json, ['client', 'time_limit_expired'], true, false);
 	}
 
 	/* 
@@ -821,33 +871,8 @@ class IfPageShortTextAnswerSchema extends IfPageBaseSchema {
 		return '';
 	}
 
-
-	/*
-		Update any fields for which user has permissions.
-		
-		Safe to re-run, with the exception that upon changing client_items, will
-		reset this.correct (since we don't know its status).  Will re-run updateCorrect() in 
-		case this is on the server and we're updating the object.
-
-		Run upon initial obj creation.
-	*/
 	updateUserFields(json: Object) {
-		if(typeof json === 'undefined') throw new Error('IfGames.updateUserFields(json) is null');
-		if(json.type !== this.type ) throw new Error('Invalid type '+json.type+' in ' + this.type + '.updateUserFields');
-
-		// don't allow updates to finished items. Note that completed isn't set internally by this obj,
-		// but instead is set by the server code with knowledge of each tutorial's rules.
-		if(this.completed) return; 
-
-		if(this.client !== json.client ){
-			this.client = json.client;
-			this.history = json.history;
-		}
-		if(typeof json.time_limit_expired !== 'undefined' ){
-			this.time_limit_expired = json.time_limit_expired;
-		}
-
-		this.updateCorrect();
+		this._updateUserFields(json, ['client', 'time_limit_expired']);
 	}
 
 	/* 
@@ -962,38 +987,11 @@ class IfPageChoiceSchema extends IfPageBaseSchema {
 		}
 		
 		this.updateCorrect();
-	}		
+	}
 
-	/*
-		Update any fields for which user has permissions.
-		
-		Safe to re-run, with the exception that upon changing client_items, will
-		reset this.correct (since we don't know its status).  Will re-run updateCorrect() in 
-		case this is on the server and we're updating the object.
 
-		Run upon initial obj creation.
-	*/
 	updateUserFields(json: Object) {
-		if(typeof json === 'undefined') throw new Error('IfGames.updateUserFields(json) is null');
-		if(json.type !== this.type ) throw new Error('Invalid type '+json.type+' in ' + this.type + '.updateUserFields');
-
-		// don't allow updates to finished items. Note that completed isn't set internally by this obj,
-		// but instead is set by the server code with knowledge of each tutorial's rules.
-		if(this.completed) return;
-
-		if(this.client !== json.client ){
-			this.client = json.client;
-			this.correct = null; // we no longer know if the solution is correct.
-			this.history = json.history;
-
-		}
-
-		// Look to see if the timer has expired.
-		if(typeof json.time_limit_expired !== 'undefined' ){
-			this.time_limit_expired = json.time_limit_expired;
-		}
-
-		this.updateCorrect();
+		this._updateUserFields(json, ['client', 'time_limit_expired']);
 	}
 
 	/* 
@@ -1001,9 +999,6 @@ class IfPageChoiceSchema extends IfPageBaseSchema {
 	*/
 	updateCorrect() {
 		if(this.completed) return; // do not update completed items.
-
-		// Update feedback.
-		//this.client_feedback = get_feedback(this);
 
 		if(this.client === null) return; // no client submission.
 
@@ -1089,38 +1084,8 @@ class IfPageParsonsSchema extends IfPageBaseSchema {
 	}		
 
 
-
-	/*
-		Update any fields for which user has permissions.
-		
-		Safe to re-run, with the exception that upon changing client_items, will
-		reset this.correct (since we don't know its status).  Will re-run updateCorrect() in 
-		case this is on the server and we're updating the object.
-
-		Run upon initial obj creation.
-	*/
 	updateUserFields(json: Object) {
-		if(typeof json === 'undefined') throw new Error('IfGames.updateUserFields(json) is null');
-		if(json.type !== this.type ) throw new Error('Invalid type '+json.type+' in ' + this.type + '.updateUserFields');
-
-		// don't allow updates to finished items. Note that completed isn't set internally by this obj,
-		// but instead is set by the server code with knowledge of each tutorial's rules.
-		if(this.completed) return;
-
-		// over-write server-set true/false if new values are being set.
-		if(arrayDifferent(this.client_items,json.client_items)) this.correct = null; 
-
-		this.client_items = json.client_items;
-		this.history = json.history;
-
-		if(typeof json.time_limit_expired !== 'undefined' ){
-			this.time_limit_expired = json.time_limit_expired;
-		}
-
-		if(!(json.history instanceof Array)) throw new Error('Invalid history type '+typeof history);
-		
-		// Update level parsing as needed.
-		this.updateCorrect();
+		this._updateUserFields(json, ['client_items', 'time_limit_expired']);
 	}
 
 
@@ -1255,65 +1220,14 @@ class IfPageFormulaSchema extends IfPageBaseSchema {
 	// Update any fields for which user has permissions.
 	// Save to re-run.  Can also run upon initial obj creation.
 	updateUserFields(json: Object) {
-		let update = false;
-		let history = {};
-		
-		history.dt = new Date();
-		history.code = is_server() ? 'server_update' : 'client_update'
 
-		if(typeof json === 'undefined') throw new Error('IfGames.updateUserFields(json) is null');
-		if(json.type !== this.type ) throw new Error('Invalid type '+json.type+' in ' + this.type + '.updateUserFields');
-
-		// don't allow updates to finished items. Note that completed isn't set internally by this obj,
-		// but instead is set by the server code with knowledge of each tutorial's rules.
-		
-		if(this.completed && this.client_f !== json.client_f) throw new Error('Invalid attempt to update completed client_f');
-		if(this.completed) return;
-
-
-		// Update expired status.  Don't generate a history for this.
-		if(typeof json.time_limit_expired !== 'undefined' ){
-			this.time_limit_expired = json.time_limit_expired;
+		// Look to see if we have a new client_f. If so, need to update the client parsed results.
+		// Empty out the old results. Will be reset by .updateCorrect().
+		if(typeof json.client_f !== 'undefined' && json.client_f !== this.client_f) {
+			this.client_test_results = [];
 		}
 
-
-		// Update hints
-		if(this.hints_parsed !== json.hints_parsed) {
-			history.hints_parsed = json.hints_parsed;
-			this.hints_parsed = json.hints_parsed;
-			update = true;
-		}
-		if(this.hints_viewsolution !== json.hints_viewsolution) {
-			history.hints_viewsolution = json.hints_viewsolution;
-			this.hints_viewsolution = json.hints_viewsolution;
-			update = true;
-		}
-
-
-		// Update client_f
-		// If the old and new solutions don't match, the null out the correct variable and the client feedback.
-		// We do this as it no longer pertains to the solution.
-		if(this.client_f !== json.client_f) {
-			this.client_f = json.client_f;
-			this.correct = null;
-			this.client_feedback = null;
-
-			// Update level parsing as needed.
-			this.updateSolutionTestResults();
-			this.updateClientTestResults();
-			this.updateCorrect();
-
-			history.client_f = this.client_f;
-			history.correct = this.correct;
-			update = true;
-		}
-
-
-		// Update history.
-		if(update) {
-			this.history = Array.from(json.history);
-			this.history.push(history);
-		}
+		this._updateUserFields(json, ['client_f', 'time_limit_expired', 'hints_parsed', 'hints_viewsolution']);
 	}
 
 
@@ -1346,23 +1260,29 @@ class IfPageFormulaSchema extends IfPageBaseSchema {
 		if(this.completed) return;
 
 		// Create custom feedback.
-		// See if we are on the client, in which case feedback is not provided.
-		if(typeof this.feedback !== 'undefined' &&
-				this.feedback !== null) {
-
+		//
+		// Feedback are not always provided by the server/client, or could just be
+		// undefined for the current problem.
+		if(typeof this.feedback !== 'undefined' && this.feedback !== null) {
+			// $FlowFixMe
 			this.client_feedback = get_feedback(this);
-		} 
+		}
 
 		// Check to see if we have any input from the user.
 		if(this.client_f === null || this.client_f.length < 1) {
 			this.correct = null;
 			return;
 		}
+		
+		// See if we need to re-generate answers.
+		if(this.client_test_results.length === 0 ){
+			this.updateClientTestResults();
+		}
 
 		// If we don't have a solution, then (i.e., on the client) then just keep the old
 		// correct variable.  Don't over-write it, as we may be on the client and
 		// are reading out the result of the server's code.
-		if(typeof this.solution_f === 'undefined' || this. solution_f === null) {
+		if(typeof this.solution_f === 'undefined' || this.solution_f === null) {
 			return;
 		}
 
@@ -1380,6 +1300,7 @@ class IfPageFormulaSchema extends IfPageBaseSchema {
 			this.correct = (this.client_feedback.length === 0);
 			if(!this.correct) return;
 		}
+
 
 		// Check individual answers
 		for(let i=0; i<this.client_test_results.length && this.correct; i++) {
@@ -1708,24 +1629,21 @@ class IfPagePredictFormulaSchema extends IfPageFormulaSchema {
 	}
 
 
-	// Update fields 
+	// Update fields. Note that super will generate a history object.
 	updateUserFields(json: Object) {
-		super.updateUserFields(json);
-		
-		// Also look at updating the predicted answers (if they have changed)
-		if(typeof json.predicted_answers_used !== 'undefined' ) {
-			let history = {};
-			
-			history.dt = new Date();
-			history.code = is_server() ? 'server_update' : 'client_update'
-
-			this.predicted_answers_used = json.predicted_answers_used;
-			
-			this.history = Array.from(json.history);
-			this.history.push(history);
+		// Look to see if we have a new client_f. If so, need to update the client parsed results.
+		// Empty out the old results. Will be reset by .updateCorrect().
+		if(typeof json.client_f !== 'undefined' && json.client_f !== this.client_f) {
+			this.client_test_results = [];
 		}
+
+		this._updateUserFields(json, 
+				['client_f', 'predicted_answers_used', 
+				'time_limit_expired', 'hints_parsed', 'hints_viewsolution']);
 	}
 }
+
+
 
 // Used to correctly instantiate a class based on the json .type property.
 function get_page_schema_as_class(json: Object): IfPageBaseSchema {

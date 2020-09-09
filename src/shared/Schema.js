@@ -86,6 +86,7 @@ class Schema {
 		throw Error('Inheriting classes must implement schema');
 	}
 
+
 	/*
 		Convert the object to a JSON object, taking only valid properties.
 
@@ -106,7 +107,6 @@ class Schema {
 			if(this[key] instanceof Date) {
 				// convert date to UTC int value.
 				json[key] = this[key].getTime(); 
-				
 
 			} else if(this[key] instanceof Object && typeof this[key].toJson !== 'undefined') {
 				// See if this is an object, which has a toJson property. If so, use that.
@@ -132,8 +132,6 @@ class Schema {
 				// Normal conversion.
 				json[key] = this[key];
 			}
-
-			
 		}
 
 		// Copy any new_values provided.
@@ -191,32 +189,48 @@ let isObject = function(o: any): boolean {
 	return typeof o === 'object'
 };
 
+
+
 // Go through the given obj or array, recursively matching items that look like a date
 // back to the date() object. Works when dates are in '1981-12-20T04:00:14.000Z format, 
 // not Unix seconds mode.  Needed, as some objects are dynamic, such as tests containing dates.
-function revive_dates_recursively(obj: any): any {
-	var datePattern = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
+const revive_dates_recursively_datePattern = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
+const revive_dates_recursively_test = (o => {
+	return ( typeof o === 'string' && 
+			o.length === 24 && 
+			revive_dates_recursively_datePattern.test(o) );
+});
 
-	if(obj instanceof Array ) {
-		return obj.map( (o: any): any => revive_dates_recursively(o) );
-	}
+// Must only be run on objects and arrays. No primitives.
+function revive_dates_recursively(obj: any): void {
 
-	if(typeof obj === 'object' ) {
-		for(let name in obj) {
-			if(obj.hasOwnProperty(name)) {
-				obj[name] = revive_dates_recursively(obj[name]);
+	if(Array.isArray(obj) ) {
+		for(let i=0; i<obj.length; i++) {
+			if( revive_dates_recursively_test(obj[i]) ) {
+				obj[i] = new Date(obj[i]);
+			} else {
+				if( Array.isArray(obj[i]) || typeof obj[i] === 'object' ) revive_dates_recursively(obj[i]);
 			}
 		}
 		return obj;
 	}
 
-	if(typeof obj === 'string') {
-		if(datePattern.test(obj)) {
-			return new Date(obj);
+	if(typeof obj === 'object' ) {
+		for(let name in obj) {
+			if(obj.hasOwnProperty(name)) {
+				if( revive_dates_recursively_test(obj[name]) ) {
+					obj[name] = new Date(obj[name]);
+				} else if ( Array.isArray(obj[name]) || typeof obj[name] === 'object') {
+					revive_dates_recursively(obj[name]);
+				}
+			}
 		}
+		return obj;
 	}
-	return obj;
 }
+
+
+
 
 
 module.exports = {

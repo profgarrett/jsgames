@@ -26,7 +26,7 @@ import type { LevelSchemaFactoryType } from './../IfLevelSchemaFactory';
 
 
 const REVIEW_MINIMUM_CORRECT = 3;
-const REVIEW_LIMIT = 4;
+const REVIEW_LIMIT = 5;
 
 
 // Pictures

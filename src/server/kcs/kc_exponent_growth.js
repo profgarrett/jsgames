@@ -169,7 +169,7 @@ const _base = {
 			<li>Regular growth: <code>=Starting Amount * (1 + Rate * Years)</code></li>
 		</ul>
 		`,
-	client_f_format: '',
+	client_f_format: ',',
 	code: 'test',
 	template_values: {
 		'n': '[2-6]'

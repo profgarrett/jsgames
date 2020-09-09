@@ -96,12 +96,12 @@ const format = (p_input, format) => {
 
 	} else if( format === '0' ) {
 		// Format without any decimal numbers, but include commas as needed.
-		return input.toLocaleString();
+		return Number.parseInt(input).toLocaleString();
 
 	} else if( format === ',' || format === '.' || format === '0') {
 		// Decimal
 		//$FlowFixMe
-		return input.toLocaleString('en-US', {style:'decimal'});
+		return Number.parseFloat(input).toLocaleString('en-US', {style:'decimal'});
 
 	} else if( format === '$.') {
 		// Currency with decimals.
@@ -116,7 +116,7 @@ const format = (p_input, format) => {
 	} else if(format === '%') {
 		// Percent.
 		//$FlowFixMe
-		return input.toLocaleString('en-US', {style:'percent'});
+		return (Number.parseFloat(input)).toLocaleString('en-US', { style:'percent'} );
 
 	} else if(format === 'boolean') {
 		// Percent.

@@ -42,13 +42,13 @@ const tutorial_pages = [
 	{	type: 'IfPageFormulaSchema',
 		description: `Use <b>regular</b> growth to calculate the number of animals in <b>four years</b>.
 			<br/><br/>
-			Remember that the formula for regular growth is <code>Starting Value * (1 + rate) * Years</code>`,
+			Remember that the formula for regular growth is <code>Starting Value * (1 + rate * Years</code>`,
 		instruction: 'Write the formula. Remember to add together the two types of animals first, placing them in parenthesis.',
 		column_formats: farm1_data.column_formats,
 		column_titles: farm1_data.column_titles,
 		tests: farm1_data.tests,
 		client_f_format: farm1_data.client_f_format,
-		solution_f: '=(a1+b1)*(1+c1) * 4', 
+		solution_f: '=(a1+b1) * (1+c1*4)', 
 		code: 'tutorial'
 	},
 	{	type: 'IfPageFormulaSchema',
@@ -87,8 +87,8 @@ const _base = {
 	instruction: `
 		Type in the correct formula. The ending amount will be:
 		<ul>
-			<li>Compound growth: <code>Starting Amount * (1 + Rate) ^ Years</code></li>
-			<li>Regular growth: <code>=Starting Amount * (1 + Rate) * Years</code></li>
+			<li>Compound growth: <code>=Starting Amount * (1 + Rate) ^ Years</code></li>
+			<li>Regular growth: <code>=Starting Amount * (1 + Rate * Years)</code></li>
 		</ul>
 		`,
 	template_values: {
@@ -116,7 +116,7 @@ const test_pages = [
 	// Compound and regular growth rate
 	}, {
 		..._base,
-		solution_f: '=(a1+b1)*(1+c1)*{years}', 
+		solution_f: '=(a1+b1)*(1+c1*{years})', 
 		description: 'How many animals will we have in {years} years? Use <i>regular</i> growth',
 		kcs: [ KC_NAMES.ORDEROFOPERATION_AND_GROWTH, KC_NAMES.MULTIPLY_INCREASE ],
 	}, {

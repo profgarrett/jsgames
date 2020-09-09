@@ -1,8 +1,11 @@
 // @flow
-import React from 'react';
-import { Button, Modal } from 'react-bootstrap';
+import React, { useState } from 'react';
+
+
+import { Table, Button, Modal } from 'react-bootstrap';
 
 import { PrettyDate } from './../components/Misc';
+import { StyledReactTable } from './../components/StyledReactTable';
 
 import { LevelModal } from './LevelModal';
 import { IfLevelPagelessSchema } from './../../shared/IfLevelSchema';
@@ -18,29 +21,21 @@ type PropsType = {
 	levels: Array<IfLevelPagelessSchema>
 };
 
-export default class Recent extends React.Component<PropsType,StateType> {
-	constructor(props: any) {
-		super(props);
+export default function Recent(props: PropsType) {
+	const [ level_id, setLevel_id ] = useState(null);
 
-		this.state = {
-			level_id: null
-		};
-
-		//(this: any).show = this.show.bind(this);
-		(this: any).hide = this.hide_modal.bind(this);
-	}
-
-	dateAsString(d: Object): string {
+	const dateAsString = (d: Object): string => {
 		return d.getFullYear()+'/'+(d.getMonth()+1) +'/'+d.getDate() +
 				' ' + d.getHours()+':'+ (d.getMinutes()<10 ? '0': '') + d.getMinutes();
-	}
+	};
 
-	hide_modal() {
-		this.setState({ level_id: null });
-	}
+	const hide_modal = () => {
+		setLevel_id(null); 
+	};
 
-	render(): Node {
-		if(this.props.levels.length < 1) 
+
+	// Render
+		if(props.levels.length < 1) 
 			return <div/>;
 
 		const columns = [{
@@ -79,27 +74,26 @@ export default class Recent extends React.Component<PropsType,StateType> {
 			Header: 'View',
 			accessor: (l: IfLevelPagelessSchema) => <Button onClick={ 
 				() => {
-					this.setState({ level_id: l._id }) 
+					setLevel_id( l._id ); 
 				}
 				} >View</Button>
 		}];
 
 		// Fixes old bug, where some people's levels didn't have a props value.
-		const data = this.props.levels.filter( l => l.props !== null ); 
+		const data = props.levels.filter( l => l.props !== null ); 
 
-		const modal = this.state.level_id === null 
+		const modal = level_id === null 
 			? null
-			: <LevelModal level={null} level_id={this.state.level_id} hide={ () => this.hide_modal() } />
+			: <LevelModal level={null} level_id={level_id} hide={ () => hide_modal() } />
 		
 		return (<div>
 				{ modal }
-				<ReactTable 
+				<StyledReactTable 
 					data={data}
-
 					filterable={true}
 					columns={columns} 
 				/>
 			</div>
 		);
-	}
+	
 }

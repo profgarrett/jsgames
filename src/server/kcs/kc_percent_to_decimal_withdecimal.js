@@ -63,7 +63,7 @@ const tutorial_pages = [
 				turn into 4.0
 				`,
 		instruction: 'What is {n1}84.{n2}% of {cell1_title}?',
-		solution_f: '={cell1_ref}*{n1}84.{n2}', 
+		solution_f: '={cell1_ref}*{n1}.84{n2}', 
 		kcs: [ KC_NAMES.PERCENT_TO_DECIMAL_WITHDECIMAL, KC_NAMES.MULTIPLY, KC_NAMES.PERCENT_TO_DECIMAL_OVER1 ]
 
 

@@ -414,12 +414,14 @@ WHERE ` + sql_where_clauses.join(' AND ') + ' ORDER BY iflevels.updated desc ';
 		let iflevels = select_results.map( l => new IfLevelPagelessSchema(l) );
 
 		const users = turn_array_into_map(iflevels, l => {
-			l.username.toLowerCase().trim() 
+			return l.username.toLowerCase().trim();
 		});
 
 		// Grab biggest item for each user.
 		const grades = [];
+		
 		users.forEach( (levels, user) => {
+
 			// Build user object.
 			const u = { username: user };
 			const level_map = turn_array_into_map(levels, (l) => l.code );

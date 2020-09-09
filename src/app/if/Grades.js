@@ -3,6 +3,7 @@ import React from 'react';
 import { Table } from 'react-bootstrap';
 
 import { IfLevelSchema } from './../../shared/IfLevelSchema';
+import { StyledReactTable } from './../components/StyledReactTable';
 
 import type { Node } from 'react';
 
@@ -22,35 +23,12 @@ const avg_of = function(obj: Object, arr: Array<any>): number {
 };
 
 
-export default class Grades extends React.Component<PropsType> {
-	constructor(props: any) {
-		super(props);
-	}
+export default function Grades(props: PropsType): Node {
 
-	_get_columns(): Array<any> {
-		// Create a list of distinct columns.
-		// Don't include the waivers.
+
+	const _get_columns = (): Array<any> => {
+		// Create a list of distinct columns. Don't include the waivers.
 		const tutorials = IfLevels.map( l => l.code ).filter( s => s.substr(0,13) !== 'surveywaiver_' );
-
-		return tutorials;
-	}
-
-	/* 
-		Return table
-	*/
-	_render_rich_grades_table(): Node {
-		const columnsx = this._get_columns();
-		return <h1></h1>;
-
-	}
-
-
-	/**
-		Return historical information
-
-	*/
-	_render_grades_table(): Node {
-		const tutorials = this._get_columns();
 
 		const columns = [{
 			id: 'username',
@@ -92,7 +70,28 @@ export default class Grades extends React.Component<PropsType> {
 				style: { textAlign: 'right' },
 				accessor: l => typeof l[t] !== 'undefined' && l[t] !== null ? l[t]+'%' : '', 
 				width: 60 }));
+				
+		return columns;
+	}
 
+	/* 
+		Return table
+	*/
+	const _render_rich_grades_table = (): Node => {
+		const columns = _get_columns();
+		return 	<StyledReactTable 
+					data={props.data}
+					filterable={true}
+					columns={columns} 
+				/>;
+	};
+
+
+	/**
+		Return historical information
+	*/
+	const _render_grades_table = (): Node => {
+		const columns = _get_columns();
 
 		return <Table striped bordered hover>
 			<thead><tr>{
@@ -100,7 +99,7 @@ export default class Grades extends React.Component<PropsType> {
 			}</tr>
 			</thead>
 			<tbody>
-			{ this.props.data.map( 
+			{ props.data.map( 
 				(t: Object,i) => <tr key={'tr'+i}>
 					{
 						columns.map( 
@@ -117,18 +116,14 @@ export default class Grades extends React.Component<PropsType> {
 	}
 
 
+	if(props.data.length < 1) 
+		return <div/>;
 
-	render(): Node {
-		
-		if(this.props.data.length < 1) 
-			return <div/>;
-
-		return (<div>
-				{this._render_rich_grades_table()}
-				<br/><br/><br/>
-				<h3>Table for Copying to Excel</h3>
-					{this._render_grades_table()}
-				</div>);
-	}
+	return (<div>
+			{_render_rich_grades_table()}
+			<br/><br/><br/>
+			<h3>Basic table for copying to Excel</h3>
+				{_render_grades_table()}
+			</div>);
 
 }
