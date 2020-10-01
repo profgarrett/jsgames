@@ -102,6 +102,11 @@ const KC_NAMES = {
 	KC_IF_AMBIGUOUS_LOGIC: 'kc_if_ambiguous_logic',
 	KC_IF_AMBIGUOUS: 'kc_if_ambiguous',
 
+	// Financial functions
+	KC_PV: 'kc_pv',
+	KC_PV_ANNUITY: 'kc_pv_annuity',
+	KC_FV: 'kc_fv',
+	KC_FV_ANNUITY: 'kc_fv',
 };
 
 

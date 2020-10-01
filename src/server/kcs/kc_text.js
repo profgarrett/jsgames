@@ -1033,7 +1033,7 @@ const kc_text_search = ({
 			...name_base,
 			...kc_text_search_state,
 			description: 'Return the state name, making sure to remove any commas or spaces.',
-			solution_f: '=MID(a1, search(",", a1)+1, 99999)',
+			solution_f: '=MID(a1, search("-", a1)+1, 99999)',
 
 		},{	
 			...test,

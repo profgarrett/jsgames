@@ -35,6 +35,9 @@ const IfLevels = [
 	{ code: 'functionstext1', title: 'Functions - Text 1', description: 'Learn about basic text functions.' },
 	{ code: 'functionstext2', title: 'Functions - Text 2', description: 'Use advanced text functions.' },
 
+	{ code: 'financial1', title: 'Functions - Financial 1', description: 'Introduction to financial functions.' },
+	{ code: 'financial2', title: 'Functions - Financial 2', description: 'More financial functions.' },
+
 	{ code: 'if1', title: 'IF1: Logical comparisons', description: 'Compare numbers and text' },
 	{ code: 'if2', title: 'IF2: Returns', description: 'Return numbers and text' },
 	{ code: 'if3', title: 'IF3: Math', description: 'Embed math into the IF function' },
@@ -445,6 +448,7 @@ const DEFAULT_TUTORIAL_LEVEL_LIST = [
 	'math1', 'math2', 'math3','math4',
 	'functions1', 'functionsdates','functionstext1', 'functionstext2',
 	'if1', 'if2', 'if3', 'if4', 'if5', 'if6', 'if7',
+	'financial1', 'financial2',
 	];
 
 

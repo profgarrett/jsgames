@@ -51,21 +51,21 @@ const kc_if_math_logic = ({
 			description: `The first place to embed simple math expressions is in the logical test.
 					<br/><br/>
 					For example, if we are trying to find find apartments that have at least 1 pet, 
-					we would write <code>=IF(B1+C1+D1>{n}, "{Happy}", "{Sad}")</code>.`,
+					we would write <code>=IF(B1+C1+D1>{n}, "{happy}", "{sad}")</code>.`,
 			instruction: 'Write the formula above below.',
 			
             ...pets_data,
             client_f_format: 'text',
 
-			solution_f: '=IF(B1+C1+D1>{n}, "{Happy}", "{Sad}")',
+			solution_f: '=IF(B1+C1+D1>{n}, "{happy}", "{sad}")',
             template_values: {
                 'n': 'randOf(1,2,3)',
-                'Happy': 'randOf(Happy,Excellent)',
-                'Sad': 'randOf(Poor,Bad)',
+                'happy': 'randOf(Happy,Excellent)',
+                'sad': 'randOf(Poor,Bad)',
             },
 			feedback: [
 				{ 'has': 'references', args: ['b1', 'C1', 'D1'] },
-				{ 'has': 'values', args: ['{n}', '{Happy}', '{Sad}'] },
+				{ 'has': 'values', args: ['{n}', '{happy}', '{sad}'] },
 			],
 
 		},{	...tutorial,
@@ -228,7 +228,7 @@ const kc_if_math_return = ({
             },
 			feedback: [
 				{ 'has': 'references', args: ['c1'] },
-				{ 'has': 'values', args: ['{profit}', '{extra}', '10'] },
+				{ 'has': 'values', args: ['{rev}', '{extra}', '10'] },
 			],
 
 		},{	...tutorial,

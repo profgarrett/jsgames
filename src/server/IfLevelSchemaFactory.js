@@ -27,6 +27,9 @@ const { functionstext1, functionstext2 } = require('./tutorials/functionstext');
 
 const { if1, if2, if3, if4, if5, if6, if7, if8 } = require('./tutorials/if');
 
+const { financial1, financial2 } = require('./tutorials/financial');
+
+
 const { surveymath1, surveymath2 } = require('./tutorials/surveymath');
 const { surveywaiver_non_woodbury_student, surveywaiver_non_woodbury_user, surveywaiver_woodbury_student } = require('./tutorials/surveywaivers');
 const { surveycharts_amt, surveycharts_wu } = require('./tutorials/surveycharts');
@@ -56,6 +59,7 @@ const LEVEL_GENS = {
 	functionsdates, 
 	functionstext1, functionstext2,
 	if1, if2, if3, if4, if5, if6, if7, if8, 
+	financial1, financial2,
 	surveymath1, surveymath2,
 	surveywaiver_non_woodbury_student, surveywaiver_non_woodbury_user, surveywaiver_woodbury_student,
 	surveycharts_amt, surveycharts_wu

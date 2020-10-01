@@ -4,7 +4,7 @@ import type { AdaptiveKC } from './kc';
 
 const farm1_data = {
 	column_titles: ['Alpacas', 'Baboon', 'Camels' ],
-	column_formats: [ ',', ',', '$' ],
+	column_formats: [ ',', ',', ',' ],
 	client_f_format: ',',
 	tests: [
 			{ 'a': 54, 'b': 83, 'c': 10 }, 
@@ -39,7 +39,7 @@ const tutorial_pages = [
             the steps with parenthesis.
             <br/><br/>
             For example, if you were going to add two numbers together and then
-            find two thirds, you would write <code>=(a1+b1) * 1/3</code>
+            find one-sixth, you would write <code>=(a1+b1) * 1/6</code>
             `,
 		instruction: `Type in <code>=(A1+B1) * 1/{n}</code>.`,
 		solution_f: '=(a1+b1) * 1/{n}', 
