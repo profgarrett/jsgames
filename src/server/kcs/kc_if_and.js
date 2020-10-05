@@ -250,7 +250,6 @@ const kc_if_and_logic = ({
                     'cell1': 'popCell(B1,C1)',
                 },
                 feedback: [
-                    { 'has': 'symbols', args: ['<=', '>=']},
                     { 'has': 'functions', args: ['AND'] },
                     { 'has': 'references', args: ['{cell1_ref}'] },
                 ],

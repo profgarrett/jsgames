@@ -165,12 +165,12 @@ const kc_if_math_logic = ({
                 should be charged \${outYes}, and all others \${outNo}.`,
 
             client_f_format: '$',
-			solution_f: '=if(B1+C1+D1<={n}, {outYes}, {outNo})',
+			solution_f: '=if(B1+C1+D1>={n}, {outYes}, {outNo})',
             template_values: {
                 'n': 'randOf(1,2)',
                 'gte': 'randOf(at or over,equal to or greater than)',
-                'outNo': 'randOf(20,30,40)',
                 'outYes': 'randOf(5,10,15)',
+                'outNo': 'randOf(20,30,40)',
             },
 
         }
