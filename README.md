@@ -16,7 +16,7 @@ git clone http://github.com/profgarrett/jsgames
 
 Install NPM packages
 ```
-npm pull
+npm install
 ```
 
 Create a secret.js file in the \build\server folder. The Bugsnag API is optional, or use DEBUG. Local bugs are pushed to a log.txt file by default.

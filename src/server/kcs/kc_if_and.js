@@ -235,7 +235,7 @@ const kc_if_and_logic = ({
 						<code>=AND(1<=A1, A1<=4)</code>
 					</br><br/>
 					If you were asked to see if A1 was between 1 and 4 <i>exclusive</i>, <br/> use
-						<code>=AND(1<A1, A1<4)</code>
+						<code>=AND(1&lt;A1, A1&lt;4)</code>
 					<br/><br/>
 					If you have any trouble remembering this, remember that <i>inclu</i>sive means to <i>inclu</i>de
 						the numbers in the problem, and <i>exclu</i>sive means to <i>exclu</i>de them.`,
@@ -323,7 +323,7 @@ const kc_if_and_logic = ({
         },{ ...test,
             ...animals2_data,
             
-			description: `Do {cell1_title} number between {n1} and {n2} (inclusive)?`,
+			description: `Do {cell1_title} number between {n1} and 3 (inclusive)?`,
 
 			solution_f: '=AND({cell1_ref}>={n1}, {cell1_ref}<=3)',
             template_values: {
@@ -347,7 +347,7 @@ const kc_if_and_logic = ({
         },{ ...test,
             ...animals2_data,
             
-			description: `Are {cell1_title} over {n1} and {cell2_title} under {n2}?`,
+			description: `Are {cell1_title} over {n1} and {cell2_title} under or equal to {n2}?`,
 
 			solution_f: '=AND({cell1_ref}>{n1}, {cell2_ref}<={n2})',
             template_values: {
@@ -644,7 +644,7 @@ const kc_if_and = ({
 			
             ...animals_data,
 
-			solution_f: '=IF(and({cell1_ref}<{n}, {cell1_ref}<{n}), "Bad", "Ok")', 
+			solution_f: '=IF(and({cell1_ref}<{n}, {cell2_ref}<{n}), "Bad", "Ok")', 
             template_values: {
                 'cell1': 'popCell(a1,b1,c1,d1)',
                 'cell2': 'popCell(a1,b1,c1,d1)',

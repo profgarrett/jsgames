@@ -7,6 +7,8 @@ import { IfLevelSchema } from './../../shared/IfLevelSchema';
 import type { Node } from 'react';
 import { HtmlDiv } from './../components/Misc';
 
+import { StyledReactTable } from './../components/StyledReactTable';
+
 type DetailPropsType = {
 	levels: Array<IfLevelSchema>
 };
@@ -56,7 +58,7 @@ export default class PagesTable extends React.Component<DetailPropsType> {
 			Header: 'html',
 			accessor: answer => <HtmlDiv html={answer.html} />,
 			width: 450
-		}, {
+/*		}, {
 			expander: true,
 			Header: () => <b>More</b>,
 			width: 65,
@@ -69,7 +71,9 @@ export default class PagesTable extends React.Component<DetailPropsType> {
 			style: {
 				cursor: 'pointer',
 				fontSize: 32
+				
 			}
+*/
 		}];
 
 
@@ -86,10 +90,10 @@ export default class PagesTable extends React.Component<DetailPropsType> {
 										{ tag.tag }</span>) }
 						</div>
 					</div>
-					<ReactTable 
-						data={question.answers} 
+					<StyledReactTable 
+						data={question.answers}
 						filterable={true}
-						columns={columns}
+						columns={columns} 
 						defaultSorted={['type', 'seconds']}
 						defaultPageSize={question.answers.length}
 						style={{ backgroundColor: '#f5f5f5' }}

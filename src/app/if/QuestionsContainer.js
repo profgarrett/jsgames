@@ -100,8 +100,8 @@ export default class QuestionsContainer extends React.Component<QuestionsPropsTy
 			);
 
 		const default_type =  'IfPageChoiceSchema'; //'IfPageFormulaSchema|IfPageHarsonsSchema';
-		const default_output = 'chart';
-		const default_level = 'math3';
+		const default_output = 'excel';
+		const default_level = 'if';
 
 			//'IfPageChoice'; 
 			//'IfPageNumberAnswerSchema'; //'IfPageFormulaSchema|IfPageHarsonsSchema'

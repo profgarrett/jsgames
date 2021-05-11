@@ -104,9 +104,13 @@ const KC_NAMES = {
 
 	// Financial functions
 	KC_PV: 'kc_pv',
+	KC_PV_ADJUST: 'kc_pv_adjust',
 	KC_PV_ANNUITY: 'kc_pv_annuity',
+	KC_PV_ANNUITY_ADJUST: 'kc_pv_annuity_adjust',
 	KC_FV: 'kc_fv',
+	KC_FV_ADJUST: 'kc_fv_adjust',
 	KC_FV_ANNUITY: 'kc_fv',
+	KC_FV_ANNUITY_ADJUST: 'kc_fv_adjust',
 };
 
 

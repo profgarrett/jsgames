@@ -72,7 +72,7 @@ router.get('/questions/', nocache, require_logged_in_user,
 				: parseInt(req.query.iduser, 0);
 
 		const sql_params = [
-			param_code, param_code,
+			param_code, param_code, param_code,
 			param_idsection, param_idsection,
 			param_iduser, param_iduser
 		];
@@ -80,8 +80,12 @@ router.get('/questions/', nocache, require_logged_in_user,
 
 		// Make sure that the given code is valid. If not, then immediately fail
 		const code_in_array = IfLevels.filter( l => l.code === param_code).map( l => l.code );
-		if(param_code !== '*' && param_code !== null && code_in_array.length !== 1)
-			throw new Error('Invalid code type '+ param_code + ' passed to recent_levels');
+		if( 
+			param_code !== '*' 
+			&& param_code !== 'if' 
+			&& param_code !== null 
+			&& code_in_array.length !== 1)
+			throw new Error('Invalid code type '+ param_code + ' passed to questions');
 
 
 		// Build SQL statement.
@@ -97,7 +101,9 @@ router.get('/questions/', nocache, require_logged_in_user,
 			WHERE 
 			
 				(
-				(iflevels.code = ? OR ? = '*') 
+					iflevels.code = ? 
+					OR ? = '*'
+					OR ? = 'if' && LEFT(iflevels.code, 2) = 'if'
 				) AND
 
 				(sections.idsection = ? OR ? = '*') AND 

@@ -240,40 +240,93 @@ router.delete('/level/:id',
 });
 
 
+
+/** 
+	Delete a single level.
+	Only allow for admins.
+*/
+router.post('/level/:id/delete', 
+	nocache, require_logged_in_user,
+	async (req: $Request, res: $Response, next: NextFunction): Promise<any> => {
+	try {
+		const sql = 'DELETE FROM iflevels WHERE _id = ? ';
+		const _id = req.params.id;
+		const username = get_username_or_emptystring(req, res);
+
+		if(username !== ADMIN_USERNAME) {
+			console.log([username, ADMIN_USERNAME])
+			return res.sendStatus(401); // unauthorized.
+		}
+
+		let delete_results = await run_mysql_query(sql, [_id] );
+
+		res.json({success: (delete_results.affectedRows >= 1)});
+
+	} catch (e) {
+		log_error(e);
+		next(e);
+	}
+});
+
+
 // Update One
 router.post('/level/:id', 
 	nocache, require_logged_in_user,
 	async (req: $Request, res: $Response, next: NextFunction): Promise<any> => {
 	try {
+		const replace = req.query.replace === '1'; // replace the entire object?
 		const validate_only = req.query.validate_only === '1'; // do we just check the current page?
 		const username = get_username_or_emptystring(req, res);
+		const is_admin = ADMIN_USERNAME === username;
 		const _id = req.params.id;
-		const sql_select = 'SELECT * FROM iflevels WHERE _id = ? AND username = ?';
+		const sql_select = 'SELECT * FROM iflevels WHERE _id = ?';
 		
 
-		let select_results = await run_mysql_query(sql_select, [_id, username]);
+		let select_results = await run_mysql_query(sql_select, [ _id ]);
 
 		// Return 404 if no results match.
 		if(select_results.length === 0) return res.sendStatus(404);
 
-		// Ensure that this level isn't completed.
-		if(select_results[0].completed) return res.sendStatus(401);
+		// new iflevel object.
+		let iflevel = null; 
 
-		// update.
-		let iflevel = new IfLevelSchema(select_results[0]); // initialize from sql
-		iflevel.updateUserFields(req.body); // update all properties from client that can be changed.
+		
+		// Check permissions. 
+		// Different types of updates. If an admin, allow a whole-sale replacement
+		// If not, then only allow updating legal client-provided stuff.
+		if( replace  ) {
+			if( is_admin ) {
+				// Allow any changes. Replace old object with new object.
+				// Used to fix issues with levels, so no validation is needed.
+				iflevel = new IfLevelSchema(req.body);
+			} else {
+				return res.sendStatus(401);
+			}
+
+		} else {
+			// Fail if the level is completed.
+			if(select_results[0].completed) return res.sendStatus(401);
+
+			// Fail if not the owner.
+			if( select_results[0].username !== username ) {
+				return res.sendStatus(401);
+			} else {
+				// initialize from sql
+				iflevel = new IfLevelSchema(select_results[0]); 
+				
+				// update all properties from client that can be changed.
+				iflevel.updateUserFields(req.body); 
+			}
+			
+		}
 
 		// Make sure that there is feedback.
 		iflevel.pages.filter( p => p.client_feedback === null).filter( p=> p.type === 'IfPageFormulaSchema').map( p => {
 			throw new Error('Client feedback should not be null');
 		});
 
-		// Look to see if there is client_feedback. If so, then create a history event showing this and 
-		// increment the hints
-		//iflevel.pages.forEach( p:  => )
-
-		// If we're just supposed to validate, don't add a new page.
-		if(!validate_only) {
+		// Add a new page, unless we are only validating OR replacing.
+		if( validate_only === false && replace === false  ) {
 			// Update and add new page if needed.
 			IfLevelSchemaFactory.addPageOrMarkAsComplete(iflevel); 
 		}
@@ -281,11 +334,16 @@ router.post('/level/:id',
 		// Update level in db.
 		const update_results = await update_level_in_db(iflevel);
 
+console.log(update_results);
+console.log(iflevel.title);
+console.log(iflevel);
+
 		// Ensure exactly 1 item was updated.
 		if(update_results.changedRows !== 1) return res.sendStatus(500);
 
 		res.json(return_level_prepared_for_transmit(iflevel, true));
 	} catch (e) {
+		console.log(e);
 		log_error(e);
 		next(e);
 	}

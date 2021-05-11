@@ -99,7 +99,7 @@ const kc_if_or_logic = ({
                 Eventually, we will want to use this in <code>IF</code> 
                 But, for now, focus only on the logical test, returning either <code>TRUE</code> or <code>FALSE</code>.
                 `,
-			instruction: 'Write a formula that will say <code>TRUE</code> if sales in Boson or Columbus are equal to {n1}.',
+			instruction: 'Write a formula that will say <code>TRUE</code> if sales in Boston or Dallas are equal to {n1}.',
 
 			solution_f: '=OR(B1={n1}, D1={n1})',
             ...product_data,
@@ -225,10 +225,10 @@ const kc_if_or_logic = ({
 						<li><b>Exclusive</b> means to exclude the top & bottom numbers. (i.e., 2, 3)</li>
 					</ul>
 					So, if you were asked to test if A1 was outside the range of 1 and 4 <i>inclusive</i>, write<br/>
-						<code>=OR(A1>=1, A1<=4)</code>
+						<code>=OR(A1<=1, 4<=A1)</code>
 					</br><br/>
-					If you were asked to see if A1 was between 1 and 4 <i>exclusive</i>, <br/> use
-						<code>=OR(A1>1, A1<4)</code>
+					If you were asked to see if A1 was outside the range of 1 and 4 <i>exclusive</i>, <br/> use
+						<code>=OR(A1&lt;1, 4&lt;A1)</code>
 					<br/><br/>
 					If you have any trouble remembering this, remember that <i>inclu</i>sive means to <i>inclu</i>de
 						the numbers in the problem, and <i>exclu</i>sive means to <i>exclu</i>de them.`,
@@ -408,7 +408,7 @@ const kc_if_or = ({
 			
             ...animals_data,
 
-			solution_f: '=IF(OR({cell1_ref}<{n}, {cell1_ref}<{n}), "Bad", "Ok")', 
+			solution_f: '=IF(OR({cell1_ref}<{n}, {cell2_ref}<{n}), "Bad", "Ok")', 
             template_values: {
                 'cell1': 'popCell(a1,b1,c1,d1)',
                 'cell2': 'popCell(a1,b1,c1,d1)',
@@ -578,15 +578,14 @@ const kc_if_or = ({
         },{ ...test,
             ...animals2_data,
             
-			description: `Are either {cell1_title} equal to or less than {n1}, or {cell2_title} greater or equal to {n2}?
+			description: `Are either {cell1_title} equal to or less than 1, or {cell2_title} greater or equal to {n2}?
                 <br/><br/>
                 Return <code>{iftrue}</code> if this is correct, or <code>{iffalse}</code> if not.`,
 
-			solution_f: '=IF(OR({cell1_ref}<={n1}, {cell2_ref}>={n2}), "{iftrue}", "{iffalse}")',
+			solution_f: '=IF(OR({cell1_ref}<=1, {cell2_ref}>={n2}), "{iftrue}", "{iffalse}")',
             template_values: {
                 'cell1': 'popCell(b1,c1,d1)',
                 'cell2': 'popCell(b1,c1,d1)',
-                'n1': '1',
                 'n2': '[3-4]',
                 'iftrue': 'randOf(Yes,Good,Correct)',
                 'iffalse': 'randOf(No,Bad,Incorrect)',            },

@@ -996,7 +996,7 @@ const kc_if_or_boolean = ({
                 { 'has': 'values', args: ['{n}','{iffalse}', '{iftrue}' ] },
                 { 'has': 'symbols', args: ['=']},
                 { 'has': 'functions', args: ['OR','IF'] },
-                { 'has': 'references', args: ['A1', 'C1'] },
+                { 'has': 'references', args: ['B1', 'C1'] },
             ],
 
 

@@ -56,6 +56,7 @@ export default class Filter extends React.Component<PropsType, ContainerStateTyp
 		if(typeof filters.levels !== 'undefined') {
 			filters.levels = IfLevels.map( l => { return { value: l.code, label: l.title }; });
 			filters.levels.unshift({ value:'', label: 'All'}); // add the all option
+			filters.levels.unshift({ value: 'if', label: 'All Ifs'}); // add the all if option
 		}
 
 		// Populate page types

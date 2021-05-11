@@ -1,5 +1,5 @@
 //@flow
-const { JWT_AUTH_SECRET } = require('./secret.js'); 
+const { JWT_AUTH_SECRET, ADMIN_USERNAME } = require('./secret.js'); 
 const { IfLevelSchema, IfLevelPagelessSchema } = require('./../shared/IfLevelSchema');
 const { from_mysql_to_utc, run_mysql_query } = require('./mysql');
 const bcrypt = require('bcryptjs');
@@ -159,9 +159,7 @@ function logout_user(req: $Request, res: $Response) {
 	res.clearCookie('x-access-token');
 	res.clearCookie('x-access-token-refreshed');
 	res.clearCookie('x-access-token-username');
-	res.clearCookie('iduser');
 	res.clearCookie('is-admin');
-	res.clearCookie('is-teacher');
 }
 
 /**
@@ -184,11 +182,8 @@ function require_logged_in_user(req: $Request, res: $Response, next: NextFunctio
 		res.cookie('x-access-token-username', username, options);
 		res.cookie('x-access-token-refreshed', last, options);
 
-		// Perms. Used on client side to enable/hide information.
-		// @TODO Permissions
-		// res.cookie('iduser', '?');
-		// res.cookie('is-admin', 'False');
-		// res.cookie('is-teacher', 'False');
+		// Perms. Used on client side to enable/hide interface.
+		res.cookie('is-admin', ADMIN_USERNAME === username ? 'True' : 'False' );
 		
 		return next();
 	} 
@@ -232,10 +227,8 @@ async function login_user(username: string, password: string, res: $Response): a
 	res.cookie('x-access-token-username', username, options);
 	res.cookie('x-access-token-refreshed', last, options);
 
-	// Perms. Used on client side to enable/hide information.
-	//res.cookie('iduser', '?');
-	//res.cookie('is-admin', 'False');
-	//res.cookie('is-teacher', 'False');
+	// Perms. Used on client side to enable/hide interface.
+	res.cookie('is-admin', ADMIN_USERNAME === username ? 'True' : 'False' );
 
 }
 

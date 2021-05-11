@@ -1,4 +1,5 @@
-//@ flow
+// @flow
+
 import React from 'react';
 import type { Node } from 'react';
 import { ResponsiveLine } from '@nivo/line'
@@ -81,6 +82,7 @@ export function ChartLine_StockDollar(cd_param: ChartDef): Node {
 	}
 
 
+
 	return <ResponsiveLine
 		data={cd.data}
 		keys={cd.keys}
@@ -97,7 +99,8 @@ export function ChartLine_StockDollar(cd_param: ChartDef): Node {
 		axisBottom={{ tickPadding: 12 }}
 		theme={{ fontSize: 20, }}
 		animate={ false }
+		
 		interactive={ true }
-	/>
+	/>;
 }
 

@@ -20,9 +20,7 @@ function get_cookie(arg: string): string {
 
 type BrowserUserType = {
 	username: string,
-	iduser: string,
 	isAdmin: boolean,
-	isTeacher: boolean
 };
 
 
@@ -42,9 +40,7 @@ type BrowserUserType = {
 export function getUserFromBrowser(): BrowserUserType {
 	const user = {
 		username: get_cookie('x-access-token-username'),
-		iduser: get_cookie('id-user'),
 		isAdmin: get_cookie('is-admin') === 'True',
-		isTeacher: get_cookie('is-teacher') === 'True'
 	};
 
 	// If the username is an email address, then replace the encoded @ with the proper symbol.

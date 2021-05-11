@@ -216,6 +216,9 @@ const tutorial_pages = [
 		solution_f: '=YEAR(a1)-1',
 		client_f_format: '0',
 		code: 'tutorial'
+
+		/* Disabled next due to some issue with days on server v. client. 
+			Wrong day on server? caused 
 	}, {
 		type: 'IfPageFormulaSchema',
 		description: `The <code>NETWORKDAYS()</code> function will return the number
@@ -231,6 +234,7 @@ const tutorial_pages = [
 		solution_f: '=NetWorkDays(a1, now())',
 		client_f_format: '0',
 		code: 'tutorial'
+		*/
 	}
 ];
 
@@ -260,12 +264,14 @@ const test_pages = [
 		description: 'What is the current month? Hint: you will need two functions, one of which is NOW()',
 		solution_f: '=MONTH(NOW())',
 	}, {
+		/* Disabled due to networkdays problem
 		...base,
 		description: 'How many working days are between the start and stop dates?',
 		tests: DataFactory.randDates(6, 2, { a_range: -30, b_range: -5 }),
 		column_titles: ['Start Date', 'End Date'],
 		solution_f: '=networkdays(a1, b1)',
 	}, {
+		*/
 		...base,
 		description: `Three years after the sale, buyers can still get a refund. 
 					Write a formula to give the year in which the refund option expires. Hint: find the year, and add to it!`,

@@ -106,19 +106,20 @@ export default class Login extends React.Component<PropsType, StateType> {
 			? 'Have a problem or input?'
 			: 'Error submitting, please email your feedback to profgarrett@gmail.com';
 
-		const button = !this.state.error 
+		const button = (!this.state.error)
 			? 	<Button 
 					type='submit' 
 					variant='primary'
+					style={{ marginLeft: 10 }}
 					disabled={this.state.submitting}
 					>
 					Submit</Button>
-			: 	<Button 
-					variant='secondary'	
-					onClick={ () => this.setState({ expanded: false, message: '', error: false })} 
-					>
-					Close
-					</Button>;
+			: 	null;
+
+		const close = <Button
+			variant='secondary'
+			onClick={ () => this.setState({ expanded: false, message: ''})}
+			>Close</Button>
 
 		if(this.state.expanded) {
 			return (<div style={expandedStyle}>
@@ -134,6 +135,7 @@ export default class Login extends React.Component<PropsType, StateType> {
 									placeholder='Type in your feedback'
 								/>
 								<div style={{ textAlign: 'right', marginTop: 10 }}>
+									{ close }
 									{ button }
 								</div>
 							</Form.Group>

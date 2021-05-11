@@ -226,10 +226,10 @@ const kc_if_ambiguous_logic = ({
 						<li><b>Exclusive</b> means to exclude the top & bottom numbers. (i.e., 2, 3)</li>
 					</ul>
 					So, if you were asked to test if A1 was outside the range of 1 and 4 <i>inclusive</i>, write<br/>
-						<code>=OR(A1>=1, A1<=4)</code>
+						<code>=OR(A1>=1, 4<=A1)</code>
 					</br><br/>
-					If you were asked to see if A1 was between 1 and 4 <i>exclusive</i>, <br/> use
-						<code>=OR(A1>1, A1<4)</code>
+					If you were asked to see if A1 was outside the range of 1 and 4 <i>exclusive</i>, <br/> use
+						<code>=OR(A1&lt;1, 4&lt;A1)</code>
 					<br/><br/>
 					If you have any trouble remembering this, remember that <i>inclu</i>sive means to <i>inclu</i>de
 						the numbers in the problem, and <i>exclu</i>sive means to <i>exclu</i>de them.`,

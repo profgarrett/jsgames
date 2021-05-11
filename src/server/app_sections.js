@@ -49,6 +49,7 @@ router.get('/sections',
 		const params = [username];
 
 		const sections = await run_mysql_query(sql, params);
+		console.log(sections);
 		res.json(sections);
 
 	} catch (e) {

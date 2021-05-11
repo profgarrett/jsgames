@@ -58,8 +58,8 @@ const fv_quiz_data = {
 
 const kc_fv = ({
 	kc: KC_NAMES.KC_FV,
-	until_correct: 6,
-	until_total: 10,
+	until_correct: 8,
+	until_total: 16,
 	tutorial_pages: [
 
 		{	...tutorial,
@@ -302,7 +302,7 @@ add_if_undefined( { kcs: [ KC_NAMES.KC_FV ] }, kc_fv.test_pages );
 
 const kc_fv_annuity = ({
 	kc: KC_NAMES.KC_FV_ANNUITY,
-	until_correct: 6,
+	until_correct: 8,
 	until_total: 10,
 	tutorial_pages: [
 

@@ -17,6 +17,7 @@ type DetailPropsType = {
 // Return the count for the given tag. 
 // Returns 0 if not found.
 function get_tag_n( tags: Array<any>, tag: string): number {
+	if(typeof tags === 'undefined') return 0;
 	for(let i=0; i<tags.length; i++) {
 		if(tags[i].tag == tag) return tags[i].n;
 	}
@@ -158,7 +159,7 @@ export default class QuestionsPagesExcelFormula extends React.Component<DetailPr
 			if(!answer.page.completed) return;
 			if(answer.page.type === 'IfPageChoiceSchema' || answer.page.type === 'IfPageTextSchema' || answer.page.type === 'IfPageParsonsSchema') return;
 
-			console.log(answer);
+			//console.log(answer);
 
 			const local = {
 				a_standardize_formula_case: answer.page.standardize_formula_case ? 1 : 0,
@@ -265,7 +266,7 @@ export default class QuestionsPagesExcelFormula extends React.Component<DetailPr
 
 	render(): Node {
 		const levels = this.props.levels;
-		if(levels) console.log(levels[0].questions[4]);
+		//if(levels) console.log(levels[0].questions[4]);
 		const flat = this.flatten_levels(levels);
 		const rows = flat.rows;
 		const columns = flat.columns;

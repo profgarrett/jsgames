@@ -1,7 +1,8 @@
-//@ flow
+// @flow
+
 import React from 'react';
 import type { Node } from 'react';
-import { ResponsiveBar, Bar } from '@nivo/bar'
+import { ResponsiveBar } from '@nivo/bar'
 import { ChartDef } from './../../../shared/ChartDef';
 
 const _default = {
@@ -105,8 +106,9 @@ export function ChartStackedBar_Plain(cd_param: ChartDef): Node {
         labelFormat={'$'}
 		//labelFormat={ d => <tspan style={{  marginBottom: 10, fontSize: 24 }} y={ -20 }>${ d+distortion }</tspan> }
 		enableGridY={true}
-        legends={ cd.legends}
-		axisLeft={ cd.axisLeft}
+		
+        legends={ cd.legends }
+		axisLeft={ cd.axisLeft }
 		axisBottom={
 			{ 	tickSize: 0,
 				fontSize: 30
@@ -114,6 +116,6 @@ export function ChartStackedBar_Plain(cd_param: ChartDef): Node {
 		}
 		theme={{ fontSize: '18px', }}
 		isInteractive={false}
-		animate={false}
-	/>
+		animate={false} 
+	/>;
 }

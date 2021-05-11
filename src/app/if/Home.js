@@ -10,6 +10,7 @@ import RecentContainer from './RecentContainer';
 import GradesContainer from './GradesContainer';
 import QuestionsContainer from './QuestionsContainer';
 import LevelDebugContainer from './LevelDebugContainer';
+import LevelRawContainer from './LevelRawContainer';
 import MyProgressContainer from './MyProgressContainer';
 import ClassProgressContainer from './ClassProgressContainer';
 import {KCContainer} from './KCContainer';
@@ -29,6 +30,7 @@ export default function Home() {
 				<Route exact path='/ifgame/level/:_id/play' component={LevelPlayContainer} />
 				<Route exact path='/ifgame/level/:_id/score' component={LevelScoreContainer} />
 				<Route exact path='/ifgame/leveldebug/:_id' component={LevelDebugContainer} />
+				<Route exact path='/ifgame/levelraw/:_id' component={LevelRawContainer} />
 			</Switch>
 		</Router>
 	);

@@ -1,7 +1,7 @@
 // @flow
 const { LinearGen, UntilGen } = require('./../Gens');
 
-const { kc_pv, kc_pv_annuity } = require('./../kcs/kc_pv'); 
+const { kc_pv, kc_pv_adjust, kc_pv_annuity, kc_pv_annuity_adjust } = require('./../kcs/kc_pv'); 
 const { kc_fv, kc_fv_annuity } = require('./../kcs/kc_fv');
 
 const { finish_questions } = require('./../pages/finish_questions');
@@ -57,8 +57,14 @@ const financial1 = ({
 			makeInertiaGenFromKC(kc_pv),
 			ReviewNextConcept, 
 			
+			makeInertiaGenFromKC(kc_pv_adjust),
+			ReviewNextConcept, 
+
 			makeInertiaGenFromKC(kc_fv),
 			ReviewNextConcept, 
+
+			//makeInertiaGenFromKC(kc_fv_adjust),
+			//ReviewNextConcept, 
 
 			...finish_questions
 		]
@@ -88,18 +94,28 @@ const financial2 = ({
 				</ul>`
             },
 
-//			makeInertiaGenFromKC(kc_pv_annuity),
-//			ReviewNextConcept, 
+			makeInertiaGenFromKC(kc_pv_annuity),
+			ReviewNextConcept, 
 			
+			makeInertiaGenFromKC(kc_pv_annuity_adjust),
+			ReviewNextConcept, 
 
-//			makeInertiaGenFromKC(kc_pv_annuity),
-//			ReviewNextConcept, 
+
+			makeInertiaGenFromKC(kc_fv_annuity),
+			ReviewNextConcept, 
+
+
+			//makeInertiaGenFromKC(kc_fv_annuity_adjust),
+			//ReviewNextConcept, 
+
+
 
 
 			...finish_questions
 		]
 	}: GenType)
 }: LevelSchemaFactoryType);
+
 
 
 module.exports = { financial1, financial2 };

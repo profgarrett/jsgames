@@ -189,7 +189,7 @@ async function _update_get_version(): Promise<any> {
 /*
 	Used to update a single level in the database.
 */
-async function update_level_in_db(level: IfLevelSchema): Promise<any> {
+async function update_level_in_db(level: IfLevelSchema ): Promise<any> {
 	const sql_update = `UPDATE iflevels 
 			SET completed = ?, 
 				pages = ?, 
@@ -197,6 +197,7 @@ async function update_level_in_db(level: IfLevelSchema): Promise<any> {
 				updated = ?,
 				props = ?,
 				props_version = ?
+				
 			WHERE _id = ? AND username = ?`;
 	
 	// need to refresh before saving. Otherwise, this will be set to the old mysql version.

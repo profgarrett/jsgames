@@ -6,12 +6,12 @@ import { Table, Button, Modal } from 'react-bootstrap';
 
 import { PrettyDate } from './../components/Misc';
 import { StyledReactTable } from './../components/StyledReactTable';
-
+import { getUserFromBrowser } from './../components/Authentication';
 import { LevelModal } from './LevelModal';
 import { IfLevelPagelessSchema } from './../../shared/IfLevelSchema';
 import type { Node } from 'react';
 import { DEMO_MODE } from './../../server/secret';
-
+import { Link } from 'react-router-dom';
 
 type StateType = {
 	level_id: ?string, // should we show a modal box?
@@ -33,6 +33,9 @@ export default function Recent(props: PropsType) {
 		setLevel_id(null); 
 	};
 
+
+	const user = getUserFromBrowser();
+	const isAdmin = user.isAdmin;
 
 	// Render
 		if(props.levels.length < 1) 
@@ -78,6 +81,14 @@ export default function Recent(props: PropsType) {
 				}
 				} >View</Button>
 		}];
+
+		if(isAdmin) {
+			columns.push({
+				id: 'edit',
+				Header: 'Edit',
+				accessor: (l: IfLevelPagelessSchema) => <Link to={'/ifgame/levelraw/'+l._id}>edit</Link>
+			});
+		}
 
 		// Fixes old bug, where some people's levels didn't have a props value.
 		const data = props.levels.filter( l => l.props !== null ); 

@@ -239,7 +239,7 @@ const kc_if_math_return = ({
 			instruction: 'Write the IF formula.',
 			
              ...sales_data,
-            solution_f: '=IF(A1>"High Tech", 0.{high}*c1, 0.{low}*c1)',
+            solution_f: '=IF(A1="High Tech", 0.{high}*c1, 0.{low}*c1)',
             client_f_format: '$',
 
             template_values: {
@@ -261,7 +261,7 @@ const kc_if_math_return = ({
 			instruction: 'Write the IF formula.',
 			
              ...sales_data,
-            solution_f: '=IF(A1>"High Tech", c1*(1-0.{n}), c1)',
+            solution_f: '=IF(A1="High Tech", c1*(1-0.{n}), c1)',
             client_f_format: '$',
 
             template_values: {
@@ -335,7 +335,7 @@ const kc_if_math_return = ({
             description: `The CA revenue numbers were entered incorrectly. Create an IF that 
                 increases CA revenue by {increase}0%, but returns TX unchanged.`,
 
-			solution_f: '=IF(B1="CA", d1*(1+.{increase}), d1)', 
+			solution_f: '=IF(B1="CA", c1*(1+.{increase}), c1)', 
             template_values: {
                 'increase': 'randOf(1,2,3,4)',
             },
@@ -343,8 +343,8 @@ const kc_if_math_return = ({
         },{ ...test,
             ...sales_data,
 
-            description: `The TX profit numbers were entered incorrectly. Create an IF that 
-                decreases TX profit by {decrease}0%, but returns CA unchanged.`,
+            description: `The TX expenses numbers were entered incorrectly. Create an IF that 
+                decreases TX expenses by {decrease}0%, but returns CA unchanged.`,
 
 			solution_f: '=IF(B1="TX", d1*(1-0.{decrease}), d1)', 
             template_values: {
