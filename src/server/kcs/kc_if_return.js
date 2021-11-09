@@ -19,7 +19,7 @@ const tutorial = {
 	type: 'IfPageFormulaSchema',
 	code: 'tutorial',
     client_f_format: '0',
-}
+};
 const test = {
 	type: 'IfPageFormulaSchema',
 	code: 'test',
@@ -243,7 +243,7 @@ const duck_data = {
         { 'a': 'Maximilian', 'b': 'A', 'c': 'D' }
     ],
     column_formats: [ 'text', 'text', 'text', 'text' ],
-}
+};
 const duck_test = {
     ...test,
     ...duck_data,

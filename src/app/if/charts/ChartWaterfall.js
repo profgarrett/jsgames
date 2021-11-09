@@ -1,7 +1,8 @@
-//@ flow
+// @flow
+
 import React from 'react';
 import type { Node } from 'react';
-import { ResponsiveBar, Bar } from '@nivo/bar'
+import { ResponsiveBar } from '@nivo/bar'
 import { ChartDef } from './../../../shared/ChartDef';
 
 const _default = {
@@ -71,7 +72,7 @@ const THEMES = {
 	},
 
 	
-}
+};
 
 // Return the correct color.
 const getColor = ( obj: any, theme: object): string => {
@@ -85,7 +86,7 @@ const getColor = ( obj: any, theme: object): string => {
     } else {
         throw new Error('Invalid obj.id in ChartWaterFall');
     }
-}
+};
 
 
 export function ChartWaterfall_Plain(cd_param: ChartDef): Node {
@@ -153,6 +154,7 @@ export function ChartWaterfall_Plain(cd_param: ChartDef): Node {
 		enableLabel={true}
 		labelFormat= { d => <tspan y={-20}> {d}</tspan> }
 		label={ d => {
+			if(d.value === 0) return '';
 			if(d.id === 'Positive') return '$' + d.value;
 			if(d.id === 'Negative') return '-$' + d.value + '';
 			else return '';
@@ -168,5 +170,5 @@ export function ChartWaterfall_Plain(cd_param: ChartDef): Node {
 		theme={{ fontSize: '18px', }}
 		isInteractive={false}
 		animate={false}
-	/>
+	/>;
 }

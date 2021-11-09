@@ -1,7 +1,7 @@
 // @flow
 import React from 'react';
 import type { Node } from 'react';
-import { Button, Table, Card, Popover, Overlay, OverlayTrigger, Modal } from 'react-bootstrap';
+import { Button, Table, Card, Popover, OverlayTrigger, Modal } from 'react-bootstrap';
 import { HtmlSpan, HtmlDiv, 
 		HandPointRightGlyphicon, IncorrectGlyphicon, CorrectGlyphicon, 
 		CompletedGlyphicon, ProgressGlyphicon} from './../components/Misc';
@@ -20,7 +20,6 @@ import ShortTextAnswer from './IfPlayComponents/ShortTextAnswer';
 import { CacheBuster } from './../components/CacheBuster';
 
 import { buildChart } from './charts/Charts.js';
-import { ChartDef } from './../../shared/ChartDef';
 
 import { fill_template } from './../../shared/template.js';
 import { IfLevelSchema } from './../../shared/IfLevelSchema.js';
@@ -70,7 +69,7 @@ const build_score = (pages: Array<IfPageBaseSchema>): any => pages.map( (p: IfPa
 				html = desc + '<br/><div class="well well-sm">'+p.toString()+'</div>'; // style={background} 
 				g = <CorrectGlyphicon />;
 			} else {
-				title = "Sorry, but that's not correct";
+				title = 'Sorry, but that\'s not correct';
 				html = desc + '<br/><div class="well well-sm">'+p.toString()+'</div>';
 				g = <IncorrectGlyphicon />;
 			}
@@ -134,7 +133,7 @@ type StateType = {
 	// moving to a new page.
 	lastPageI_displayed_at_time: Object,
 	// handle, used to track js event.
-	handle: any,
+	handle: any
 };
 
 export default class IfLevelPlay extends React.Component<PropsType, StateType> {
@@ -198,11 +197,11 @@ export default class IfLevelPlay extends React.Component<PropsType, StateType> {
 	// Tick is a way of regularly updating things on the page.
 	// Needed to update the timer even for the 'don't submit too fast' feature.
 	_on_tick() {
-		const pageI = this.props.selected_page_index; // used to keep track of the page #
+		//const pageI = this.props.selected_page_index; // used to keep track of the page #
 		const page = this.props.level.pages[this.props.selected_page_index];
 		
 		if(page.time_limit !== null || typeof page.time_minimum === 'number') {
-			this.setState( (s, p) => { return {} } );
+			this.setState( () => { return {}; } );
 		}
 	}
 
@@ -234,7 +233,7 @@ export default class IfLevelPlay extends React.Component<PropsType, StateType> {
 					&& page.correct !== true 
 					&& 
 						(page.type === 'IfPageFormulaSchema'
-						 || page.type === 'IfPagePredictFormulaSchema')) {
+						|| page.type === 'IfPagePredictFormulaSchema')) {
 				event.preventDefault(); // cancel any keypress.
 				this.handleValidate(event);
 			}
@@ -378,7 +377,7 @@ export default class IfLevelPlay extends React.Component<PropsType, StateType> {
 
 
 	// Create the pop-up or pop-over elements
-	_render_page_feedback_inline(page: IfPageBaseSchema, button: Node, orientation: string): Node {
+	_render_page_feedback_inline( /*page: IfPageBaseSchema, button: Node, orientation: string */): Node {
 		return null;
 
 		/*
@@ -505,7 +504,7 @@ export default class IfLevelPlay extends React.Component<PropsType, StateType> {
 						// Should we show the solution to the user?
 						if(feedback.length > 0) {
 							// No, still feedback.
-							body.push(<div>Try to resolve the problems above. Once you do that, and if you're still stuck, you can come back here for the solution</div>);
+							body.push(<div>Try to resolve the problems above. Once you do that, and if you&apos;re still stuck, you can come back here for the solution</div>);
 
 						} else if ( typedPage.correct ) {
 							body.push(<div>Correct answer!</div>);
@@ -589,7 +588,7 @@ export default class IfLevelPlay extends React.Component<PropsType, StateType> {
 			if( page.time_minimum !== null && page.time_minimum > 0) {
 				if(page.time_minimum*1000 > time_page_displayed_in_ms) {
 					button_disabled = true;
-					button_text += " ("+ Math.ceil( (page.time_minimum*1000 - time_page_displayed_in_ms)/1000) + ")";
+					button_text += ' ('+ Math.ceil( (page.time_minimum*1000 - time_page_displayed_in_ms)/1000) + ')';
 				} else {
 					button_disabled = false;
 				}
@@ -650,7 +649,7 @@ export default class IfLevelPlay extends React.Component<PropsType, StateType> {
 			this.props.onChange({ time_limit_expired: true }, 
 				() => {
 					this.props.onNext();
-				})
+				});
 			}} />;
 	}
 
@@ -827,6 +826,7 @@ export default class IfLevelPlay extends React.Component<PropsType, StateType> {
 		const hint_button = this._render_page_hint_button(page);
 
 		// Setup inline options for pop-up.
+		/*
 		let button = next_button;
 		let orientation = 'left';
 
@@ -834,6 +834,7 @@ export default class IfLevelPlay extends React.Component<PropsType, StateType> {
 			button = validate_button;
 			orientation = 'right';
 		}
+		*/
 
 		return (
 			<div>
@@ -841,7 +842,7 @@ export default class IfLevelPlay extends React.Component<PropsType, StateType> {
 				<CacheBuster />
 					<CSSTransition 
 							timeout={20}
-							classNames="levelplay-transition"
+							classNames='levelplay-transition'
 							in={true}
 							>
 						<form key={'formkey' + this.state.lastPageI} name='c' onSubmit={this.handleNext}>
@@ -881,7 +882,7 @@ export default class IfLevelPlay extends React.Component<PropsType, StateType> {
 				</div>
 				{ this._render_fullpage_invisible_div() }
 				{ this._render_page_feedback_popup(page) }
-				{ this._render_page_feedback_inline(page, button, orientation) }
+				{ this._render_page_feedback_inline( /*page, button, orientation */ ) }
 			</div>
 		);
 	}

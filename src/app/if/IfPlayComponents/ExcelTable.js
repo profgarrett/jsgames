@@ -52,11 +52,13 @@ const transform_if_date = dt => {
 // Very flexible with input format, guessing how to respond. 
 const format = (p_input, format) => {
 	let input = p_input;
+	let number = 0; // temp space for testing isNan
+
 	if(input === null) return null;
 	if(input === '') return '';
 
 	// Undefined format.  Guess!
-	if(typeof format === 'undefined' || format === null || format === '') {
+	if(typeof format === 'undefined' || format === null || format === '' || format === null ) {
 		if(typeof input === 'number') 
 			return input.toLocaleString('en-US');
 		else
@@ -96,27 +98,37 @@ const format = (p_input, format) => {
 
 	} else if( format === '0' ) {
 		// Format without any decimal numbers, but include commas as needed.
-		return Number.parseInt(input).toLocaleString();
+		number = Number.parseInt(input);
+		return Number.isNaN(number) ? input : number.toLocaleString();
 
 	} else if( format === ',' || format === '.' || format === '0') {
 		// Decimal
 		//$FlowFixMe
-		return Number.parseFloat(input).toLocaleString('en-US', {style:'decimal'});
+		number =  Number.parseFloat(input);
+		return Number.isNaN(number) ? input :  number.toLocaleString('en-US', {style:'decimal'});
 
 	} else if( format === '$.') {
 		// Currency with decimals.
-		return (Math.round(Number.parseFloat(input)*100)/100).toLocaleString('en-US', 
-			{style:'currency', currency: 'usd'});
+		number = (Math.round(Number.parseFloat(input)*100)/100);
+		return Number.isNaN(number) 
+			? input 
+			: number.toLocaleString('en-US', {style:'currency', currency: 'usd'});
 
 	} else if( format === '$') {
 		// Return a clean currency with no decimals.
-		return Math.round(Number.parseFloat(input)).toLocaleString('en-US', 
-			{style:'currency', minimumFractionDigits: 0, currency: 'usd'});
+		number = Math.round(Number.parseFloat(input));
+		return Number.isNaN(number) 
+			? input
+			: number.toLocaleString('en-US', {style:'currency', minimumFractionDigits: 0, currency: 'usd'});
 
 	} else if(format === '%') {
 		// Percent.
+		number = Number.parseFloat(input);
+		console.log('format %')
 		//$FlowFixMe
-		return (Number.parseFloat(input)).toLocaleString('en-US', { style:'percent'} );
+		return Number.isNaN(number) 
+			? input
+			: number.toLocaleString('en-US', { style:'percent'} );
 
 	} else if(format === 'boolean') {
 		// Percent.

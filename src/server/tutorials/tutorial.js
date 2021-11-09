@@ -18,6 +18,131 @@ const formatBigGif = (url) => {
 			'<img src=' + url + ' width="600px" style="border: solid 2px darkgray;" />';
 };
 
+/*
+const test_format: GenType = {
+	gen_type: LinearGen,
+	pages: [
+		{	type: 'IfPageFormulaSchema',
+			description: 'test',
+			instruction: 'test %',
+			tests: [ 
+				{ 'a': 1 },
+				{ 'a': 3 }, 
+				{ 'a': 5 },
+				{ 'a': 10 }
+			],
+			solution_f: '=1',
+			client_f_format: '%',
+			correct_required: false,
+			code: 'tutorial'
+		},
+
+		{	type: 'IfPageFormulaSchema',
+			description: 'test',
+			instruction: 'test shortdate',
+			tests: [ 
+				{ 'a': 1 },
+				{ 'a': 3 }, 
+				{ 'a': 5 },
+				{ 'a': 10 }
+			],
+			solution_f: '=1',
+			client_f_format: 'shortdate',
+			correct_required: false,
+			code: 'tutorial'
+		},
+
+		{	type: 'IfPageFormulaSchema',
+			description: 'test',
+			instruction: 'test 0',
+			tests: [ 
+				{ 'a': 1 },
+				{ 'a': 3 }, 
+				{ 'a': 5 },
+				{ 'a': 10 }
+			],
+			solution_f: '=1',
+			client_f_format: '0',
+			correct_required: false,
+			code: 'tutorial'
+		},
+
+		{	type: 'IfPageFormulaSchema',
+			description: 'test',
+			instruction: 'test ,',
+			tests: [ 
+				{ 'a': 1 },
+				{ 'a': 3 }, 
+				{ 'a': 5 },
+				{ 'a': 10 }
+			],
+			solution_f: '=1',
+			client_f_format: ',',
+			correct_required: false,
+			code: 'tutorial'
+		},
+
+		{	type: 'IfPageFormulaSchema',
+			description: 'test',
+			instruction: 'test $',
+			tests: [ 
+				{ 'a': 1 },
+				{ 'a': 3 }, 
+				{ 'a': 5 },
+				{ 'a': 10 }
+			],
+			solution_f: '=1',
+			client_f_format: '$',
+			correct_required: false,
+			code: 'tutorial'
+		},
+		{	type: 'IfPageFormulaSchema',
+			description: 'test',
+			instruction: 'test $.',
+			tests: [ 
+				{ 'a': 1 },
+				{ 'a': 3 }, 
+				{ 'a': 5 },
+				{ 'a': 10 }
+			],
+			solution_f: '=1',
+			client_f_format: '$.',
+			correct_required: false,
+			code: 'tutorial'
+		},
+		{	type: 'IfPageFormulaSchema',
+			description: 'test',
+			instruction: 'test %',
+			tests: [ 
+				{ 'a': 1 },
+				{ 'a': 3 }, 
+				{ 'a': 5 },
+				{ 'a': 10 }
+			],
+			solution_f: '=1',
+			client_f_format: '%',
+			correct_required: false,
+			code: 'tutorial'
+		},
+
+		{	type: 'IfPageFormulaSchema',
+			description: 'test',
+			instruction: 'test boolean',
+			tests: [ 
+				{ 'a': 1 },
+				{ 'a': 3 }, 
+				{ 'a': 5 },
+				{ 'a': 10 }
+			],
+			solution_f: '=1',
+			client_f_format: 'boolean',
+			correct_required: false,
+			code: 'tutorial'
+		},		
+	]
+};
+*/
+
 
 const gen_opening: GenType = {
 	gen_type: LinearGen,
@@ -147,6 +272,9 @@ const gen_on_harsons: GenType = {
 			],
 			code: 'tutorial'
 		},
+
+
+
 		{	type: 'IfPageHarsonsSchema',
 			description: `You will also sometimes need to input text or numbers.  You can tell that a field
 					is text (instead of a number) by the "quotes" around it.
@@ -271,7 +399,6 @@ const tutorial: LevelSchemaFactoryType = {
 			gen_on_choices,
 			gen_on_interface, 
 			gen_closing
-			
 		],
 	}: GenType)
 };
