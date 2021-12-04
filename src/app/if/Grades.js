@@ -28,7 +28,9 @@ export default function Grades(props: PropsType): Node {
 
 	const _get_columns = (): Array<any> => {
 		// Create a list of distinct columns. Don't include the waivers.
-		const tutorials = IfLevels.map( l => l.code ).filter( s => s.substr(0,13) !== 'surveywaiver_' );
+		const tutorials = IfLevels.map( l => l.code )
+			.filter( s => s.substr(0,13) !== 'surveywaiver_' )
+			.filter( s => !s.includes('review') );
 
 		const columns = [{
 			id: 'username',
@@ -72,7 +74,7 @@ export default function Grades(props: PropsType): Node {
 				width: 60 }));
 				
 		return columns;
-	}
+	};
 
 	/* 
 		Return table
@@ -113,7 +115,7 @@ export default function Grades(props: PropsType): Node {
 			}
 			</tbody>
 		</Table>;		
-	}
+	};
 
 
 	if(props.data.length < 1) 

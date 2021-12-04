@@ -9,10 +9,9 @@ const router = express.Router();
 
 const { ADMIN_USERNAME } = require('./secret.js'); 
 const { IfLevels, IfLevelSchema, IfLevelPagelessSchema } = require('./../shared/IfLevelSchema');
-const { IfPageAnswer, build_answers_from_level } = require('./../shared/IfPageSchemas');
-const { IfLevelSchemaFactory } = require('./IfLevelSchemaFactory');
+const { build_answers_from_level } = require('./../shared/IfPageSchemas');
 
-const { from_utc_to_myql, run_mysql_query, is_faculty, to_utc } = require('./mysql.js');
+const { run_mysql_query, is_faculty } = require('./mysql.js');
 const { require_logged_in_user, 
 		nocache,
 		log_error,
@@ -39,7 +38,7 @@ function to_string_from_possible_array( s: string | Array<any>): string {
 	if(typeof s.join !== 'undefined') {
 		return s[0];
 	} else {
-		throw new Error('Invalid type in to_string_from_possible_array')
+		throw new Error('Invalid type in to_string_from_possible_array');
 	}
 }
 
@@ -90,7 +89,12 @@ router.get('/questions/', nocache, require_logged_in_user,
 
 		// Build SQL statement.
 		// Note that we trust that all given params have already been cleaned up.
-		const sql = `select distinct iflevels.* 
+		console.log('DEBUG: Hax to retrieve correct 3 sections');
+		
+		const DEBUG_ID_SECTION = '(sections.idsection IN (16, 18, 19)) ';
+			// '(sections.idsection = ? OR ? = '*') ';
+
+		const sql = `select distinct iflevels.*
 			from iflevels 
 				inner join users on iflevels.username = users.username 
 				left outer join users_sections on users_sections.iduser = users.iduser 
@@ -99,18 +103,20 @@ router.get('/questions/', nocache, require_logged_in_user,
 					(select TRUE as first, min(created) as created, username, code from iflevels group by username, code) as iflevelsmax 
 					ON iflevels.created = iflevelsmax.created AND iflevels.username = iflevelsmax.username AND iflevels.code = iflevelsmax.code
 			WHERE 
-			
+
 				(
 					iflevels.code = ? 
 					OR ? = '*'
 					OR ? = 'if' && LEFT(iflevels.code, 2) = 'if'
 				) AND
-
-				(sections.idsection = ? OR ? = '*') AND 
+				
+				${DEBUG_ID_SECTION} AND
 				(users.iduser = ? OR ? = '*') AND 
 				iflevels.updated > NOW() - INTERVAL ${INTERVAL} AND 
-				iflevels.username NOT IN ('xgarrettn') AND 
+				iflevels.username NOT IN ('${ADMIN_USERNAME}') AND 
 				iflevelsmax.first = 1`;
+
+
 
 		let select_results = await run_mysql_query(sql, sql_params);
 

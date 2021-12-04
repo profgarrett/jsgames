@@ -1,11 +1,11 @@
 // @flow
 import React from 'react';
-import PropTypes from 'prop-types';
+//import PropTypes from 'prop-types';
 import Container from 'react-bootstrap/Container';
 import { Row, Col, Breadcrumb, Button  } from 'react-bootstrap';
 import { Message, Loading } from './../components/Misc';
-import ReactJson from 'react-json-view'
-import { getUserFromBrowser } from './../components/Authentication';
+import ReactJson from 'react-json-view';
+//import { getUserFromBrowser } from './../components/Authentication';
 import { IfLevelSchema } from './../../shared/IfLevelSchema';
 
 import ForceLogin from './../components/ForceLogin';
@@ -21,6 +21,7 @@ type StateType = {
 	messageStyle: string,
 	isLoading: boolean,
 	level: ?IfLevelSchema,
+	pageIndex: ?number,
 	_id: number
 };
 
@@ -34,6 +35,7 @@ export default class LevelScoreContainer extends React.Component<PropsType, Stat
 			messageStyle: '',
 			isLoading: true,
 			level: null,
+			pageIndex: null,
 			_id: this.props.match.params._id
 		};
         (this: any).update_level = this.update_level.bind(this);
@@ -55,7 +57,7 @@ export default class LevelScoreContainer extends React.Component<PropsType, Stat
         if(level.completed) throw new Error('Can not update completed level');
 
         // Don't delete all pages. Update algo requires >0 pages.
-        if(level.pages.length === 0) throw new Error("Should not delete all pages");
+        if(level.pages.length === 0) throw new Error('Should not delete all pages');
 
         // We may have deleted the last page. Make sure that the latest page
         // is marked as uncompleted.
@@ -99,6 +101,7 @@ export default class LevelScoreContainer extends React.Component<PropsType, Stat
 				this.setState({ 
 					isLoading: false,
 					level: null,
+					pageIndex: null,
                     message: 'Level deleted',
                     messageStyle: '',
 				});
@@ -107,6 +110,7 @@ export default class LevelScoreContainer extends React.Component<PropsType, Stat
 			.catch( (error: any) => {
 				this.setState({ 
 					level: null, 
+					pageIndex: null,
 					message: error.message,
 					isLoading: false
 				});
@@ -152,6 +156,7 @@ export default class LevelScoreContainer extends React.Component<PropsType, Stat
 				this.setState({ 
 					isLoading: false,
 					level: ifLevel,
+					pageIndex: null,
                     message: 'Update saved',
                     messageStyle: '',
 				});
@@ -160,6 +165,7 @@ export default class LevelScoreContainer extends React.Component<PropsType, Stat
 			.catch( (error: any) => {
 				this.setState({ 
 					level: null, 
+					pageIndex: null,
 					message: error.message,
 					isLoading: false
 				});
@@ -168,7 +174,8 @@ export default class LevelScoreContainer extends React.Component<PropsType, Stat
 
 	componentDidMount() {
 		let _id = this.props.match.params._id;
-		const url =  '/api/levels/level/'+_id;
+		let _pageIndex = this.props.match.params._pageIndex;
+		const url =  '/api/levels/level/'+_id+'/tagged';
 
 		fetch(url, {
 				method: 'get',
@@ -183,6 +190,7 @@ export default class LevelScoreContainer extends React.Component<PropsType, Stat
 			.then( ifLevel => {
 				this.setState({
 					level: ifLevel,
+					pageIndex: _pageIndex,
 					message: '',
 					isLoading: false
 				});
@@ -230,10 +238,44 @@ export default class LevelScoreContainer extends React.Component<PropsType, Stat
         
     }
     
-    
+    render_page( page: IfPageBaseSchema ): Node {
+        if(this.state.isLoading) return <p>Loading...</p>;
+		if( this.state.pageIndex === null ) return <h1>No page index</h1>;
+
+		const history = page.history;
+
+        const dom_page =  <ReactJson 
+                src={page.toJson() } 
+                collapsed={ 1 }
+                displayDataType={ false }
+                enableClipboard={ false }
+                shouldCollapse={ field => (
+                        field.name === 'history' || 
+                        field.name === 'pages' ||
+                        field.name === 'props' 
+                )}
+            />;
+
+
+		const history_lis = history.map( (h,i) => {
+			console.log(h);
+			const content = '' +
+				(typeof h.predicted_answers_used === 'undefined' ? '' : '['+h.predicted_answers_used.join(', ') +'] ') +
+				(typeof h.client_f === 'undefined' ? '' : h.client_f) +
+				(typeof h.tags !== 'undefined' && h.tags.length > 0 ? ' ['+h.tags.map( tag => tag.tag ).join(', ') +']' : '');
+			
+			return <li key={'pageHistory'+i}> { h.dt.toString()} : { h.code } - { content }</li>;
+		});
+		return (<div>
+			<h1>Page { this.state.pageIndex }</h1>
+			<ul>{ history_lis }</ul>
+			{ dom_page }
+		</div>);
+	}
 
 	render(): Node {
 		const level = this.state.level;
+		const pageIndex = this.state.pageIndex;
 
         const levelraw = (level === null || typeof level === 'undefined') 
 			? 'loading...' 
@@ -246,6 +288,7 @@ export default class LevelScoreContainer extends React.Component<PropsType, Stat
 			</Breadcrumb>
 			: <span></span>;
 
+		
 		const back = this.state.level ?
 			<Button variant='primary' 
 					style={{ marginBottom: 20, marginTop: 20 }} 
@@ -254,6 +297,11 @@ export default class LevelScoreContainer extends React.Component<PropsType, Stat
 			</Button>
 			: <span />;
 
+		// If we have an optional argument to highlight page, then go ahead and show it first above the rest.
+		let render_page = null;
+		if( typeof pageIndex !== 'undefined' && pageIndex !== null && typeof level !== 'undefined' && level !== null ) {
+			render_page = 	this.render_page( level.pages[pageIndex]);
+		}
 
 		return (
 			<Container fluid>
@@ -265,6 +313,7 @@ export default class LevelScoreContainer extends React.Component<PropsType, Stat
 
 						<Message message={this.state.message} style={this.state.messageStyle} />
 						<Loading loading={this.state.isLoading } />
+						{ render_page }
 						<div style={{ textAlign: 'center' }}>{ back }</div>
 						{ levelraw }
 						<div style={{ textAlign: 'center' }}>{ back }</div>

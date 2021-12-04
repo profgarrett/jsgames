@@ -192,7 +192,7 @@ function to_string_from_possible_array( s: string | Array<any>): string {
 
 
 // Select object, provide it is owned by the logged in user.
-router.get('/level/:id', nocache, require_logged_in_user,
+router.get('/level/:id/:tagged?', nocache, require_logged_in_user,
 	async (req: $Request, res: $Response, next: NextFunction): Promise<any> => {
 	try {
 		const username = get_username_or_emptystring(req, res);
@@ -200,6 +200,7 @@ router.get('/level/:id', nocache, require_logged_in_user,
 			? 'SELECT * FROM iflevels WHERE _id = ? '   // allow admin access to any item
 			: 'SELECT * FROM iflevels WHERE _id = ? AND username = ?';
 		const _id = req.params.id;
+		const _tagged = typeof req.params.tagged === 'undefined' ? false : req.params.tagged === 'tagged';
 
 		let select_results = await run_mysql_query(sql, [_id, username]);
 
@@ -207,6 +208,11 @@ router.get('/level/:id', nocache, require_logged_in_user,
 		
 		let iflevel = new IfLevelSchema(select_results[0]); // initialize from sql
 		
+		// If needed, then process all of the history items 
+		if( _tagged ) {
+			iflevel = return_tagged_level(iflevel);
+		}
+
 		res.json(return_level_prepared_for_transmit(iflevel, true));
 	} catch (e) {
 		log_error(e);

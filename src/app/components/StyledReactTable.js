@@ -10,12 +10,12 @@ type TablePropColumnType = {
 	id: string,
 	Header: string,
 	width?: number, 
-	accessor?: function,
-}
+	accessor?: Function
+};
 
 type TablePropsType = {
 	columns: Array<TablePropColumnType>,
-	data: Array<any>,
+	data: Array<any>
 };
 
 
@@ -26,11 +26,11 @@ const ColumnFilter = ({ column: { filterValue, setFilter, filter } }) => {
 
     return (
         <input style={{ width: '90%' }}
-        value={filterValue || ""}
+        value={filterValue || ''}
         onChange={e => {
             setFilter(e.target.value || undefined); // Set undefined to remove the filter entirely
         }}
-        placeholder={`Search ${filter ? filter : ""}...`}
+        placeholder={`Search ${filter ? filter : ''}...`}
         />
     );
 };
@@ -39,9 +39,6 @@ const ColumnFilter = ({ column: { filterValue, setFilter, filter } }) => {
 export function StyledReactTable(props: TablePropsType): Node {
 
     const m_props = React.useMemo( () => props );
-
-
- 
 
     // Different type of filters.
     const filterTypes = {
@@ -84,7 +81,7 @@ export function StyledReactTable(props: TablePropsType): Node {
         headerGroups,
         rows,
         prepareRow,
-    } = tableInstance
+    } = tableInstance;
 
 
 

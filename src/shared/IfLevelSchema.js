@@ -1,10 +1,14 @@
 // @flow
 const { Schema, isDef  } = require('./Schema');
-const { get_page_schema_as_class, IfPageBaseSchema,
-		IfPageTextSchema, IfPageChoiceSchema, 
+const { get_page_schema_as_class, IfPageBaseSchema } = require('./IfPageSchemas');
+
+/*
+IfPageTextSchema, IfPageChoiceSchema, 
 		IfPageFormulaSchema, IfPageSliderSchema,
 		IfPageParsonsSchema, IfPageHarsonsSchema,
-		IfPageNumberAnswerSchema, IfPageShortTextAnswerSchema } = require('./IfPageSchemas');
+IfPageNumberAnswerSchema, IfPageShortTextAnswerSchema 
+*/
+
 
 /** 
 	This const is used to provide a list of available tutorials.
@@ -97,10 +101,10 @@ const LEVEL_DERIVED_PROPS_VERSION = 1;
 	It should be created by the IfLevelSchema.refresh_derived_props method
 */
 class IfLevelDerivedProps extends Schema {
-	pages_length: number
-	test_score_as_percent: ?number
-	minutes: number
-	classification: ?string
+	pages_length: number;
+	test_score_as_percent: ?number;
+	minutes: number;
+	classification: ?string;
 
 	// Apply json to this obj, signally no parent classes to do the setting for us.
 	constructor( json?: any) {
@@ -108,11 +112,11 @@ class IfLevelDerivedProps extends Schema {
 		if(json !== true) this.initialize(json, this.schema);
 	}
 
-	get type() {
-		return 'IfLevelDerivedProps'
+	get type(): string {
+		return 'IfLevelDerivedProps';
 	}
 
-	get schema() {
+	get schema(): any {
 		return {
 			pages_length: { type: 'number', initialize: (i: any) => isDef(i) ? i : null },
 			test_score_as_percent: { type: 'number', initialize: (i: any) => isDef(i) ? i : null },
@@ -123,31 +127,31 @@ class IfLevelDerivedProps extends Schema {
 }
 
 class IfLevelPagelessSchema extends Schema {
-	_id: string
-	code: string
-	username: string
+	_id: string;
+	code: string;
+	username: string;
 
-	seed: number
-	harsons_randomly_on_username: boolean
-	predict_randomly_on_username: boolean
-	standardize_formula_case: boolean
-	show_score_after_completing: boolean
+	seed: number;
+	harsons_randomly_on_username: boolean;
+	predict_randomly_on_username: boolean;
+	standardize_formula_case: boolean;
+	show_score_after_completing: boolean;
 
-	title: string
-	description: string
-	updated: Date
-	created: Date
+	title: string;
+	description: string;
+	updated: Date;
+	created: Date;
 
-	completed: boolean
+	completed: boolean;
 
-	history: Array<Object>
-	allow_skipping_tutorial: boolean
+	history: Array<Object>;
+	allow_skipping_tutorial: boolean;
 
-	show_progress: boolean
+	show_progress: boolean;
 	
-	props: IfLevelDerivedProps
-	props_version: number
-	version: number
+	props: IfLevelDerivedProps;
+	props_version: number;
+	version: number;
 
 	// Apply json to this obj, signally no parent classes to do the setting for us.
 	constructor( json?: any) {
@@ -223,7 +227,7 @@ class IfLevelPagelessSchema extends Schema {
 	It contains multiple pages.
 */
 class IfLevelSchema extends IfLevelPagelessSchema {
-	pages: Array<IfPageBaseSchema>
+	pages: Array<IfPageBaseSchema>;
 
 	// Apply json to this obj, signally no parent classes to do the setting for us.
 	constructor( json?: any) {

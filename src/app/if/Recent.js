@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 
 
-import { Table, Button, Modal } from 'react-bootstrap';
+import { Button } from 'react-bootstrap';
 
 import { PrettyDate } from './../components/Misc';
 import { StyledReactTable } from './../components/StyledReactTable';
@@ -13,21 +13,26 @@ import type { Node } from 'react';
 import { DEMO_MODE } from './../../server/secret';
 import { Link } from 'react-router-dom';
 
+
+/*
 type StateType = {
 	level_id: ?string, // should we show a modal box?
 };
+*/
 
 type PropsType = {
 	levels: Array<IfLevelPagelessSchema>
 };
 
-export default function Recent(props: PropsType) {
+export default function Recent(props: PropsType): Node {
 	const [ level_id, setLevel_id ] = useState(null);
 
+	/*
 	const dateAsString = (d: Object): string => {
 		return d.getFullYear()+'/'+(d.getMonth()+1) +'/'+d.getDate() +
 				' ' + d.getHours()+':'+ (d.getMinutes()<10 ? '0': '') + d.getMinutes();
 	};
+	*/
 
 	const hide_modal = () => {
 		setLevel_id(null); 
@@ -59,11 +64,15 @@ export default function Recent(props: PropsType) {
 		}, {
 			id: 'created',
 			Header: 'Created',
-			accessor: l => <PrettyDate date={l.created} /> 
+			accessor: function prettyDate(l: IfLevelPagelessSchema): Node { 
+				return <PrettyDate date={l.created} />;
+			}
 		}, {
 			id: 'updated',
 			Header: 'Last Updated',
-			accessor: l => <PrettyDate date={l.updated} />
+			accessor: function prettyDate(l: IfLevelPagelessSchema): Node { 
+				return <PrettyDate date={l.created} />;
+			}
 		}, {
 			id: 'score',
 			Header: 'Score',
@@ -75,18 +84,18 @@ export default function Recent(props: PropsType) {
 		}, {
 			id: 'view',
 			Header: 'View',
-			accessor: (l: IfLevelPagelessSchema) => <Button onClick={ 
-				() => {
-					setLevel_id( l._id ); 
-				}
-				} >View</Button>
+			accessor: function viewButton(l: IfLevelPagelessSchema): Node {
+				return <Button onClick={ () => setLevel_id( l._id ) }>View</Button>;
+			}
 		}];
 
 		if(isAdmin) {
 			columns.push({
 				id: 'edit',
 				Header: 'Edit',
-				accessor: (l: IfLevelPagelessSchema) => <Link to={'/ifgame/levelraw/'+l._id}>edit</Link>
+				accessor: function viewRaw(l: IfLevelPagelessSchema): Node {
+					return <Link to={'/ifgame/levelraw/'+l._id}>edit</Link>;
+				}
 			});
 		}
 
@@ -95,7 +104,7 @@ export default function Recent(props: PropsType) {
 
 		const modal = level_id === null 
 			? null
-			: <LevelModal level={null} level_id={level_id} hide={ () => hide_modal() } />
+			: <LevelModal level={null} level_id={level_id} hide={ () => hide_modal() } />;
 		
 		return (<div>
 				{ modal }

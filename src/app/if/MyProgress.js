@@ -22,7 +22,7 @@ const glyph = (score: number, is_survey: boolean): Node => {
 
 	// Survey, we don't care if they hit a certain score level or not.
 	if(is_survey) {
-		return <FontAwesomeIcon icon={faCheck} style={{ color: 'green'}} />
+		return <FontAwesomeIcon icon={faCheck} style={{ color: 'green'}} />;
 	}
 
 	if( score >= GREEN_GRADE ) return (<span>
@@ -118,7 +118,6 @@ export default class MyProgress extends React.Component<PropsType, StateType> {
 	*/
 	_render_table(levels: Array<Object>): Node {
 		let counter = 0;
-		const user = getUserFromBrowser();
 
 		// Style
 		const td_c = { textAlign: 'center', verticalAlign: 'middle', width: '6%' };
@@ -343,6 +342,7 @@ export default class MyProgress extends React.Component<PropsType, StateType> {
 
 	render(): Node {
 		const grades = this.props.grades.length>0 ? this.props.grades[0] : {};
+		const user = getUserFromBrowser();
 
 		// Only a single grades entry should be returned.
 		// [{ username: 'x', tutorial: 20, ... }
@@ -365,19 +365,20 @@ export default class MyProgress extends React.Component<PropsType, StateType> {
 		let picker = null;
 		if(this.props.sections.length > 0 && this.state.section.role === 'faculty') {
 			let p = '?idsection=' + this.state.section.idsection;	
-			
+
+			// If super-admin, then show extra analysis link for questions data.
+			const questions_link = user.isAdmin ? <Link key='link6' to={'/ifgame/questions'+p}>Question analysis</Link> : null;
+
 			let course_links = (
 				<InputGroup style={{ marginLeft: 3, marginTop: 3}}>
 					View this section&apos;s&nbsp;
 					<Link key='link2' to={'/ifgame/progress'+p}>progress</Link>,&nbsp;
 					<Link key='link3' to={'/ifgame/recent'+p}>recent activity</Link>,&nbsp;
 					<Link key='link4' to={'/ifgame/grades'+p}>grades</Link>&nbsp;and&nbsp;
-					<Link key='link1' to={'/ifgame/kcs'+p}>learning</Link>&nbsp;
+					<Link key='link5' to={'/ifgame/kcs'+p}>learning</Link>.&nbsp;
+					{ questions_link }		
 				</InputGroup>
 				);
-
-
-			//		<Link key='link3' to={'/ifgame/questions'+p}>questions</Link>
 
 
 			picker = (<ButtonToolbar>

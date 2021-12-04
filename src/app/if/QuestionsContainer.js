@@ -53,7 +53,7 @@ export default class QuestionsContainer extends React.Component<QuestionsPropsTy
 		if(filter.sections !== '') args.push('idsection='+filter.sections);
 		if(filter.users !== '') args.push('iduser='+filter.users);
 
-
+		
 		// Set local filters, which are applied locally.
 		if(filter.pagetypes !== '') this.setState({ pagetype: filter.pagetypes });
 		if(filter.outputs !== '') this.setState({ outputs: filter.outputs });
@@ -99,9 +99,9 @@ export default class QuestionsContainer extends React.Component<QuestionsPropsTy
 			</Breadcrumb>
 			);
 
-		const default_type =  'IfPageChoiceSchema'; //'IfPageFormulaSchema|IfPageHarsonsSchema';
-		const default_output = 'excel';
-		const default_level = 'if';
+		const default_type =  'All';  // 'IfPageFormulaSchema|IfPageHarsonsSchema|IfPagePredictFormulaSchema';
+		const default_output = 'table';
+		const default_level = 'if1';
 
 			//'IfPageChoice'; 
 			//'IfPageNumberAnswerSchema'; //'IfPageFormulaSchema|IfPageHarsonsSchema'
@@ -109,7 +109,9 @@ export default class QuestionsContainer extends React.Component<QuestionsPropsTy
 		const filter_defaults = search.has('idsection') 
 			? { pagetypes: default_type, outputs: default_output, levels: default_level, sections: search.get('idsection') }
 			: { pagetypes: default_type, outputs: default_output, levels: default_level };
+
 		
+
 		const filter = <Filter 
 				onChange={this.onRefreshData} 
 				onReady={this.onReady} 
@@ -131,10 +133,13 @@ export default class QuestionsContainer extends React.Component<QuestionsPropsTy
 
 
 		// Filter returned values based off of pagetype filter set in state.
-		const filterpagetype = (type: string) => this.state.pagetype.split('|').includes( type ) ;
+		const filterpagetype = (type: string) => this.state.pagetype === 'All' || this.state.pagetype.split('|').includes( type ) ;
+
 		let filtered_levels = this.state.levels.map( (level: IfLevelSchema) => { 
-			const new_level = new IfLevelSchema(level.toJson()); // create a new level.
-			//new_level.pages = new_level.pages.filter(p => filterpagetype(p.type) ); // filter page.
+			// Note: filtering by level will break some of the table functionalisty (i.e., linking the raw version
+			// of a page).
+			let new_level = new IfLevelSchema(level.toJson()); // create a new level.
+			new_level.pages = new_level.pages.filter(p => filterpagetype(p.type) ); // filter page.
 			return new_level;
 		});
 

@@ -5,13 +5,15 @@ import { DEMO_MODE } from './../../server/secret';
 import { IfLevelSchema } from './../../shared/IfLevelSchema';
 import type { Node } from 'react';
 import { formatDate, padL } from './../../shared/misc';
+//import { a } from 'react-spring';
 
 type DetailPropsType = {
 	levels: Array<IfLevelSchema>
 };
 
 
-
+// Do we want to output KC columns?
+const ADD_KC_COLUMNS = false;
 
 
 // Return the count for the given tag. 
@@ -67,7 +69,7 @@ export default class QuestionsPagesExcelFormula extends React.Component<DetailPr
 			*/
 			//'a_tag_USES_NUMBER_IN_QUOTES',
 			
-			"a_history_nonintermediate_length",
+			'a_history_clientf_nonintermediate_length',
 
 			//'a_tag_INTERMEDIATE',
 			'a_history_length', 
@@ -76,7 +78,14 @@ export default class QuestionsPagesExcelFormula extends React.Component<DetailPr
 			'a_answer_final', 
 			// 'a_answer_intermediate', 
 			//'a_answer_all',
-			'a_history_first_dt'
+			'a_history_first_clientf_dt',
+			'a_history_last_clientf_dt',
+			'a_history_predicted_answers_used',
+			'a_page_id',
+			'a_paste',
+			'level_completed',
+			'server_page_added',
+			'server_nextactivity',
 			];
 		const rows = [];
 
@@ -101,9 +110,11 @@ export default class QuestionsPagesExcelFormula extends React.Component<DetailPr
 
 
 		// Add KC columns  
-		const kcs = this.add_kc_order_column_by_user(rows);
-		for(let kc in kcs) {
-			columns.push(kc);
+		if(ADD_KC_COLUMNS) {
+			const kcs = this.add_kc_order_column_by_user(rows);
+			for(let kc in kcs) {
+				columns.push(kc);
+			}
 		}
 
 		return { columns, rows };
@@ -112,7 +123,7 @@ export default class QuestionsPagesExcelFormula extends React.Component<DetailPr
 	flatten_level_questions(rows: Array<any>, level_summary: any, columns: any, defaults: any) {
 
 		level_summary.questions.map( question => {
-			if( question.type === "IfPageChoiceSchema") return;
+			if( question.type === 'IfPageChoiceSchema') return;
 
 			const local = {
 				q_code: question.description + '. ' + question.instruction,
@@ -134,6 +145,7 @@ export default class QuestionsPagesExcelFormula extends React.Component<DetailPr
 				q_correct_average: Math.round(question.correct_average*100)+'%',
 				q_seconds_average: Math.round(question.seconds_average),
 				q_tags: question.tags.map( t => t.n + ' ' + t.tag ).join(', '),
+				
 				//q_solution_f: question.solution_f,
 				...defaults
 			};
@@ -153,13 +165,12 @@ export default class QuestionsPagesExcelFormula extends React.Component<DetailPr
 
 	flatten_level_question_answers(rows: Array<any>, question: any, columns: any, defaults: any) {
 
-
 		question.answers.map( answer => {
 			// Only track completed pages.
 			if(!answer.page.completed) return;
 			if(answer.page.type === 'IfPageChoiceSchema' || answer.page.type === 'IfPageTextSchema' || answer.page.type === 'IfPageParsonsSchema') return;
 
-			//console.log(answer);
+			let history = answer.page.history.filter( h => typeof h.client_f !== 'undefined' && h.code === 'client_update' );
 
 			const local = {
 				a_standardize_formula_case: answer.page.standardize_formula_case ? 1 : 0,
@@ -169,6 +180,7 @@ export default class QuestionsPagesExcelFormula extends React.Component<DetailPr
 				'a_correct': answer.correct ? 1 : 0,
 				'a_completed': answer.completed ? 1 : 0, 
 				'a_html': answer.html,
+				
 				'a_tag_ABS_REF': get_tag_n(answer.tags, 'ABS_REF'),
 				'a_tag_NO_STARTING_EQUAL': get_tag_n(answer.tags, 'NO_STARTING_EQUAL'),
 				'a_tag_NON_ROW_1_REFERENCE': get_tag_n(answer.tags, 'NON_ROW_1_REFERENCE'),
@@ -184,7 +196,10 @@ export default class QuestionsPagesExcelFormula extends React.Component<DetailPr
 				'a_tag_CORRECT': get_tag_n(answer.tags, 'CORRECT'),
 				a_history_length: answer.page.history.length,
 				
-				a_history_nonintermediate_length: answer.page.history.filter(
+				a_history_clientf_nonintermediate_length: answer.page.history
+					.filter( 
+						h => typeof h.client_f !== 'undefined' )
+					.filter(
 						h => get_tag_n(h.tags, 'INTERMEDIATE') === 0
 					).length,
 				
@@ -198,11 +213,24 @@ export default class QuestionsPagesExcelFormula extends React.Component<DetailPr
 				a_answer_intermediate: "'" + this.replace_spans(answer.intermediate),
 				a_answer_all: "'" + this.replace_spans(answer.all),
 				a_sequence_in_level: answer.sequence_in_level,
-				a_history_first_dt: answer.page.history.length > 0 ? formatDate(answer.page.history[0].dt) : null,
 
-				
+				a_history_first_clientf_dt: history.length > 0 ? formatDate(history[0].dt) : null,
+				a_history_last_clientf_dt: history.length > 0 ? formatDate(history[history.length-1].dt) : null,
+
+				a_history_predicted_answers_used: answer.page.history.filter(
+					h => typeof h.predicted_answers_used !== 'undefined' && typeof h.predicted_answers_used.client_f === 'undefined'
+				).length,
+
+				a_page_id: answer.page.id,
+
+				a_paste: get_tag_n(answer.tags, 'PASTE'),
+				level_completed: answer.level_completed ? 1 : 0,
+				server_page_added: formatDate(answer.server_page_added),
+				server_nextactivity: formatDate(answer.server_nextactivity),
 				...defaults
 			};
+
+			//debugger;
 
 			rows.push(local);
 		});
@@ -303,4 +331,5 @@ export default class QuestionsPagesExcelFormula extends React.Component<DetailPr
 				</table>);
 	}
 }
+
 

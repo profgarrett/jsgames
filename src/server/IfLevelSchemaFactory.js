@@ -1,11 +1,6 @@
 // @flow
 const { IfLevelSchema } = require('./../shared/IfLevelSchema');
-const { get_page_schema_as_class, IfPageBaseSchema,
-		IfPageTextSchema, IfPageChoiceSchema, 
-		IfPageFormulaSchema, IfPageSliderSchema,
-		IfPageParsonsSchema, IfPageHarsonsSchema,
-		IfPagePredictFormulaSchema,
-		IfPageNumberAnswerSchema, IfPageShortTextAnswerSchema } = require('./../shared/IfPageSchemas');
+const { get_page_schema_as_class } = require('./../shared/IfPageSchemas');
 const { runGen } = require('./Gens');
 const { DataFactory } = require('./DataFactory');
 
@@ -102,7 +97,7 @@ const _initialize_json =  function(level: IfLevelSchema, original_json: Object):
 
 		// Initialize contained objects.
 		for(let key in version) {
-			if(version.hasOwnProperty(key)) {
+			if( Object.prototype.hasOwnProperty.call(version, key) ) {
 				if(typeof version[key] === 'function') {
 					// If function, run
 					json[key] = version[key](json[key]);
@@ -277,7 +272,7 @@ const _initialize_json =  function(level: IfLevelSchema, original_json: Object):
 	json.history = [ { dt: new Date(), code: 'server_initialized' } ];
 
 	return json;
-}
+};
 
 
 
@@ -287,7 +282,7 @@ const IfLevelSchemaFactory = {
 	create: function(code: string, username: string): IfLevelSchema {
 		if(typeof LEVEL_GENS[code] === 'undefined') throw new Error('Invalid type '+code+' passed to IfLevelModelFactory.create');
 
-		const allow_skipping_tutorial = (username === 'garrettn');
+		const allow_skipping_tutorial = (username === 'garrettnxxx');
 
 		// If we are the admin, or 1/2th of users, then standardize the display 
 		// of formula cases.
@@ -306,8 +301,8 @@ const IfLevelSchemaFactory = {
 		delete defaults.gen; // remove gen, as it isn't valid as a property of an actual level.
 
 		// Make a full copy of the level.
-		const new_json_p = JSON.stringify(LEVEL_GENS[code]);
-		const new_json = JSON.parse(new_json_p);
+		//const new_json_p = JSON.stringify(LEVEL_GENS[code]);
+		//const new_json = JSON.parse(new_json_p);
 
 		const level = new IfLevelSchema( defaults );
 

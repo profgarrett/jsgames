@@ -3,7 +3,7 @@
 	This "tag" module is used to automatically tag elements for correctness.
 
 */
-const { IfPageBaseSchema, IfPageFormulaSchema, IfPageHarsonsSchema } = require('./../shared/IfPageSchemas');
+const { IfPageBaseSchema, IfPageFormulaSchema } = require('./../shared/IfPageSchemas');
 const { IfLevelSchema } = require('./../shared/IfLevelSchema');
 const { fill_template } = require('./../shared/template');
 const { parseFeedback } = require('./../shared/parseFeedback');
@@ -761,11 +761,11 @@ function return_tagged_level(level: IfLevelSchema): IfLevelSchema {
 	level.pages = level.pages.map( (untyped_page: IfPageBaseSchema) => {
 		const page = untyped_page.type === 'IfPageFormulaSchema' 
 			? untyped_page.toIfPageFormulaSchema()
-			: untyped_page.type === 'IfPageHarsonsSchema'
+			: untyped_page.type === 'IfPageHarsonsSchema' 
 				? untyped_page.toIfPageHarsonsSchema()
 				: untyped_page;
 
-		if( !(page.type === 'IfPageFormulaSchema' || page.type === 'IfPageHarsonsSchema' ) ) 
+		if( !(page.type === 'IfPageFormulaSchema' || page.type === 'IfPageHarsonsSchema' || page.type === 'IfPagePredictFormulaSchema') ) 
 			return page; // don't do any tags on non-formula pages.
 
 		// Clean-up history.
@@ -784,7 +784,7 @@ function return_tagged_level(level: IfLevelSchema): IfLevelSchema {
 		let parsed = {};
 
 		// Fill template, so that {n} turns into 1, or {cell1_ref}  turns into A1.
-		let t_solution_f = fill_template(page.solution_f, page.template_values)
+		let t_solution_f = fill_template(page.solution_f, page.template_values);
 		
 		// Run checks.
 		page.history.map( h => {

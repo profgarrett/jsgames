@@ -62,11 +62,12 @@ export default class Filter extends React.Component<PropsType, ContainerStateTyp
 		// Populate page types
 		if(typeof filters.pagetypes !== 'undefined') {
 			filters.pagetypes = [
+				{ value: 'All', label:'All' },
 				{ value: 'IfGameNumberAnswerSchema', label:'Numbers' },
 				{ value: 'IfPageChoiceSchema',  label:'Choice' },
 				{ value: 'IfPageHarsonsSchema', label:'Harsons' },
 				{ value: 'IfPageFormulaSchema', label:'Formula' },
-				{ value: 'IfPageFormulaSchema|IfPageHarsonsSchema', label:'Harsons/Formula' },
+				{ value: 'IfPageFormulaSchema|IfPageHarsonsSchema|IfPagePredictFormulaSchema', label:'Harsons/Predict/Formula' },
 				{ value: 'IfPageParsonsSchema', label:'Parsons' }
 				];
 		}

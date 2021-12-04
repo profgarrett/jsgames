@@ -20,7 +20,7 @@ function get_cookie(arg: string): string {
 
 type BrowserUserType = {
 	username: string,
-	isAdmin: boolean,
+	isAdmin: boolean
 };
 
 

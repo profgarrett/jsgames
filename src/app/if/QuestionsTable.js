@@ -1,11 +1,13 @@
 //@flow
-import React from 'react';
+import React, { useState } from 'react';
 
 import { DEMO_MODE } from './../../server/secret';
 
 import { IfLevelSchema } from './../../shared/IfLevelSchema';
 import type { Node } from 'react';
 import { HtmlDiv } from './../components/Misc';
+import { Collapse, Card } from 'react-bootstrap';
+
 
 import { StyledReactTable } from './../components/StyledReactTable';
 
@@ -40,7 +42,7 @@ export default class PagesTable extends React.Component<DetailPropsType> {
 		}, {
 			id: 'completed',
 			Header: 'completed',
-			accessor: answer => answer.completed ? '' : 'N' ,
+			accessor: answer => answer.completed ? 'Y' : 'N' ,
 			width: 50
 		}, {
 			id: 'breaks',
@@ -56,7 +58,13 @@ export default class PagesTable extends React.Component<DetailPropsType> {
 		}, {
 			id: 'html',
 			Header: 'html',
-			accessor: answer => <HtmlDiv html={answer.html} />,
+			accessor: answer => { 
+				const html = '<a href="/ifgame/levelraw/' + answer.page.id + '/' + answer.sequence_in_level +'" target="_blank">Raw</a>';
+				return <Card>
+					<HtmlDiv html={ html } />
+					<Expandable title={ 'answer' } body={ typeof answer.html == 'undefined' ? '' : answer.html } />
+				</Card>; 
+			},
 			width: 450
 /*		}, {
 			expander: true,
@@ -76,12 +84,14 @@ export default class PagesTable extends React.Component<DetailPropsType> {
 */
 		}];
 
+		/*
+		{ question.description }
+		{ question.instruction }
+		<b>{ question.solution_f }</b>
+		*/
 
-		return (<div>
-					<div style={{ backgroundColor: 'gray', marginTop: 20 }}>
-						{ question.description }
-						{ question.instruction }
-						<b>{ question.solution_f }</b>
+		return (<Expandable title={'submissions'} body={
+					<div style={{ }}>
 						<div>{ question.kcs === false
 							? ''
 							: question.kcs.map( 
@@ -89,17 +99,17 @@ export default class PagesTable extends React.Component<DetailPropsType> {
 									<span key={'questioncomplexity'+i} className='badge badge-pill badge-info'>
 										{ tag.tag }</span>) }
 						</div>
+						<StyledReactTable 
+							data={question.answers}
+							filterable={true}
+							columns={columns} 
+							defaultSorted={['type', 'seconds']}
+							defaultPageSize={question.answers.length}
+							style={{ backgroundColor: '#f5f5f5' }}
+						/>
 					</div>
-					<StyledReactTable 
-						data={question.answers}
-						filterable={true}
-						columns={columns} 
-						defaultSorted={['type', 'seconds']}
-						defaultPageSize={question.answers.length}
-						style={{ backgroundColor: '#f5f5f5' }}
-						SubComponent={ (p) => <HtmlDiv html={p.original.expand} /> }
-					/> 
-				</div>);
+					} 
+				/>);
 
 	}
 
@@ -111,68 +121,62 @@ export default class PagesTable extends React.Component<DetailPropsType> {
 			id: 'description',
 			Header: 'Desc',
 			accessor: q => q.description,
-			width: 550
+			width: 300
 		}, {
 			id: 'type',
 			Header: 'Type',
 			accessor: q => q.type.substr(6).replace('Schema', ''),
-			width: 100
+			width: 75
 		}, {
 			id: 'count',
 			Header: 'Count',
 			accessor: q => q.n,
 			style: {textAlign: 'right'},
-			width: 100
+			width: 75,
 		}, {
 			id: 'correct',
 			Header: 'Correct',
 			accessor: q => Math.round(q.correct_average*100)+'%',
 			style: {textAlign: 'right'},
 			sortMethod: (a, b) => {
-				return parseInt(a,10) - parseInt(b,10)
+				return parseInt(a,10) - parseInt(b,10);
 			},
-			width: 100
+			width: 75,
 		}, {
 			id: 'seconds',
 			Header: 'Seconds',
 			accessor: q => Math.round(q.seconds_average),
 			style: {textAlign: 'right'},
-			width: 100
-			/*
-		}, {
+			width: 100,
+/*		}, {
 			id: 'tags',
 			Header: 'Tags',
 			accessor: q => q.tags.map( t => t.n + ' ' + t.tag ).join(', '),
-			width: 400
-
-		}, {
+			width: 150,
+*/
+		},  {
 			id: 'breaks',
 			Header: 'breaks',
 			accessor: q => q.breaks === 0 ? '' : q.breaks,
 			style: {textAlign: 'right'},
-			width: 50
-			*/
+			width: 50,
 		}, {
-			expander: true,
-			Header: () => <b>More</b>,
-			width: 65,
-			Expander: ({ isExpanded, ...rest }) => 
-				<span> 
-					{ isExpanded 
-						? <span>&#x2299;</span>
-						: <span>&#x2295;</span>}
-				</span>,
+			id: 'expander',
+			Header: 'More',
+			width: 400,
+			accessor: (q) => {
+				return this._render_answers_for_pages_with_same_question(q);
+			},				
 			style: {
 				cursor: 'pointer',
 				fontSize: 16
 			}
 		}];
 
-		return <ReactTable
+		return <StyledReactTable
 			data={level_summary.questions}
 			filterable={true}
 			columns={columns}
-			SubComponent={ (q) => this._render_answers_for_pages_with_same_question(q.original) }
 			/>;
 		
 	}
@@ -199,3 +203,30 @@ export default class PagesTable extends React.Component<DetailPropsType> {
 	}
 }
 
+
+
+
+  function Expandable(props: { title: string, body: any }): Node {
+	const [open, setOpen] = useState(false);
+  
+	const body_as_dom = typeof props.body === 'string' 
+			? <HtmlDiv html={ props.body } />
+			: props.body;
+	
+	return (
+		<div>
+			<kbd
+				onClick={() => setOpen(!open)}
+				aria-controls='example-collapse-text'
+				aria-expanded={open}
+			>
+				{props.title}
+			</kbd>
+			<Collapse in={open}>
+				<div id='example-collapse-text'>
+					{ body_as_dom }
+				</div>
+			</Collapse>
+		</div>
+	);
+  }

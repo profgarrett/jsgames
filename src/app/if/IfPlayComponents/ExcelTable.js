@@ -124,7 +124,6 @@ const format = (p_input, format) => {
 	} else if(format === '%') {
 		// Percent.
 		number = Number.parseFloat(input);
-		console.log('format %')
 		//$FlowFixMe
 		return Number.isNaN(number) 
 			? input

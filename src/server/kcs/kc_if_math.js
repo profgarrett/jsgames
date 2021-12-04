@@ -19,8 +19,7 @@ const pets_data = {
 const tutorial = {
 	type: 'IfPageFormulaSchema',
 	code: 'tutorial',
-
-}
+};
 const test = {
 	type: 'IfPageFormulaSchema',
 	code: 'test',

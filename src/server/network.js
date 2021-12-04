@@ -183,7 +183,7 @@ function require_logged_in_user(req: $Request, res: $Response, next: NextFunctio
 		res.cookie('x-access-token-refreshed', last, options);
 
 		// Perms. Used on client side to enable/hide interface.
-		res.cookie('is-admin', ADMIN_USERNAME === username ? 'True' : 'False' );
+		res.cookie('is-admin', ADMIN_USERNAME === username ? 'True' : 'False', options );
 		
 		return next();
 	} 

@@ -16,10 +16,8 @@ import ForceLogin from './../components/ForceLogin';
 import type { Node } from 'react';
 
 
-type PropsType = {};
 
-
-export default function IfRecentContainer(props: PropsType): Node {
+export default function IfRecentContainer(): Node {
 	const [ message, setMessage ] = useState('Loading filter data');
 	const [ messageStyle, setMessageStyle ] = useState('');
 	const [ isLoading, setIsLoading ] = useState(true);
@@ -28,7 +26,7 @@ export default function IfRecentContainer(props: PropsType): Node {
 
 	const onReady = (filter: Object) => {
 		setIsLoading(false);
-		setMessage('')
+		setMessage('');
 		onRefreshData(filter);
 	};
 
@@ -57,16 +55,16 @@ export default function IfRecentContainer(props: PropsType): Node {
 			.then( ifLevels => {
 				setLevels(ifLevels);
 				setMessage('');
-				setMessageStyle('')
+				setMessageStyle('');
 				setIsLoading(false);
 			})
 			.catch( error => {
 				setLevels([]);
 				setMessage('Error: ' + error);
-				setMessageStyle('Error')
+				setMessageStyle('Error');
 				setIsLoading(false);
 			});
-	}
+	};
 
 
 

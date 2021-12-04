@@ -32,12 +32,12 @@ function turn_object_keys_into_array( o: any): Array<any> {
 
 	// Test for map.
 	if( o instanceof Map) {
-		o.forEach( (values, key) => results_a.push(key))
+		o.forEach( (values, key) => results_a.push(key));
 
 	} else {
 		// Assume regular object.
 		for( let key in o ) {
-			if(o.hasOwnProperty(key)) {
+			if( Object.prototype.hasOwnProperty.call(o, key) ) {
 				results_a.push(key);
 			}
 		}
@@ -51,7 +51,7 @@ function turn_object_keys_into_array( o: any): Array<any> {
 function turn_object_values_into_array( o: any): Array<any> {
     const results_a = [];
     for( let key in o ) {
-        if(o.hasOwnProperty(key)) {
+        if( Object.prototype.hasOwnProperty.call(o, key) ) {
             results_a.push(o[key]);
         }
     }
@@ -60,11 +60,21 @@ function turn_object_values_into_array( o: any): Array<any> {
 }
 
 // Turn a string into a y/n value.
-const random_boolean_from_string = (s: string): boolean => {
-	const s_as_number = s.split('').reduce( (i, s) => s.charCodeAt(0) + i, 1 );
-	return (s_as_number % 2) === 0;
+let random_boolean_from_string = (s: string): boolean => {
+	//const s_as_number = s.split('').reduce( (i, s) => s.charCodeAt(0) + i, 1 );
+	//return (s_as_number % 2) === 0;
+	return seededRandom(1, 0, s) == 1;
 };
 
+// Return a random number in the given range using a text seed.
+// Returns an integer, not double.
+let seededRandom = function(max: number, min: number, text_seed: string ): number  {
+	const s_as_number = text_seed.split('').reduce( (i, s) => s.charCodeAt(0) + i, 1 );
+ 
+    const rnd = ( (s_as_number * 9301 + 49297) % 233280) / 233280;
+ 
+    return Math.round(min + rnd * (max - min));
+};
 
 
 // toLocaleTimeString is super slow when used with a larger number of objects.

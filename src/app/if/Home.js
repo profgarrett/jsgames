@@ -1,7 +1,6 @@
 // @flow
 import React from 'react';
-import { BrowserRouter as Router, Switch, Route, Link } from 'react-router-dom';
-
+import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
 
 import LevelListContainer from './LevelListContainer';
 import LevelPlayContainer from './LevelPlayContainer';
@@ -15,7 +14,7 @@ import MyProgressContainer from './MyProgressContainer';
 import ClassProgressContainer from './ClassProgressContainer';
 import {KCContainer} from './KCContainer';
 
-export default function Home() {
+export default function Home(): any {
 
 	return (
 		<Router>
@@ -30,7 +29,7 @@ export default function Home() {
 				<Route exact path='/ifgame/level/:_id/play' component={LevelPlayContainer} />
 				<Route exact path='/ifgame/level/:_id/score' component={LevelScoreContainer} />
 				<Route exact path='/ifgame/leveldebug/:_id' component={LevelDebugContainer} />
-				<Route exact path='/ifgame/levelraw/:_id' component={LevelRawContainer} />
+				<Route exact path='/ifgame/levelraw/:_id/:_pageIndex?' component={LevelRawContainer} />
 			</Switch>
 		</Router>
 	);
