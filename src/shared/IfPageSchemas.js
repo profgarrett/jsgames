@@ -187,27 +187,28 @@ class IfPageBaseSchema extends Schema {
 
 	// Must be implemented by inheriting classes.
 	client_has_answered(): boolean {
-		throw new Error('Inheriting classes must implement client_has_answered')
+		throw new Error('Inheriting classes must implement client_has_answered');
 	}
 	debug_answer(): any {
-		throw new Error('Inheriting classes must implement debug_answer')
+		throw new Error('Inheriting classes must implement debug_answer');
 	}
 	toString(): string {
-		throw new Error('Inheriting classes must implement toString')
+		throw new Error('Inheriting classes must implement toString');
 	}
 	get_solution(): string {
-		throw new Error('Inheriting classes must implement get_solution')
+		throw new Error('Inheriting classes must implement get_solution');
 	}
-	updateCorrect(): void {
-		throw new Error('Inheriting classes must implement updateCorrect')
+	updateCorrect() {
+		throw new Error('Inheriting classes must implement updateCorrect');
 	}
 
 
 	// This is a placeholder. It's called by IfLevleSchema to update all of the json
 	// blobs of it's contained pages. This shouldn't actually be called, as the instantiated classes
 	// all over-ride this method.
-	updateUserFields(json: any): void {
-		throw new Error('Inheriting classes must implement updateUserFields and call _updateUserFields')
+	updateUserFields(json: any) {
+		console.log(json);
+		throw new Error('Inheriting classes must implement updateUserFields and call _updateUserFields');
 	}
 
 

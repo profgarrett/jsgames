@@ -75,6 +75,8 @@ export default class LevelPlayContainer extends React.Component<PropsType, State
 		const time = page.get_time_in_seconds();
 
 		// Increment hints.
+		// TODO: Fix, hints_parsed isn't being saved, instead relying on history.
+		// TODO FIX LOGGING PROBLEM
 		page.hints_parsed = page.hints_parsed + 1;
 		history.hints_parsed = page.hints_parsed;
 
@@ -85,7 +87,7 @@ export default class LevelPlayContainer extends React.Component<PropsType, State
 			dt: new Date(),
 			correct: page.correct,
 			client_feedback: page.client_feedback,
-		})
+		});
 
 		// If we're over time, then increment view solution.
 		if(time > TIME_BEFORE_SHOWING_SOLUTION ) {

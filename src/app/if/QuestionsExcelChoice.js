@@ -56,7 +56,8 @@ export default class QuestionsPagesExcelChoice extends React.Component<DetailPro
 			'a_completed',
 			'a_history_length', 
 			'a_tutorial',
-			'a_history_first_dt',
+			'a_history_first_clientf_dt',
+			'a_history_last_clientf_dt',
 			'q_solution',
 			'q_instruction',
 			'q_description',
@@ -113,6 +114,7 @@ export default class QuestionsPagesExcelChoice extends React.Component<DetailPro
 			if(!answer.page.completed) return;
 			if(answer.page.type !== 'IfPageChoiceSchema') return;
 
+			let history = answer.page.history.filter( h => typeof h.client_f !== 'undefined' && h.code === 'client_update' );
 
 			const local = {
 				'a_username': DEMO_MODE ? '****' : answer.username, 
@@ -125,7 +127,8 @@ export default class QuestionsPagesExcelChoice extends React.Component<DetailPro
 				'a_client': answer.client,
 				'a_client_n': answer.client_n,
 				'a_sequence_in_level': answer.sequence_in_level,
-				'a_history_first_dt': answer.page.history.length > 0 ? formatDate(answer.page.history[0].dt) : null,
+				'a_history_first_clientf_dt': history.length > 0 ? formatDate(history[0].dt) : null,
+				'a_history_last_clientf_dt': history.length > 0 ? formatDate(history[history.length-1].dt) : null,
 				...defaults
 			};
 

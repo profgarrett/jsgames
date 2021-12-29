@@ -6,19 +6,22 @@
 const express = require('express');
 const router = express.Router();
 
+/*
 const { ADMIN_USERNAME } = require('./secret.js'); 
 const { IfLevels, IfLevelSchema } = require('./../shared/IfLevelSchema');
 const { IfPageAnswer, build_answers_from_level } = require('./../shared/IfPageSchemas');
 const { IfLevelSchemaFactory } = require('./IfLevelSchemaFactory');
 
-const { from_utc_to_myql, run_mysql_query, is_faculty, to_utc } = require('./mysql.js');
+const { turn_array_into_map } = require('./../shared/misc.js');
+const { return_tagged_level } = require('./tag.js');
+*/
+
+const { run_mysql_query } = require('./mysql.js');
 const { require_logged_in_user, 
 		nocache,
 		log_error,
-		get_username_or_emptystring, return_level_prepared_for_transmit} = require('./network.js');
+		get_username_or_emptystring } = require('./network.js');
 
-const { turn_array_into_map } = require('./../shared/misc.js');
-const { return_tagged_level } = require('./tag.js');
 
 
 import type { $Request, $Response, NextFunction } from 'express';
@@ -49,7 +52,6 @@ router.get('/sections',
 		const params = [username];
 
 		const sections = await run_mysql_query(sql, params);
-		console.log(sections);
 		res.json(sections);
 
 	} catch (e) {

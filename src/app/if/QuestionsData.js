@@ -199,10 +199,18 @@ function create_summary_answer( page: IfPageBaseSchema, ): any {
 		level_completed: page.level_completed,
 		server_page_added: page.server_page_added,
 		server_nextactivity: page.server_nextactivity,
+		hints_parsed: page.hints_parsed,
+		hints_viewsolution: page.hints_viewsolution,
 	};
 
 	// Harsons and/or formulas
 	if( page.type === 'IfPageHarsonsSchema' || page.type === 'IfPageFormulaSchema' || page.type === 'IfPagePredictFormulaSchema' ) {
+
+		const hints_parsed = page.history.filter( h => typeof h.hints_parsed !== 'undefined' ).length;
+		const hints_viewsolution = page.history.filter( h => typeof h.hints_viewsolution !== 'undefined' ).length;
+		summary_answer.hints_parsed = hints_parsed;
+		summary_answer.hints_viewsolution = hints_viewsolution;
+
 		const history = page.history.filter( h => !has_tag(h.tags, 'INTERMEDIATE' ) );
 		const history_string = history.map( h => pretty_history(h) ).join('<br/>');
 		const expand_string = page.history
@@ -247,6 +255,8 @@ function create_summary_answer( page: IfPageBaseSchema, ): any {
 		summary_answer.breaks = page.get_break_times_in_minutes().join(', ');
 		summary_answer.type = 'number';
 		summary_answer.html = page.client;
+		summary_answer.answer = page.client;
+		summary_answer.q_solution_f = page.solution;
 		summary_answer.expand = '';
 		summary_answer.client = page.client;
 		summary_answer.intermediate = '';
@@ -296,14 +306,10 @@ export function create_summary( levels: Array<IfLevelSchema>): any {
 	const summaries = [];
 
 	// find the time/date that each page was created.
-	// Depends on no filter being set on pagetype. Does have a sanity check in place for this problem.
+	// Depends on no filter being set on pagetype.
 	const add_page_history = (l) => {
 		const hist = l.history.filter( (h) => { return h.code === 'server_page_added'; } );
-		if( hist.length !== l.pages.length) {
-			//debugger;
-			return;
-			//throw new Error('History length does not match page length');
-		}
+		if( hist.length !== l.pages.length) return;
 
 		// Start dt
 		l.pages.forEach( (p, i) => {

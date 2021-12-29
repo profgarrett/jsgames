@@ -60,13 +60,13 @@ export default class QuestionsPagesExcelFormula extends React.Component<DetailPr
 			// 'a_html',
 			
 			//'a_tag_ABS_REF', 
-			/*
+			
 			'a_tag_NO_STARTING_EQUAL', 
 			'a_tag_NON_ROW_1_REFERENCE', 
 			'a_tag_NON_EXISTANT_COLUMN_REFERENCE', 'a_tag_USES_A_REFERENCE_NOT_IN_SOLUTION', 'a_tag_MISSING_A_REFERENCE_USED_IN_SOLUTION', 
 			'a_tag_USES_FUNCTION_NOT_IN_SOLUTION', 'a_tag_FUNCTION_WITHOUT_PAREN', 
 			'a_tag_USES_VALUE_NOT_IN_SOLUTION', 
-			*/
+			
 			//'a_tag_USES_NUMBER_IN_QUOTES',
 			
 			'a_history_clientf_nonintermediate_length',
@@ -86,6 +86,8 @@ export default class QuestionsPagesExcelFormula extends React.Component<DetailPr
 			'level_completed',
 			'server_page_added',
 			'server_nextactivity',
+			'hints_parsed',
+			'hints_viewsolution',
 			];
 		const rows = [];
 
@@ -156,6 +158,7 @@ export default class QuestionsPagesExcelFormula extends React.Component<DetailPr
 	replace_spans(s: string): string {
 		if(s === null) return '';
 		if(typeof s === 'undefined') return '';
+		if(typeof s ===  'number') return s.toString();
 
 		return s
 			.replace( new RegExp('<span class="badge">', 'g'), '[')
@@ -227,6 +230,9 @@ export default class QuestionsPagesExcelFormula extends React.Component<DetailPr
 				level_completed: answer.level_completed ? 1 : 0,
 				server_page_added: formatDate(answer.server_page_added),
 				server_nextactivity: formatDate(answer.server_nextactivity),
+				hints_parsed: answer.hints_parsed,
+				hints_viewsolution: answer.hints_viewsolution,
+	
 				...defaults
 			};
 

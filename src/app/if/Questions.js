@@ -5,7 +5,7 @@ import { IfLevelSchema } from './../../shared/IfLevelSchema';
 import type { Node } from 'react';
 
 import { create_summary } from './QuestionsData';
-//import QuestionsExcelChoice from './QuestionsExcelChoice';
+import QuestionsExcelChoice from './QuestionsExcelChoice';
 //import QuestionsExcelNumberAnswer from './QuestionsExcelNumberAnswer';
 import QuestionsExcelFormulas from './QuestionsExcelFormulas';
 import QuestionsTable from './QuestionsTable';
@@ -16,6 +16,8 @@ type PropsType = {
 	levels: Array<IfLevelSchema>,
 	output: string
 };
+
+const SHOW_FORMULA_INSTEAD_OF_CHOICE = true;
 
 export default class IfQuestions extends React.Component<PropsType> {
 
@@ -38,11 +40,11 @@ export default class IfQuestions extends React.Component<PropsType> {
 			//<IfQuestionsExcelChoice levels={levels} />
 			//<IfQuestionsExcelNumberAnswer levels={levels} />
 
-			// GOOD, just don't currently need. <QuestionsExcelChoice levels={levels} />
-			return <div>
-				
-				<QuestionsExcelFormulas levels={levels} />
-			</div>;
+			// GOOD, just don't currently need. 
+			if( SHOW_FORMULA_INSTEAD_OF_CHOICE ) 
+				return <div><QuestionsExcelFormulas levels={levels} /></div>;
+			else 
+				return <div><QuestionsExcelChoice levels={levels} /></div>;
 		}
 
 		throw new Error('Invalid output type passed to IfQuestions');
