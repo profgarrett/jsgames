@@ -4,9 +4,10 @@ const { LinearGen } = require('./../Gens');
 const { 
 	makeTutorialGenFromKC, makeAdaptiveReviewGenFromKC,
 	makeReviewIntroduction,
-	makeReviewNextConcept,
+	//makeReviewNextConcept,
 	makeReviewCompleted,
-	makeTutorialNextConcept } = require('./../kcs/kc.js');
+	//makeTutorialNextConcept 
+} = require('./../kcs/kc.js');
 
 const { finish_questions } = require('./../pages/finish_questions');
 

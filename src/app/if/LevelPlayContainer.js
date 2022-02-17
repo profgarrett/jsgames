@@ -1,6 +1,5 @@
 // @flow
 import React from 'react';
-import PropTypes from 'prop-types';
 import type { Node } from 'react';
 
 import Container from 'react-bootstrap/Container';
@@ -80,6 +79,7 @@ export default class LevelPlayContainer extends React.Component<PropsType, State
 		page.hints_parsed = page.hints_parsed + 1;
 		history.hints_parsed = page.hints_parsed;
 
+		
 
 		page.history.push({
 			code: 'client_update_feedback',
@@ -215,14 +215,14 @@ export default class LevelPlayContainer extends React.Component<PropsType, State
 					// Hide the cursor, if the previous render has it showing loading,
 					//  it needs to be reset.
 					if(document.body) {
-						document.body.style.cursor = "default"
+						document.body.style.cursor = 'default';
 					}
 
 					if( ifLevel.show_score_after_completing ) {
 						this.props.history.push('/ifgame/level/'+ifLevel._id+'/score');
 					} else {
 						// Back to home page w/o any results shown.
-						this.props.history.push('/ifgame');;
+						this.props.history.push('/ifgame');
 					}
 					return;
 				} 
@@ -333,9 +333,9 @@ export default class LevelPlayContainer extends React.Component<PropsType, State
 
 
 		if(this.state.isLoading) {
-			(document.body) ? document.body.style.cursor = "wait" : false;
+			(document.body) ? document.body.style.cursor = 'wait' : false;
 		} else {
-			(document.body) ? document.body.style.cursor = "default" : false;
+			(document.body) ? document.body.style.cursor = 'default' : false;
 		}
 
 		return (

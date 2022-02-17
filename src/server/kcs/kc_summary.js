@@ -226,13 +226,23 @@ const test_pages = [
 
 	{
 		..._base,
-		description: 'Use <code>SUM</code> to add up sales from NY, CA, and NV.',
+		description: 'Use <code>SUM</code> to add up sales from NY, CA, and NV. You must use references for each cell, and not use a range reference.',
 		solution_f: '=sum(a1,b1,c1)',
 		feedback: [ { 'has': 'functions', args: ['sum'] }]
 	}, {
 		..._base,
-		description: 'Add up the entire row using the correct function.',
+		description: 'Add up the entire row using the correct function.  You must use references for each cell, and not use a range reference.',
 		solution_f: '=sum(a1,b1,c1,d1,e1)',
+		feedback: [ { 'has': 'functions', args: ['sum'] }]
+	}, {
+		..._base,
+		description: 'Use <code>SUM</code> to add up sales from NY, CA, and NV. You must use a range reference.',
+		solution_f: '=sum(a1:c1)',
+		feedback: [ { 'has': 'functions', args: ['sum'] }]
+	}, {
+		..._base,
+		description: 'Add up the entire row using the correct function.  You must use a range reference.',
+		solution_f: '=sum(a1:e1)',
 		feedback: [ { 'has': 'functions', args: ['sum'] }]
 	}, {
 		..._base,

@@ -7,7 +7,7 @@ import type { InertiaKC } from './kc';
 const tutorial = {
 	type: 'IfPagePredictFormulaSchema', //'IfPageFormulaSchema',
 	code: 'tutorial',
-}
+};
 const test = {
 	type: 'IfPageFormulaSchema',
 	code: 'test',
@@ -183,10 +183,10 @@ const kc_text_quotes = ({
 			code: 'test',
 
 			...address_base,
-			description: 'Write a formula to say <span>Good morning!</span>',
+			description: 'Write a formula to say <span>good morning!</span>',
 			instruction: 'Type in the correct formula',
 
-			solution_f: '="Good Morning!"',
+			solution_f: '="good morning!"',
 		}
 
 	]
@@ -357,7 +357,7 @@ const kc_text_concat = ({
 		},{	
 			...test,
 			...name_base,
-			description: `Write a formula that writes <code>Hello X</code>, where <code>X</code> is their first name.`,
+			description: 'Write a formula that writes <code>Hello X</code>, where <code>X</code> is their first name.',
 			solution_f: '="Hello " & a1'
 
 		},{	
@@ -800,7 +800,7 @@ add_if_undefined( { kcs: [ KC_NAMES.TEXT_MID ] }, kc_text_mid.tutorial_pages );
 add_if_undefined( { kcs: [ KC_NAMES.TEXT_MID ] }, kc_text_mid.test_pages );
 
 
-
+/*
 const kc_text_search_the = {
 	tests: [
 		{ 'a': 'Bob the Jones' },
@@ -810,7 +810,8 @@ const kc_text_search_the = {
 	],
 	column_formats: ['text'],
 	column_titles: ['Name']
-}
+};
+*/
 
 const kc_text_search_state = {
 	tests: [
@@ -821,7 +822,7 @@ const kc_text_search_state = {
 	],
 	column_formats: ['text'],
 	column_titles: ['City and State']
-}
+};
 
 const kc_text_search_sport = {
 	tests: [
@@ -832,7 +833,7 @@ const kc_text_search_sport = {
 	],
 	column_formats: ['text'],
 	column_titles: ['Name']
-}
+};
 
 const kc_text_search_productcode = {
 	tests: [
@@ -843,7 +844,7 @@ const kc_text_search_productcode = {
 	],
 	column_formats: ['text'],
 	column_titles: ['Product Code']
-}
+};
 
 const kc_text_search_comma = {
 	tests: [
@@ -854,7 +855,7 @@ const kc_text_search_comma = {
 	],
 	column_formats: ['text'],
 	column_titles: ['Name']
-}
+};
 
 
 
@@ -867,6 +868,7 @@ const kc_text_search = ({
 	until_total: 8,
 	tutorial_pages: [
 		{	
+			/*
 			...tutorial,
 			
 			description: `Text values are easy to modify when they always have the same position for 
@@ -973,6 +975,7 @@ const kc_text_search = ({
 			solution_f: '=left(a1, search(",", a1)-1)',
 			
 		},{
+			*/
 			...tutorial,
 
 			description: `How about grabbing their first name? We will still follow the same basic process as before,

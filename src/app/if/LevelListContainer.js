@@ -1,8 +1,8 @@
 // @flow
 import React from 'react';
-import PropTypes from 'prop-types';
+//import PropTypes from 'prop-types';
 
-import type { Node } from 'react';
+//import type { Node } from 'react';
 
 import LevelList from './LevelList';
 import Container from 'react-bootstrap/Container';
@@ -10,12 +10,9 @@ import { Breadcrumb, Row, Col, Button } from 'react-bootstrap';
 import { Message, Loading } from './../components/Misc';
 import { IfLevelSchema, IfLevels } from './../../shared/IfLevelSchema';
 
-import { withRouter } from "react-router";
-
-
 type PropsType = {
 	match: Object,
-	history: any,
+	history: any
 };
 
 
@@ -31,8 +28,7 @@ type StateType = {
 	reviews: Array<any>
 };
 
-
-export default withRouter( class LevelListContainer extends React.Component<PropsType, StateType> {
+export default class LevelListContainer extends React.Component<PropsType, StateType> {
 
 	constructor(props: PropsType) {
 		super(props);
@@ -131,7 +127,7 @@ export default withRouter( class LevelListContainer extends React.Component<Prop
 
 
 	// Return start new lesson button 
-	_render_lesson_button(code: string) {
+	_render_lesson_button(code: string): Node {
 		const uncompleted_lessons_count = this.state.lessons.filter( l=> !l.completed ).length;
 		const completed_lessons_count = this.state.lessons.filter( l=> l.completed ).length;
 		const lesson_label = completed_lessons_count > 0 ? 'Restart lesson' : 'Start lesson';
@@ -141,13 +137,13 @@ export default withRouter( class LevelListContainer extends React.Component<Prop
 		if(uncompleted_lessons_count > 0 || uncompleted_reviews_count > 0) return <span/>;
 
 		return (<Button 
-				onClick={ e => this.insertLevel(code) }>
+				onClick={ () => this.insertLevel(code) }>
 					{lesson_label}
 			</Button>);
 	}
 
 	// Return start new review button
-	_render_review_button(code: string) {
+	_render_review_button(code: string): Node {
 		const completed_lessons_count = this.state.lessons.filter( l=> l.completed ).length;
 		const uncompleted_reviews_count = this.state.reviews.filter( l=> !l.completed ).length;
 		const completed_reviews_count = this.state.reviews.filter( l=> l.completed ).length;
@@ -159,13 +155,13 @@ export default withRouter( class LevelListContainer extends React.Component<Prop
 		if(completed_lessons_count < 1 ) return <span />;
 
 		return (<Button 
-					onClick={ e => this.insertLevel(code+'review') }>
+					onClick={ () => this.insertLevel(code+'review') }>
 						{review_label}
 				</Button>);
 	}
 
 
-	_get_highest_grade(levels: Array<any>) {
+	_get_highest_grade(levels: Array<any>): Node {
 
 		return levels.filter( l=> l.completed ).reduce( (max, l) => {
 			let grade = l.get_test_score_as_percent();
@@ -177,7 +173,7 @@ export default withRouter( class LevelListContainer extends React.Component<Prop
 
 
 	// Return the highest grade text
-	_render_highest_grade() {
+	_render_highest_grade(): Node {
 		const highest_lesson = this._get_highest_grade(this.state.lessons);
 		const highest_review = this._get_highest_grade(this.state.reviews);
 
@@ -203,7 +199,7 @@ export default withRouter( class LevelListContainer extends React.Component<Prop
 
 
 	// Return a link to continue anything in progress.
-	_render_complete_in_progress() {
+	_render_complete_in_progress(): Node {
 		const in_progress_lessons = this.state.lessons.filter( l=>!l.completed);
 		const in_progress_reviews = this.state.reviews.filter( l=>!l.completed);
 
@@ -227,7 +223,7 @@ export default withRouter( class LevelListContainer extends React.Component<Prop
 	}
 
 
-	render() {
+	render(): Node {
 		const code = this.props.match.params._code ? this.props.match.params._code : 'all';
 		const page_level = IfLevels.filter( level => level.code === code )[0];
 
@@ -278,4 +274,4 @@ export default withRouter( class LevelListContainer extends React.Component<Prop
 		);		
 	}
 
-});
+}

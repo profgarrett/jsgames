@@ -1,12 +1,13 @@
 // @flow
 const { LinearGen } = require('./../Gens');
 const { 
-	makeTutorialGenFromKC, 
+	//makeTutorialGenFromKC, 
 	makeInertiaGenFromKC,
-	makeReviewIntroduction,
-	makeReviewNextConcept,
-	makeReviewCompleted,
-	makeTutorialNextConcept } = require('./../kcs/kc.js');
+	//makeReviewIntroduction,
+	//makeReviewNextConcept,
+	//makeReviewCompleted,
+	//makeTutorialNextConcept 
+	} = require('./../kcs/kc.js');
 
 const { finish_questions } = require('./../pages/finish_questions');
 
@@ -20,11 +21,11 @@ const {
 	kc_text_leftright,
 	kc_text_mid,
 	kc_text_search,
-	kc_text_combine, 
+	//kc_text_combine, 
 	} = require('./../kcs/kc_text.js');
 
 import type { GenType } from './../Gens';
-import type { InertiaKC } from './../kcs/kc';
+//import type { InertiaKC } from './../kcs/kc';
 import type { LevelSchemaFactoryType } from './../IfLevelSchemaFactory';
 
 const ReviewNextConcept = {

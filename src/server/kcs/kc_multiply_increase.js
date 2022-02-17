@@ -50,7 +50,7 @@ const tutorial_pages = [
 			<br/><br/>
 			Remember, never type a % symbol in a formula! Always convert it to a decimal number.`,
 	
-		instruction: 'If {n}% (0.{n}) of the {cell1_title} have babies, how many <i>new</i> animals will we have?',
+		instruction: 'If {n}% (0.{n}) of the {cell1_title} have babies, how many <i>new</i> {cell1_title} will we have?',
 		solution_f: '={cell1_ref}*0.{n}',
 		code: 'tutorial'
 	},
@@ -67,7 +67,7 @@ const tutorial_pages = [
 				<br/><br/>
 				Either of these approaches will show you the new total number of Alpacas.`,
 		
-		instruction: 'If {n}% (0.{n}) of the {cell1_title} have babies, how many <i>total</i> animals will we have?',
+		instruction: 'If {n}% (0.{n}) of the {cell1_title} have babies, how many <i>total</i> {cell1_title} will we have?',
 		solution_f: '={cell1_ref}*1.{n}',
 
 		code: 'tutorial',

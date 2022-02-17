@@ -1,9 +1,10 @@
 // @flow
 import React from 'react';
 
-import 'rc-slider/assets/index.css';
-import 'rc-tooltip/assets/bootstrap.css';
-import Slider from 'rc-slider';
+// NDG: Fix disabled rc-slider
+// import 'rc-slider/assets/index.css';
+// import 'rc-tooltip/assets/bootstrap.css';
+// import Slider from 'rc-slider';
 import { IfPageBaseSchema } from './../../shared/IfPageSchemas';
 
 import type { Node } from 'react';
@@ -19,6 +20,8 @@ type StateType = {};
 export default class HistorySlider extends React.Component<HistoryPropsType, StateType> {
 
 	render(): Node {
+		return <p></p>;
+
 		const page = this.props.page;
 		const style = { marginBottom:5, margin: 5};
 

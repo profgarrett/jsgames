@@ -49,7 +49,7 @@ const kc_if_math_logic = ({
 
 			description: `The first place to embed simple math expressions is in the logical test.
 					<br/><br/>
-					For example, if we are trying to find find apartments that have at least 1 pet, 
+					For example, if we are trying to find find apartments that have at least {n} pet, 
 					we would write <code>=IF(B1+C1+D1>{n}, "{happy}", "{sad}")</code>.`,
 			instruction: 'Write the formula above below.',
 			
@@ -214,11 +214,11 @@ const kc_if_math_return = ({
                     Normaly we would pay $10 for a sale, but if the total revenue is over \${rev},
                     we will pay {extra}0% of the revenue instead.
                     <br/>
-					You would write <code>=IF(C1>{rev}, 10, c1*0.{extra})</code>.`,
+					You would write <code>=IF(C1>{rev}, c1*0.{extra}, 10)</code>.`,
 			instruction: 'Write the above formula.',
 			
             ...sales_data,
-            solution_f: '=IF(C1>{rev}, 10, c1*0.{extra})',
+            solution_f: '=IF(C1>{rev}, c1*0.{extra}, 10)',
             client_f_format: '$',
 
             template_values: {

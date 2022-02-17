@@ -1,6 +1,6 @@
 // @flow
 import React from 'react';
-import PropTypes from 'prop-types';
+//import PropTypes from 'prop-types';
 
 import Container from 'react-bootstrap/Container';
 import { Row, Col } from 'react-bootstrap';
@@ -17,13 +17,9 @@ import { CacheBuster } from './../components/CacheBuster';
 
 import type { Node } from 'react';
 
-//$FlowFixMe
-//import { BrowserRouter, useHistory } from "react-router-dom";
-import { withRouter } from "react-router";
-
 
 type PropsType = {
-	history: any,
+	history: any
 };
 
 type StateType = {
@@ -34,12 +30,12 @@ type StateType = {
 	isLoadingUncompletedLevels: boolean,
 	levels: Array<Object>,
 	grades: Array<Object>,
-	sections: Array<Object>,
+	sections: Array<Object>
 	
 };
 
 
-export default withRouter(class MyProgressContainer extends React.Component<PropsType, StateType>  {
+export default class MyProgressContainer extends React.Component<PropsType, StateType>  {
 	_isMounted: boolean;
 
 	constructor(props: any) {
@@ -184,7 +180,7 @@ export default withRouter(class MyProgressContainer extends React.Component<Prop
 							sections={this.state.sections }
 							grades={this.state.grades} 
 							uncompleted_levels={this.state.levels} 
-							onClickNewCode={ (code,e)=> this.insertGame(code)}
+							onClickNewCode={ (code)=> this.insertGame(code)}
 							onClickContinueLevel={ (ifLevel)=> history.push('/ifgame/level/'+ifLevel._id+'/play') } 
 						/>;
 
@@ -205,4 +201,4 @@ export default withRouter(class MyProgressContainer extends React.Component<Prop
 		);
 	}
 
-});
+}

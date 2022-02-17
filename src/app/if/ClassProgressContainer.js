@@ -22,7 +22,7 @@ type ProgressContainerStateType = {
 	message: string,
 	messageStyle: string,
 	data_loading: boolean,
-	data: Array<IfLevelPagelessSchema>,
+	data: Array<IfLevelPagelessSchema>
 };
 
 export default class ClassProgressContainer extends React.Component<ProgressPropsType, ProgressContainerStateType> {

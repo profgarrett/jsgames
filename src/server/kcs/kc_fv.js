@@ -9,7 +9,7 @@ const tutorial = {
 	code: 'tutorial',
     client_f_format: '$.',
     helpblock: 'FV(<i>rate</i>, <i>nper</i>, <i>pmt</i>, <i>pv</i>)',
-}
+};
 
 const test = {
     ...tutorial,
@@ -32,6 +32,7 @@ const savings_data = {
     column_formats: ['text', '$', '%', '0' ],
 };
 
+/*
 const investment_data = {
     column_titles: ['Option', 'Investement', 'Interest Rate', 'Years' ],
     tests: [
@@ -41,6 +42,7 @@ const investment_data = {
             ],
     column_formats: ['text', '$', '%', '0' ],
 };
+*/
 
 const fv_quiz_data = {
     column_titles: ['Interest', 'Periods', 'Deposit' ],
@@ -195,14 +197,14 @@ const kc_fv = ({
         {	...test,
             ...fv_quiz_data,
             
-			description: `What is the future value for each row?`,
+			description: 'What is the future value for each row?',
 			solution_f: '=FV(A1, B1, 0, C1)',
 
         },{ ...test,
             ...fv_quiz_data,
             
-			description: `Assuming that periods is shown in months, and interest rates for a year, 
-                what is the future value for each row?`,
+			description: 'Assuming that periods is shown in months, and interest rates for a year ' +
+                'what is the future value for each row?',
 			solution_f: '=FV(A1/12, B1, 0, C1)',
 
 
@@ -217,7 +219,7 @@ const kc_fv = ({
         },{ ...test,
             ...fv_quiz_data,
             
-			description: `The depoits have been overstated! Reduce them by {n}0%, and then calculate the future value.`,
+			description: 'The depoits have been overstated! Reduce them by {n}0%, and then calculate the future value.',
 			solution_f: '=FV(A1, B1, 0, C1*(1-.{n}))',
             template_values: {
                 'n': '[2-8]',
@@ -226,7 +228,7 @@ const kc_fv = ({
         },{ ...test,
             ...fv_quiz_data,
             
-			description: `The deposits have been understated! Increase them by {n}0%, and then calculate the future value.`,
+			description: 'The deposits have been understated! Increase them by {n}0%, and then calculate the future value.',
 			solution_f: '=FV(A1, B1, 0, C1*(1+.{n}))',
             template_values: {
                 'n': '[2-8]',
@@ -235,7 +237,7 @@ const kc_fv = ({
         },{ ...test,
             ...fv_quiz_data,
             
-			description: `The deposits have been understated! Increase them by \${n}00, and then calculate the future value.`,
+			description: 'The deposits have been understated! Increase them by \${n}00, and then calculate the future value.',
 			solution_f: '=FV(A1, B1, 0, C1+{n}00)',
             template_values: {
                 'n': '[2-6]',
@@ -265,7 +267,7 @@ const kc_fv = ({
         },{ ...test,
             ...fv_quiz_data,
             
-			description: `All of the years were typed in wrong. Change each to {n} years, and then calculate the future value.`,
+			description: 'All of the years were typed in wrong. Change each to {n} years, and then calculate the future value.',
 			solution_f: '=FV(A1, {n}, 0, C1)',
             template_values: {
                 'n': '[10-20]',
@@ -275,7 +277,7 @@ const kc_fv = ({
         },{ ...test,
             ...fv_quiz_data,
             
-			description: `All of the interest rates were typed in wrong. Change each to {n}%, and then calculate the future value.`,
+			description: 'All of the interest rates were typed in wrong. Change each to {n}%, and then calculate the future value.',
 			solution_f: '=FV(0.0{n}, B1, 0, C1)',
             template_values: {
                 'n': '[2-7]',

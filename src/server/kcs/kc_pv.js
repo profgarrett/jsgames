@@ -9,7 +9,7 @@ const tutorial = {
 	code: 'tutorial',
     client_f_format: '$.',
     helpblock: 'PV(<i>rate</i>, <i>nper</i>, <i>pmt</i>, <i>fv</i>)',
-}
+};
 
 const test = {
     ...tutorial,
@@ -22,6 +22,7 @@ const test = {
 // Basic use of PV 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
+/*
 const savings_data = {
     column_titles: ['Option', 'Deposit', 'Interest Rate', 'Years' ],
     tests: [
@@ -34,6 +35,7 @@ const savings_data = {
             ],
     column_formats: ['text', '$', '%', '0' ],
 };
+*/
 
 
 
@@ -377,7 +379,7 @@ const kc_pv_adjust = ({
         },{ ...test,
             ...pv_quiz_data,
             
-			description: `The prizes have been overstated! Reduce them by {n}0%, and then calculate the present value.`,
+			description: 'The prizes have been overstated! Reduce them by {n}0%, and then calculate the present value.',
 			solution_f: '=PV(A1, B1, 0, C1*(1-.{n}))',
             template_values: {
                 'n': '[2-8]',
@@ -386,7 +388,7 @@ const kc_pv_adjust = ({
         },{ ...test,
             ...pv_quiz_data,
             
-			description: `The prizes have been understated! Increase them by {n}0%, and then calculate the present value.`,
+			description: 'The prizes have been understated! Increase them by {n}0%, and then calculate the present value.',
 			solution_f: '=PV(A1, B1, 0, C1*(1+.{n}))',
             template_values: {
                 'n': '[2-8]',
@@ -395,8 +397,8 @@ const kc_pv_adjust = ({
         },{ ...test,
             ...pv_quiz_data,
             
-			description: `The prizes have been understated! Increase them by \${n}00, and then calculate the present value.`,
-			solution_f: '=PV(A1, B1, 0, C1+{n}00)',
+			description: 'The prizes have been understated! Increase them by \${n}00, and then calculate the present value.',
+            solution_f: '=PV(A1, B1, 0, C1+{n}00)',
             template_values: {
                 'n': '[2-6]',
             },
@@ -404,7 +406,7 @@ const kc_pv_adjust = ({
         },{ ...test,
             ...pv_quiz_data,
             
-			description: `As part of a special promotion, all of the interest rates are being increased by {n}% (add). Calculate the present value.`,
+			description: 'As part of a special promotion, all of the interest rates are being increased by {n}% (add). Calculate the present value.',
 			solution_f: '=PV(A1+0.0{n}, B1, 0, C1)',
             template_values: {
                 'n': '[2-6]',
@@ -413,7 +415,7 @@ const kc_pv_adjust = ({
         },{ ...test,
             ...pv_quiz_data,
             
-			description: `Unfortunately, all of the years have been overstated. Reduce each by {n} years, and then calculate the present value.`,
+			description: 'Unfortunately, all of the years have been overstated. Reduce each by {n} years, and then calculate the present value.',
 			solution_f: '=PV(A1, B1-{n}, 0, C1)',
             template_values: {
                 'n': '[2-6]',
@@ -436,7 +438,7 @@ add_if_undefined( { kcs: [ KC_NAMES.KC_PV_ADJUST ] }, kc_pv_adjust.test_pages );
 // PV with Annuity
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-
+/*
 const annuity_savings_data = {
     column_titles: ['Option', 'Deposit', 'Interest Rate', 'Years' ],
     tests: [
@@ -449,7 +451,7 @@ const annuity_savings_data = {
             ],
     column_formats: ['text', '$', '%', '0' ],
 };
-
+*/
 
 
 const annuity_prize_data = {
@@ -465,7 +467,7 @@ const annuity_prize_data = {
 };
 
 
-
+/*
 const annuity_quiz_data = {
     column_titles: ['Interest', 'Payments', 'Value' ],
     tests: [
@@ -476,7 +478,7 @@ const annuity_quiz_data = {
             ],
     column_formats: ['%', '0', '$' ],
 };
-
+*/
 
 const kc_pv_annuity = ({
 	kc: KC_NAMES.KC_PV_ANNUITY,
@@ -606,14 +608,14 @@ const kc_pv_annuity = ({
         {	...test,
             ...pv_quiz_data,
             
-			description: `What is the present value for each row?`,
+			description: 'What is the present value for each row?',
 			solution_f: '=PV(A1, B1, C1, 0)',
 
 
         },{ ...test,
             ...pv_quiz_data,
             
-			description: `The years were not typed correctly. Change each to {n} years, and then calculate the present value.`,
+			description: 'The years were not typed correctly. Change each to {n} years, and then calculate the present value.',
 			solution_f: '=PV(A1, {n}, C1, 0)',
             template_values: {
                 'n': '[10-20]',
@@ -623,7 +625,7 @@ const kc_pv_annuity = ({
         },{ ...test,
             ...pv_quiz_data,
             
-			description: `All of the interest rates were typed in wrong. Change each to {n}%, and then calculate the present value.`,
+			description: 'All of the interest rates were typed in wrong. Change each to {n}%, and then calculate the present value.',
 			solution_f: '=PV(0.0{n}, B1, C1, 0)',
             template_values: {
                 'n': '[2-7]',
@@ -634,7 +636,7 @@ const kc_pv_annuity = ({
         },{ ...test,
             ...pv_quiz_data,
             
-			description: `Change each amount to \${n},000, and then calculate the present value.`,
+			description: 'Change each amount to ${n},000, and then calculate the present value.',
 			solution_f: '=PV(A1, B1, {n}000, 0)',
             template_values: {
                 'n': '[2-7]',
@@ -697,7 +699,7 @@ const kc_pv_annuity_adjust = ({
                 Remember that you can reduce a value by multiplying it by (1-x%). For example, reduce
                 a value by 10% by mutiplying it by (1-0.1).
                 `,
-			instruction: 'Write <code>=PV(<i>interest</i>, <i>years</i>, <i>annual payment</i>, 0)</code>',
+			instruction: 'Write <code>=PV(<i>interest</i>, <i>years</i>, 0, <i>annual payment</i>)</code>',
 
 			solution_f: '=PV(C1, D1, 0, B1*(1-0.{n}))',
             ...prize_data,
@@ -724,7 +726,7 @@ const kc_pv_annuity_adjust = ({
                 Assume that the interest rates shown are yearly, but the periods are monthly. Calculate the 
                 present value.
                 `,
-			instruction: 'Write <code>=PV(<i>interest</i>, <i>years</i>, <i>annual payment</i>, 0)</code>',
+			instruction: 'Write <code>=PV(<i>interest</i>, <i>years</i>, 0, <i>annual payment</i>)</code>',
 
 			solution_f: '=PV(C1/12, D1, 0, B1)',
             ...prize_data,
@@ -758,7 +760,7 @@ const kc_pv_annuity_adjust = ({
         },{ ...test,
             ...pv_quiz_data,
             
-			description: `The prizes have been overstated! Reduce them by {n}0%, and then calculate the present value.`,
+			description: 'The prizes have been overstated! Reduce them by {n}0%, and then calculate the present value.',
 			solution_f: '=PV(A1, B1, C1*(1-.{n}), 0)',
             template_values: {
                 'n': '[2-8]',
@@ -767,7 +769,7 @@ const kc_pv_annuity_adjust = ({
         },{ ...test,
             ...pv_quiz_data,
             
-			description: `The prizes have been understated! Increase them by {n}0%, and then calculate the present value.`,
+			description: 'The prizes have been understated! Increase them by {n}0%, and then calculate the present value.',
 			solution_f: '=PV(A1, B1, C1*(1+.{n}), 0)',
             template_values: {
                 'n': '[2-8]',
@@ -776,7 +778,7 @@ const kc_pv_annuity_adjust = ({
         },{ ...test,
             ...pv_quiz_data,
             
-			description: `The prizes have been understated! Increase them by \${n}00, and then calculate the present value.`,
+			description: 'The prizes have been understated! Increase them by \${n}00, and then calculate the present value.',
 			solution_f: '=PV(A1, B1, C1+{n}00, 0)',
             template_values: {
                 'n': '[2-6]',
@@ -785,7 +787,7 @@ const kc_pv_annuity_adjust = ({
         },{ ...test,
             ...pv_quiz_data,
             
-			description: `As part of a special promotion, all of the interest rates are being increased by {n}% (add). Calculate the present value.`,
+			description: 'As part of a special promotion, all of the interest rates are being increased by {n}% (add). Calculate the present value.',
 			solution_f: '=PV(A1+0.0{n}, B1, C1, 0)',
             template_values: {
                 'n': '[2-6]',
@@ -794,7 +796,7 @@ const kc_pv_annuity_adjust = ({
         },{ ...test,
             ...pv_quiz_data,
             
-			description: `Unfortunately, all of the years have been overstated. Reduce each by {n} years, and then calculate the present value.`,
+			description: 'Unfortunately, all of the years have been overstated. Reduce each by {n} years, and then calculate the present value.',
 			solution_f: '=PV(A1, B1-{n}, C1, 0)',
             template_values: {
                 'n': '[2-6]',

@@ -154,25 +154,25 @@ function common_schema(): Object {
 	Common base class for shared behavior.
 */
 class IfPageBaseSchema extends Schema {
-	code: string
-	description: string
-	instruction: string
-	template_values: Object
-	client_feedback: ?Array<string>
-	feedback: Array<Function>
-	correct: ?boolean
-	correct_required: boolean
-	completed: boolean
-	show_feedback_on: boolean
-	history: Array<Object>
-	kcs: Array<Object>
-	time_minimum: number
-	time_limit: number
-	time_limit_expired: boolean
-	chart_def: ChartDef
-	template_id: string
-	hints_parsed: number
-	hints_viewsolution: number
+	code: string;
+	description: string;
+	instruction: string;
+	template_values: Object;
+	client_feedback: ?Array<string>;
+	feedback: Array<Function>;
+	correct: ?boolean;
+	correct_required: boolean;
+	completed: boolean;
+	show_feedback_on: boolean;
+	history: Array<Object>;
+	kcs: Array<Object>;
+	time_minimum: number;
+	time_limit: number;
+	time_limit_expired: boolean;
+	chart_def: ChartDef;
+	template_id: string;
+	hints_parsed: number;
+	hints_viewsolution: number;
 
 	// Apply json to this obj, signally no parent classes to do the setting for us.
 	constructor( json?: any) {
@@ -221,7 +221,7 @@ class IfPageBaseSchema extends Schema {
 		@update_correct: default true
 		@generate_history: Will generate a history action for any updates. Default true.
 	*/
-	_updateUserFields(json: any, valid_fields: Array<string>, update_correct: boolean = true, generate_history: boolean = true): void {
+	_updateUserFields(json: any, valid_fields: Array<string>, update_correct: boolean = true, generate_history: boolean = true) {
 		const changes = [];
 
 		// Make sure that we have a json
@@ -259,7 +259,7 @@ class IfPageBaseSchema extends Schema {
 			if(typeof json[field] !== 'undefined') {
 
 				// Is array and is different array by contents?
-			 	if(Array.isArray(json[field])) {
+				if(Array.isArray(json[field])) {
 
 					//$FlowFixMe
 					if(arrayDifferent(this[field], json[field])) {
@@ -456,7 +456,8 @@ class IfPageBaseSchema extends Schema {
 		}
 
 		if(ms < 0) {
-			debugger;
+			// Debug point. Sometimes happens when stupid clocks have times do weird things.
+			//throw new Error('invalid time? IfPageSchema ms < zero');
 		}
 
 		return Math.round( ms / 1000 );
@@ -512,8 +513,8 @@ class IfPageBaseSchema extends Schema {
 	// Type coercion for flow not liking subtypes.
 	toIfPageChoiceSchema(): IfPageChoiceSchema {
 		if( this.type !== 'IfPageChoiceSchema') {
-			throw new Error('Invalid type convertion to IfPageChoiceSchema')
-		};
+			throw new Error('Invalid type convertion to IfPageChoiceSchema');
+		}
 		// $FlowFixMe 
 		return this;
 	}
@@ -584,7 +585,7 @@ class IfPageBaseSchema extends Schema {
 	This pages displays information to the user.
 */
 class IfPageTextSchema extends IfPageBaseSchema {
-	client_read: bool
+	client_read: boolean;
 
 	// Apply json to this obj, signally no parent classes to do the setting for us.
 	constructor( json?: any) {
@@ -620,7 +621,7 @@ class IfPageTextSchema extends IfPageBaseSchema {
 	}
 
 	// There is no solution for text fields.
-	get_solution() {
+	get_solution(): string {
 		return '';
 	}
 
@@ -663,8 +664,8 @@ class IfPageTextSchema extends IfPageBaseSchema {
 	Get a single-line piece of information from the user.
 */
 class IfPageNumberAnswerSchema extends IfPageBaseSchema {
-	client: number
-	solution: number
+	client: number;
+	solution: number;
 
 	// Apply json to this obj, signally no parent classes to do the setting for us.
 	constructor( json?: any) {
@@ -707,7 +708,7 @@ class IfPageNumberAnswerSchema extends IfPageBaseSchema {
 	}
 
 	// Return solution (after changing to string)
-	get_solution() {
+	get_solution(): string {
 		if(this.solution === null) return '';
 		return ''+this.solution;
 	}
@@ -796,7 +797,7 @@ class IfPageSliderSchema extends IfPageBaseSchema {
 	}	
 
 	// Return solution (after changing to string)
-	get_solution() {
+	get_solution(): string {
 		if(this.solution === null) return '';
 		return ''+this.solution;
 	}
@@ -830,8 +831,8 @@ class IfPageSliderSchema extends IfPageBaseSchema {
 	Get a single-line piece of information from the user.
 */
 class IfPageShortTextAnswerSchema extends IfPageBaseSchema {
-	client: string
-	solution: string
+	client: string;
+	solution: string;
 
 	// Apply json to this obj, signally no parent classes to do the setting for us.
 	constructor( json?: any) {
@@ -868,7 +869,7 @@ class IfPageShortTextAnswerSchema extends IfPageBaseSchema {
 	}
 
 	// No solution, return empty string.
-	get_solution() {
+	get_solution(): string {
 		return '';
 	}
 
@@ -934,9 +935,9 @@ class IfPageLongTextAnswerSchema extends IfPageShortTextAnswerSchema {
 	If a range of choices, then solution should be a wildcard ? or *.
 */
 class IfPageChoiceSchema extends IfPageBaseSchema {
-	client: string
-	client_items: Array<string>
-	solution: string
+	client: string;
+	client_items: Array<string>;
+	solution: string;
 
 	// Apply json to this obj, signally no parent classes to do the setting for us.
 	constructor( json?: any) {
@@ -968,8 +969,8 @@ class IfPageChoiceSchema extends IfPageBaseSchema {
 		return this.client !== null;
 	}
 
-	// If we have one, return teh solution.
-	get_solution() {
+	// If we have one, return the solution.
+	get_solution(): string {
 		if(this.solution === '?') return '';
 		return this.solution;
 	}
@@ -1032,10 +1033,10 @@ class IfPageChoiceSchema extends IfPageBaseSchema {
 	The solution fields are not sent to the client unless they have the _visible tag set.
 */
 class IfPageParsonsSchema extends IfPageBaseSchema {
-	helpblock: string
-	potential_items: Array<string>
-	solution_items: Array<string>
-	client_items: Array<string>
+	helpblock: string;
+	potential_items: Array<string>;
+	solution_items: Array<string>;
+	client_items: Array<string>;
 
 	// Apply json to this obj, signally no parent classes to do the setting for us.
 	constructor( json?: any) {
@@ -1069,7 +1070,7 @@ class IfPageParsonsSchema extends IfPageBaseSchema {
 	}
 
 	// Turn solution into a string and return.
-	get_solution() {
+	get_solution(): string {
 		return this.solution_items.join(', ');
 	}
 
@@ -1078,7 +1079,7 @@ class IfPageParsonsSchema extends IfPageBaseSchema {
 	// solution_f will not be present.
 	debug_answer() {
 		if(typeof this.solution_items === 'undefined' || this.solution_items.length < 1) {
-			throw new Error('You can not debug answer without solution_items being present')
+			throw new Error('You can not debug answer without solution_items being present');
 		}
 		this.client_items = this.solution_items;
 		this.updateCorrect();
@@ -1134,20 +1135,20 @@ class IfPageParsonsSchema extends IfPageBaseSchema {
 	The solution fields are not sent to the client unless they have the _visible tag set.
 */
 class IfPageFormulaSchema extends IfPageBaseSchema {
-	tests: Array<Object>
-	column_titles: Array<string>
-	column_formats: Array<string>
+	tests: Array<Object>;
+	column_titles: Array<string>;
+	column_formats: Array<string>;
 
-	client_f: string
-	client_f_format: string
-	client_test_results: Array<Object>
+	client_f: string;
+	client_f_format: string;
+	client_test_results: Array<Object>;
 
-	solution_f: string
-	solution_test_results: Array<Object>
-	solution_f_visible: boolean
-	solution_test_results_visible: boolean
+	solution_f: string;
+	solution_test_results: Array<Object>;
+	solution_f_visible: boolean;
+	solution_test_results_visible: boolean;
 
-	helpblock: string
+	helpblock: string;
 
 	// Apply json to this obj, signally no parent classes to do the setting for us.
 	constructor( json?: any) {
@@ -1166,7 +1167,7 @@ class IfPageFormulaSchema extends IfPageBaseSchema {
 	}
 
 	// Return solution
-	get_solution() {
+	get_solution(): string {
 		if(this.solution_f === null) return '';
 		return this.solution_f;
 	}
@@ -1404,7 +1405,7 @@ class IfPageFormulaSchema extends IfPageBaseSchema {
 
 		// Add a hook for getting variables.
 		// Requires that all passed coordinates are on the first row.
-		parser.on('callCellValue', function(cellCoord, done) {
+		parser.on('callCellValue', function(cellCoord: string, done: any) {
 			let coor = cellCoord.label.toLowerCase();
 			if(coor.substr(1) !== '1') {
 				throw new Error('#REF '+ coor);
@@ -1418,7 +1419,7 @@ class IfPageFormulaSchema extends IfPageBaseSchema {
 
 
 		// Add hook for getting ranges.
-		parser.on('callRangeValue', function(startCellCoord, endCellCoord, done) {
+		parser.on('callRangeValue', function(startCellCoord: string, endCellCoord: string, done: any) {
 			let fragment = [];
 
 			// Only allow
@@ -1498,7 +1499,7 @@ class IfPageFormulaSchema extends IfPageBaseSchema {
 	It's the same as the FormulaSchema, with the addition of a toolbox.
 */
 class IfPageHarsonsSchema extends IfPageFormulaSchema {
-	toolbox: Array<string>
+	toolbox: Array<string>;
 
 
 	// Apply json to this obj, signally no parent classes to do the setting for us.
@@ -1553,7 +1554,7 @@ class IfPageHarsonsSchema extends IfPageFormulaSchema {
 	Used to trigger different interface
 */
 class IfPagePredictFormulaSchema extends IfPageFormulaSchema {
-	predicted_answers_used: Array<number>
+	predicted_answers_used: Array<number>;
 
 
 	// Apply json to this obj, signally no parent classes to do the setting for us.
@@ -1624,7 +1625,7 @@ class IfPagePredictFormulaSchema extends IfPageFormulaSchema {
 			// See if the answer for the given index matches the answer
 			// for that row. 
 			if(	this.solution_test_results[answer_index].result !== 
-				 this.solution_test_results[i].result) return false;
+				this.solution_test_results[i].result) return false;
 		}
 		return true;
 	}
@@ -1662,7 +1663,7 @@ function get_page_schema_as_class(json: Object): IfPageBaseSchema {
 		'IfPagePredictFormulaSchema': IfPagePredictFormulaSchema,
 	}[type];
 
-	if(typeof p === 'undefined') throw new Error('Invalid type passed to IfPageSchemas.get_page_schema_class')
+	if(typeof p === 'undefined') throw new Error('Invalid type passed to IfPageSchemas.get_page_schema_class');
 
 	return new p(json);
 }
@@ -1675,24 +1676,25 @@ function get_page_schema_as_class(json: Object): IfPageBaseSchema {
 	a quick summary of how their class is doing.
  */
 class IfPageAnswer {
-    username: string
-	level_id: string
-    level_code: string // level code, math1, math2, etc...
-    sequence_in_level: number
-    kcs_as_string: string // comma delimited list.
-    answers: Array<string>
-    solution: string
-    solution_pretty: string
-    correct: ?boolean
-    seconds: number
-    classification: string
+    username: string;
+	level_id: string;
+    level_code: string; // level code, math1, math2, etc...
+    sequence_in_level: number;
+    kcs_as_string: string; // comma delimited list.
+    answers: Array<string>;
+    solution: string;
+    solution_pretty: string;
+    correct: ?boolean;
+    seconds: number;
+    classification: string;
 
-	page_code: string // page code, such as test, tutorial, ...
+	page_code: string; // page code, such as test, tutorial, ...
 	
 	constructor(json: any) {
 		if(typeof json === 'undefined') return;
 		
 		for(let key in json) {
+			// eslint-disable-next-line no-prototype-builtins
 			if(json.hasOwnProperty(key)) {
 				//$FlowFixMe
 				this[key] = json[key];
@@ -1718,7 +1720,7 @@ function build_answers_from_level( level: IfLevelSchema ): Array<IfPageAnswer> {
         a.sequence_in_level = i;
         a.kcs_as_string = p.kcs.join(',');
         a.solution = p.get_solution();
-        a.solution_pretty = ''+fill_template( a.solution, p.template_values )
+        a.solution_pretty = ''+fill_template( a.solution, p.template_values );
         a.correct = p.correct;
         a.seconds = p.get_time_in_seconds();
 		a.page_code = p.code;
@@ -1745,7 +1747,7 @@ function build_answers_from_level( level: IfLevelSchema ): Array<IfPageAnswer> {
             ? 'Incorrect' 
             : a.seconds > 60 ? 'Correct, but slow' : 'Correct';
         
-        answers.push(a)
+        answers.push(a);
     });
 
     return answers;

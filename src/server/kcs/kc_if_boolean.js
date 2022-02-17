@@ -240,7 +240,7 @@ const kc_if_and_boolean_logic = ({
         },{	...test,
             ...pig6_data,
             
-			description: `Which pigs were <i>sold</i> and had a rating later in the alphabet than <code>{n}</code>?`,
+			description: `Which pigs were <i>sold</i> and had a rating later in the alphabet than <code>{l}</code>?`,
 
 			solution_f: '=AND(C1, A1>"{l}")',
             template_values: {

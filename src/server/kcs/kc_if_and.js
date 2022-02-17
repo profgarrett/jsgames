@@ -274,7 +274,7 @@ const kc_if_and_logic = ({
         {	...test,
             ...animals_data,
             
-			description: `Do we have have over {n} {cell1_title} and over {n} {cell2_title}?`,
+			description: `Do we have over {n} {cell1_title} and over {n} {cell2_title}?`,
 
 			solution_f: '=AND({cell1_ref}>{n}, {cell2_ref}>{n})',
             template_values: {

@@ -136,6 +136,23 @@ type StateType = {
 	handle: any
 };
 
+/*
+	Look at client_f.  If it's found, then replace
+	any weird quotes with normal quotes.
+	Also replace a dash – with a normal -
+*/
+const replaceClientFSmartQuotes = ( o: any ): string => {
+	if(typeof o.client_f !== 'undefined' ) {
+		o.client_f = o.client_f.replaceAll(/“/g, '"')
+		.replaceAll(/”/g, '"')
+		.replaceAll(/‘/g, "'")
+		.replaceAll(/’/g, "'")
+		.replaceAll(/–/g, '-');
+	}
+
+	return o;
+};
+
 export default class IfLevelPlay extends React.Component<PropsType, StateType> {
 
 	constructor(props: any) {
@@ -164,7 +181,8 @@ export default class IfLevelPlay extends React.Component<PropsType, StateType> {
 	}
 
 	handleChange(new_value: Object) {
-		this.props.onChange(new_value);
+		// Clean out smartQuotes
+		this.props.onChange( replaceClientFSmartQuotes(new_value) );
 	} 
 
 

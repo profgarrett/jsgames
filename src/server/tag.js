@@ -45,6 +45,10 @@ const countIn = (s: string, c: string): number => {
 const filter_history = 	
 		(h) => h.filter( 
 			// filter non f and unused events.
+			/* Note:  NDG 12/30/21, 
+				Be careful looking at output from here.
+				History events are limited to only those with client_f updates.
+			*/
 			h => typeof h.client_f !== 'undefined' &&
 				h.client_f !== null &&
 				h.code !== 'created' &&
@@ -56,7 +60,7 @@ const filter_history =
 		).filter( 
 			// filter out any harsons with a ;, as those are returned whenver something is being
 			// built (drag and drop operation), or something is put on the background.
-			h => (h.client_f.search(';') === -1)
+			h => typeof h.client_f === 'undefined' ? true : (h.client_f.search(';') === -1)
 		);
 
 
@@ -779,7 +783,7 @@ function return_tagged_level(level: IfLevelSchema): IfLevelSchema {
 		if(page.type === 'IfPageFormulaSchema') 
 			filtered_history = tag_paste(filtered_history);
 
-		page.history = filtered_history;
+		//page.history = filtered_history;
 
 		let parsed = {};
 
@@ -787,7 +791,7 @@ function return_tagged_level(level: IfLevelSchema): IfLevelSchema {
 		let t_solution_f = fill_template(page.solution_f, page.template_values);
 		
 		// Run checks.
-		page.history.map( h => {
+		filtered_history.map( h => {
 			// Make sure we have data.
 			if( typeof h.client_f === 'undefined' ) return;
 

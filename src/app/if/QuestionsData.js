@@ -22,15 +22,18 @@ const SOLUTION_F_LIST = [];
 
 // Show a history item in an appealing fashion.
 const pretty_history = h => {
-	const tags = h.tags
-			.map( t => '<span class="badge badge-pill badge-primary">'+ he.encode(t.tag)+'</span>' );
+	const s = typeof h.client_f === 'undefined' || h.client_f == null ? '' : h.client_f;
+	const tags = typeof h.tags === 'undefined' 
+			? [] 
+			: h.tags.map( t => '<span class="badge badge-pill badge-primary">'+ he.encode(t.tag)+'</span>' );
 
-	return he.encode(h.client_f) + ' ' + tags.join(' ');
+	return he.encode(s) + ' ' + tags.join(' ');
 };
 
 // Return if the tag array has a matching tag.
 // T/F
 const has_tag = (tags: Array<Object>, match: string): boolean => {
+	if( typeof tags === 'undefined' ) return false;
 	return 0 < tags.filter( t => t.tag === match ).length;
 };
 const get_first_matching_tag = (tags: Array<Object>, match: string): ?Object => {
@@ -231,7 +234,9 @@ function create_summary_answer( page: IfPageBaseSchema, ): any {
 
 		// Add tags.
 		page.history.map( h => {
-			h.tags.map( tag => {
+			const tags = typeof h.tags === 'undefined' || h.tags === null ? [] : h.tags;
+
+			return tags.map( tag => {
 				increment_tag( summary_answer.tags, tag.tag );
 			});
 		});

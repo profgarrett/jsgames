@@ -1,10 +1,10 @@
 // @flow
 const {  LinearGen, ShuffleGen } = require('./../Gens');
-const { IfPageFormulaSchema, IfPagePredictFormulaSchema } = require( './../../shared/IfPageSchemas');
+//const { IfPageFormulaSchema, IfPagePredictFormulaSchema } = require( './../../shared/IfPageSchemas');
 import type { GenType } from './../Gens';
 import type { LevelSchemaFactoryType } from './../IfLevelSchemaFactory';
 
-
+/*
 const formatGif = (url) => {
 	return '<img src=' + url + ' width="400px" height="118px" style="border: solid 2px darkgray;" />' +
 			'<div style="width: 400px; text-align: center; background-color: darkgray; color: white; ' +
@@ -17,6 +17,8 @@ const formatBigGif = (url) => {
 			'font-size: 14px;">Video Demo</div>' +
 			'<img src=' + url + ' width="600px" style="border: solid 2px darkgray;" />';
 };
+*/
+
 
 /*
 const test_format: GenType = {
@@ -165,6 +167,36 @@ const gen_opening: GenType = {
 };
 
 
+
+
+const gen_on_hint: GenType = {
+	gen_type: LinearGen,
+	pages: [
+		{	type: 'IfPageFormulaSchema',
+			code: 'tutorial',
+			template_id: 'tutorial_hint',
+			description: `This tutorial system will help you with the yellow "Get a hint" button.
+				It will look
+				at your current formula, and tell you about missed references or functions.
+				<br/><br/>
+				After 3 minutes, the system will tell you the correct answer for any tutorial (not quiz) question.
+				`,
+			instruction: 'Use the hint button to figure out what number to <i>multiply</i> by A1',
+			column_titles: ['Sales', 'Profit', 'Revenue'],
+			tests: [{ 'a': 23, 'b': 55, 'c': 43 }],
+			solution_f: '=A1*{x}',
+			template_values: {
+				'x': '[2-9]'
+			},
+			feedback: [
+				{ 'has': 'symbols', args: ['*'] },
+				{ 'has': 'references', args: ['A1'] },
+				{ 'has': 'values', args: ['{x}'] }
+			],
+		}
+	]
+};
+
 const gen_on_references: GenType = {
 	gen_type: LinearGen,
 	pages: [
@@ -237,7 +269,7 @@ const gen_on_choices: GenType = {
 	]
 };
 
-
+/*
 const gen_on_harsons: GenType = {
 	gen_type: LinearGen,
 	pages: [
@@ -253,7 +285,7 @@ const gen_on_harsons: GenType = {
 			instruction: 'Click the "Next page" to try it on the next screen.'
 		},
 		{	type: 'IfPageHarsonsSchema',
-			description: `Drag the blocks into the white space below.`,
+			description: 'Drag the blocks into the white space below.',
 			instruction: 'Create the formula <code>={ref1_ref} + {n}</code>',
 			tests: [ 
 				{ 'a': 9, b: 123 },
@@ -303,7 +335,7 @@ const gen_on_harsons: GenType = {
 		}
 	]
 };
-
+*/
 
 
 const gen_on_interface: GenType = {
@@ -383,9 +415,9 @@ const tutorial: LevelSchemaFactoryType = {
 		gen_type: LinearGen,
 		pages: [
 			gen_opening,
-			
-			//gen_on_harsons,
 
+			gen_on_hint,
+			//gen_on_harsons,
 			gen_on_references,
 			gen_on_predict,
 			({

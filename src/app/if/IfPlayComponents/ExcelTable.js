@@ -1,8 +1,7 @@
 // @flow
 import React from 'react';
-import PropTypes from 'prop-types';
-import { Table, FormControl, Button, Tabs, Tab, Alert, OverlayTrigger, Tooltip } from 'react-bootstrap';
-import { HtmlSpan, SmallOkGlyphicon, BlueSpan } from './../../components/Misc';
+import { Table, FormControl, Button, Tabs, Tab, OverlayTrigger, Tooltip } from 'react-bootstrap';
+import { HtmlSpan, BlueSpan } from './../../components/Misc';
 import { IfPageFormulaSchema, IfPagePredictFormulaSchema } from './../../../shared/IfPageSchemas';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 
@@ -20,8 +19,7 @@ const randomizeListInPlace = (a: Array<any>, seed: number): void => {
 		// $FlowFixMe
 		[a[i], a[j]] = [a[j], a[i]];
 	}
-
-}
+};
 
 
 // Helper functions to clean up the display of true/false, which 
@@ -241,7 +239,7 @@ const getItemStyle = (snapshot, draggableStyle, answer_index) => {
 		borderColor: isDragging ? '#b8daff' : '',
 		borderStyle: 'solid',
 		...draggableStyle
-	}
+	};
 	if(answer_index === -1) {
 		new_style.background = 'white';
 		new_style.borderStyle = 'dashed';
@@ -249,13 +247,16 @@ const getItemStyle = (snapshot, draggableStyle, answer_index) => {
 	if(snapshot.isDropAnimating) {
 		return {
 			...new_style,
-			transitionDuraction: `0.001s`,
-		}
+			transitionDuraction: '0.001s',
+		};
 	}
 	return new_style;
 };
 
 const getListStyle = (isDraggingOver: boolean, position?: string): Object => {
+	// Not sure if needed
+	position;
+
 	const style = {
 		background: isDraggingOver ? 'lightblue' : '',
 		padding: grid,
@@ -274,11 +275,13 @@ type StateType = {
 	seed: number
 };
 
+/*
 type Answer = {
 	content: string,
 	row: number,
 	correct?: boolean,
 }
+*/
 
 type PredictPropsType = {
 	page: IfPagePredictFormulaSchema,
@@ -300,8 +303,8 @@ class PredictExcelTable extends React.Component<PredictPropsType, StateType> {
 	// Convert an answer (number) into the string value for display
 	_answer_to_string(page: IfPagePredictFormulaSchema, answer_index: number): string {
 		if(answer_index === -1) return 'Drag answer here';
-		if(page.solution_test_results[answer_index].result === true) return "True";
-		if(page.solution_test_results[answer_index].result === false) return "False";
+		if(page.solution_test_results[answer_index].result === true) return 'True';
+		if(page.solution_test_results[answer_index].result === false) return 'False';
 		return page.solution_test_results[answer_index].result;
 	}
 
@@ -330,8 +333,8 @@ class PredictExcelTable extends React.Component<PredictPropsType, StateType> {
 		const unused = sorted_answers
 			.map( (answer_text: string, answer_index: number) => answer_index )
 			.filter( ( answer_index: number )=> { 
-				return used.indexOf( answer_index ) === -1
-			 });
+				return used.indexOf( answer_index ) === -1;
+			});
 
 		return unused;
 	}
@@ -346,7 +349,7 @@ class PredictExcelTable extends React.Component<PredictPropsType, StateType> {
 		
 		// If zero-length for used, initialize with an empty string for each row.
 		if(used.length === 0) {
-			page.solution_test_results.forEach( n => used.push(-1)); // -1 is a flag for non-set.
+			page.solution_test_results.forEach( () => used.push(-1)); // -1 is a flag for non-set.
 		}
 
 		return used;
@@ -376,7 +379,7 @@ class PredictExcelTable extends React.Component<PredictPropsType, StateType> {
 	}
 
 	// Code to run after finishing a move.
-    onDragEnd(result) {
+    onDragEnd(result: any) {
         const { source, destination, draggableId } = result;
 	
         if (!destination) return; // dropped outside of a list. Do nothing
@@ -408,12 +411,12 @@ class PredictExcelTable extends React.Component<PredictPropsType, StateType> {
 			used[fromRow] = -1;
 		} else {
 			// Pulled from master list.
-			used[destRow] = answer_index
+			used[destRow] = answer_index;
 		}
 
 		// Both update predicted answers, as well as reset the timer.
 		this.props.handleChange( { 'predicted_answers_used': used });
-    };
+    }
 
 
 	render_top_draggables(page: IfPagePredictFormulaSchema ): Node {
@@ -425,7 +428,7 @@ class PredictExcelTable extends React.Component<PredictPropsType, StateType> {
 		const original_potential_answers = this._get_answers_as_string(page);
 		const resorted_potential_answer_indexes = [];
 		original_potential_answers.map( (answer, i) => resorted_potential_answer_indexes.push(i));
-		randomizeListInPlace(resorted_potential_answer_indexes, this.state.seed)
+		randomizeListInPlace(resorted_potential_answer_indexes, this.state.seed);
 
 		// Get the answers we haven't used yet.
 		const unused_answer_indexes = this._get_unused_answers(page);
@@ -437,9 +440,9 @@ class PredictExcelTable extends React.Component<PredictPropsType, StateType> {
 			return <Tooltip id='doubleclicktooltip' {...props}>
 				Double-click to place in the first open cell.
 			</Tooltip>;
-		}		
+		};
 		return (
-			<Droppable droppableId="PredictExcelTable_Source">
+			<Droppable droppableId='PredictExcelTable_Source'>
                     {(provided, snapshot) => (
                         <div
                             ref={provided.innerRef}
@@ -452,11 +455,11 @@ class PredictExcelTable extends React.Component<PredictPropsType, StateType> {
                                     {(provided, snapshot) => (
 										<div>
                                         <OverlayTrigger
-											placement="top"
+											placement='top'
 											delay={{ show: 400, hide: 50}}
 											overlay={renderTooltip}
 											><div>
-												<Button variant='info' as="div"
+												<Button variant='info' as='div'
 												ref={provided.innerRef}
 												onDoubleClick={() => this.onAnswerDoubleclick(answer_index)}
 												{...provided.draggableProps}
@@ -503,7 +506,7 @@ class PredictExcelTable extends React.Component<PredictPropsType, StateType> {
                             { used.map(( answer_index: number, index) => (
                                 <Draggable
                                     key={ 'DraggablePredictExcelTable_Row'+answer_index}
-                                    draggableId={ ""+answer_index }
+                                    draggableId={ ''+answer_index }
                                     index={index}>
                                     {(provided, snapshot) => (
                                         <Button 
@@ -532,7 +535,7 @@ class PredictExcelTable extends React.Component<PredictPropsType, StateType> {
 	}
 
 	// Build out the table 
-	render() {
+	render(): Node {
 		const page = this.props.page.toIfPagePredictFormulaSchema();
 		
 		// Set columns to [null] for cases where we don't have any tests.
@@ -543,18 +546,19 @@ class PredictExcelTable extends React.Component<PredictPropsType, StateType> {
 		const columns =  Object.keys(page.tests[0]);
 
 		// Helper function to increment the a1, b2, ... references to a2, b2.
+		/*
 		const increment_row = 
 				(formula, row_i) => 
 					columns.reduce( (accum, c) => 
 						accum.replace( new RegExp(c+'1', 'ig' ), c+row_i),
 						formula);
-
+		*/
 
 		// Build table.
 		let rows = [];
-		let fieldFormula = null;
-		let fieldSolution = null;
-		let style = null;
+		//let fieldFormula = null;
+		//let fieldSolution = null;
+		//let style = null;
 		let test = null;
 
 		// Create each of the rows in the table.
@@ -643,7 +647,7 @@ class FormulaExcelTable extends React.Component<PropsType> {
 
 
 	// Build out the input box.
-	_render_field(page: IfPageFormulaSchema) {
+	_render_field(page: IfPageFormulaSchema): Node {
 		const helpblockStyle = {
 			color: 'white',
 			marginBottom: 5,
@@ -669,7 +673,7 @@ class FormulaExcelTable extends React.Component<PropsType> {
 
 
 	// Build out the table 
-	render() {
+	render(): Node {
 		const page = this.props.page;
 		// Set columns to [null] for cases where we don't have any tests.
 		// Need to have something for the for loop, but null won't be displayed.
@@ -737,7 +741,7 @@ class FormulaExcelTable extends React.Component<PropsType> {
 				if(		page.client_test_results[i].result === page.solution_test_results[i].result ||
 						Math.round(page.client_test_results[i].result * 100) === 
 						Math.round(page.solution_test_results[i].result * 100 )
-				 	) {
+				) {
 					// Render the field with a checkbox showing success.
 					fieldResult = <td style={addCorrectColor(style)}>{ clean(page.client_test_results[i].result, page.client_f_format) }</td>;
 				} else {
@@ -834,12 +838,12 @@ export default class ExcelTable extends React.Component<PropsType> {
 				page={this.props.page} 
 				editable={this.props.editable} 
 				readonly={this.props.readonly} 
-				handleChange={this.props.handleChange}/>
+				handleChange={this.props.handleChange}/>;
 
 		// If we are a PredictFormula, then look to see if the predictions are correct.
 		if(page.type === 'IfPagePredictFormulaSchema' && this.props.editable ) {
 			const p = page.toIfPagePredictFormulaSchema();
-			const correct = p.predictions_correct()
+			const correct = p.predictions_correct();
 			// Test correctness.
 				
 			return ( 
@@ -850,7 +854,7 @@ export default class ExcelTable extends React.Component<PropsType> {
 							readonly={this.props.readonly} 
 							handleChange={this.props.handleChange}/>
 					</Tab>
-					<Tab eventKey='formula' disabled={!correct} title="Step 2: Write the formula">
+					<Tab eventKey='formula' disabled={!correct} title='Step 2: Write the formula'>
 						{ excelTable }
 					</Tab>
 				</Tabs>
