@@ -1,8 +1,9 @@
-require('@babel/polyfill');
+// REMOVE require('@babel/polyfill');
+// import "core-js/stable";
 
+const HTMLWebpackPlugin = require('html-webpack-plugin');
 
-var HTMLWebpackPlugin = require('html-webpack-plugin');
-var HTMLWebpackPluginConfig = new HTMLWebpackPlugin({
+const HTMLWebpackPluginConfig = new HTMLWebpackPlugin({
 	template: __dirname + '/src/app/index.html',
 	filename: 'index.html',
 	inject: 'body',
@@ -11,28 +12,14 @@ var HTMLWebpackPluginConfig = new HTMLWebpackPlugin({
 
 module.exports = {
 	mode: 'development',
-	entry: ['@babel/polyfill', __dirname + '/src/app/index.js'],
-	module: {
-		rules: [
-			{
-				test: /\.js$/,
-				exclude: /node_modules/,
-				use: { loader: 'babel-loader' }
-			},
-			{
-				test: /\.css$/,
-				use: [ 'style-loader', 'css-loader']
-			}
-		]
-	},
+	entry: [__dirname + '/src/app/index.jsx'],
 	output: {
 		filename: 'packedjs.js',
 		publicPath: '/',
-		path:   __dirname + '/build/public'
+		path: __dirname + '/build/public'
 	},
 	plugins: [HTMLWebpackPluginConfig],
 	devtool: 'source-map',
-
 	devServer: {
 		port: 8080,
 		proxy: {
@@ -42,6 +29,40 @@ module.exports = {
 			}
 		},
 		historyApiFallback: true
+	},
+	resolve: {
+		extensions: ['.js', '.jsx', '.ts', '.tsx' ],
+	},
+	module: {
+		rules: [
+			{
+				test: /\.?jsx$/,
+				exclude: /node_modules/,
+				use: {
+					loader: 'babel-loader'
+				}
+			},
+			{
+				test: /\.?js$/,
+				exclude: /node_modules/,
+				use: {
+					loader: 'babel-loader'
+				}
+			},
+			{
+				test: /\.?ts$/,
+				exclude: /node_modules/,
+				use: {
+					loader: 'babel-loader'
+				}
+			},
+			{
+				test: /\.?tsx$/,
+				exclude: /node_modules/,
+				use: {
+					loader: 'babel-loader'
+				}
+			},
+		]
 	}
-
 };

@@ -306,7 +306,7 @@ export class LevelScoreChart extends React.Component<LevelPropsType> {
 			</div>)
 		});
 
-		const slider_summary: Object = slider_pairs.reduce( (accum: Array<any>, pair: any) => {
+		const slider_summary: any = slider_pairs.reduce( (accum: Array<any>, pair: any) => {
 			// Find match
 			for(let i=0; i<accum.length; i++) {
 				if(accum[i].title === pair.title) {
@@ -420,7 +420,7 @@ export class LevelScoreChart extends React.Component<LevelPropsType> {
 		});
 
 
-		const choice_summary: Object = choice_pairs.reduce( (accum: Array<any>, pair: any) => {
+		const choice_summary: any = choice_pairs.reduce( (accum: Array<any>, pair: any) => {
 			// Find match
 			for(let i=0; i<accum.length; i++) {
 				if(accum[i].title === pair.title) {
@@ -495,7 +495,7 @@ export class LevelScoreChart extends React.Component<LevelPropsType> {
 		});
 
 
-		const choice_summary: Object = choice_pairs.reduce( (accum: Array<any>, pair: any) => {
+		const choice_summary: any = choice_pairs.reduce( (accum: Array<any>, pair: any) => {
 			// Find match
 			for(let i=0; i<accum.length; i++) {
 				if(accum[i].title === pair.title) {
@@ -610,7 +610,7 @@ export class LevelScoreChart extends React.Component<LevelPropsType> {
 		});
 
 
-		const choice_summary: Object = choice_pairs.reduce( (accum: Array<any>, pair: any) => {
+		const choice_summary: any = choice_pairs.reduce( (accum: Array<any>, pair: any) => {
 			// Find match
 			for(let i=0; i<accum.length; i++) {
 				if(accum[i].title === pair.title) {
@@ -678,7 +678,7 @@ export class LevelScoreChart extends React.Component<LevelPropsType> {
 		});
 
 
-		const choice_summary: Object = choice_items.reduce( (accum: Array<any>, item: any) => {
+		const choice_summary: any = choice_items.reduce( (accum: Array<any>, item: any) => {
 			// Find match
 			for(let i=0; i<accum.length; i++) {
 				if(accum[i].title === item.title) {
@@ -743,7 +743,7 @@ export class LevelScoreChart extends React.Component<LevelPropsType> {
 		});
 
 
-		const choice_summary: Object = choice_items.reduce( (accum: Array<any>, item: any) => {
+		const choice_summary: any = choice_items.reduce( (accum: Array<any>, item: any) => {
 			// Find match
 			for(let i=0; i<accum.length; i++) {
 				if(accum[i].title === item.title) {
@@ -821,7 +821,7 @@ export class LevelScoreChart extends React.Component<LevelPropsType> {
 		});
 
 
-		const choice_summary: Object = choice_items.reduce( (accum: Array<any>, item: any) => {
+		const choice_summary: any = choice_items.reduce( (accum: Array<any>, item: any) => {
 			// Find match
 			for(let i=0; i<accum.length; i++) {
 				if(accum[i].title === item.title) {
@@ -889,7 +889,7 @@ export class LevelScoreChart extends React.Component<LevelPropsType> {
 		});
 
 
-		const choice_summary: Object = choice_items.reduce( (accum: Array<any>, item: any) => {
+		const choice_summary: any = choice_items.reduce( (accum: Array<any>, item: any) => {
 			// Find match
 			for(let i=0; i<accum.length; i++) {
 				if(accum[i].title === item.title) {
@@ -945,7 +945,7 @@ export class LevelScoreChart extends React.Component<LevelPropsType> {
 		});
 
 
-		const choice_summary: Object = choice_items.reduce( (accum: Array<any>, item: any) => {
+		const choice_summary: any = choice_items.reduce( (accum: Array<any>, item: any) => {
 			// Find match
 			for(let i=0; i<accum.length; i++) {
 				if(accum[i].title === item.title) {

@@ -14,7 +14,7 @@ type DetailPropsType = {
 
 
 
-function array_to_object( a: Array<string> ): Object {
+function array_to_object( a: Array<string> ): any {
 	var o = {};
 	a.map( s => o[s] = true );
 	return o;
@@ -26,7 +26,7 @@ function array_to_object( a: Array<string> ): Object {
 export default class QuestionsTags extends React.Component<DetailPropsType> {
 
 
-	build_row( data: Object, columns: Object, i: number ): Node {
+	build_row( data: any, columns: any, i: number ): Node {
 		const tds = [];
 
 		for(let index in columns) {
@@ -45,7 +45,7 @@ export default class QuestionsTags extends React.Component<DetailPropsType> {
 
 
 
-	build_row_data( rows: Array<Object>, question: Object) {
+	build_row_data( rows: Array<Object>, question: any) {
 
 		const question_base = {
 			level: question.level,

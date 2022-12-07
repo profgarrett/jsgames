@@ -1,7 +1,7 @@
 // @flow
 import React from 'react';
 import { Table, Modal, Button } from 'react-bootstrap';
-import { turn_array_into_map, turn_object_keys_into_array } from './../../shared/misc.js';
+import { turn_array_into_map, turn_object_keys_into_array } from './../../shared/misc';
 import { ResponsiveBar, Bar } from '@nivo/bar'
 import { LevelModal } from './LevelModal';
 import { prettyDateAsString } from './../components/Misc';
@@ -90,11 +90,11 @@ export class ClassProgressChart extends React.Component<PropsType, StateType> {
             }
         });
 
-        let c_data = [];
-        let code_levels = [];
-        let completed = [];
-        let uncompleted = [];
-        let needs_repeating = [];
+        let c_data : any[] = [];
+        let code_levels : any[] = [];
+        let completed : any[] = [];
+        let uncompleted : any[] = [];
+        let needs_repeating : any[] = [];
 
         // Build by code and completion
 
@@ -249,7 +249,7 @@ export class ClassProgressChart extends React.Component<PropsType, StateType> {
 			</thead>
 			<tbody>
 			{ row_data.map( 
-				(t: Object,i) => <tr key={'tr'+i}>
+				(t: any,i) => <tr key={'tr'+i}>
 					{
 						columns.map( 
 							(c,i) => ( <td key={'td'+i}>{ cell(t, c, i)}</td> )

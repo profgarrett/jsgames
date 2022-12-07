@@ -1,14 +1,16 @@
 {
 	"presets": [
-		"@babel/preset-react",
 		"@babel/preset-env",
-		"@babel/preset-flow"
+		"@babel/typescript",
+		"@babel/preset-react"
 	],
 	"plugins": [
+		/* REMOVE
 		"@babel/plugin-proposal-object-rest-spread",
 		"@babel/plugin-transform-flow-strip-types",
 		"@babel/plugin-proposal-class-properties",
 		"@babel/plugin-proposal-optional-chaining",
 		"@emotion"
+		*/
 	]
 }

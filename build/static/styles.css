@@ -1,0 +1,27 @@
+.levelplay-transition-enter {
+  color: white;
+}
+
+.levelplay-transition-enter.levelplay-transition-enter-active {
+  transition: color 1000ms linear;
+  color: black;
+} 
+
+.levelplay-transition-appear {
+  color: white;
+}
+
+.levelplay-transition-appear.levelplay-transition-appear-active {
+  transition: color 1000ms linear;
+  color: black;
+}
+
+/* Give the breadcrumb control some extra space and formatting.*/
+.breadcrumb {
+	background-color: yellow;
+	padding: .75rem;
+	padding-bottom: 1rem;
+	margin-bottom: 1rem;
+	background-color: #e9ecef;
+	border-radius: .25rem;
+}

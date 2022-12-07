@@ -24,14 +24,14 @@ export default function IfRecentContainer(): Node {
 	const [ levels, setLevels ] = useState([]);
 
 
-	const onReady = (filter: Object) => {
+	const onReady = (filter: any) => {
 		setIsLoading(false);
 		setMessage('');
 		onRefreshData(filter);
 	};
 
 
-	const onRefreshData = (filter: Object) => {
+	const onRefreshData = (filter: any) => {
 		const args = [];
 		
 		if(filter.levels != '') args.push('code='+filter.levels);

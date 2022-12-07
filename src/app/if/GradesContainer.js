@@ -28,13 +28,13 @@ export default function GradesContainer(props: GradesPropsType): Node {
 	const [ isLoading, setIsLoading ] = useState(true);
 	const [ data, setData ] = useState([]);
 
-	const onReady = (filter: Object) => {
+	const onReady = (filter: any) => {
 		setIsLoading(false);
 		setMessage('');
 		onRefreshData(filter);
 	};
 
-	const onRefreshData = (filter: Object) => {
+	const onRefreshData = (filter: any) => {
 		const args = [];
 
 		if(filter.sections !== '') args.push('idsection='+filter.sections);

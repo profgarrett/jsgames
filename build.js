@@ -29,8 +29,8 @@ http.createServer(function (req, res) {
     '.doc': 'application/msword'
   };
 
-  fs.exists(pathname, function (exist) {
-    if(!exist) {
+  fs.exists(pathname,  (exists) => {
+    if(!exists) {
       // if the file is not found, return 404
       res.statusCode = 404;
       res.end(`File ${pathname} not found!`);

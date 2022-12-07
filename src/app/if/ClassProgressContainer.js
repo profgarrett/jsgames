@@ -38,13 +38,13 @@ export default class ClassProgressContainer extends React.Component<ProgressProp
 		(this: any).onReady = this.onReady.bind(this);
 	}
 
-	onReady(filter: Object) {
+	onReady(filter: any) {
 		this.setState({ data_loading: false, message: ''});
 		this.onRefreshData(filter);
 	}
 
-	onRefreshData(filter: Object) {
-		const args = [];
+	onRefreshData(filter: any) {
+		const args : any[] = [];
 
 		if(filter.sections !== '') args.push('idsection='+filter.sections);
 

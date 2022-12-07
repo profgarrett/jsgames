@@ -3,7 +3,7 @@ import React from 'react';
 import { Popover, Card, OverlayTrigger } from 'react-bootstrap';
 
 import { HtmlDiv, IncorrectGlyphicon, CorrectGlyphicon, CompletedGlyphicon } from './../components/Misc';
-import { fill_template } from './../../shared/template.js';
+import { fill_template } from './../../shared/template';
 
 import ExcelTable from './IfPlayComponents/ExcelTable';
 import Text from './IfPlayComponents/Text';

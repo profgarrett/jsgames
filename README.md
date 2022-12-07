@@ -1,13 +1,9 @@
 # JS Games
 
-This project provides a set of Javascript games and tutorials.
-
-
-## Getting Started
-
-Requires a server with Node.js installed and a MySql server.
-
+This is a research project from Nathan Garrett. It provide a set of Excel tutorials.
 ### Installing
+
+Install Node.js, MySql, npm, ts-node, and nodemon globally.
 
 Load code 
 ```
@@ -21,7 +17,7 @@ npm install
 
 Create a secret.js file in the \build\server folder. The Bugsnag API is optional, or use DEBUG. Local bugs are pushed to a log.txt file by default.
 ```
-module.exports = {
+export {
 	ADMIN_USERNAME: '',
 	USER_CREATION_SECRET: '',
 	JWT_AUTH_SECRET: '',
@@ -30,19 +26,31 @@ module.exports = {
 	MYSQL_HOST: '',
 	MYSQL_DATABASE: '',
 	BUGSNAG_API: '',
-	DEBUG: false
-};
-```
+	DEBUG: false,
+	VERSION: 3,
+	GOOGLEID: '',
 
+	EMAIL_ADDRESS: '',
+	EMAIL_PASSWORD: '',
+	EMAIL_HOST: '',
+	
+	ADMIN_OVER_PASSWORD: '',
+
+	DEMO_MODE: false, // demo mode blanks out usernames.
+
+	VISLIT_MIN_TIME_PER_SLIDE: 3,
+	VISLIT_TIME_PER_SLIDE: 60,
+	DISTORTION_MEDIUM: 0.6, 
+	DISTORTION_SMALL: 0.3,
+}
+```
 
 After updating, visit this page to update SQL schema.
 ```
 http://hosthame/api/sql
 ```
 
-Create tutorial files and put in \server\tutorials. You can also get them by emailing Nathan.  See below for tutorial information. Note that you need to build them first, as you shouldn't deploy with flow type annotations.
-
-Then, run tests. Replace x with the code used to create users on your system. Note that this requires the test tutorial file to be uploaded.
+Tun tests. Replace x with the code used to create users on your system. Note that this requires the test tutorial file to be uploaded.
 ```
 http://hostname/ifgame/test/?USER_CREATION_SECRET=x
 ```
@@ -63,8 +71,19 @@ ln -s jsgames/build/server/app.js app.js
 
 If you're having trouble getting npm packages to update, npm-install-missing is very useful.
 
-### Updating
+### Useful Typescript Hints
 
+
+Initialize an array to be a specific type:
+```
+x = new Array<IfLevelSchema>()
+```
+Initialize an object that is access with strings.
+```
+interface IStringIndexJsonObject {
+	[key: string]: any
+}
+```
 
 
 
@@ -113,11 +132,6 @@ After updating, and before submitting, be sure the build folder is up to date. U
 npm run build
 ```
 
-
-If installing new library through npm or yarn, use flow-typed to install the type defs.
-```
-flow-typed install
-```
 
 
 ## Authoring Tutorials.

@@ -12,7 +12,7 @@ import { IfLevelSchema } from './../../shared/IfLevelSchema';
 import ForceLogin from './../components/ForceLogin';
 
 type PropsType = {
-	match: Object
+	match: any
 };
 type StateType = {
 	message: string,

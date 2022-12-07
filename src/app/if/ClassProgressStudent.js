@@ -1,14 +1,14 @@
 // @flow
 import React from 'react';
 import { Popover, Table, Modal, Button } from 'react-bootstrap';
-import { turn_array_into_map } from './../../shared/misc.js';
-import { HtmlDiv } from './../components/Misc.js';
+import { turn_array_into_map } from './../../shared/misc';
+import { HtmlDiv } from './../components/Misc';
 import { ResponsiveBar, Bar } from '@nivo/bar'
 import { Pie } from '@nivo/pie'
 import { prettyDateAsString } from './../components/Misc';
 import { IfLevelSchema, GREEN_GRADE, PASSING_GRADE, DEFAULT_TUTORIAL_LEVEL_LIST } from './../../shared/IfLevelSchema';
 import { IfPageBaseSchema, IfPageFormulaSchema } from './../../shared/IfPageSchemas';
-import { fill_template } from './../../shared/template.js';
+import { fill_template } from './../../shared/template';
 
 import type { Node } from 'react';
 
@@ -23,7 +23,7 @@ type PropsType = {
 type StateType = {
     code: string,
     caption: string,
-    el: Object,
+    el: any,
 };
 
 
@@ -52,7 +52,7 @@ export class ClassProgressStudent extends React.Component<PropsType, StateType> 
     }
 
 
-    _render_users_by_time_bar(s: Object): Node {
+    _render_users_by_time_bar(s: any): Node {
         const data = s.pages;
 
         return (<div>
@@ -492,7 +492,7 @@ function create_level_summary(level: IfLevelSchema) {
 }
 
 // Create a simple version of the page to display.
-function create_page_summary( p: IfPageBaseSchema, i: number): Object {
+function create_page_summary( p: IfPageBaseSchema, i: number): any {
     const full_history = p.history;
     const attempts = [];
 

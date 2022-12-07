@@ -1,9 +1,0 @@
-[ignore]
-.*/npm/node_modules/config-chain/.*
-
-[libs]
-<PROJECT_ROOT>/flow-typed/
-
-[options]
-module.ignore_non_literal_requires=true
-react.runtime=automatic

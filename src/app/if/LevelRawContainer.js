@@ -14,7 +14,7 @@ import type { Node } from 'react';
 
 
 type PropsType = {
-	match: Object
+	match: any
 };
 type StateType = {
 	message: string,
@@ -92,8 +92,8 @@ export default class LevelScoreContainer extends React.Component<PropsType, Stat
 				},
 				body: level.toJsonString()
 			})
-			.then( (response: any): Object => response.json() )
-			.then( (json: Object) => {
+			.then( (response: any): any => response.json() )
+			.then( (json: any) => {
 				if(json._error) throw new Error(json._error); 
                 console.log(json);
 
@@ -117,7 +117,7 @@ export default class LevelScoreContainer extends React.Component<PropsType, Stat
 			});
     }
 
-    update_level(level_json: Object) {
+    update_level(level_json: any) {
         
         // Convert back into regular IfLevel.
         const level = new IfLevelSchema(level_json);
@@ -145,8 +145,8 @@ export default class LevelScoreContainer extends React.Component<PropsType, Stat
 				},
 				body: level.toJsonString()
 			})
-			.then( (response: any): Object => response.json() )
-			.then( (json: Object): IfLevelSchema => {
+			.then( (response: any): any => response.json() )
+			.then( (json: any): IfLevelSchema => {
 				if(json._error) throw new Error(json._error); 
 				return new IfLevelSchema(json);
 			})

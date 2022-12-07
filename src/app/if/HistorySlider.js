@@ -36,7 +36,7 @@ export default class HistorySlider extends React.Component<HistoryPropsType, Sta
 
 		// Convert history to an obj keyed by index.
 		let i = 0;
-		const marks = history.reduce( (marks: Object /*, history_item: Object*/): any => {
+		const marks = history.reduce( (marks: any /*, history_item: any*/): any => {
 			marks[i] = ''; // history_item.created.toLocaleTimeString();
 			i++;
 			return marks;

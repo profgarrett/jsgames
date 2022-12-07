@@ -50,7 +50,7 @@ export default class IfQuestionsChart extends React.Component<DetailPropsType> {
     /* 
         Find unique page keys
     */
-    get_keys_from_levels(levels: Array<IfLevelSchema>): Object {
+    get_keys_from_levels(levels: Array<IfLevelSchema>): any {
         const keys = {};
 
         // Iterate through the entire list, finding unique pages
@@ -78,7 +78,7 @@ export default class IfQuestionsChart extends React.Component<DetailPropsType> {
         ]
 
     */
-    flatten_levels(levels: Array<IfLevelSchema>, oKeys: Object): Array<Object> {
+    flatten_levels(levels: Array<IfLevelSchema>, oKeys: any): Array<Object> {
         const results = [];
         const aKeys = Object.keys(oKeys);
 
@@ -115,7 +115,7 @@ export default class IfQuestionsChart extends React.Component<DetailPropsType> {
     }
 
     // Return a table showing a list of questions.
-    render_questions(oKeys: Object, aKeys: Array<Object>, levels: Array<Object>): Node {
+    render_questions(oKeys: any, aKeys: Array<Object>, levels: Array<Object>): Node {
 
 		const td_style = {
 			'border': 'solid 1px black',
@@ -174,7 +174,7 @@ export default class IfQuestionsChart extends React.Component<DetailPropsType> {
 
     // return a table of results, with one row per user, showing what they actually answered.
     // Uses aKeys to figure out with properties to include as columns.
-	render_results(oKeys: Object, aKeys: Array<Object>, levels: Array<Object>): Node {
+	render_results(oKeys: any, aKeys: Array<Object>, levels: Array<Object>): Node {
 
 		const td_style = {
 			'border': 'solid 1px black',

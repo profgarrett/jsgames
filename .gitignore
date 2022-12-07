@@ -1,0 +1,5 @@
+node_modules
+.vs
+secret.js
+secret.distribution.js
+log.txt

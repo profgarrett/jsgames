@@ -14,8 +14,8 @@ type PropsType = {
 	disabled: boolean, // provide a way to make it readonly, such as when data is being loaded externally.
 	onChange: (Object) => void,
 	onReady: (Object) => void,
-	defaults: Object,
-	filters: Object
+	defaults: any,
+	filters: any
 };
 
 /* Filters expects the following 
@@ -27,9 +27,9 @@ type PropsType = {
 
 type ContainerStateType = {
 	// Status.
-	filters: Object,
-	selection: Object,
-	loading: Object
+	filters: any,
+	selection: any,
+	loading: any
 
 };
 
@@ -117,7 +117,7 @@ export default class Filter extends React.Component<PropsType, ContainerStateTyp
 	}
 
 
-	getFilter(): Object {
+	getFilter(): any {
 		const values = {};
 
 		for(let filter in this.state.filters) {

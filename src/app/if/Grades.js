@@ -16,7 +16,7 @@ type PropsType = {
 };
 
 // Return the average of the given items.
-const avg_of = function(obj: Object, arr: Array<any>): number {
+const avg_of = function(obj: any, arr: Array<any>): number {
 	let totals = arr.map( a => typeof obj[a] === 'undefined' ? 0 : obj[a] );
 	let sum = totals.reduce( (sum, i) => sum + i, 0);
 	return Math.round(sum / arr.length);
@@ -102,7 +102,7 @@ export default function Grades(props: PropsType): Node {
 			</thead>
 			<tbody>
 			{ props.data.map( 
-				(t: Object,i) => <tr key={'tr'+i}>
+				(t: any,i) => <tr key={'tr'+i}>
 					{
 						columns.map( 
 							(c,i) => ( <td key={'td'+i}> 

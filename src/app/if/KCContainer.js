@@ -47,12 +47,12 @@ export class KCContainer extends React.Component<ProgressPropsType, ProgressCont
 		(this: any).show_modal = this.show_modal.bind(this);
 	}
 
-	onReady(filter: Object) {
+	onReady(filter: any) {
 		this.setState({ data_loading: false, message: ''});
 		this.onRefreshData(filter);
 	}
 
-	onRefreshData(filter: Object, ) {
+	onRefreshData(filter: any, ) {
 		const args = [];
 
 		if(filter.sections !== '') args.push('idsection='+filter.sections);

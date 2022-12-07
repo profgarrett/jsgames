@@ -28,7 +28,7 @@ export default function Recent(props: PropsType): Node {
 	const [ level_id, setLevel_id ] = useState(null);
 
 	/*
-	const dateAsString = (d: Object): string => {
+	const dateAsString = (d: any): string => {
 		return d.getFullYear()+'/'+(d.getMonth()+1) +'/'+d.getDate() +
 				' ' + d.getHours()+':'+ (d.getMinutes()<10 ? '0': '') + d.getMinutes();
 	};

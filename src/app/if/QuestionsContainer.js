@@ -40,12 +40,12 @@ export default class QuestionsContainer extends React.Component<QuestionsPropsTy
 		(this: any).onReady = this.onReady.bind(this);
 	}
 
-	onReady(filter: Object) {
+	onReady(filter: any) {
 		this.setState({ isLoading: false, message: ''});
 		this.onRefreshData(filter);
 	}
 
-	onRefreshData(filter: Object) {
+	onRefreshData(filter: any) {
 		const args = [];
 
 		// Set server-level filters for the http request.
