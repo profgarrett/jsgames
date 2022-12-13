@@ -10,7 +10,8 @@ import { IfLevels, IfLevelSchema, IfLevelPagelessSchema } from './../shared/IfLe
 import { build_answers_from_level } from './../shared/IfPageSchemas';
 
 import { run_mysql_query, is_faculty } from './mysql';
-import { require_logged_in_user, nocache, log_error, get_username_or_emptystring, return_level_prepared_for_transmit } from './network';
+import { user_get_username_or_emptystring, user_require_logged_in, 
+		nocache, log_error, return_level_prepared_for_transmit } from './network';
 
 import { turn_array_into_map, turn_object_keys_into_array } from './../shared/misc';
 import { return_tagged_level } from './tag';
@@ -43,14 +44,14 @@ function to_string_from_possible_array( s: string | string[] | any ): string {
 	Gets a list of data useful for deeper analysis.
 	Allows retrieving solutions, as it requires admin use.
 */
-router.get('/questions/', nocache, require_logged_in_user,
+router.get('/questions/', nocache, user_require_logged_in,
 	async (req: Request, res: Response, next: NextFunction): Promise<any> => {
 	try {
 		// Time limit on returned data.
 		const INTERVAL = 99999 + ' DAY';
 
 		// Only allow faculty to have access to questions
-		const username = get_username_or_emptystring(req, res);
+		const username = user_get_username_or_emptystring(req, res);
 		const is_faculty_result = await is_faculty(username);
 		if(!is_faculty_result) throw new Error('User do not have permission to review questions');
 
@@ -85,10 +86,6 @@ router.get('/questions/', nocache, require_logged_in_user,
 
 		// Build SQL statement.
 		// Note that we trust that all given params have already been cleaned up.
-		console.log('DEBUG: Hax to retrieve correct 3 sections');
-		
-		const DEBUG_ID_SECTION = '(sections.idsection IN (16, 18, 19)) ';
-			// '(sections.idsection = ? OR ? = '*') ';
 
 		const sql = `select distinct iflevels.*
 			from iflevels 
@@ -106,13 +103,11 @@ router.get('/questions/', nocache, require_logged_in_user,
 					OR ? = 'if' && LEFT(iflevels.code, 2) = 'if'
 				) AND
 				
-				${DEBUG_ID_SECTION} AND
+				(sections.idsection IN (?)) AND
 				(users.iduser = ? OR ? = '*') AND 
 				iflevels.updated > NOW() - INTERVAL ${INTERVAL} AND 
 				iflevels.username NOT IN ('${ADMIN_USERNAME}') AND 
 				iflevelsmax.first = 1`;
-
-
 
 		let select_results = await run_mysql_query(sql, sql_params);
 
@@ -134,10 +129,10 @@ router.get('/questions/', nocache, require_logged_in_user,
 
 // Select object updated in the last time period..
 // Allows retrieving solutions, as it requires faculty role.
-router.get('/recent/', nocache, require_logged_in_user,
+router.get('/recent/', nocache, user_require_logged_in,
 	async (req: Request, res: Response, next: NextFunction): Promise<any> => {
 	try {
-		const username = get_username_or_emptystring(req, res);
+		const username = user_get_username_or_emptystring(req, res);
 		const is_faculty_result = await is_faculty(username);
 		if(!is_faculty_result) throw new Error('User does not have permission to review questions');
 
@@ -213,10 +208,10 @@ WHERE  ` + sql_where_clauses.join(' AND ') +
 	Get progress for a list of users.
 	Normally passed a section id.
 */
-router.get('/progress?', nocache, require_logged_in_user,
+router.get('/progress?', nocache, user_require_logged_in,
 	async (req: Request, res: Response, next: NextFunction): Promise<any> => {
 	try {
-		const username = get_username_or_emptystring(req, res);
+		const username = user_get_username_or_emptystring(req, res);
 		const is_faculty_result = await is_faculty(username);
 
 		// Simple perm check.  
@@ -273,10 +268,10 @@ ORDER BY iflevels.updated desc `;
 /**
 	Get IfAnswers for the passed section and level.
 */
-router.get('/answers?', nocache, require_logged_in_user,
+router.get('/answers?', nocache, user_require_logged_in,
 	async (req: Request, res: Response, next: NextFunction): Promise<any> => {
 	try {
-		const username = get_username_or_emptystring(req, res);
+		const username = user_get_username_or_emptystring(req, res);
 		const is_faculty_result = await is_faculty(username);
 
 		// Simple perm check.  
@@ -341,13 +336,13 @@ ORDER BY iflevels.updated desc `;
 	
 	If the param username is passed, then return that user's information only.
 */
-router.get('/grades?', nocache, require_logged_in_user,
+router.get('/grades?', nocache, user_require_logged_in,
 	async (req: Request, res: Response, next: NextFunction): Promise<any> => {
 	try {
 		let sql = ''; 
 		const sql_where_values: any[] = [];
 		const sql_where_clauses: any[] = [];
-		const username = get_username_or_emptystring(req, res);
+		const username = user_get_username_or_emptystring(req, res);
 		const is_faculty_result = await is_faculty(username);
 
 		const fields = turn_object_keys_into_array(IfLevelPagelessSchema._level_schema_no_pages());

@@ -1,21 +1,19 @@
-// @flow
-import React from 'react';
+import React, { ReactElement } from 'react';
 
 import { useTable, useFilters, useSortBy } from 'react-table';
 import { Table, Button, Modal } from 'react-bootstrap';
 
-import type { Node } from 'react';
 
-type TablePropColumnType = {
-	id: string,
-	Header: string,
-	width?: number, 
-	accessor?: Function
-};
+interface TablePropColumnType {
+	id: string;
+	Header: string;
+	width: number|null; 
+	accessor: Function|null;
+}
 
-type TablePropsType = {
-	columns: Array<TablePropColumnType>,
-	data: Array<any>
+interface TablePropsType {
+	columns: Array<TablePropColumnType>;
+	data: Array<any>;
 };
 
 
@@ -36,9 +34,9 @@ const ColumnFilter = ({ column: { filterValue, setFilter, filter } }) => {
 };
 
 
-export function StyledReactTable(props: TablePropsType): Node {
+export function StyledReactTable(props: TablePropsType): ReactElement {
 
-    const m_props = React.useMemo( () => props );
+    const m_props = props; // React.useMemo( () => props, props.data );
 
     // Different type of filters.
     const filterTypes = {

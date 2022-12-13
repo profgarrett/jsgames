@@ -5,12 +5,14 @@ import React from 'react';
 //import ExcelTable from './ExcelTable';
 import { IfPageHarsonsSchema } from './../../../shared/IfPageSchemas';
 
+import type { IStringIndexJsonObject } from '../../components/Misc';
+
 
 interface HarsonsPropsType {
 	page: IfPageHarsonsSchema;
 	editable: boolean;
 	readonly: boolean;
-	handleChange: (any) => void;
+	onChange: (json: IStringIndexJsonObject) => void;
 }
 
 interface HarsonsStateType {

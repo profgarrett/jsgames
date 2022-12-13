@@ -1,28 +1,31 @@
-// @flow
-import React, { useState } from 'react';
+import React, { useState, ReactElement } from 'react';
 import Container from 'react-bootstrap/Container';
 import { Row, Col, Breadcrumb  } from 'react-bootstrap';
 
 import Recent from './Recent';
-import { Message, Loading } from './../components/Misc';
+import { Message, Loading, IStringIndexJsonObject } from '../components/Misc';
 import Filter from './Filter';
 
+import { useParams, useNavigate } from 'react-router-dom';
 
-import { IfLevelPagelessSchema } from './../../shared/IfLevelSchema';
-import 'url-search-params-polyfill';
+import { IfLevelPagelessSchema } from '../../shared/IfLevelSchema';
 
-import ForceLogin from './../components/ForceLogin';
+//import 'url-search-params-polyfill';
 
-import type { Node } from 'react';
-
+import ForceLogin from '../components/ForceLogin';
 
 
-export default function IfRecentContainer(): Node {
+
+
+export default function IfRecentContainer(): ReactElement {
 	const [ message, setMessage ] = useState('Loading filter data');
 	const [ messageStyle, setMessageStyle ] = useState('');
 	const [ isLoading, setIsLoading ] = useState(true);
 	const [ levels, setLevels ] = useState([]);
 
+	const params = useParams();
+	const navigate = useNavigate();
+	const _idsection = params._idsection ? params._idsection : null;
 
 	const onReady = (filter: any) => {
 		setIsLoading(false);
@@ -32,7 +35,7 @@ export default function IfRecentContainer(): Node {
 
 
 	const onRefreshData = (filter: any) => {
-		const args = [];
+		const args: IStringIndexJsonObject = [];
 		
 		if(filter.levels != '') args.push('code='+filter.levels);
 		if(filter.sections !== '') args.push('idsection='+filter.sections);
@@ -79,10 +82,7 @@ export default function IfRecentContainer(): Node {
 
 	const search = new URLSearchParams(window.location.search);
 
-	const filter_defaults = search.has('idsection') 
-		? { days: 1, sections: search.get('idsection') }
-		: { days: 1 };
-
+	const filter_defaults = { sections: _idsection };
 
 	const filter_filters = {
 		levels: [],

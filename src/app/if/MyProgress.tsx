@@ -389,7 +389,7 @@ export default class MyProgress extends React.Component<PropsType, StateType> {
 		let picker;
 
 		if(this.props.sections.length > 0 && this.state.section.role === 'faculty') {
-			const p = '?idsection=' + this.state.section.idsection;	
+			const p = '/' + this.state.section.idsection;	
 
 			// If super-admin, then show extra analysis link for questions data.
 			const questions_link = user.isAdmin ? <Link key='link6' to={'/ifgame/questions'+p}>Question analysis</Link> : null;

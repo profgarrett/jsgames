@@ -19,14 +19,19 @@ let { BUGSNAG_API, DEBUG, VERSION } = require('./secret');
 const DEBUG_DELAY = DEBUG ? 500 : 0;
 
 import { update_mysql_database_schema } from './mysql';
-import { nocache, log_error } from './network';
+import { nocache, log_error, session_refresh, session_initialize } from './network';
+
 
 import type { Request, Response, NextFunction } from 'express';
 // import type { Connection } from 'mysql';
 
 const app = express();
 
+// TRust the proxy, as is used during development.
+app.set('trust proxy', 1)
 
+app.use( session_initialize() ) ;
+app.use( session_refresh) ;
 
 /////////////////////////////////////////////////////////////////////////////////////////
 // Setup app
@@ -76,7 +81,6 @@ if(DEBUG === false && typeof BUGSNAG_API !== 'undefined' && BUGSNAG_API.length >
 app.use(bodyParser.json({ limit: '10mb'}));
 app.use(bodyParser.urlencoded({ limit: '10mb', extended: false }));
 
-// $FlowFixMe,  This is ok as the cookie parser has a flow type messed up.
 app.use(cookieParser());
 
 // Allow trusting the IP from the proxy forwarding
@@ -200,15 +204,6 @@ app.get('*', (req: Request, res: Response) => {
 });
 
 
-// Load bugsnag if it is defined in secret.js.
-if(DEBUG === false && typeof BUGSNAG_API !== 'undefined' && BUGSNAG_API.length > 0) {
-	var middleware = Bugsnag.getPlugin('express')
-
-	if( typeof middleware == 'undefined') throw new Error('Unable to load express middleware in app.js')
-	// This handles any errors that Express catches. This needs to go before any
-	// other error handlers. Bugsnag will call the `next` error handler they exist
-	app.use(middleware.errorHandler)
-}
 
 process.on('uncaughtException', function (er: any) {
   log_error(er);

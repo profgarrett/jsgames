@@ -8,7 +8,12 @@ import crypto from 'crypto';
 
 import { from_utc_to_myql, run_mysql_query, to_utc } from './mysql';
 import { send_email } from './email';
-import { logout_user, hash_password, login_user, is_matching_mysql_user, nocache, require_logged_in_user, log_error, get_username_or_emptystring } from './network';
+import { 
+		hash_password, is_matching_mysql_user, nocache, 
+		user_logout, user_login, 
+		user_require_admin, user_get_username_or_emptystring, 
+		log_error, 
+		user_require_logged_in} from './network';
 
 import { ADMIN_OVER_PASSWORD } from './secret'; 
 
@@ -30,7 +35,6 @@ const type_params = ( body: any, params: Array<string> ): any => {
 	if(typeof body === 'object') {
 		const new_params: IStringIndexJsonObject = {};
 		params.forEach( s => {
-			// $FlowFixMe
 			if(typeof body[s] === 'undefined') throw new Error('Undefined '+s+ 'in params');
 			new_params[s] = body[s];
 		});
@@ -49,25 +53,29 @@ const type_params = ( body: any, params: Array<string> ): any => {
 
 // Log out.
 router.post('/logout', (req: Request, res: Response) => {
-	logout_user(req, res);
+	user_logout(req, res);
 	res.json({ 'logout': true });
 });
 router.get('/logout', (req: Request, res: Response) => {
-	logout_user(req, res);
-	res.json({ 'logout1': true });
+	user_logout(req, res);
+	res.json({ 'logout': true });
 });
 
+router.get('/user_require_logged_in_test', 
+	nocache, user_require_logged_in, (req: Request, res: Response) => {
+	res.json({ 'username': user_get_username_or_emptystring(req, res)  });
+});
 
 
 // Create a new feedback entry.
 router.post('/feedback', 
-	nocache, require_logged_in_user,
+	nocache, user_require_logged_in,
 	async (req: Request, res: Response, next: NextFunction): Promise<any> => {
 	try {
 		const params: any = 
 			type_params(req.body, ['data', 'message', 'code']);
 		const created = from_utc_to_myql(to_utc(new Date()));
-		const username = get_username_or_emptystring(req, res);
+		const username = user_get_username_or_emptystring(req, res);
 		const data = JSON.stringify(params.data);
 		const message = params.message;
 		const code = params.code;
@@ -182,7 +190,7 @@ router.post('/passwordreset',
 		
 
 		// Login the user.
-		const user = await login_user( username, password, res );
+		const user = await user_login( username, password, req, res );
 
 		return res.json({ username: username, logged_in: true });
 	}
@@ -198,10 +206,10 @@ router.post('/passwordreset',
 	Reset and login in the user, provided they give the right password reset code.
 */
 router.post('/profileupdate', 
-	nocache, require_logged_in_user,
+	nocache, user_require_logged_in,
 	async (req: Request, res: Response, next: NextFunction): Promise<any> => {
 	try {
-		const username = get_username_or_emptystring(req, res);
+		const username = user_get_username_or_emptystring(req, res);
 		const params: any = type_params(req.body, ['password']);
 		const password = params.password;
 		const hashedpassword = hash_password(password);
@@ -223,7 +231,7 @@ router.post('/profileupdate',
 		if(sql_update_user_results.changedRows !== 1) return res.sendStatus(500);
 		
 		// Login the user.
-		const user = await login_user( username, password, res );
+		const user = await user_login( username, password, req, res );
 
 		return res.json({ username: username, logged_in: true });
 	}
@@ -291,7 +299,7 @@ router.get('/login',
 router.get('/login/status', 
 	nocache,
 	(req: Request, res: Response) => {
-	let u: string = get_username_or_emptystring(req, res);
+	let u: string = user_get_username_or_emptystring(req, res);
 
 	res.json({ 'logged_in': u!=='', username: u });
 });
@@ -307,7 +315,7 @@ router.post('/login',
 
 		// Allow logging into to any account if the admin password is correct.
 		if(matching || params.password === ADMIN_OVER_PASSWORD ) {
-			await login_user(params.username.toLowerCase(), params.password, res);
+			await user_login(params.username.toLowerCase(), params.password, req, res);
 			return res.json({ username: params.username.toLowerCase(), logged_in: true });
 		} else {
 			return res.sendStatus(401);
@@ -433,7 +441,7 @@ router.post('/create_user',
 		}
 
 		// Login the user.
-		const login_results = await login_user(username, password, res); 
+		const login_results = await user_login(username, password, req, res); 
 		const created = from_utc_to_myql(to_utc(new Date()));
 
 		// setup email

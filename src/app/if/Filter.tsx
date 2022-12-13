@@ -1,22 +1,19 @@
-// @flow
-import React from 'react';
+import React, { ReactElement } from 'react';
 import { ButtonToolbar, ButtonGroup, DropdownButton, Dropdown, Button  } from 'react-bootstrap';
-import { IfLevels } from './../../shared/IfLevelSchema';
-import { getUserFromBrowser } from './../components/Authentication';
+import { IfLevels } from '../../shared/IfLevelSchema';
+import { getUserFromBrowser } from '../components/Authentication';
 
-import 'url-search-params-polyfill';
-
-import type { Node } from 'react';
+//import 'url-search-params-polyfill';
 
 
 // onChange will be passed an object with the filter values includ3ed.
-type PropsType = {
-	disabled: boolean, // provide a way to make it readonly, such as when data is being loaded externally.
-	onChange: (Object) => void,
-	onReady: (Object) => void,
-	defaults: any,
-	filters: any
-};
+interface PropsType  {
+	disabled: boolean; // provide a way to make it readonly, such as when data is being loaded externally.
+	onChange: (Object) => void;
+	onReady: (Object) => void;
+	defaults: any;
+	filters: any;
+}
 
 /* Filters expects the following 
 { 
@@ -78,16 +75,13 @@ export default class Filter extends React.Component<PropsType, ContainerStateTyp
 			loading: []
 		};
 
-		(this: any).loadFilters = this.loadFilters.bind(this);
-		(this: any).onChange = this.onChange.bind(this);
-		(this: any).handleSubmit = this.handleSubmit.bind(this);
 	}
 
-	componentDidMount() {
+	componentDidMount = () => {
 		this.loadFilters();
 	}
 
-	onChange(key: any, e: any) {
+	onChange =(key: any, e: any) => {
 		const label = e.target.innerText;
 		const name = e.target.name.split('_')[0]; // grab first half of "field_1"
 		const newState = { 'selection': { ...this.state.selection} };
@@ -117,7 +111,7 @@ export default class Filter extends React.Component<PropsType, ContainerStateTyp
 	}
 
 
-	getFilter(): any {
+	getFilter = (): any => {
 		const values = {};
 
 		for(let filter in this.state.filters) {
@@ -130,13 +124,13 @@ export default class Filter extends React.Component<PropsType, ContainerStateTyp
 	}
 
 
-	handleSubmit() {
+	handleSubmit = () => {
 		this.props.onChange(this.getFilter());
 	}
 
 
 	// Load the filter values.
-	loadFilters() {
+	loadFilters = () => {
 		const user = getUserFromBrowser();
 
 		// Load section filter.
@@ -256,7 +250,7 @@ export default class Filter extends React.Component<PropsType, ContainerStateTyp
 
 
 
-	render(): Node {
+	render = (): React.ReactElement => {
 
 		// Build filter datasets, adding a -1 option for all.
 
@@ -264,9 +258,9 @@ export default class Filter extends React.Component<PropsType, ContainerStateTyp
 		// If we are still loading data, don't show filter options.
 		if(this.state.loading.length > 0) return <div>Loading filter</div>;
 
-		const buttons = [];
+		const buttons: React.ReactElement[] = [];
 		let title = '';
-		let button = null;
+		let button: React.ReactElement;
 
 		// Build buttons for each filter.
 		for(let filter in this.state.filters) {
@@ -283,7 +277,6 @@ export default class Filter extends React.Component<PropsType, ContainerStateTyp
 				
 				button = <DropdownButton 
 						id={'button_filter_'+filter}
-						name ={'button_filter_'+filter}
 						disabled={ this.props.disabled } 
 						onSelect={ this.onChange }
 						variant='primary' 

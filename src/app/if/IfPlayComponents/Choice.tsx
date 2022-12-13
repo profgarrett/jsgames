@@ -2,13 +2,14 @@ import React, { ReactElement } from 'react';
 import { ListGroup, ListGroupItem } from 'react-bootstrap';
 import { IfPageChoiceSchema } from './../../../shared/IfPageSchemas';
 import { IfLevelSchema } from '../../../shared/IfLevelSchema';
-
+import type { IStringIndexJsonObject } from '../../components/Misc';
 
 interface PropsType {
 	page: IfPageChoiceSchema;
 	editable: boolean;
-	handleChange: (any) => void;
-	showSolution: boolean;
+	readonly: boolean;
+	onChange: (json: IStringIndexJsonObject) => void;
+	show_solution?: boolean;
 }
 
 
@@ -18,18 +19,20 @@ interface PropsType {
 export default class Choice extends React.Component<PropsType> {
 
 	handleChange = (new_value: string) => {
-		this.props.handleChange({ client: new_value});	
+		if(this.props.readonly) return;
+		this.props.onChange({ client: new_value});	
 	} 
 
 	// Build out the table 
 	render = (): ReactElement => {
 		const page = this.props.page;
-
+		
+		
 		if(!this.props.editable) {
 			let style = 'info';
 			if(page.correct !== null) style = page.correct ? 'success' : 'warning';
 
-			if(this.props.showSolution) {
+			if(this.props.show_solution) {
 				// Give full list.
 				return (
 					<ListGroup>
@@ -46,7 +49,7 @@ export default class Choice extends React.Component<PropsType> {
 				// Only show selected.
 				return (
 					<ListGroup className='list-group'>
-						<ListGroup.Item href='#' variant={style}>{ ''+page.client }</ListGroup.Item>
+						<ListGroup.Item variant={style}>{ ''+page.client }</ListGroup.Item>
 					</ListGroup>
 				);
 			}

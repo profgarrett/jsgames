@@ -6,35 +6,70 @@ import { headerStyle, tdStyle, tdFirstColumnStyle,
 		clean, 
 		addDangerColor, addInfoColor, addCorrectColor, addCSSProperty} from './ExcelTableFormatting';
 
+import type { IStringIndexJsonObject } from '../../components/Misc';
 import CSS from 'csstype';
 
 
 type PropsType = {
 	page: IfPageFormulaSchema | IfPagePredictFormulaSchema,
-	editable: boolean,
+	editable: boolean, // 
 	readonly: boolean,
-	handleChange: (any) => void
+	onChange: (json: IStringIndexJsonObject) => void;
+	onEnter: () => void;
+	onValidate: () => void;
 };
 
 
 
 export default class FormulaExcelTable extends React.Component<PropsType> {
+
+	// If there is an input field, then set its focus.
 	componentDidMount() {
-		// If there is an input field, then set its focus.
 		if(this.props.editable) {
 			let node = document.getElementById('ExcelTableRenderFieldInput');
 			if(node) node.focus();
-			//this.client_fInput.focus();
 		}
 	}
 	componentDidUpdate() {
-		if(this.props.editable) {
-			let node = document.getElementById('ExcelTableRenderFieldInput');
-			if(node) node.focus();
-			//this.client_fInput.focus();
-		}	
+		this.componentDidMount();
 	}
 
+	/**
+	 * Handler function for keypresses on ExcelTableRenderFieldInput
+	 * 
+	 * If repeating, cancel
+	 * Otherwise, submit.
+	 */
+	 handleKeyDown = (event: any ) => {
+
+		// Make sure that we don't do anything if we're loading.
+		if(!this.props.editable || this.props.readonly) return;
+
+		// See if this is a repeating key event, which is automatically fired if the user keeps hitting the key.
+		// If so, exit out.
+		if(event.repeat) {
+			event.preventDefault();
+			return;
+		}
+		// Handle keypresses for advancing tutorial window.
+		// Normally, enter will submit the form.  However, if a validate option is 
+		// present, and the answer is wrong, we should instead validate.
+		if(event.key === 'Enter'
+				&& this.props.page.code === 'tutorial' 
+				&& !this.props.page.correct_required 
+				&& !this.props.page.correct  
+				&& 
+					(this.props.page.type === 'IfPageFormulaSchema'
+					|| this.props.page.type === 'IfPagePredictFormulaSchema')) {
+			event.preventDefault(); // cancel any keypress.
+			this.props.onValidate();
+		}
+
+		if(event.key == 'Enter') {
+			this.props.onEnter();
+		}
+
+	}
 
 	// Build out the input box.
 	_render_field = (page: IfPageFormulaSchema): ReactElement => {
@@ -53,8 +88,9 @@ export default class FormulaExcelTable extends React.Component<PropsType> {
 					autoComplete='off'
 					value={ page.client_f==null ? '' : page.client_f }
 					disabled={ this.props.readonly }
+					onKeyDown={ (e) => this.handleKeyDown(e) }
 					placeholder='Enter a formula'
-					onChange={ (e) => this.props.handleChange({ client_f: e.target.value}) }
+					onChange={ (e) => this.props.onChange({ client_f: e.target.value}) }
 				/>
 				{ helpblock }		
 			</div>
@@ -215,5 +251,3 @@ export default class FormulaExcelTable extends React.Component<PropsType> {
 			);
 	}
 }
-
-

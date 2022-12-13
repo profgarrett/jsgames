@@ -1,19 +1,17 @@
-// @flow
-import React from 'react';
+import React, { ReactElement } from 'react';
 import { Table, Modal, Button } from 'react-bootstrap';
-import { turn_array_into_map, turn_object_keys_into_array } from './../../shared/misc';
+import { turn_array_into_map, turn_object_keys_into_array } from '../../shared/misc';
 import { ResponsiveBar, Bar } from '@nivo/bar'
 import { LevelModal } from './LevelModal';
-import { prettyDateAsString } from './../components/Misc';
-import { IfLevelSchema, IfLevelPagelessSchema, GREEN_GRADE, PASSING_GRADE, DEFAULT_TUTORIAL_LEVEL_LIST } from './../../shared/IfLevelSchema';
-import { IfPageBaseSchema, IfPageFormulaSchema } from './../../shared/IfPageSchemas';
+import { IStringIndexJsonObject, prettyDateAsString } from '../components/Misc';
+import { IfLevelSchema, IfLevelPagelessSchema, GREEN_GRADE, PASSING_GRADE, DEFAULT_TUTORIAL_LEVEL_LIST } from '../../shared/IfLevelSchema';
+import { IfPageBaseSchema, IfPageFormulaSchema } from '../../shared/IfPageSchemas';
 
-import type { Node } from 'react';
 
 //import 'react-table/react-table.css';
 
-import { IfLevels } from './../../shared/IfLevelSchema';
-import { DEMO_MODE } from './../../server/secret';
+import { IfLevels } from '../../shared/IfLevelSchema';
+import { DEMO_MODE } from '../../server/secret';
 
 
 const colors = {
@@ -22,17 +20,17 @@ const colors = {
     Uncompleted: 'rgb(231, 41, 138)',
 }
 
-type PropsType = {
-	data: Array<IfLevelPagelessSchema>,
+interface PropsType {
+	data: Array<IfLevelPagelessSchema>;
 };
 
-type StateType = {
+interface StateType {
 	// what info are we currently viewing in the table below?
-	code: string,
-    classification: string,
+	code: string;
+    classification: string;
     // are we looking at a particular modal item?
-    modal_id: ?string,
-};
+    modal_id: null|string;
+}
 
 
 export class ClassProgressChart extends React.Component<PropsType, StateType> {
@@ -43,30 +41,27 @@ export class ClassProgressChart extends React.Component<PropsType, StateType> {
             classification: '',
             modal_id: null,
         };
-        (this: any)._on_click_to_show_code = this._on_click_to_show_code.bind(this);
-        (this: any)._on_click_to_show_modal = this._on_click_to_show_modal.bind(this);
-        (this: any)._on_click_to_hide_modal = this._on_click_to_hide_modal.bind(this);
 	}
 
     // Tell the container to load a modal for the given item.
-    _on_click_to_show_modal( modal_id: string ) {
+    _on_click_to_show_modal =( modal_id: string ) => {
         this.setState({ modal_id} );
     }
 
    // Tell the container to load a modal for the given item.
-    _on_click_to_hide_modal( ) {
+    _on_click_to_hide_modal =( ) => {
         this.setState({ modal_id: null } );
     }
 
 
     // Focus on a specific item.
-    _on_click_to_show_code(code: string, classification: string) {
+    _on_click_to_show_code = (code: string, classification: string) => {
         this.setState({ code, classification });
     }
 
 
     // Convenience function used for rendering a pop-up in the chart.
-    _render_bar_popup( o: any ): string {
+    _render_bar_popup = ( o: any ): string => {
         return o
             .map( d => d.username )
             .sort( (s1, s2) => s1.toLowerCase() - s2.toLowerCase() )
@@ -75,7 +70,7 @@ export class ClassProgressChart extends React.Component<PropsType, StateType> {
             + (o.length > 15 ? ', and...' : '');
     }
 
-    _render_bar(levels: Array<IfLevelPagelessSchema>): Node {
+    _render_bar = (levels: Array<IfLevelPagelessSchema>): ReactElement => {
         const keys = [ ...DEFAULT_TUTORIAL_LEVEL_LIST];
         const map_classifications = turn_array_into_map( levels, l => l.props.classification );
         const a_classifications = turn_object_keys_into_array(map_classifications);
@@ -104,7 +99,7 @@ export class ClassProgressChart extends React.Component<PropsType, StateType> {
             code_levels = levels.filter( l => l.code === key ).sort( (a, b) => a.username > b.username ? 1 : -1 );
 
             // Return object for the chart.
-            let o = {};
+            let o: IStringIndexJsonObject = {};
             o.key = key;
 
             // Build classification for 'Completed' as a higher priority than all others.
@@ -141,7 +136,8 @@ export class ClassProgressChart extends React.Component<PropsType, StateType> {
             width={width*.9}
             
             margin={{ top: 20, right: 25, left: 25, bottom: 50 }}
-            colorBy={ c => c.id }
+// Not sure, disabled by NDG 12/13/22
+//            colorBy={ c => c.id }
             colors={ c => colors[c.id] }
             tooltip={
                 o => {
@@ -156,7 +152,7 @@ export class ClassProgressChart extends React.Component<PropsType, StateType> {
             }
             onClick={
                 o => { // Show a focus on that item.
-                    this._on_click_to_show_code( o.indexValue, o.id );
+                    this._on_click_to_show_code( ''+o.indexValue, ''+o.id );
                 }
             }
             legends={[{
@@ -183,16 +179,18 @@ export class ClassProgressChart extends React.Component<PropsType, StateType> {
             isInteractive={true}
             animate={true}
             onMouseEnter={(data, event) => {
+				// @ts-ignore
                 event.target.style.opacity = 0.75;
             }}
             onMouseLeave={(data, event) => {
-                event.target.style.opacity = 1;
+				// @ts-ignore
+				event.target.style.opacity = 1;
             }}
         />
         </div>);
     }
     
-    _render_details(levels: Array<IfLevelPagelessSchema>): Node {
+    _render_details = (levels: Array<IfLevelPagelessSchema>): ReactElement => {
 
         if(this.state.code === '') return <div style={{ textAlign:'center'}}><i>Click on a bar to see detailed student progress</i></div>;
         
@@ -269,12 +267,12 @@ export class ClassProgressChart extends React.Component<PropsType, StateType> {
     }
 
 
-	render(): Node {
-		if(this.props.data.length < 1) return null;
+	render = (): ReactElement => {
+		if(this.props.data.length < 1) return <></>;
         
         //const summaries = create_summaries(this.props.data);
         const modal = this.state.modal_id === null
-            ? null
+            ? <></>
             : <LevelModal level={null} level_id={this.state.modal_id} hide={ () => this._on_click_to_hide_modal() } />;
         
 		return (<div>

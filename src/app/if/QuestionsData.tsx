@@ -1,4 +1,4 @@
-// @flow
+// @ts-nocheck
 import { IfPageBaseSchema, IfPageFormulaSchema, IfPageChoiceSchema, IfPageNumberAnswerSchema } from './../../shared/IfPageSchemas';
 import { IfLevelSchema } from './../../shared/IfLevelSchema';
 import { formatDate } from './../../shared/misc';
@@ -32,11 +32,11 @@ const pretty_history = h => {
 
 // Return if the tag array has a matching tag.
 // T/F
-const has_tag = (tags: Array<Object>, match: string): boolean => {
+const has_tag = (tags: Array<any>, match: string): boolean => {
 	if( typeof tags === 'undefined' ) return false;
 	return 0 < tags.filter( t => t.tag === match ).length;
 };
-const get_first_matching_tag = (tags: Array<Object>, match: string): ?Object => {
+const get_first_matching_tag = (tags: Array<any>, match: string): null|any => {
 	const f_tags = tags.filter( t => t.tag === match );
 	if(f_tags.length > 0) return f_tags[0];
 	return null;
@@ -52,12 +52,12 @@ const get_first_matching_tag = (tags: Array<Object>, match: string): ?Object => 
 */
 function rollup_tags(pages: Array<IfPageBaseSchema>): Array<any> {
 
-	const tags = [];
+	const tags: any[] = [];
 
 	pages.map( (p: IfPageBaseSchema) => {
 		if(typeof p.history == 'undefined') return;
 
-		p.history.map( h => {
+		p.history.map( (h: any) => {
 			// Parson pages don't have tags. Ignore.
 			if(typeof h.tags === 'undefined') return;
 
@@ -97,7 +97,7 @@ function create_summary_level( levels: Array<IfLevelSchema>): any {
 	// Needed, as the pages are currently organized into levels by individual users.
 	const all_pages = levels.reduce( 
 			(all_pages, level) => {
-				level.pages.map( p => all_pages.push(p));
+				level.pages.map( (p: any) => all_pages.push(p));
 				return all_pages;
 			}, [] );
 

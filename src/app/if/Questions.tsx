@@ -1,8 +1,6 @@
-// @flow
-import React from 'react';
+import React, { ReactElement } from 'react';
 
-import { IfLevelSchema } from './../../shared/IfLevelSchema';
-import type { Node } from 'react';
+import { IfLevelSchema } from '../../shared/IfLevelSchema';
 
 import { create_summary } from './QuestionsData';
 import QuestionsExcelChoice from './QuestionsExcelChoice';
@@ -17,11 +15,11 @@ type PropsType = {
 	output: string
 };
 
-const SHOW_FORMULA_INSTEAD_OF_CHOICE = true;
+const SHOW_FORMULA_INSTEAD_OF_CHOICE = false;
 
 export default class IfQuestions extends React.Component<PropsType> {
 
-	render(): Node {
+	render = (): ReactElement=> {
 		if(this.props.levels.length < 1) 
 			return <div/>;
 
@@ -37,10 +35,7 @@ export default class IfQuestions extends React.Component<PropsType> {
 			return <QuestionsChart levels={this.props.levels} />;
 
 		if(this.props.output === 'excel') {
-			//<IfQuestionsExcelChoice levels={levels} />
-			//<IfQuestionsExcelNumberAnswer levels={levels} />
-
-			// GOOD, just don't currently need. 
+			// GOOD, just don't currently need both options.
 			if( SHOW_FORMULA_INSTEAD_OF_CHOICE ) 
 				return <div><QuestionsExcelFormulas levels={levels} /></div>;
 			else 

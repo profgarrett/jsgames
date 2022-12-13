@@ -27,6 +27,12 @@ PageHeader.propTypes = {
 };
 */
 
+export interface IStringIndexJsonObject {
+	[key: string]: any
+}
+
+
+
 /*
 	This wraps problematic compoments that throw errors.
 	It keeps the whole react app from getting hosed by an error
@@ -54,6 +60,20 @@ export class ErrorBoundary extends React.Component {
 	}
 }
 
+/*
+	Look at client_f.  If it's found, then replace
+	any weird quotes with normal quotes.
+	Also replace a dash – with a normal -
+*/
+export function replaceClientFSmartQuotes( s: string ): string {
+	const s2: string = s.replaceAll(/“/g, '"').
+		replaceAll(/”/g, '"').
+		replaceAll(/‘/g, "'").
+		replaceAll(/’/g, "'").
+		replaceAll(/–/g, '-');
+
+	return s2;
+};
 
 // Source:
 // https://github.com/FortAwesome/react-fontawesome
@@ -93,11 +113,16 @@ export class CompletedGlyphicon extends React.Component<ICompletedGlyphicon> {
 }
 
 
+interface ICorrectGlyphicon {
+	fontSize?: string;
+}
 
-export class CorrectGlyphicon extends React.Component {
+export class CorrectGlyphicon extends React.Component<ICorrectGlyphicon> {
 	render() {
+		const fontSize = typeof this.props.fontSize == 'undefined' ? '2em' : this.props.fontSize;
+
 		return (<FontAwesomeIcon 
-			style={{ color: 'green', paddingLeft: 2, top: 3, paddingRight: 5, fontSize: '2em' }} 
+			style={{ color: 'green', paddingLeft: 2, top: 3, paddingRight: 5, fontSize: fontSize }} 
 			icon={faCheck} />);
 	}
 }
@@ -116,10 +141,15 @@ export class ProgressGlyphicon extends React.Component {
 
 
 // This is a standard Glyph for showing success.
-export class IncorrectGlyphicon extends React.Component {
+interface IIncorrectGlyphicon {
+	fontSize?: string;
+}
+export class IncorrectGlyphicon extends React.Component<IIncorrectGlyphicon> {
 	render() {
+		const fontSize = typeof this.props.fontSize == 'undefined' ? '2em' : this.props.fontSize;
+
 		return (<FontAwesomeIcon 
-			style={{ paddingLeft: 2, top: 3, paddingRight: 5, fontSize: '2em', color: 'rgb(199, 37, 78)' }} 
+			style={{ paddingLeft: 2, top: 3, paddingRight: 5, fontSize: { fontSize }, color: 'rgb(199, 37, 78)' }} 
 			icon={faMinusCircle} />);
 	}
 }
@@ -241,6 +271,18 @@ export function prettyDateAsString(d: Date): string {
 	return message;
 }
 
+
+// Little function to give a standard way of reflecting dates.
+// Useful when we have a ton of dates and don't want to hit the locale format, which has a surprisingly 
+// large performance impact.
+export function formattedDateAsString(d: Date): string {
+	if(typeof d == 'undefined') throw new Error('Invalid data passed to formattedDateSTring');
+
+	return d.getFullYear() + '/' + d.getMonth()+1 + '/' + d.getDate() + ' ' + 
+			d.getHours() + ':' + (d.getMinutes()<10 ? '0': '') + d.getMinutes();
+}
+
+
 export class PageNotFound extends React.Component {
 	render() {
 		return (<Row><Col xs={12}>Page not found!</Col></Row>);
@@ -329,7 +371,7 @@ interface MessageStateType {
 }
 export class Message extends React.Component<MessagePropsType, MessageStateType> {
 	state = { 
-			hidden: false 
+		hidden: false 
 	}
 
 	render() {

@@ -12,9 +12,10 @@ export default class IfLevelList extends React.Component<PropsType> {
 	_render_link = (level: IfLevelSchema): ReactElement => {
 
 		if(level.completed) {
+			let d = level.get_last_update_date() || level.created;
 			// Go to score
 			return <Link to={'/ifgame/level/'+level._id+'/score'}>
-						Scored { level.get_test_score_as_percent() }% on <PrettyDate date={ level.created } />
+						Scored { level.get_test_score_as_percent() }% on <PrettyDate date={ d } />
 					</Link>;
 		} else {
 			// Go to play

@@ -1,6 +1,5 @@
 import React, { ReactElement, useEffect, useState } from 'react';
 
-
 import { Container, Breadcrumb, Row, Col, Button } from 'react-bootstrap';
 import { useParams, useNavigate } from 'react-router-dom';
 
@@ -9,17 +8,13 @@ import { get_page_schema_as_class } from '../../shared/IfPageSchemas';
 
 import LevelPlay from './LevelPlay';
 
-import { ErrorBoundary, Message } from '../components/Misc';
+import { ErrorBoundary, Message, IStringIndexJsonObject } from '../components/Misc';
 import ForceLogin from '../components/ForceLogin';
 import Feedback from '../components/Feedback';
 
 import CacheBuster from '../components/CacheBuster';
 
-
-// NOTE: Also update in LevelPlay.js - present in both places.
-const TIME_BEFORE_SHOWING_SOLUTION = 60*3; 
-
-
+import { TIME_BEFORE_SHOWING_SOLUTION  } from './../configuration.js'; 
 
 
 export default function LevelPlayContainer() {
@@ -27,11 +22,11 @@ export default function LevelPlayContainer() {
 	const [message, setMessage] = useState('Loading data from server')
 	const [messageStyle, setMessageStyle] = useState('');
 	const [isLoading, setIsLoading] = useState(true);
-	const [isSaving, setIsSaving] = useState(false);
 	const [level, setLevel] = useState<IfLevelSchema|null>(null);
 	const [selectedPageIndex, setSelectedPageIndex] = useState(-1);
-	const [showFeedback, setShowFeedback] = useState(false);
-	const [showFeedbackOn, setShowFeedbackOn] = useState(-1);
+	// -1 means no feedback is to be shown
+	const [showFeedbackOn, setShowFeedbackOn] = useState(-1); 
+
 	
 	const params = useParams();
 	const navigate = useNavigate();
@@ -39,8 +34,7 @@ export default function LevelPlayContainer() {
 	
 
 	// Mark that the user has finished viewing the feedback.
-	const onViewFeedback = () => {
-		setShowFeedback(false);
+	const handleHideFeedback = () => {
 		setShowFeedbackOn(-1);
 	}
 
@@ -79,10 +73,9 @@ export default function LevelPlayContainer() {
 		return level;
 	}
 
-
 	// Update level based on user input.
 	// Changes is passed a json object with the updated values.
-	const onChange = (json: any) => {
+	const handleChange = (json: IStringIndexJsonObject): void => {
 
 		if(typeof level === 'undefined' || level === null) {
 			throw new Error('Invalid onChange of undefined LevelPlayContainer');
@@ -109,10 +102,13 @@ export default function LevelPlayContainer() {
 	};
 
 
-	// Update the current page and send to the server for an update.
-	// Next is true when we want to submit and get the next page. It's false when 
-	// we just want to test the current page, and if wrong, then not continue.
-	const onNext = ( validate_only: boolean ) => {
+	/**
+	 * Update the current page and send to the server for an update.
+	 * 
+	 * validate_only is true when we want to submit and get the next page. It's false when 
+	 * we just want to test the current page, and if wrong, then not continue.
+	 */
+	const handleNext = ( validate_only: boolean ): void => {
 		// Don't accept any input if we are currently loading
 		if(isLoading) return;
 
@@ -143,15 +139,15 @@ export default function LevelPlayContainer() {
 				&& !validate_only // allow hints without a submission
 			) {
 			setMessage('You must provide an answer before continuing.');
-			setMessageStyle('warning');
+			setMessageStyle('danger');
 			return;
 		}
 
 		// Show loading status.
 		setMessage('');
 		setMessageStyle('');
-		setShowFeedbackOn(current_page_i); // remember what page to show feedback on.
-		setShowFeedback(false); // set to true after we get back the results from the server
+		//setShowFeedbackOn(current_page_i); // remember what page to show feedback on.
+		handleHideFeedback(); // hide feedback, it may be re-enabled by the loading code.
 		setIsLoading(true);
 
 		// User is allowed to just check the answer.  If they do, set URL
@@ -202,7 +198,7 @@ export default function LevelPlayContainer() {
 					// Show feedback.
 					setIsLoading( false);
 					setLevel(ifLevel);
-					setShowFeedback(true);
+					setShowFeedbackOn( current_page_i );
 					return;
 				} 
 
@@ -214,38 +210,39 @@ export default function LevelPlayContainer() {
 				// Does the submitted page *not* require feedback to be shown?
 				// If not, set index to the latest page.
 				if(!page.show_feedback_on) {
-					setIsLoading( false);
-					setLevel(ifLevel);
-					setSelectedPageIndex( ifLevel.pages.length-1);
-					setShowFeedback(false);
-					setShowFeedbackOn(-1);
+					setIsLoading( false );
+					setLevel( ifLevel );
+					// Use latest page, not current_page_i (which would be the page for feedback)
+					setSelectedPageIndex( ifLevel.pages.length-1 );
+					handleHideFeedback();
 
 					return;
 				}
 
-				// If !correct_required, then don't show feedback. Only show if user hit feedback.
-				if(!page.correct_required && page.code === 'tutorial' ) {
+				// Don't show feedback for optional tutorial pages that aren't required
+				// and aren't correct
+				if(!page.correct_required && page.code === 'tutorial' && !page.correct) {
 					setIsLoading( false);
 					setLevel(ifLevel);
 					setSelectedPageIndex( ifLevel.pages.length-1);
-					setShowFeedback(false);
-					setShowFeedbackOn(-1);
+					handleHideFeedback();
 					return;
 				}
 
-				// Add feedback event to the level and then show.
+				// Show the page we saved at the beginning of this process.
+				// Note that we are showing a feedback on a page that isn't 
+				// the selected page. Clearing the feedback will reset the focus
+				// to the latest page.
 				setIsLoading(false);
 				setLevel(ifLevel);
 				setSelectedPageIndex( ifLevel.pages.length-1);
-				setShowFeedback(true);
-					// show_feedback_on is already set by previous setState event.
-				
+				setShowFeedbackOn( current_page_i );				
 			})
 			.catch( (error: any) => {
 				setIsLoading( false);
 				setLevel(null);
 				setMessage(error.message);
-
+				setMessageStyle('danger');
 			});
 
 	}
@@ -308,12 +305,12 @@ export default function LevelPlayContainer() {
 							<LevelPlay 
 								level={level} 
 								selected_page_index={selectedPageIndex }
-								onNext={ ()=>onNext(false) }
-								onValidate={ ()=>onNext(true) }
-								onChange={ (json)=>onChange(json) }
-								show_feedback={showFeedback}
+								onNext={ ()=>handleNext(false) }
+								onValidate={ ()=>handleNext(true) }
+								onChange={ (json)=>handleChange(json) }
+								show_feedback={ showFeedbackOn != -1 }
 								show_feedback_on={showFeedbackOn}
-								onViewFeedback={onViewFeedback}
+								onHideFeedback={handleHideFeedback}
 								isLoading={isLoading}
 							/>
 							<Feedback

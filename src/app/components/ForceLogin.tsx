@@ -11,7 +11,13 @@ interface IUsersLoginStatusJson {
 // Also shows currently logged in user as a small box on the bottom-left of the screen.
 export default function ForceLogin() {
 	const user = getUserFromBrowser();
- 
+
+	// Check cookies on client side.
+	if(user.username ===null || user.username === '') {
+		window.location.href = '/login/';
+		return <></>;
+	}
+
 	// Retrieve loged in status from server.
 	useEffect( () => {
 
@@ -36,9 +42,6 @@ export default function ForceLogin() {
 	
 	}, []);
 
-	if(user.username ===null || user.username === '') {
-		window.location.href = '/login/'
-	}
 	
 	const divStyle: CSS.Properties = { 
 		position: 'fixed',

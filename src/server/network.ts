@@ -1,24 +1,19 @@
-import { JWT_AUTH_SECRET, ADMIN_USERNAME } from './secret.js'; 
+import { DEBUG, JWT_AUTH_SECRET, ADMIN_USERNAME } from './secret.js'; 
 import { IfLevelSchema, IfLevelPagelessSchema } from './../shared/IfLevelSchema';
 import { from_mysql_to_utc, run_mysql_query } from './mysql';
 
 // @ts-ignore
 import bcrypt from 'bcryptjs';
-// @ts-ignore
-import jwt from 'jsonwebtoken';
-
-const JWT_EXPIRE_SECONDS = 60*60*24*300; // 300 days.
-
-import { DEBUG } from './secret.js'; 
 import fs from 'fs';
-import util from 'util';
 
+import cookieSession from 'cookie-session';
 
 interface IStringIndexJsonObject {
 	[key: string]: any
 }
 
 import type { Request, Response, NextFunction } from 'express';
+import { config } from 'webpack';
 
 ////////////////////////////////////////////////////////////////////////
 // Permission
@@ -131,23 +126,39 @@ const return_level_prepared_for_transmit = (level: any, secure: boolean): any =>
 // Authentication
 ////////////////////////////////////////////////////////////////////////
 
+/**
+ * Starts middleware for session handling.
+ * 
+ * Use as app.user(initialize_session())
+ */
+function session_initialize() {
+	return cookieSession({
+		name: 'session',
+		keys: [ JWT_AUTH_SECRET ],
+		maxAge: 356 * 24 * 60 * 60 * 1000, // 356 days
+		httpOnly: false,
+	});
+
+}
+
+
+function session_refresh(req, res, next) {
+	req.session.nowInMinutes = Math.floor(Date.now() / 60e3)
+	next()
+}
 
 // Find the current username.
-// Side effect of logging the user out if the token has expired.
-function get_username_or_emptystring(req: Request, res: Response): string {
-	const token = req.cookies['x-access-token'];
+function user_get_username_or_emptystring(req, res): string {
+	const username = req.session.username || '';
+	return username;
+	/*
 	let result = {};
-	if (!token) return '';
-
-	if(typeof res === 'undefined') {
-		throw new Error('undefined res for get_username_or_emptystring');
-	}
 
 	try {
 		result = jwt.verify(token, JWT_AUTH_SECRET);
 	} catch (e: any) {
 		if(e.name === 'TokenExpiredError') {
-			logout_user(req, res);
+			user_logout(req, res);
 			return '';
 		}
 	}
@@ -155,15 +166,32 @@ function get_username_or_emptystring(req: Request, res: Response): string {
 	// @ts-ignore
 	if(typeof result.username === 'string') return result.username;
 	return '';
+	*/
 }
 
 // Logout user.
-function logout_user(req: Request, res: Response) {
+function user_logout(req, res) {
+	req.session = null;
+	/*
 	res.clearCookie('x-access-token');
 	res.clearCookie('x-access-token-refreshed');
 	res.clearCookie('x-access-token-username');
 	res.clearCookie('username');
 	res.clearCookie('is-admin');
+	*/
+}
+
+
+/**
+	Middleware requiring the user to be an admin.
+*/
+function user_require_admin( req, res, next: NextFunction): any {
+	if( 	req.session.username != '' && 
+			req.session.username == ADMIN_USERNAME ) {
+		 next();
+	} else {
+		return res.sendStatus(401);
+	}
 }
 
 /**
@@ -171,10 +199,22 @@ function logout_user(req: Request, res: Response) {
 
 	Fails with 401 error if not logged in.
 */
-function require_logged_in_user(req: Request, res: Response, next: NextFunction): any {
+function user_require_logged_in(req, res: Response, next: NextFunction): any {
+	
+	// Make sure that there is a username defined and longer then ''
+	if(typeof req.session.username != 'undefined' && req.session.username !== '') {
+		next();
+	} else {
+		return res.sendStatus(401);
+	}
+
+	//?next('route');
+
+	/*
+	Old authentication settings
 	const username = get_username_or_emptystring(req, res);
 	const options = {
-		maxAge: 3*2600000, /* 3 months */
+		maxAge: 3*2600000, 
 		httpOnly: true,
 	};
 
@@ -194,7 +234,35 @@ function require_logged_in_user(req: Request, res: Response, next: NextFunction)
 
 	// username is null.  Send invalid request.
 	return res.sendStatus(401);
+	*/
 }
+
+
+// Log the user in.
+async function user_login(username: string, password: string, req, res) {
+	req.session.username = username;
+	req.session.isAdmin = username == ADMIN_USERNAME;
+	/*
+	const options = {
+		maxAge: 3*2600000,
+		httpOnly: true
+	};
+	// We have a proper user.  Continue!
+	const un = username.trim().toLowerCase();
+	let jwt_token = jwt.sign({ username: un }, JWT_AUTH_SECRET, { expiresIn: 864000 });
+	const last = (new Date()).toString().replace(/ /g, '_').replace('(', '').replace(')', '').replace(/:/g,'_').replace(/-/g, '_');
+
+	res.cookie('x-access-token', jwt_token, options);
+	res.cookie('x-access-token-username', username, options);
+	res.cookie('x-access-token-refreshed', last, options);
+
+	// Perms. Used on client side to enable/hide interface.
+	res.cookie('is-admin', ADMIN_USERNAME === username ? 'True' : 'False' );
+	res.cookie('username', username );
+	*/
+}
+
+
 
 
 function hash_password(password: string): string {
@@ -216,29 +284,9 @@ async function is_matching_mysql_user(username: string, password: string): Promi
 }
 
 
-// Log the user in.
-async function login_user(username: string, password: string, res: Response): Promise<any> {
-	const options = {
-		maxAge: 3*2600000, /* 3 months */
-		httpOnly: true
-	};
-	// We have a proper user.  Continue!
-	const un = username.trim().toLowerCase();
-	let jwt_token = jwt.sign({ username: un }, JWT_AUTH_SECRET, { expiresIn: 864000 });
-	const last = (new Date()).toString().replace(/ /g, '_').replace('(', '').replace(')', '').replace(/:/g,'_').replace(/-/g, '_');
-
-	res.cookie('x-access-token', jwt_token, options);
-	res.cookie('x-access-token-username', username, options);
-	res.cookie('x-access-token-refreshed', last, options);
-
-	// Perms. Used on client side to enable/hide interface.
-	res.cookie('is-admin', ADMIN_USERNAME === username ? 'True' : 'False' );
-	res.cookie('username', username );
-}
 
 
-
-// Force responses to not be cached. Since we don't server actual files, and just API requests,
+// Force responses to not be cached. Since we don't serve actual files, and just API requests,
 // and those update, if a browser caches a response they may not stale/incorrect data later.
 // @Thanks to https://stackoverflow.com/questions/20429592/no-cache-in-a-nodejs-server
 function nocache(req: Request, res: Response, next: NextFunction) {
@@ -264,14 +312,21 @@ const log_error = function (arg?: any) {
 };
 
 export {
-	logout_user,
 	hash_password,
+	is_matching_mysql_user,
+
 	return_level_without,
 	return_level_prepared_for_transmit,
-	get_username_or_emptystring,
-	require_logged_in_user,
-	is_matching_mysql_user,
-	login_user,
+	
 	nocache,
-	log_error
+	log_error,
+
+	session_initialize,
+	session_refresh,
+
+	user_logout,
+	user_login,
+	user_get_username_or_emptystring,
+	user_require_logged_in,
+	user_require_admin,
 };

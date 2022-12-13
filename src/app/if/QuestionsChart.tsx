@@ -1,9 +1,7 @@
-//@flow
-import React from 'react';
+import React, { ReactElement } from 'react';
 import { IfPageBaseSchema, IfPageFormulaSchema, IfPageHarsonsSchema, IfPageChoiceSchema, IfPageNumberAnswerSchema } from './../../shared/IfPageSchemas';
 
 import { IfLevelSchema } from './../../shared/IfLevelSchema';
-import type { Node } from 'react';
 import { formatDate, padL } from './../../shared/misc';
 
 type DetailPropsType = {
@@ -79,7 +77,7 @@ export default class IfQuestionsChart extends React.Component<DetailPropsType> {
 
     */
     flatten_levels(levels: Array<IfLevelSchema>, oKeys: any): Array<Object> {
-        const results = [];
+        const results: any[] = [];
         const aKeys = Object.keys(oKeys);
 
         levels.forEach( (l: IfLevelSchema) => {
@@ -115,7 +113,7 @@ export default class IfQuestionsChart extends React.Component<DetailPropsType> {
     }
 
     // Return a table showing a list of questions.
-    render_questions(oKeys: any, aKeys: Array<Object>, levels: Array<Object>): Node {
+    render_questions(oKeys: any, aKeys: Array<Object>, levels: Array<Object>): ReactElement {
 
 		const td_style = {
 			'border': 'solid 1px black',
@@ -136,11 +134,12 @@ export default class IfQuestionsChart extends React.Component<DetailPropsType> {
             'solution',
 
         ];
+		// @ts-ignore
         const ths = headers.map( (s,i) => <th style={th_style} key={'th'+i}>{s}</th>);
 
         const templates = {};
 
-        levels.forEach( l => {
+        levels.forEach( (l: any) => {
             l.pages.forEach( p => {
                 // Build question information.
                 if(p.template_id !== null) {
@@ -162,7 +161,8 @@ export default class IfQuestionsChart extends React.Component<DetailPropsType> {
         });
 
         const trs = Object.keys( templates ).map( (key, tr_i) => {
-            const tds = headers.map( (th, th_i) => <td style={td_style} key={'td_'+tr_i+'_'+th_i}>{ templates[key][th] }</td> );
+			// @ts-ignore
+			const tds = headers.map( (th, th_i) => <td style={td_style} key={'td_'+tr_i+'_'+th_i}>{ templates[key][th] }</td> );
             return <tr key={'tr_'+tr_i}>{ tds }</tr>;
         })
 
@@ -174,7 +174,7 @@ export default class IfQuestionsChart extends React.Component<DetailPropsType> {
 
     // return a table of results, with one row per user, showing what they actually answered.
     // Uses aKeys to figure out with properties to include as columns.
-	render_results(oKeys: any, aKeys: Array<Object>, levels: Array<Object>): Node {
+	render_results(oKeys: any, aKeys: Array<any>, levels: Array<any>): ReactElement {
 
 		const td_style = {
 			'border': 'solid 1px black',
@@ -183,12 +183,14 @@ export default class IfQuestionsChart extends React.Component<DetailPropsType> {
 		};
 
 
+		// @ts-ignore
         const ths = aKeys.map( (key,i) => <th key={'chart_ths_'+i} style={td_style}>{key}</th>);
 
         const trs = levels.map( (l, i) => {
             
             return (<tr key={'chart_tr_'+i}>{
-                aKeys.map( (key,i) => <td key={'chart_td_'+i} style={td_style}>{l[key]}</td> )
+				// @ts-ignore
+				aKeys.map( (key,i) => <td key={'chart_td_'+i} style={td_style}>{l[key]}</td> )
             }</tr>);
         })
 
@@ -201,7 +203,7 @@ export default class IfQuestionsChart extends React.Component<DetailPropsType> {
 				</table>);
 	}
 
-    render(): Node {
+    render = (): ReactElement => {
         const oKeys = this.get_keys_from_levels(this.props.levels);
         const aKeys = Object.keys(oKeys).sort( (a, b) => a>b ? 1 : 0 );
 		const flat_levels = this.flatten_levels(this.props.levels, oKeys);

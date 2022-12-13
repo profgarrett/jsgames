@@ -3,13 +3,13 @@ import { FormControl } from 'react-bootstrap';
 import { Slider, Rail, Handles, Tracks, Ticks } from 'react-compound-slider'
 
 import { IfPageSliderSchema } from '../../../shared/IfPageSchemas';
+import type { IStringIndexJsonObject } from '../../components/Misc';
 
 interface PropsType {
   page: IfPageSliderSchema;
   editable: boolean;
   readonly: boolean;
-  handleChange: (Object) => void;
-  handleSubmit: Function;
+  onChange: (json: IStringIndexJsonObject) => void;
 };
   
 const ID = 'SliderInput';
@@ -153,7 +153,7 @@ export default class NumberSlider extends React.Component<PropsType> {
 
 
 	if(n !== this.props.page.client) {
-		this.props.handleChange({ client: n});
+		this.props.onChange({ client: n});
 	}
   }
 
@@ -165,8 +165,12 @@ export default class NumberSlider extends React.Component<PropsType> {
             ? 0 
             : this.props.page.client;
         
-    const disabled = !this.props.editable;
-  
+    const disabled = this.props.readonly;
+
+	if( !this.props.editable ) {
+		return (<div>{ value }</div>);
+	}
+
     return (
       <div style={{ padding: 30 }}>
         <Slider

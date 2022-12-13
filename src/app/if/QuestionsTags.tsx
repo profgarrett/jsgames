@@ -1,15 +1,13 @@
-//@flow
-import React from 'react';
+import React, { ReactElement } from 'react';
 import { Table } from 'react-bootstrap';
 
-import { DEMO_MODE } from './../../server/secret';
+import { DEMO_MODE } from '../../server/secret';
 
-import { IfLevelSchema } from './../../shared/IfLevelSchema';
-import type { Node } from 'react';
-import { HtmlDiv } from './../components/Misc';
+import { IfLevelSchema } from '../../shared/IfLevelSchema';
+import { HtmlDiv } from '../components/Misc';
 
-type DetailPropsType = {
-	levels: Array<IfLevelSchema>
+interface DetailPropsType {
+	levels: Array<IfLevelSchema>;
 };
 
 
@@ -25,9 +23,8 @@ function array_to_object( a: Array<string> ): any {
 ////////////////////////////////////////////////////////////////////////////////
 export default class QuestionsTags extends React.Component<DetailPropsType> {
 
-
-	build_row( data: any, columns: any, i: number ): Node {
-		const tds = [];
+	build_row( data: any, columns: any, i: number ): ReactElement {
+		const tds: ReactElement[] = [];
 
 		for(let index in columns) {
 			if( columns.hasOwnProperty(index)) {
@@ -45,7 +42,7 @@ export default class QuestionsTags extends React.Component<DetailPropsType> {
 
 
 
-	build_row_data( rows: Array<Object>, question: any) {
+	build_row_data = ( rows: Array<Object>, question: any) => {
 
 		const question_base = {
 			level: question.level,
@@ -87,7 +84,7 @@ export default class QuestionsTags extends React.Component<DetailPropsType> {
 
 
 	// Return a table with the questions for the given level.
-	_render_a_levels_questions(level_summary: any): Node {
+	_render_a_levels_questions = (level_summary: any): ReactElement => {
 
 		const questions = level_summary.filter( 
 				l => l.answers.length > 1 
@@ -98,7 +95,7 @@ export default class QuestionsTags extends React.Component<DetailPropsType> {
 		questions.map( q => this.build_row_data(data, q) );
 
 
-		const columns = data.reduce( (accum, d) => {
+		const columns = data.reduce( (accum, d: any) => {
 			for(let index in d) {
 				if(d.hasOwnProperty(index)) {
 					if(accum[index] !== true) accum[index] = true;
@@ -107,7 +104,7 @@ export default class QuestionsTags extends React.Component<DetailPropsType> {
 			return accum;
 		}, {});
 
-		const ths = [];
+		const ths: ReactElement[] = [];
 
 		for(let index in columns) {
 			if( columns.hasOwnProperty(index)) {
@@ -123,7 +120,7 @@ export default class QuestionsTags extends React.Component<DetailPropsType> {
 
 
 
-	render(): Node {
+	render = (): ReactElement => {
 		const levels = this.props.levels;
 
 		// If empty, return a div.
@@ -145,7 +142,7 @@ export default class QuestionsTags extends React.Component<DetailPropsType> {
 				</div>
 			);
 
-		return html;
+		return <div> {html}</div>;
 	}
 }
 

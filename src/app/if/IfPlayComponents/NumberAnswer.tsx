@@ -3,12 +3,15 @@ import { FormControl } from 'react-bootstrap';
 
 import { IfPageNumberAnswerSchema } from '../../../shared/IfPageSchemas';
 
+import type { IStringIndexJsonObject } from '../../components/Misc';
+
+
 interface PropsType {
 	page: IfPageNumberAnswerSchema;
 	editable: boolean;
 	readonly: boolean;
-	handleChange: (Object) => void;
-	handleSubmit: (any) => void;
+	onChange: (json: IStringIndexJsonObject) => void;
+	onSubmit: () => void;
 }
 
 const ID = 'NumberAnswerFieldInput';
@@ -30,18 +33,7 @@ export default class NumberAnswer extends React.Component<PropsType> {
 			let node = document.getElementById(ID);
 			if(node) node.focus();
 		}	
-	}
-
-
-	handleSubmit = (event: any): any => {
-		/*
-		if(event.key === 'Enter' ) {
-			this.props.handleSubmit(document.getElementById(ID).text);
-		}
-		event.preventDefault(); // cancel any keypress.
-		*/
-	}
-	
+	}	
 
 	// Build out the table 
 	// Doesn't need to actually return anything, as the description will be shown 
@@ -49,6 +41,12 @@ export default class NumberAnswer extends React.Component<PropsType> {
 	render = (): React.ReactElement => {
 		const value = this.props.page.client === null ? '' : this.props.page.client;
 		
+		if(!this.props.editable) {
+			return (
+				<div>{ value }</div>
+			);
+		}
+
 		return (
 			<div>
 				<FormControl 
@@ -58,7 +56,7 @@ export default class NumberAnswer extends React.Component<PropsType> {
 					value={ value }
 					readOnly={ this.props.readonly }
 					placeholder='Type a number'
-					onChange={ (e) => this.props.handleChange({ client: e.target.value}) }
+					onChange={ (e) => this.props.onChange({ client: e.target.value}) }
 				/>
 			</div>
 			);

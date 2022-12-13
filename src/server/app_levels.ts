@@ -11,7 +11,7 @@ import { IfLevels, IfLevelSchema } from './../shared/IfLevelSchema';
 import { IfLevelSchemaFactory } from './IfLevelSchemaFactory';
 
 import { from_utc_to_myql, run_mysql_query, is_faculty, to_utc, update_level_in_db } from './mysql';
-import { require_logged_in_user, nocache, log_error, get_username_or_emptystring, return_level_prepared_for_transmit } from './network';
+import { user_require_logged_in, nocache, log_error, user_get_username_or_emptystring, return_level_prepared_for_transmit } from './network';
 
 import { turn_array_into_map } from './../shared/misc';
 import { return_tagged_level } from './tag';
@@ -27,11 +27,11 @@ import type { Request, Response, NextFunction } from 'express';
 
 // Create a new level for the currently logged in user with the given type.
 router.post('/new_level_by_code/:code', 
-	nocache, require_logged_in_user,
+	nocache, user_require_logged_in,
 	async (req: Request, res: Response, next: NextFunction): Promise<any> => {
 	try {
 		const code = req.params.code;
-		const username = get_username_or_emptystring(req, res);
+		const username = user_get_username_or_emptystring(req, res);
 		const level = IfLevelSchemaFactory.create(code, username);
 		const now = from_utc_to_myql(to_utc(new Date()));
 
@@ -81,12 +81,12 @@ router.post('/new_level_by_code/:code',
 // List objects owned by the logged in user.
 // :type may be 'all', or limited to a single code.
 router.get('/levels/byCode/:code', 
-	nocache, require_logged_in_user,
+	nocache, user_require_logged_in,
 	async (req: Request, res: Response, next: NextFunction): Promise<any> => {
 	try {
 		const sql = 'SELECT * FROM iflevels WHERE username = ? AND (code = ? OR ? = "all")';
 		const code = req.params.code;
-		const username = get_username_or_emptystring(req, res);
+		const username = user_get_username_or_emptystring(req, res);
 
 		let iflevels = await run_mysql_query(sql, [username, code, code]);
 
@@ -106,12 +106,12 @@ router.get('/levels/byCode/:code',
 // Get completed or uncompleted objects owned by the logged in user.
 // :type may be 'all', or limited to a single code.
 router.get('/levels/byCompleted/:code', 
-	nocache, require_logged_in_user,
+	nocache, user_require_logged_in,
 	async (req: Request, res: Response, next: NextFunction): Promise<any> => {
 	try {
 		const sql = 'SELECT * FROM iflevels WHERE username = ? AND (completed = ?)';
 		const code = req.params.code === 'true' || req.params.code === 'True';
-		const username = get_username_or_emptystring(req, res);
+		const username = user_get_username_or_emptystring(req, res);
 
 		let iflevels = await run_mysql_query(sql, [username, code, code]);
 
@@ -135,11 +135,11 @@ router.get('/levels/byCompleted/:code',
 	Note that this doesn't hit the database at all, but instead builds a temporary 
 	level and returns it to the user.
 */
-router.get('/debuglevel/:code', nocache, require_logged_in_user,
+router.get('/debuglevel/:code', nocache, user_require_logged_in,
 	async (req: Request, res: Response, next: NextFunction): Promise<any> => {
 	try {
 		const param_code = req.params.code; // level code.
-		const username = get_username_or_emptystring(req, res);
+		const username = user_get_username_or_emptystring(req, res);
 
 		// Only allow faculty to have access to debug levels.
 		const is_faculty_result = await is_faculty(username);
@@ -188,10 +188,11 @@ function to_string_from_possible_array( s: string | Array<any>): string {
 
 
 // Select object, provide it is owned by the logged in user.
-router.get('/level/:id/:tagged?', nocache, require_logged_in_user,
+router.get('/level/:id/:tagged?', 
+	nocache, user_require_logged_in,
 	async (req: Request, res: Response, next: NextFunction): Promise<any> => {
 	try {
-		const username = get_username_or_emptystring(req, res);
+		const username = user_get_username_or_emptystring(req, res);
 		const sql = username === 'garrettn' 
 			? 'SELECT * FROM iflevels WHERE _id = ? '   // allow admin access to any item
 			: 'SELECT * FROM iflevels WHERE _id = ? AND username = ?';
@@ -221,11 +222,11 @@ router.get('/level/:id/:tagged?', nocache, require_logged_in_user,
 	This end-point is only used for testing purposes.  Hard-coded for test user and *all*  test pages.
 */
 router.delete('/level/:id', 
-	nocache, require_logged_in_user,
+	nocache, user_require_logged_in,
 	async (req: Request, res: Response, next: NextFunction): Promise<any> => {
 	try {
 		const sql = 'DELETE FROM iflevels WHERE username = "test" '; // AND _id = ?
-		const username = get_username_or_emptystring(req, res);
+		const username = user_get_username_or_emptystring(req, res);
 
 		if(username !== 'test') {
 			return res.sendStatus(401); // unauthorized.
@@ -248,12 +249,12 @@ router.delete('/level/:id',
 	Only allow for admins.
 */
 router.post('/level/:id/delete', 
-	nocache, require_logged_in_user,
+	nocache, user_require_logged_in,
 	async (req: Request, res: Response, next: NextFunction): Promise<any> => {
 	try {
 		const sql = 'DELETE FROM iflevels WHERE _id = ? ';
 		const _id = req.params.id;
-		const username = get_username_or_emptystring(req, res);
+		const username = user_get_username_or_emptystring(req, res);
 
 		if(username !== ADMIN_USERNAME) {
 			console.log([username, ADMIN_USERNAME])
@@ -273,12 +274,12 @@ router.post('/level/:id/delete',
 
 // Update One
 router.post('/level/:id', 
-	nocache, require_logged_in_user,
+	nocache, user_require_logged_in,
 	async (req: Request, res: Response, next: NextFunction): Promise<any> => {
 	try {
 		const replace = req.query.replace === '1'; // replace the entire object?
 		const validate_only = req.query.validate_only === '1'; // do we just check the current page?
-		const username = get_username_or_emptystring(req, res);
+		const username = user_get_username_or_emptystring(req, res);
 		const is_admin = ADMIN_USERNAME === username;
 		const _id = req.params.id;
 		const sql_select = 'SELECT * FROM iflevels WHERE _id = ?';

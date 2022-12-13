@@ -1,5 +1,9 @@
 import CSS from 'csstype';
 
+// This file contains functions used by both ExcelPredict and ExcelFormula.
+// It primarily provides formatting functions to ensure consistency.
+
+
 
 // Helper functions to clean up the display of true/false, which 
 //  aren't shown by react if just given to the render function.

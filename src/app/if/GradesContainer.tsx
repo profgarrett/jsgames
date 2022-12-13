@@ -1,28 +1,25 @@
-// @flow
-import React, { useState } from 'react';
+import React, { ReactElement, useState } from 'react';
 import Container from 'react-bootstrap/Container';
 import { Row, Col, Breadcrumb  } from 'react-bootstrap';
+import { useParams, useNavigate } from 'react-router-dom';
 
 import Grades from './Grades';
-import { Message, Loading } from './../components/Misc';
+import { Message, Loading } from '../components/Misc';
 import Filter from './Filter';
-import { DEMO_MODE } from './../../server/secret';
+import { DEMO_MODE } from '../../server/secret';
 
-import ForceLogin from './../components/ForceLogin';
-
-import type { Node } from 'react';
+import ForceLogin from '../components/ForceLogin';
 
 
-type GradesPropsType = {};
 
-type GradesContainerStateType = {
-	message: string,
-	messageStyle: string,
-	isLoading: boolean,
-	data: Array<any>
-};
+interface GradesContainerStateType {
+	message: string;
+	messageStyle: string;
+	isLoading: boolean;
+	data: Array<any>;
+}
 
-export default function GradesContainer(props: GradesPropsType): Node {
+export default function GradesContainer(): ReactElement {
 	const [ message, setMessage ] = useState('Loading data from server');
 	const [ messageStyle, setMessageStyle ] = useState('');
 	const [ isLoading, setIsLoading ] = useState(true);
@@ -34,8 +31,12 @@ export default function GradesContainer(props: GradesPropsType): Node {
 		onRefreshData(filter);
 	};
 
+	const params = useParams();
+	const navigate = useNavigate();
+	const _idsection = params._idsection ? params._idsection : null;
+
 	const onRefreshData = (filter: any) => {
-		const args = [];
+		const args: string[] = [];
 
 		if(filter.sections !== '') args.push('idsection='+filter.sections);
 
@@ -75,10 +76,7 @@ export default function GradesContainer(props: GradesPropsType): Node {
 		);
 
 
-	const search = new URLSearchParams(window.location.search);
-	const filter_defaults = search.has('idsection') 
-		? { sections: search.get('idsection') }
-		: {};
+	const filter_defaults = { sections: _idsection };
 	
 	const filter = <Filter 
 			onChange={onRefreshData} 

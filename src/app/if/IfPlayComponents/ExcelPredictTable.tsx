@@ -13,12 +13,13 @@ import { headerStyle, tdStyle, tdFirstColumnStyle,
 	clean, 
 	addDangerColor, addInfoColor, addCorrectColor, addCSSProperty} from './ExcelTableFormatting';
 
+import type { IStringIndexJsonObject } from '../../components/Misc';
 
 interface PredictPropsType {
 	page: IfPagePredictFormulaSchema;
 	editable: boolean;
 	readonly: boolean;
-	handleChange: (any) => void;
+	onChange: (json: IStringIndexJsonObject) => void;
 };
 interface StateType {
 	seed: number;
@@ -100,9 +101,6 @@ const getListStyle = (isDraggingOver: boolean, position?: string): any => {
 export default class ExcelPredictTable extends React.Component<PredictPropsType, StateType> {
 	constructor(props: any) {
 		super(props);
-//		(this: any).onDragEnd = this.onDragEnd.bind(this);
-//		(this: any).onAnswerDoubleclick = this.onAnswerDoubleclick.bind(this);
-//		(this: any)._get_unused_potential_answers = this._get_unused_answers.bind(this);
 		this.state = { seed: Math.random() };
 	}
 
@@ -178,7 +176,7 @@ export default class ExcelPredictTable extends React.Component<PredictPropsType,
 			if(used[i] === -1) {
 				used = used.slice();
 				used[i] = answer_index;
-				this.props.handleChange({ 'predicted_answers_used': used });
+				this.props.onChange({ 'predicted_answers_used': used });
 				return;
 			}
 		}
@@ -223,7 +221,7 @@ export default class ExcelPredictTable extends React.Component<PredictPropsType,
 		}
 
 		// Both update predicted answers, as well as reset the timer.
-		this.props.handleChange( { 'predicted_answers_used': used });
+		this.props.onChange( { 'predicted_answers_used': used });
     }
 
 

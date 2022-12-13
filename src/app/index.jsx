@@ -171,6 +171,12 @@ import MyProgressContainer from './if/MyProgressContainer.tsx';
 import LevelDebugContainer from './if/LevelDebugContainer.tsx';
 import LevelListContainer from './if/LevelListContainer.tsx';
 import LevelPlayContainer from './if/LevelPlayContainer';
+import LevelScoreContainer from './if/LevelScoreContainer';
+import ClassProgressContainer from './if/ClassProgressContainer';
+import RecentContainer from './if/RecentContainer';
+import GradesContainer from './if/GradesContainer';
+import QuestionsContainer from './if/QuestionsContainer';
+
 
 const Error = () => <div><h1>Error</h1><p>Sorry, but an error occurred. Pleaser try closing your browser, refreshing, and trying again.</p></div>
 
@@ -182,6 +188,11 @@ const router = createBrowserRouter([
 	{ path: '/ifgame/leveldebug/:_id', element: <LevelDebugContainer /> },
 	{ path: '/ifgame/levels/:_code', element: <LevelListContainer /> },
 	{ path: '/ifgame/level/:_id/play', element: <LevelPlayContainer /> },
+	{ path: '/ifgame/level/:_id/score', element: <LevelScoreContainer /> },
+	{ path: '/ifgame/progress/:_idsection', element: <ClassProgressContainer /> },
+	{ path: '/ifgame/recent/:_idsection', element: <RecentContainer /> },
+	{ path: '/ifgame/grades/:_idsection', element: <GradesContainer /> },
+	{ path: '/ifgame/questions/:_idsection', element: <QuestionsContainer /> },
 
 	{ path: '/login', element: <LoginContainer /> },
 	{ path: '/logout', element: <Logout /> },

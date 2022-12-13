@@ -1,14 +1,11 @@
-// @flow
-import React from 'react';
+import React, { ReactElement } from 'react';
 import { Table } from 'react-bootstrap';
 
-import { IfLevelSchema } from './../../shared/IfLevelSchema';
-import { StyledReactTable } from './../components/StyledReactTable';
+import { IfLevelSchema } from '../../shared/IfLevelSchema';
+import { StyledReactTable } from '../components/StyledReactTable';
 
-import type { Node } from 'react';
-
-import { IfLevels } from './../../shared/IfLevelSchema';
-import { DEMO_MODE } from './../../server/secret';
+import { IfLevels } from '../../shared/IfLevelSchema';
+import { DEMO_MODE } from '../../server/secret';
 
 
 type PropsType = {
@@ -23,8 +20,7 @@ const avg_of = function(obj: any, arr: Array<any>): number {
 };
 
 
-export default function Grades(props: PropsType): Node {
-
+export default function Grades(props: PropsType): ReactElement {
 
 	const _get_columns = (): Array<any> => {
 		// Create a list of distinct columns. Don't include the waivers.
@@ -61,15 +57,16 @@ export default function Grades(props: PropsType): Node {
 		columns.push( {
 			id:'total',
 			Header: 'Avg',
-			style: { textAlign: 'right' },
-			textAlign: 'right',
-			accessor: l => avg_of(l, tutorials) + '%'
+//			style: { textAlign: 'right' },
+//			textAlign: 'right',
+			accessor: l => avg_of(l, tutorials) + '%',
+			width: 100,
 		});
 
 		tutorials.map( t => columns.push({ 
 				id: t, 
 				Header: t, 
-				style: { textAlign: 'right' },
+//				style: { textAlign: 'right' },
 				accessor: l => typeof l[t] !== 'undefined' && l[t] !== null ? l[t]+'%' : '', 
 				width: 60 }));
 				
@@ -79,11 +76,10 @@ export default function Grades(props: PropsType): Node {
 	/* 
 		Return table
 	*/
-	const _render_rich_grades_table = (): Node => {
+	const _render_rich_grades_table = (): ReactElement => {
 		const columns = _get_columns();
 		return 	<StyledReactTable 
 					data={props.data}
-					filterable={true}
 					columns={columns} 
 				/>;
 	};
@@ -92,7 +88,7 @@ export default function Grades(props: PropsType): Node {
 	/**
 		Return historical information
 	*/
-	const _render_grades_table = (): Node => {
+	const _render_grades_table = (): ReactElement => {
 		const columns = _get_columns();
 
 		return <Table striped bordered hover>

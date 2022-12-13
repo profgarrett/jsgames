@@ -1,10 +1,8 @@
-//@flow
-import React from 'react';
-import { DEMO_MODE } from './../../server/secret';
+import React, { ReactElement } from 'react';
+import { DEMO_MODE } from '../../server/secret';
 
-import { IfLevelSchema } from './../../shared/IfLevelSchema';
-import type { Node } from 'react';
-import { formatDate, padL } from './../../shared/misc';
+import { IfLevelSchema } from '../../shared/IfLevelSchema';
+import { formatDate, padL } from '../../shared/misc';
 //import { a } from 'react-spring';
 
 type DetailPropsType = {
@@ -35,7 +33,7 @@ export default class QuestionsPagesExcelFormula extends React.Component<DetailPr
 
 
 	// Convert the nested structure into a flat table of common values.
-	flatten_levels(levels: any): any {
+	flatten_levels = (levels: any): any => {
 		const columns = [
 			'level',
 			'a_standardize_formula_case',
@@ -89,7 +87,7 @@ export default class QuestionsPagesExcelFormula extends React.Component<DetailPr
 			'hints_parsed',
 			'hints_viewsolution',
 			];
-		const rows = [];
+		const rows: any[] = [];
 
 		levels.map( level_summary => {
 			const defaults = { 
@@ -122,7 +120,7 @@ export default class QuestionsPagesExcelFormula extends React.Component<DetailPr
 		return { columns, rows };
 	}
 
-	flatten_level_questions(rows: Array<any>, level_summary: any, columns: any, defaults: any) {
+	flatten_level_questions= (rows: Array<any>, level_summary: any, columns: any, defaults: any) => {
 
 		level_summary.questions.map( question => {
 			if( question.type === 'IfPageChoiceSchema') return;
@@ -155,9 +153,10 @@ export default class QuestionsPagesExcelFormula extends React.Component<DetailPr
 		});
 	}
 
-	replace_spans(s: string): string {
+	replace_spans = (s: string): string => {
 		if(s === null) return '';
 		if(typeof s === 'undefined') return '';
+		// @ts-ignore
 		if(typeof s ===  'number') return s.toString();
 
 		return s
@@ -166,7 +165,7 @@ export default class QuestionsPagesExcelFormula extends React.Component<DetailPr
 	}
 	
 
-	flatten_level_question_answers(rows: Array<any>, question: any, columns: any, defaults: any) {
+	flatten_level_question_answers = (rows: Array<any>, question: any, columns: any, defaults: any) => {
 
 		question.answers.map( answer => {
 			// Only track completed pages.
@@ -249,7 +248,7 @@ export default class QuestionsPagesExcelFormula extends React.Component<DetailPr
 		Looks by user to find the order in which they experience each KC.
 		Relies upon rows being in order being being sent.
 	*/
-	add_kc_order_column_by_user( rows: Array<any> ): any {
+	add_kc_order_column_by_user = ( rows: Array<any> ): any => {
 		const users = {};
 		const kcs = {};
 		let username = '';
@@ -298,7 +297,7 @@ export default class QuestionsPagesExcelFormula extends React.Component<DetailPr
 	}
 
 
-	render(): Node {
+	render = (): ReactElement => {
 		const levels = this.props.levels;
 		//if(levels) console.log(levels[0].questions[4]);
 		const flat = this.flatten_levels(levels);
@@ -314,9 +313,10 @@ export default class QuestionsPagesExcelFormula extends React.Component<DetailPr
 		// Go through each map of levels and return a table for each.
 		const trs = rows.map( 
 			(answer, n) => {
-				const tds = [];
+				const tds: ReactElement[] = [];
 
 				for(let i=0; i<columns.length; i++) {
+					// @ts-ignore
 					tds.push( <td key={'excel_td_'+i} style={td_style}>{ 
 						typeof answer[columns[i]] === 'undefined' ? 0 : answer[columns[i]] 
 					}</td> );
@@ -326,6 +326,7 @@ export default class QuestionsPagesExcelFormula extends React.Component<DetailPr
 			}
 			);
 
+		// @ts-ignore
 		const ths = columns.map( (col,i) => <th key={'excel_ths_'+i} style={td_style}>{col}</th>);
 
 		// If empty, return a div.

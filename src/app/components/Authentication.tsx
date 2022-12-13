@@ -27,7 +27,6 @@ type BrowserUserType = {
 	isAdmin: boolean
 };
 
-
 /**
 	This function is used by the client to return information about the current user.
 	It's based solely upon cookie data.
@@ -42,9 +41,15 @@ type BrowserUserType = {
 	}
 */
 export function getUserFromBrowser(): BrowserUserType {
+	const cookie = get_cookie('session');
+
+	if( cookie == '') return { 'username': '', 'isAdmin': false };
+
+	const decoded = JSON.parse( atob(cookie) );
+
 	const user = {
-		username: get_cookie('username'),
-		isAdmin: get_cookie('is-admin') === 'True',
+		username: decoded.username ? decoded.username : '',
+		isAdmin: decoded.isAdmin ? decoded.isAdmin : false,
 	};
 
 	// If the username is an email address, then replace the encoded @ with the proper symbol.

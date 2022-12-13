@@ -1,27 +1,25 @@
-// @flow
-import React from 'react';
+import React, {ReactElement} from 'react';
 import { Table, Modal, Button } from 'react-bootstrap';
 import { LevelScore, LevelScorePage } from './LevelScore';
-import { Loading } from './../components/Misc';
+import { Loading } from '../components/Misc';
 
-import { IfLevelSchema } from './../../shared/IfLevelSchema';
+import { IfLevelSchema } from '../../shared/IfLevelSchema';
 
-import type { Node } from 'react';
 
-import { IfLevels } from './../../shared/IfLevelSchema';
-import { DEMO_MODE } from './../../server/secret';
+import { IfLevels } from '../../shared/IfLevelSchema';
+import { DEMO_MODE } from '../../server/secret';
 
-type PropsType = {
-	level: ?IfLevelSchema,
-	level_id: ?string,
+interface PropsType {
+	level: IfLevelSchema|null,
+	level_id: string,
     hide: Function,
-	sequence_in_level: ?number,
-};
+	sequence_in_level: number|null,
+}
 
-type StateType = {
-	modal_level: ?IfLevelSchema,
+interface StateType {
+	modal_level: IfLevelSchema|null,
 	modal_level_loading: boolean,
-};
+}
 
 export class LevelModal extends React.Component<PropsType, StateType> {
 	static defaultProps = {
@@ -37,12 +35,11 @@ export class LevelModal extends React.Component<PropsType, StateType> {
 			modal_level_loading: (this.props.level === null ),
 		};
 
-        (this: any)._on_click_to_hide_modal = this._on_click_to_hide_modal.bind(this);
 		this.load_data();
 	}
 
     // Send a sigal to hide the modal.
-    _on_click_to_hide_modal() {
+    _on_click_to_hide_modal = () => {
 		this.setState({ modal_level: null, modal_level_loading: false });
 		this.props.hide();
     }
@@ -50,7 +47,7 @@ export class LevelModal extends React.Component<PropsType, StateType> {
 	/*
 		Load a level to view as a modal box.
 	*/
-	load_data() {
+	load_data = () => {
 		const level_id = typeof this.props.level_id === 'undefined' || this.props.level_id === null
 			? ''
 			: this.props.level_id;
@@ -78,7 +75,7 @@ export class LevelModal extends React.Component<PropsType, StateType> {
 	}
     
     // Show a modal pop up if the state requires it.
-    render_modal() {
+    render_modal = () => {
 		// Are we still loading?
 		if(this.state.modal_level_loading || this.state.modal_level === null || typeof this.state.modal_level === 'undefined') {
 			return <div>Loading...<Loading loading={true } /></div>
@@ -97,7 +94,7 @@ export class LevelModal extends React.Component<PropsType, StateType> {
 		}
 	}
 
-	render(): Node {
+	render(): ReactElement {
 		const view_results = this.render_modal();
 		const id = <i style={{ fontSize: 8}}>{this.props.level_id}</i>;
 

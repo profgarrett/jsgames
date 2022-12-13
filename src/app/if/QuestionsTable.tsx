@@ -1,15 +1,13 @@
-//@flow
-import React, { useState } from 'react';
+import React, { useState, ReactElement } from 'react';
 
-import { DEMO_MODE } from './../../server/secret';
+import { DEMO_MODE } from '../../server/secret';
 
-import { IfLevelSchema } from './../../shared/IfLevelSchema';
-import type { Node } from 'react';
-import { HtmlDiv } from './../components/Misc';
+import { IfLevelSchema } from '../../shared/IfLevelSchema';
+import { HtmlDiv } from '../components/Misc';
 import { Collapse, Card } from 'react-bootstrap';
 
 
-import { StyledReactTable } from './../components/StyledReactTable';
+import { StyledReactTable } from '../components/StyledReactTable';
 
 type DetailPropsType = {
 	levels: Array<IfLevelSchema>
@@ -26,7 +24,7 @@ export default class PagesTable extends React.Component<DetailPropsType> {
 
 
 	// Render a single summary row
-	_render_answers_for_pages_with_same_question(question: any): Node {
+	_render_answers_for_pages_with_same_question = (question: any): ReactElement => {
 
 		const columns = [{
 			id: 'username',
@@ -101,11 +99,10 @@ export default class PagesTable extends React.Component<DetailPropsType> {
 						</div>
 						<StyledReactTable 
 							data={question.answers}
-							filterable={true}
 							columns={columns} 
-							defaultSorted={['type', 'seconds']}
-							defaultPageSize={question.answers.length}
-							style={{ backgroundColor: '#f5f5f5' }}
+//							defaultSorted={['type', 'seconds']}
+//							defaultPageSize={question.answers.length}
+//							style={{ backgroundColor: '#f5f5f5' }}
 						/>
 					</div>
 					} 
@@ -115,7 +112,7 @@ export default class PagesTable extends React.Component<DetailPropsType> {
 
 
 	// Return a table with the questions for the given level.
-	_render_a_levels_questions(level_summary: any): Node {
+	_render_a_levels_questions = (level_summary: any): ReactElement => {
 
 		const columns = [{
 			id: 'description',
@@ -175,21 +172,19 @@ export default class PagesTable extends React.Component<DetailPropsType> {
 
 		return <StyledReactTable
 			data={level_summary.questions}
-			filterable={true}
 			columns={columns}
 			/>;
 		
 	}
 
 
-	render(): Node {
+	render = (): ReactElement[] => {
 		const levels = this.props.levels;
-
 
 		// If empty, return a div.
 		if(levels.length < 1) 
-			return <div/>;
-		
+			return [<></>];
+
 		// Go through each map of levels and return a table for each.
 		const html = levels.map( 
 			(level_summary,i) => 
@@ -206,7 +201,7 @@ export default class PagesTable extends React.Component<DetailPropsType> {
 
 
 
-  function Expandable(props: { title: string, body: any }): Node {
+  function Expandable(props: { title: string, body: any }): ReactElement {
 	const [open, setOpen] = useState(false);
   
 	const body_as_dom = typeof props.body === 'string' 

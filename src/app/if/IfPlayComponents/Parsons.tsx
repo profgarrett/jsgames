@@ -1,31 +1,35 @@
 import React from 'react';
 
 import { ListGroup, ListGroupItem } from 'react-bootstrap';
-import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
+import { DragDropContext, Draggable } from 'react-beautiful-dnd';
+import { StrictModeDroppable } from './StrictModeDroppable';
 import { HtmlSpan } from '../../components/Misc';
+import type { IStringIndexJsonObject } from '../../components/Misc';
 
 import CSS from 'csstype';
 
 interface PropsType {
 	page: any;
-	handleChange: Function;
+	onChange: (json: IStringIndexJsonObject) => void;
 	editable: boolean;
+	readonly: boolean;
+	show_solution?: boolean;
 }
 
 
 // change background colour if dragging
 const getItemStyle = (isDragging: boolean, draggableStyle: CSS.Properties): CSS.Properties => ({
   background: isDragging ? '#eee' : '#fff',
-  margin: '5',
+  margin: '5px',
   ...draggableStyle
 });
 
 
 const getListStyle = (isDraggingOver: boolean): CSS.Properties => ({
 	border: isDraggingOver ? '1px solid #337ab7' : '1px solid #ddd',
-	minWidth: '300',
-	marginBottom: '20',
-	minHeight: '42',
+	minWidth: '300px',
+	marginBottom: '20px',
+	minHeight: '42px',
 });
 
 const make_draggables = (a, clickToMove, listId )=> a.map(
@@ -61,7 +65,7 @@ const make_draggables = (a, clickToMove, listId )=> a.map(
 const make_droppable = (title, id, list) => (
 	<div>
 		<h3>{title}</h3>
-		<Droppable droppableId={id}>
+		<StrictModeDroppable droppableId={id}>
 			{(provided, snapshot) => (
 				<div ref={provided.innerRef} 
 					className='list-group' 
@@ -71,7 +75,7 @@ const make_droppable = (title, id, list) => (
 					{ provided.placeholder }
 				</div>
 			)}
-		</Droppable>
+		</StrictModeDroppable>
 	</div>
 );
 
@@ -130,6 +134,9 @@ export default class Parsons extends React.Component<PropsType> {
 		let unused_items = toObjs(get_unused_items(page.potential_items, page.client_items));
 		let client_items: any[] = [];
 
+		// No updates if this is readonly.
+		if(this.props.readonly) return;
+
 		// Outside list.
 		if (!result.destination) return;
 
@@ -152,12 +159,12 @@ export default class Parsons extends React.Component<PropsType> {
 			client_items.splice(result.source.index, 1);
 
 		}
-		// Note that we don't care are sorting the unused list.  That list is automatically generated
+		// Note that we don't care about sorting the unused list.  That list is automatically generated
 		// each time render() is called.
 
 		//unused_items = (get_unused_items(page.potential_items, client_items));
 		//console.log({unused_items: unused_items, 'client_items': client_items });
-		this.props.handleChange({ client_items });
+		this.props.onChange({ client_items });
 	}
 
 	// respond to a double-click by moving the given object to the tail of the other list.
@@ -176,7 +183,7 @@ export default class Parsons extends React.Component<PropsType> {
 			throw new Error('Invalid listId passed to Parsons.clickToMove '+ listId);
 		}
 
-		this.props.handleChange({ client_items });
+		this.props.onChange({ client_items });
 	}
 
 	// Build out the table 
@@ -188,21 +195,30 @@ export default class Parsons extends React.Component<PropsType> {
 		let client_items = null === page.client_items ? [] : page.client_items;
 
 		if(!this.props.editable) {
-			return (
-				<ListGroup>
-					{ client_items.map( (item,i) => <ListGroupItem key={i}><HtmlSpan html={""+item}/></ListGroupItem> ) }
-				</ListGroup>
-			);
+			if(typeof this.props.show_solution != 'undefined' && this.props.show_solution === true && typeof page.solution != 'undefined') {
+				return (
+					<ListGroup>
+						{ client_items.map( (item,i) => <ListGroupItem key={i}><HtmlSpan html={""+item}/></ListGroupItem> ) }
+						Correct answer { page.solution }
+					</ListGroup>
+				);
+			} else {
+				return (
+					<ListGroup>
+						{ client_items.map( (item,i) => <ListGroupItem key={i}><HtmlSpan html={""+item}/></ListGroupItem> ) }
+					</ListGroup>
+				);
+			}
 		} else {
 			return (
 			<DragDropContext onDragEnd={this.onDragEnd}>
 				<table style={{ marginBottom: 10 }}><tbody>
 					<tr >
-						<td style={{verticalAlign: 'top'}}>
+						<td style={{verticalAlign: 'top', padding: '10px'}}>
 							{ make_droppable('Drag from here', 'unused_items', 
 								make_draggables(unused_items, this.clickToMove, 'unused_items'))}
 						</td>
-						<td style={{paddingLeft: 10, verticalAlign: 'top'}}>
+						<td style={{paddingLeft: 10, verticalAlign: 'top', padding: '10px'}}>
 							{ make_droppable('To here', 'client_items', 
 								make_draggables(used_items, this.clickToMove, 'client_items'))}
 						</td>

@@ -15,7 +15,7 @@ const { return_tagged_level } = require('./tag');
 */
 
 import { run_mysql_query } from './mysql';
-import { require_logged_in_user, nocache, log_error, get_username_or_emptystring } from './network';
+import { user_require_logged_in, nocache, log_error, user_get_username_or_emptystring } from './network';
 
 interface IStringIndexJsonObject {
 	[key: string]: any
@@ -35,10 +35,10 @@ import type { Request, Response, NextFunction } from 'express';
 // List a list of classes that the logged in user has access to.
 // Allow access to all by garrettn (admin)
 router.get('/sections', 
-	nocache, require_logged_in_user, 
+	nocache, user_require_logged_in, 
 	async (req: Request, res: Response, next: NextFunction): Promise<any> => {
 	try {
-		const username = get_username_or_emptystring(req, res);
+		const username = user_get_username_or_emptystring(req, res);
 
 		if(username === '') throw new Error('Invalid username '+username+' for sections');
 
@@ -62,10 +62,10 @@ router.get('/sections',
 
 // List users in classes which this person is recorded as teaching.
 router.get('/users', 
-	nocache, require_logged_in_user,
+	nocache, user_require_logged_in,
 	async (req: Request, res: Response, next: NextFunction): Promise<any> => {
 	try {
-		const username = get_username_or_emptystring(req, res);
+		const username = user_get_username_or_emptystring(req, res);
 
 		const sql = `SELECT DISTINCT student.iduser, student.username
 				FROM users as teacher
