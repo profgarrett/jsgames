@@ -1321,7 +1321,7 @@ class IfPageFormulaSchema extends IfPageBaseSchema {
 			if(!this.correct) return;
 		}
 
-		console.log(['updateCorrect: 1313', this.client_test_results, this.server_test_results, this.client_f, this.solution_f]);
+		//console.log(['updateCorrect: 1313', this.client_test_results, this.server_test_results, this.client_f, this.solution_f]);
 
 		// Check individual answers
 		for(let i=0; i<this.client_test_results.length && this.correct; i++) {

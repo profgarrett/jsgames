@@ -716,7 +716,6 @@ function getTokens(formula) {
 //<!-- End GoCalc Prototype Excel Formula Parser -->
 
 
-export {
-	parseFormula,
-  parseFeedback
-};
+
+exports.parseFormula = parseFormula;
+exports.parseFeedback =  parseFeedback;

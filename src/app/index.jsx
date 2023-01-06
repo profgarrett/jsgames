@@ -9,8 +9,6 @@ import { createBrowserRouter,
 
 
 
-
-
 //  Old browser compatability.
 //import Promise from 'promise-polyfill';
 //if (!window.Promise) { window.Promise = Promise; }
@@ -104,15 +102,15 @@ import ProfileContainer from './components/ProfileContainer.tsx';
 import Logout from './components/Logout';
 import PasswordContainer from './components/PasswordContainer.tsx';
 
-import Bugsnag from '@bugsnag/js'
-import BugsnagPluginReact from '@bugsnag/plugin-react'
+//import Bugsnag from '@bugsnag/js'
+//import BugsnagPluginReact from '@bugsnag/plugin-react'
 
 let Root = null;
 
-
+/*
 if(window.location.hostname !== 'localhost') {
 	throw Error('not tested');
-	/*
+	
   Bugsnag.start({
     apiKey: '9b68269d9ba2d11171ecafa393afbb8e',
     plugins: [new BugsnagPluginReact()],
@@ -137,12 +135,14 @@ if(window.location.hostname !== 'localhost') {
 			</ErrorBoundary>
 		</BrowserRouter>
 	);
-		*/
+		
 } else {
 
 	Root = <></>;
 
 }
+*/
+
 
 import { StaticRouter } from "react-router-dom/server";
 

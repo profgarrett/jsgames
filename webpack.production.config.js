@@ -1,25 +1,52 @@
-require('@babel/polyfill');
+// require('@babel/polyfill');
 
 const HTMLWebpackPlugin = require('html-webpack-plugin');
 const webpack = require('webpack');
+
 const TerserPlugin = require('terser-webpack-plugin');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 //const { GOOGLEID } = require('./secret.distribution.js');
 
 module.exports = {
 	mode: 'production',
-	entry: ['@babel/polyfill', __dirname + '/src/app/index.js'],
+	entry: [ __dirname + '/src/app/index.jsx'],
+	resolve: {
+		extensions: ['.js', '.jsx', '.ts', '.tsx' ],
+	},
 	module: {
 		rules: [
 			{
-				test: /\.js$/,
-				exclude: /node_modules/,
-				use: { loader: 'babel-loader' }
+				test: /\.css$/i,
+				use: ['style-loader', 'css-loader']
 			},
 			{
-				test: /\.css$/,
-				use: [ 'style-loader', 'css-loader']
-			}
+				test: /\.?jsx$/,
+				exclude: /node_modules/,
+				use: {
+					loader: 'babel-loader'
+				}
+			},
+			{
+				test: /\.?js$/,
+				exclude: /node_modules/,
+				use: {
+					loader: 'babel-loader'
+				}
+			},
+			{
+				test: /\.?ts$/,
+				exclude: /node_modules/,
+				use: {
+					loader: 'babel-loader'
+				}
+			},
+			{
+				test: /\.?tsx$/,
+				exclude: /node_modules/,
+				use: {
+					loader: 'babel-loader'
+				}
+			},
 		]
 	},
 	plugins: [
@@ -36,15 +63,13 @@ module.exports = {
 	],
 	
 	optimization: {
+		/*
 		minimize: true,
 		minimizer: [new TerserPlugin({
-			sourceMap: true,
-			terserOptions: {
-				ie8: true,
-				safari10: true,
-				ecma: 5,
-			},
+			terserOptions: { sourceMap: true }
 		})],
+		*/
+		minimize: false
 	},
 	
 	output: {

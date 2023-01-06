@@ -1,5 +1,3 @@
-// @flow
-
 /* 
     Used to avoid cache issues. Before building and deploying, use to find the most recent build
  */

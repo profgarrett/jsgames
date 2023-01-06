@@ -257,7 +257,7 @@ router.post('/level/:id/delete',
 		const username = user_get_username_or_emptystring(req, res);
 
 		if(username !== ADMIN_USERNAME) {
-			console.log([username, ADMIN_USERNAME])
+			//console.log([username, ADMIN_USERNAME])
 			return res.sendStatus(401); // unauthorized.
 		}
 

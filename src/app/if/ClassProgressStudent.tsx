@@ -1,3 +1,4 @@
+// @ts-ignore
 // @flow
 import React from 'react';
 import { Popover, Table, Modal, Button } from 'react-bootstrap';

@@ -27,7 +27,7 @@ import type { Request, Response, NextFunction } from 'express';
 
 const app = express();
 
-// TRust the proxy, as is used during development.
+// Trust the proxy, as is used during development.
 app.set('trust proxy', 1)
 
 app.use( session_initialize() ) ;

@@ -3,3 +3,4 @@ node_modules
 secret.js
 secret.distribution.js
 log.txt
+build

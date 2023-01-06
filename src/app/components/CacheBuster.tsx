@@ -92,7 +92,7 @@ _render_modal() {
                         If you keep getting these messages, please press the refresh button on your browser.
                     </Modal.Body>
                 <Modal.Footer>
-                    <Button variant="primary" onClick={this.reload()}>Reload website</Button>
+                    <Button variant="primary" onClick={ () => this.reload() }>Reload website</Button>
                 </Modal.Footer>
             </Modal>
         </div>);

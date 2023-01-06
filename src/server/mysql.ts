@@ -280,7 +280,7 @@ async function _update_fix_bad_page_data6(): Promise<any> {
 		json = ifLevel.pages.map( (p: any ): any => p.toJson() )
 		values = [JSON.stringify(json), ifLevel._id];
 		let update_results = await run_mysql_query(sql_update, values);
-		console.log(update_results); //update_results);
+		//console.log(update_results); //update_results);
 		//console.log(ifLevel.pages);
 		//console.log(values);
 	}
