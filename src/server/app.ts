@@ -191,12 +191,14 @@ app.get('/transformed.js.map', (req: Request, res: Response) => {
 });
 
 
-// Load static files.
-app.use('/static', express.static('public'));
+// Load static files. 
+// When published for real, this should be set through .htaccess to avoid hitting express
+// However, it's useful to have this in place for development.
+app.use('/static', express.static('static'));
 
 // Default case that returns the general index page.
 // Needed for when client is on a subpage and refreshes the page to return the react app.
-// SHould be last.
+// Should be last.
 app.get('*', (req: Request, res: Response) => {
 	// If on local, don't add jsgames. On server, code is in subfolder.
 	log_error( build_path('index.html'));

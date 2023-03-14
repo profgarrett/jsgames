@@ -14,7 +14,7 @@ const tutorial_pages = [
 		description: `Imagine that you invest $100 into a savings account. If you have
 				a 5% interest rate, how much money will you have after 5 years?
 				<br/><br/>
-				Simple interest assumes that we pull out
+				<i>Simple</i> interest assumes that we pull out
 				all of the new cash earned each year (instead of putting it back into the account). 
 				The formula will be <code>starting cash * (1 + interest rate * years)</code>
 				<br/><br/>
@@ -166,7 +166,7 @@ const _base = {
 		Type in the correct formula. The ending amount will be:
 		<ul>
 			<li>Compound growth: <code>Starting Amount * (1 + Rate) ^ Years</code></li>
-			<li>Regular growth: <code>=Starting Amount * (1 + Rate * Years)</code></li>
+			<li>Simple growth: <code>=Starting Amount * (1 + Rate * Years)</code></li>
 		</ul>
 		`,
 	client_f_format: ',',
@@ -185,7 +185,7 @@ const test_pages = [
 	},{	..._base,
 		...use(true, false, false),
 		solution_f: '=a1*(1+{n}/100*10)', 
-		description: 'How many Alpacas will you have after 10 years?  Use a {n}% <b>regular</b> growth rate.',
+		description: 'How many Alpacas will you have after 10 years?  Use a {n}% <b>simple</b> growth rate.',
 	},{	..._base,
 		...use(false, false, true),
 		solution_f: '=100*(1+({n}/100))^a1', 
@@ -193,7 +193,7 @@ const test_pages = [
 	},{	..._base,
 		...use(false, false, true),
 		solution_f: '=100*(1+{n}/100*a1)', 
-		description: 'If we start with 100 Alpacas, how many will we end up with?  Use a {n}% <b>regular</b> growth rate.',
+		description: 'If we start with 100 Alpacas, how many will we end up with?  Use a {n}% <b>simple</b> growth rate.',
 	},{	..._base,
 		...use(true, true, true),
 		solution_f: '=a1*(1+b1)^c1',  
@@ -201,7 +201,7 @@ const test_pages = [
 	},{	..._base,
 		...use(true, true, true),
 		solution_f: '=a1*(1+b1*c1)',  
-		description: 'How many Alpacas will we end up with?  Use the values from the table and a <b>regular</b> growth rate. ',
+		description: 'How many Alpacas will we end up with?  Use the values from the table and a <b>simple</b> growth rate. ',
 	},
 
 

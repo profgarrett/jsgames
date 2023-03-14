@@ -42,7 +42,7 @@ const tutorial_pages = [
 	{	type: 'IfPageFormulaSchema',
 		description: `Use <b>regular</b> growth to calculate the number of animals in <b>four years</b>.
 			<br/><br/>
-			Remember that the formula for regular growth is <code>Starting Value * (1 + rate * Years</code>`,
+			Remember that the formula for regular growth is <code>Starting Value * (1 + rate * Years)</code>`,
 		instruction: 'Write the formula. Remember to add together the two types of animals first, placing them in parenthesis.',
 		column_formats: farm1_data.column_formats,
 		column_titles: farm1_data.column_titles,

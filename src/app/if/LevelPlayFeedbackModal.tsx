@@ -99,11 +99,11 @@ export default class LevelPlayFeedbackModal extends React.Component<IProps> {
 						} else if ( typedPage.correct ) {
 							body.push(<div>Correct answer!</div>);
 						
-						} else if( typedPage.get_time_in_seconds() < TIME_BEFORE_SHOWING_SOLUTION ) {
+						} else if( typedPage.get_time_in_seconds_since_first_history() < TIME_BEFORE_SHOWING_SOLUTION ) {
 							// No, haven't  tried for at least 3 minutes.
 							//console.log(typedPage.get_time_in_seconds());
 							body.push(<div>Sorry, but that answer is not correct.<br/><br/>
-								You have spent around {typedPage.get_time_in_seconds()} seconds
+								You have spent around {typedPage.get_time_in_seconds_since_first_history()} seconds
 								trying to solve the problem on your own. Please try for 
 								at least three minutes. You can then 
 								come back here for the solution.</div>);

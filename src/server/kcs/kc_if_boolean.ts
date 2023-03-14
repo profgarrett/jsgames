@@ -304,7 +304,7 @@ const kc_if_and_boolean_logic = ({
        },{	...test,
             ...pig6_data,
             
-			description: `Which pigs have a length between <code>{n}</code> and <code>200</code> (inclusive)?`,
+			description: `Which pigs have a weight between <code>{n}</code> and <code>200</code> (inclusive)?`,
 
 			solution_f: '=AND({n}<=B1, B1<=200)',
             template_values: {
@@ -314,7 +314,7 @@ const kc_if_and_boolean_logic = ({
        },{	...test,
             ...pig6_data,
             
-			description: `Which pigs have a length between <code>{n1}</code> and <code>{n2}</code> (exclusive)?`,
+			description: `Which pigs have a weight between <code>{n1}</code> and <code>{n2}</code> (exclusive)?`,
 
 			solution_f: '=AND({n1}<B1, B1<{n1})',
             template_values: {

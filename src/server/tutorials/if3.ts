@@ -54,9 +54,9 @@ const if3 = ({
 	title: 'IF3: Math',
 	description: 'Embed math into the IF function',
 	harsons_randomly_on_username: false,
-	predict_randomly_on_username: true,
+	predict_randomly_on_username: false,
 	
-	version: 2.0,
+	version: 2.1,
 
 	
 	gen: ({

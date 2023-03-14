@@ -1,7 +1,7 @@
 {
   "name": "jsgames",
-  "version": "2023.01.05",
-  "description": "Javascript Games Package for Education",
+  "version": "2023.03.14",
+  "description": "Javascript Educational System",
   "repository": {
     "type": "git",
     "url": "git://github.com/profgarrett/jsgames.git"

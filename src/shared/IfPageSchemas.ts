@@ -417,6 +417,18 @@ class IfPageBaseSchema extends Schema {
 		return Math.round( diff_in_ms / 1000 );
 	}
 
+	// Returns the time since the first edit until now.
+	// Different from editing time, this just considers how long it's been 
+	// since they did their first input.
+	get_time_in_seconds_since_first_history(): number {
+		const first = this.get_first_update_date();
+		const current = new Date();
+
+		if(first == null) return 0;
+
+		return Math.round((current.getTime() - first.getTime()) / 1000);
+	}
+
 	// Return the time from the first edit to the last edit.
 	// Ignores periods with an update longer than 5 minutes.
 	get_time_in_seconds(): number {

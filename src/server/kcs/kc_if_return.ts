@@ -116,7 +116,7 @@ const kc_if_return_number = ({
         },{	...tutorial,
             
 			description: `One more! Return 0
-                for offices with <b>at most</b> {n} {cell1_title}, and one dozen (12) for all others.`,
+                for offices with {n} or fewer {cell1_title}, and one dozen (12) for all others.`,
 			instruction: 'Write the formula described above.',
 			helpblock: 'Write =IF( <i>logical test</i>, <i>donuts if true</i>, <i>donuts if false</i> )',
 			
@@ -125,7 +125,7 @@ const kc_if_return_number = ({
 			solution_f: '=if({cell1_ref}<={n}, 0, 12)',
             template_values: {
                 'cell1': 'popCell(c1,d1)',
-                'n': 'randOf(3,5,10)',
+                'n': 'randOf(3,5,9)',
             },
             feedback: [
                 { 'has': 'values', args: ['{n}', '0', '12'] },

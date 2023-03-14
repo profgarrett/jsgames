@@ -18,133 +18,6 @@ const formatBigGif = (url) => {
 };
 */
 
-
-/*
-const test_format: GenType = {
-	gen_type: LinearGen,
-	pages: [
-		{	type: 'IfPageFormulaSchema',
-			description: 'test',
-			instruction: 'test %',
-			tests: [ 
-				{ 'a': 1 },
-				{ 'a': 3 }, 
-				{ 'a': 5 },
-				{ 'a': 10 }
-			],
-			solution_f: '=1',
-			client_f_format: '%',
-			correct_required: false,
-			code: 'tutorial'
-		},
-
-		{	type: 'IfPageFormulaSchema',
-			description: 'test',
-			instruction: 'test shortdate',
-			tests: [ 
-				{ 'a': 1 },
-				{ 'a': 3 }, 
-				{ 'a': 5 },
-				{ 'a': 10 }
-			],
-			solution_f: '=1',
-			client_f_format: 'shortdate',
-			correct_required: false,
-			code: 'tutorial'
-		},
-
-		{	type: 'IfPageFormulaSchema',
-			description: 'test',
-			instruction: 'test 0',
-			tests: [ 
-				{ 'a': 1 },
-				{ 'a': 3 }, 
-				{ 'a': 5 },
-				{ 'a': 10 }
-			],
-			solution_f: '=1',
-			client_f_format: '0',
-			correct_required: false,
-			code: 'tutorial'
-		},
-
-		{	type: 'IfPageFormulaSchema',
-			description: 'test',
-			instruction: 'test ,',
-			tests: [ 
-				{ 'a': 1 },
-				{ 'a': 3 }, 
-				{ 'a': 5 },
-				{ 'a': 10 }
-			],
-			solution_f: '=1',
-			client_f_format: ',',
-			correct_required: false,
-			code: 'tutorial'
-		},
-
-		{	type: 'IfPageFormulaSchema',
-			description: 'test',
-			instruction: 'test $',
-			tests: [ 
-				{ 'a': 1 },
-				{ 'a': 3 }, 
-				{ 'a': 5 },
-				{ 'a': 10 }
-			],
-			solution_f: '=1',
-			client_f_format: '$',
-			correct_required: false,
-			code: 'tutorial'
-		},
-		{	type: 'IfPageFormulaSchema',
-			description: 'test',
-			instruction: 'test $.',
-			tests: [ 
-				{ 'a': 1 },
-				{ 'a': 3 }, 
-				{ 'a': 5 },
-				{ 'a': 10 }
-			],
-			solution_f: '=1',
-			client_f_format: '$.',
-			correct_required: false,
-			code: 'tutorial'
-		},
-		{	type: 'IfPageFormulaSchema',
-			description: 'test',
-			instruction: 'test %',
-			tests: [ 
-				{ 'a': 1 },
-				{ 'a': 3 }, 
-				{ 'a': 5 },
-				{ 'a': 10 }
-			],
-			solution_f: '=1',
-			client_f_format: '%',
-			correct_required: false,
-			code: 'tutorial'
-		},
-
-		{	type: 'IfPageFormulaSchema',
-			description: 'test',
-			instruction: 'test boolean',
-			tests: [ 
-				{ 'a': 1 },
-				{ 'a': 3 }, 
-				{ 'a': 5 },
-				{ 'a': 10 }
-			],
-			solution_f: '=1',
-			client_f_format: 'boolean',
-			correct_required: false,
-			code: 'tutorial'
-		},		
-	]
-};
-*/
-
-
 const gen_opening: GenType = {
 	gen_type: 'LinearGen',
 	pages: [
@@ -165,36 +38,6 @@ const gen_opening: GenType = {
 	]
 };
 
-
-
-
-const gen_on_hint: GenType = {
-	gen_type: 'LinearGen',
-	pages: [
-		{	type: 'IfPageFormulaSchema',
-			code: 'tutorial',
-			template_id: 'tutorial_hint',
-			description: `This tutorial system will help you with the yellow "Get a hint" button.
-				It will look
-				at your current formula, and tell you about missed references or functions.
-				<br/><br/>
-				After 3 minutes, the system will tell you the correct answer for any tutorial (not quiz) question.
-				`,
-			instruction: 'Use the hint button to figure out what number to <i>multiply</i> by A1',
-			column_titles: ['Sales', 'Profit', 'Revenue'],
-			tests: [{ 'a': 23, 'b': 55, 'c': 43 }],
-			solution_f: '=A1*{x}',
-			template_values: {
-				'x': '[2-9]'
-			},
-			feedback: [
-				{ 'has': 'symbols', args: ['*'] },
-				{ 'has': 'references', args: ['A1'] },
-				{ 'has': 'values', args: ['{x}'] }
-			],
-		}
-	]
-};
 
 const gen_on_references: GenType = {
 	gen_type: 'LinearGen',
@@ -350,10 +193,6 @@ const gen_on_interface: GenType = {
 	]
 };
 
-//				<br/><br/>
-//				On the bottom of the screen, you can also hover your cursor over the "Progress" 
-//				checkboxes to review the instructions on each page.
-
 
 const gen_on_predict: GenType = {
 	gen_type: 'LinearGen',
@@ -414,8 +253,6 @@ const tutorial: LevelSchemaFactoryType = {
 		gen_type: 'LinearGen',
 		pages: [
 			gen_opening,
-
-			gen_on_hint,
 			//gen_on_harsons,
 			gen_on_references,
 			gen_on_predict,

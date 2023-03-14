@@ -321,10 +321,6 @@ export default class MyProgress extends React.Component<PropsType, StateType> {
 				review_incompleted_levels:  new Array<IfLevelSchema>(),
 			};
 
-			// Build out information on the level.
-			//console.log( l);
-			//console.log( IfLevels );
-
 			l.title = IfLevels.filter( l => l.code === code)[0].title;
 			l.description = IfLevels.filter( l => l.code === code)[0].description;
 

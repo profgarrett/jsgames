@@ -21,6 +21,18 @@ The Woodbury Institutional Review Board has approved this project (irb@woodbury.
 
 
 
+const wvu_consent = {	
+		..._base,
+		template_id: 'consent_wvu_use',
+		description: `
+		This website helps people improve their Excel formula skills.
+		<br/><br/>
+		Students using this site as part of a class assignment receive the same data protections at other work submitted at WVU in eCampus.
+		<br/><br/>
+		If you have any questions, please contact me at Nathan.Garrett@wvu.edu.
+		`};
+
+
 const wu_consent = {	
 	..._base,
 	template_id: 'consent_wu_use',
@@ -77,4 +89,4 @@ Continuing onto the next section signifies that you have been informed about thi
 `
 };
 
-export { use_consent, wu_consent, amt_consent };
+export { use_consent, wu_consent, amt_consent, wvu_consent };

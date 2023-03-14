@@ -55,9 +55,9 @@ const if7 = ({
 	title: 'IF7: OR Booleans',
 	description: 'Use booleans inside of OR',
 	harsons_randomly_on_username: false,
-	predict_randomly_on_username: true,
+	predict_randomly_on_username: false,
 	
-	version: 2.0,
+	version: 2.1,
 
 	
 	gen: ({

@@ -56,8 +56,8 @@ const if2 = ({
 	title: 'IF2: Returns',
 	description: 'Returning numbers and text',
 	harsons_randomly_on_username: false,
-	predict_randomly_on_username: true,
-	version: 2,
+	predict_randomly_on_username: false,
+	version: 2.1,
 
 	gen: ({
 		gen_type: 'LinearGen',

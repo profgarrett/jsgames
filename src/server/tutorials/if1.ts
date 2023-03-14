@@ -84,8 +84,8 @@ const if1 = ({
 	title: 'IF1: Logical comparisons',
 	description: 'Compare numbers, text, and boolean values',
 	harsons_randomly_on_username: false,
-	predict_randomly_on_username: true,
-	version: 2,
+	predict_randomly_on_username: false,
+	version: 2.1,
 
 	gen: ({
 		gen_type: 'LinearGen',

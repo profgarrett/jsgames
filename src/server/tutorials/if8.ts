@@ -234,9 +234,9 @@ const if8 = ({
 	description: 'Use booleans with the AND & OR functions',
 
 	harsons_randomly_on_username: false,
-	predict_randomly_on_username: true,
+	predict_randomly_on_username: false,
 	
-	version: 1,
+	version: 1.1,
 
 	gen: ({
 		gen_type: 'LinearGen',

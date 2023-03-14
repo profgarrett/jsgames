@@ -56,7 +56,8 @@ const IfLevels = [
 	{ code: 'surveywaiver_non_woodbury_student', title: 'Student Account Setup', description: 'Learn about this website and answer several questions' },
 	{ code: 'surveywaiver_non_woodbury_user', title: 'Anonymous User Account Setup', description: 'Learn about this website and answer several questions' },
 	{ code: 'surveywaiver_woodbury_student', title: 'Woodbury Student Account Setup', description: 'Learn about this website and answer several questions' },
-	
+	{ code: 'surveywaiver_wvu_user', title: 'WVU Account Setup', description: 'Learn about this website' },
+		
 	{ code: 'surveycharts_amt', title: 'Chart Survey (AMT)', description: 'Test your ability to interpret common charts' },
 	{ code: 'surveycharts_wu', title: 'Chart Survey', description: 'Assess your ability to interpret common charts' },
 
@@ -464,7 +465,7 @@ const DEFAULT_TUTORIAL_LEVEL_LIST = [
 
 // Common setting to establish passing grades.
 const GREEN_GRADE = 85;
-const PASSING_GRADE = 74;
+const PASSING_GRADE = 75;
 
 
 

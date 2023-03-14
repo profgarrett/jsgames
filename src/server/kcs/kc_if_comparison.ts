@@ -51,7 +51,7 @@ const pig_test = {
 
 const kc_if_comparison_number = ({
 	kc: KC_NAMES.KC_IF_COMPARISON_NUMBER,
-	until_correct: 8,
+	until_correct: 6,
 	until_total: 15,
 	tutorial_pages: [
         {	...tutorial,
@@ -296,8 +296,8 @@ const duck_test = {
 
 const kc_if_comparison_text = ({
 	kc: KC_NAMES.KC_IF_COMPARISON_TEXT,
-	until_correct: 8,
-	until_total: 15,
+	until_correct: 6,
+	until_total: 12,
 	tutorial_pages: [
 
 		{	...tutorial,

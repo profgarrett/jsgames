@@ -720,7 +720,7 @@ const kc_if_and = ({
                 <br/><br/>
                 Return <code>{iftrue}</code> if this is correct, or <code>{iffalse}</code> if not.`,
 
-			solution_f: '=IF(AND({cell1_ref}>={n}, {cell2_ref}>={n}), "{iftrue}", "{iffalse}")', 
+			solution_f: '=IF(AND({cell1_ref}>{n}, {cell2_ref}>{n}), "{iftrue}", "{iffalse}")', 
             template_values: {
                 'cell1': 'popCell(a1,b1,c1,d1)',
                 'cell2': 'popCell(a1,b1,c1,d1)',
@@ -796,7 +796,7 @@ const kc_if_and = ({
         },{ ...test,
             ...animals2_data,
             
-			description: `Are {cell1_title} over {n1} and {cell2_title} under {n2}?
+			description: `Are {cell1_title} over {n1} and {cell2_title} under or equal to {n2}?
                 <br/><br/>
                 Return <code>{iftrue}</code> if this is correct, or <code>{iffalse}</code> if not.`,
 
@@ -813,7 +813,7 @@ const kc_if_and = ({
         },{ ...test,
             ...animals2_data,
             
-			description: `Are {cell1_title} under or less than {n1} and {cell2_title} over or greater than {n2}?
+			description: `Are {cell1_title} equal to or less than {n1} and {cell2_title} over or greater than {n2}?
                 <br/><br/>
                 Return <code>{iftrue}</code> if this is correct, or <code>{iffalse}</code> if not.`,
 

@@ -1,6 +1,6 @@
 //import { LinearGen, ShuffleGen } from './../Gens';
 import { sns } from './../pages/sns';
-import { wu_consent, use_consent } from './../pages/consent';
+import { wu_consent, use_consent, wvu_consent } from './../pages/consent';
 import { numeracy_pretest, numeracy_posttest } from './../pages/numeracy';
 import { tutorial } from './tutorial';
 
@@ -96,5 +96,24 @@ const surveywaiver_woodbury_student: LevelSchemaFactoryType = {
 };
 
 
+const surveywaiver_wvu_user: LevelSchemaFactoryType = {
+	code: 'surveywaiver_wvu_user', 
+	title: 'WVU User Account Setup ', 
+	description: 'Learn about this website',
+	show_score_after_completing: false,
+	show_progress: false,
+	version: 1.0,
 
-export { surveywaiver_non_woodbury_student, surveywaiver_non_woodbury_user, surveywaiver_woodbury_student };
+	gen: ({
+		gen_type: 'LinearGen',
+		pages: [
+			wvu_consent,
+			tutorial.gen,
+
+		]
+	})
+};
+
+
+
+export { surveywaiver_non_woodbury_student, surveywaiver_non_woodbury_user, surveywaiver_woodbury_student, surveywaiver_wvu_user };

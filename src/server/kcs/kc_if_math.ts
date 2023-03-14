@@ -210,7 +210,7 @@ const kc_if_math_return = ({
 			description: `We can also do calculations in the return values.
 					<br/><br/>
 					For example, let's say we were trying to calculate the commission for a number of sales.
-                    Normaly we would pay $10 for a sale, but if the total revenue is over \${rev},
+                    Normally we would pay $10 for a sale, but if the total revenue is over \${rev},
                     we will pay {extra}0% of the revenue instead.
                     <br/>
 					You would write <code>=IF(C1>{rev}, c1*0.{extra}, 10)</code>.`,
@@ -341,7 +341,7 @@ const kc_if_math_return = ({
         },{ ...test,
             ...sales_data,
 
-            description: `The TX expenses numbers were entered incorrectly. Create an IF that 
+            description: `The TX expenses were entered incorrectly. Create an IF that 
                 decreases TX expenses by {decrease}0%, but returns CA unchanged.`,
 
 			solution_f: '=IF(B1="TX", d1*(1-0.{decrease}), d1)', 

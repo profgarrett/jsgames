@@ -24,7 +24,7 @@ import { financial1, financial2 } from './tutorials/financial';
 
 
 import { surveymath1, surveymath2 } from './tutorials/surveymath';
-import { surveywaiver_non_woodbury_student, surveywaiver_non_woodbury_user, surveywaiver_woodbury_student } from './tutorials/surveywaivers';
+import { surveywaiver_non_woodbury_student, surveywaiver_non_woodbury_user, surveywaiver_woodbury_student, surveywaiver_wvu_user } from './tutorials/surveywaivers';
 import { surveycharts_amt, surveycharts_wu } from './tutorials/surveycharts';
 
 import { parseFeedback } from './parseFeedback';
@@ -61,7 +61,7 @@ const LEVEL_GENS: IStringIndexJsonObject = {
 	if1, if2, if3, if4, if5, if6, if7, if8, 
 	financial1, financial2,
 	surveymath1, surveymath2,
-	surveywaiver_non_woodbury_student, surveywaiver_non_woodbury_user, surveywaiver_woodbury_student,
+	surveywaiver_non_woodbury_student, surveywaiver_non_woodbury_user, surveywaiver_woodbury_student, surveywaiver_wvu_user,
 	surveycharts_amt, surveycharts_wu
 };
 

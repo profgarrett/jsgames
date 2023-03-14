@@ -5,7 +5,7 @@ import { DataFactory } from './../DataFactory';
 
 
 const tutorial = {
-	type: 'IfPagePredictFormulaSchema', //'IfPageFormulaSchema',
+	type: 'IfPageFormulaSchema', 
 	code: 'tutorial',
 };
 const test = {
