@@ -343,7 +343,7 @@ const kc_if_or_logic = ({
             
 			description: `Are {cell1_title} over {n1} or {cell2_title} under {n2}?`,
 
-			solution_f: '=OR({cell1_ref}>{n1}, {cell2_ref}<={n2})',
+			solution_f: '=OR({cell1_ref}>{n1}, {cell2_ref}<{n2})',
             template_values: {
                 'cell1': 'popCell(b1,c1,d1)',
                 'cell2': 'popCell(b1,c1,d1)',

@@ -374,8 +374,8 @@ export default class MyProgress extends React.Component<PropsType, StateType> {
 
 		// If the user hasn't done anything, then have a friendlier title.
 		const title = typeof grades.tutorial === 'undefined' 
-				? 'Welcome to the Formula Trainer website!' 
-				: 'Formula Trainer';
+				? 'Welcome to the Excel.fun website!' 
+				: 'Excel.fun';
 
 		const section = this.props.sections.length == 0 
 				? null 
