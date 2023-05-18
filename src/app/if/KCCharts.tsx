@@ -1,9 +1,7 @@
-// @ts-ignore
-import React, { useState } from 'react';
+import React, { ReactElement, useState } from 'react';
 import { Collapse, Accordion, Card, Popover, Table, Modal, Button } from 'react-bootstrap';
 import { turn_array_into_map, turn_object_keys_into_array, turn_object_values_into_array } from '../../shared/misc';
 import { HtmlDiv } from '../components/Misc';
-import { ResponsiveBar, Bar } from '@nivo/bar'
 import { Pie } from '@nivo/pie'
 import { Line } from '@nivo/line'
 import { prettyDateAsString } from '../components/Misc';
@@ -11,28 +9,29 @@ import { IfLevelSchema, GREEN_GRADE, PASSING_GRADE, DEFAULT_TUTORIAL_LEVEL_LIST 
 import { IfPageAnswer, IfPageBaseSchema, IfPageFormulaSchema } from '../../shared/IfPageSchemas';
 import { fill_template } from '../../shared/template';
 import { LevelModal } from './LevelModal';
-import type ReactElement from 'react';
 
 //import 'react-table/react-table.css';
 
 import { IfLevels } from '../../shared/IfLevelSchema';
 import { DEMO_MODE } from '../../server/secret';
 
+// Hide user name
+const DEBUG = true;
 
 type PropsType = {
 	answers: Array<IfPageAnswer>,
 };
 
 type StateType = {
-    level_id: ?string,
-    sequence_in_level: ?number,
+    level_id: string|null,
+    sequence_in_level: number|null,
 };
 
 
-const colors = {
-    'Correct': 'rgb(102, 166, 30)',
-    'Correct, but slow': 'rgb(230, 171, 2)',
-    'Incorrect': 'rgb(231, 41, 138)',
+const colors = { 
+		'Correct': 'rgb(102, 166, 30)',
+		'Correct, but slow': 'rgb(230, 171, 2)',
+		'Incorrect': 'rgb(231, 41, 138)',
 }
 
 
@@ -43,34 +42,33 @@ export class KCCharts extends React.Component<PropsType, StateType> {
             level_id: null,
             sequence_in_level: null,
         };
-        (this: any).show_modal = this.show_modal.bind(this);
-        (this: any).hide_modal = this.hide_modal.bind(this);
 	}
 
     // Show a specific level and sequence.
-    show_modal( level_id: string, sequence_in_level: number ) {
+    show_modal = ( level_id: string, sequence_in_level: number ) => {
         this.setState({ level_id, sequence_in_level });
     }
 
     // Show a specific level and sequence.
-    hide_modal( ) {
+    hide_modal = ( ) => {
         this.setState({ level_id: null, sequence_in_level: null });
     }
 
 
     // Bring back the charts for each KC component, split by level.code.
-    _render_kcs(answers: Array<IfPageAnswer>): ReactElement {
+    _render_kcs = (answers: Array<IfPageAnswer>): any => {
         if(answers.length === 0) return null;
 
         const answer_map = turn_array_into_map( answers, a => a.level_code );
-        const html = [];
+        const html: any[] = [];
 
         IfLevels.forEach( level => {
             // See if we have matching answers for this particular level. If not, return null.
             if(!answer_map.has(level.code) ) return;
 
             // Add title for level.
-            html.push(<h3 key={'renderkcslevel'+level.code} style={{ clear: 'both' }}>{ level.title }</h3>);
+            html.push(<h3 	key={'renderkcslevel'+level.code} 
+							style={{ clear: 'both' }}>{ level.title }</h3>);
 
             // Add each KC as a separate chart.
             let answers = answer_map.get(level.code)
@@ -117,12 +115,14 @@ export class KCCharts extends React.Component<PropsType, StateType> {
                 margin={{ top: 0, right: 5, left: 5, bottom: 0 }}
                 innerRadius={ 0 }
                 padAngle={ 0 }
-                tooltip={ o => o.id + ' ' + o.value + '%' }
-                colors={ c => c.color }
-                enableSlicesLabels={ false }
-                enableRadialLabels={ false }
-                sliceLabel={function(e){return ''; /*e.id+", "+e.value+"%" */}}
-                animate={false}
+//                tooltip={ o => <span>{ o.id + ' ' + o.value + '%' }</span>}
+                colors={ o => o.data.color }
+//				colors={colors}
+ //               enableSlicesLabels={ false }
+ //               enableRadialLabels={ false }
+  //              sliceLabel={function(e){return ''; /*e.id+", "+e.value+"%" */}}
+  
+  animate={false}
             />;
         
         return pie;
@@ -132,7 +132,7 @@ export class KCCharts extends React.Component<PropsType, StateType> {
 
     // Build a timeline chart for a single set of answers.
     _render_kc_charts_timeline( answers: Array<IfPageAnswer> ): ReactElement {
-        const chart_data = [];
+        const chart_data: any[] = [];
         const INTERVAL = 10;
         const MAX = 120;
 
@@ -154,8 +154,8 @@ export class KCCharts extends React.Component<PropsType, StateType> {
         // Build chart
         const chart_el = <Line
                 data={ [ { id: 'Completion', color: 'black', data: chart_data }] }
-                groups={[ 'Correct', 'Incorrect']}
-                values='seconds'
+   //             groups={[ 'Correct', 'Incorrect']}
+   //             values='seconds'
                 width={ 100 }
                 height={ 30 }
                 curve='cardinal'
@@ -200,7 +200,7 @@ export class KCCharts extends React.Component<PropsType, StateType> {
                 <tbody>
                 {
                 sorted_answers.map( a => <tr>
-                        <td>{a.username}</td>
+                        <td>{ DEBUG ? '*****' : a.username}</td>
                         <td>{a.seconds}</td>
                         <td>{ a.solution_pretty }</td>
                         <td>{ a.answers.map( a => <p>{ a }</p> ) }</td>
@@ -218,7 +218,7 @@ export class KCCharts extends React.Component<PropsType, StateType> {
     // Return an array of charts, one per KC in the passed levels array.
     // Note, only a single .code value should be present.
     _render_kc_charts( answers: Array<IfPageAnswer> ): Array<Node> {
-        const els = [];
+        const els: any[] = [];
 
         const kc_summaries = get_classification_by_kcs( answers );
         const sorted_kc_summaries = [...kc_summaries].sort( 
@@ -239,20 +239,20 @@ export class KCCharts extends React.Component<PropsType, StateType> {
             const correct = typeof(data['Correct']) === 'undefined' ? 0 : data['Correct'];
             const slow = typeof(data['Correct, but slow']) === 'undefined' ? 0 : data['Correct, but slow'];
             const max = (incorrect + correct + slow) / 100;
-
+	
             let chart_data = [   
                 {
                     id: 'Wrong',
                     value: Math.round(incorrect / max) ,
-                    color: colors['Incorrect'],
+					color: colors['Incorrect'],
                 },{
                     id: 'Ok',
                     value: Math.round(correct / max) ,
-                    color: colors['Correct'],
+					color: colors['Correct'],
                 },{
                     id: 'Slow',
                     value: Math.round(slow / max),
-                    color: colors['Correct, but slow'],
+					color: colors['Correct, but slow'],
                 }
             ];
 
@@ -264,12 +264,12 @@ export class KCCharts extends React.Component<PropsType, StateType> {
                     margin={{ top: 5, right: 5, left: 5, bottom: 5 }}
                     innerRadius={ 0 }
                     padAngle={ 0 }
-                    tooltip={ o => o.id + ' ' + o.value + '%' }
-                    colors={ c => c.color }
-                    enableSlicesLabel={ false }
-                    enableRadialLabels={false}
-                    sliceLabel={function(e){return e.id+", "+e.value+"%"}}
-                    slicesLabelsSkipAngle={20}
+      //              tooltip={ o => o.id + ' ' + o.value + '%' }
+                    colors = { (o: any) => o.data.color }
+        //            enableSlicesLabel={ false }
+        //            enableRadialLabels={false}
+          //          sliceLabel={function(e){return e.id+", "+e.value+"%"}}
+          //          slicesLabelsSkipAngle={20}
                     animate={false}
                 />;
 
@@ -282,7 +282,7 @@ export class KCCharts extends React.Component<PropsType, StateType> {
             const sorted_map = new Map([...answer_map].sort( 
                     (a,b) => a[0]  > b[0] ? -1 : 1));
             
-            const answer_els = [];
+            const answer_els: any[] = [];
 
             sorted_map.forEach( (answers,i) => {
                 
@@ -328,7 +328,7 @@ export class KCCharts extends React.Component<PropsType, StateType> {
         return els;
     }
 
-    render(): ReactElement {
+    render(): ReactElement|null {
         if(this.props.answers.length === 0) return null;
 
         const answers = this.props.answers.filter( 

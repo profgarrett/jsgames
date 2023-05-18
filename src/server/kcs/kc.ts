@@ -1,6 +1,5 @@
 //const { LinearGen, AdaptiveGen, UntilGen, ShuffleGenUntilLimit } = require('./../Gens');
 import type { AdaptiveGenType, GenType } from '../Gens';
-import type { LevelSchemaFactoryType } from '../IfLevelSchemaFactory';
 
 export type AdaptiveKC = {
 	kc: string,
@@ -110,6 +109,9 @@ const KC_NAMES = {
 	KC_FV_ADJUST: 'kc_fv_adjust',
 	KC_FV_ANNUITY: 'kc_fv',
 	KC_FV_ANNUITY_ADJUST: 'kc_fv_adjust',
+
+	// SQL
+	KC_SQL_SELECTFROM: 'kc_sql_selectfrom',
 };
 
 

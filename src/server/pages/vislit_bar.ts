@@ -1,9 +1,6 @@
 /**
 	Visual Literacy Test
 **/
-//const { LinearGen, ShuffleGen } = require('./../Gens');
-//import type { GenType } from './../Gens';
-//import type { LevelSchemaFactoryType } from './../IfLevelSchemaFactory';
 const { VISLIT_MIN_TIME_PER_SLIDE, VISLIT_TIME_PER_SLIDE, DISTORTION_MEDIUM, DISTORTION_SMALL } = require('./../secret');
 
 const _text_base = {

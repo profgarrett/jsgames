@@ -10,6 +10,8 @@ import Harsons from './IfPlayComponents/Harsons';
 import NumberAnswer from './IfPlayComponents/NumberAnswer';
 import Slider from './IfPlayComponents/Slider';
 import ShortTextAnswer from './IfPlayComponents/ShortTextAnswer';
+import SqlQuery from './IfPlayComponents/SqlQuery';
+
 
 import { IfLevelSchema } from '../../shared/IfLevelSchema';
 import { IfPageBaseSchema, IfPageFormulaSchema, IfPageHarsonsSchema, IfPageChoiceSchema } from '../../shared/IfPageSchemas';
@@ -118,6 +120,8 @@ class LevelDebugPage extends React.Component<ScorePropsType> {
 		} else if(page.type === 'IfPageNumberAnswerSchema') {
 			problem = (<div><ShortTextAnswer page={page.toIfPageNumberAnswerSchema()} readonly={true} editable={false} handleChange={()=> {}} handleSubmit={()=> {} }/></div>);
 
+		} else if(page.type === 'IfPageSqlSchema') {
+			problem = (<div><SqlQuery page={page.toIfPageSqlSchema()} readonly={false} editable={true} handleChange={()=> {}} handleSubmit={()=> {} }/></div>);
 
 		} else if(page.type === 'IfPageChoiceSchema') {
 			// Show range of choice only if the user was wrong.  If no right answer,

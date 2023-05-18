@@ -4,15 +4,6 @@
 import express from 'express';
 const router = express.Router();
 
-/*
-const { ADMIN_USERNAME } = require('./secret'); 
-const { IfLevels, IfLevelSchema } = require('./../shared/IfLevelSchema');
-const { IfPageAnswer, build_answers_from_level } = require('./../shared/IfPageSchemas');
-const { IfLevelSchemaFactory } = require('./IfLevelSchemaFactory');
-
-const { turn_array_into_map } = require('./../shared/misc');
-const { return_tagged_level } = require('./tag');
-*/
 
 import { run_mysql_query } from './mysql';
 import { user_require_logged_in, nocache, log_error, user_get_username_or_emptystring } from './network';

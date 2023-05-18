@@ -4,13 +4,7 @@ const { finish_questions } = require('./../pages/finish_questions');
 
 const { kc_if_and_boolean, kc_if_and_boolean_logic } = require('./../kcs/kc_if_boolean');
 
-const { IfPageFormulaSchema } = require( './../../shared/IfPageSchemas');
-
 const { makeInertiaGenFromKC } = require('./../kcs/kc');
-
-import type { GenType } from '../Gens';
-import type { LevelSchemaFactoryType } from '../IfLevelSchemaFactory';
-
 
 
 const introduction_gen = ({

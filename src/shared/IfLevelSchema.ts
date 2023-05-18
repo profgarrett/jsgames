@@ -61,6 +61,9 @@ const IfLevels = [
 	{ code: 'surveycharts_amt', title: 'Chart Survey (AMT)', description: 'Test your ability to interpret common charts' },
 	{ code: 'surveycharts_wu', title: 'Chart Survey', description: 'Assess your ability to interpret common charts' },
 
+	{ code: 'sql_selectfrom', title: 'SQL - Select and From', description: 'Introduction to SQL and getting data from a table' },
+
+
 ];
 
 
@@ -459,7 +462,7 @@ const DEFAULT_TUTORIAL_LEVEL_LIST = [
 	'math1', 'math2', 'math3','math4',
 	'functions1', 'functionsdates','functionstext1', 'functionstext2',
 	'if1', 'if2', 'if3', 'if4', 'if5', 'if6', 'if7',
-	'financial1', 'financial2',
+	'financial1', 'financial2', 'sql_selectfrom',
 	];
 
 

@@ -3,7 +3,6 @@ const { sns } = require('./../pages/sns');
 const { numeracy_pretest, numeracy_posttest } = require('./../pages/numeracy');
 
 import type { GenType } from '../Gens';
-//import type { LevelSchemaFactoryType } from '../IfLevelSchemaFactory';
 
 
 /*

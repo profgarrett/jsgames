@@ -1,7 +1,7 @@
-// @ts-ignore
-import React from 'react';
-import Container from 'react-bootstrap/Container';
-import { Row, Col, Breadcrumb  } from 'react-bootstrap';
+import React, { ReactElement, useEffect, useState } from 'react';
+
+import { Container, Breadcrumb, Row, Col, Button } from 'react-bootstrap';
+import { useParams, useNavigate } from 'react-router-dom';
 
 import { IfPageAnswer } from '../../shared/IfPageSchemas';
 import { ClassProgressChart } from './ClassProgressChart';
@@ -14,51 +14,34 @@ import { DEMO_MODE } from '../../server/secret';
 import ForceLogin from '../components/ForceLogin';
 import { IfLevelSchema } from '../../shared/IfLevelSchema';
 
-import type ReactElement from 'react';
+export default function KCContainer() {
+	const [message, setMessage] = useState('Loading data from server')
+	const [messageStyle, setMessageStyle] = useState('');
+	const [isLoading, setIsLoading] = useState(true);
+	const [answers, setAnswers] = useState<IfPageAnswer[]|null>(null);
 
+	const [modalLevel, setModalLevel] = useState<IfLevelSchema|null>(null);
+	const [isModalLoading, setIsModalLoading] = useState(false);
 
-type ProgressPropsType = {};
+	const params = useParams();
+	const navigate = useNavigate();
+	const _id = params._id ? params._id : null;
+	
 
-type ProgressContainerStateType = {
-	message: string,
-	messageStyle: string,
-	data_loading: boolean,
-	answers: Array<any>,
-	modal_level: ?IfLevelSchema,
-	modal_level_loading: boolean,
-};
+	const onReady = (filter: any) => {
+		setIsLoading(false);
+		setMessage('');
+		onRefreshData(filter);
+	};
 
-export class KCContainer extends React.Component<ProgressPropsType, ProgressContainerStateType> {
-	constructor(props: any) {
-		super(props);
-		this.state = { 
-			message: 'Loading data from server',
-			messageStyle: '',
-
-			answers: [],
-			data_loading: true,
-
-			modal_level: null,
-			modal_level_loading: false,
-		};
-		(this: any).onRefreshData = this.onRefreshData.bind(this);
-		(this: any).onReady = this.onReady.bind(this);
-		(this: any).hide_modal = this.hide_modal.bind(this);
-		(this: any).show_modal = this.show_modal.bind(this);
-	}
-
-	onReady(filter: any) {
-		this.setState({ data_loading: false, message: ''});
-		this.onRefreshData(filter);
-	}
-
-	onRefreshData(filter: any, ) {
-		const args = [];
+	const onRefreshData = (filter: any) => {
+		const args: string[] = [];
 
 		if(filter.sections !== '') args.push('idsection='+filter.sections);
         if(filter.levels !== '') args.push('code='+filter.levels);
 
-		this.setState({ data_loading: true, message: 'Loading progress data'});
+		setIsLoading(true);
+		setMessage('Loading progress data');
 		
 		fetch('/api/reports/answers?'+args.join('&'), {
 				method: 'get',
@@ -71,20 +54,17 @@ export class KCContainer extends React.Component<ProgressPropsType, ProgressCont
 			.then( response => response.json() )
 			.then( json => {
                 const answers = json.map( j => new IfPageAnswer(j) )
-				this.setState({
-					answers: answers,
-					messageStyle: '',
-					message: '',
-					data_loading: false
-				});
+				setAnswers(answers);
+				setMessage('');
+				setMessageStyle('');
+				setIsLoading(false);
+
 			})
 			.catch( error => {
-				this.setState({ 
-					answers: [],
-					message: 'Error: ' + error,
-					messageStyle: 'Error',
-					data_loading: false
-				});
+				setAnswers(null);
+				setMessage('Error: ' + error.message);
+				setIsLoading(false);
+				setMessageStyle('Error');
 			});
 	}
 
@@ -92,8 +72,8 @@ export class KCContainer extends React.Component<ProgressPropsType, ProgressCont
 	/*
 		Load a level to view as a modal box.
 	*/
-	show_modal(level_id: number) {
-		this.setState({ modal_level_loading: true });
+	const show_modal = (level_id: number) => {
+		setIsModalLoading(true);
 
 		fetch('/api/reports/level/'+level_id , {
 				credentials: 'include'
@@ -101,75 +81,73 @@ export class KCContainer extends React.Component<ProgressPropsType, ProgressCont
 			.then( response => response.json() )
 			.then( json => new IfLevelSchema(json) )
 			.then( ifLevel => {
-				this.setState({
-					modal_level: ifLevel,
-					modal_level_loading: false,
-				});
+				setModalLevel(ifLevel);
+				setIsModalLoading(false);
 			})
 			.catch( error => {
-				this.setState({ 
-					modal_level: null,
-					message: 'Error: ' + error.message,
-					modal_level_loading: false
-				});
+				setModalLevel(null);
+				setIsModalLoading(false);
+				setMessage('Error: ' + error.message);
 			});
 	}
 
-	hide_modal() {
-		this.setState({ modal_level: null });
+	const hide_modal = () => {
+		setModalLevel(null);
 	}
 
-	render(): ReactElement {
-
-		const crumbs = (
+	// Render
+	const crumbs = (
 			<Breadcrumb>
 				<Breadcrumb.Item title='home' href='/ifgame/'>If Games</Breadcrumb.Item>
 				<Breadcrumb.Item title='KC Analysis' active>KC Analysis</Breadcrumb.Item>
 			</Breadcrumb>
 			);
-        
-        const default_level = 'math1';
+	
+	const default_level = 'math1';
 
-		const search = new URLSearchParams(window.location.search);
-		const filter_defaults = search.has('idsection') 
-			? { levels: default_level, sections: search.get('idsection') }
-			: { levels: default_level };
-		
-		const filter = <Filter 
-				onChange={this.onRefreshData} 
-				onReady={this.onReady} 
-				disabled={this.state.data_loading} 
-				defaults={filter_defaults}
-				filters={{
-                    levels: [],
-                    sections: []
-                }}
-			/>;
+	const search = new URLSearchParams(window.location.search);
+	const filter_defaults = search.has('idsection') 
+		? { levels: default_level, sections: search.get('idsection') }
+		: { levels: default_level };
+	
+	const filter = <Filter 
+			onChange={onRefreshData} 
+			onReady={onReady} 
+			disabled={isLoading} 
+			defaults={filter_defaults}
+			filters={{
+				levels: [],
+				sections: []
+			}}
+		/>;
 
-		const empty = this.state.answers.length === 0 && this.state.data_loading === false
-				? <p>No students in this section have yet started completing lessons. Once they get started, you'll see a chart here with their progress</p>
-				: null;
-		const modal = this.state.modal_level === null || typeof this.state.modal_level === 'undefined'
-				? null
-				: <LevelModal level={this.state.modal_level} level_id={null} hide={ () => this.setState({ modal_level: null }) }/>;
+	const empty = !isLoading && answers !== null && answers.length == 0
+			? <p>No students in this section have yet started completing lessons. Once they get started, you'll see a chart here with their progress</p>
+			: null;
+	const modal = modalLevel == null 
+			? null
+			: <LevelModal level={modalLevel} hide={ () => hide_modal() }/>;
 
-		return (
-			<Container fluid>
-			<Row>
-				<Col>
-					<ForceLogin/>
-					{ crumbs }
-					<h3>Student Learning</h3>
-					<Message message={this.state.message} style={this.state.messageStyle} />
-					<Loading loading={ this.state.data_loading || this.state.modal_level_loading } />
-					{ modal }
-					{ filter }
-					{ empty }
-					<KCCharts answers={this.state.answers} />
+	const dom_answers = answers !== null && answers.length > 0 
+			? <KCCharts answers={answers} />
+			: null
 
-				</Col>
-			</Row>
-			</Container>
-		);
-	}
+	return (
+		<Container fluid>
+		<Row>
+			<Col>
+				<ForceLogin/>
+				{ crumbs }
+				<h3>Student Learning</h3>
+				<Message message={message} style={messageStyle} />
+				<Loading loading={ isLoading || isModalLoading } />
+				{ modal }
+				{ filter }
+				{ empty }
+				{ dom_answers }				
+			</Col>
+		</Row>
+		</Container>
+	);
+
 }

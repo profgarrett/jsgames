@@ -157,7 +157,6 @@ import ClassProgressContainer from './ClassProgressContainer';
 import {KCContainer} from './KCContainer';
 				<Route exact path='/ifgame/' component={MyProgressContainer} />
 				<Route exact path='/ifgame/progress' component={ClassProgressContainer} />
-				<Route exact path='/ifgame/kcs' component={KCContainer} />
 				<Route exact path='/ifgame/grades' component={GradesContainer} />
 				<Route exact path='/ifgame/questions' component={QuestionsContainer} />
 				<Route exact path='/ifgame/recent' component={RecentContainer} />
@@ -176,6 +175,7 @@ import ClassProgressContainer from './if/ClassProgressContainer';
 import RecentContainer from './if/RecentContainer';
 import GradesContainer from './if/GradesContainer';
 import QuestionsContainer from './if/QuestionsContainer';
+import KCContainer from './if/KCContainer';
 
 
 const Error = () => <div><h1>Error</h1><p>Sorry, but an error occurred. Pleaser try closing your browser, refreshing, and trying again.</p></div>
@@ -193,6 +193,8 @@ const router = createBrowserRouter([
 	{ path: '/ifgame/recent/:_idsection', element: <RecentContainer /> },
 	{ path: '/ifgame/grades/:_idsection', element: <GradesContainer /> },
 	{ path: '/ifgame/questions/:_idsection', element: <QuestionsContainer /> },
+
+	{ path: '/ifgame/kcs/:_idsection', element: <KCContainer /> },
 
 	{ path: '/login', element: <LoginContainer /> },
 	{ path: '/logout', element: <Logout /> },

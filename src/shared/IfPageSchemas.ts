@@ -6,6 +6,7 @@ const FormulaParser = require('hot-formula-parser').Parser;
 import type { ChartDef } from './ChartDef';
 import type { IfLevelSchema } from './IfLevelSchema';
 
+
 // Are we on the server or on the client?
 function is_server(): boolean {
 	return ! (typeof window !== 'undefined' && window.document );
@@ -188,7 +189,7 @@ class IfPageBaseSchema extends Schema {
 	hints_parsed!: number;
 	hints_viewsolution!: number;
 
-	// Apply json to this obj, signally no parent classes to do the setting for us.
+	// Apply json to this obj, signaling no parent classes to do the setting for us.
 	constructor( json?: any) {
 		super(true);
 		if(json === true) return;
@@ -591,7 +592,13 @@ class IfPageBaseSchema extends Schema {
 	}
 	// Type coercion for ts not liking subtypes.
 	toIfPageSliderSchema(): IfPageSliderSchema {
-		if( this.type !== 'IfPageSliderSchema') throw new Error('Invalid type convertion to IfPageHarsonsSchema');
+		if( this.type !== 'IfPageSliderSchema') throw new Error('Invalid type convertion to IfPageSliderSchema');
+		// @ts-ignore 
+		return this;
+	}
+	// Type coercion for ts not liking subtypes.
+	toIfPageSqlSchema(): IfPageSqlSchema {
+		if( this.type !== 'IfPageSqlSchema') throw new Error('Invalid type convertion to IfPageSqlSchema');
 		// @ts-ignore 
 		return this;
 	}
@@ -1684,6 +1691,236 @@ class IfPagePredictFormulaSchema extends IfPageFormulaSchema {
 }
 
 
+/**
+ * SqlSchema requires a more complex instantiation. Solution Results must be set
+ * in the json object. This keeps any parsing / sql code out of this schema file.
+ */
+class IfPageSqlSchema extends IfPageBaseSchema {
+
+	// Data
+	t1_name!: string
+	t1_column_titles!: Array<string>
+    t1_column_formats!: Array<string>
+	t1_rows!: Array<any>
+
+	// Problem
+	client_sql!: string;
+	client_results_columns!: string[];
+	client_results_rows!: any[];
+
+	solution_sql!: string;
+	solution_results_columns!: string[];
+	solution_results_rows!: any[];
+	solution_sql_visible!: boolean;
+	solution_results_visible!: boolean;
+
+	helpblock!: string;
+
+	// Apply json to this obj, signaling no parent classes to do the setting for us.
+	constructor(json?: any) {
+		super(true);
+		
+		if(json === true) return;
+		
+		this.initialize(json, this.schema);
+
+		// Solution_results must be set in the origination json object.
+		// Keeps us from needing to have mix sql generation code into this object.
+		//if(this.solution_results_columns.length === 0)	this.updateSolutionResults();
+
+		this.updateCorrect();
+	}
+
+	get type(): string {
+		return 'IfPageSqlSchema';
+	}
+
+	get_solution(): string {
+		if(this.solution_sql === null) return '';
+		return this.solution_sql;
+	}
+
+	get schema(): any {
+		let inherit = common_schema();
+
+		return {
+			...inherit,
+
+			t1_name: { type: 'String', initialize: (s: any) => isDef(s) ? s : null },
+			t1_column_titles: { type: 'Array', initialize: (a: any) => isDef(a) && isArray(a) ? a : [] },
+			t1_column_formats: { type: 'Array', initialize: (a: any) => isDef(a) && isArray(a) ? a : [] },
+			t1_rows: { type: 'Array', initialize: (a: any) => isDef(a) && isArray(a) ? a : [] },
+
+
+
+			helpblock: { type: 'String', initialize: (s: any) => isDef(s) ? s : null },
+
+			client_sql: { type: 'String', initialize: (s: any) => isDef(s) ? s : null },
+			client_results_rows: { type: 'Array', initialize: (a: any) => isDef(a) && isArray(a) ? a : [] },
+			client_results_columns: { type: 'Array', initialize: (a: any) => isDef(a) && isArray(a) ? a : [] },
+
+			solution_sql: { type: 'String', initialize: (s: any) => isDef(s) ? s : null },
+			solution_results_rows: { type: 'Array', initialize: (a: any) => isDef(a) && isArray(a) ? a : [] },
+			solution_results_columns: { type: 'Array', initialize: (a: any) => isDef(a) && isArray(a) ? a : [] },
+
+			// Should we show students the results of the solutions, or the solutions themselves?
+			solution_sql_visible: { type: 'Boolean', initialize: (s: any) => isDef(s) ? bool(s) : false },
+			solution_results_visible: { type: 'Boolean', initialize: (s: any) => isDef(s) ? s : false }
+
+		};
+	}
+
+	// Has the user provided input?
+	client_has_answered(): boolean {
+		return this.client_sql !== null && this.client_sql.length > 0;
+	}
+
+
+	// Automatically fill in the answer.
+	// Used for testing out on the server.  Not usable on client side, as 
+	// solution_sql will not be present.
+	debug_answer() {
+		if(typeof this.solution_sql === 'undefined') {
+			throw new Error('You can not debug answer without solution_sql being present');
+		}
+		this.client_sql = '' + fill_template(this.solution_sql, this.template_values); // make sure that we have a string here.
+		this.updateCorrect();
+	}		
+
+
+	// Update any fields for which user has permissions.
+	// Save to re-run.  Can also run upon initial obj creation.
+	updateUserFields(json: any) {
+
+		// Look to see if we have a new client_sql. If so, need to update the client parsed results.
+		// Empty out the old results. 
+		if(typeof json.client_sql !== 'undefined' && json.client_sql !== this.client_sql) {
+			this.client_results_rows = [];
+			this.client_results_columns = [];
+		}
+
+		this._updateUserFields(json, ['client_sql', 'client_results_rows', 'clients_results_columns', 'time_limit_expired', 'hints_parsed', 'hints_viewsolution']);
+	}
+
+
+
+	// Refresh the this.correct variable. Relies upon client and solution results being run.
+	// If solution aren't run (or available), sets correct to null.
+	updateCorrect() {
+		// Checks to see if we are set to complete.  If so, do not update.
+		// Happens when the server provides us a json with .completed set.
+		if(this.completed) return;
+
+		// Create custom feedback.
+		//
+		// Feedback are not always provided by the server/client, or could just be
+		// undefined for the current problem.
+		//const feedback = null; //get_feedback(this); NEED TO FIX DURING UPDATE!!!
+		//if(feedback !== null) {
+		//	this.client_feedback = feedback;
+		//}
+
+		// Check to see if we have any input from the user.
+		if(this.client_sql === null || this.client_sql.length < 1) {
+			this.correct = null;
+			return;
+		}
+		
+		// See if we need to re-generate client answers. If so, error out, as sql results
+		// must be set externally by queryFactory
+		if(this.client_results_columns.length === 0){
+			throw new Error('IfPageSchemas.SQL updateCorrect should not have empty client results');
+		}
+
+		// See if we need to re-generate solution answers. If so, error out, as sql results
+		// must be set externally by queryFactory
+		if(this.solution_results_columns.length === 0 ){
+			throw new Error('IfPageSchemas.SQL updateCorrect should not have empty solution results');
+		}
+
+
+		// If we don't have a solution, then (i.e., on the client) then just keep the old
+		// correct variable.  Don't over-write it, as we may be on the client and
+		// are reading out the result of the server's code.
+		if(typeof this.solution_sql === 'undefined' || this.solution_sql === null) {
+			return;
+		}
+
+
+		// Start testing with the assumption of correctness.
+		this.correct = true;
+
+		// Since we are actually testing, make solution results visible after something
+		//  has been submitted and no more changes are possible.
+		this.solution_results_visible = true;
+
+		// Feedback may be null if we're on the client, not server.
+		// But, if it's not null, and longer than zero, then this is not correct.
+		if(typeof this.client_feedback !== 'undefined' && this.client_feedback !== null ) {
+			this.correct = (this.client_feedback.length === 0);
+			if(!this.correct) return;
+		}
+
+		// Check column titles
+		if(this.client_results_columns.length !== this.solution_results_columns.length) {
+			this.correct = false;
+			this.client_feedback.push('You have a different number of columns than the solution.');
+			return;
+		}
+		for(let i=0; i<this.client_results_columns.length; i++) {
+			if( this.client_results_columns[i] !== this.solution_results_columns[i]) {
+				this.correct = false;
+				this.client_feedback.push('Your column '+this.client_results_columns[i] +
+					 ' does not match the solution column ' +this.solution_results_columns[i] );
+				return;
+			}
+		}
+
+		// Check Rows
+		if(this.client_results_rows.length !== this.solution_results_rows.length) {
+			this.correct = false;
+			this.client_feedback.push('You have a different number of rows than the solution.');
+			return;
+		}
+		for(let i=0; i<this.client_results_rows.length; i++) {
+			for(let j=0; j<this.client_results_rows[i].length; j++) {
+				if( typeof this.client_results_rows[i][j] === 'string') {
+					// string comparison
+					if( this.client_results_rows[i][j] !== this.solution_results_rows[i][j]) {
+						this.correct = false;
+						this.client_feedback.push('At least one value in '+this.client_results_columns[i] +
+							' does not match the solution.' );
+						return;
+					}					
+				} else {
+					// numeric, check for floating point issue.
+					if( 	Math.round(this.client_results_rows[i][j]*100) !== 
+							Math.round(this.solution_results_rows[i][j]*100) ) {
+						this.correct = false;
+						this.client_feedback.push('At least one value in '+this.client_results_columns[i] +
+							' does not match the solution.' );
+						return;
+					}
+
+				}
+			}
+		}
+
+		// Reached the end, no issues found. Assume that it is still correct.
+		if(!this.correct) throw new Error('Invalid end state for SqlPageSchema.updateCorrect');
+	}
+
+
+	// Return a nicely formatted view of the client's input. 
+	// Don't return nulls but instead an empty string.
+	toString(): string {
+		return this.client_sql === null ? '': this.client_sql;
+	}
+}
+
+
+
+
 
 // Used to correctly instantiate a class based on the json .type property.
 function get_page_schema_as_class(json: any): IfPageBaseSchema {
@@ -1700,9 +1937,13 @@ function get_page_schema_as_class(json: any): IfPageBaseSchema {
 		'IfPageShortTextAnswerSchema': IfPageShortTextAnswerSchema,
 		'IfPageLongTextAnswerSchema': IfPageLongTextAnswerSchema,
 		'IfPagePredictFormulaSchema': IfPagePredictFormulaSchema,
+		'IfPageSqlSchema': IfPageSqlSchema,
 	}[type];
 
-	if(typeof p === 'undefined') throw new Error('Invalid type passed to IfPageSchemas.get_page_schema_class');
+	if(typeof p === 'undefined') {
+		console.log(json);
+		throw new Error('Invalid type passed to IfPageSchemas.get_page_schema_class');
+	}
 
 	return new p(json);
 }
@@ -1806,6 +2047,7 @@ export {
 	IfPageShortTextAnswerSchema,
 	IfPageLongTextAnswerSchema,
 	IfPageAnswer,
+	IfPageSqlSchema,
 	build_answers_from_level,
 };
 

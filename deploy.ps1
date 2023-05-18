@@ -23,11 +23,18 @@ npx babel src --out-dir build --presets @babel/preset-typescript  --extensions "
 # Build server-side w/o ts
 # this just copies it - don't use... xcopy src build\server\ /s /y /q
 
+# Copy the wasm for sql to both the local run, as well as the public 
+copy node_modules\sql.js\dist\sql-wasm.* static\
+
 
 # Copy extra files
 copy secret.distribution.js build\server\secret.js
 xcopy static\ build\public\static\ /s /y /q
 copy static\favicon.ico build\public\favicon.ico 
+
+# Copy the wasm for sql to both the local run, as well as the public 
+copy node_modules\sql.js\dist\sql-wasm.* build\public\static
+copy node_modules\sql.js\dist\sql-wasm.* static\
 
 # not needed?
 # copy .htaccess build\public\.htaccess 

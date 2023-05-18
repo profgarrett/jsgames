@@ -14,6 +14,7 @@ import NumberAnswer from './IfPlayComponents/NumberAnswer';
 import Slider from './IfPlayComponents/Slider';
 import ShortTextAnswer from './IfPlayComponents/ShortTextAnswer';
 import Timer from './../components/Timer';
+import SqlQuery from './IfPlayComponents/SqlQuery';
 
 import { buildChart } from './charts/Charts';
 
@@ -175,6 +176,15 @@ export function render_exercise_panel(
 					editable={ true } 
 					onChange={handleChange} />;
 
+
+
+	} else if(page.type === 'IfPageSqlSchema') {
+		problem = <SqlQuery page={page.toIfPageSqlSchema()} 
+					readonly={ isLoading }
+					editable={ true } 
+					onChange={handleChange} 
+					onSubmit={handleSubmit } />;
+					
 	} else {
 		throw new Error('Invalid type in IfLevelPlay '+page.type);
 	}

@@ -27,8 +27,12 @@ import { surveymath1, surveymath2 } from './tutorials/surveymath';
 import { surveywaiver_non_woodbury_student, surveywaiver_non_woodbury_user, surveywaiver_woodbury_student, surveywaiver_wvu_user } from './tutorials/surveywaivers';
 import { surveycharts_amt, surveycharts_wu } from './tutorials/surveycharts';
 
+import { sql_selectfrom } from './tutorials/sql';
+
 import { parseFeedback } from './parseFeedback';
 import type { GenType } from './Gens';
+
+import { queryFactory_updateSolutionResults, queryFactory_updateClientResults } from './../shared/queryFactory';
 
 interface IStringIndexJsonObject {
 	[key: string]: any
@@ -62,7 +66,8 @@ const LEVEL_GENS: IStringIndexJsonObject = {
 	financial1, financial2,
 	surveymath1, surveymath2,
 	surveywaiver_non_woodbury_student, surveywaiver_non_woodbury_user, surveywaiver_woodbury_student, surveywaiver_wvu_user,
-	surveycharts_amt, surveycharts_wu
+	surveycharts_amt, surveycharts_wu,
+	sql_selectfrom,
 };
 
 
@@ -75,7 +80,7 @@ const LEVEL_GENS: IStringIndexJsonObject = {
 
 	WARNING: original_json 
  */
-const _initialize_json =  function(level: IfLevelSchema, original_json: any): any {
+async function _initialize_json(level: IfLevelSchema, original_json: any): Promise<any> {
 	let json = { ...original_json};
 	let version_i: number = 0;
 	let version: IStringIndexJsonObject = {};
@@ -247,6 +252,41 @@ const _initialize_json =  function(level: IfLevelSchema, original_json: any): an
 		if(json.code === 'tutorial' && level.allow_skipping_tutorial) {
 			json.correct_required = false;
 		}
+		
+
+	} else if( json.type === 'IfPageSqlSchema' ) {
+		if(json.code === 'tutorial') {
+			// Allow over-riding correct_required if set by the json object.
+			json.correct_required = typeof json.correct_required == 'undefined' ? true : json.correct_required;
+
+			json.solution_results_visible = true;
+			json.solution_sql_visible = false;
+
+		} else if(json.code === 'test') {
+			json.correct_required = false;
+			json.solution_results_visible = true;
+			json.solution_sql_visible = false;
+
+		} else {
+			console.log(json);
+			throw new Error('Invalid formula code '+json.code+' in baseifgame');
+		}
+
+		// Pull the setting from level to see if we should allow skipping a tutorial page.
+		if(json.code === 'tutorial' && level.allow_skipping_tutorial) {
+			json.correct_required = false;
+		}
+		
+		// Update solution results
+		let results = await queryFactory_updateSolutionResults(json);
+		json.solution_results_columns = results.columns;
+		json.solution_results_rows = results.rows;
+
+
+		// If there is a client solution, then update that as well.
+		results = await queryFactory_updateClientResults(json);
+		json.client_results_columns = results.columns;
+		json.client_results_rows = results.rows;
 
 	} else if( json.type === 'IfPageShortTextAnswerSchema' ) {
 		json.correct_required = false;
@@ -284,7 +324,7 @@ const _initialize_json =  function(level: IfLevelSchema, original_json: any): an
 const IfLevelSchemaFactory = {
 
 	// Create and return a new level of the given code.
-	create: function(code: string, username: string): IfLevelSchema {
+	create: async function(code: string, username: string): Promise<IfLevelSchema> {
 		if(typeof LEVEL_GENS[code] === 'undefined') throw new Error('Invalid type '+code+' passed to IfLevelModelFactory.create');
 
 		const allow_skipping_tutorial = (username === 'garrettnxxx');
@@ -311,12 +351,13 @@ const IfLevelSchemaFactory = {
 
 		const level = new IfLevelSchema( defaults );
 
-		return this.addPageOrMarkAsComplete(level);
+		const results = await this.addPageOrMarkAsComplete(level);
+		return results;
 	},
 
 
 	// Add a new page to the level, or if we're at the end, mark complete.
-	addPageOrMarkAsComplete: function(level: IfLevelSchema): IfLevelSchema {
+	addPageOrMarkAsComplete: async function(level: IfLevelSchema): Promise<IfLevelSchema> {
 		if(typeof LEVEL_GENS[level.code] === 'undefined') 
 			throw new Error('Invalid type '+level.code+' passed to IfLevelModelFactory.processSubmission');
 		if(level.completed)
@@ -332,8 +373,10 @@ const IfLevelSchemaFactory = {
 			// The last page should never be marked as completed.  Only this code marks a page as
 			// completed.  If completed, then a new page is added at the tail end.
 			// If no more, then the entire level should be marked as completed.
-			if(last_page.completed) 
+			if(last_page.completed) {
+				//console.log(last_page);
 				throw new Error('IfGame.addPageOrMarkAsComplete.lastpage_already_completed');
+			}
 
 			// Test to see if the last page needs to be correct to continue.
 			// Note that the last page may not have been answered by the user yet.
@@ -412,7 +455,7 @@ const IfLevelSchemaFactory = {
 			}
 
 			// setup new page 
-			const initialized_json = _initialize_json(level, new_page_json);
+			const initialized_json = await _initialize_json(level, new_page_json);
 
 
 			let new_page = get_page_schema_as_class(initialized_json);

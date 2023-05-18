@@ -8,7 +8,6 @@ const { numeracy_pretest } = require('./../pages/numeracy');
 const { bnt } = require('./../pages/bnt');
 
 import type { GenType } from '../Gens';
-//import type { LevelSchemaFactoryType } from '../IfLevelSchemaFactory';
 
 
 const surveycharts_wu = ({

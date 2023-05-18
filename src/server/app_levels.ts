@@ -32,7 +32,7 @@ router.post('/new_level_by_code/:code',
 	try {
 		const code = req.params.code;
 		const username = user_get_username_or_emptystring(req, res);
-		const level = IfLevelSchemaFactory.create(code, username);
+		const level = await IfLevelSchemaFactory.create(code, username);
 		const now = from_utc_to_myql(to_utc(new Date()));
 
 		// need to refresh, even though this is a new object, before saving. Otherwise, this will be null
@@ -140,6 +140,7 @@ router.get('/debuglevel/:code', nocache, user_require_logged_in,
 	try {
 		const param_code = req.params.code; // level code.
 		const username = user_get_username_or_emptystring(req, res);
+		let results;
 
 		// Only allow faculty to have access to debug levels.
 		const is_faculty_result = await is_faculty(username);
@@ -151,7 +152,7 @@ router.get('/debuglevel/:code', nocache, user_require_logged_in,
 		if(code_in_array.length !== 1)
 			throw new Error('Invalid code type '+param_code+' passed to debuglevel');
 
-		const level = IfLevelSchemaFactory.create(code_in_array[0], username);
+		const level = await IfLevelSchemaFactory.create(code_in_array[0], username);
 
 		let loop_escape = 200;
 		let last_page = {};
@@ -163,7 +164,7 @@ router.get('/debuglevel/:code', nocache, user_require_logged_in,
 			last_page = level.pages[level.pages.length-1];
 			// @ts-ignore
 			last_page.debug_answer();
-			IfLevelSchemaFactory.addPageOrMarkAsComplete(level); 
+			results = await IfLevelSchemaFactory.addPageOrMarkAsComplete(level); 
 		}
 
 		res.json(return_level_prepared_for_transmit(level, false));
@@ -331,7 +332,8 @@ router.post('/level/:id',
 		// Add a new page, unless we are only validating OR replacing.
 		if( validate_only === false && replace === false  ) {
 			// Update and add new page if needed.
-			IfLevelSchemaFactory.addPageOrMarkAsComplete(iflevel); 
+			console.log('test1')
+			await IfLevelSchemaFactory.addPageOrMarkAsComplete(iflevel); 
 		}
 
 		// Update level in db.
