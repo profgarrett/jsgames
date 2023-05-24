@@ -32,7 +32,7 @@ import { sql_selectfrom } from './tutorials/sql';
 import { parseFeedback } from './parseFeedback';
 import type { GenType } from './Gens';
 
-import { queryFactory_updateSolutionResults, queryFactory_updateClientResults } from './../shared/queryFactory';
+import { queryFactory_getSolutionResults, queryFactory_getClientResults } from './../shared/queryFactory';
 
 interface IStringIndexJsonObject {
 	[key: string]: any
@@ -278,15 +278,27 @@ async function _initialize_json(level: IfLevelSchema, original_json: any): Promi
 		}
 		
 		// Update solution results
-		let results = await queryFactory_updateSolutionResults(json);
-		json.solution_results_columns = results.columns;
+		let results = await queryFactory_getSolutionResults(json);
+		if(results.error !== null) {
+			throw new Error('Invalid SQL solution result for IfPageSqlSchema in IfLevelSchema Factory, ' + results.error );
+		}
+		json.solution_results_titles = results.titles;
 		json.solution_results_rows = results.rows;
 
-
+		// todo: delete, removed as client sql query isn't initialized with the raw json.
+		// 
 		// If there is a client solution, then update that as well.
-		results = await queryFactory_updateClientResults(json);
-		json.client_results_columns = results.columns;
-		json.client_results_rows = results.rows;
+		// This normally doesn't happen, but it's possible that a 
+		// Note, if there is an error, just set the results to an empty string. This can easily happen if 
+		//    the user has updated with an invalid SQL query.
+		//results = await queryFactory_getClientResults(json);
+		//if(results.error !== null) {
+		//	json.client_feedback = [ results.error ];
+		//}
+		// If an error, these will both be []
+		//json.client_results_titles = results.titles;
+		//json.client_results_rows = results.rows;
+
 
 	} else if( json.type === 'IfPageShortTextAnswerSchema' ) {
 		json.correct_required = false;
@@ -369,6 +381,25 @@ const IfLevelSchemaFactory = {
 
 		// Update the last page as needed.
 		if(last_page !== null) {
+
+			// If it is a SQL page, then refresh the results.
+			// Note that this is done here, and not in the refresh correct property.
+			// This is done to more tightly control exactly when the code runs to create
+			// the SQL db.
+			if(last_page.type === 'IfPageSqlSchema') {
+
+				// Look to see if results are null.
+				// This is automatically done by the IfPageSqlSchema.updateUserFields,
+				// showing that the server should re-generated the results and check for correctness. 
+				if(last_page.client_results_rows === null || last_page.client_results_titles === null) {
+					let results = await queryFactory_getClientResults(last_page);
+					last_page.client_results_rows = results.rows;
+					last_page.client_results_titles = results.titles;
+					last_page.client_feedback = [];
+					if(results.error !== null) last_page.client_feedback.push(results.error);
+					last_page.updateCorrect();
+				}
+			}
 
 			// The last page should never be marked as completed.  Only this code marks a page as
 			// completed.  If completed, then a new page is added at the tail end.

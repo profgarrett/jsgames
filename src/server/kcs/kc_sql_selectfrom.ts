@@ -2,9 +2,33 @@ import { KC_NAMES } from './kc';
 
 const t1_farm1_data = {
 	t1_name: 'animals',
-	t1_column_titles: ['Name', 'Cost', 'Inventory', 'Sold' ],
-    t1_column_formats: ['text', '$', '0', '0' ],
+	t1_titles: ['Name', 'Cost', 'Inventory', 'Sold' ],
+    t1_formats: ['text', '$', '0', '0' ],
 	t1_rows: [
+			[ 'Sheep',  34, 54, 400 ], 
+			[ 'Goats', 39, 49,  128 ], 
+			[ 'Pigs',  38, 58,  189 ], 
+			[ 'Dogs', 13, 60, 167 ],
+			[ 'Sheep',  34, 54, 400 ], 
+			[ 'Goats', 39, 49,  128 ], 
+			[ 'Pigs',  38, 58,  189 ], 
+			[ 'Dogs', 13, 60, 167 ],
+			[ 'Sheep',  34, 54, 400 ], 
+			[ 'Goats', 39, 49,  128 ], 
+			[ 'Pigs',  38, 58,  189 ], 
+			[ 'Dogs', 13, 60, 167 ],
+			[ 'Sheep',  34, 54, 400 ], 
+			[ 'Goats', 39, 49,  128 ], 
+			[ 'Pigs',  38, 58,  189 ], 
+			[ 'Dogs', 13, 60, 167 ],
+			[ 'Sheep',  34, 54, 400 ], 
+			[ 'Goats', 39, 49,  128 ], 
+			[ 'Pigs',  38, 58,  189 ], 
+			[ 'Dogs', 13, 60, 167 ],
+			[ 'Sheep',  34, 54, 400 ], 
+			[ 'Goats', 39, 49,  128 ], 
+			[ 'Pigs',  38, 58,  189 ], 
+			[ 'Dogs', 13, 60, 167 ],
 			[ 'Sheep',  34, 54, 400 ], 
 			[ 'Goats', 39, 49,  128 ], 
 			[ 'Pigs',  38, 58,  189 ], 
@@ -14,23 +38,38 @@ const t1_farm1_data = {
 
 
 
+const _baseT = {
+	type: 'IfPageSqlSchema',
+	kcs: [ KC_NAMES.KC_SQL_SELECTFROM ],
+	code: 'tutorial',
+}
 const tutorial_pages = [
-	{	type: 'IfPageSqlSchema',
-		description: `SQL is used to select items from a table.
+	{	..._baseT,
+		description: `Let's start with the most basic SQL query. <kbd>SELECT * FROM animals</kbd> will show all rows and columns in our animal table. 
+			<br/>	
+			Breaking down the query,
+			<ul> 
+				<li><kbd>SELECT</kbd> asks the database to show us information (instead of updating, deleting, or inserting)</li>
+				<li><kbd>*</kbd> says we want all columns in the table</li>
+				<li><kbd>FROM</kbd> selects a table </li>
+				<li><kbd>animals</kbd> is the name of our table</li>
+			</ul>
 			`,
-		instruction: 'Write SELECT * FROM table to see all fields.',
+		instruction: 'Write <kbd>SELECT * FROM animals</kbd> in the box below',
 
 		...t1_farm1_data,
 
 		solution_sql: 'SELECT * FROM animals',
+		solution_results_formats: ['text', '$', '0', '0'],
+
 		template_values: {
+	
 		},
 		feedback: [
+	
 		],
-		kcs: [ KC_NAMES.KC_SQL_SELECTFROM ],
-		code: 'tutorial'
-	},
-	{	type: 'IfPageSqlSchema',
+		
+	},{	..._baseT,
 		description: `Use ORDER BY
 			`,
 		instruction: 'Get all fields, ordering by sold',
@@ -38,6 +77,8 @@ const tutorial_pages = [
 		...t1_farm1_data,
 
 		solution_sql: 'SELECT * FROM animals ORDER BY sold',
+		solution_results_formats: ['text', '$', '0', '0'],
+
 		template_values: {
 		},
 		feedback: [
@@ -53,7 +94,7 @@ const tutorial_pages = [
 
 
 
-const _base = {
+const _baseX = {
 	type: 'IfPageSqlSchema',
 	...t1_farm1_data,
 	
@@ -64,9 +105,10 @@ const _base = {
 
 const test_pages = [ 
 	{
-		..._base,
+		..._baseX,
 		description: `TEST PAGE - Retrieve all rows from the animals table.`,
 		solution_sql: 'SELECT * FROM animals',
+		solution_results_formats: ['text', '$', '0', '0'],
 	},
 
 	/*

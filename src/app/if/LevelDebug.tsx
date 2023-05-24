@@ -121,7 +121,7 @@ class LevelDebugPage extends React.Component<ScorePropsType> {
 			problem = (<div><ShortTextAnswer page={page.toIfPageNumberAnswerSchema()} readonly={true} editable={false} handleChange={()=> {}} handleSubmit={()=> {} }/></div>);
 
 		} else if(page.type === 'IfPageSqlSchema') {
-			problem = (<div><SqlQuery page={page.toIfPageSqlSchema()} readonly={false} editable={true} handleChange={()=> {}} handleSubmit={()=> {} }/></div>);
+			problem = (<div><SqlQuery page={page.toIfPageSqlSchema()} readonly={true} editable={true} handleChange={()=> {}} handleSubmit={()=> {} }/></div>);
 
 		} else if(page.type === 'IfPageChoiceSchema') {
 			// Show range of choice only if the user was wrong.  If no right answer,

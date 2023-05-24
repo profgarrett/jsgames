@@ -332,7 +332,6 @@ router.post('/level/:id',
 		// Add a new page, unless we are only validating OR replacing.
 		if( validate_only === false && replace === false  ) {
 			// Update and add new page if needed.
-			console.log('test1')
 			await IfLevelSchemaFactory.addPageOrMarkAsComplete(iflevel); 
 		}
 
@@ -348,6 +347,7 @@ router.post('/level/:id',
 
 		res.json(return_level_prepared_for_transmit(iflevel, true));
 	} catch (e) {
+		console.log('Error in app_levels');
 		console.log(e);
 		log_error(e);
 		next(e);

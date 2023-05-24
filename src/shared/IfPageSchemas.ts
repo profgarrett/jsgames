@@ -173,7 +173,8 @@ class IfPageBaseSchema extends Schema {
 	description!: string;
 	instruction!: string;
 	template_values!: any;
-	client_feedback!: Array<string>;
+	client_feedback!: string[] | null;
+
 	feedback!: Array<Function>;
 	correct!: boolean | null;
 	correct_required!: boolean;
@@ -1699,17 +1700,19 @@ class IfPageSqlSchema extends IfPageBaseSchema {
 
 	// Data
 	t1_name!: string
-	t1_column_titles!: Array<string>
-    t1_column_formats!: Array<string>
+	t1_titles!: Array<string>
+    t1_formats!: Array<string>
 	t1_rows!: Array<any>
 
 	// Problem
 	client_sql!: string;
-	client_results_columns!: string[];
-	client_results_rows!: any[];
+	client_results_titles!: string[] | null;
+	client_results_rows!: any[] | null;
+	client_feedback!: string[];
 
 	solution_sql!: string;
-	solution_results_columns!: string[];
+	solution_results_titles!: string[];
+	solution_results_formats!: string[];
 	solution_results_rows!: any[];
 	solution_sql_visible!: boolean;
 	solution_results_visible!: boolean;
@@ -1723,11 +1726,6 @@ class IfPageSqlSchema extends IfPageBaseSchema {
 		if(json === true) return;
 		
 		this.initialize(json, this.schema);
-
-		// Solution_results must be set in the origination json object.
-		// Keeps us from needing to have mix sql generation code into this object.
-		//if(this.solution_results_columns.length === 0)	this.updateSolutionResults();
-
 		this.updateCorrect();
 	}
 
@@ -1747,27 +1745,62 @@ class IfPageSqlSchema extends IfPageBaseSchema {
 			...inherit,
 
 			t1_name: { type: 'String', initialize: (s: any) => isDef(s) ? s : null },
-			t1_column_titles: { type: 'Array', initialize: (a: any) => isDef(a) && isArray(a) ? a : [] },
-			t1_column_formats: { type: 'Array', initialize: (a: any) => isDef(a) && isArray(a) ? a : [] },
+			t1_titles: { type: 'Array', initialize: (a: any) => isDef(a) && isArray(a) ? a : [] },
+			t1_formats: { type: 'Array', initialize: (a: any) => isDef(a) && isArray(a) ? a : [] },
 			t1_rows: { type: 'Array', initialize: (a: any) => isDef(a) && isArray(a) ? a : [] },
-
-
 
 			helpblock: { type: 'String', initialize: (s: any) => isDef(s) ? s : null },
 
 			client_sql: { type: 'String', initialize: (s: any) => isDef(s) ? s : null },
 			client_results_rows: { type: 'Array', initialize: (a: any) => isDef(a) && isArray(a) ? a : [] },
-			client_results_columns: { type: 'Array', initialize: (a: any) => isDef(a) && isArray(a) ? a : [] },
+			client_results_titles: { type: 'Array', initialize: (a: any) => isDef(a) && isArray(a) ? a : [] },
+			client_feedback: { type: 'Array', initialize: (a: any) => isDef(a) && isArray(a) ? a : null },
 
 			solution_sql: { type: 'String', initialize: (s: any) => isDef(s) ? s : null },
 			solution_results_rows: { type: 'Array', initialize: (a: any) => isDef(a) && isArray(a) ? a : [] },
-			solution_results_columns: { type: 'Array', initialize: (a: any) => isDef(a) && isArray(a) ? a : [] },
+			solution_results_titles: { type: 'Array', initialize: (a: any) => isDef(a) && isArray(a) ? a : [] },
+			solution_results_formats: { type: 'Array', initialize: (a: any) => isDef(a) && isArray(a) ? a : [] },
 
 			// Should we show students the results of the solutions, or the solutions themselves?
 			solution_sql_visible: { type: 'Boolean', initialize: (s: any) => isDef(s) ? bool(s) : false },
 			solution_results_visible: { type: 'Boolean', initialize: (s: any) => isDef(s) ? s : false }
 
 		};
+	}
+
+	// Guess about column format based on solution and t1, t2, ... 
+	get_client_formats_based_on_title(): any[] {
+		const formats: any[] = [];
+		let match_i = -1;
+		let title = '';
+
+		// If no client results, then return null.
+		if(this.client_results_titles === null ) return [];
+		if(this.client_results_rows === null ) return [];
+
+		// Go through each client title, looking for a match.
+		for(let i=0; i < this.client_results_titles.length; i++) {
+			title = this.client_results_titles[i];
+
+			// Try looking in solutions
+			match_i = this.solution_results_titles.findIndex( arg => arg === title);
+			if(match_i > -1) {
+				formats.push(this.solution_results_formats[i])
+			} else {
+				// Try looking in t1
+				match_i = this.t1_titles.findIndex( arg => arg === title);
+				if(match_i > -1) {
+					formats.push(this.t1_formats[i])
+				} else {
+					//
+					//
+					console.log('add t2 and t3 to IfPageSchema 1792');
+					formats.push('string');
+				}	
+			}
+		} 
+
+		return formats;
 	}
 
 	// Has the user provided input?
@@ -1784,7 +1817,9 @@ class IfPageSqlSchema extends IfPageBaseSchema {
 			throw new Error('You can not debug answer without solution_sql being present');
 		}
 		this.client_sql = '' + fill_template(this.solution_sql, this.template_values); // make sure that we have a string here.
-		this.updateCorrect();
+		this.client_results_rows = null;
+		this.client_results_titles = null;
+		this.updateCorrect(); // sets correct to null
 	}		
 
 
@@ -1795,17 +1830,18 @@ class IfPageSqlSchema extends IfPageBaseSchema {
 		// Look to see if we have a new client_sql. If so, need to update the client parsed results.
 		// Empty out the old results. 
 		if(typeof json.client_sql !== 'undefined' && json.client_sql !== this.client_sql) {
-			this.client_results_rows = [];
-			this.client_results_columns = [];
+			this.client_results_rows = null;
+			this.client_results_titles = null;
 		}
 
-		this._updateUserFields(json, ['client_sql', 'client_results_rows', 'clients_results_columns', 'time_limit_expired', 'hints_parsed', 'hints_viewsolution']);
+		this._updateUserFields(json, ['client_sql', 'time_limit_expired', 'hints_parsed', 'hints_viewsolution']);
 	}
 
 
 
 	// Refresh the this.correct variable. Relies upon client and solution results being run.
 	// If solution aren't run (or available), sets correct to null.
+	// Requires that queryFactory sets the client_results_rows and titles prior to being run.
 	updateCorrect() {
 		// Checks to see if we are set to complete.  If so, do not update.
 		// Happens when the server provides us a json with .completed set.
@@ -1815,10 +1851,8 @@ class IfPageSqlSchema extends IfPageBaseSchema {
 		//
 		// Feedback are not always provided by the server/client, or could just be
 		// undefined for the current problem.
-		//const feedback = null; //get_feedback(this); NEED TO FIX DURING UPDATE!!!
-		//if(feedback !== null) {
-		//	this.client_feedback = feedback;
-		//}
+		//const feedback = []; // get_feedback(this); Expand when implementing custom rules.
+		//this.client_feedback = feedback;
 
 		// Check to see if we have any input from the user.
 		if(this.client_sql === null || this.client_sql.length < 1) {
@@ -1826,26 +1860,23 @@ class IfPageSqlSchema extends IfPageBaseSchema {
 			return;
 		}
 		
-		// See if we need to re-generate client answers. If so, error out, as sql results
-		// must be set externally by queryFactory
-		if(this.client_results_columns.length === 0){
-			throw new Error('IfPageSchemas.SQL updateCorrect should not have empty client results');
+		// See if we need to re-generate client answers. If so, pop out, as sql results
+		// must be set externally by queryFactory.
+		if(this.client_results_rows === null || this.client_results_rows.length === 0){
+			return;
+			console.log(this);
+			throw new Error('Client results must be re-generated before running IfPageSchema.SQL.updateCorrect(). Logic error.')
+		}
+		if(this.client_results_titles === null || this.client_results_titles.length === 0){
+			return;
+			throw new Error('Client results must be re-generated before running IfPageSchema.SQL.updateCorrect(). Logic error.')
 		}
 
 		// See if we need to re-generate solution answers. If so, error out, as sql results
 		// must be set externally by queryFactory
-		if(this.solution_results_columns.length === 0 ){
+		if(this.solution_results_titles.length === 0 ){
 			throw new Error('IfPageSchemas.SQL updateCorrect should not have empty solution results');
 		}
-
-
-		// If we don't have a solution, then (i.e., on the client) then just keep the old
-		// correct variable.  Don't over-write it, as we may be on the client and
-		// are reading out the result of the server's code.
-		if(typeof this.solution_sql === 'undefined' || this.solution_sql === null) {
-			return;
-		}
-
 
 		// Start testing with the assumption of correctness.
 		this.correct = true;
@@ -1856,22 +1887,23 @@ class IfPageSqlSchema extends IfPageBaseSchema {
 
 		// Feedback may be null if we're on the client, not server.
 		// But, if it's not null, and longer than zero, then this is not correct.
+		// Mark as false, and don't do any more checks.
 		if(typeof this.client_feedback !== 'undefined' && this.client_feedback !== null ) {
 			this.correct = (this.client_feedback.length === 0);
 			if(!this.correct) return;
 		}
 
 		// Check column titles
-		if(this.client_results_columns.length !== this.solution_results_columns.length) {
+		if(this.client_results_titles.length !== this.solution_results_titles.length) {
 			this.correct = false;
 			this.client_feedback.push('You have a different number of columns than the solution.');
 			return;
 		}
-		for(let i=0; i<this.client_results_columns.length; i++) {
-			if( this.client_results_columns[i] !== this.solution_results_columns[i]) {
+		for(let i=0; i<this.client_results_titles.length; i++) {
+			if( this.client_results_titles[i] !== this.solution_results_titles[i]) {
 				this.correct = false;
-				this.client_feedback.push('Your column '+this.client_results_columns[i] +
-					 ' does not match the solution column ' +this.solution_results_columns[i] );
+				this.client_feedback.push('Your column ' + this.client_results_titles[i] +
+					 ' does not match the solution column ' + this.solution_results_titles[i] );
 				return;
 			}
 		}
@@ -1888,7 +1920,7 @@ class IfPageSqlSchema extends IfPageBaseSchema {
 					// string comparison
 					if( this.client_results_rows[i][j] !== this.solution_results_rows[i][j]) {
 						this.correct = false;
-						this.client_feedback.push('At least one value in '+this.client_results_columns[i] +
+						this.client_feedback.push('At least one value in ' + this.client_results_titles[i] +
 							' does not match the solution.' );
 						return;
 					}					
@@ -1897,7 +1929,7 @@ class IfPageSqlSchema extends IfPageBaseSchema {
 					if( 	Math.round(this.client_results_rows[i][j]*100) !== 
 							Math.round(this.solution_results_rows[i][j]*100) ) {
 						this.correct = false;
-						this.client_feedback.push('At least one value in '+this.client_results_columns[i] +
+						this.client_feedback.push('At least one value in ' + this.client_results_titles[i] +
 							' does not match the solution.' );
 						return;
 					}

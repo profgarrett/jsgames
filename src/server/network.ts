@@ -51,9 +51,10 @@ const _strip_secrets = function(input: IStringIndexJsonObject): any {
 	// recursively iterate through.
 	for(let property in input ) {
 		if(input.hasOwnProperty(property)) {
-			if(property.substr(0,8) !== 'solution' 
-				|| ( property.substr(0,8) === 'solution' && input[property+'_visible'] ) ) {
-
+			if(typeof input[property+'_visible'] !== 'undefined' && input[property+'_visible'] === false ) {
+				// strip this property.
+				//console.log('strip secret: ' + property);
+			} else {
 				if(Array.isArray(input[property])) {
 					new_json[property] = _strip_secrets(input[property]);
 				} else {
@@ -113,7 +114,7 @@ const return_level_prepared_for_transmit = (level: any, secure: boolean): any =>
 	if(typeof secure === 'undefined') throw Error('Secure level network/return_level_prepared_for_transmit?');
 
 	const json = level.toJson();
-	let clean_json = false /*secure*/ ? _strip_secrets(json) : json ;
+	let clean_json = secure ? _strip_secrets(json) : json ;
 
 	clean_json.updated = from_mysql_to_utc(clean_json.updated); 
 	clean_json.created = from_mysql_to_utc(clean_json.created); 

@@ -12,6 +12,7 @@ import Parsons from './IfPlayComponents/Parsons';
 import NumberAnswer from './IfPlayComponents/NumberAnswer';
 import Slider from './IfPlayComponents/Slider';
 import ShortTextAnswer from './IfPlayComponents/ShortTextAnswer';
+import SqlQuery from './IfPlayComponents/SqlQuery';
 import HistorySlider from './HistorySlider';
 
 import { buildChart } from './charts/Charts';
@@ -133,6 +134,10 @@ export class LevelScorePage extends React.Component<ScorePropsType, ScoreStateTy
 			// then correct will be null.
 			problem = (<div><Choice page={page_at.toIfPageChoiceSchema()}  onChange={noop}  readonly={true} editable={false} show_solution={page_final.correct === false} /></div>);
 
+		} else if(page_at.type === 'IfPageSqlSchema') {
+			problem = (<div><SqlQuery page={page_at.toIfPageSqlSchema()} readonly={true} editable={false} show_solution={page_final.correct === false} onChange={noop} onSubmit={noop }/></div>);
+
+			
 		} else {
 			throw new Error('Invalid type in IfLevelScore '+page_at.type);
 		}

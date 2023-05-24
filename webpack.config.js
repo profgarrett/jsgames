@@ -9,8 +9,8 @@ const HTMLWebpackPluginConfig = new HTMLWebpackPlugin({
 	inject: 'body',
 
 });
-
 module.exports = {
+	
 	mode: 'development',
 	entry: [__dirname + '/src/app/index.jsx'],
 	output: {
