@@ -1769,39 +1769,59 @@ class IfPageSqlSchema extends IfPageBaseSchema {
 	}
 
 	// Guess about column format based on solution and t1, t2, ... 
-	get_client_formats_based_on_title(): any[] {
-		const formats: any[] = [];
-		let match_i = -1;
-		let title = '';
+	get_column_formats_based_on_title(titles: string[], default_format: string = 'string'): string[] {
+		const formats: string[] = [];
+		let match: string | null = null;
 
-		// If no client results, then return null.
-		if(this.client_results_titles === null ) return [];
-		if(this.client_results_rows === null ) return [];
-
-		// Go through each client title, looking for a match.
-		for(let i=0; i < this.client_results_titles.length; i++) {
-			title = this.client_results_titles[i];
-
-			// Try looking in solutions
-			match_i = this.solution_results_titles.findIndex( arg => arg === title);
+		const get_title = (title: string, titles: string[], formats: string[]): string | null => {
+			let match_i = -1;
+			match_i = titles.findIndex( arg => arg.toLowerCase() === title.toLowerCase());
 			if(match_i > -1) {
-				formats.push(this.solution_results_formats[i])
+				return formats[match_i];
 			} else {
-				// Try looking in t1
-				match_i = this.t1_titles.findIndex( arg => arg === title);
-				if(match_i > -1) {
-					formats.push(this.t1_formats[i])
-				} else {
-					//
-					//
-					console.log('add t2 and t3 to IfPageSchema 1792');
-					formats.push('string');
-				}	
+				return null;
+			}
+		};
+
+		// Go through each title, looking for a match.
+		for(let i=0; i < titles.length; i++) {
+
+			// Try looking in solutions formats
+			if(typeof this.solution_results_formats !== 'undefined' && this.solution_results_formats.length > 0) {
+				match = get_title(titles[i], this.solution_results_titles, this.solution_results_formats);
+			}
+
+			if(match === null && typeof this.t1_formats !== 'undefined' && this.t1_formats.length > 0) {
+				match = get_title(titles[i], this.t1_titles, this.t1_formats);
+			} 
+
+			if(match === null && typeof this.t2_formats !== 'undefined' && this.t2_formats.length > 0) {
+				match = get_title(titles[i], this.t2_titles, this.t2_formats);
+			} 
+
+			if(match === null && typeof this.t3_formats !== 'undefined' && this.t3_formats.length > 0) {
+				match = get_title(titles[i], this.t3_titles, this.t3_formats);
+			} 
+
+			// Add found column format or the default
+			if(match === null ) {
+				formats.push(default_format);
+			} else {
+				formats.push(match);
 			}
 		} 
 
+		// Logic check to make sure that we have a format for each column.
+		if( formats.filter( f => typeof f === 'undefined').length > 0) {
+			console.log(formats)
+			console.log(titles);
+			throw new Error('Invalid undefined result for get_column_formats_based_on_title');
+		}
+
 		return formats;
 	}
+
+
 
 	// Has the user provided input?
 	client_has_answered(): boolean {
@@ -1863,13 +1883,12 @@ class IfPageSqlSchema extends IfPageBaseSchema {
 		// See if we need to re-generate client answers. If so, pop out, as sql results
 		// must be set externally by queryFactory.
 		if(this.client_results_rows === null || this.client_results_rows.length === 0){
+			this.correct = null;
 			return;
-			console.log(this);
-			throw new Error('Client results must be re-generated before running IfPageSchema.SQL.updateCorrect(). Logic error.')
 		}
 		if(this.client_results_titles === null || this.client_results_titles.length === 0){
+			this.correct = null;
 			return;
-			throw new Error('Client results must be re-generated before running IfPageSchema.SQL.updateCorrect(). Logic error.')
 		}
 
 		// See if we need to re-generate solution answers. If so, error out, as sql results

@@ -530,7 +530,7 @@ const kc_if_and_not_logic = ({
             template_values: {
                 'cell1': 'popCell(b1,c1,d1)',
                 'cell2': 'popCell(b1,c1,d1)',
-                'n': 'randOf(0)',
+                'n': 0,
             },
 
         }

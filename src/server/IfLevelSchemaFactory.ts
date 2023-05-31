@@ -3,7 +3,7 @@ import { get_page_schema_as_class } from './../shared/IfPageSchemas';
 import { runGen } from './Gens';
 import { DataFactory } from './DataFactory';
 
-import { compile_template_values } from './../shared/template';
+import { get_compiled_template_values } from './../shared/template';
 import { arrayDifferent, random_boolean_from_string, clean_text_of_tabs_and_newlines } from './../shared/misc';
 
 
@@ -131,7 +131,7 @@ async function _initialize_json(level: IfLevelSchema, original_json: any): Promi
 	// Setup template values (if any!);
 	// This converts strings like [1-3] into numbers 1, 2, or 3.
 	// It also works with references. See templates for more information.
-	json.template_values = compile_template_values( json, level );
+	json.template_values = get_compiled_template_values( json, level );
 
 	// Type-specific setup
 	if( json.type === 'IfPageTextSchema' ) {

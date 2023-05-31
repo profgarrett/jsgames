@@ -7,7 +7,7 @@
 
 //import initSqlJs from "sql.js";
 //import initSqlJs from 'sql.js';
-
+import { fill_template } from "./template";
 
 function quote_string(s_or_i: any): string {
 	if(typeof s_or_i === 'string' ) return '"' + s_or_i + '"';
@@ -19,12 +19,12 @@ function return_create_tables(json: any): string {
 		let lines: string[] = [];
 
 		// T1
-		lines.push('CREATE TABLE ' + json.t1_name + ' (' );
+		lines.push('CREATE TABLE "' + json.t1_name + '" (' );
 
 		// Add each column, basing type on if it is text or not.
 		let lines_sub: string[] = [];
 		for(let i = 0; i < json.t1_titles.length; i++) {
-			lines_sub.push( json.t1_titles[i] + ' ' + 
+			lines_sub.push( '"'+json.t1_titles[i] + '" ' + 
 					(json.t1_formats[i] === 'text' ? 'char' : 'real')
 			);
 		}
@@ -39,8 +39,8 @@ function return_insert_intos(json: any): string {
 
 		// T1
 		for (let i = 0; i < json.t1_rows.length; i++) {
-			lines.push('INSERT INTO ' + json.t1_name + ' ' );
-			lines.push(' ('+ json.t1_titles.join(', ') + ') ');
+			lines.push('INSERT INTO "' + json.t1_name + '" ' );
+			lines.push(' ("'+ json.t1_titles.join('", "') + '") ');
 			lines.push(' VALUES (');
 
 			// Add quoted values
@@ -87,7 +87,9 @@ async function proto_queryFactory_getSolutionResults(json: any, SQL: any): Promi
 	db.exec(return_create_tables(json));
 	db.exec(return_insert_intos(json));
 
-	const res = db.exec(json.solution_sql);
+	const sql = fill_template(json.solution_sql, json.template_values);
+	const res = db.exec(sql);
+	
 	if(res.length !== 1) throw new Error('queryFactory solution found length not equal to 1');
 
 	return {
@@ -133,12 +135,13 @@ async function proto_queryFactory_getClientResults(json: any, SQL: any): Promise
 		} else {
 			throw new Error('Invalid option for proto_queryfacotry_getclientresults')
 		}
-		//console.log(message);
 		return { titles: [], rows: [], error: message };
 	}
 
-	// Bubble up this error.
-	if(res.length !== 1) throw new Error('queryFactory client found length not equal to 1');
+	// Results can zero at this point, for example WHERE false 
+	if(res.length !== 1) {
+		return { titles: [], rows: [], error: 'No records returned'};	
+	}
 
 	return {
 		titles: res[0].columns, 
