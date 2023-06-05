@@ -14,22 +14,58 @@ function quote_string(s_or_i: any): string {
 	return s_or_i;
 }
 
-	// Get the SQL text to create tables t1-tn
+
+/**
+ * Return a single table as a string.
+ * 
+ * @param name 
+ * @param titles 
+ * @param formats 
+ */
+function _return_create_table(name: string, titles: string[], formats: string[]): string {
+	const lines: string[] = [];
+
+	// Sanity check.
+	if(titles.length !== formats.length) {
+		console.log(titles, formats);
+		throw new Error('queryFactory_clients: return create table has different titles v. formats');
+	}
+
+	lines.push('CREATE TABLE "' + name + '" (' );
+
+	// Add each column, fixing type.	
+	for(let i = 0; i < titles.length; i++) {
+		if(formats[i] === 'text') {
+			lines.push( '"'+titles[i] + '" TEXT' + (i<titles.length-1 ? ', ' : '') )
+		} else if(formats[i] === '0' || formats[i] === 'pk' || formats[i] === 'fk' ) {
+			lines.push( '"'+titles[i] + '" INT' + (i<titles.length-1 ? ', ' : '') )
+		} else if(formats[i] === '$') {
+			lines.push( '"'+titles[i] + '" REAL' + (i<titles.length-1 ? ', ' : '') )
+		} else {
+			throw new Error('queryFactory_clients: invalid type of '+formats[i] + ' for ' + name);
+		}
+	}
+
+	// Make sure that we don't accept bad data for each table, which is SQLite default
+	lines.push(  ') STRICT; ');
+
+	return lines.join(" ");
+}
+
+// Get the SQL text to create tables t1-tn
 function return_create_tables(json: any): string {
 		let lines: string[] = [];
 
-		// T1
-		lines.push('CREATE TABLE "' + json.t1_name + '" (' );
+		lines.push(_return_create_table(json.t1_name, json.t1_titles, json.t1_formats));
 
-		// Add each column, basing type on if it is text or not.
-		let lines_sub: string[] = [];
-		for(let i = 0; i < json.t1_titles.length; i++) {
-			lines_sub.push( '"'+json.t1_titles[i] + '" ' + 
-					(json.t1_formats[i] === 'text' ? 'char' : 'real')
-			);
+		if(typeof json.t2_name !== 'undefined' && json.t2_name !== null && json.t2_name.length > 0) {
+			lines.push(_return_create_table(json.t2_name, json.t2_titles, json.t2_formats));
 		}
-		lines.push( lines_sub.join(', ') + '); ');
+		if(typeof json.t3_name !== 'undefined' && json.t3_name !== null && json.t3_name.length > 0) {
+			lines.push(_return_create_table(json.t3_name, json.t3_titles, json.t3_formats));
+		}
 
+		// Done!
 		return lines.join(' ');
 	}
 
@@ -49,6 +85,39 @@ function return_insert_intos(json: any): string {
 			);
 
 			lines.push(');');
+		}
+
+		// T2
+		if(typeof json.t2_rows !== 'undefined') {
+			for (let i = 0; i < json.t2_rows.length; i++) {
+				lines.push('INSERT INTO "' + json.t2_name + '" ' );
+				lines.push(' ("'+ json.t2_titles.join('", "') + '") ');
+				lines.push(' VALUES (');
+
+				// Add quoted values
+				lines.push(
+					json.t2_rows[i].map( quote_string ).join(', ')
+				);
+
+				lines.push(');');
+			}
+		}
+
+
+		// T3
+		if(typeof json.t3_rows !== 'undefined') {
+			for (let i = 0; i < json.t3_rows.length; i++) {
+				lines.push('INSERT INTO "' + json.t3_name + '" ' );
+				lines.push(' ("'+ json.t3_titles.join('", "') + '") ');
+				lines.push(' VALUES (');
+
+				// Add quoted values
+				lines.push(
+					json.t3_rows[i].map( quote_string ).join(', ')
+				);
+
+				lines.push(');');
+			}
 		}
 
 		return lines.join(' ');
@@ -84,13 +153,14 @@ async function proto_queryFactory_getSolutionResults(json: any, SQL: any): Promi
 	if(typeof window !== 'undefined') throw new Error('You can not run queryFactory_updateSolutionResults on the client');
 
 	const db = new SQL.Database();
+
 	db.exec(return_create_tables(json));
 	db.exec(return_insert_intos(json));
 
 	const sql = fill_template(json.solution_sql, json.template_values);
 	const res = db.exec(sql);
 	
-	if(res.length !== 1) throw new Error('queryFactory solution found length not equal to 1');
+	if(res.length !== 1) throw new Error('queryFactory solution found length not equal to 1, '+ sql);
 
 	return {
 		titles: res[0].columns, 
@@ -125,7 +195,6 @@ async function proto_queryFactory_getClientResults(json: any, SQL: any): Promise
 		
 		// Run query
 		res = db.exec(json.client_sql);
-		
 	} catch (e: any) {
 		let message = '';
 		if(typeof e === 'string') {

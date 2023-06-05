@@ -6,6 +6,7 @@ import { IfPageSqlSchema } from '../../../shared/IfPageSchemas';
 import type { IStringIndexJsonObject } from '../../components/Misc';
 import Editor from '@monaco-editor/react';
 import { formatDialect, sqlite } from 'sql-formatter';
+import { debug } from 'webpack';
 
 const USE_MONACO_NICE_EDITOR = true;
 
@@ -41,17 +42,33 @@ export default class SqlQuery extends React.Component<PropsType, StateType> {
 	_render_tables = (): React.ReactElement => {
 		const p = this.props.page;
 
-		let t1 = this.__render_table('t1', p.t1_name, p.t1_titles, p.t1_formats, p.t1_rows );
 		let solution = this.__render_table('sol', 'Solution', p.solution_results_titles, p.solution_results_formats, p.solution_results_rows );
 
 
 		let items: any[] = [];
 
+		let t = this.__render_table('t1', p.t1_name, p.t1_titles, p.t1_formats, p.t1_rows );
 		items.push(<Accordion.Item eventKey='t1' key='sqlqueryt1'>
 			<Accordion.Header>{ 'Table: '+p.t1_name }</Accordion.Header>
-			<Accordion.Body>{ t1 }</Accordion.Body> 
+			<Accordion.Body>{ t }</Accordion.Body> 
 			</Accordion.Item>)
 		
+		if(p.t2_name !== null && p.t2_name.length > 0) {
+			t = this.__render_table('t2', p.t2_name, p.t2_titles, p.t2_formats, p.t2_rows );
+			items.push(<Accordion.Item eventKey='t2' key='sqlqueryt2'>
+			<Accordion.Header>{ 'Table: '+p.t2_name }</Accordion.Header>
+			<Accordion.Body>{ t }</Accordion.Body> 
+			</Accordion.Item>)
+		}
+
+		if(p.t3_name !== null && p.t3_name.length > 0) {
+			t = this.__render_table('t3', p.t3_name, p.t3_titles, p.t3_formats, p.t3_rows );
+			items.push(<Accordion.Item eventKey='t3' key='sqlqueryt3'>
+			<Accordion.Header>{ 'Table: '+p.t3_name }</Accordion.Header>
+			<Accordion.Body>{ t }</Accordion.Body> 
+			</Accordion.Item>)
+		}
+
 		if(p.solution_results_visible) {
 			items.push(<Accordion.Item eventKey='solution' key='sqlquerysolution'>
 				<Accordion.Header>{ 'Solution' }</Accordion.Header>
@@ -70,7 +87,6 @@ export default class SqlQuery extends React.Component<PropsType, StateType> {
 			: p.get_column_formats_based_on_title(column_titles);
 
 		if(fixed_column_formats.length !== column_titles.length) {
-			debugger;
 			throw new Error('renderTable not found matching length in SqlQuery');
 		}
 
@@ -98,17 +114,20 @@ export default class SqlQuery extends React.Component<PropsType, StateType> {
 	// Return a formatted value.
 	__render_table_td = (column_formats: string[], key: string, value: string, index: number): ReactElement => {
 		let format = column_formats[index];
-		let formatted_value = value;
+		let formatted_value = <span>{ value }</span>;
 		let leftAlign = false;
 
-		if(format === 'string') {
+		if(format === 'text') {
 			leftAlign = true;
 		} else if(format === '0') {
 			// No change
+		} else if(format === 'pk') {
+			formatted_value = <b>{value}</b>;
+		} else if(format === 'fk') {
+			formatted_value = <i>{value}</i>;
 		} else if(format === '$') {
-			formatted_value = '$' + value;
+			formatted_value = <span>{'$' + value}</span>;
 		} else {
-			debugger;
 			throw new Error("Unable to display SqlQuery.render_table_td format "+format);
 		}
 
@@ -164,9 +183,6 @@ export default class SqlQuery extends React.Component<PropsType, StateType> {
 		// Override, making sure that ON starts on a newline with two spaces.
 		// to the prior line's input.
 		const formatted_with_on_newline = formatted.replaceAll(/ON /g, '\n  ON ');
-
-		//console.log(s, formatted, formatted_with_on_newline);
-		//debugger;
 
 		return formatted_with_on_newline;
 	}

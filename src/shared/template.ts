@@ -199,6 +199,47 @@ if(DEBUG) {
 	assert(values.x1_ref != 'a1')
 	assert(values.x2_ref != 'a1')
 
+
+	// Test popColumn for sql pages
+	values = get_compiled_template_values({ 
+		t1_titles: ['aTitle', 'bTitle', 'cTitle'],
+		template_values: { 
+			x1: 'popColumn(aTitle,bTitle)',
+			x2: 'popColumn(aTitle,bTitle)' 
+		}
+	},baselevel);
+	assert(values.x1 != 'cTitle')
+	assert(values.x2 != 'cTitle')
+	assert(values.x1 !== values.x2)
+
+
+	values = get_compiled_template_values({ 
+		t1_titles: ['aTitle'],
+		t2_titles: ['bTitle'],
+		t3_titles: ['cTitle'],
+		template_values: { 
+			x1: 'popColumn(aTitle,bTitle)',
+			x2: 'popColumn(aTitle,bTitle)' 
+		}
+	},baselevel);
+	assert(values.x1 != 'cTitle')
+	assert(values.x2 != 'cTitle')
+	assert(values.x1 !== values.x2)
+
+	values = get_compiled_template_values({ 
+		t1_titles: ['aTitle', 'bTitle', 'cTitle'],
+		template_values: { 
+			x1: 'popColumn()',
+			x2: 'popColumn()',
+			x3: 'popColumn()',
+		}
+	},baselevel);
+
+	assert(values.x1 === 'aTitle' || values.x1 === 'bTitle' || values.x1 === 'cTitle' )
+	assert(values.x2 === 'aTitle' || values.x2 === 'bTitle' || values.x2 === 'cTitle' )
+	assert(values.x3 === 'aTitle' || values.x3 === 'bTitle' || values.x3 === 'cTitle' )
+	assert(values.x1 !== values.x2 && values.x2 !== values.x3)
+
 }
 
 
@@ -218,10 +259,41 @@ interface IPage {
 	template_values?: IStringIndexJsonObject 
 	column_titles?: string[]
 	tests?: IStringIndexJsonObject[]
+	t1_titles?: string[]
+	t2_titles?: string[]
+	t3_titles?: string[]
 }
 interface IExcelRow1Reference {
 	title: string,
 	ref: string,
+}
+
+
+/**
+ * Return a list of columns for the page
+ */
+function get_all_table_titles(page: IPage): string[] {
+	let titles: string[];
+
+	// t1
+	if(typeof page.t1_titles !== 'undefined') {
+		titles = [...page.t1_titles];
+	} else {
+		titles = [];
+	}
+
+	// t2/3
+	if(typeof page.t2_titles !== 'undefined') {
+		titles.push(...page.t2_titles);
+	}
+	if(typeof page.t3_titles !== 'undefined') {
+		titles.push(...page.t3_titles);
+	}
+
+	// Remove duplicates
+	titles = titles.filter((value, index, array) => array.indexOf(value) === index);
+
+	return titles;
 }
 
 /**
@@ -273,6 +345,7 @@ function get_compiled_template_values(page: IPage, level?: ILevel): IStringIndex
 
 	// Make sure that we have all lowercase references.
 	let page_excel_references: IExcelRow1Reference[] = get_all_excel_row1_references( page );
+	let page_column_titles: string[] = get_all_table_titles(page);
 
 	// Temporary variables for use below.
 	let s: string;
@@ -310,6 +383,7 @@ function get_compiled_template_values(page: IPage, level?: ILevel): IStringIndex
 				continue;
 			} 
 			
+			// References, for Excel pages.
 			// Return one of a list of cells available in the underlying data.
 			// Persistant, so don't return a cell previously returned.
 			if( s.startsWith('popCell(') ) {
@@ -336,6 +410,35 @@ function get_compiled_template_values(page: IPage, level?: ILevel): IStringIndex
 				page_excel_references.pop();
 				continue;
 			}  
+
+
+			// Columns, used for SQL pages
+			if(s.startsWith('popColumn(')) {
+
+				// Make sure we aren't out of columns.
+				if(page_column_titles.length < 1) throw new Error('template.js popColumn run out of refs');
+
+
+				// Remove any refs that don't match something in the filter.
+				// Safe to run multiple times, as it only removes items that don't match.
+				if(s !== 'popColumn()') {
+					if(s.indexOf('"') !== -1) throw new Error('template.get_compiled_template_values can not handle "quoted" strings');
+					if(s.indexOf("'") !== -1) throw new Error('template.get_compiled_template_values can not handle \'quoted\' strings');
+					
+					filter_refs = s.slice(10, s.length-1).toLowerCase().split(',');
+					page_column_titles = page_column_titles.filter( (title: string) => filter_refs.includes(title.toLowerCase()));
+				}
+				
+				if(page_column_titles.length < 1 )  {
+					throw new Error('Invalid reference in template.page_column_titles');
+				}
+				
+				// Add the title to the return values.
+				// Have the || to avoid typeScript error of returning undef if array is too short.
+				return_values[key] = page_column_titles.pop() || '';
+				continue;
+			}
+	
 			
 			if( s.startsWith('randOf(')) {
 				// Make sure that there is no period.

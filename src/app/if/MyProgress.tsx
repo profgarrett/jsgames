@@ -321,8 +321,11 @@ export default class MyProgress extends React.Component<PropsType, StateType> {
 				review_incompleted_levels:  new Array<IfLevelSchema>(),
 			};
 
-			l.title = IfLevels.filter( l => l.code === code)[0].title;
-			l.description = IfLevels.filter( l => l.code === code)[0].description;
+			const levels = IfLevels.filter( l => l.code === code);
+			if(levels.length !== 1) throw new Error('Unable to locate level in IFLevels, "' + code +  '"');
+
+			l.title = levels[0].title;
+			l.description = levels[0].description;
 
 			if(IfLevels.filter( l=> l.code === code+'review').length > 0) {
 				l.review_available = true;

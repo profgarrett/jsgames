@@ -1,9 +1,9 @@
 import { KC_NAMES } from './kc';
 
-const t1_farm1_data = {
+const t1_animals = {
 	t1_name: 'animals',
 	t1_titles: ['Name', 'Cost', 'Inventory', 'Sold', 'Breed Rating' ],
-    t1_formats: ['string', '$', '0', '0', 'string' ],
+    t1_formats: ['text', '$', '0', '0', 'text' ],
 	t1_rows: [
 			[ 'Sheep',  34, 54, 400, "A" ], 
 			[ 'Goats', 39, 49,  128, "B" ], 
@@ -14,17 +14,17 @@ const t1_farm1_data = {
 
 
 
-const t1_farm2_data = {
-	t1_name: 'pigs',
-	t1_titles: ['Name', 'Gender', 'Weight' ],
-    t1_formats: ['string', 'string', '0' ],
-	t1_rows: [
-		[ 'Sarah',  'Female', 432 ], 
-		[ 'Jane',  'Male', 132 ], 
-		[ 'Sue',  'Female', 332 ], 
-		[ 'Bob',  'Male', 202 ], 
-		[ 'Jerry',  'Female', 32 ], 
-		[ 'Ryan',  'Female', 32 ], 
+const t2_pigs = {
+	t2_name: 'pigs',
+	t2_titles: ['Name', 'Gender', 'Price', 'Pig Weight', 'Pig Height' ],
+    t2_formats: ['text', 'text', '$', '0', '0' ],
+	t2_rows: [
+		[ 'Sarah',  'Female', 1531, 432, 23 ], 
+		[ 'Jane',  'Male', 842, 132, 18 ], 
+		[ 'Sue',  'Female', 281, 332, 34 ], 
+		[ 'Bob',  'Male', 240, 202, 54 ], 
+		[ 'Jerry',  'Female', 81, 32, 8 ], 
+		[ 'Ryan',  'Female', 154, 32, 12 ], 
 	]
 };
 
@@ -53,7 +53,7 @@ const tutorial_pages = [
 		instruction: `Type <code>SELECT * FROM animals</code> in the Query Window below. Then click 
 			 <kbd>Refresh query results</kbd> in Query Results.`,
 
-		...t1_farm1_data,
+		...t1_animals,
 		solution_sql: 'SELECT * FROM animals',
 
 	}, {	..._baseT,
@@ -62,14 +62,15 @@ const tutorial_pages = [
 				<br/><br/>
 				For example, <code>SELECT name, sold FROM animals</code>
 				`,
-			instruction: `Write a query that shows the <code>name</code> and <code>{col1}</code> fields.`,
+			instruction: `Write a query that shows the <code>name</code>, <code>{col1}</code>, and <code>{col2}</code> fields.`,
 	
-			...t1_farm1_data,
+			...t1_animals,
 	
-			solution_sql: 'SELECT name, {col1} FROM animals',
+			solution_sql: 'SELECT name, {col1}, {col2} FROM animals',
 
             template_values: {
-                'col1': 'randOf(cost,inventory,sold)',
+                'col1': 'popColumn(cost,inventory,sold)',
+                'col2': 'popColumn(cost,inventory,sold)',
             },
 
 
@@ -83,7 +84,7 @@ const tutorial_pages = [
 			`,
 		instruction: `Write a query that shows the <code>name</code> and <code>{col1}</code> fields. Experiment by writing in UPPER, lower, and Mixed case.`,
 
-		...t1_farm1_data,
+		...t1_animals,
 
 		solution_sql: 'SELECT name, {col1} FROM animals',
 
@@ -100,126 +101,97 @@ const tutorial_pages = [
 			To help you follow this style, the tutorial will automatically format your code prior to submitting
 			it. Try submitting a wrong answer to a query, and seeing how it will fix your style.
 			`,
-		instruction: `Write a query that shows the name field for all animals. Submit an incorrect answer to see how your code is automatically formatted.`,
+		instruction: `Write a query that shows all fields to see the system reformat your response. Then just get the {col1} field to continue this tutorial.`,
 
-		...t1_farm1_data,
+		...t1_animals,
 
-		solution_sql: 'SELECT name FROM animals ',
+		solution_sql: 'SELECT {col1} FROM animals ',
 
+		template_values: {
+			'col1': 'randOf(cost,inventory,sold)',
+		},
 
 	}, {	..._baseT,
-		description: `While most tables use a single word for a column or table, some have columns with  multiple words. 
+		description: `Some tables have column names containing spaces, such as <code>Animal Name</code>.
 			In those cases, you will need to wrap 
-			the words in quotes, such as  <code>SELECT {col1}, inventory FROM animals</code>
+			the column name in quotes, such as  <code>SELECT "Breed Rating", inventory FROM animals</code>
 			<br/><br/>
 			Be sure to put any commas outside of the quote, for example use <code>"breed rating", inventory</code>
 			instead of <code>"breed rating," inventory</code>.
 			`,
-		instruction: `Write a query that shows the <code>{col1}</code> and <code>name</code> fields.`,
+		instruction: `Write a query that shows the <code>breed rating</code> and <code>{col1}</code> fields.`,
 
-		...t1_farm1_data,
+		...t1_animals,
 
-		solution_sql: 'SELECT "breed rating", name FROM animals',
+		solution_sql: 'SELECT "breed rating", {col1} FROM animals',
 		template_values: {
-			'col1': 'randOf("breed rating")'
+			'col1': 'randOf(name,cost,inventory)'
 		}
 
 	}, {	..._baseT,
-		description: `We can also set the sort order of the resulting table. For example, 
-			the query <code>SELECT * FROM animals ORDER BY name</code> will place them in 
-			order by name.
-			<br/><br/>
-			You can also choose if you want ascending (a-z) or descending (z-a). Just add 
-			either <code>desc</code> or <code>asc</code> after each field. For example,
-			<ul>
-				<li><code>SELECT * FROM animals ORDER BY name ASC</code></li>
-				<li><code>SELECT * FROM animals ORDER BY name DESC</code> </li>
-			</ul>
+		description: `Good job! Let's try another table. Look below to see our second table called <b>pigs</b>.
 			`,
-		instruction: `Write a query that shows all fields, sorted by breed rating in descending order.`,
+		instruction: `Write a query that shows the animals' sale prices.`,
 
-		...t1_farm1_data,
+		...t1_animals,
+		...t2_pigs,
 
-		solution_sql: 'SELECT * FROM animals ORDER BY "breed rating" DESC',
-
-
-	}, {	..._baseT,
-		description: `We sometimes will want to sort by multiple fields. You can 
-			list each field, separated by a comma.
-			<br/><br/>
-			For example, <code>SELECT * FROM animals ORDER BY name, weight</code> will place them in 
-			order first by name, and then by weight inside of each name.
-			`,
-		instruction: `Write a query that shows all animals, sorted by Breed Rating and Name.`,
-
-		...t1_farm1_data,
-
-		solution_sql: 'SELECT * FROM animals ORDER BY "Breed Rating", name',
-
+		solution_sql: 'SELECT price FROM animals',
 
 	}
 ];
 
 
-
-
-
 const _baseX = {
 	type: 'IfPageSqlSchema',
-	...t1_farm1_data,
-	
+	...t1_animals,
+	...t2_pigs,
+
 	instruction: `Type in the correct sql query.`,
 	code: 'test',
 	kcs: [ KC_NAMES.KC_SQL_SELECTFROM ],
 };
 
+
+
 const test_pages = [ 
+
 	{ 	..._baseX,
-		description: `Retrieve all fields from the animals table.`,
-		solution_sql: 'SELECT * FROM animals',
-	}, { 	..._baseX,
-		description: `Retrieve all fields from the animals table, sorted by Name ascending.`,
-		solution_sql: 'SELECT * FROM animals ORDER BY name',
-	}, { 	..._baseX,
-		description: `Retrieve all fields from the animals table, sorted by Name descending.`,
-		solution_sql: 'SELECT * FROM animals ORDER BY name DESC',
-	}, { 	..._baseX,
-		description: `Retrieve all fields from the animals table, sorted by Breed Rating ascending.`,
-		solution_sql: 'SELECT * FROM animals ORDER BY "Breed Rating"',
-	}, { 	..._baseX,
-		description: `Retrieve all fields from the animals table, sorted by Breed Rating descending.`,
-		solution_sql: 'SELECT * FROM animals ORDER BY "Breed Rating" desc',
-	},{ 	..._baseX,
-		description: `Retrieve Name and Breed Rating from the animals table.`,
-		solution_sql: 'SELECT name, "breed rating" FROM animals',
-	},{ 	..._baseX,
-		description: `Retrieve Name and Inventory from the animals table.`,
-		solution_sql: 'SELECT name, inventory FROM animals',
-	},{ 	..._baseX,
-		description: `Retrieve Name and Cost from the animals table.`,
-		solution_sql: 'SELECT name, cost FROM animals',
-	},{ 	..._baseX,
-		description: `Retrieve Sold, Inventory, and Name from the animals table.`,
-		solution_sql: 'SELECT sold, inventory, name FROM animals',
-	},{ 	..._baseX,
-		description: `Retrieve Name, Breed Rating, and Inventory from the animals table.`,
-		solution_sql: 'SELECT name, "Breed Rating", Inventory FROM animals',
-	},
-
-	/*
+		description: `Retrieve all fields from the {tablename} table.`,
+		solution_sql: 'SELECT * FROM {tablename}',
 		template_values: {
-			'sum': 'randOf(all together,in total)'
-		},
-		feedback: [
-			{ 'has': 'no_values' },
-			{ 'has': 'symbols', args: ['+']},
-			{ 'has': 'references', args: ['a1', 'b1', 'c1', 'd1']}
-		]
-	},{
-	*/
+			'tablename': 'randOf(animals,pigs)'
+		}
+	}, { 	..._baseX,
+		description: `Retrieve Name, {col1}, and {col2} from the pigs table.`,
+		solution_sql: 'SELECT name, {col1}, {col2} FROM pigs',
+		template_values: {
+			'col1': 'popColumn(name,gender,price)',
+			'col2': 'popColumn(name,gender,price)',
+		}
+	}, { 	..._baseX,
+		description: `Retrieve Name and {col1} from the pigs table.`,
+		solution_sql: 'SELECT name, "{col1}" FROM pigs',
+		template_values: {
+			'col1': 'popColumn(pig weight,pig height)'
+		}
+	}, { 	..._baseX,
+		description: `Retrieve {col1}, {col2}, and {col3} from the pigs table.`,
+		solution_sql: 'SELECT "{col1}", "{col2}", "{col3}" FROM pigs',
+		template_values: {
+			'col1': 'popColumn(name,gender,price,pig weight,pig height)',
+			'col2': 'popColumn(name,gender,price,pig weight,pig height)',
+			'col3': 'popColumn(name,gender,price,pig weight,pig height)',
+		}
+	}, { 	..._baseX,
+		description: `Retrieve Name and {col1} from the pigs table.`,
+		solution_sql: 'SELECT name, "{col1}" FROM pigs',
+		template_values: {
+			'col1': 'popColumn(pig weight,pig height)'
+		}
 
+	},
 ];
-
 
 
 const kc_sql_selectfrom = {

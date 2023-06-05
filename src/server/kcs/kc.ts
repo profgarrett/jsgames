@@ -112,6 +112,10 @@ const KC_NAMES = {
 
 	// SQL
 	KC_SQL_SELECTFROM: 'kc_sql_selectfrom',
+	KC_SQL_ORDERBY: 'kc_sql_orderby',
+	KC_SQL_WHERE: 'kc_sql_where',
+	KC_SQL_WHERE_AND_OR: 'kc_sql_where_and_or',
+	KC_SQL_JOIN_INNER: 'kc_sql_join_inner',
 };
 
 
@@ -132,10 +136,7 @@ const makeTutorialGenFromKC = (kc: AdaptiveKC, review_questions: number = REVIEW
 	// Only add the 'time to practice' if tutorial pages were added.
 	if(pages.length > 0) pages.push({
 			type: 'IfPageTextSchema',
-			description: `Great!  Now it's time to practice some problems. 
-				<br/><br/>
-				You can review earlier pages by hovering your cursor 
-				over the 'Progress' icons below.`
+			description: `Great!  Now it's time to practice some problems.`
 		});
 
 	

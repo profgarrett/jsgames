@@ -223,7 +223,6 @@ class IfPageBaseSchema extends Schema {
 	// blobs of it's contained pages. This shouldn't actually be called, as the instantiated classes
 	// all over-ride this method.
 	updateUserFields(json: any) {
-		console.log(json);
 		throw new Error('Inheriting classes must implement updateUserFields and call _updateUserFields');
 	}
 
@@ -1341,8 +1340,6 @@ class IfPageFormulaSchema extends IfPageBaseSchema {
 			if(!this.correct) return;
 		}
 
-		//console.log(['updateCorrect: 1313', this.client_test_results, this.server_test_results, this.client_f, this.solution_f]);
-
 		// Check individual answers
 		for(let i=0; i<this.client_test_results.length && this.correct; i++) {
 
@@ -1499,7 +1496,6 @@ class IfPageFormulaSchema extends IfPageBaseSchema {
 			try {
 				res =  parser.parse(clean_formula.substr(1));  // Parser doesn't want a starting `=`
 			} catch(e) {
-				console.log(res);
 				res.error = '#ERROR!';
 			}
 		}
@@ -1647,7 +1643,6 @@ class IfPagePredictFormulaSchema extends IfPageFormulaSchema {
 			// This should be an array of strings.
 			predicted_answers_used: { type: 'Array', initialize: (a: any) => isDef(a) && isArray(a) ? a : [] },
 		};
-		//console.log(inherit);
 	}
 	
 	// Loop through predictions to see if the correct items have been chosen.
@@ -1704,6 +1699,16 @@ class IfPageSqlSchema extends IfPageBaseSchema {
     t1_formats!: Array<string>
 	t1_rows!: Array<any>
 
+	t2_name!: string
+	t2_titles!: Array<string>
+    t2_formats!: Array<string>
+	t2_rows!: Array<any>
+
+	t3_name!: string
+	t3_titles!: Array<string>
+    t3_formats!: Array<string>
+	t3_rows!: Array<any>
+
 	// Problem
 	client_sql!: string;
 	client_results_titles!: string[] | null;
@@ -1749,6 +1754,16 @@ class IfPageSqlSchema extends IfPageBaseSchema {
 			t1_formats: { type: 'Array', initialize: (a: any) => isDef(a) && isArray(a) ? a : [] },
 			t1_rows: { type: 'Array', initialize: (a: any) => isDef(a) && isArray(a) ? a : [] },
 
+			t2_name: { type: 'String', initialize: (s: any) => isDef(s) ? s : null },
+			t2_titles: { type: 'Array', initialize: (a: any) => isDef(a) && isArray(a) ? a : [] },
+			t2_formats: { type: 'Array', initialize: (a: any) => isDef(a) && isArray(a) ? a : [] },
+			t2_rows: { type: 'Array', initialize: (a: any) => isDef(a) && isArray(a) ? a : [] },
+
+			t3_name: { type: 'String', initialize: (s: any) => isDef(s) ? s : null },
+			t3_titles: { type: 'Array', initialize: (a: any) => isDef(a) && isArray(a) ? a : [] },
+			t3_formats: { type: 'Array', initialize: (a: any) => isDef(a) && isArray(a) ? a : [] },
+			t3_rows: { type: 'Array', initialize: (a: any) => isDef(a) && isArray(a) ? a : [] },
+
 			helpblock: { type: 'String', initialize: (s: any) => isDef(s) ? s : null },
 
 			client_sql: { type: 'String', initialize: (s: any) => isDef(s) ? s : null },
@@ -1769,9 +1784,12 @@ class IfPageSqlSchema extends IfPageBaseSchema {
 	}
 
 	// Guess about column format based on solution and t1, t2, ... 
-	get_column_formats_based_on_title(titles: string[], default_format: string = 'string'): string[] {
+	get_column_formats_based_on_title(titles: string[], default_format: string = 'text'): string[] {
 		const formats: string[] = [];
 		let match: string | null = null;
+
+		// Should only happen on client-side, not server.
+		if(typeof window === 'undefined') throw new Error('get_column_formats_based_on_title');
 
 		const get_title = (title: string, titles: string[], formats: string[]): string | null => {
 			let match_i = -1;
@@ -1785,7 +1803,8 @@ class IfPageSqlSchema extends IfPageBaseSchema {
 
 		// Go through each title, looking for a match.
 		for(let i=0; i < titles.length; i++) {
-
+			match = null;
+			
 			// Try looking in solutions formats
 			if(typeof this.solution_results_formats !== 'undefined' && this.solution_results_formats.length > 0) {
 				match = get_title(titles[i], this.solution_results_titles, this.solution_results_formats);
@@ -1813,8 +1832,7 @@ class IfPageSqlSchema extends IfPageBaseSchema {
 
 		// Logic check to make sure that we have a format for each column.
 		if( formats.filter( f => typeof f === 'undefined').length > 0) {
-			console.log(formats)
-			console.log(titles);
+			//onsole.log(formats, titles);
 			throw new Error('Invalid undefined result for get_column_formats_based_on_title');
 		}
 
@@ -1853,7 +1871,6 @@ class IfPageSqlSchema extends IfPageBaseSchema {
 			this.client_results_rows = null;
 			this.client_results_titles = null;
 		}
-
 		this._updateUserFields(json, ['client_sql', 'time_limit_expired', 'hints_parsed', 'hints_viewsolution']);
 	}
 
@@ -1992,7 +2009,6 @@ function get_page_schema_as_class(json: any): IfPageBaseSchema {
 	}[type];
 
 	if(typeof p === 'undefined') {
-		console.log(json);
 		throw new Error('Invalid type passed to IfPageSchemas.get_page_schema_class');
 	}
 

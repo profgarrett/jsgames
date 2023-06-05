@@ -2,6 +2,9 @@
 	queryFactory is used to generate SQL results
 	This is a modification of queryFActory_client, which defines the basic prototypes
 	That one returns a version of SQL that we can override the SQL result.
+
+	We have two separate versions, so that we can run one on the client and one on the server.
+	As of 6/5/23, only being run on the server, so isn't strictly needed.
 */
 
 import initSqlJs from 'sql.js';

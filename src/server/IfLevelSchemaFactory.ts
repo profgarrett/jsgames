@@ -27,7 +27,7 @@ import { surveymath1, surveymath2 } from './tutorials/surveymath';
 import { surveywaiver_non_woodbury_student, surveywaiver_non_woodbury_user, surveywaiver_woodbury_student, surveywaiver_wvu_user } from './tutorials/surveywaivers';
 import { surveycharts_amt, surveycharts_wu } from './tutorials/surveycharts';
 
-import { sql_selectfrom } from './tutorials/sql';
+import { sql_selectfrom, sql_orderby, sql_where, sql_where_and_or, sql_join_inner } from './tutorials/sql';
 
 import { parseFeedback } from './parseFeedback';
 import type { GenType } from './Gens';
@@ -67,7 +67,7 @@ const LEVEL_GENS: IStringIndexJsonObject = {
 	surveymath1, surveymath2,
 	surveywaiver_non_woodbury_student, surveywaiver_non_woodbury_user, surveywaiver_woodbury_student, surveywaiver_wvu_user,
 	surveycharts_amt, surveycharts_wu,
-	sql_selectfrom,
+	sql_selectfrom, sql_orderby, sql_where, sql_where_and_or, sql_join_inner,
 };
 
 
@@ -235,7 +235,6 @@ async function _initialize_json(level: IfLevelSchema, original_json: any): Promi
 			json.solution_f_visible = false;
 
 		} else {
-			console.log(json);
 			throw new Error('Invalid formula code '+json.code+' in baseifgame');
 		}
 
@@ -268,7 +267,6 @@ async function _initialize_json(level: IfLevelSchema, original_json: any): Promi
 			json.solution_sql_visible = false;
 
 		} else {
-			console.log(json);
 			throw new Error('Invalid formula code '+json.code+' in baseifgame');
 		}
 
@@ -285,21 +283,6 @@ async function _initialize_json(level: IfLevelSchema, original_json: any): Promi
 		json.solution_results_titles = results.titles;
 		json.solution_results_rows = results.rows;
 
-		// todo: delete, removed as client sql query isn't initialized with the raw json.
-		// 
-		// If there is a client solution, then update that as well.
-		// This normally doesn't happen, but it's possible that a 
-		// Note, if there is an error, just set the results to an empty string. This can easily happen if 
-		//    the user has updated with an invalid SQL query.
-		//results = await queryFactory_getClientResults(json);
-		//if(results.error !== null) {
-		//	json.client_feedback = [ results.error ];
-		//}
-		// If an error, these will both be []
-		//json.client_results_titles = results.titles;
-		//json.client_results_rows = results.rows;
-
-
 	} else if( json.type === 'IfPageShortTextAnswerSchema' ) {
 		json.correct_required = false;
 
@@ -310,14 +293,12 @@ async function _initialize_json(level: IfLevelSchema, original_json: any): Promi
 		json.code = typeof json.code === 'undefined' ? 'tutorial' : json.code;
 
 	} else {
-		console.log(json);
 		throw new Error('Invalid page type '+json.type+' in baseifgame');
 	}
 
 	// Require description and instructions.
 	if( typeof json.description === 'undefined' || json.description === null ||
 		typeof json.instruction === 'undefined' || json.instruction === null) {
-		console.log( json );
 		throw new Error('IfGameServerInitializeJson.NullDescriptionOrInstructions');
 	}
 
@@ -405,7 +386,6 @@ const IfLevelSchemaFactory = {
 			// completed.  If completed, then a new page is added at the tail end.
 			// If no more, then the entire level should be marked as completed.
 			if(last_page.completed) {
-				//console.log(last_page);
 				throw new Error('IfGame.addPageOrMarkAsComplete.lastpage_already_completed');
 			}
 
