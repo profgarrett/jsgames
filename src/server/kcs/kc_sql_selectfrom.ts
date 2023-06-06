@@ -60,7 +60,7 @@ const tutorial_pages = [
 			description: `We may not want all columns. You can replace <code>*</code> with the
 				the name of each column (separated by commas).
 				<br/><br/>
-				For example, <code>SELECT name, sold FROM animals</code>
+				For example, <code>SELECT field1, field2, field3 FROM table2</code>
 				`,
 			instruction: `Write a query that shows the <code>name</code>, <code>{col1}</code>, and <code>{col2}</code> fields.`,
 	
@@ -131,12 +131,12 @@ const tutorial_pages = [
 	}, {	..._baseT,
 		description: `Good job! Let's try another table. Look below to see our second table called <b>pigs</b>.
 			`,
-		instruction: `Write a query that shows the animals' sale prices.`,
+		instruction: `Write a query that shows all prices from the pigs table.`,
 
 		...t1_animals,
 		...t2_pigs,
 
-		solution_sql: 'SELECT price FROM animals',
+		solution_sql: 'SELECT price FROM pigs',
 
 	}
 ];

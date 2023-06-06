@@ -11,6 +11,7 @@ const t1_sheep = {
 			[ 'Aunt 2',  275, 4, 0, "C" ], 
 			[ 'Baby', 100, 1, 0, "C" ],
 			[ 'Descendent',  50, 1, 0, "D" ], 
+			[ 'MiXeD CaSe', 100, 1, 0, "C" ],
 		]
 };
 
@@ -77,14 +78,27 @@ const tutorial_pages = [
 			<code>SELECT * FROM pigs WHERE "Pig Name" = "Sue"</code>
 			shows all pigs with a name of Sue.
 			`,
-		instruction: `Write a query that shows all sheep with a name of {v}.`,
+		instruction: `Write a query that shows all sheep with a name of {v}. Be sure to match the capitalization exactly!`,
 
 		solution_sql: 'SELECT * FROM sheep WHERE "Sheep Name" = "{v}"',
 		template_values: {
 			'v': 'randOf(Dad,Mother,Aunt 1,Baby)',
 		}
 
+	}, {	..._baseT,
+		description: `Notice that SQL uses case sensitive string comparisons! 
+			<br/><br/>
+			So, is each of these would be a totally different test:
+			<ul>
+				<li><code>"Sheep name" = "Dad"<code></li>
+				<li><code>"Sheep name" = "dad"</code></li>
+				<li><code>"Sheep name" = "DAD"</code></li>
+			</ul>
+			`,
+		instruction: `Write a query that shows the sheep with a name of MiXeD CaSe.`,
 
+		solution_sql: 'SELECT * FROM sheep WHERE "Sheep Name" = "MiXeD CaSe"',
+		
 	}, {	..._baseT,
 		description: `While most columns are made of either numbers or text, some may have a 
 			boolean (true or false) value stored as a number. In these cases, you will want

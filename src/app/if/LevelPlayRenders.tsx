@@ -183,6 +183,7 @@ export function render_exercise_panel(
 					readonly={ isLoading }
 					editable={ true } 
 					onChange={handleChange} 
+					onValidate={handleValidate}
 					onSubmit={handleSubmit } />;
 					
 	} else {

@@ -158,15 +158,27 @@ async function proto_queryFactory_getSolutionResults(json: any, SQL: any): Promi
 	db.exec(return_insert_intos(json));
 
 	const sql = fill_template(json.solution_sql, json.template_values);
-	const res = db.exec(sql);
-	
-	if(res.length !== 1) throw new Error('queryFactory solution found length not equal to 1, '+ sql);
 
-	return {
-		titles: res[0].columns, 
-		rows: res[0].values,
-		error: null,
-	};
+//	try {
+		const res = db.exec(sql);
+
+		if(res.length !== 1) throw new Error('queryFactory solution found length not equal to 1, '+ sql);
+
+		return {
+			titles: res[0].columns, 
+			rows: res[0].values,
+			error: null,
+		};
+/*
+	} catch (e) {
+		debugger;
+		return {
+			titles: [],
+			rows: [],
+			error: 'error'
+		}
+	}
+*/	
 
 }
 

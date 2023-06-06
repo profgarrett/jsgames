@@ -44,6 +44,10 @@ function isInteger(nVal: number): boolean {
     return typeof nVal === 'number' && isFinite(nVal) && nVal > -9007199254740992 && nVal < 9007199254740992 && Math.floor(nVal) === nVal;
 }
 
+function onlyUnique(value, index, array) {
+	return array.indexOf(value) === index;
+}
+
 
 // Are the arrays similar or different?
 const arrayDifferent = (a1: Array<any>, a2: Array<any>): boolean => {
@@ -1783,6 +1787,49 @@ class IfPageSqlSchema extends IfPageBaseSchema {
 		};
 	}
 
+	// Get a list of all tables
+	get_all_table_names() {
+		const names: string[] = [];
+
+		if(this.t1_name !== null ) {
+			names.push(this.t1_name);
+		}
+		if(this.t2_name !== null ) {
+			names.push(this.t2_name);
+		}
+		if(this.t3_name !== null ) {
+			names.push(this.t3_name);
+		}
+		return names;
+	}
+
+	// Get a list of all column names
+	get_all_column_names(filter: string = '') {
+		
+		if(filter === '') {
+			return [ 
+				...this.get_all_column_names('t1'), 
+				...this.get_all_column_names('t2'), 
+				...this.get_all_column_names('t3'),
+				...this.get_all_column_names('solution') ].filter(onlyUnique);
+		} 
+
+		if(filter === 't1' && this.t1_titles !== null ) {
+			return [ ...this.t1_titles ]
+		}
+		if(filter === 't2' && this.t2_titles !== null ) {
+			return [ ...this.t2_titles ]
+		}
+		if(filter === 't3' && this.t3_titles !== null ) {
+			return [ ...this.t3_titles ]
+		}
+		if(filter === 'solution' && this.solution_results_titles !== null) {
+			return [ ...this.solution_results_titles ];
+		}
+		return [];
+
+	}
+
 	// Guess about column format based on solution and t1, t2, ... 
 	get_column_formats_based_on_title(titles: string[], default_format: string = 'text'): string[] {
 		const formats: string[] = [];
@@ -1840,6 +1887,7 @@ class IfPageSqlSchema extends IfPageBaseSchema {
 	}
 
 
+	
 
 	// Has the user provided input?
 	client_has_answered(): boolean {

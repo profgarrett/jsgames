@@ -196,9 +196,9 @@ export default function LevelPlayContainer() {
 				// Did we try to validate? If so, show feedback no matter what.
 				if(validate_only) {
 					// Show feedback.
-					setIsLoading( false);
+					setIsLoading(false);
 					setLevel(ifLevel);
-					setShowFeedbackOn( current_page_i );
+					setShowFeedbackOn(current_page_i);
 					return;
 				} 
 

@@ -66,6 +66,7 @@ const IfLevels = [
 	{ code: 'sql_where', title: 'SQL - WHERE', description: 'Filter rows from a query' },
 	{ code: 'sql_where_and_or', title: 'SQL - AND / OR', description: 'More complex logical tests' },
 	{ code: 'sql_join_inner', title: 'SQL - INNER JOIN', description: 'Join two tables with INNER JOIN' },
+	{ code: 'sql_join_leftouter', title: 'SQL - LEFT OUTER JOIN', description: 'Join two tables with partial matches '}
 ];
 
 
@@ -465,7 +466,7 @@ const DEFAULT_TUTORIAL_LEVEL_LIST = [
 	'functions1', 'functionsdates','functionstext1', 'functionstext2',
 	'if1', 'if2', 'if3', 'if4', 'if5', 'if6', 'if7',
 	'financial1', 'financial2', 
-	'sql_selectfrom', 'sql_orderby', 'sql_where','sql_where_and_or', 'sql_join_inner',
+	'sql_selectfrom', 'sql_orderby', 'sql_where','sql_where_and_or', 'sql_join_inner', 'sql_join_leftouter',
 	];
 
 

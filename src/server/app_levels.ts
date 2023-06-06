@@ -7,14 +7,14 @@ const router = express.Router();
 
 import { ADMIN_USERNAME } from './secret.js'; 
 import { IfLevels, IfLevelSchema } from './../shared/IfLevelSchema';
-//import { IfPageAnswer, build_answers_from_level } from './../shared/IfPageSchemas';
 import { IfLevelSchemaFactory } from './IfLevelSchemaFactory';
 
 import { from_utc_to_myql, run_mysql_query, is_faculty, to_utc, update_level_in_db } from './mysql';
 import { user_require_logged_in, nocache, log_error, user_get_username_or_emptystring, return_level_prepared_for_transmit } from './network';
 
-import { turn_array_into_map } from './../shared/misc';
 import { return_tagged_level } from './tag';
+
+import { queryFactory_getClientResults } from './../shared/queryFactory';
 
 
 import type { Request, Response, NextFunction } from 'express';
@@ -324,6 +324,27 @@ router.post('/level/:id',
 			
 		}
 
+		// If the last page is a SQL page, then refresh the results.
+		// Note that this is done here, and not in the refresh correct property (which is run by updateUserFields)
+		// This is done to more tightly control exactly when the code runs to create the SQL db.
+		const last_page = iflevel.pages[iflevel.pages.length-1];
+
+		if(last_page.type === 'IfPageSqlSchema') {
+
+			// Look to see if results are null.
+			// This is automatically done by the IfPageSqlSchema.updateUserFields,
+			// showing that the server should re-generated the results and check for correctness. 
+			if(last_page.client_results_rows === null || last_page.client_results_titles === null) {
+				let results = await queryFactory_getClientResults(last_page);
+				last_page.client_results_rows = results.rows;
+				last_page.client_results_titles = results.titles;
+				last_page.client_feedback = [];
+				if(results.error !== null) last_page.client_feedback.push(results.error);
+				last_page.updateCorrect();
+			}
+		}
+
+
 		// Make sure that there is feedback.
 		iflevel.pages.filter( (p: any) => p.client_feedback === null).filter( (p: any) => p.type === 'IfPageFormulaSchema').map( (p:any) => {
 			throw new Error('Client feedback should not be null');
@@ -337,10 +358,6 @@ router.post('/level/:id',
 
 		// Update level in db.
 		const update_results = await update_level_in_db(iflevel);
-
-		//console.log(update_results);
-		//console.log(iflevel.title);
-		//console.log(iflevel);
 
 		// Ensure exactly 1 item was updated.
 		if(update_results.changedRows !== 1) return res.sendStatus(500);

@@ -116,6 +116,7 @@ const KC_NAMES = {
 	KC_SQL_WHERE: 'kc_sql_where',
 	KC_SQL_WHERE_AND_OR: 'kc_sql_where_and_or',
 	KC_SQL_JOIN_INNER: 'kc_sql_join_inner',
+	KC_SQL_JOIN_LEFTOUTER: 'kc_sql_join_leftouter',
 };
 
 

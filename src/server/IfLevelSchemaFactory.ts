@@ -27,12 +27,12 @@ import { surveymath1, surveymath2 } from './tutorials/surveymath';
 import { surveywaiver_non_woodbury_student, surveywaiver_non_woodbury_user, surveywaiver_woodbury_student, surveywaiver_wvu_user } from './tutorials/surveywaivers';
 import { surveycharts_amt, surveycharts_wu } from './tutorials/surveycharts';
 
-import { sql_selectfrom, sql_orderby, sql_where, sql_where_and_or, sql_join_inner } from './tutorials/sql';
+import { sql_selectfrom, sql_orderby, sql_where, sql_where_and_or, sql_join_inner, sql_join_leftouter } from './tutorials/sql';
 
 import { parseFeedback } from './parseFeedback';
 import type { GenType } from './Gens';
 
-import { queryFactory_getSolutionResults, queryFactory_getClientResults } from './../shared/queryFactory';
+import { queryFactory_getSolutionResults } from './../shared/queryFactory';
 
 interface IStringIndexJsonObject {
 	[key: string]: any
@@ -67,7 +67,7 @@ const LEVEL_GENS: IStringIndexJsonObject = {
 	surveymath1, surveymath2,
 	surveywaiver_non_woodbury_student, surveywaiver_non_woodbury_user, surveywaiver_woodbury_student, surveywaiver_wvu_user,
 	surveycharts_amt, surveycharts_wu,
-	sql_selectfrom, sql_orderby, sql_where, sql_where_and_or, sql_join_inner,
+	sql_selectfrom, sql_orderby, sql_where, sql_where_and_or, sql_join_inner, sql_join_leftouter,
 };
 
 
@@ -363,24 +363,6 @@ const IfLevelSchemaFactory = {
 		// Update the last page as needed.
 		if(last_page !== null) {
 
-			// If it is a SQL page, then refresh the results.
-			// Note that this is done here, and not in the refresh correct property.
-			// This is done to more tightly control exactly when the code runs to create
-			// the SQL db.
-			if(last_page.type === 'IfPageSqlSchema') {
-
-				// Look to see if results are null.
-				// This is automatically done by the IfPageSqlSchema.updateUserFields,
-				// showing that the server should re-generated the results and check for correctness. 
-				if(last_page.client_results_rows === null || last_page.client_results_titles === null) {
-					let results = await queryFactory_getClientResults(last_page);
-					last_page.client_results_rows = results.rows;
-					last_page.client_results_titles = results.titles;
-					last_page.client_feedback = [];
-					if(results.error !== null) last_page.client_feedback.push(results.error);
-					last_page.updateCorrect();
-				}
-			}
 
 			// The last page should never be marked as completed.  Only this code marks a page as
 			// completed.  If completed, then a new page is added at the tail end.

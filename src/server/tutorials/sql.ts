@@ -5,9 +5,9 @@ import { kc_sql_orderby } from './../kcs/kc_sql_orderby';
 import { kc_sql_where } from '../kcs/kc_sql_where';
 import { kc_sql_where_and_or } from '../kcs/kc_sql_where_and_or';
 import { kc_sql_join_inner } from '../kcs/kc_sql_join_inner';
-//import type { GenType } from '../Gens';
+import { kc_sql_join_leftouter } from '../kcs/kc_sql_join_leftouter';
 
-const REVIEW_QUESTIONS = 4;
+const REVIEW_QUESTIONS = 5;
 
 
 const sql_selectfrom = ({
@@ -146,4 +146,32 @@ const sql_join_inner = ({
 
 });
 
-export { sql_selectfrom, sql_orderby, sql_where, sql_where_and_or, sql_join_inner };
+
+
+
+const sql_join_leftouter = ({
+	code: 'sql_join_leftouter', 
+	title: 'SQL - LEFT OUTER JOIN', 
+	description: 'Connect two tables with mismatched keys and use IS NULL',
+	show_score_after_completing: true,
+	version: 0.1,
+	show_progress: false,
+
+	gen: ({
+		gen_type: 'LinearGen',
+		pages: [
+			{	type: 'IfPageTextSchema',
+				description: `This tutorial introduces the <code>LEFT OUTER JOIN</code> and <code>IS NULL</code> keywords.`,
+			},
+			
+			makeTutorialGenFromKC(kc_sql_join_leftouter, REVIEW_QUESTIONS),
+
+			{	type: 'IfPageTextSchema',
+				description: `Good job! You have completed this tutorial!`,
+			},
+			
+		]
+	})
+
+});
+export { sql_selectfrom, sql_orderby, sql_where, sql_where_and_or, sql_join_inner, sql_join_leftouter };

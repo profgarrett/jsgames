@@ -17,7 +17,8 @@ interface PropsType  {
 	readonly: boolean;
 	show_solution?: boolean;
 	onChange: (json: IStringIndexJsonObject) => void;
-	onSubmit: Function;
+	onSubmit: () => void;
+	onValidate: () => void;
 }
 
 interface StateType {
@@ -35,7 +36,7 @@ export default class SqlQuery extends React.Component<PropsType, StateType> {
 		// Useful in making sure that we don't run duplicate updates, which happens
 		// as Monaco is refreshed with the code formatter.
 		this.state = {
-			client_sql: this.props.page.client_sql
+			client_sql: this.props.page.client_sql,
 		};
 	}
 
@@ -172,13 +173,20 @@ export default class SqlQuery extends React.Component<PropsType, StateType> {
 
 	// Return a properly formatted SQL string.
 	_format(s?: string): string {
+		let formatted: string = '';
+
 		if(typeof s === 'undefined') return '';
 
-		const formatted = formatDialect(s, {
-			dialect: sqlite,
-			tabWidth: 2,
-			keywordCase: 'upper'
-		});
+		try {
+			formatted = formatDialect(s, {
+				dialect: sqlite,
+				tabWidth: 2,
+				keywordCase: 'upper'
+			});
+		} catch (e: any) {
+			// If any error parsing, then revert to the starting string.
+			return s;
+		}
 
 		// Override, making sure that ON starts on a newline with two spaces.
 		// to the prior line's input.
@@ -187,14 +195,61 @@ export default class SqlQuery extends React.Component<PropsType, StateType> {
 		return formatted_with_on_newline;
 	}
 
+
+	componentWillUnmount(): void {
+		// @ts-ignore
+		this.unregisterCompletionItemProvider && this.unregisterCompletionItemProvider.dispose();
+	}
 	
-	editorDidMount = (editor) => {
-		if( this.props.editable && !this.props.readonly ) {
-			//editor.focus()
-		}
+	editorDidMount = (page: IfPageSqlSchema, editor: any, monaco: any, focus: boolean) => {
+		if(focus) editor.focus()
+
+		// Build a list of items
+		const item_names = [ ...page.get_all_table_names(), ...page.get_all_column_names() ];
+		const get_lookups = (range) => item_names.map( (name) => {
+			return {
+				label: name,
+				kind: monaco.languages.CompletionItemKind.Function,
+				documentation: 'A table or field in the problem',
+				insertText: name,
+				range: range,
+			} 
+		});
+
+
+		// register a completion item provider 
+		// code idea / structure from https://github.com/microsoft/monaco-editor/issues/2518
+		const unreg = monaco.languages.registerCompletionItemProvider('sql', {
+				triggerCharacters : [],
+				provideCompletionItems: function(model, position) {
+					// find out if we are completing a property in the 'dependencies' object.
+					//var textUntilPosition = model.getValueInRange({startLineNumber: 1, startColumn: 1, endLineNumber: position.lineNumber, endColumn: position.column});
+					//var match = textUntilPosition.match(/"dependencies"\s*:\s*\{\s*("[^"]*"\s*:\s*"[^"]*"\s*,\s*)*([^"]*)?$/);
+					//if (!match) {
+					//	return []
+					//}
+					var word = model.getWordUntilPosition(position);
+					var range = {
+						startLineNumber: position.lineNumber,
+						endLineNumber: position.lineNumber,
+						startColumn: word.startColumn,
+						endColumn: word.endColumn
+					};
+					
+					return {
+						suggestions: get_lookups(range)
+					};
+					
+				}
+			});
+
+		// Save references to tear down editor and provider.
+		// @ts-ignore
+		this.unregisterCompletionItemProvider = unreg;
 		// @ts-ignore
 		this.editor = editor;
 	}
+
 
 	/**
 	 * Submit tracks to make sure that duplicate submissions don't happen
@@ -222,7 +277,7 @@ export default class SqlQuery extends React.Component<PropsType, StateType> {
 	 * Doens't break anything, but does mean that we'll be saving unformatted code
 	 * as a last step.
 	 */
-	_onSubmit() {
+	_onSubmit(validate_only: boolean = false) {
 		const formatted = this._format(this.props.page.client_sql);
 		
 		// Update the state. This will keep onChange from 
@@ -230,18 +285,26 @@ export default class SqlQuery extends React.Component<PropsType, StateType> {
 		this.setState( (state, props) => {
 			client_sql: formatted
 		}, () => {
+			// update the editor window with the formatted value.
+			// @ts-ignore
+			this.editor.setValue(formatted);
+
 			// Now that we've updated the state, trigger the update
 			// and screen refresh
 			this.props.onChange({ client_sql: formatted });
-			this.props.onSubmit();
-			// @ts-ignore
-			this.editor.setValue(formatted);
+			
+			if(validate_only) {
+				this.props.onValidate();
+			} else {
+				this.props.onSubmit();
+			}
 		});
 
 	}
 	
 	// Build out the table 
 	render = (): React.ReactElement => {
+		const page = this.props.page;
 		const value = this.props.page.client_sql === null ? '' : this.props.page.client_sql;
 
 		if(this.props.page.solution_results_rows.length === 0) {
@@ -257,6 +320,7 @@ export default class SqlQuery extends React.Component<PropsType, StateType> {
 		}
 
 		const tables = this._render_tables();
+		const focus = false; // this.props.editable && !this.props.readonly;
 
 		const editor = USE_MONACO_NICE_EDITOR ?
 			<Editor 
@@ -280,8 +344,7 @@ export default class SqlQuery extends React.Component<PropsType, StateType> {
 					}
 					defaultValue={ value } 
 					onChange={ (value, event) => this._onChange(value) }
-					onMount={ (editor, monaco) => this.editorDidMount(editor) }
-					
+					onMount={ (editor, monaco) => this.editorDidMount(page, editor, monaco, focus) }					
 					/>
 			: 
 			<FormControl 
@@ -294,8 +357,9 @@ export default class SqlQuery extends React.Component<PropsType, StateType> {
 					onChange={ (e) => this.props.onChange({ client_sql: this._format(e.target.value) }) }
 				/>;
 
+
 		const results = this._render_client_result();
-		const button = <Button variant='outline-primary' onClick={ (e) => this._onSubmit() }>Refresh query results</Button>;
+		const button = <Button variant='outline-primary' onClick={ (e) => this._onSubmit(true) }>Refresh query results</Button>;
 		const feedback = this._render_client_feedback();
 
 		return (
