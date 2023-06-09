@@ -1984,7 +1984,7 @@ class IfPageSqlSchema extends IfPageBaseSchema {
 			return;
 		}
 		for(let i=0; i<this.client_results_titles.length; i++) {
-			if( this.client_results_titles[i] !== this.solution_results_titles[i]) {
+			if( this.client_results_titles[i].toLowerCase() !== this.solution_results_titles[i].toLowerCase()) {
 				this.correct = false;
 				this.client_feedback.push('Your column ' + this.client_results_titles[i] +
 					 ' does not match the solution column ' + this.solution_results_titles[i] );
@@ -1998,23 +1998,31 @@ class IfPageSqlSchema extends IfPageBaseSchema {
 			this.client_feedback.push('You have a different number of rows than the solution.');
 			return;
 		}
-		for(let i=0; i<this.client_results_rows.length; i++) {
-			for(let j=0; j<this.client_results_rows[i].length; j++) {
-				if( typeof this.client_results_rows[i][j] === 'string') {
-					// string comparison
+
+
+		// Compare each value in client v. server solution.
+		// Relies upon the same sort being set in client and solution.
+		// Should be done by the SQL code, which will automatically sort by field values (0...n) if
+		// no order by is given.
+		for(let i=0; i < this.client_results_rows.length; i++) {
+			for(let j=0; j < this.client_results_rows[i].length; j++) {
+				if( typeof this.client_results_rows[i][j] === 'string' || this.client_results_rows[i][j] === null) {
+					// string or null comparison 
+					
 					if( this.client_results_rows[i][j] !== this.solution_results_rows[i][j]) {
 						this.correct = false;
 						this.client_feedback.push('At least one value in ' + this.client_results_titles[i] +
-							' does not match the solution.' );
+							' does not match the solution. (' + this.client_results_rows[i][j] + ' != ' + this.solution_results_rows[i][j] +')' );
 						return;
-					}					
+					}
+
 				} else {
 					// numeric, check for floating point issue.
 					if( 	Math.round(this.client_results_rows[i][j]*100) !== 
 							Math.round(this.solution_results_rows[i][j]*100) ) {
 						this.correct = false;
 						this.client_feedback.push('At least one value in ' + this.client_results_titles[i] +
-							' does not match the solution.' );
+							' does not match the solution. (' + this.client_results_rows[i][j] + ' != ' + this.solution_results_rows[i][j] +')' );
 						return;
 					}
 

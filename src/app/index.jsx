@@ -176,6 +176,7 @@ import RecentContainer from './if/RecentContainer';
 import GradesContainer from './if/GradesContainer';
 import QuestionsContainer from './if/QuestionsContainer';
 import KCContainer from './if/KCContainer';
+import LevelRawContainer from './if/LevelRawContainer';
 
 
 const Error = () => <div><h1>Error</h1><p>Sorry, but an error occurred. Pleaser try closing your browser, refreshing, and trying again.</p></div>
@@ -193,6 +194,7 @@ const router = createBrowserRouter([
 	{ path: '/ifgame/recent/:_idsection', element: <RecentContainer /> },
 	{ path: '/ifgame/grades/:_idsection', element: <GradesContainer /> },
 	{ path: '/ifgame/questions/:_idsection', element: <QuestionsContainer /> },
+	{ path: '/ifgame/levelraw/:_id', element: <LevelRawContainer /> },
 
 	{ path: '/ifgame/kcs/:_idsection', element: <KCContainer /> },
 

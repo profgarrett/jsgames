@@ -141,7 +141,7 @@ export default function LevelScoreContainer() {
 
 
 	useEffect( () => {
-		const url =  '/api/levels/level/'+_id+'/tagged';
+		const url =  '/api/levels/level/'+_id; //+'/tagged';
 
 		fetch(url, {
 				method: 'get',
@@ -262,33 +262,31 @@ export default function LevelScoreContainer() {
 		</Button>
 		: <span />;
 
-		// If we have an optional argument to highlight page, then go ahead and show it first above the rest.
-		let render_page2;
-		if( typeof pageIndex !== 'undefined' && pageIndex !== null && typeof level !== 'undefined' && level !== null ) {
-			render_page2 = 	render_page( level.pages[pageIndex]);
-		}
-		return <h1>Not coded</h1>;
-/*
-		return (
-			<Container fluid>
-				<Row>
-					<Col>
-						<div>
-						<ForceLogin/>
-						{ crumbs }
-						<h3>{ level ? level.title : '' }</h3>
+	// If we have an optional argument to highlight page, then go ahead and show it first above the rest.
+	let render_page2;
+	if( typeof pageIndex !== 'undefined' && pageIndex !== null && typeof level !== 'undefined' && level !== null ) {
+		render_page2 = 	render_page( level.pages[pageIndex]);
+	}
 
-						<Message message={message} style={messageStyle} />
-						<Loading loading={isLoading } />
-						{ render_page }
-						<div style={{ textAlign: 'center' }}>{ back }</div>
-						{ levelraw }
-						<div style={{ textAlign: 'center' }}>{ back }</div>
-						<br/>
-						</div>
-					</Col>
-				</Row>
-			</Container>
-		);
-*/
+	return (
+		<Container fluid>
+			<Row>
+				<Col>
+					<div>
+					<ForceLogin/>
+					{ crumbs }
+					<h3>{ level ? level.title : '' }</h3>
+
+					<Message message={message} style={messageStyle} />
+					<Loading loading={isLoading } />
+					<div style={{ textAlign: 'center' }}>{ back }</div>
+					{ levelraw }
+					<div style={{ textAlign: 'center' }}>{ back }</div>
+					<br/>
+					</div>
+				</Col>
+			</Row>
+		</Container>
+	);
+
 }

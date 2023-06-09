@@ -9,11 +9,35 @@
 //import initSqlJs from 'sql.js';
 import { fill_template } from "./template";
 
-function quote_string(s_or_i: any): string {
+function quote_string(s_or_i: string | number | null): string {
+	if(s_or_i == null) return 'NULL';
 	if(typeof s_or_i === 'string' ) return '"' + s_or_i + '"';
-	return s_or_i;
+	return ''+s_or_i;
 }
 
+
+// Apply a default sort to an array of rows, going in order by field position.
+// update in place
+function apply_default_sort_if_no_order_by_clause(rows: any[]): void {
+	// Take in two arrays, each representing a separate row
+	// Figure out which should go first by examining in field order, first to last. 
+	const sortBy = (a: any[], b: any[]) => {
+		if(a.length !== b.length) throw new Error('queryFactory:apply_default_sort_if_no_order_by_clause, rows should have identical length');
+
+		// For each field, start with field 0, and go up. If we find a difference, then return sort order.
+		for(let i=0; i < a.length; i++) {
+			if(a[i] < b[i]) return -1;
+			if(a[i] > b[i]) return 1;
+		}
+
+		// Gone through and all fields are identical. Return 0, as it doesn't actually matter which order
+		// they are sorted (since they are identical)
+		return 0;
+	};
+
+	// Update passed rows variable. 
+	rows.sort(sortBy);
+}
 
 /**
  * Return a single table as a string.
@@ -157,11 +181,18 @@ async function proto_queryFactory_getSolutionResults(json: any, SQL: any): Promi
 	db.exec(return_create_tables(json));
 	db.exec(return_insert_intos(json));
 
-	const sql = fill_template(json.solution_sql, json.template_values);
+	const sql = ''+fill_template(json.solution_sql, json.template_values);
 
-//	try {
+	// We only typically get issues during development. Include the SQL to make debuggin easier.
+	try {
 		const res = db.exec(sql);
 
+		// Look to see if we should re-order the results.
+		// Can be an issue if the server v. client happens to choose a different sort order.
+		if(sql.toLowerCase().indexOf('order by') === -1) {
+			apply_default_sort_if_no_order_by_clause(res[0].values);
+		}
+		
 		if(res.length !== 1) throw new Error('queryFactory solution found length not equal to 1, '+ sql);
 
 		return {
@@ -169,16 +200,11 @@ async function proto_queryFactory_getSolutionResults(json: any, SQL: any): Promi
 			rows: res[0].values,
 			error: null,
 		};
-/*
+
 	} catch (e) {
-		debugger;
-		return {
-			titles: [],
-			rows: [],
-			error: 'error'
-		}
+		throw new Error('proto_queryFactory_getSolutionResults error "'+e +'", for SQL ' + sql);
 	}
-*/	
+	
 
 }
 
@@ -207,6 +233,13 @@ async function proto_queryFactory_getClientResults(json: any, SQL: any): Promise
 		
 		// Run query
 		res = db.exec(json.client_sql);
+
+		// Look to see if we should re-order the results.
+		// Can be an issue if the server v. client happens to choose a different sort order.
+		if(json.client_sql.toLowerCase().indexOf('order by') === -1) {
+			apply_default_sort_if_no_order_by_clause(res[0].values);
+		}
+
 	} catch (e: any) {
 		let message = '';
 		if(typeof e === 'string') {

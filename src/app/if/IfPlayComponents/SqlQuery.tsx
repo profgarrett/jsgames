@@ -113,15 +113,24 @@ export default class SqlQuery extends React.Component<PropsType, StateType> {
 	}
 
 	// Return a formatted value.
-	__render_table_td = (column_formats: string[], key: string, value: string, index: number): ReactElement => {
+	__render_table_td = (column_formats: string[], key: string, value: string | number, index: number): ReactElement => {
 		let format = column_formats[index];
 		let formatted_value = <span>{ value }</span>;
 		let leftAlign = false;
 
-		if(format === 'text') {
+		if(value === null) {
+			// If null, override all styles.
+			return <td style={{ textAlign: 'center'}} key={'sqlquery'+key+'td'+index}><i>null</i></td>;
+
+		} else if(format === 'text') {
 			leftAlign = true;
 		} else if(format === '0') {
-			// No change
+			if(typeof value === 'number') {
+				// Add rounding
+				formatted_value = <span>{ value.toFixed(2) }</span>;
+			} else {
+				formatted_value = <span>{ value }</span>;
+			}
 		} else if(format === 'pk') {
 			formatted_value = <b>{value}</b>;
 		} else if(format === 'fk') {

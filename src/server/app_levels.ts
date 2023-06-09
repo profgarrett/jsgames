@@ -14,10 +14,11 @@ import { user_require_logged_in, nocache, log_error, user_get_username_or_emptys
 
 import { return_tagged_level } from './tag';
 
-import { queryFactory_getClientResults } from './../shared/queryFactory';
+import { queryFactory_updateClientResults } from './../shared/queryFactory';
 
 
 import type { Request, Response, NextFunction } from 'express';
+import { IfPageSqlSchema } from '../shared/IfPageSchemas.js';
 
 
 ////////////////////////////////////////////////////////////////////////
@@ -164,6 +165,9 @@ router.get('/debuglevel/:code', nocache, user_require_logged_in,
 			last_page = level.pages[level.pages.length-1];
 			// @ts-ignore
 			last_page.debug_answer();
+			// @ts-ignore
+			if(last_page.type === 'IfPageSqlSchema') await queryFactory_updateClientResults(last_page);
+
 			results = await IfLevelSchemaFactory.addPageOrMarkAsComplete(level); 
 		}
 
@@ -258,7 +262,6 @@ router.post('/level/:id/delete',
 		const username = user_get_username_or_emptystring(req, res);
 
 		if(username !== ADMIN_USERNAME) {
-			//console.log([username, ADMIN_USERNAME])
 			return res.sendStatus(401); // unauthorized.
 		}
 
@@ -328,21 +331,7 @@ router.post('/level/:id',
 		// Note that this is done here, and not in the refresh correct property (which is run by updateUserFields)
 		// This is done to more tightly control exactly when the code runs to create the SQL db.
 		const last_page = iflevel.pages[iflevel.pages.length-1];
-
-		if(last_page.type === 'IfPageSqlSchema') {
-
-			// Look to see if results are null.
-			// This is automatically done by the IfPageSqlSchema.updateUserFields,
-			// showing that the server should re-generated the results and check for correctness. 
-			if(last_page.client_results_rows === null || last_page.client_results_titles === null) {
-				let results = await queryFactory_getClientResults(last_page);
-				last_page.client_results_rows = results.rows;
-				last_page.client_results_titles = results.titles;
-				last_page.client_feedback = [];
-				if(results.error !== null) last_page.client_feedback.push(results.error);
-				last_page.updateCorrect();
-			}
-		}
+		if(last_page.type === 'IfPageSqlSchema') await queryFactory_updateClientResults(last_page);
 
 
 		// Make sure that there is feedback.

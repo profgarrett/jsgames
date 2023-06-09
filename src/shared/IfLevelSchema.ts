@@ -66,7 +66,10 @@ const IfLevels = [
 	{ code: 'sql_where', title: 'SQL - WHERE', description: 'Filter rows from a query' },
 	{ code: 'sql_where_and_or', title: 'SQL - AND / OR', description: 'More complex logical tests' },
 	{ code: 'sql_join_inner', title: 'SQL - INNER JOIN', description: 'Join two tables with INNER JOIN' },
-	{ code: 'sql_join_leftouter', title: 'SQL - LEFT OUTER JOIN', description: 'Join two tables with partial matches '}
+	{ code: 'sql_join_leftouter', title: 'SQL - LEFT OUTER JOIN', description: 'Join two tables with partial matches '},
+	{ code: 'sql_join_self', title: 'SQL - Self join', description: 'Practice joining a table to itself'},
+	{ code: 'sql_join_keys', title: 'SQL - Key Practice', description: 'Practice joining tables on different keys' },
+	{ code: 'sql_groupby', title: 'SQL - GROUP BY', description: 'Calculate summaries of rows'},
 ];
 
 
@@ -467,6 +470,8 @@ const DEFAULT_TUTORIAL_LEVEL_LIST = [
 	'if1', 'if2', 'if3', 'if4', 'if5', 'if6', 'if7',
 	'financial1', 'financial2', 
 	'sql_selectfrom', 'sql_orderby', 'sql_where','sql_where_and_or', 'sql_join_inner', 'sql_join_leftouter',
+	'sql_join_keys', 'sql_join_self',
+	'sql_groupby',
 	];
 
 

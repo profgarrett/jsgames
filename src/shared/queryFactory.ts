@@ -8,8 +8,32 @@
 */
 
 import initSqlJs from 'sql.js';
-import { proto_queryFactory_getClientResults, proto_queryFactory_getSolutionResults } from './queryFactory_client';
+import { proto_queryFactory_getClientResults, 
+		 proto_queryFactory_getSolutionResults } from './queryFactory_client';
 
+
+/** 
+ * Update the page with the results of the query.
+ */
+async function queryFactory_updateClientResults(page: { client_results_rows: any[], 
+														client_feedback: any[], 
+														client_results_titles: any[],
+														updateCorrect: () => void },
+												refresh_client_results_regardless_of_non_null_prior_results: boolean = true) {
+	// Look to see if results are null.
+	// This is automatically done by the IfPageSqlSchema.updateUserFields,
+	// showing that the server should re-generated the results and check for correctness. 
+	if(refresh_client_results_regardless_of_non_null_prior_results 
+			|| page.client_results_rows === null 
+			|| page.client_results_titles === null) {
+		let results = await queryFactory_getClientResults(page);
+		page.client_results_rows = results.rows;
+		page.client_results_titles = results.titles;
+		page.client_feedback = [];
+		if(results.error !== null) page.client_feedback.push(results.error);
+		page.updateCorrect();
+	}
+}
 
 
 async function getInitSqlJs() {
@@ -43,4 +67,4 @@ async function queryFactory_getClientResults(json: any): Promise<{ rows: any[], 
 	return await proto_queryFactory_getClientResults(json, SQL);	
 }
 
-export { queryFactory_getSolutionResults, queryFactory_getClientResults };
+export { queryFactory_getSolutionResults, queryFactory_getClientResults, queryFactory_updateClientResults };

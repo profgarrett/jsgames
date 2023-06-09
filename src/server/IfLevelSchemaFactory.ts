@@ -27,7 +27,7 @@ import { surveymath1, surveymath2 } from './tutorials/surveymath';
 import { surveywaiver_non_woodbury_student, surveywaiver_non_woodbury_user, surveywaiver_woodbury_student, surveywaiver_wvu_user } from './tutorials/surveywaivers';
 import { surveycharts_amt, surveycharts_wu } from './tutorials/surveycharts';
 
-import { sql_selectfrom, sql_orderby, sql_where, sql_where_and_or, sql_join_inner, sql_join_leftouter } from './tutorials/sql';
+import { sql_selectfrom, sql_orderby, sql_where, sql_where_and_or, sql_join_inner, sql_join_leftouter, sql_join_keys, sql_join_self, sql_groupby } from './tutorials/sql';
 
 import { parseFeedback } from './parseFeedback';
 import type { GenType } from './Gens';
@@ -67,7 +67,9 @@ const LEVEL_GENS: IStringIndexJsonObject = {
 	surveymath1, surveymath2,
 	surveywaiver_non_woodbury_student, surveywaiver_non_woodbury_user, surveywaiver_woodbury_student, surveywaiver_wvu_user,
 	surveycharts_amt, surveycharts_wu,
-	sql_selectfrom, sql_orderby, sql_where, sql_where_and_or, sql_join_inner, sql_join_leftouter,
+	sql_selectfrom, sql_orderby, sql_where, sql_where_and_or, 
+	sql_join_inner, sql_join_leftouter, sql_join_keys, sql_join_self,
+	sql_groupby,
 };
 
 

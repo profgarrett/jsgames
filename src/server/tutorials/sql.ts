@@ -6,6 +6,9 @@ import { kc_sql_where } from '../kcs/kc_sql_where';
 import { kc_sql_where_and_or } from '../kcs/kc_sql_where_and_or';
 import { kc_sql_join_inner } from '../kcs/kc_sql_join_inner';
 import { kc_sql_join_leftouter } from '../kcs/kc_sql_join_leftouter';
+import { kc_sql_join_keys} from '../kcs/kc_sql_join_keys';
+import { kc_sql_join_self } from '../kcs/kc_sql_join_self';
+import { kc_sql_groupby } from '../kcs/kc_sql_groupby';
 
 const REVIEW_QUESTIONS = 5;
 
@@ -174,4 +177,92 @@ const sql_join_leftouter = ({
 	})
 
 });
-export { sql_selectfrom, sql_orderby, sql_where, sql_where_and_or, sql_join_inner, sql_join_leftouter };
+
+
+
+
+const sql_join_keys = ({
+	code: 'sql_join_keys', 
+	title: 'SQL - Keys', 
+	description: 'Practice joining tables on different keys',
+	show_score_after_completing: true,
+	version: 0.1,
+	show_progress: false,
+
+	gen: ({
+		gen_type: 'LinearGen',
+		pages: [
+			{	type: 'IfPageTextSchema',
+				description: `This tutorial provides practice using different keys to join tables.`,
+			},
+			
+			makeTutorialGenFromKC(kc_sql_join_keys, REVIEW_QUESTIONS),
+
+			{	type: 'IfPageTextSchema',
+				description: `Good job! You have completed this tutorial!`,
+			},
+			
+		]
+	})
+
+});
+
+
+
+
+
+const sql_join_self = ({
+	code: 'sql_join_self', 
+	title: 'SQL - Self join', 
+	description: 'Practice joining a table to itself',
+	show_score_after_completing: true,
+	version: 0.1,
+	show_progress: false,
+
+	gen: ({
+		gen_type: 'LinearGen',
+		pages: [
+			{	type: 'IfPageTextSchema',
+				description: `This tutorial shows you how to join a table to itself.`,
+			},
+			
+			makeTutorialGenFromKC(kc_sql_join_self, REVIEW_QUESTIONS),
+
+			{	type: 'IfPageTextSchema',
+				description: `Good job! You have completed this tutorial!`,
+			},
+			
+		]
+	})
+
+});
+
+
+
+const sql_groupby = ({
+	code: 'sql_groupby', 
+	title: 'SQL - GROUP BY', 
+	description: 'Group records to find summaries',
+	show_score_after_completing: true,
+	version: 0.1,
+	show_progress: false,
+
+	gen: ({
+		gen_type: 'LinearGen',
+		pages: [
+			{	type: 'IfPageTextSchema',
+				description: `This tutorial shows you how to group rows in a table.`,
+			},
+			
+			makeTutorialGenFromKC(kc_sql_groupby, REVIEW_QUESTIONS),
+
+			{	type: 'IfPageTextSchema',
+				description: `Good job! You have completed this tutorial!`,
+			},
+			
+		]
+	})
+
+});
+
+export { sql_selectfrom, sql_orderby, sql_where, sql_where_and_or, sql_join_inner, sql_join_leftouter, sql_join_keys, sql_join_self, sql_groupby };

@@ -51,15 +51,17 @@ const tutorial_pages = [
 	}, {	..._baseT,
 		description: `These logical tests are similar to <code>IF</code> in Excel.
 			<br/><br/>
-			Here are the five basic comparisons:
+			Here are the six basic comparisons:
 			<ul>
 				<li><code>Price &lt; 1</code>: is price is less than one?</li>
 				<li><code>Price &lt;= 1</code>: is price is less than or equal to one?</li>
 				<li><code>Price &gt; 1</code>: is price is greater than one?</li>
 				<li><code>Price &gt;= 1</code>: is price is greater than or equal to one?</li>
 				<li><code>Price = 1</code>: is price is equal to one?</li>
+				<li><code>Price != 1</code>: is price not equal to one?</li>
 			</ul>
 			<br/><br/>
+			Note that we use != to say that a field is not equal to another value.
 			`,
 		instruction: `Write a query that shows all sheep with a {col1} over or equal to \${v}.`,
 		solution_sql: 'SELECT * FROM sheep WHERE {col1} >= {v}',
