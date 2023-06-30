@@ -94,12 +94,13 @@ const gen_on_choices: GenType = {
 	gen_type: 'LinearGen',
 	pages: [
 		{	type: 'IfPageParsonsSchema',
-			description: 'Some exercises ask you to sort items.',
+			description: `Some exercises ask you to sort items.
+			<br/><br/>
+			You can also double-click on items to quickly move them from one list to another.			
+			`,
 			instruction: `Drag the items from the left column to the right column.  
-					Put them in order with smallest on top and largest on bottom.
-					<br/><br/>
-					You can also double-click on items to quickly move them from one list to another.`,
-			solution_items: [1,2,3],
+					Put them in order with smallest on top and largest on bottom.`,
+			solution_items: ['10','100','1000'],
 			code: 'tutorial'
 		},
 		{	type: 'IfPageChoiceSchema',
@@ -193,7 +194,7 @@ const gen_on_interface: GenType = {
 	]
 };
 
-
+/*
 const gen_on_predict: GenType = {
 	gen_type: 'LinearGen',
 	pages: [
@@ -226,7 +227,7 @@ const gen_on_predict: GenType = {
 		}
 	]
 };
-
+*/
 
 
 const gen_closing: GenType = {
@@ -255,7 +256,7 @@ const tutorial: LevelSchemaFactoryType = {
 			gen_opening,
 			//gen_on_harsons,
 			gen_on_references,
-			gen_on_predict,
+			//gen_on_predict,
 			({
 				gen_type: 'ShuffleGen',
 				pages: [

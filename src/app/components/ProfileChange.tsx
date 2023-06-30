@@ -94,7 +94,7 @@ export class ProfileChange extends React.Component<PropsType, StateType> {
 					>
 					<Form.Group className='mb-3'>
 						{input }
-						<Form.Check type="checkbox" label="Show password" onChange={this.onChecked} name='showPassword' checked={this.state.showPassword} />
+						<Form.Check type="checkbox" aria-label="Show password" label="Show password" onChange={this.onChecked} name='showPassword' checked={this.state.showPassword} />
 					</Form.Group>
 					{ message }
 					<Form.Group className='mb-3'>

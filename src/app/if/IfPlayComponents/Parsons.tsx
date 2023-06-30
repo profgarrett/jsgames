@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { ReactElement } from 'react';
 
-import { ListGroup, ListGroupItem } from 'react-bootstrap';
+import { ListGroup, ListGroupItem, Button, Form } from 'react-bootstrap';
 import { DragDropContext, Draggable } from 'react-beautiful-dnd';
 import { StrictModeDroppable } from './StrictModeDroppable';
 import { HtmlSpan } from '../../components/Misc';
@@ -120,13 +120,24 @@ const get_unused_items = (potential, used) => {
 	throw new Error('Parsons does not know how to sort objects');
 };
 
+interface StateType {
+	keyboard_entry_mode: boolean;
+};
+
 
 
 /**
 	A Parsons problem shows a list, allowing a user to drag and drop
 	any elements from a potential_items into user_items.
+
+	Can be toggled into keyboard mode, which shows a numbered list of items
+	and a text field.
 */
-export default class Parsons extends React.Component<PropsType> {
+export default class Parsons extends React.Component<PropsType, StateType> {
+	constructor(props: any) {
+		super(props);
+		this.state = { keyboard_entry_mode: false };
+	}
 
 	// Finish drag & drop.
 	onDragEnd = (result: any) => {
@@ -186,12 +197,12 @@ export default class Parsons extends React.Component<PropsType> {
 		this.props.onChange({ client_items });
 	}
 
-	// Build out the table 
-	render = () => {
-		const page = this.props.page;
+	switchMode = () => {
+		this.setState((prevState) => { return { keyboard_entry_mode: !prevState.keyboard_entry_mode}; });
+	}
 
-		let unused_items = toObjs(get_unused_items(page.potential_items, page.client_items));
-		let used_items = toObjs(page.client_items ? page.client_items : []);
+	render = (): ReactElement => {
+		const page = this.props.page;
 		let client_items = null === page.client_items ? [] : page.client_items;
 
 		if(!this.props.editable) {
@@ -209,8 +220,75 @@ export default class Parsons extends React.Component<PropsType> {
 					</ListGroup>
 				);
 			}
-		} else {
-			return (
+		}
+
+		return (<div>
+			{ this.state.keyboard_entry_mode ? this.render_keyboard() : this.render_mouse() }
+			<Button variant='outline-info' onClick={this.switchMode}>Switch to { this.state.keyboard_entry_mode ? 'mouse' : 'keyboard' } mode</Button>
+		</div>);
+	}
+
+	// Update the value of the client items
+	onKeyboardChange = (): void => {
+		const id = 'inputOrder';
+		const orderEl: null | HTMLElement = document.getElementById(id);
+		if(orderEl == null) {
+			throw new Error('Did not find item in ParsonsText');
+		}
+		const max_answer_id = this.props.page.potential_items.length-1;
+		const newOrderAsString = (orderEl as HTMLInputElement).value;
+		const dirty_newOrderArray = newOrderAsString.trim().replaceAll( ' ', '').split(',');
+		let clean_newOrderArray = dirty_newOrderArray
+				.map( old => parseInt(old, 10) )
+				.filter( i_or_na => !isNaN(i_or_na) );
+		clean_newOrderArray = clean_newOrderArray.filter( i => i > 0 && (i-1) <= max_answer_id);
+		const newOrderValues: any[] = [];
+
+		clean_newOrderArray.forEach(i => {
+			newOrderValues.push( this.props.page.potential_items[(i-1)] );
+		});
+
+		this.props.onChange({ client_items: newOrderValues });
+	}
+
+	render_keyboard = (): ReactElement => {
+		const page = this.props.page;
+		//let unused_items = toObjs(get_unused_items(page.potential_items, page.client_items));
+		//let used_items = toObjs(page.client_items ? page.client_items : []);
+		let client_items = null === page.client_items ? [] : page.client_items;
+
+
+		return (<div>
+			<h3>Potential Items</h3>
+			<ListGroup as='ol' numbered>
+				{ page.potential_items.map( (item,i) => <ListGroupItem as='li' key={i}><HtmlSpan html={"" + item}/></ListGroupItem> ) }
+			</ListGroup>
+			<Form.Label htmlFor="inputOrder">Item Order</Form.Label>
+				<Form.Control
+					id="inputOrder"
+					aria-describedby="inputHelpBlock"
+					onChange={this.onKeyboardChange}
+				/>
+				<Form.Text id="inputHelpBlock" muted>
+					Type the item number of each entry, in the order you want (separated by commas). For example, if you want three items to be in reverse 
+					order, you would input "3,2,1". Do not type the values of each item, but their number in the list above.
+				</Form.Text>
+			<h3>Selected Items</h3>
+			<ListGroup as='ol' numbered>
+				{ client_items.map( (item,i) => <ListGroupItem as='li' key={i}><HtmlSpan html={"" + item}/></ListGroupItem> ) }
+			</ListGroup>
+		</div>);
+	}
+
+	// Build out the table 
+	render_mouse = (): ReactElement => {
+		const page = this.props.page;
+
+		let unused_items = toObjs(get_unused_items(page.potential_items, page.client_items));
+		let used_items = toObjs(page.client_items ? page.client_items : []);
+		let client_items = null === page.client_items ? [] : page.client_items;
+
+		return (
 			<DragDropContext onDragEnd={this.onDragEnd}>
 				<table style={{ marginBottom: 10 }}><tbody>
 					<tr >
@@ -226,6 +304,5 @@ export default class Parsons extends React.Component<PropsType> {
 				</tbody></table>
 			</DragDropContext>
 			);
-		}
 	}
 }

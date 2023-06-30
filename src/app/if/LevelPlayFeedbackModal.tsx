@@ -147,7 +147,7 @@ export default class LevelPlayFeedbackModal extends React.Component<IProps> {
 							{ body.map( (d,i) => <div key={'pagefeedbackmodal'+i}>{d}</div>) }
 						</Modal.Body>
 						<Modal.Footer>
-							Press <kbd>enter</kbd> or 
+							Press <kbd>space</kbd> or 
 							<Button variant='primary' size='sm'>click</Button>
 						</Modal.Footer>
 					</Modal>

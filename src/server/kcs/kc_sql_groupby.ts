@@ -96,7 +96,7 @@ const tutorial_pages = [
 		}
 
 	}, {..._baseT,
-		description: `The ordering of eac element is important! <code>GROUP BY</code> must be
+		description: `The ordering of each element is important! <code>GROUP BY</code> must be
 			between <code>WHERE ...</code> and <code>ORDER BY ...</code>. 
 			<br/><br/>
 			As an example, <br/>
@@ -218,7 +218,7 @@ const test_pages = [
 		}
 
 	},{	..._baseX,
-		description: `What is the highest {val1} in each {val2}? Order the results by the highest {val1}. Do not include cats with a name of 'Blarg'.`,
+		description: `What is the highest {val1} in each {val2}?  Do not include cats with a name of 'Blarg'. Order the results by the highest {val1} (desc).`,
 		solution_sql: `SELECT 
 				{val2},
 				MAX({val1}) as MaxValue

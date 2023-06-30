@@ -8,6 +8,9 @@ import Editor from '@monaco-editor/react';
 import { formatDialect, sqlite } from 'sql-formatter';
 import { debug } from 'webpack';
 
+
+
+
 const USE_MONACO_NICE_EDITOR = true;
 
 const ID = 'SqlAnswerFieldInput';
@@ -259,6 +262,12 @@ export default class SqlQuery extends React.Component<PropsType, StateType> {
 		this.editor = editor;
 	}
 
+	onKeyDown(keyName, e, handle): void {
+		console.log("test:onKeyDown", keyName, e, handle)
+		if(keyName === 'alt g') {
+			this._onSubmit(true)
+		}
+	}
 
 	/**
 	 * Submit tracks to make sure that duplicate submissions don't happen
@@ -396,6 +405,7 @@ export default class SqlQuery extends React.Component<PropsType, StateType> {
 						</Card>
 					</Col>
 				</Row>
+				<i>Use <kbd>ctrl+m</kbd> (windows) or <kbd>ctrl+shift+m</kbd> (mac) to exit query window</i>
 			</div>
 			);
 
