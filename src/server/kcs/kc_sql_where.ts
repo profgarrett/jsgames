@@ -90,9 +90,9 @@ const tutorial_pages = [
 	}, {	..._baseT,
 		description: `Notice that SQL uses case sensitive string comparisons! 
 			<br/><br/>
-			So, is each of these would be a totally different test:
+			So, each of these would be a totally different test:
 			<ul>
-				<li><code>"Sheep name" = "Dad"<code></li>
+				<li><code>"Sheep name" = "Dad"</code></li>
 				<li><code>"Sheep name" = "dad"</code></li>
 				<li><code>"Sheep name" = "DAD"</code></li>
 			</ul>

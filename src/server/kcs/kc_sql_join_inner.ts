@@ -80,7 +80,7 @@ const tutorial_pages = [
 			<br/><br/>
 			This code above will let us link together two tables by finding where table1's pk matches the foreign key in table2.
 			`,
-		instruction: `Write a query that links puppies and parents. You will want to include the on clause <code>ON parents.parent_pk = puppies.FK_to_Parent</code>`,
+		instruction: `Write a query that links puppies and parents. Return puppies.* and parents.* in the SELECT clause. You will want to include the on clause <code>ON parents.parent_pk = puppies.FK_to_Parent</code>`,
 		solution_sql: 'SELECT * FROM puppies INNER JOIN parents ON puppies.FK_to_Parent = parents.parent_pk',
 		
 	}, {	..._baseT,

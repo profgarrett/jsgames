@@ -73,11 +73,11 @@ const tutorial_pages = [
 			the order in which the database should evaluate them.
 			<br/><br/>
 			An example, the query
-			<code>SELECT * FROM pigs WHERE name = "Sue" OR name = "Bob" OR name = "Tim"</code>
+			<code>SELECT * FROM pigs WHERE name = 'Sue' OR name = 'Bob' OR name = 'Tim'</code>
 			will show Sue, Bob, and Tim. 
 			`,
 		instruction: `Write a query that shows all cows with the names D1, D2, A3, and {v}.`,
-		solution_sql: 'SELECT * FROM cows WHERE "Cow Name" IN ("D1", "D2", "A3", "{v}")',
+		solution_sql: `SELECT * FROM cows WHERE "Cow Name" IN ('D1', 'D2', 'A3', '{v}')`,
 		template_values: {
 			'v': 'randOf(A10,C8,A8)',
 		}
