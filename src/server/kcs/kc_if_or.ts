@@ -560,7 +560,7 @@ const kc_if_or = ({
         },{ ...test,
             ...animals2_data,
             
-			description: `Are {cell1_title} over {n1} or {cell2_title} under {n2}?
+			description: `Are {cell1_title} over {n1} or {cell2_title} under or equal to {n2}?
                 <br/><br/>
                 Return <code>{iftrue}</code> if this is correct, or <code>{iffalse}</code> if not.`,
 

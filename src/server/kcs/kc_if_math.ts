@@ -267,7 +267,6 @@ const kc_if_math_return = ({
             },
 			feedback: [
 				{ 'has': 'references', args: ['a1', 'c1'] },
-				{ 'has': 'values', args: ['{n}' ] },
 				{ 'has': 'functions', args: ['if' ] },
 			],
 
