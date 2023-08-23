@@ -59,7 +59,7 @@ export function render_page_lead(page: IfPageBaseSchema, pageId: number): ReactE
 				<Card.Header>Quiz Question</Card.Header>
 				<Card.Body>
 					<div style={ style }>
-						<HtmlDiv html={ ''+desc } />
+						<HtmlDiv ariaLive='alert' html={ ''+desc } />
 					</div>
 				</Card.Body>
 			</Card>
@@ -73,7 +73,7 @@ export function render_page_lead(page: IfPageBaseSchema, pageId: number): ReactE
 		let sDescriptions: string[] = desc.split('<br/><br/>');
 
 		let elDescriptions = sDescriptions.map( (d: string, i: number): ReactElement =>
-				<HtmlDiv className='lead' style={{ marginBottom: '1rem' }} key={i} html={ d } /> );
+				<HtmlDiv ariaLive='alert' className='lead' style={{ marginBottom: '1rem' }} key={i} html={ d } /> );
 
 		return <div>{ elDescriptions }</div>;
 	}

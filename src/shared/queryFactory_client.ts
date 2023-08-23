@@ -183,7 +183,7 @@ async function proto_queryFactory_getSolutionResults(json: any, SQL: any): Promi
 
 	const sql = ''+fill_template(json.solution_sql, json.template_values);
 
-	// We only typically get issues during development. Include the SQL to make debuggin easier.
+	// We only typically get issues during development. Include the SQL to make debugging easier.
 	try {
 		const res = db.exec(sql);
 
@@ -242,10 +242,15 @@ async function proto_queryFactory_getClientResults(json: any, SQL: any): Promise
 
 	} catch (e: any) {
 		let message = '';
+		
 		if(typeof e === 'string') {
 			message = 'Error ' + e;
 		} else if( e instanceof Error) {
-			message = 'Error ' + e.message;
+			if(e.message === "Cannot read properties of undefined (reading 'values')") {
+				message = 'No rows returned';
+			} else {
+				message = 'Error ' + e.message;
+			}
 		} else {
 			throw new Error('Invalid option for proto_queryfacotry_getclientresults')
 		}

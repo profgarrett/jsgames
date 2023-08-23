@@ -146,7 +146,7 @@ const test_pages = [
 		},
 	}, { 	..._baseX,
 		description: `Retrieve animals with a weight under {v1} or who are {v2}`,
-		solution_sql: 'SELECT * FROM animals WHERE weight < {v1} AND gender = "{v2}"',
+		solution_sql: 'SELECT * FROM animals WHERE weight < {v1} OR gender = "{v2}"',
 		template_values: {
 			'v1': 'randOf(300,200)',
 			'v2': 'randOf(male,female)',

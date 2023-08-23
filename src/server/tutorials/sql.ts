@@ -19,7 +19,7 @@ const sql_selectfrom = ({
 	description: 'Select data from a table',
 	show_score_after_completing: true,
 	version: 0.1,
-	show_progress: false,
+	show_progress: true,
 
 	gen: ({
 		gen_type: 'LinearGen',
@@ -46,7 +46,7 @@ const sql_orderby = ({
 	description: 'Order the returned values from a query',
 	show_score_after_completing: true,
 	version: 0.1,
-	show_progress: false,
+	show_progress: true,
 
 	gen: ({
 		gen_type: 'LinearGen',
@@ -73,7 +73,7 @@ const sql_where = ({
 	description: 'Filter the number of rows returned from a query',
 	show_score_after_completing: true,
 	version: 0.1,
-	show_progress: false,
+	show_progress: true,
 
 	gen: ({
 		gen_type: 'LinearGen',
@@ -102,7 +102,7 @@ const sql_where_and_or = ({
 	description: 'Have more complex logical tests',
 	show_score_after_completing: true,
 	version: 0.1,
-	show_progress: false,
+	show_progress: true,
 
 	gen: ({
 		gen_type: 'LinearGen',
@@ -129,7 +129,7 @@ const sql_join_inner = ({
 	description: 'Connect two tables with matching keys',
 	show_score_after_completing: true,
 	version: 0.1,
-	show_progress: false,
+	show_progress: true,
 
 	gen: ({
 		gen_type: 'LinearGen',
@@ -158,7 +158,7 @@ const sql_join_leftouter = ({
 	description: 'Connect two tables with mismatched keys and use IS NULL',
 	show_score_after_completing: true,
 	version: 0.1,
-	show_progress: false,
+	show_progress: true,
 
 	gen: ({
 		gen_type: 'LinearGen',
@@ -187,7 +187,7 @@ const sql_join_keys = ({
 	description: 'Practice joining tables on different keys',
 	show_score_after_completing: true,
 	version: 0.1,
-	show_progress: false,
+	show_progress: true,
 
 	gen: ({
 		gen_type: 'LinearGen',
@@ -217,7 +217,7 @@ const sql_join_self = ({
 	description: 'Practice joining a table to itself',
 	show_score_after_completing: true,
 	version: 0.1,
-	show_progress: false,
+	show_progress: true,
 
 	gen: ({
 		gen_type: 'LinearGen',
@@ -245,7 +245,7 @@ const sql_groupby = ({
 	description: 'Group records to find summaries',
 	show_score_after_completing: true,
 	version: 0.1,
-	show_progress: false,
+	show_progress: true,
 
 	gen: ({
 		gen_type: 'LinearGen',

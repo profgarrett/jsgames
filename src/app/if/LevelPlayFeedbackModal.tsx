@@ -135,6 +135,7 @@ export default class LevelPlayFeedbackModal extends React.Component<IProps> {
 		// Return full-screen feedback.
 //style = {styleFullPageDiv} 
 		return (<div id='LevelPlayFeedbackModal'
+						aria-live='assertive'
 						style = {styleFullPageDiv}
 						onKeyDown = { (e) => { e.preventDefault; this.props.onHideModal(); } }
 						onClick = { (e) => { e.preventDefault; this.props.onHideModal();  }  }

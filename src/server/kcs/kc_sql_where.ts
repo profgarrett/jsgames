@@ -79,8 +79,11 @@ const tutorial_pages = [
 			An example, the query
 			<code>SELECT * FROM pigs WHERE "Pig Name" = "Sue"</code>
 			shows all pigs with a name of Sue.
+			<br/><br/>
+			Note that anything in quotes (i.e., "Sue") <b>must match the capitalization exactly!</b>
+			<code>Sue</code> is different than <code>sue</code>.
 			`,
-		instruction: `Write a query that shows all sheep with a name of {v}. Be sure to match the capitalization exactly!`,
+		instruction: `Write a query that shows all sheep with a name of {v}.`,
 
 		solution_sql: 'SELECT * FROM sheep WHERE "Sheep Name" = "{v}"',
 		template_values: {

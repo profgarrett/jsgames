@@ -152,7 +152,7 @@ export default class FormulaExcelTable extends React.Component<PropsType> {
 
 			} else if (page.client_test_results[i].error!==null || page.client_f.substr(0,1) !== '=') {
 				// Error in result
-				fieldResult = <td style={addDangerColor(style)}>{page.client_test_results[i].error}</td>;
+				fieldResult = <td aria-label='Error' aria-live='polite' style={addDangerColor(style)}>{page.client_test_results[i].error}</td>;
 
 			} else if (page.solution_test_results.length === 0 ) {
 				// Good value result, but we don't know the result
@@ -168,11 +168,11 @@ export default class FormulaExcelTable extends React.Component<PropsType> {
 						Math.round(page.client_test_results[i].result * 100) === 
 						Math.round(page.solution_test_results[i].result * 100 )
 				) {
-					// Render the field with a checkbox showing success.
-					fieldResult = <td style={addCorrectColor(style)}>{ clean(page.client_test_results[i].result, page.client_f_format) }</td>;
+					// Render the field 
+					fieldResult = <td style={addCorrectColor(style)} aria-label='Formula Correct' aria-live='polite'>{ clean(page.client_test_results[i].result, page.client_f_format) }</td>;
 				} else {
 					// Render normally
-					fieldResult = <td style={(style)}>{ clean(page.client_test_results[i].result, page.client_f_format) }</td>;
+					fieldResult = <td style={(style)} aria-label='Formula Incorrect' aria-live='polite'>{ clean(page.client_test_results[i].result, page.client_f_format) }</td>;
 				}
 			}
 
@@ -197,9 +197,10 @@ export default class FormulaExcelTable extends React.Component<PropsType> {
 			}
 
 			// Combine into a single row.
+			// Note: use th for first cell for accessibility for each row
 			rows.push(
 				<tr key={'test'+i}> 
-					<td style={tdFirstColumnStyle}>{ i+1 }</td>
+					<th style={tdFirstColumnStyle}>{ i+1 }</th>
 					{ test }
 					{ fieldFormula }
 					{ fieldResult }

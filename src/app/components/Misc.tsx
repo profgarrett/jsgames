@@ -199,18 +199,26 @@ interface iHtmlDiv {
 	className?: string;
 	style?: any;
 	html: string;
+	ariaLive?: string;
 }
-export function htmlDiv( html: string, className?: string, style?: any ): ReactElement<iHtmlDiv> {
+export function htmlDiv( html: string, className?: string, style?: any, ariaLive?: string = '' ): ReactElement<iHtmlDiv> {
 	const _style = typeof(style) == 'undefined' ? {} : style;
 	const _className = typeof(className) == 'undefined' ? '' : className;
 
 	// Use dangerouslySetInnerHtml so that the description can use html characters.
-	return <div className={_className} style={_style} dangerouslySetInnerHTML={ { '__html': html } }></div>;
+	if(ariaLive == 'polite' || ariaLive == 'alert') {
+		return <div aria-live={ariaLive} className={_className} style={_style} dangerouslySetInnerHTML={ { '__html': html } }></div>;
+	} else if (ariaLive == '') {
+		return <div className={_className} style={_style} dangerouslySetInnerHTML={ { '__html': html } }></div>;
+	} else {
+		console.log(ariaLive)
+		throw new Error('Invalid ariaLive value');
+	}
 
 }
 export class HtmlDiv extends React.Component<iHtmlDiv> {
 	render() {
-		return htmlDiv( this.props.html, this.props.className, this.props.style);
+		return htmlDiv( this.props.html, this.props.className, this.props.style, this.props.ariaLive );
 	}
 }
 
