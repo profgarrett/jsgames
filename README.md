@@ -1,6 +1,13 @@
 # JS Games
 
 This is a research project from Nathan Garrett. It provide a set of Excel tutorials.
+
+## Todo for SUmmer 2024
+
+> Fix quote marks for SQL
+> Expand SEARCH/FIND section for text2, focusing on mid + search
+> Hint engine for SQL
+
 ### Installing
 
 Install Node.js, MySql, npm, ts-node, and nodemon globally.
@@ -33,6 +40,8 @@ export {
 	EMAIL_ADDRESS: '',
 	EMAIL_PASSWORD: '',
 	EMAIL_HOST: '',
+	EMAIL_REPLYTO: '',
+	EMAIL_PORT: 1,
 	
 	ADMIN_OVER_PASSWORD: '',
 

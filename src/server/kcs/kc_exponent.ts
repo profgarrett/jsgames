@@ -37,8 +37,8 @@ const tutorial_pages = [
 				We write exponents as <code>2^3</code>.  We use <code>^</code> (caret)
 				because keyboards make it difficult to write 2<sup>3</sup>. 
 				You can find the <code>^</code> symbol by pressing <kbd>shift</kbd> and <kbd>6</kbd>.`,
-		instruction: `To multiply 2 by itself 6 times 
-				write <code>=2^6</code>. This has the same results as <code>=2*2*2*2*2*2</code>,
+		instruction: `Multiply 2 by itself 6 times by
+				writing <code>=2^6</code>. This has the same results as <code>=2*2*2*2*2*2</code>,
 				but is easier to write.`,
 		solution_f: '=2^6', 
 		feedback: [

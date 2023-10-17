@@ -1001,7 +1001,7 @@ const kc_text_search = ({
 				<code>SEARCH</code> function. This moves the starting position 
 				to the right.
 				`,
-			instruction: 'Modify your previous <code>=MID(a1, SEARCH(",", a1), 99999)</code> formula to just get the first name.',
+			instruction: 'Change 0 to 2 in the following to get the first name: <code>=MID(a1, SEARCH(",", a1) + 0, 99999)</code>.',
 			
 			...kc_text_search_comma,
 			
