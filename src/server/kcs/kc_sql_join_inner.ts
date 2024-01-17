@@ -47,7 +47,15 @@ const _baseT = {
 	...t3_puppies,
 }
 const tutorial_pages = [
-	{	..._baseT,
+	{	type: 'IfPageTextSchema',
+		description: `
+			<iframe width="560" height="315" 
+			src="https://www.youtube.com/embed/vSg39mmAYj0?si=eqD7pcJ3EO29kyKU" 
+			title="YouTube video player" frameborder="0" 
+			allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>`,
+		code: 'tutorial'
+
+	}, {	..._baseT,
 		description: `<code>Join</code> is the most important feature in sql.
 			<br/><br/>
 			We generally have information stored in different tables. 

@@ -35,9 +35,22 @@ const _baseT = {
 	kcs: [ KC_NAMES.KC_SQL_SELECTFROM ],
 	code: 'tutorial',
 }
+
+
 const tutorial_pages = [
-	{	..._baseT,
-		description: `Let's start with a query showing all of our animals. 
+	{	type: 'IfPageTextSchema',
+		description: `
+			<iframe width="560" height="315" 
+				src="https://www.youtube.com/embed/rWRCEBWBClE?si=mMdx634f5rl3pio6" 
+				title="YouTube video player" 
+				frameborder="0" 
+				allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+				allowfullscreen></iframe>
+		`,
+		code: 'tutorial'
+
+	}, {	 ..._baseT,
+			description: `Let's start with a query showing all of our animals. 
 			<br/><br/>	
 			<code>SELECT * FROM animals</code>
 			<br/><br/>

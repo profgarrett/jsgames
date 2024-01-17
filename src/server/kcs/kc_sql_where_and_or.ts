@@ -41,7 +41,7 @@ const _baseT = {
 	...t1_cows,
 }
 const tutorial_pages = [
-	{	..._baseT,
+{	..._baseT,
 		description: `Sometimes we need to combine two or more logical tests.  
 			<code>AND</code> will only return rows meeting both conditions.
 			<br/><br/>

@@ -1,8 +1,8 @@
 # JS Games
 
-This is a research project from Nathan Garrett. It provide a set of Excel tutorials.
+This is a research project from Nathan Garrett. It provide a set of software tutorials.
 
-## Todo for SUmmer 2024
+## Todo for Summer 2024
 
 > Fix quote marks for SQL
 > Expand SEARCH/FIND section for text2, focusing on mid + search

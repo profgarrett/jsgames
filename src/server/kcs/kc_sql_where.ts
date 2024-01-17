@@ -36,7 +36,17 @@ const _baseT = {
 	...t1_sheep,
 }
 const tutorial_pages = [
-	{	..._baseT,
+	{	type: 'IfPageTextSchema',
+		description: `
+			<iframe width="560" height="315" 
+				src="https://www.youtube.com/embed/yXFEBYirWXg?si=eIJiZgnc6RepEAML" 
+				title="YouTube video player" 
+				frameborder="0" 
+				allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+				allowfullscreen></iframe>`,
+		code: 'tutorial'
+
+	}, {	..._baseT,
 		description: `We can filter out some rows returned by a query. 
 			<br/><br/>
 			The query <code>SELECT * FROM sheep WHERE price > 260 </code> will only show rows

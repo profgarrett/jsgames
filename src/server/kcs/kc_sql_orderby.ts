@@ -36,7 +36,17 @@ const _baseT = {
 	...t2_pigs,
 }
 const tutorial_pages = [
-	{	..._baseT,
+	{	type: 'IfPageTextSchema',
+		description: `
+		<iframe width="560" height="315" 
+			src="https://www.youtube.com/embed/F5DCaowwwlA?si=Z8wAHAIq_hX3Ouw7" 
+			title="YouTube video player" 
+			frameborder="0" 
+			allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+			allowfullscreen></iframe>`,
+		code: 'tutorial'
+
+	}, {	..._baseT,
 		description: `We can sort the rows returned by a query. 
 			<br/><br/>
 			The query <code>SELECT * FROM animals ORDER BY name</code> will order rows

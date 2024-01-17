@@ -46,8 +46,18 @@ const _baseT = {
 	...t1_parents,
 	...t3_puppies,
 }
+
+
 const tutorial_pages = [
 	{	type: 'IfPageTextSchema',
+		description: `
+			<iframe width="560" height="315" 
+				src="https://www.youtube.com/embed/hdEzH_hwLJQ?si=cwUaOzBfZZqJfM8M" 
+				title="YouTube video player" frameborder="0" 
+				allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>`,
+		code: 'tutorial'
+
+	}, {	type: 'IfPageTextSchema',
 			description: `So far, we have focused on <code>INNER JOIN</code>. This is usually the easiest approach, as 
 			it only returns items that match in both tables. However, we also need to learn about <code>LEFT OUTER JOIN</code>.
 			<br/><br/>
