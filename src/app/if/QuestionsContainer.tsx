@@ -30,8 +30,8 @@ export default function QuestionsContainer() {
 		// Set server-level filters for the http request.
 		if(filter.levels !== '') args.push('code='+filter.levels);
 		if(filter.sections !== '') args.push('idsection='+filter.sections);
+		
 		if(filter.users !== '') args.push('iduser='+filter.users);
-
 		
 		// Set local filters, which are applied locally.
 		if(filter.pagetypes !== '') setPagetype(filter.pagetypes);
@@ -73,9 +73,9 @@ export default function QuestionsContainer() {
 		</Breadcrumb>
 		);
 
-	const default_type =  'All';  // 'IfPageFormulaSchema|IfPageHarsonsSchema|IfPagePredictFormulaSchema';
-	const default_output = 'excel';
-	const default_level = 'if1';
+	const default_type =  'IfPageSqlSchema';  // 'IfPageFormulaSchema|IfPageHarsonsSchema|IfPagePredictFormulaSchema';
+	const default_output = 'table';
+	const default_level = 'sql_selectfrom';
 
 		//'IfPageChoice'; 
 		//'IfPageNumberAnswerSchema'; //'IfPageFormulaSchema|IfPageHarsonsSchema'

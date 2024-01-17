@@ -41,7 +41,8 @@ export default class IfQuestions extends React.Component<PropsType> {
 			else 
 				return <div><QuestionsExcelChoice levels={levels} /></div>;
 		}
-
+		console.log(this.props.output);
+		
 		throw new Error('Invalid output type passed to IfQuestions');
 	}
 

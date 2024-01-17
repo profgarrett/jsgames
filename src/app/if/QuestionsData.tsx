@@ -19,6 +19,16 @@ const USE_FORMULA_PAGES_ONLY = false;
 const SOLUTION_F_LIST = [];
 
 
+// Show a history item in an appealing fashion.
+const pretty_history_sql = h => {
+	const s = typeof h.client_sql === 'undefined' || h.client_sql == null ? '' : h.client_sql;
+	const tags = typeof h.tags === 'undefined' 
+			? [] 
+			: h.tags.map( t => '<span class="badge badge-pill badge-primary">'+ he.encode(t.tag)+'</span>' );
+
+	return he.encode(s) + ' ' + tags.join(' ');
+};
+
 
 // Show a history item in an appealing fashion.
 const pretty_history = h => {
@@ -205,6 +215,37 @@ function create_summary_answer( page: IfPageBaseSchema, ): any {
 		hints_parsed: page.hints_parsed,
 		hints_viewsolution: page.hints_viewsolution,
 	};
+
+
+	// SQL
+	if( page.type === 'IfPageSqlSchema' ) {
+		const history = page.history.filter( h => !has_tag(h.tags, 'INTERMEDIATE' ) );
+		const history_string = history.map( h => pretty_history_sql(h) ).join('<br/>');
+		const expand_string = page.history
+			.filter( h => typeof h.client_sql !== 'undefined')
+			.map( h => formatDate(h.dt) + ': ' + pretty_history_sql(h) )
+			.join('<br/>');
+
+		summary_answer.type = 'sql';
+		summary_answer.html = history_string;
+		summary_answer.expand = expand_string;
+
+		summary_answer.answer = page.client_sql;
+		summary_answer.intermediate = history.map( h => pretty_history_sql(h) ).join('\n');
+		summary_answer.all = page.history
+			.filter( h => typeof h.client_f !== 'undefined')
+			.map( h => formatDate(h.dt) + ': ' + pretty_history(h) )
+			.join('\n');
+
+		// Add tags.
+		page.history.map( h => {
+			const tags = typeof h.tags === 'undefined' || h.tags === null ? [] : h.tags;
+
+			return tags.map( tag => {
+				increment_tag( summary_answer.tags, tag.tag );
+			});
+		});
+	}
 
 	// Harsons and/or formulas
 	if( page.type === 'IfPageHarsonsSchema' || page.type === 'IfPageFormulaSchema' || page.type === 'IfPagePredictFormulaSchema' ) {

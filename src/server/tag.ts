@@ -150,6 +150,13 @@ if(DEBUG) {
 }
 */
 
+// Return either client_f, or client_sql (as appropriate)
+const c = (obj): string => {
+	if(typeof obj.client_f !== 'undefined') return obj.client_f;
+	if(typeof obj.client_sql !== 'undefined') return obj.client_sql;
+	return '';
+}
+
 // tag progressively built items  A, A+, A+1, ...
 const tag_intermediate_history = (h) => h.map( 
 		(h, i, h_array) => {
@@ -164,35 +171,35 @@ const tag_intermediate_history = (h) => h.map(
 			}
 
 			// must be different than next.
-			if (h.client_f === h_array[i+1].client_f) {
+			if ( c(h) === c(h_array[i+1])) {
 				h.tags.push({tag:'INTERMEDIATE'});
 				return h;
 			}
 
 			// must be different than next + 1 or more characters, i.e. ignore intermediate typing
 			// Only valid if the adding is at the end.
-			if(h.client_f === h_array[i+1].client_f.substr(0, h.client_f.length))  {
+			if( c(h) === c(h_array[i+1]).substr(0, c(h).length))  {
 				h.tags.push({tag:'INTERMEDIATE'});
 				return h;
 			}
 
 			// See if we have a pattern of progressively-built inner options.
 			// i.e., =(), =(a), =(a1)
-			if(is_sub_sequence(h.client_f, h_array[i+1].client_f)) {
+			if(is_sub_sequence( c(h), c(h_array[i+1]))) {
 				h.tags.push({tag:'INTERMEDIATE'});
 				return h;
 			}
 
 			// See if we have intermediate deletions.
 			// i.e., =(a1), =(a), =()
-			if(i>0 && is_sub_sequence(h.client_f, h_array[i-1].client_f)) {
+			if(i>0 && is_sub_sequence( c(h), c(h_array[i-1]))) {
 				h.tags.push({tag:'INTERMEDIATE'});
 				return h;
 			}
 
 			// see if we are deleting, i.e., the current entry could entirely fit inside 
 			// of the previous entry. Only valid if the deletion is at the end.
-			if(i>1 && h_array[i-1].client_f.indexOf(h.client_f) !== -1)  {
+			if(i>1 && c(h_array[i-1]).indexOf( c(h)) !== -1)  {
 				h.tags.push({tag:'INTERMEDIATE'});
 				return h;
 			}

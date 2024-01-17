@@ -126,12 +126,14 @@ export default class QuestionsTags extends React.Component<DetailPropsType> {
 		// If empty, return a div.
 		if(levels.length < 1) return <div/>;
 
+		
 		// Move code into questions
 		levels.map( l => l.questions.map( q => q.level = l.code ));
 
 		// Join.
 		const level = levels.reduce( (accum, l) => accum.concat(l.questions), []);
 
+		console.log(level);
 		//<h1>{ level_summary.code }</h1>
 
 		// Go through each map of levels and return a table for each.

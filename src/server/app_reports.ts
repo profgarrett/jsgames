@@ -103,7 +103,7 @@ router.get('/questions/', nocache, user_require_logged_in,
 					OR ? = 'if' && LEFT(iflevels.code, 2) = 'if'
 				) AND
 				
-				(sections.idsection IN (?)) AND
+				(sections.idsection = ? OR ? = '*') AND
 				(users.iduser = ? OR ? = '*') AND 
 				iflevels.updated > NOW() - INTERVAL ${INTERVAL} AND 
 				iflevels.username NOT IN ('${ADMIN_USERNAME}') AND 
