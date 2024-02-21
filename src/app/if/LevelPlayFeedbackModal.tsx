@@ -110,6 +110,7 @@ export default class LevelPlayFeedbackModal extends React.Component<IProps> {
 						
 						} else {
 							// Yes, give the solution.
+
 							body.push(<div>Sorry, but your solution is not correct. The correct answer is &nbsp;
 								<code>{ fill_template(typedPage.solution_f, typedPage.template_values)}</code>
 								</div>);
@@ -137,19 +138,26 @@ export default class LevelPlayFeedbackModal extends React.Component<IProps> {
 		return (<div id='LevelPlayFeedbackModal'
 						aria-live='assertive'
 						style = {styleFullPageDiv}
-						onKeyDown = { (e) => { e.preventDefault; this.props.onHideModal(); } }
-						onClick = { (e) => { e.preventDefault; this.props.onHideModal();  }  }
+						onKeyDown = { (e) => { 
+							e.preventDefault(); 
+							this.props.onHideModal(); 
+							return false;
+						}}
+						onClick = { (e) => { 
+							e.preventDefault(); 
+							this.props.onHideModal();  
+						}}
 					>
 					<Modal show={true}>
 						<Modal.Header closeButton>
-							<Modal.Title>Problem Feedback</Modal.Title>
+							<Modal.Title>Feedback</Modal.Title>
 						</Modal.Header>
 						<Modal.Body>
 							{ body.map( (d,i) => <div key={'pagefeedbackmodal'+i}>{d}</div>) }
 						</Modal.Body>
 						<Modal.Footer>
 							Press <kbd>space</kbd> or 
-							<Button variant='primary' size='sm'>click</Button>
+							<Button variant='primary' size='sm' autoFocus>click</Button>
 						</Modal.Footer>
 					</Modal>
 				</div>);

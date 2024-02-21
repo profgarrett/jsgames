@@ -10,6 +10,7 @@ import { parseFeedback } from './../shared/parseFeedback';
 
 
 // Enable DEBUG to run all tests on tagger.
+// Note, we have some tests commented out here as well.
 const DEBUG = false;
 
 
@@ -47,21 +48,23 @@ const filter_history =
 			// filter non f and unused events.
 			/* Note:  NDG 12/30/21, 
 				Be careful looking at output from here.
-				History events are limited to only those with client_f updates.
+				History events are limited to only those with client_f or client_sql updates.
 			*/
-			h => typeof h.client_f !== 'undefined' &&
-				h.client_f !== null &&
-				h.code !== 'created' &&
-				h.code !== 'server_page_completed'
-		).filter( 
+			h => (
+					typeof h.client_f === 'undefined' && typeof h.client_sql === 'undefined' 
+				)
+		);
+		/*.filter( 
 			// remove null values 
 			h => h !== null
 
 		).filter( 
 			// filter out any harsons with a ;, as those are returned whenver something is being
 			// built (drag and drop operation), or something is put on the background.
-			h => typeof h.client_f === 'undefined' ? true : (h.client_f.search(';') === -1)
+			h => (typeof h.client_f !== 'undefined' ? h.client_f.search(';') === -1: false)
 		);
+		*/
+
 
 
 // Don't return items that are the same as the next item.
@@ -72,7 +75,13 @@ const remove_duplicate_history = (h) => h.filter(
 			if(i+1 === h_array.length) return true;
 
 			// If the same as the previous item, don't return.
-			if(h_array[i+1].client_f === h.client_f) return false;
+			if(typeof h.client_f !== 'undefined') {
+				if (h_array[i+1].client_f === h.client_f) return false;
+			}
+
+			if(typeof h.client_sql !== 'undefined') {
+				if (h_array[i+1].client_sql === h.client_sql) return false;
+			}
 
 			return true;
 		}
@@ -88,6 +97,13 @@ if(DEBUG) {
 		{ client_f: '=LEFT("Left' }, 
 		]
 	).map( h=> console.log( [h.tags, h.client_f]));
+
+	remove_duplicate_history([ 
+		{ client_sql: 'SELECT' }, 
+		{ client_sql: 'SELECT' }, 
+		{ client_sql: 'SELECT ' }, 
+		]
+	).map( h=> console.log( [h.tags, h.client_sql]));
 }
 */
 
@@ -98,6 +114,9 @@ const add_tags = (h) => h.map( h => { return { tags: [], ...h }; } );
 // tag items with a single letter backspace and re-add.
 const tag_single_letter_typos = (h) => h.map( 
 		(h, i, h_array) => {
+
+			// Only do for client_f updates
+			if(typeof h_array[i].client_f === 'undefined') return h;
 
 			// Make sure that there are at least 2 more items.
 			// n0, n1, and n2 ()
@@ -230,29 +249,49 @@ function is_sub_sequence(s1: string, s2: string): boolean {
 /*
 if(DEBUG) {
 	tag_intermediate_history([ 
-		{ client_f: '=LEFT("L", 1)' }, 
-		{ client_f: '=LEFT("Le", 1)' }, 
-		{ client_f: '=LEFT("Lef", 1)' }, 
-		{ client_f: '=LEFT("Left", 1)' }, 
-		{ client_f: '=LEFT("Left", 2)' }, 
+		{ tags: [], client_f: '=LEFT("L", 1)' }, 
+		{ tags: [], client_f: '=LEFT("Le", 1)' }, 
+		{ tags: [], client_f: '=LEFT("Lef", 1)' }, 
+		{ tags: [], client_f: '=LEFT("Left", 1)' }, 
+		{ tags: [], client_f: '=LEFT("Left", 2)' }, 
 		]
 	).map( h=> console.log( [h.tags, h.client_f]));
 
 	tag_intermediate_history([ 
-		{ client_f: '=LEFT("Left", ' }, 
-		{ client_f: '=LEFT("Left", 1' }, 
-		{ client_f: '=LEFT("Left", 1)' }, 
-		{ client_f: '=LEFT("Lef", 1)' }, 
-		{ client_f: '=LEFT("Le", 1)' }, 
-		{ client_f: '=LEFT("", 1)' }, 
-		{ client_f: '=LEFT("R", 1)' }, 
-		{ client_f: '=LEFT("Ri", 1)' }, 
-		{ client_f: '=LEFT("Rig", 1)' }, 
-		{ client_f: '=LEFT("Righ", 1)' }, 
-		{ client_f: '=LEFT("Right", 1)' }, 
-		{ client_f: '=LEFT("Right", 2)' }, 
+		{ tags: [], client_f: '=LEFT("Left", ' }, 
+		{ tags: [], client_f: '=LEFT("Left", 1' }, 
+		{ tags: [], client_f: '=LEFT("Left", 1)' }, 
+		{ tags: [], client_f: '=LEFT("Lef", 1)' }, 
+		{ tags: [], client_f: '=LEFT("Le", 1)' }, 
+		{ tags: [], client_f: '=LEFT("", 1)' }, 
+		{ tags: [], client_f: '=LEFT("R", 1)' }, 
+		{ tags: [], client_f: '=LEFT("Ri", 1)' }, 
+		{ tags: [], client_f: '=LEFT("Rig", 1)' }, 
+		{ tags: [], client_f: '=LEFT("Righ", 1)' }, 
+		{ tags: [], client_f: '=LEFT("Right", 1)' }, 
+		{ tags: [], client_f: '=LEFT("Right", 2)' }, 
 		]
 	).map( h=> console.log( [h.tags, h.client_f]));
+
+
+	tag_intermediate_history([ 
+		{ tags: [], client_sql: 'S' }, 
+		{ tags: [], client_sql: 'SE' }, 
+		{ tags: [], client_sql: 'SEL' }, 
+		{ tags: [], client_sql: 'SELE' }, 
+		{ tags: [], client_sql: 'SELEC' }, 
+		{ tags: [], client_sql: 'SELECT' }, 
+		{ tags: [], client_sql: 'SELECT ' }, 
+		{ tags: [], client_sql: 'SELECT *' }, 
+		{ tags: [], client_sql: 'SELECT * ' }, 
+		{ tags: [], client_sql: 'SELECT *' }, 
+		{ tags: [], client_sql: 'SELECT ' }, 
+		{ tags: [], client_sql: 'SELECT c' }, 
+		{ tags: [], client_sql: 'SELECT c ' }, 
+		{ tags: [], client_sql: 'SELECT c F' }, 
+		{ tags: [], client_sql: 'SELECT c Fx' }, 
+		]
+	).map( h=> console.log( [h.tags, h.client_sql]));
 }
 */
 
@@ -352,6 +391,7 @@ if(DEBUG) {
 // Return if the tag array has a matching tag.
 // T/F
 function has_tag(tags: Array<any>, match: string): boolean {
+	if(typeof tags == 'undefined') return false;
 	return 0 < tags.filter( t => t.tag === match ).length;
 }
 
@@ -776,11 +816,15 @@ function return_tagged_level(level: IfLevelSchema): IfLevelSchema {
 				? untyped_page.toIfPageHarsonsSchema()
 				: untyped_page;
 
-		if( !(page.type === 'IfPageFormulaSchema' || page.type === 'IfPageHarsonsSchema' || page.type === 'IfPagePredictFormulaSchema') ) 
+		if( !(page.type === 'IfPageFormulaSchema' || page.type === 'IfPageHarsonsSchema' 
+				|| page.type === 'IfPagePredictFormulaSchema'
+				|| page.type === 'XXXXIfPageSqlSchema') ) 
 			return page; // don't do any tags on non-formula pages.
 
 		// Clean-up history.
+		console.log(page.history)
 		let filtered_history = filter_history(page.history);
+		console.log(filtered_history)
 		filtered_history = remove_duplicate_history(filtered_history);
 		filtered_history = add_tags(filtered_history);
 		filtered_history = tag_single_letter_typos(filtered_history);
@@ -790,35 +834,37 @@ function return_tagged_level(level: IfLevelSchema): IfLevelSchema {
 		if(page.type === 'IfPageFormulaSchema') 
 			filtered_history = tag_paste(filtered_history);
 
-		//page.history = filtered_history;
-
 		let parsed = {};
 
 		// Fill template, so that {n} turns into 1, or {cell1_ref}  turns into A1.
-		let t_solution_f = fill_template(page.solution_f, page.template_values);
+		let t_solution_f = typeof page.solution_f !== 'undefined' ?
+								fill_template(page.solution_f, page.template_values) :
+								fill_template(page.solution_sql, page.template_values);
 		
+		console.log(filtered_history)
 		// Run checks.
 		filtered_history.map( h => {
 			// Make sure we have data.
-			if( typeof h.client_f === 'undefined' ) return;
+			if( typeof h.client_f === 'undefined' && typeof h.client_sql === 'undefined') return;
 
 			// Only tag non-intermediate data.
 			if( h.tags.filter( tag => tag.tag === 'INTERMEDIATE').length === 1 ) return;
 
 			// See if we can parse it out.
-			try {
-				parsed = parseFeedback(h.client_f);
-			} catch (e) {
-				h.tags.push( { tag: 'PARSE_ERROR'});
-				return;
-			}
-
-			ENTRY_TESTS.forEach( test => { 
-				// $FlowFixMe
-				if(test.if( t_solution_f, h.client_f, page, parsed )) {
-					h.tags.push( { tag: test.tag });
+			if(typeof h.client_f !== 'undefined') {
+				try {
+					parsed = parseFeedback(h.client_f);
+				} catch (e) {
+					h.tags.push( { tag: 'PARSE_ERROR'});
+					return;
 				}
-			});
+				ENTRY_TESTS.forEach( test => { 
+					// $FlowFixMe
+					if(test.if( t_solution_f, h.client_f, page, parsed )) {
+						h.tags.push( { tag: test.tag });
+					}
+				});
+			}
 
 			//if(!has_tag(h.tags, 'intermediate')) 
 			//	console.log([ h.client_f, h.tags, parsed.map( p => p.has + ': ' + p.args.join(', ')) ]);
@@ -827,6 +873,7 @@ function return_tagged_level(level: IfLevelSchema): IfLevelSchema {
 			//	console.log([ h, page.solution_f, h.client_f, page.tests[0] ]);
 		});
 
+		page.history = filtered_history;
 
 		return page;
 	});

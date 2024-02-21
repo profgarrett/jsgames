@@ -58,7 +58,7 @@ const tutorial_pages = [
 			{	instruction: 'If we double our Alpacas (multiply by 2), how many would we have?',
 				solution_f: '=a1*2',
 			},
-			{	instruction: 'How many triple our Alpacas (multiply by 3), how many would we have?',
+			{	instruction: 'If we triple our Alpacas (multiply by 3), how many would we have?',
 				solution_f: '=a1*3', 
 			},
 		],

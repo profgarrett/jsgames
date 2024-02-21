@@ -176,6 +176,8 @@ function create_summary_question( pages: Array<IfPageBaseSchema>): any {
 	} else if (pages[0].type === 'IfPageNumberAnswerSchema') {
 		let p: IfPageNumberAnswerSchema = pages[0].toIfPageNumberAnswerSchema();
 		summary_question.solution_f = p.solution.toString();
+	} else if (pages[0].type === 'IfPageSqlSchema') {
+		summary_question.solution_sql = pages[0].solution_sql;
 	}
 	
 

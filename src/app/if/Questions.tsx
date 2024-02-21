@@ -6,6 +6,7 @@ import { create_summary } from './QuestionsData';
 import QuestionsExcelChoice from './QuestionsExcelChoice';
 //import QuestionsExcelNumberAnswer from './QuestionsExcelNumberAnswer';
 import QuestionsExcelFormulas from './QuestionsExcelFormulas';
+import QuestionsExcelSql from './QuestionsExcelSql';
 import QuestionsTable from './QuestionsTable';
 import QuestionsTags from './QuestionsTags';
 import QuestionsChart from './QuestionsChart';
@@ -35,6 +36,9 @@ export default class IfQuestions extends React.Component<PropsType> {
 			return <QuestionsChart levels={this.props.levels} />;
 
 		if(this.props.output === 'excel') {
+
+			return <div><QuestionsExcelSql levels={levels} /></div>;
+
 			// GOOD, just don't currently need both options.
 			if( SHOW_FORMULA_INSTEAD_OF_CHOICE ) 
 				return <div><QuestionsExcelFormulas levels={levels} /></div>;

@@ -229,12 +229,13 @@ async function _initialize_json(level: IfLevelSchema, original_json: any): Promi
 			json.correct_required = typeof json.correct_required == 'undefined' ? true : json.correct_required;
 
 			json.solution_test_results_visible = true;
-			json.solution_f_visible = false;
+			json.solution_f_visible = true;
 
 		} else if(json.code === 'test') {
 			json.correct_required = false;
 			json.solution_test_results_visible = true;
-			json.solution_f_visible = false;
+			json.solution_f_visible = true; // note! This is critical, otherwise studnets won't be able to see hints or the
+				// correct answer when they're stuck.
 
 		} else {
 			throw new Error('Invalid formula code '+json.code+' in baseifgame');

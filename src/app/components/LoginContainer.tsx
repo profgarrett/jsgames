@@ -172,7 +172,7 @@ return (
 			<div className='card-text'>
 	
 				<h3>A free Excel tutorial system</h3>
-				This free website teaches you how to write formulas and functions in Microsoft Excel.
+				This website teaches you how to write formulas and functions in Microsoft Excel.
 				<br/><br/>
 				It is a research project developed by <a href='http://profgarrett.com'>Nathan Garrett</a>.
 				The <a href='https://github.com/profgarrett/jsgames'>code</a> is free for public use, and 

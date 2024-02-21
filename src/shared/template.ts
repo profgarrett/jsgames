@@ -483,7 +483,6 @@ function get_compiled_template_values(page: IPage, level?: ILevel): IStringIndex
 	Returns new string or number.
 **/
 function fill_template(s: string | number, values: IStringIndexJsonObject): string | number {
-	
 	if(s === null) return '';
 
 	// Check in case we are passed a number instead of a string.
