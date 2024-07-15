@@ -22,16 +22,18 @@ module.exports = {
 	devtool: 'source-map',
 	devServer: {
 		port: 8080,
-		proxy: {
-			'/api': {
+		proxy: [
+			{
+				context: ['/api'],
 				target: 'http://localhost:3000/',
 				secure: false
 			},
-			'/static': {
+			{
+				context: ['/static'],
 				target: 'http://localhost:3000/',
 				secure: false
 			},
-		},
+		],
 		historyApiFallback: true
 	},
 	resolve: {
