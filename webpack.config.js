@@ -25,12 +25,12 @@ module.exports = {
 		proxy: [
 			{
 				context: ['/api'],
-				target: 'http://localhost:3000/',
+				target: 'http://localhost:9000/',
 				secure: false
 			},
 			{
 				context: ['/static'],
-				target: 'http://localhost:3000/',
+				target: 'http://localhost:9000/',
 				secure: false
 			},
 		],

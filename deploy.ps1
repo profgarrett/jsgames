@@ -60,5 +60,5 @@ ssh profgarrett@excel.fun "cd excel.fun; rm app.js; ln -s jsgames/build/server/a
 # Clean logs
 ssh profgarrett@excel.fun "cd excel.fun; rm -f log.txt"
 
-# Restart server 
-ssh profgarrett@excel.fun "cd excel.fun; touch tmp/restart.txt"
+# Restart server through pm2
+ssh profgarrett@excel.fun "pm2 restart all"

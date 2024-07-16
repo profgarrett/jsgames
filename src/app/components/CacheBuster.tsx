@@ -48,7 +48,7 @@ export default class CacheBuster extends React.Component<unknown, StateType> {
     // Ping the server to find the most recent posted version.
 	load_version = () => {
         if (DEBUG) console.log('CacheBuster: Loading Version from Server');
-        const url = `/static/meta.json?${new Date().getTime()}`; 
+        const url = `/meta.json?${new Date().getTime()}`; 
 
         // Don't load anything if this is on the localhost (i.e., developing)
         if(this.state.localhost) return;

@@ -100,32 +100,33 @@ interface IStringIndexJsonObject {
 
 Depending on the server, you may need to take further actions.  If deploying to Dreamhost, then you may need to take some additional steps to configure node. See latest at https://help.dreamhost.com/hc/en-us/articles/217185397-Node-js-overview
 
-Install NVM
+Install NVM and Node
 ```
-curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.33.8/install.sh | bash
+https://help.dreamhost.com/hc/en-us/articles/360029083351-Installing-a-custom-version-of-NVM-and-Node-js
 ```
 
-Switch to correct version of NVM
+Switch to correct version of NVM (note, all version numbers need to be incremented)
 ```
 nvm use 9.4.0
-nvm alias default v9.4.0
+nvm alias default v20.whatever.1
 ```
 
-Check for local installed npm packages.
+After loading the files, be sure to npm install to get all local packages.
+
+Check node by running which node.
+
+Next, install pm2 (https://pm2.keymetrics.io/docs/usage/quick-start/)
+Add the app file to auto-run
 ```
-https://help.dreamhost.com/hc/en-us/articles/115004415628-Node-js-installing-packages
+pm2 start app.js --name jsgames --watch
 ```
 
-Make sure that the .htaccess file points to the correct version of node. You can check this by ssh into the server, and running which node.
+I use a custom .htaccess file on the server. Look in the build folder.  This file forces https.
 
-After updating on Dreamhost, be sure to reload passenger.  SSH into the server, and then run the following.
-```
-npm update
-git pull
-touch tmp/restart
-```
+Test the server by going to excel.fun:9000/api/version
 
-I use a custom .htaccess file on the server. Look in the build folder.  This file forces https, as well as helps passenger use the correct node version.
+You now need to add a proxy server. Bind /api and /sql to port 9000.
+This is generally done through the Dreamhost interface.
 
 ## Developing
 
@@ -136,14 +137,12 @@ npm run startnode
 npm run startreact
 ```
 
-After updating, and before submitting, be sure the build folder is up to date. Use deploy.sh and build.sh files to automate as needed.
-```
-npm run build
-```
+After updating, and before submitting, be sure the build folder is up to date. Use build file in PowerShell deploy to server.
+
+Y
 
 
-
-## Authoring Tutorials.
+## Authoring Tutorials
 
 
 Tutorials are written as code.  They should be placed into the src/server/tutorials folder, and 

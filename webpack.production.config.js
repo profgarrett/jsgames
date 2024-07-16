@@ -78,6 +78,7 @@ module.exports = {
 	
 	output: {
 		filename: '[name].[chunkhash].js',
+		sourceMapFilename: "[name].[chunkhash].js.map",
 		publicPath: '/',
 		path:   __dirname + '/build/public'
 	},
@@ -87,7 +88,7 @@ module.exports = {
 		port: 8080,
 		proxy: {
 			'/api': {
-				target: 'http://localhost:3000/',
+				target: 'http://localhost:9000/',
 				secure: false
 			}
 		},

@@ -178,8 +178,12 @@ const build_path = (filename: string): string => {
 		return path.join(__dirname, '../public/'+filename);
 };
 
-// Build files. Note that the paths don't work on :3000 when developing,
-// but they do work when deployed due to passenger on dreamhost using that folder.
+// Build files. Note that the paths work on :9000 when developing,
+// and are essential when deploying.
+app.get('/test', (req: Request, res: Response) => {
+	res.send("<h1>Refresh 2</h1>");
+});
+
 app.get('/favicon.ico', (req: Request, res: Response) => {
 	res.sendFile(build_path('favicon.ico'));
 });
@@ -189,12 +193,22 @@ app.get('/transformed.js', (req: Request, res: Response) => {
 app.get('/transformed.js.map', (req: Request, res: Response) => {
 	res.sendFile(build_path('transformed.js.map'));
 });
+app.get('/meta.json', (req: Request, res: Response) => {
+	res.sendFile(build_path('meta.json'));
+});
+app.get('/main:p.js', (req: Request, res: Response) => {
+	res.sendFile(build_path('main'+req.params.p+'.js'));
+});
+app.get('/main:p.js.map', (req: Request, res: Response) => {
+	res.sendFile(build_path('main' + req.params.p + '.js.map'));
+});
+
 
 
 // Load static files. 
 // When published for real, this should be set through .htaccess to avoid hitting express
 // However, it's useful to have this in place for development.
-app.use('/static', express.static('static'));
+app.use('/static', express.static(build_path('static')));
 
 // Default case that returns the general index page.
 // Needed for when client is on a subpage and refreshes the page to return the react app.
@@ -212,6 +226,6 @@ process.on('uncaughtException', function (er: any) {
   process.exit(1);
 });
 
-app.listen(DEBUG ? 3000 : 80, function(){
-	console.log('app started ' + (DEBUG ? 3000 : 80) + ' - ' + (new Date()).toString() );
+app.listen(DEBUG ? 9000 : 80, function(){
+	console.log('app started ' + (DEBUG ? 9000 : 80) + ' - ' + (new Date()).toString() );
 });

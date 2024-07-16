@@ -4,6 +4,7 @@ import ReactDOM from 'react-dom/client';
 //import 'url-search-params-polyfill'; // yeah for IE!
 import { createBrowserRouter,
 	RouterProvider,
+	useRouteError,
 	Route, 
 	useNavigate} from 'react-router-dom';
 
@@ -179,11 +180,25 @@ import KCContainer from './if/KCContainer';
 import LevelRawContainer from './if/LevelRawContainer';
 
 
-const Error = () => <div><h1>Error</h1><p>Sorry, but an error occurred. Pleaser try closing your browser, refreshing, and trying again.</p></div>
+function ErrorPage() {
+	const error = useRouteError();
+	console.error(error);
+  
+	return (
+	  <div id="error-page">
+		<h1>Oops!</h1>
+		<p>Sorry, an unexpected error has occurred.</p>
+		<p>
+		  <i>{error.statusText || error.message}</i>
+		</p>
+	  </div>
+	);
+}
 
 
 const router = createBrowserRouter([
-	{ path: '/', element: <MyProgressContainer /> },
+	{ path: '/', element: <MyProgressContainer />, errorElement: <ErrorPage/> },
+
 	{ path: '/ifgame/', element: <MyProgressContainer /> },
 
 	{ path: '/ifgame/leveldebug/:_id', element: <LevelDebugContainer /> },
