@@ -1,4 +1,4 @@
-const { DataFactory } = require('./../DataFactory');
+const { DataFactory } = require('./../../shared/DataFactory');
 //const { LinearGen, UntilGen } = require('./../Gens');
 const { finish_questions } = require('./../pages/finish_questions');
 

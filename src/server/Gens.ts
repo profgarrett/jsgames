@@ -1,5 +1,5 @@
 // @ts-nocheck comment
-import { DataFactory } from './DataFactory';
+import { DataFactory } from './../shared/DataFactory';
 import { IfPageBaseSchema } from './../shared/IfPageSchemas';
 const assert = require('assert').strict;
 

@@ -1,6 +1,7 @@
 import React, { useState, ReactElement } from 'react';
 
-import { DEMO_MODE } from '../../server/secret';
+import { DEMO_MODE } from '../configuration';
+
 
 import { IfLevelSchema } from '../../shared/IfLevelSchema';
 import { HtmlDiv } from '../components/Misc';

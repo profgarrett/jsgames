@@ -1,5 +1,5 @@
 import { fill_template } from './template';
-import { IfPageFormulaSchema, IfPageHarsonsSchema, IfPagePredictFormulaSchema } from './../shared/IfPageSchemas';
+import { IfPageFormulaSchema, IfPageHarsonsSchema, IfPagePredictFormulaSchema, IfPageSqlSchema } from './../shared/IfPageSchemas';
 import { parseFeedback } from './parseFeedback';
 
 // Feedback types are used by the server to create custom feedback for page submissions.
@@ -184,6 +184,7 @@ const has = {
 };
 
 
+
 // Return feedback for a completed answer.
 // Only used in the server-side, where we have the solution_rules populated.
 const get_feedback = (that: IfPageFormulaSchema | IfPageHarsonsSchema | IfPagePredictFormulaSchema): string[]|null => {
@@ -226,6 +227,106 @@ const get_feedback = (that: IfPageFormulaSchema | IfPageHarsonsSchema | IfPagePr
 
 
 
+// Ensure that the given page has the given values in it.
+// This is *not* case sensitive.
+const sql = (page: IfPageSqlSchema, values: number[]|string[]): string|null => {
+	let missing: any[] = [];
+	let value: string;
+
+	if(page.client_sql === null) return null;
+
+	const client_sql = page.client_sql.toLowerCase();
+
+	// Test each
+	for(let i=0; i<values.length; i++) {
+		value = ''+fill_template((s(values[i])), page.template_values);
+		// Test with lower case, but don't change the template value.
+		if((s(client_sql)).indexOf((s(value).toLowerCase())) === -1) {
+			missing.push(value);
+		}
+	}
+
+	if (missing.length === 0) {
+		return null;
+	} else if (missing.length === 1) {
+		return 'You are missing ' + missing[0];
+	} else {
+		return 'You are missing: ' + missing.join(', ');
+	}
+};
+
+
+// Ensure that the given page has the given values in it.
+// This is *not* case sensitive.
+const no_sql = (page: IfPageSqlSchema, values: number[]|string[]): string|null => {
+	let missing: any[] = [];
+	let value: string;
+
+	if(page.client_sql === null) return null;
+
+	const client_sql = page.client_sql.toLowerCase();
+
+	// Test each
+	for(let i=0; i<values.length; i++) {
+		value = ''+fill_template((s(values[i])), page.template_values);
+		// Test with lower case, but don't change the template value.
+		if((s(client_sql)).indexOf((s(value).toLowerCase())) != -1) {
+			missing.push(value);
+		}
+	}
+
+	if (missing.length === 0) {
+		return null;
+	} else if (missing.length === 1) {
+		return 'You should not have ' + missing[0];
+	} else {
+		return 'You shoudl not have any of these: ' + missing.join(', ');
+	}
+};
+
+
+// List of functions for has.
+const has_sql = {
+	'sql': sql,
+	'no_sql': no_sql
+};
+
+// Return feedback for a completed answer.
+// Only used in the server-side, where we have the solution_rules populated.
+const get_feedback_sql = (that: IfPageSqlSchema): string[]|null => {
+	let response: any = '';
+	let responses: any[] = [];
+
+	// Do not give feedback on un-submitted items.
+	if(!that.client_has_answered) return null;
+
+	// Always check to make sure that there is SELECT and FROM.	
+	response = sql(that, ['SELECT', 'FROM']);
+	if(response) responses.push(response);
+
+	// If no custom rules are defined
+	//if(that.feedback.length === 0) return responses;
+
+	// Loop through feedbacks, returning any that return a non-null response.
+	for(let i = 0; i < that.feedback.length; i++) {
+		// Make sure that it is a valid has type.
+		// @ts-ignore
+		if(typeof has_sql[that.feedback[i].has] === 'undefined') {
+			// @ts-ignore
+			throw new Error('Invalid feedback type of ' + that.feedback[i].has);
+		}
+
+		// Run has code and save result (if not null, meaning ok).
+		// @ts-ignore
+		response = has_sql[that.feedback[i].has](that, that.feedback[i].args);
+		if(response) responses.push(response);
+	}
+
+	return responses;
+};
+
+
 export {
-	get_feedback
+	get_feedback,
+	get_feedback_sql
 };

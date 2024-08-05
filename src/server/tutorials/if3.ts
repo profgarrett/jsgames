@@ -1,4 +1,4 @@
-import { DataFactory } from './../DataFactory';
+import { DataFactory } from './../../shared/DataFactory';
 //import { LinearGen, UntilGen } from './../Gens';
 import { finish_questions } from './../pages/finish_questions';
 

@@ -1,7 +1,7 @@
 import { IfLevelSchema } from './../shared/IfLevelSchema';
 import { get_page_schema_as_class } from './../shared/IfPageSchemas';
 import { runGen } from './Gens';
-import { DataFactory } from './DataFactory';
+import { DataFactory } from './../shared/DataFactory';
 
 import { get_compiled_template_values } from './../shared/template';
 import { arrayDifferent, random_boolean_from_string, clean_text_of_tabs_and_newlines } from './../shared/misc';
@@ -262,12 +262,14 @@ async function _initialize_json(level: IfLevelSchema, original_json: any): Promi
 			json.correct_required = typeof json.correct_required == 'undefined' ? true : json.correct_required;
 
 			json.solution_results_visible = true;
-			json.solution_sql_visible = false;
+			json.solution_sql_visible = true;
 
 		} else if(json.code === 'test') {
 			json.correct_required = false;
 			json.solution_results_visible = true;
-			json.solution_sql_visible = false;
+			json.solution_sql_visible = false; // keep disabled, as user can submit
+			// a test answer before a final one. If true, then they can wait 5m and
+			// see all results.
 
 		} else {
 			throw new Error('Invalid formula code '+json.code+' in baseifgame');

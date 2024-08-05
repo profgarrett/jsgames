@@ -12,3 +12,5 @@ exports.TIME_BEFORE_SHOWING_SOLUTION = 60*3;
 // For chart designs, what is a medium v. small distortion?
 exports.VISLIT_DISTORTION_MEDIUM = 0.6;
 exports.VISLIT_DISTORTION_SMALL = 0.3;
+
+exports.DEMO_MODE = false;

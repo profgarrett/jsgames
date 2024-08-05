@@ -1,10 +1,12 @@
 import React from 'react';
+import { useEffect } from 'react';
 import ReactDOM from 'react-dom/client';
 
 //import 'url-search-params-polyfill'; // yeah for IE!
 import { createBrowserRouter,
 	RouterProvider,
 	useRouteError,
+	useLocation,
 	Route, 
 	useNavigate} from 'react-router-dom';
 
@@ -196,27 +198,46 @@ function ErrorPage() {
 }
 
 
+
+const PageTitle = ({ title }) => {
+	const location = useLocation();
+  
+	useEffect( () => {
+	  document.title = title;
+	}, [location, title]);
+  
+	return null;
+  };
+  
+
+const t = (t, el ) => {
+	return (<>
+		<PageTitle title={t} />{ el }
+	</>);
+}
+
+
 const router = createBrowserRouter([
-	{ path: '/', element: <MyProgressContainer />, errorElement: <ErrorPage/> },
+	{ path: '/', element: t('Excel.fun', <MyProgressContainer />), errorElement: <ErrorPage/> },
 
-	{ path: '/ifgame/', element: <MyProgressContainer /> },
+	{ path: '/ifgame/', element: t('Excel.fun Home', <MyProgressContainer />) },
 
-	{ path: '/ifgame/leveldebug/:_id', element: <LevelDebugContainer /> },
-	{ path: '/ifgame/levels/:_code', element: <LevelListContainer /> },
-	{ path: '/ifgame/level/:_id/play', element: <LevelPlayContainer /> },
-	{ path: '/ifgame/level/:_id/score', element: <LevelScoreContainer /> },
-	{ path: '/ifgame/progress/:_idsection', element: <ClassProgressContainer /> },
-	{ path: '/ifgame/recent/:_idsection', element: <RecentContainer /> },
-	{ path: '/ifgame/grades/:_idsection', element: <GradesContainer /> },
-	{ path: '/ifgame/questions/:_idsection', element: <QuestionsContainer /> },
-	{ path: '/ifgame/levelraw/:_id', element: <LevelRawContainer /> },
+	{ path: '/ifgame/leveldebug/:_id', element: t('Debug', <LevelDebugContainer />) },
+	{ path: '/ifgame/levels/:_code', element: t('Levels', <LevelListContainer />) },
+	{ path: '/ifgame/level/:_id/play', element: t('Level', <LevelPlayContainer />) },
+	{ path: '/ifgame/level/:_id/score', element: t('Grade', <LevelScoreContainer />) },
+	{ path: '/ifgame/progress/:_idsection', element: t('Class progress',<ClassProgressContainer /> ) },
+	{ path: '/ifgame/recent/:_idsection', element: t('Recent', <RecentContainer />) },
+	{ path: '/ifgame/grades/:_idsection', element: t('Grades', <GradesContainer />) },
+	{ path: '/ifgame/questions/:_idsection', element: t('Questions', <QuestionsContainer />) },
+	{ path: '/ifgame/levelraw/:_id', element: t('Raw', <LevelRawContainer />) },
 
-	{ path: '/ifgame/kcs/:_idsection', element: <KCContainer /> },
+	{ path: '/ifgame/kcs/:_idsection', element: t('KCs', <KCContainer /> ) },
 
-	{ path: '/login', element: <LoginContainer /> },
-	{ path: '/logout', element: <Logout /> },
-	{ path: '/profile', element: <ProfileContainer /> },
-	{ path: '/password', element: <PasswordContainer /> },
+	{ path: '/login', element: t('Excel.fun Login', <LoginContainer />) },
+	{ path: '/logout', element: t('Excel.fun Logout', <Logout />) },
+	{ path: '/profile', element: t('Excel.fun Profile', <ProfileContainer />) },
+	{ path: '/password', element: t('Excel.fun Password', <PasswordContainer />) },
   ]);
 
 

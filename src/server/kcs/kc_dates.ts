@@ -1,5 +1,5 @@
 import { KC_NAMES } from './../kcs/kc';
-import { DataFactory } from './../DataFactory';
+import { DataFactory } from './../../shared/DataFactory';
 import type { AdaptiveKC } from './kc';
 
 

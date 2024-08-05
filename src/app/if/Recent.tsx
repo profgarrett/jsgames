@@ -7,7 +7,8 @@ import { getUserFromBrowser } from '../components/Authentication';
 import { LevelModal } from './LevelModal';
 import { IfLevelPagelessSchema } from '../../shared/IfLevelSchema';
 
-import { DEMO_MODE } from '../../server/secret';
+import { DEMO_MODE } from '../configuration';
+
 import { Link } from 'react-router-dom';
 
 

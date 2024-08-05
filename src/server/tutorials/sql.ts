@@ -1,10 +1,10 @@
 import { makeTutorialGenFromKC } from './../kcs/kc';
 
-import { kc_sql_selectfrom } from './../kcs/kc_sql_selectfrom';
+import { kc_sql_selectfrom, kc_sql_selectfrom_quotes } from './../kcs/kc_sql_selectfrom';
 import { kc_sql_orderby } from './../kcs/kc_sql_orderby';
-import { kc_sql_where } from '../kcs/kc_sql_where';
-import { kc_sql_where_and_or } from '../kcs/kc_sql_where_and_or';
-import { kc_sql_join_inner } from '../kcs/kc_sql_join_inner';
+import { kc_sql_where_numbers, kc_sql_where_text, kc_sql_where_quotes } from '../kcs/kc_sql_where';
+import { kc_sql_where_and_or_numbers, kc_sql_where_and_or_text, kc_sql_where_and_or_quotes } from '../kcs/kc_sql_where_and_or';
+import { kc_sql_join_inner_prep, kc_sql_join_inner_intro, kc_sql_join_inner_practice } from '../kcs/kc_sql_join_inner';
 import { kc_sql_join_leftouter } from '../kcs/kc_sql_join_leftouter';
 import { kc_sql_join_keys} from '../kcs/kc_sql_join_keys';
 import { kc_sql_join_self } from '../kcs/kc_sql_join_self';
@@ -15,10 +15,10 @@ const REVIEW_QUESTIONS = 5;
 
 const sql_selectfrom = ({
 	code: 'sql_selectfrom', 
-	title: 'SQL - Select and From', 
+	title: 'SQL - Select and From (v2)', 
 	description: 'Select data from a table',
 	show_score_after_completing: true,
-	version: 0.1,
+	version: 0.2,
 	show_progress: true,
 
 	gen: ({
@@ -29,6 +29,7 @@ const sql_selectfrom = ({
 			},
 			
 			makeTutorialGenFromKC(kc_sql_selectfrom, REVIEW_QUESTIONS),
+			makeTutorialGenFromKC(kc_sql_selectfrom_quotes, REVIEW_QUESTIONS),
 
 			{	type: 'IfPageTextSchema',
 				description: `Good job! You have completed this tutorial!`,
@@ -42,10 +43,10 @@ const sql_selectfrom = ({
 
 const sql_orderby = ({
 	code: 'sql_orderby', 
-	title: 'SQL - Order By', 
+	title: 'SQL - Order By (v2)', 
 	description: 'Order the returned values from a query',
 	show_score_after_completing: true,
-	version: 0.1,
+	version: 0.2,
 	show_progress: true,
 
 	gen: ({
@@ -69,10 +70,10 @@ const sql_orderby = ({
 
 const sql_where = ({
 	code: 'sql_where', 
-	title: 'SQL - Where', 
+	title: 'SQL - Where (v2)', 
 	description: 'Filter the number of rows returned from a query',
 	show_score_after_completing: true,
-	version: 0.1,
+	version: 0.2,
 	show_progress: true,
 
 	gen: ({
@@ -82,7 +83,9 @@ const sql_where = ({
 				description: `This tutorial introduces the <code>WHERE</code> keyword.`,
 			},
 			
-			makeTutorialGenFromKC(kc_sql_where, REVIEW_QUESTIONS),
+			makeTutorialGenFromKC(kc_sql_where_numbers, REVIEW_QUESTIONS),
+			makeTutorialGenFromKC(kc_sql_where_text, REVIEW_QUESTIONS),
+			makeTutorialGenFromKC(kc_sql_where_quotes, REVIEW_QUESTIONS),
 
 			{	type: 'IfPageTextSchema',
 				description: `Good job! You have completed this tutorial!`,
@@ -98,10 +101,10 @@ const sql_where = ({
 
 const sql_where_and_or = ({
 	code: 'sql_where_and_or', 
-	title: 'SQL - AND OR', 
+	title: 'SQL - AND OR (v2)', 
 	description: 'Have more complex logical tests',
 	show_score_after_completing: true,
-	version: 0.1,
+	version: 0.2,
 	show_progress: true,
 
 	gen: ({
@@ -111,7 +114,9 @@ const sql_where_and_or = ({
 				description: `This tutorial introduces the <code>AND</code> & <code>OR</code> keywords.`,
 			},
 			
-			makeTutorialGenFromKC(kc_sql_where_and_or, REVIEW_QUESTIONS),
+			makeTutorialGenFromKC(kc_sql_where_and_or_numbers, REVIEW_QUESTIONS),
+			makeTutorialGenFromKC(kc_sql_where_and_or_text, REVIEW_QUESTIONS),
+			makeTutorialGenFromKC(kc_sql_where_and_or_quotes, REVIEW_QUESTIONS),
 
 			{	type: 'IfPageTextSchema',
 				description: `Good job! You have completed this tutorial!`,
@@ -126,9 +131,9 @@ const sql_where_and_or = ({
 const sql_join_inner = ({
 	code: 'sql_join_inner', 
 	title: 'SQL - INNER JOIN', 
-	description: 'Connect two tables with matching keys',
+	description: 'Connect two tables with matching keys (v2)',
 	show_score_after_completing: true,
-	version: 0.1,
+	version: 0.2,
 	show_progress: true,
 
 	gen: ({
@@ -138,8 +143,10 @@ const sql_join_inner = ({
 				description: `This tutorial introduces the <code>INNER JOIN</code> keyword.`,
 			},
 			
-			makeTutorialGenFromKC(kc_sql_join_inner, REVIEW_QUESTIONS),
-
+			makeTutorialGenFromKC(kc_sql_join_inner_prep, REVIEW_QUESTIONS),
+			makeTutorialGenFromKC(kc_sql_join_inner_intro, REVIEW_QUESTIONS),
+			makeTutorialGenFromKC(kc_sql_join_inner_practice, REVIEW_QUESTIONS),
+			 
 			{	type: 'IfPageTextSchema',
 				description: `Good job! You have completed this tutorial!`,
 			},

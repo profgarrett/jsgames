@@ -144,7 +144,7 @@ const _baseX = {
 
 	instruction: `Type in the correct sql query.`,
 	code: 'test',
-	kcs: [ KC_NAMES.KC_SQL_WHERE ],
+	kcs: [ KC_NAMES.KC_SQL_JOIN_LEFTOUTER ],
 
 };
 

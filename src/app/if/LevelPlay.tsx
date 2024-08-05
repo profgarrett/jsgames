@@ -217,8 +217,15 @@ export default class IfLevelPlay extends React.Component<PropsType, StateType> {
 		
 		const feedback_modal = this.props.show_feedback ? <LevelPlayFeedbackModal page={page} onHideModal={ this.handleViewFeedback } /> : <></>;
 
+
+		// Discourage copying stuff on the page.
+		function onCopyHandler(e) {
+			e.preventDefault();
+			e.stopPropagation();
+		}
+
 		return (
-			<div>
+			<div onCopy={onCopyHandler} draggable={false} onDragStart={onCopyHandler}>
 				<div key={'iflevelplay'+this.props.selected_page_index} id='iflevelplay' style={{position: 'relative', opacity: this.props.show_feedback ? 0.5 : 1 }}>
 					<CSSTransition 
 							timeout={20}

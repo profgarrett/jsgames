@@ -1,4 +1,4 @@
-const { DataFactory } = require('./../DataFactory');
+const { DataFactory } = require('./../../shared/DataFactory');
 //const { LinearGen, ShuffleGen, UntilGen, AdaptiveGen } = require('./../Gens');
 const { finish_questions } = require('./../pages/finish_questions');
 import type { GenType } from '../Gens';

@@ -1,5 +1,5 @@
 import { Schema, isDef, isObject, isArray, revive_dates_recursively } from './Schema';
-import { get_feedback } from './feedback';
+import { get_feedback, get_feedback_sql } from './feedback';
 import { fill_template } from './template';
 //const { ChartDef } = require('./ChartDef');
 const FormulaParser = require('hot-formula-parser').Parser;
@@ -1934,10 +1934,18 @@ class IfPageSqlSchema extends IfPageBaseSchema {
 
 		// Create custom feedback.
 		//
-		// Feedback are not always provided by the server/client, or could just be
-		// undefined for the current problem.
-		//const feedback = []; // get_feedback(this); Expand when implementing custom rules.
-		//this.client_feedback = feedback;
+		if(this.client_feedback == null) {
+			this.client_feedback = [];
+		}
+		
+		// First see if the server has any feedback. If so, don't run on client
+		// This is important, as we don't want to wipe out server feedback by running it locally.
+		if(this.client_feedback.length == 0) {
+			const feedback = get_feedback_sql(this);
+			if(feedback !== null) {
+				this.client_feedback = feedback;
+			}
+		}
 
 		// Check to see if we have any input from the user.
 		if(this.client_sql === null || this.client_sql.length < 1) {
@@ -1980,7 +1988,7 @@ class IfPageSqlSchema extends IfPageBaseSchema {
 		// Check column titles
 		if(this.client_results_titles.length !== this.solution_results_titles.length) {
 			this.correct = false;
-			this.client_feedback.push('You have a different number of columns than the solution.');
+			this.client_feedback.push('You have a different number of columns than the solution. Check your SELECT.');
 			return;
 		}
 		for(let i=0; i<this.client_results_titles.length; i++) {
@@ -1995,7 +2003,7 @@ class IfPageSqlSchema extends IfPageBaseSchema {
 		// Check Rows
 		if(this.client_results_rows.length !== this.solution_results_rows.length) {
 			this.correct = false;
-			this.client_feedback.push('You have a different number of rows than the solution.');
+			this.client_feedback.push('You have a different number of rows than the solution. Check your WHERE / ON commands.');
 			return;
 		}
 

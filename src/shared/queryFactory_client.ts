@@ -50,6 +50,10 @@ function _return_create_table(name: string, titles: string[], formats: string[])
 	const lines: string[] = [];
 
 	// Sanity check.
+	if(typeof titles == 'undefined' || typeof name == 'undefined' || typeof formats == 'undefined') {
+		console.log([name, titles, formats]);
+		throw new Error('Problem setting up table for Sql, return_create_table is quitting');
+	}
 	if(titles.length !== formats.length) {
 		console.log(titles, formats);
 		throw new Error('queryFactory_clients: return create table has different titles v. formats');
@@ -77,10 +81,13 @@ function _return_create_table(name: string, titles: string[], formats: string[])
 }
 
 // Get the SQL text to create tables t1-tn
+// Note that we can have any of the t1 to t3 options.
 function return_create_tables(json: any): string {
 		let lines: string[] = [];
 
-		lines.push(_return_create_table(json.t1_name, json.t1_titles, json.t1_formats));
+		if(typeof json.t1_name !== 'undefined' && json.t1_name !== null && json.t1_name.length > 0) {
+			lines.push(_return_create_table(json.t1_name, json.t1_titles, json.t1_formats));
+		}
 
 		if(typeof json.t2_name !== 'undefined' && json.t2_name !== null && json.t2_name.length > 0) {
 			lines.push(_return_create_table(json.t2_name, json.t2_titles, json.t2_formats));
@@ -98,17 +105,19 @@ function return_insert_intos(json: any): string {
 		let lines: string[] = [];
 
 		// T1
-		for (let i = 0; i < json.t1_rows.length; i++) {
-			lines.push('INSERT INTO "' + json.t1_name + '" ' );
-			lines.push(' ("'+ json.t1_titles.join('", "') + '") ');
-			lines.push(' VALUES (');
+		if(typeof json.t1_rows !== 'undefined') {
+			for (let i = 0; i < json.t1_rows.length; i++) {
+				lines.push('INSERT INTO "' + json.t1_name + '" ' );
+				lines.push(' ("'+ json.t1_titles.join('", "') + '") ');
+				lines.push(' VALUES (');
 
-			// Add quoted values
-			lines.push(
-				json.t1_rows[i].map( quote_string ).join(', ')
-			);
+				// Add quoted values
+				lines.push(
+					json.t1_rows[i].map( quote_string ).join(', ')
+				);
 
-			lines.push(');');
+				lines.push(');');
+			}
 		}
 
 		// T2
@@ -195,6 +204,12 @@ async function proto_queryFactory_getSolutionResults(json: any, SQL: any): Promi
 		
 		if(res.length !== 1) throw new Error('queryFactory solution found length not equal to 1, '+ sql);
 
+		if(typeof res[0].values == 'undefined') {
+			console.log(sql);
+			console.log(res);
+			throw new Error('No values returned for '+ sql);
+		}
+
 		return {
 			titles: res[0].columns, 
 			rows: res[0].values,
@@ -240,7 +255,7 @@ async function proto_queryFactory_getClientResults(json: any, SQL: any): Promise
 			apply_default_sort_if_no_order_by_clause(res[0].values);
 		}
 
-	} catch (e: any) {
+	} catch (e: any) {		
 		let message = '';
 		
 		if(typeof e === 'string') {

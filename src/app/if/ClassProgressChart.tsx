@@ -11,7 +11,7 @@ import { IfPageBaseSchema, IfPageFormulaSchema } from '../../shared/IfPageSchema
 //import 'react-table/react-table.css';
 
 import { IfLevels } from '../../shared/IfLevelSchema';
-import { DEMO_MODE } from '../../server/secret';
+import { DEMO_MODE } from '../configuration';
 
 
 const colors = {

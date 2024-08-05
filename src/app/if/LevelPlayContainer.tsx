@@ -13,6 +13,7 @@ import ForceLogin from '../components/ForceLogin';
 import Feedback from '../components/Feedback';
 
 import CacheBuster from '../components/CacheBuster';
+import { getUserFromBrowser } from '../components/Authentication';
 
 import { TIME_BEFORE_SHOWING_SOLUTION  } from './../configuration.js'; 
 
@@ -27,7 +28,7 @@ export default function LevelPlayContainer() {
 	// -1 means no feedback is to be shown
 	const [showFeedbackOn, setShowFeedbackOn] = useState(-1); 
 
-	
+	const user = getUserFromBrowser();
 	const params = useParams();
 	const navigate = useNavigate();
 	const _id = params._id ? params._id : null;
@@ -272,7 +273,6 @@ export default function LevelPlayContainer() {
 			});
 	}, [_id] );
 
-
 	// Render 
 	//<Breadcrumb.Item href='/'>Home</Breadcrumb.Item>-->
 	// <h3>{ this.state.level ? this.state.level.title : '' }</h3> 
@@ -289,14 +289,20 @@ export default function LevelPlayContainer() {
 		(document.body) ? document.body.style.cursor = 'default' : false;
 	}
 
+
+	// Discourage copying stuff on the page.
+	function onCopyHandler(e) {
+		e.preventDefault();
+		e.stopPropagation();
+	}
+
 	return (
-		<Container fluid>
+		<Container fluid onCopy={onCopyHandler} onDragStart={onCopyHandler}>
 			<Row>
 				<Col>
 					<ForceLogin />
 					<CacheBuster />
 					{ crumbs }
-					
 
 					<Message spinner={isLoading } message={message} style={messageStyle} />
 					<ErrorBoundary>
@@ -315,7 +321,8 @@ export default function LevelPlayContainer() {
 							/>
 							<Feedback
 								data={level}
-								code={_id == null ? 'loading' : _id}
+								code={_id == null ? '' : _id}
+								username={user.username}
 							/>
 						</div>
 					}

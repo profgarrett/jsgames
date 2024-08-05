@@ -1,10 +1,12 @@
-import React from 'react';
 import { Form, Button } from 'react-bootstrap';
 import CSS from 'csstype';
+import React from 'react';
+
 
 type PropsType = {
 	data: any,
-	code: string
+	code: string,
+	username: string,
 };
 
 type StateType = {
@@ -14,7 +16,7 @@ type StateType = {
 	expanded: boolean
 };
 
-export default class Login extends React.Component<PropsType, StateType> { 
+export default class Feedback extends React.Component<PropsType, StateType> { 
 	constructor(props: PropsType) {
 		super(props);
 
@@ -22,7 +24,7 @@ export default class Login extends React.Component<PropsType, StateType> {
 			error: false,
 			message: '',
 			submitting: false,
-			expanded: false
+			expanded: false,
 		};
 
 	}
@@ -36,6 +38,14 @@ export default class Login extends React.Component<PropsType, StateType> {
 			submitting: true,
 		});
 
+		const code = this.props.code;
+		const message = 'Feedback \n\n' +
+			'User: ' + this.props.username + '\n' +
+			this.state.message + '\n' +
+			'https://excel.fun/ifgame/level/' + code + '/play\n' +
+			'https://excel.fun/ifgame/level/' + code + '/score\n' +
+			'https://excel.fun/ifgame/levelraw/' + code + '\n';
+
 		// Fire AJAX.
 		fetch('/api/users/feedback/', {
 				method: 'POST',
@@ -46,7 +56,7 @@ export default class Login extends React.Component<PropsType, StateType> {
 					'Content-Type': 'application/json'
 				},
 				body: JSON.stringify({ 
-						message: this.state.message, 
+						message: message, 
 						data: this.props.data,
 						code: this.props.code,
 					}
@@ -99,7 +109,7 @@ export default class Login extends React.Component<PropsType, StateType> {
 		};
 
 		const label = !this.state.error 
-			? 'Have a problem or input?'
+			? 'Have a problem?'
 			: 'Error submitting, please email your feedback to profgarrett@gmail.com';
 
 		const button = (!this.state.error)
@@ -128,7 +138,7 @@ export default class Login extends React.Component<PropsType, StateType> {
 									value={this.state.message }
 									as="textarea"
 									style={{ height: 100 }}
-									placeholder='Type in your feedback'
+									placeholder='Type in your feedback. Dr. Garrett will try to respond by the end of the day.'
 								/>
 								<div style={{ textAlign: 'right', marginTop: 10 }}>
 									{ close }

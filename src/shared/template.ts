@@ -1,4 +1,4 @@
-import { DataFactory } from './../server/DataFactory';
+import { DataFactory } from './../shared/DataFactory';
 // Note: Do not import IfLevel/IfPages here. It's nice to have the type annotations,
 //		but importing will lead to a import loop that breaks everything.
 
@@ -430,6 +430,9 @@ function get_compiled_template_values(page: IPage, level?: ILevel): IStringIndex
 				}
 				
 				if(page_column_titles.length < 1 )  {
+					console.log(page);
+					console.log(filter_refs);
+					console.log(page_column_titles);
 					throw new Error('Invalid reference in template.page_column_titles');
 				}
 				

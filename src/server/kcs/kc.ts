@@ -112,10 +112,22 @@ const KC_NAMES = {
 
 	// SQL
 	KC_SQL_SELECTFROM: 'kc_sql_selectfrom',
+	KC_SQL_SELECTFROM_QUOTES: 'kc_sql_selectfrom_quotes',
 	KC_SQL_ORDERBY: 'kc_sql_orderby',
-	KC_SQL_WHERE: 'kc_sql_where',
-	KC_SQL_WHERE_AND_OR: 'kc_sql_where_and_or',
-	KC_SQL_JOIN_INNER: 'kc_sql_join_inner',
+	KC_SQL_ORDERBY_QUOTES: 'kc_sql_orderby_quotes',
+
+	KC_SQL_WHERE_NUMBERS: 'kc_sql_where_numbers',
+	KC_SQL_WHERE_TEXT: 'kc_sql_where_text',
+	KC_SQL_WHERE_QUOTES: 'kc_sql_where_quotes',
+
+	KC_SQL_WHERE_AND_OR_NUMBERS: 'kc_sql_where_and_or_numbers',
+	KC_SQL_WHERE_AND_OR_TEXT: 'kc_sql_where_and_or_text',
+	KC_SQL_WHERE_AND_OR_QUOTES: 'kc_sql_where_and_or_quotes',
+
+	KC_SQL_JOIN_INNER_PREP: 'kc_sql_join_inner_prep',
+	KC_SQL_JOIN_INNER_INTRO: 'kc_sql_join_inner_intro',
+	KC_SQL_JOIN_INNER_PRACTICE: 'kc_sql_join_inner_practice',
+
 	KC_SQL_JOIN_LEFTOUTER: 'kc_sql_join_leftouter',
 	KC_SQL_JOIN_KEYS: 'kc_sql_join_keys',
 	KC_SQL_JOIN_SELF: 'kc_sql_join_self',

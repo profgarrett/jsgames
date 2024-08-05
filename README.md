@@ -45,14 +45,10 @@ export {
 	
 	ADMIN_OVER_PASSWORD: '',
 
-	DEMO_MODE: false, // demo mode blanks out usernames.
-
-	VISLIT_MIN_TIME_PER_SLIDE: 3,
-	VISLIT_TIME_PER_SLIDE: 60,
-	DISTORTION_MEDIUM: 0.6, 
-	DISTORTION_SMALL: 0.3,
 }
 ```
+
+You can modify other settings in /configuration.js
 
 After updating, visit this page to update SQL schema.
 ```

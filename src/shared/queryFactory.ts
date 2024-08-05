@@ -10,6 +10,7 @@
 import initSqlJs from 'sql.js';
 import { proto_queryFactory_getClientResults, 
 		 proto_queryFactory_getSolutionResults } from './queryFactory_client';
+//import { debug } from 'webpack';
 
 
 /** 

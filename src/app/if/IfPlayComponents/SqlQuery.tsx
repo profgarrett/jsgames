@@ -51,12 +51,16 @@ export default class SqlQuery extends React.Component<PropsType, StateType> {
 
 		let items: any[] = [];
 
-		let t = this.__render_table('t1', p.t1_name, p.t1_titles, p.t1_formats, p.t1_rows );
-		items.push(<Accordion.Item eventKey='t1' key='sqlqueryt1'>
-			<Accordion.Header>{ 'Table: '+p.t1_name }</Accordion.Header>
-			<Accordion.Body>{ t }</Accordion.Body> 
-			</Accordion.Item>)
+		let t;
 		
+		if(p.t1_name !== null && p.t1_name.length > 0) {
+			t = this.__render_table('t1', p.t1_name, p.t1_titles, p.t1_formats, p.t1_rows );
+			items.push(<Accordion.Item eventKey='t1' key='sqlqueryt1'>
+				<Accordion.Header>{ 'Table: '+p.t1_name }</Accordion.Header>
+				<Accordion.Body>{ t }</Accordion.Body> 
+				</Accordion.Item>)
+		}
+
 		if(p.t2_name !== null && p.t2_name.length > 0) {
 			t = this.__render_table('t2', p.t2_name, p.t2_titles, p.t2_formats, p.t2_rows );
 			items.push(<Accordion.Item eventKey='t2' key='sqlqueryt2'>

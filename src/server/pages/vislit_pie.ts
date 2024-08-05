@@ -4,7 +4,10 @@
 //import { LinearGen, ShuffleGen } from './../Gens';
 //import type { GenType } from './../Gens';
 //import type { LevelSchemaFac../Gens} from './../IfLevelSchemaFactory';
-import { VISLIT_MIN_TIME_PER_SLIDE, VISLIT_TIME_PER_SLIDE, DISTORTION_MEDIUM, DISTORTION_SMALL } from './../secret.js';
+const VISLIT_MIN_TIME_PER_SLIDE = 3;
+const VISLIT_TIME_PER_SLIDE = 60;
+const DISTORTION_MEDIUM = 0.6;
+const DISTORTION_SMALL = 0.3;
 
 
 const _text_base = {

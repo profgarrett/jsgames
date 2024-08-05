@@ -9,7 +9,8 @@ import { KCCharts } from './KCCharts';
 import { LevelModal } from './LevelModal';
 import { Message, Loading } from '../components/Misc';
 import Filter from './Filter';
-import { DEMO_MODE } from '../../server/secret';
+import { DEMO_MODE } from '../configuration';
+
 
 import ForceLogin from '../components/ForceLogin';
 import { IfLevelSchema } from '../../shared/IfLevelSchema';

@@ -4,7 +4,6 @@
 import express from 'express';
 const router = express.Router();
 
-
 import { ADMIN_USERNAME } from './secret.js'; 
 import { IfLevels, IfLevelSchema } from './../shared/IfLevelSchema';
 import { IfLevelSchemaFactory } from './IfLevelSchemaFactory';

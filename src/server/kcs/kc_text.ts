@@ -1,6 +1,6 @@
 import { KC_NAMES, add_if_undefined } from './../kcs/kc';
 
-import { DataFactory } from './../DataFactory';
+import { DataFactory } from './../../shared/DataFactory';
 //import type { InertiaKC } from './kc';
 
 

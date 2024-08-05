@@ -7,7 +7,8 @@ import { IfLevelSchema } from '../../shared/IfLevelSchema';
 
 
 import { IfLevels } from '../../shared/IfLevelSchema';
-import { DEMO_MODE } from '../../server/secret';
+import { DEMO_MODE } from '../configuration';
+
 
 interface PropsType {
 	level: IfLevelSchema|null,

@@ -45,7 +45,6 @@ export default class LevelPlayFeedbackModal extends React.Component<IProps> {
 		let body: ReactElement[] = [];
 		let typedPage: IfPageBaseSchema;
 
-
 		if(page.completed) {
 			if(page.correct) {
 				// Complete & right
@@ -63,6 +62,11 @@ export default class LevelPlayFeedbackModal extends React.Component<IProps> {
 					body.push(<div>The right answer was <code>{ fill_template(typedPage.solution_f, typedPage.template_values)}</code></div>);
 				}
 
+				if(	page.type === 'IfPageSqlSchema'  ) {
+					// Sql page.
+					typedPage = page.toIfPageSqlSchema();
+					body.push(<div>The right answer was <code>{ fill_template(typedPage.solution_sql, typedPage.template_values)}</code></div>);
+				}
 			}
 
 		} else if(!page.completed){
@@ -73,9 +77,11 @@ export default class LevelPlayFeedbackModal extends React.Component<IProps> {
 
 			} else {
 				// Wrong, but not submitted.
+
+				// Formulas
 				if(	page.type === 'IfPageFormulaSchema' || 
 					page.type === 'IfPagePredictFormulaSchema' ||
-					page.type === 'IfPageHarsonsSchema') {
+					page.type === 'IfPageHarsonsSchema' ) {
 
 					// Formula page
 					typedPage = page.toIfPageFormulaSchema();
@@ -116,6 +122,59 @@ export default class LevelPlayFeedbackModal extends React.Component<IProps> {
 								</div>);
 
 						}
+
+					} else {
+
+						body.push(<div>Sorry, but your solution is not correct.</div>);
+
+					}
+
+				// SQL
+				} else if (page.type === 'IfPageSqlSchema' ) {
+
+					// Formula page
+					typedPage = page.toIfPageSqlSchema();
+					
+					// Item feedback
+					if( feedback.length > 0) {
+						// Add feedback to the page.
+						body.push( <ul>
+							{ feedback.map( (f: string, i: number): ReactElement => <li key={i}>{f}</li>) }
+						</ul>);
+					}
+
+					// Show correct solution
+					if(typedPage.solution_sql !== null && typedPage.solution_sql.length > 0) {
+
+						// Should we show the solution to the user?
+						if(feedback.length > 0) {
+							// No, still feedback.
+							body.push(<div>Try to resolve the problems above. Once you do that, and if you&apos;re still stuck, you can come back here for the solution</div>);
+
+						} else if ( typedPage.correct ) {
+							body.push(<div>Correct answer!</div>);
+						
+						} else if( typedPage.get_time_in_seconds_since_first_history() < TIME_BEFORE_SHOWING_SOLUTION ) {
+							// No, haven't  tried for at least 3 minutes.
+							//console.log(typedPage.get_time_in_seconds());
+							body.push(<div>Sorry, but that answer is not correct.<br/><br/>
+								You have spent around {typedPage.get_time_in_seconds_since_first_history()} seconds
+								trying to solve the problem on your own. Please try for 
+								at least three minutes. You can then 
+								come back here for the solution.</div>);
+						
+						} else {
+							// Yes, give the solution.
+
+							body.push(<div>Sorry, but your solution is not correct. The correct answer is &nbsp;
+								<code>{ fill_template(typedPage.solution_sql, typedPage.template_values)}</code>
+								</div>);
+
+						}
+
+					} else {
+						body.push(<div>Sorry, but your solution is not correct.</div>);
+
 					}
 
 				} else {

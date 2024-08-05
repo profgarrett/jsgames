@@ -3,12 +3,12 @@ import { KC_NAMES } from './kc';
 const t1_animals = {
 	t1_name: 'animals',
 	t1_titles: ['Name', 'Cost', 'Inventory', 'Sold', 'Breed Rating' ],
-    t1_formats: ['text', '$', '0', '0', 'text' ],
+    t1_formats: ['text', '$', '0', 'text', 'text' ],
 	t1_rows: [
-			[ 'Sheep',  34, 54, 400, "A" ], 
-			[ 'Goats', 39, 49,  128, "B" ], 
-			[ 'Pigs',  38, 58,  189, "A" ], 
-			[ 'Dogs', 13, 60, 167, "C" ],
+			[ 'Sheep',  34, 54, 'Yes', "A" ], 
+			[ 'Goats', 39, 49,  'Yes', "B" ], 
+			[ 'Pigs',  38, 58,  'No', "A" ], 
+			[ 'Dogs', 13, 60, 'No', "C" ],
 		]
 };
 
@@ -28,12 +28,27 @@ const t2_pigs = {
 };
 
 
+
+const t3_dogs = {
+	t3_name: 'dogs',
+	t3_titles: ['Dog Name', 'Dog Gender', 'Dog Price', 'Dog Weight', 'Dog Height' ],
+    t3_formats: ['text', 'text', '$', '0', '0' ],
+	t3_rows: [
+		[ 'Pete',  'Female', 1531, 432, 23 ], 
+		[ 'Sam',  'Male', 842, 132, 18 ], 
+		[ 'Sam2',  'Female', 281, 332, 34 ], 
+		[ 'Sarah',  'Male', 240, 202, 54 ], 
+		[ 'June',  'Female', 81, 32, 8 ], 
+		[ 'Jane',  'Female', 154, 32, 12 ], 
+	]
+};
+
+
+
 const _baseT = {
 	type: 'IfPageSqlSchema',
 	kcs: [ KC_NAMES.KC_SQL_ORDERBY ],
 	code: 'tutorial',
-	...t1_animals,
-	...t2_pigs,
 }
 const tutorial_pages = [
 	{	type: 'IfPageTextSchema',
@@ -43,10 +58,21 @@ const tutorial_pages = [
 			title="YouTube video player" 
 			frameborder="0" 
 			allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
-			allowfullscreen></iframe>`,
+			allowfullscreen></iframe>
+			
+			<br/>
+			Learning outcomes:<br/>
+			<ul>
+				<li>Use <code>ORDER BY field1</code> to sort by a single field</li>
+				<li>Use <code>ORDER BY field1 DESC</code> to sort in descending order</li>
+				<li>Use <code>ORDER BY field1, field2</code> to sort by multiple fields</li>
+				<li>Use <code>ORDER BY "field name"</code> to sort by a field with a space in its name</li>
+			<ul>`,
 		code: 'tutorial'
 
 	}, {	..._baseT,
+		...t1_animals,
+		
 		description: `We can sort the rows returned by a query. 
 			<br/><br/>
 			The query <code>SELECT * FROM animals ORDER BY name</code> will order rows
@@ -56,23 +82,17 @@ const tutorial_pages = [
  		solution_sql: 'SELECT * FROM animals ORDER BY {col1}',
 		template_values: {
 			'col1': 'popColumn(name,cost,inventory,sold)',
-		}
+		},
+		feedback: [
+			{ 'has': 'sql', args: ['*', '{col1}', 'animals', 'ORDER BY'] },
+			{ 'has': 'no_sql', args: ['table'] },
+		],
+
 
 	}, {	..._baseT,
-		description: `Any columns with a space will need to have
-			"quotes" around it. 
-			<br/><br/>
-			For example, a table with a column named <code>Pig Name</code> would be
-			<code>SELECT * FROM testtable ORDER BY "Pig Name"</code>
-			`,
-		instruction: `Write a query that shows all fields in pigs, sorted by {col1}.`,
-		solution_sql: 'SELECT * FROM pigs ORDER BY "{col1}"',
-		template_values: {
-			'col1': 'popColumn(pig weight,pig height)',
-		}
-
-	}, {	..._baseT,
-		description: `You can choose if you want ascending (a-z) or descending (z-a). Add 
+		...t1_animals,
+		
+			description: `You can choose if you want ascending (a-z) or descending (z-a). Add 
 			either <code>DESC</code> or <code>ASC</code> after each field. For example,
 			<ul>
 				<li><code>SELECT * FROM animals ORDER BY name ASC</code></li>
@@ -85,10 +105,16 @@ const tutorial_pages = [
 		solution_sql: 'SELECT * FROM animals ORDER BY {col1} DESC',
 		template_values: {
 			'col1': 'popColumn(name,cost,inventory,sold)',
-		}
+		},
+		feedback: [
+			{ 'has': 'sql', args: ['*', '{col1}', 'animals', 'ORDER BY', 'DESC'] },
+			{ 'has': 'no_sql', args: ['table', 'pigs'] },
+		],
 
 	}, {	..._baseT,
-		description: `We sometimes want to sort by multiple fields. List each field separated by commas.
+		...t1_animals,
+		
+			description: `We sometimes want to sort by multiple fields. List each field separated by commas.
 			<br/><br/>
 			For example, <code>SELECT * FROM animals ORDER BY name, weight</code> will place them in 
 			order first by name, and then by weight inside of each name.
@@ -99,8 +125,90 @@ const tutorial_pages = [
 		template_values: {
 			'col1': 'popColumn(name,cost,inventory,sold)',
 			'col2': 'popColumn(name,cost,inventory,sold)',
-		}
+		},
+		feedback: [
+			{ 'has': 'sql', args: ['*', '{col1}', 'animals', 'ORDER BY', '{col2}'] },
+			{ 'has': 'no_sql', args: ['table', 'pigs'] },
+		],
 
+	}, {	..._baseT,
+		...t1_animals,
+		
+			description: `We can also put multiple sort fields into descending order.
+			<br/><br/>
+			An example would be <code>SELECT * FROM animals ORDER BY name DESC, weight DESC</code>
+			<br/><br/>
+			Note that we add <code>DESC</code> after each field.
+			`,
+		instruction: `Write a query that shows all animals, sorted by {col1} and {col2}, both in descending order.`,
+
+		solution_sql: 'SELECT * FROM animals ORDER BY {col1} DESC, {col2} DESC',
+		template_values: {
+			'col1': 'popColumn(name,cost,inventory,sold)',
+			'col2': 'popColumn(name,cost,inventory,sold)',
+		},
+		feedback: [
+			{ 'has': 'sql', args: ["*", '{col1}', '{col2}', 'animals', 'DESC'] },
+		]
+
+	}, {	..._baseT,
+		...t2_pigs,
+
+		description: `Any columns with a space in their name will need "quotes". 
+			<br/><br/>
+			For example, a table with a column named <code>Pig Name</code> would be
+			<code>SELECT * FROM tablename ORDER BY "Pig Name"</code>
+			`,
+		instruction: `Write a query that shows all fields from <b>pigs</b>, sorted by {col1}.`,
+		solution_sql: 'SELECT * FROM pigs ORDER BY "{col1}"',
+		template_values: {
+			'col1': 'popColumn(pig weight,pig height)',
+		},
+		feedback: [
+			{ 'has': 'sql', args: ['*', '"{col1}"', 'pigs', 'ORDER BY'] },
+			{ 'has': 'no_sql', args: ['table', 'animals'] },
+		],
+
+
+	}, {	..._baseT,
+		...t3_dogs,
+		
+		description: `Let's try another one from a new table. Show all dogs, sorted by two fields.
+			<br/><br/>
+			Remember that you will need to add quotes around each "field name" since they have spaces!
+			`,
+		instruction: `Write a query that shows all dogs, sorted by {col1} and {col2}.`,
+
+		solution_sql: 'SELECT * from dogs ORDER BY "{col1}", "{col2}"',
+		template_values: {
+			'col1': 'popColumn(dog name,dog gender,dog price)',
+			'col2': 'popColumn(dog name,dog gender,dog price)',
+		},
+		feedback: [
+			{ 'has': 'sql', args: ["*", '"{col1}"', '"{col2}"', 'dogs'] },
+			{ 'has': 'no_sql', args: ["animals"] },
+		]
+
+
+	}, {	..._baseT,
+		...t3_dogs,
+		
+			description: `Do the same as before, but add <code>DESC</code>
+			after each field name.
+			<br/><br/>
+			Remember that you will need to add quotes around each "field name" since they have spaces!
+			`,
+		instruction: `Write a query that shows all dogs, sorted by {col1} and {col2} in descending order.`,
+
+		solution_sql: 'SELECT * from dogs ORDER BY "{col1}" DESC, "{col2}" DESC',
+		template_values: {
+			'col1': 'popColumn(dog name,dog gender,dog price)',
+			'col2': 'popColumn(dog name,dog gender,dog price)',
+		},
+		feedback: [
+			{ 'has': 'sql', args: ["*", '"{col1}"', '"{col2}"', 'dogs', 'DESC'] },
+			{ 'has': 'no_sql', args: ["animals"] },
+		]
 
 	}
 ];
