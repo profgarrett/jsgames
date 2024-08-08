@@ -235,6 +235,7 @@ class IfLevelPagelessSchema extends Schema {
 */
 class IfLevelSchema extends IfLevelPagelessSchema {
 	page!: typeof IfPageBaseSchema[];
+	history!: Array<Object>;
 
 	// Apply json to this obj, signally no parent classes to do the setting for us.
 	constructor( json?: any) {
@@ -260,6 +261,9 @@ class IfLevelSchema extends IfLevelPagelessSchema {
 		schema.pages = { type: 'Array', initialize: (aJ) => isDef(aJ) ? a(aJ).map(j => {
 						return get_page_schema_as_class(j);
 					}) : [] };
+
+		// Add history 
+		schema.history = { type: 'Array', initialize: (aH :any) => isDef(aH) ? a(aH) : [] };
 
 		return schema;
 	}
