@@ -12,12 +12,7 @@ const use_consent = {
 	description: `
 This website is part of a research project conducted by Nathan Garrett.  I am studying online intelligent tutorial systems, and how they can improve participants' abilities.
 By using this website, you consent to the use of submitted data for research purposes.  All of your data will be 
-anonymized, and your individual privacy will be maintained in all publications or presentations resulting from this study. 
-<br/><br/>
-If you have any questions or would like additional information about this research, please contact me at 818.252.5147, Nathan.Garrett@Woodbury.edu. 7500 Glenoaks, Blvd, Burbank, 91510. 
-<br/><br/>
-The Woodbury Institutional Review Board has approved this project (irb@woodbury.edu).
-	`};
+anonymized, and your individual privacy will be maintained in all publications or presentations resulting from this study.`};
 
 
 

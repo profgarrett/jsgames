@@ -1,6 +1,6 @@
 import React, { ReactElement, useEffect, useState } from 'react';
 
-import { Container, Row, Col, Breadcrumb  } from 'react-bootstrap';
+import { Container, Row, Col, Breadcrumb, Navbar  } from 'react-bootstrap';
 import { useParams, useNavigate } from 'react-router-dom';
 
 import { ClassProgressChart } from './ClassProgressChart';
@@ -71,8 +71,9 @@ export default function ClassProgressContainer() {
 
 	const crumbs = (
 		<Breadcrumb>
-			<Breadcrumb.Item title='home' href='/ifgame/'>If Games</Breadcrumb.Item>
-			<Breadcrumb.Item title='Progress' active>Class Progress</Breadcrumb.Item>
+			<Breadcrumb.Item title='home' href='/'>Home</Breadcrumb.Item>
+			<Breadcrumb.Item title='My Progress' href='/ifgame/'>My Progress</Breadcrumb.Item>
+			<Breadcrumb.Item title='Class' active>Class Progress</Breadcrumb.Item>
 		</Breadcrumb>
 		);
 
@@ -98,6 +99,12 @@ export default function ClassProgressContainer() {
 
 	return (
 		<Container fluid>
+		<Navbar bg='dark' variant='dark'>
+			<Container fluid>
+				<Navbar.Brand href='/'>Excel.fun</Navbar.Brand>
+			</Container>
+		</Navbar>
+
 		<Row>
 			<Col>
 				<ForceLogin/>

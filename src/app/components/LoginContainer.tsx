@@ -88,7 +88,7 @@ export default function LoginContainer() {
 				setIsLoading(false);
 
 				setTimeout( () => {
-					navigate(url)
+					navigate('/'+url);
 				}, location.host === 'localhost:8080' ? 1000 : 0);  // add a short delay if on dev.
 
 			})
@@ -126,9 +126,9 @@ export default function LoginContainer() {
 
 				setMessage('Success creating your account!  If you provided an email, you will receive a link to verify your account.')
 				setMessageStyle('success')
-				
+		
 				setTimeout( () => {
-					navigate(url)
+					navigate( '/'+url)
 				}, location.host === 'localhost:8080' ? 1000 : 0);  // short delay if we're developing.
 				
 			})

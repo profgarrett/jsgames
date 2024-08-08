@@ -5,7 +5,7 @@ import type { AdaptiveKC } from './kc';
 // Common Data
 const farm4_data = {
 	column_titles: ['Alpacas', 'Baboons', 'Camels',  'Ducks' ],
-	column_formats: [ ',', '', ',', ',', ','],
+	column_formats: [ ',', ',', ',', ',', ','],
 	tests: [
 			{ 'a': 100, 'b': 23, 'c': 1, 'd': 124 }, 
 			{ 'a': 1, 'b': 20, 'c': 10, 'd': 31 }, 

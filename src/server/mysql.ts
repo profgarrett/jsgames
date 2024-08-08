@@ -18,6 +18,7 @@ import { sql13 } from './../../sql/sql13.js';
 import { sql14 } from './../../sql/sql14.js';
 import { sql15 } from './../../sql/sql15.js';
 import { sql16 } from './../../sql/sql16.js';
+import { sql17 } from './../../sql/sql17.js';
 
 /**
 	Initialize MYSQL with credentials from secret.js.
@@ -132,6 +133,7 @@ async function update_mysql_database_schema(): Promise<any> {
 	if(old_version < 14 ) await _update_update_version( sql14 );
 	if(old_version < 15 ) await _update_update_version( sql15 );
 	if(old_version < 16 ) await _update_update_version( sql16 );
+	if(old_version < 17 ) await _update_update_version( sql17 );
 
 	await _update_all_levels_to_latest_props();
 	
@@ -227,9 +229,7 @@ async function update_level_in_db(level: IfLevelSchema ): Promise<any> {
 */
 async function _update_all_levels_to_latest_props(): Promise<any> {
 	console.log('Updating old props');
-	const sql_old_levels = false
-		? 'select * from iflevels WHERE props_version = 1 '
-		: 'select * from iflevels WHERE props_version is null or props_version < ?';
+	const sql_old_levels = 'select * from iflevels WHERE props_version is null or props_version < ?';
 	
 	let level: IfLevelSchema;
 

@@ -27,12 +27,11 @@ export default class Choice extends React.Component<PropsType> {
 	render = (): ReactElement => {
 		const page = this.props.page;
 		
-		
 		if(!this.props.editable) {
 			let style = 'info';
 			if(page.correct !== null) style = page.correct ? 'success' : 'warning';
 
-			if(this.props.show_solution) {
+			if(this.props.show_solution || !page.client_has_answered() ) {
 				// Give full list.
 				return (
 					<ListGroup>
@@ -53,19 +52,22 @@ export default class Choice extends React.Component<PropsType> {
 					</ListGroup>
 				);
 			}
-		} else {
-			return (
-				<ListGroup>
-					{ page.client_items.map( 
-						(ans: string, i: number): ReactElement => 
-							<button type="button" 
-								className={ 'list-group-item list-group-item-action' + (ans===page.client ? ' active' : '') }
-								key={i}
-								onClick={ (): void => this.handleChange(ans) }
-					>{ans}</button>  )}
-				</ListGroup>
-			);
-		}
+		} 
+
+
+		// Editable version
+		return (
+			<ListGroup>
+				{ page.client_items.map( 
+					(ans: string, i: number): ReactElement => 
+						<button type="button" 
+							className={ 'list-group-item list-group-item-action' + (ans===page.client ? ' active' : '') }
+							key={i}
+							onClick={ (): void => this.handleChange(ans) }
+				>{ans}</button>  )}
+			</ListGroup>
+		);
+		
 	}
 }
 

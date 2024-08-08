@@ -221,6 +221,9 @@ class IfPageBaseSchema extends Schema {
 	updateCorrect() {
 		throw new Error('Inheriting classes must implement updateCorrect');
 	}
+	clear_answer_and_all_results(): void {
+		throw new Error('Inheriting classes must implement clear_answer_and_all_results');
+	}
 
 
 	// This is a placeholder. It's called by IfLevleSchema to update all of the json
@@ -638,6 +641,14 @@ class IfPageTextSchema extends IfPageBaseSchema {
 		};
 	}
 
+	// Remove all client input
+	clear_answer_and_all_results(): void {
+		this.client_read = false;
+		this.correct = false;
+		this.completed = false;
+		this.client_feedback = [];
+	}
+
 	// Has the user provided input?
 	client_has_answered(): boolean {
 		return this.client_read;
@@ -725,6 +736,14 @@ class IfPageNumberAnswerSchema extends IfPageBaseSchema {
 		return this.client !== null;
 	}
 
+	// Remove all client input
+	clear_answer_and_all_results(): void {
+		this.client = 0;
+		this.correct = false;
+		this.completed = false;
+		this.client_feedback = [];
+	}
+	
 
 	// Automatically fill in the answer.
 	// Used for testing out on the server. 
@@ -815,6 +834,13 @@ class IfPageSliderSchema extends IfPageBaseSchema {
 		return this.client !== null;
 	}
 
+	// Remove all client input
+	clear_answer_and_all_results(): void {
+		this.client = 0;
+		this.correct = false;
+		this.completed = false;
+		this.client_feedback = [];
+	}
 
 	// Automatically fill in the answer.
 	// Used for testing out on the server. 
@@ -890,6 +916,13 @@ class IfPageShortTextAnswerSchema extends IfPageBaseSchema {
 		return this.client.length > 0;
 	}
 
+	// Remove all client input
+	clear_answer_and_all_results(): void {
+		this.client = '';
+		this.correct = false;
+		this.completed = false;
+		this.client_feedback = [];
+	}
 
 	// Automatically fill in the answer.
 	// Used for testing out on the server. 
@@ -965,7 +998,7 @@ class IfPageLongTextAnswerSchema extends IfPageShortTextAnswerSchema {
 	If a range of choices, then solution should be a wildcard ? or *.
 */
 class IfPageChoiceSchema extends IfPageBaseSchema {
-	client!: string;
+	client!: string|null;
 	client_items!: Array<string>;
 	solution!: string;
 
@@ -993,6 +1026,15 @@ class IfPageChoiceSchema extends IfPageBaseSchema {
 
 		};
 	}
+
+	// Remove all client input
+	clear_answer_and_all_results(): void {
+		this.client = null;
+		this.correct = false;
+		this.completed = false;
+		this.client_feedback = [];
+	}
+
 
 	// Has the user provided input?
 	client_has_answered(): boolean {
@@ -1066,7 +1108,7 @@ class IfPageParsonsSchema extends IfPageBaseSchema {
 	helpblock!: string;
 	potential_items!: Array<string>;
 	solution_items!: Array<string>;
-	client_items!: Array<string>;
+	client_items!: Array<string>|null;
 
 	// Apply json to this obj, signally no parent classes to do the setting for us.
 	constructor( json?: any) {
@@ -1098,6 +1140,15 @@ class IfPageParsonsSchema extends IfPageBaseSchema {
 	client_has_answered(): boolean {
 		return this.client_items !== null && this.client_items.length > 0;
 	}
+
+	// Remove all client input
+	clear_answer_and_all_results(): void {
+		this.clientclient_items = null;
+		this.correct = false;
+		this.completed = false;
+		this.client_feedback = [];
+	}
+
 
 	// Turn solution into a string and return.
 	get_solution(): string {
@@ -1247,6 +1298,14 @@ class IfPageFormulaSchema extends IfPageBaseSchema {
 		return this.client_f !== null && this.client_f.length > 0;
 	}
 
+	// Remove all client input
+	clear_answer_and_all_results(): void {
+		this.client_f = '';
+		this.client_test_results = [];
+		this.correct = false;
+		this.completed = false;
+		this.client_feedback = [];
+	}
 
 	// Automatically fill in the answer.
 	// Used for testing out on the server.  Not usable on client side, as 
@@ -1894,6 +1953,15 @@ class IfPageSqlSchema extends IfPageBaseSchema {
 		return this.client_sql !== null && this.client_sql.length > 0;
 	}
 
+	// Remove all client input
+	clear_answer_and_all_results(): void {
+		this.client_sql = '';
+		this.correct = false;
+		this.completed = false;
+		this.client_results_rows = null;
+		this.client_results_columns = null;
+	}
+	
 
 	// Automatically fill in the answer.
 	// Used for testing out on the server.  Not usable on client side, as 

@@ -100,7 +100,7 @@ const from_int_dt = (unknown: any): any => {
 
 // Number to increment after updating props. Will cause a refresh of all pages when
 // the next api sql update is hit.
-const LEVEL_DERIVED_PROPS_VERSION = 1;
+const LEVEL_DERIVED_PROPS_VERSION = 2;
 
 
 /*
@@ -390,7 +390,7 @@ class IfLevelSchema extends IfLevelPagelessSchema {
 		} else if( 
 				level.completed && score_nullable !== null 
 				&& score_nullable < PASSING_GRADE ) {
-			classification = 'Needs repeating';
+			classification = 'Fail';
 		} else {
 			throw new Error('Invalid type! classify in IfLevelSchema');
 		} 

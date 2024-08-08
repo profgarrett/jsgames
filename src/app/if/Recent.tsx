@@ -104,7 +104,7 @@ export default function Recent(props: PropsType): ReactElement {
 				id: 'edit',
 				Header: 'Edit',
 				accessor: function viewRaw(l: IfLevelPagelessSchema): ReactElement {
-					return <Link to={'/ifgame/levelraw/'+l._id}>edit</Link>;
+					return <Link to={'/ifgame/level/'+l._id+'/raw'}>edit</Link>;
 				},
 				width: 50,
 			});

@@ -17,7 +17,7 @@ import { queryFactory_updateClientResults } from './../shared/queryFactory';
 
 
 import type { Request, Response, NextFunction } from 'express';
-import { IfPageSqlSchema } from '../shared/IfPageSchemas.js';
+import { IfPageBaseSchema, IfPageSqlSchema } from '../shared/IfPageSchemas.js';
 
 
 ////////////////////////////////////////////////////////////////////////
@@ -178,6 +178,56 @@ router.get('/debuglevel/:code', nocache, user_require_logged_in,
 });
 
 
+/**
+	Gets a preview template for a given tutorial.
+	Allowed for all users and anonymous users
+
+	Builds a temporary level, wipes out all answers, and send to the user.
+*/
+router.get('/previewlevel/:code', nocache,
+	async (req: Request, res: Response, next: NextFunction): Promise<any> => {
+	try {
+		const param_code = req.params.code; // level code.
+		let results;
+
+		// Make sure that the given code is valid. If not, then immediately fail
+		// to avoid having some type of SQL injection issue.
+		const code_in_array = IfLevels.filter( l => l.code === param_code).map( l => l.code );
+		if(code_in_array.length !== 1)
+			throw new Error('Invalid code type '+param_code+' passed to debuglevel');
+
+		const level = await IfLevelSchemaFactory.create(code_in_array[0], 'previewuser');
+
+		let loop_escape = 200;
+		let last_page = {};
+
+		// Create level using debug codes
+		while(!level.completed && loop_escape > 0) {
+			loop_escape--; // emergency escape in case something goes wrong.
+
+			// Complete last page.
+			last_page = level.pages[level.pages.length-1];
+			// @ts-ignore
+			last_page.debug_answer();
+			// @ts-ignore
+			if(last_page.type === 'IfPageSqlSchema') await queryFactory_updateClientResults(last_page);
+
+			results = await IfLevelSchemaFactory.addPageOrMarkAsComplete(level); 
+		}
+
+		// Wipe out all results and answers.
+		level.pages.forEach( (p: IfPageBaseSchema) => {
+			p.clear_answer_and_all_results();
+		});
+
+		res.json(return_level_prepared_for_transmit(level, false));
+	} catch (e) {
+		log_error(e);
+		next(e);
+	}
+});
+
+
 // Grab first item from query.
 function to_string_from_possible_array( s: string | Array<any>): string {
 	if( typeof s === 'string') return s;
@@ -191,19 +241,46 @@ function to_string_from_possible_array( s: string | Array<any>): string {
 
 
 
-// Select object, provide it is owned by the logged in user.
+// Select object, provide it is owned by the logged in user OR a faculty teaching a section that
+// the student is enrolled in.
 router.get('/level/:id/:tagged?', 
 	nocache, user_require_logged_in,
 	async (req: Request, res: Response, next: NextFunction): Promise<any> => {
 	try {
 		const username = user_get_username_or_emptystring(req, res);
-		const sql = username === 'garrettn' 
-			? 'SELECT * FROM iflevels WHERE _id = ? '   // allow admin access to any item
-			: 'SELECT * FROM iflevels WHERE _id = ? AND username = ?';
+		let sql = '';
+		let params;
+
 		const _id = req.params.id;
 		const _tagged = typeof req.params.tagged === 'undefined' ? false : req.params.tagged === 'tagged';
 
-		let select_results = await run_mysql_query(sql, [_id, username]);
+		if(username === 'garrettn' ) {
+			// Allow admin access to any item
+			sql = 'SELECT * FROM iflevels WHERE _id = ?' 
+			params = [_id];
+		} else {
+			// allow teacher or individual access 
+
+			sql = `
+			SELECT iflevels.* FROM iflevels WHERE _id = ? AND iflevels.username = ?
+			UNION
+			SELECT iflevels.* FROM iflevels 
+			INNER JOIN users ON iflevels.username = users.username
+			INNER JOIN users_sections as student_sections
+				ON users.iduser = student_sections.iduser
+				AND student_sections.role = 'student'
+			INNER JOIN users_sections as faculty_sections 
+				ON faculty_sections.idsection = student_sections.idsection
+				AND faculty_sections.role = 'faculty'
+			INNER JOIN users as faculty 
+				ON faculty.iduser = faculty_sections.iduser
+			WHERE 
+				 _id = ? AND faculty.username = ?; `;
+
+			params =  [_id, username, _id, username];
+		}
+
+		let select_results = await run_mysql_query(sql, params);
 
 		if(select_results.length === 0) return res.sendStatus(404);
 		

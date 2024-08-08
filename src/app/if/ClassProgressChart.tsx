@@ -16,7 +16,7 @@ import { DEMO_MODE } from '../configuration';
 
 const colors = {
     Completed: 'rgb(102, 166, 30)',
-    "Needs repeating": 'rgb(230, 171, 2)',
+    Fail: 'rgb(230, 171, 2)',
     Uncompleted: 'rgb(231, 41, 138)',
 }
 
@@ -53,43 +53,18 @@ export class ClassProgressChart extends React.Component<PropsType, StateType> {
         this.setState({ modal_id: null } );
     }
 
-
     // Focus on a specific item.
     _on_click_to_show_code = (code: string, classification: string) => {
         this.setState({ code, classification });
     }
 
-
-    // Convenience function used for rendering a pop-up in the chart.
-    _render_bar_popup = ( o: any ): string => {
-        return o
-            .map( d => d.username )
-            .sort( (s1, s2) => s1.toLowerCase() - s2.toLowerCase() )
-            .slice(0, 15)
-            .join(', ')
-            + (o.length > 15 ? ', and...' : '');
-    }
-
     _render_bar = (levels: Array<IfLevelPagelessSchema>): ReactElement => {
-        const keys = [ ...DEFAULT_TUTORIAL_LEVEL_LIST];
+        let keys = [ ...DEFAULT_TUTORIAL_LEVEL_LIST].reverse();
         const map_classifications = turn_array_into_map( levels, l => l.props.classification );
         const a_classifications = turn_object_keys_into_array(map_classifications);
 
-        // Grab any completed levels that don't show in the default list, and add them.
-        // But, only for surveycharts_wu
-        const keys_obj = turn_array_into_map( keys, s => s );
-        levels.forEach( (l: IfLevelPagelessSchema) => {
-            if(!keys_obj.has(l.code) && l.code === 'surveycharts_wu') {
-                keys_obj.set(l.code, true);
-                keys.push(l.code);
-            }
-        });
-
         let c_data : any[] = [];
         let code_levels : any[] = [];
-        let completed : any[] = [];
-        let uncompleted : any[] = [];
-        let needs_repeating : any[] = [];
 
         // Build by code and completion
 
@@ -115,41 +90,35 @@ export class ClassProgressChart extends React.Component<PropsType, StateType> {
                 }
 
                 o[classification] = matching_levels.length;
-                o[classification+'Tooltip'] = classification + ': ' + this._render_bar_popup(matching_levels);
+                //o[classification+'Tooltip'] = classification + ': ' + this._render_bar_popup(matching_levels);
             });
 
             c_data.push(o);
         });
 
+		// Remove all items with a value of zero
+		c_data = c_data.map( o => {
+			let new_o = {...o};
+			if(new_o.Completed == 0) delete new_o.Completed;
+			if(new_o.Fail == 0) delete new_o.Fail;
+			if(new_o.Uncompleted == 0) delete new_o.Uncompleted;
+			return new_o;
+		});
+
         // The responsive bar isn't setting width, so grab the width of the screen and use that.
         // Breaks if the screen is resized, but otherwise ok.
-        // @TODO: Fix responsive bar for screen refreshes.
         // $FlowFixMe
-        const width = document.body.clientWidth;
+        const width = document.body.clientWidth * 0.8;
 
-        return (<div>
-            <Bar
+        return <Bar
             data={ c_data}
+			layout='horizontal'
             keys={a_classifications}
             indexBy='key'
-            height={400}
-            width={width*.9}
-            
-            margin={{ top: 20, right: 25, left: 25, bottom: 50 }}
-// Not sure, disabled by NDG 12/13/22
-//            colorBy={ c => c.id }
+            height={600}
+            width={width}
+            margin={{ top: 25, right: 25, left: 150, bottom: 25 }}
             colors={ c => colors[c.id] }
-            tooltip={
-                o => {
-                    // Show a tooltip with the people.
-                    if(typeof o.data[o.id+'Tooltip'] !== 'undefined' ) {
-                        return <div>{o.data[o.id+'Tooltip']}</div>
-                    } else {
-                        return <div>{o.value}</div>;
-                    }
-                    
-                }
-            }
             onClick={
                 o => { // Show a focus on that item.
                     this._on_click_to_show_code( ''+o.indexValue, ''+o.id );
@@ -157,7 +126,7 @@ export class ClassProgressChart extends React.Component<PropsType, StateType> {
             }
             legends={[{
                 dataFrom: 'keys',
-                anchor: 'top-right',
+                anchor: 'bottom-right',
                 direction: 'row',
                 justify: false,
                 translateX: 0,
@@ -186,8 +155,7 @@ export class ClassProgressChart extends React.Component<PropsType, StateType> {
 				// @ts-ignore
 				event.target.style.opacity = 1;
             }}
-        />
-        </div>);
+        />;
     }
     
     _render_details = (levels: Array<IfLevelPagelessSchema>): ReactElement => {

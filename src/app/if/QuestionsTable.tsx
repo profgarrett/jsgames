@@ -58,7 +58,7 @@ export default class PagesTable extends React.Component<DetailPropsType> {
 			id: 'html',
 			Header: 'html',
 			accessor: answer => { 
-				const html = '<a href="/ifgame/levelraw/' + answer.page.id + '/' + answer.sequence_in_level +'" target="_blank">Raw</a>';
+				const html = '<a href="/ifgame/level/' + answer.page.id + '/raw?' + answer.sequence_in_level +'" target="_blank">Raw</a>';
 				return <Card>
 					<HtmlDiv html={ html } />
 					<Expandable title={ 'answer' } body={ typeof answer.html == 'undefined' ? '' : answer.html } />

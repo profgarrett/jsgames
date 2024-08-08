@@ -188,7 +188,7 @@ export default class MyProgress extends React.Component<PropsType, StateType> {
 
 			if(this.state.section !== null && this.state.section.role === 'faculty') {
 				tds.push(<td key={'MyProgressRowTD'+counter++} style={td_l}>{ levels[i].description }
-						&nbsp;(<Link to={'/ifgame/leveldebug/'+level.code}>preview</Link>)
+						&nbsp;(<Link to={'/ifgame/level/'+level.code+'/debug'}>preview</Link>)
 					</td>);
 			} else {
 				tds.push(<td key={'MyProgressRowTD'+counter++} style={td_l}>{ levels[i].description }</td>);
@@ -377,24 +377,36 @@ export default class MyProgress extends React.Component<PropsType, StateType> {
 
 		// If the user hasn't done anything, then have a friendlier title.
 		const title = typeof grades.tutorial === 'undefined' 
-				? 'Welcome to the Excel.fun website!' 
+				? 'My individual progress' 
 				: 'Excel.fun';
 
 		const section = this.props.sections.length == 0 
 				? null 
 				: <p style={{ fontSize: 8, textAlign: 'right' }}><i>Course: {this.state.section.title}</i></p>;
 
-		// If member of a section, as well as an admin for this course,
+
+		// If teacher?
+		let teacher_link;
+		if( this.props.sections.length > 0 && this.state.section.role == 'faculty') {
+			teacher_link = <Link to={'/ifgame/progress/' + this.state.section.idsection} >
+				<Button size='lg' style={{ marginBottom: 10 }} variant='outline-info'>View students' progress in my class</Button>
+			</Link>;
+		} else {
+			teacher_link = null;
+		}
+
+
+		// If member of a section
 		let picker;
+		if(this.props.sections.length > 0 /* && this.state.section.role === 'faculty' */) {
+			//const p = '/' + this.state.section.idsection;	
 
-		if(this.props.sections.length > 0 && this.state.section.role === 'faculty') {
-			const p = '/' + this.state.section.idsection;	
-
+			/*
 			// If super-admin, then show extra analysis link for questions data.
 			const questions_link = user.isAdmin ? <Link key='link6' to={'/ifgame/questions'+p}>Question analysis</Link> : null;
 
 			const course_links = (
-				<InputGroup style={{ marginLeft: 3, marginTop: 3}}>
+				<InputGroup style={{ marginLeft: 3, marginTop: 0, marginBottom: 0 }}>
 					View this section&apos;s&nbsp;
 					<Link key='link2' to={'/ifgame/progress'+p}>progress</Link>,&nbsp;
 					<Link key='link3' to={'/ifgame/recent'+p}>recent activity</Link>,&nbsp;
@@ -404,13 +416,14 @@ export default class MyProgress extends React.Component<PropsType, StateType> {
 				</InputGroup>
 				);
 
-
+			*/
 			picker = (<ButtonToolbar>
 					<DropdownButton 
 						onSelect={this.handleSectionChange}
 						variant='primary' 
 						size='sm'
 						title= {this.state.section.title} 
+						style= {{ marginBottom: 5 }}
 						key='select_code' id='select_code'>
 							{ this.props.sections.map( (section,i) => 
 								<Dropdown.Item
@@ -419,31 +432,34 @@ export default class MyProgress extends React.Component<PropsType, StateType> {
 								</Dropdown.Item> 
 							)}
 					</DropdownButton>
-					{ course_links }
 				</ButtonToolbar>);
 		}
 
+		/*
 		const surveycharts_amt = (this.state.section !== null && this.state.section.levels === 'surveycharts_amt');
 
 		// only show table *if* they've completed any mandatory surveys.
 		const table =  waiver_completed && !surveycharts_amt
 				? this._render_table(levels)
 				: null;
+		*/
 
 		// Return card.
-		return (
+		return <>
+			{ teacher_link }
 			<div className='card' style={{ backgroundColor: '#f5f5f5', marginBottom: 40 }}>
 				<div className='card-body'>
-					<div className='h5'>{title}</div>
 					<div className='card-text'>
 						{ picker }
+						<div className='h5'>{title}</div>
 						{ this._render_next_lesson(levels) }
 						<span style={{ marginBottom: 10}} /> 
-						{ table }
-						{ section }
+					{ this._render_table(levels) }
+					{ section }
 					</div>
 				</div>
-			</div>);
+			</div>
+			</>;
 	}
 
 }

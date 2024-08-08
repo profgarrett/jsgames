@@ -278,7 +278,8 @@ export default function LevelPlayContainer() {
 	// <h3>{ this.state.level ? this.state.level.title : '' }</h3> 
 	const crumbs = (level == null) ? <></> :
 		<Breadcrumb>
-			<Breadcrumb.Item href={'/ifgame/'}>Home</Breadcrumb.Item>
+			<Breadcrumb.Item href={'/'}>Home</Breadcrumb.Item>
+			<Breadcrumb.Item href={'/ifgame/'}>My Progress</Breadcrumb.Item>
 			<Breadcrumb.Item active>{  level.title }</Breadcrumb.Item>
 		</Breadcrumb>;
 

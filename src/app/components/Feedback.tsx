@@ -44,7 +44,8 @@ export default class Feedback extends React.Component<PropsType, StateType> {
 			this.state.message + '\n' +
 			'https://excel.fun/ifgame/level/' + code + '/play\n' +
 			'https://excel.fun/ifgame/level/' + code + '/score\n' +
-			'https://excel.fun/ifgame/levelraw/' + code + '\n';
+			'https://excel.fun/ifgame/level/' + code + '/debug\n' +
+			'https://excel.fun/ifgame/level/' + code + '/raw\n';
 
 		// Fire AJAX.
 		fetch('/api/users/feedback/', {

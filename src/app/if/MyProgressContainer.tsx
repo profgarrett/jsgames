@@ -2,7 +2,7 @@ import React, { useState, useEffect} from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import Container from 'react-bootstrap/Container';
-import { Row, Col } from 'react-bootstrap';
+import { Row, Col, Navbar, Breadcrumb } from 'react-bootstrap';
 
 import { Message, Loading } from '../components/Misc';
 import { getUserFromBrowser } from '../components/Authentication';
@@ -135,6 +135,11 @@ export default function MyProgressContainer() {
 
 	const is_loading = isLoadingUncompletedLevels || isLoadingGrades || isLoadingSections;
 
+	// Should we have a link to view 
+	const link_to_class_progress = null;
+
+
+
 	const myProgress = is_loading ? 
 			<div/> 
 			:
@@ -146,9 +151,19 @@ export default function MyProgressContainer() {
 				onClickContinueLevel={ (ifLevel: IfLevelSchema )=> navigate('/ifgame/level/'+ifLevel._id+'/play') } 
 			/>;
 
+	const crumbs = (<Breadcrumb>
+			<Breadcrumb.Item href={'/'}>Home</Breadcrumb.Item>
+			<Breadcrumb.Item href={'/ifgame/'}>My Progress</Breadcrumb.Item>
+		</Breadcrumb>);
 
 	return (
 			<Container fluid>
+				<Navbar bg='dark' variant='dark'>
+					<Container fluid>
+						<Navbar.Brand href='/'>Excel.fun</Navbar.Brand>
+					</Container>
+				</Navbar>
+				{ crumbs }
 				<Row>
 					<Col>
 						<ForceLogin />
@@ -156,6 +171,7 @@ export default function MyProgressContainer() {
 						<div style={{ paddingTop: 10}} />
 						<Message message={message} style={messageStyle} />
 						<Loading loading={is_loading} />
+						{ link_to_class_progress }
 						{ myProgress }
 					</Col>
 				</Row>

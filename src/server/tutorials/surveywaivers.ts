@@ -14,12 +14,13 @@ const surveywaiver_non_woodbury_student: LevelSchemaFactoryType = {
 	description: 'Learn about this website and answer several questions',
 	show_score_after_completing: false,
 	show_progress: false,
-	version: 1.0,
+	version: 2,
 
 	gen: ({
 		gen_type: 'LinearGen',
 		pages: [
 			use_consent,
+			/*
 			{	type: 'IfPageTextSchema',
 				description: `Before starting to complete the online exercises, the system to needs to ask you a few questions.  
 					The results will help tune the system for your skill level.`
@@ -32,6 +33,7 @@ const surveywaiver_non_woodbury_student: LevelSchemaFactoryType = {
 				instruction: 'Click <code>Next page</code> to continue.',
 			},
 			tutorial.gen,
+			*/
 		]
 	})
 };
@@ -43,7 +45,7 @@ const surveywaiver_non_woodbury_user: LevelSchemaFactoryType = {
 	description: 'Learn about this website and answer several questions',
 	show_score_after_completing: false,
 	show_progress: false,
-	version: 1.0,
+	version: 2,
 
 	gen: ({
 		gen_type: 'LinearGen',
@@ -54,9 +56,9 @@ const surveywaiver_non_woodbury_user: LevelSchemaFactoryType = {
 				description: 'Thanks! You will now complete a short tut.',
 				instruction: 'Click <code>Next page</code> to continue.',
 			},
-			*/
+			
 			tutorial.gen,
-
+*/
 		]
 	})
 };
@@ -69,11 +71,13 @@ const surveywaiver_woodbury_student: LevelSchemaFactoryType = {
 	description: 'Get your website account setup.',
 	show_score_after_completing: false,
 	show_progress: false,
-	version: 1.2,
+	version: 2,
 
 	gen: ({
 		gen_type: 'LinearGen',
 		pages: [
+			use_consent,
+			/*
 			wu_consent,
 			{	type: 'IfPageTextSchema',
 				description: `Before starting to complete the online exercises, the system to needs to ask you a few questions.  
@@ -90,7 +94,7 @@ const surveywaiver_woodbury_student: LevelSchemaFactoryType = {
 				instruction: 'Click <code>Next page</code> to finish this assesssment! You can start working on the first tutorial now.',
 			},
 			tutorial.gen,
-
+			*/
 		]
 	})
 };
@@ -102,14 +106,13 @@ const surveywaiver_wvu_user: LevelSchemaFactoryType = {
 	description: 'Learn about this website',
 	show_score_after_completing: false,
 	show_progress: false,
-	version: 1.0,
+	version: 2,
 
 	gen: ({
 		gen_type: 'LinearGen',
 		pages: [
 			wvu_consent,
-			tutorial.gen,
-
+			//tutorial.gen,
 		]
 	})
 };

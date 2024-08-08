@@ -87,7 +87,7 @@ export default class FormulaExcelTable extends React.Component<PropsType> {
 					type='text'
 					autoComplete='off'
 					value={ page.client_f==null ? '' : page.client_f }
-					disabled={ this.props.readonly }
+					disabled={ this.props.readonly || !this.props.editable }
 					onKeyDown={ (e) => this.handleKeyDown(e) }
 					placeholder='Enter a formula'
 					onChange={ (e) => this.props.onChange({ client_f: e.target.value}) }
@@ -133,7 +133,7 @@ export default class FormulaExcelTable extends React.Component<PropsType> {
 					fieldFormula = <td className='bg-primary' >{ this._render_field(page) }</td>;
 				} else {
 					// Readonly first field.
-					fieldFormula = <td className='outline-info' >{ page.client_f }</td>;
+					fieldFormula = <td className='outline-info' >{ this._render_field(page) }</td>;
 				}
 
 			} else {

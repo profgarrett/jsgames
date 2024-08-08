@@ -2,12 +2,6 @@
 
 This is a research project from Nathan Garrett. It provide a set of software tutorials.
 
-## Todo for Summer 2024
-
-> Fix quote marks for SQL
-> Expand SEARCH/FIND section for text2, focusing on mid + search
-> Hint engine for SQL
-
 ### Installing
 
 Install Node.js, MySql, npm, ts-node, and nodemon globally.
@@ -23,6 +17,8 @@ npm install
 ```
 
 Create a secret.js file in the \build\server folder. The Bugsnag API is optional, or use DEBUG. Local bugs are pushed to a log.txt file by default.
+
+The garrettn role is a super administration by default.
 ```
 export {
 	ADMIN_USERNAME: '',
@@ -76,21 +72,6 @@ ln -s jsgames/build/server/app.js app.js
 
 If you're having trouble getting npm packages to update, npm-install-missing is very useful.
 
-### Useful Typescript Hints
-
-
-Initialize an array to be a specific type:
-```
-x = new Array<IfLevelSchema>()
-```
-Initialize an object that is access with strings.
-```
-interface IStringIndexJsonObject {
-	[key: string]: any
-}
-```
-
-
 
 ### Dreamhost
 
@@ -135,175 +116,7 @@ npm run startreact
 
 After updating, and before submitting, be sure the build folder is up to date. Use build file in PowerShell deploy to server.
 
-Y
 
-
-## Authoring Tutorials
-
-
-Tutorials are written as code.  They should be placed into the src/server/tutorials folder, and 
-then references in the src/client/ifgame.js constant below
-IfLevelModelFactory.levels
-
-### Levels
-```
-tutorial_seed_based_on_username: // Sets if people should get a consistent tutorial choice based off of their username, or if it should be random each time.  Defaults to false.
-```
-
-### Gen Functions
-
-Pages are created by gen functions.  The first two are simple, linear and shuffe.
-
-```
-const example = {
-	gen: LinearGen,
-	pages: [
-
-	]
-const example1 = {
-	gen: ShuffleGen,
-	pages: [
-
-	]
-}
-```
-
-The until function has a single page that repeated generates until the until function returns true.  Normally, you will want to have versions in the single page return multiple versions of itself.  The versions function also uses a random seed for the level. See the following example.
-
-```
-const x = {
-	gen: UntilGen
-	until: ( page => boolean),
-	pages: [
-		{}
-	]
-}
-```
-
-
-### Pages
-
-There are several kinds of pages.
-
-```
-Common fields
-	code
-		Used to help initialize common patterns.  E.g.,
-		test or tutorial.
-	helpblock
-	history
-		Array of objcts with changes.
-	correct
-		True/false.
-	correct_required
-		Do we need correct===true to continue?  False for
-		tutorial pages, true for test pages.
-	completed
-		Is this q done?  If so, allow no updates.
-	solution_feedback: [ { 'has': 'no_values', args: [ 'a' ] } ]
-		Exists only on server side. Used by .updatecorrect to
-		populate client_feedback.
-```
-
-IfPageTextSchema display information without any user input. They 
-only have two fields. Note that we use <br/><br/> for line breaks,
-as it is automatically converted into <div>.
-```
-{	type: 'IfPageTextSchema',
-	description: `Words!
-			<br/><br/>
-			More words!`
-```
-
-
-IfPageFormulaSchema shows an Excel grid. There are a variety 
-of optional fields.
-
-```
-Required fields:
-	description: ''
-	instruction: ''
-	solution_f: ''
-	code: 'tutorial' or 'test'
-
-Optional fields:
-	client_f_format: '0'
-	client_feedback: null or ['asdf', ...]  
-		Updated by .updateCorrect on server side.
-	column_titles: ['title']
-	column_formats: [ '' ]
-		$  dollar format with no decimals.
-	 	$. Dollar format with two decimals.
-	 	0  Number without any decimal points.
-	 	,  Decimal style
-	 	shortdate Date styled as 1/1/11
-	 	text Text
-	 	c  Text
-	 	%  Percent.
-	tests: [ { a: 1 } ],
-	solution_f: '=1'
-	feedback: [ { 'has': 'no_values', args: [ 'a' ] } ]
-		Exists only on server side. Used by .updatecorrect to
-		populate client_feedback.
-	versions: [ ... ]
-		Versions can contain options to override default options.
-		For example, 
-		[ { solution_f: '123' }, { solution_f: 2 }]
-
-		Or, you can have it be a function that is run upon initial creation.
-		[ { solution_f: ( page ) => 123 } ]
-
-```
-
-IfPageParsonsSchema give a list of options for the user to place in order.
-
-```
-Required fields:
-	description: ''
-	instruction: ''
-	solution_items = [ 'a', 'b' ]
-	code: tutorial or test.
-
-Optional fields:
-	versions
-	client_feedback: null or ['asdf', ...]  
-		Updated by .updateCorrect on server side.
-	solution_feedback: [ { 'has': 'no_values', args: [ 'a' ] } ]
-		Exists only on server side. Used by .updatecorrect to
-		populate client_feedback.
-```
-
-IfPageChoiceSchema allows a user to select from a list of options.
-Can be either true or false.
-
-```
-Required fields:
-	description: ''
-	instruction: ''
-	client_items = [ 'a', 'b' ]
-	code: tutorial or test.
-	solution: ? or * for any, or a specific value.
-	client_feedback: null or ['asdf', ...]  
-		Updated by .updateCorrect on server side.
-	solution_feedback: [ { 'has': 'no_values', args: [ 'a' ] } ]
-		Exists only on server side. Used by .updatecorrect to
-		populate client_feedback.
-
-Optional fields:
-	versions
-		solution: (l: level, p: page): string
-```
-
-
-### Has functions, solution_feedback
-
-Called with { has: 'references', args: [ 'a1' ]}
-
-	no_values: No literals
-	values: [0, *, ?, 'x']  <= * is text, ? is number.
-	references(args): Make sure that references are in answer
-	symbols(args): Make sure that the symbosl are included.  Use ? to include dropdown.
-	functions
 
 ## Test Plan
 
@@ -337,8 +150,3 @@ Thanks for Visualization Literacy 101
 
 
 Other credits found in NPM packages.
-
-
-## License
-
-This project is licensed under the GPL v3.  Read the GPL license [online](https://www.gnu.org/licenses/gpl.txt).

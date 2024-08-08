@@ -5,7 +5,7 @@ import type { AdaptiveKC } from './kc';
 
 const farm4_data = {
 	column_titles: ['Alpacas', 'Baboons', 'Camels',  'Ducks' ],
-	column_formats: [ ',', '', ',', ',', ','],
+	column_formats: [ ',', ',', ',', ',', ','],
 	tests: [
 			{ 'a': 1000, 'b': 230, 'c': 100, 'd': 1243 }, 
 			{ 'a': 100, 'b': 200, 'c': 1000, 'd': 312 }, 

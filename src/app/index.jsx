@@ -180,6 +180,7 @@ import GradesContainer from './if/GradesContainer';
 import QuestionsContainer from './if/QuestionsContainer';
 import KCContainer from './if/KCContainer';
 import LevelRawContainer from './if/LevelRawContainer';
+import PreviewContainer from './if/PreviewContainer';
 
 
 function ErrorPage() {
@@ -218,22 +219,28 @@ const t = (t, el ) => {
 
 
 const router = createBrowserRouter([
-	{ path: '/', element: t('Excel.fun', <MyProgressContainer />), errorElement: <ErrorPage/> },
+	{ path: '/', element: t('Excel.fun', <PreviewContainer />), errorElement: <ErrorPage/> },
 
-	{ path: '/ifgame/', element: t('Excel.fun Home', <MyProgressContainer />) },
-
-	{ path: '/ifgame/leveldebug/:_id', element: t('Debug', <LevelDebugContainer />) },
+	// Students
+	{ path: '/ifgame/', element: t('My Progress', <MyProgressContainer />) },
 	{ path: '/ifgame/levels/:_code', element: t('Levels', <LevelListContainer />) },
+
+	// Individual level
+	{ path: '/ifgame/level/:_id/debug', element: t('Debug', <LevelDebugContainer />) },
 	{ path: '/ifgame/level/:_id/play', element: t('Level', <LevelPlayContainer />) },
 	{ path: '/ifgame/level/:_id/score', element: t('Grade', <LevelScoreContainer />) },
+	{ path: '/ifgame/level/:_id/raw', element: t('Raw', <LevelRawContainer />) },
+
+	// Faculty
 	{ path: '/ifgame/progress/:_idsection', element: t('Class progress',<ClassProgressContainer /> ) },
 	{ path: '/ifgame/recent/:_idsection', element: t('Recent', <RecentContainer />) },
 	{ path: '/ifgame/grades/:_idsection', element: t('Grades', <GradesContainer />) },
-	{ path: '/ifgame/questions/:_idsection', element: t('Questions', <QuestionsContainer />) },
-	{ path: '/ifgame/levelraw/:_id', element: t('Raw', <LevelRawContainer />) },
 
+	// Admin
 	{ path: '/ifgame/kcs/:_idsection', element: t('KCs', <KCContainer /> ) },
+	{ path: '/ifgame/questions/:_idsection', element: t('Questions', <QuestionsContainer />) },
 
+	// All users
 	{ path: '/login', element: t('Excel.fun Login', <LoginContainer />) },
 	{ path: '/logout', element: t('Excel.fun Logout', <Logout />) },
 	{ path: '/profile', element: t('Excel.fun Profile', <ProfileContainer />) },
