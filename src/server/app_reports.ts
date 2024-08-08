@@ -48,10 +48,13 @@ router.get('/questions/', nocache, user_require_logged_in,
 	async (req: Request, res: Response, next: NextFunction): Promise<any> => {
 	try {
 		// Time limit on returned data.
-		const INTERVAL = 99999 + ' DAY';
+		const INTERVAL = 500 + ' DAY';
 
 		// Only allow faculty to have access to questions
 		const username = user_get_username_or_emptystring(req, res);
+
+		if(username !=='garrettn') throw new Error('Only admins have access to this report');
+
 		const is_faculty_result = await is_faculty(username);
 		if(!is_faculty_result) throw new Error('User do not have permission to review questions');
 
@@ -206,7 +209,7 @@ WHERE  ` + sql_where_clauses.join(' AND ') +
 
 /**
 	Get progress for a list of users.
-	Normally passed a section id.
+	Requires a section id.
 */
 router.get('/progress?', nocache, user_require_logged_in,
 	async (req: Request, res: Response, next: NextFunction): Promise<any> => {
@@ -219,11 +222,11 @@ router.get('/progress?', nocache, user_require_logged_in,
 
 		// SQL later on will also check to make sure that the user has permission
 		// to see the given course id.
-		const param_idsection = (typeof req.query.idsection === 'undefined') 
-				? '*' 
-				: parseInt( to_string_from_possible_array(req.query.idsection), 10);
+		if(typeof req.query.idsection === 'undefined') throw new Error('You must pass idsection');
 
-		const sql_where_values = [username, param_idsection, param_idsection];
+		const param_idsection = parseInt( to_string_from_possible_array(req.query.idsection), 10);
+
+		const sql_where_values = [username, param_idsection];
 
 		const fields = turn_object_keys_into_array(IfLevelPagelessSchema._level_schema_no_pages());
 		const fields_as_string = fields.map( (l: any) => 'iflevels.'+l).join(', ');
@@ -244,7 +247,7 @@ INNER JOIN users as faculty
 	ON faculty.iduser = faculty_sections.iduser
 WHERE 
 	faculty.username = ? 
-	AND (faculty_sections.idsection = ? OR ? = '*') 
+	AND (faculty_sections.idsection = ?) 
 ORDER BY iflevels.updated desc `;
 
 		const select_results = await run_mysql_query(sql, sql_where_values);

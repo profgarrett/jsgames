@@ -176,7 +176,6 @@ import LevelPlayContainer from './if/LevelPlayContainer';
 import LevelScoreContainer from './if/LevelScoreContainer';
 import ClassProgressContainer from './if/ClassProgressContainer';
 import RecentContainer from './if/RecentContainer';
-import GradesContainer from './if/GradesContainer';
 import QuestionsContainer from './if/QuestionsContainer';
 import KCContainer from './if/KCContainer';
 import LevelRawContainer from './if/LevelRawContainer';
@@ -233,12 +232,11 @@ const router = createBrowserRouter([
 
 	// Faculty
 	{ path: '/ifgame/progress/:_idsection', element: t('Class progress',<ClassProgressContainer /> ) },
-	{ path: '/ifgame/recent/:_idsection', element: t('Recent', <RecentContainer />) },
-	{ path: '/ifgame/grades/:_idsection', element: t('Grades', <GradesContainer />) },
 
 	// Admin
 	{ path: '/ifgame/kcs/:_idsection', element: t('KCs', <KCContainer /> ) },
 	{ path: '/ifgame/questions/:_idsection', element: t('Questions', <QuestionsContainer />) },
+	{ path: '/ifgame/recent/:_idsection', element: t('Recent', <RecentContainer />) },
 
 	// All users
 	{ path: '/login', element: t('Excel.fun Login', <LoginContainer />) },

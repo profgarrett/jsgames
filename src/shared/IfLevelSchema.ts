@@ -100,7 +100,7 @@ const from_int_dt = (unknown: any): any => {
 
 // Number to increment after updating props. Will cause a refresh of all pages when
 // the next api sql update is hit.
-const LEVEL_DERIVED_PROPS_VERSION = 2;
+const LEVEL_DERIVED_PROPS_VERSION = 1;
 
 
 /*
@@ -152,8 +152,6 @@ class IfLevelPagelessSchema extends Schema {
 	created!: Date;
 
 	completed!: boolean;
-
-	history!: Array<Object>;
 	allow_skipping_tutorial!: boolean;
 
 	show_progress!: boolean;
@@ -203,7 +201,7 @@ class IfLevelPagelessSchema extends Schema {
 
 			show_score_after_completing: { type: 'Boolean', initialize: (i: number) => isDef(i) ? b(i) : true },
 
-			history: { type: 'Array', initialize: (aH :any) => isDef(aH) ? a(aH) : [] },
+			//history: { type: 'Array', initialize: (aH :any) => isDef(aH) ? a(aH) : [] },
 
 			updated: { type: 'Date', initialize: (dt: any) => isDef(dt) ? from_int_dt(dt) : Date() }, 
 			created: { type: 'Date', initialize: (dt: any) => isDef(dt) ? from_int_dt(dt) : Date() },
@@ -379,7 +377,7 @@ class IfLevelSchema extends IfLevelPagelessSchema {
 		const score_nullable = level.completed ? level.get_test_score_as_percent() : null;
 		let classification = '';
 
-		if(     !level.completed ) {
+		if(!level.completed ) {
 			classification = 'Uncompleted';
 
 		} else if( 
@@ -390,7 +388,7 @@ class IfLevelSchema extends IfLevelPagelessSchema {
 		} else if( 
 				level.completed && score_nullable !== null 
 				&& score_nullable < PASSING_GRADE ) {
-			classification = 'Fail';
+			classification = 'Needs repeating';
 		} else {
 			throw new Error('Invalid type! classify in IfLevelSchema');
 		} 

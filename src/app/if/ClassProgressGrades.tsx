@@ -1,16 +1,17 @@
 import React, { ReactElement } from 'react';
 import { Table } from 'react-bootstrap';
 
-import { IfLevelSchema } from '../../shared/IfLevelSchema';
+import { IfLevelPagelessSchema, IfLevelSchema } from '../../shared/IfLevelSchema';
 import { StyledReactTable } from '../components/StyledReactTable';
 
+import { turn_array_into_map,  } from './../../shared/misc';
 import { IfLevels } from '../../shared/IfLevelSchema';
 import { DEMO_MODE } from '../configuration';
 
 
 
 type PropsType = {
-	data: Array<IfLevelSchema>
+	data: Array<IfLevelPagelessSchema>
 };
 
 // Return the average of the given items.
@@ -21,7 +22,8 @@ const avg_of = function(obj: any, arr: Array<any>): number {
 };
 
 
-export default function Grades(props: PropsType): ReactElement {
+export default function ClassProgressGrades(props: PropsType): ReactElement {
+
 
 	const _get_columns = (): Array<any> => {
 		// Create a list of distinct columns. Don't include the waivers.
@@ -36,30 +38,9 @@ export default function Grades(props: PropsType): ReactElement {
 			width: 200
 		}];
 
-		/*
-		columns.push( {
-			id:'part1',
-			Header: 'P1 Avg',
-			style: { textAlign: 'right' },
-			textAlign: 'right',
-			accessor: l => avg_of(l, ['tutorial', 'math1', 'math2', 'dates', 'rounding', 'summary', 'text']) + '%'
-		});
-
-
-		columns.push( {
-			id:'if_total',
-			Header: 'If Avg',
-			style: { textAlign: 'right' },
-			textAlign: 'right',
-			accessor: l => avg_of(l, ['if1', 'if2', 'if3', 'if4', 'if5', 'if6', 'if7', 'if8']) + '%'
-		});
-		*/
-
 		columns.push( {
 			id:'total',
 			Header: 'Avg',
-//			style: { textAlign: 'right' },
-//			textAlign: 'right',
 			accessor: l => avg_of(l, tutorials) + '%',
 			width: 100,
 		});
@@ -74,13 +55,45 @@ export default function Grades(props: PropsType): ReactElement {
 		return columns;
 	};
 
+	const _convert_levels_into_highest_grades = (iflevels: IfLevelPagelessSchema[] ) => {
+
+		const users = turn_array_into_map(iflevels, (l: any) => {
+			return l.username.toLowerCase().trim();
+		});
+
+		// Grab biggest item for each user.
+		const grades: any[] = [];
+		
+		users.forEach( (levels: any, user: any) => {
+
+			// Build user object.
+			const u = { username: user };
+			const level_map = turn_array_into_map(levels, (l: any) => l.code );
+
+			level_map.forEach( (levels: any, code: any) => {
+				// @ts-ignore
+				u[code] = levels.reduce( (max: any, l: IfLevelPagelessSchema) => 
+						// @ts-ignore
+						max > l.props.test_score_as_percent
+						? max 
+						: l.props.test_score_as_percent
+						, 0);
+			});
+
+			grades.push(u);
+		});
+
+		return grades;
+	}
+
+
+
 	/* 
 		Return table
 	*/
-	const _render_rich_grades_table = (): ReactElement => {
-		const columns = _get_columns();
+	const _render_rich_grades_table = (columns, grades): ReactElement => {
 		return 	<StyledReactTable 
-					data={props.data}
+					data={grades}
 					columns={columns} 
 				/>;
 	};
@@ -89,8 +102,7 @@ export default function Grades(props: PropsType): ReactElement {
 	/**
 		Return historical information
 	*/
-	const _render_grades_table = (): ReactElement => {
-		const columns = _get_columns();
+	const _render_grades_table = (columns, grades): ReactElement => {
 
 		return <Table striped bordered hover>
 			<thead><tr>{
@@ -98,7 +110,7 @@ export default function Grades(props: PropsType): ReactElement {
 			}</tr>
 			</thead>
 			<tbody>
-			{ props.data.map( 
+			{ grades.map( 
 				(t: any,i) => <tr key={'tr'+i}>
 					{
 						columns.map( 
@@ -118,11 +130,15 @@ export default function Grades(props: PropsType): ReactElement {
 	if(props.data.length < 1) 
 		return <div/>;
 
+	const grades = _convert_levels_into_highest_grades(props.data);
+	const columns = _get_columns();
+
 	return (<div>
-			{_render_rich_grades_table()}
+			{_render_rich_grades_table(columns, grades)}
 			<br/><br/><br/>
-			<h3>Basic table for copying to Excel</h3>
-				{_render_grades_table()}
+			<h3>Basic table</h3>
+			<p>This can be easier to copy to Excel or a similar spreadsheet program</p>
+				{_render_grades_table(columns, grades)}
 			</div>);
 
 }

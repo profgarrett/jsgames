@@ -6,7 +6,7 @@ import { LevelModal } from './LevelModal';
 import { IStringIndexJsonObject, prettyDateAsString } from '../components/Misc';
 import { IfLevelSchema, IfLevelPagelessSchema, GREEN_GRADE, PASSING_GRADE, DEFAULT_TUTORIAL_LEVEL_LIST } from '../../shared/IfLevelSchema';
 import { IfPageBaseSchema, IfPageFormulaSchema } from '../../shared/IfPageSchemas';
-
+import { StyledReactTable } from '../components/StyledReactTable';
 
 //import 'react-table/react-table.css';
 
@@ -61,7 +61,7 @@ export class ClassProgressChart extends React.Component<PropsType, StateType> {
     _render_bar = (levels: Array<IfLevelPagelessSchema>): ReactElement => {
         let keys = [ ...DEFAULT_TUTORIAL_LEVEL_LIST].reverse();
         const map_classifications = turn_array_into_map( levels, l => l.props.classification );
-        const a_classifications = turn_object_keys_into_array(map_classifications);
+        let a_classifications = turn_object_keys_into_array(map_classifications);
 
         let c_data : any[] = [];
         let code_levels : any[] = [];
@@ -96,8 +96,17 @@ export class ClassProgressChart extends React.Component<PropsType, StateType> {
             c_data.push(o);
         });
 
+		// Switch text from 'Needs repeating' to 'Fail'
+		let c_data2 = c_data.map( (c) => {
+			c['Fail'] = c['Needs repeating']; 
+			delete c['Needs repeating']; 
+			return c; 
+		});
+		a_classifications = ['Completed', 'Fail', 'Uncompleted'];
+
+		
 		// Remove all items with a value of zero
-		c_data = c_data.map( o => {
+		c_data2 = c_data2.map( o => {
 			let new_o = {...o};
 			if(new_o.Completed == 0) delete new_o.Completed;
 			if(new_o.Fail == 0) delete new_o.Fail;
@@ -111,7 +120,7 @@ export class ClassProgressChart extends React.Component<PropsType, StateType> {
         const width = document.body.clientWidth * 0.8;
 
         return <Bar
-            data={ c_data}
+            data={ c_data2}
 			layout='horizontal'
             keys={a_classifications}
             indexBy='key'
@@ -162,52 +171,62 @@ export class ClassProgressChart extends React.Component<PropsType, StateType> {
 
         if(this.state.code === '') return <div style={{ textAlign:'center'}}><i>Click on a bar to see detailed student progress</i></div>;
         
-        const row_data = levels.filter( l => l.code === this.state.code && l.props.classification === this.state.classification  );
+		// Turn uncompleted into Fail
+		const classification = this.state.classification == 'Fail' ? 'Needs repeating' : this.state.classification;
 
-		const columns = [{
-			id: 'username',
-			Header: 'Username', 
-			accessor: l => DEMO_MODE ? '*****' : l.username,
-			width: 250
-		}, {
-			id: 'updated',
-			Header: 'Last Update',
-			accessor: l => prettyDateAsString(l.updated),
-			style: {textAlign: 'right'},
-			width: 120
-        },{
-			id: 'minutes',
-			Header: 'Time (minutes)',
-			accessor: (l: IfLevelPagelessSchema) => l.props.minutes,
-			style: {textAlign: 'right'},
-			width: 150
-		}, {
-			id: 'pages',
-			Header: 'Pages Completed',
-			accessor: l => l.props.pages_length,
-			style: {textAlign: 'right'},
-			width: 200
-		}, {
-			id: 'score',
-			Header: 'Score',
-			accessor: l => !l.completed ? 'Unfinished' : (l.props.test_score_as_percent == null ? '' : l.props.test_score_as_percent + '%'),
-			style: {textAlign: 'right'},
-			width: 120
-		}, {
-			id: 'view',
-			Header: '',
-			accessor: l => <Button onClick={ () => this._on_click_to_show_modal(l._id) }>View</Button>,
-			width: 120,
-            style: {textAlign: 'center'},
-		},
+        const row_data = levels.filter( l => l.code === this.state.code && l.props.classification === classification  );
+
+		const columns = [
+			{
+				id: 'username',
+				Header: 'Username', 
+				accessor: l => DEMO_MODE ? '*****' : l.username,
+				width: 250
+			}, {
+				id: 'updated',
+				Header: 'Last Update',
+				accessor: l => prettyDateAsString(l.updated),
+				style: {textAlign: 'right'},
+				width: 120
+			},{
+				id: 'minutes',
+				Header: 'Time (minutes)',
+				accessor: (l: IfLevelPagelessSchema) => l.props.minutes,
+				style: {textAlign: 'right'},
+				width: 150
+			}, {
+				id: 'pages',
+				Header: 'Pages Completed',
+				accessor: l => l.props.pages_length,
+				style: {textAlign: 'right'},
+				width: 200
+			}, {
+				id: 'score',
+				Header: 'Score',
+				accessor: l => !l.completed ? 'Unfinished' : (l.props.test_score_as_percent == null ? '' : l.props.test_score_as_percent + '%'),
+				style: {textAlign: 'right'},
+				width: 120
+			}, {
+				id: 'view',
+				Header: '',
+				accessor: l => <Button onClick={ () => this._on_click_to_show_modal(l._id) }>View</Button>,
+				width: 120,
+				style: {textAlign: 'center'},
+			},
         ];
 
-        const pageSize = 30;
+        //const pageSize = 30;
 
-        const cell = (t, c, i) => {
-            return c.accessor(t);
-        }
+        //const cell = (t, c, i) => {
+         //   return c.accessor(t);
+        //}
 
+		const table = <StyledReactTable 
+					data={row_data}
+					columns={columns} 
+				/>
+			
+		/*
         const table = <Table striped bordered hover>
 			<thead><tr>{
 				columns.map( (c,i) => <th key={'trcode'+i}>{c.id}</th>)
@@ -224,10 +243,10 @@ export class ClassProgressChart extends React.Component<PropsType, StateType> {
 					</tr>) 
 			}
 			</tbody>
-		</Table>;		
+		</Table>;
+		*/
 
-        return (<div><h3>Progress for &nbsp;
-                    { this.state.classification.toLowerCase() }
+        return (<div style={{ marginTop: 10 }}><h3>Progress for&nbsp;{ this.state.classification.toLowerCase() }
                     &nbsp;
                     <kbd style={{ backgroundColor: colors[this.state.classification] }}>{ this.state.code}</kbd></h3>
                     { table }

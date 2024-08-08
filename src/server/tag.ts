@@ -301,15 +301,15 @@ if(DEBUG) {
 const tag_paste = (h) => h.map( 
 		(h, i, h_array) => {
 
-			// If first item > one character, then mark.			
+			// If first item and client_f > one character, then mark.			
 			if(i === 0 && h.client_f.length > 1)  {
-				h.tags.push( {tag:'PASTE'} );
+				h.tags.push( { tag:'PASTE' } );
 				return h;
 			}
 
 			// If not first item, and more than 1 character longer, then mark.
 			if(i > 0 && h.client_f.length > h_array[i-1].client_f.length + 1)  {
-				h.tags.push( {tag:'PASTE'} );
+				h.tags.push( { tag:'PASTE' } );
 				return h;
 			}
 
@@ -822,9 +822,7 @@ function return_tagged_level(level: IfLevelSchema): IfLevelSchema {
 			return page; // don't do any tags on non-formula pages.
 
 		// Clean-up history.
-		console.log(page.history)
 		let filtered_history = filter_history(page.history);
-		console.log(filtered_history)
 		filtered_history = remove_duplicate_history(filtered_history);
 		filtered_history = add_tags(filtered_history);
 		filtered_history = tag_single_letter_typos(filtered_history);
