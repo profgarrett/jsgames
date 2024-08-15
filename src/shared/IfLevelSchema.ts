@@ -70,6 +70,12 @@ const IfLevels = [
 	{ code: 'sql_join_self', title: 'SQL - Self join', description: 'Practice joining a table to itself'},
 	{ code: 'sql_join_keys', title: 'SQL - Key Practice', description: 'Practice joining tables on different keys' },
 	{ code: 'sql_groupby', title: 'SQL - GROUP BY', description: 'Calculate summaries of rows'},
+
+	// Feedback
+	{ code: 'feedback_t', title: 'Feedback - Text', description: 'Feedback' },
+	{ code: 'feedback_m', title: 'Feedback - Memo', description: 'Feedback' },
+	{ code: 'feedback_nm', title: 'Feedback - Number Memo', description: 'Feedback' },
+
 ];
 
 
@@ -264,6 +270,18 @@ class IfLevelSchema extends IfLevelPagelessSchema {
 
 		// Add history 
 		schema.history = { type: 'Array', initialize: (aH :any) => isDef(aH) ? a(aH) : [] };
+
+		return schema;
+	}
+
+	static _level_schema_no_history(): any {
+		const schema = IfLevelPagelessSchema._level_schema_no_pages();
+
+		// Add the pages to the pageless item.
+		// @ts-ignore
+		schema.pages = { type: 'Array', initialize: (aJ) => isDef(aJ) ? a(aJ).map(j => {
+						return get_page_schema_as_class(j);
+					}) : [] };
 
 		return schema;
 	}

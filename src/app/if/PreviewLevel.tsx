@@ -14,6 +14,7 @@ import Harsons from './IfPlayComponents/Harsons';
 import NumberAnswer from './IfPlayComponents/NumberAnswer';
 import Slider from './IfPlayComponents/Slider';
 import ShortTextAnswer from './IfPlayComponents/ShortTextAnswer';
+import LongTextAnswer  from './IfPlayComponents/LongTextAnswer';
 import SqlQuery from './IfPlayComponents/SqlQuery';
 
 
@@ -70,6 +71,9 @@ const PreviewPage = (props: any ): ReactElement => {
 
 	} else if(page.type === 'IfPageShortTextAnswerSchema') {
 		problem = <ShortTextAnswer page={page.toIfPageShortTextAnswerSchema()} readonly={true} editable={false} onChange={noop} onSubmit={noop }/>;
+
+	} else if(page.type === 'IfPageLongTextAnswerSchema') {
+		problem = <LongTextAnswer page={page.toIfPageLongTextAnswerSchema()} readonly={true} editable={false} onChange={noop} onSubmit={noop }/>;
 
 	} else if(page.type === 'IfPageNumberAnswerSchema') {
 		problem =<ShortTextAnswer page={page.toIfPageNumberAnswerSchema()} readonly={true} editable={false} onChange={noop} onSubmit={noop }/>;

@@ -34,6 +34,9 @@ import type { GenType } from './Gens';
 
 import { queryFactory_getSolutionResults } from './../shared/queryFactory';
 
+import { feedback_t, feedback_n, feedback_nm, feedback_m } from './pages/feedback';
+
+
 interface IStringIndexJsonObject {
 	[key: string]: any
 }
@@ -70,6 +73,7 @@ const LEVEL_GENS: IStringIndexJsonObject = {
 	sql_selectfrom, sql_orderby, sql_where, sql_where_and_or, 
 	sql_join_inner, sql_join_leftouter, sql_join_keys, sql_join_self,
 	sql_groupby,
+	feedback_n, feedback_nm, feedback_t, feedback_m,
 };
 
 
@@ -190,20 +194,15 @@ async function _initialize_json(level: IfLevelSchema, original_json: any): Promi
 
 	} else if(json.type === 'IfPageNumberAnswerSchema') {
 		// Allow the user to submit a number.
-
-		if(json.code === 'tutorial') {
-			json.correct_required = true;
-		} else if (json.code === 'test') {
-			json.correct_required = false;
-		}
-
-		//json.solution_test_results_visible = true;
-		//json.solution_f_visible = false;
+		
+		// Mark that correct is required for all.
+		// Ensures that we get a completed when showing result.
+		json.correct_required = true;
 
 		// Default instruction text.
-		if(typeof json.instruction === 'undefined') 
+		if(typeof json.instruction === 'undefined') {
 			json.instruction = 'Type in a number';
-
+		}
 
 
 	} else if(json.type === 'IfPageSliderSchema') {
@@ -288,7 +287,7 @@ async function _initialize_json(level: IfLevelSchema, original_json: any): Promi
 		json.solution_results_titles = results.titles;
 		json.solution_results_rows = results.rows;
 
-	} else if( json.type === 'IfPageShortTextAnswerSchema' ) {
+	} else if( json.type === 'IfPageShortTextAnswerSchema' || json.type == 'IfPageLongTextAnswerSchema') {
 		json.correct_required = false;
 
 		// Default to *not* show feedback on this item unless set.
@@ -298,6 +297,7 @@ async function _initialize_json(level: IfLevelSchema, original_json: any): Promi
 		json.code = typeof json.code === 'undefined' ? 'tutorial' : json.code;
 
 	} else {
+		console.log(json);
 		throw new Error('Invalid page type '+json.type+' in baseifgame');
 	}
 

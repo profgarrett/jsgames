@@ -620,7 +620,7 @@ class IfPageBaseSchema extends Schema {
 class IfPageTextSchema extends IfPageBaseSchema {
 	client_read!: boolean;
 
-	// Apply json to this obj, signally no parent classes to do the setting for us.
+	// Apply json to this obj, signalling no parent classes to do the setting for us.
 	constructor( json?: any) {
 		super(true);
 		if(json === true) return;
@@ -786,7 +786,13 @@ class IfPageNumberAnswerSchema extends IfPageBaseSchema {
 		if(this.client === null) return; // no client submission.
 
 		this.client_feedback = [];
-		this.correct = Math.round(this.client*100)/100 === Math.round(this.solution*100)/100;
+
+		// Don't always require having a solution.
+		if(this.solution == null || Number.isNaN(this.solution)) {
+			this.correct = true;
+		} else {
+			this.correct = Math.round(this.client*100)/100 === Math.round(this.solution*100)/100;
+		}
 	}
 
 	// Return a nicely formatted view of the client's input. 

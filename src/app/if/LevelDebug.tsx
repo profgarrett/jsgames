@@ -10,8 +10,8 @@ import Harsons from './IfPlayComponents/Harsons';
 import NumberAnswer from './IfPlayComponents/NumberAnswer';
 import Slider from './IfPlayComponents/Slider';
 import ShortTextAnswer from './IfPlayComponents/ShortTextAnswer';
+import LongTextAnswer from  './IfPlayComponents/LongTextAnswer';
 import SqlQuery from './IfPlayComponents/SqlQuery';
-
 
 import { IfLevelSchema } from '../../shared/IfLevelSchema';
 import { IfPageBaseSchema, IfPageFormulaSchema, IfPageHarsonsSchema, IfPageChoiceSchema } from '../../shared/IfPageSchemas';
@@ -92,7 +92,7 @@ class LevelDebugPage extends React.Component<ScorePropsType> {
 			problem = (
 				<Card >
 					<Card.Body>
-						<ExcelTable page={page2} readonly={true} editable={false}  handleChange={ () => {} }  />
+						<ExcelTable page={page2} readonly={true} editable={false} onEnter={()=>{}} onValidate={()=>{}}  onChange={ () => {} }  />
 						<div style={{ textAlign:  'right', fontSize: 8, color: 'gray' }}>{ page.type }</div>
 					</Card.Body>
 				</Card>
@@ -100,35 +100,38 @@ class LevelDebugPage extends React.Component<ScorePropsType> {
 
 		} else if(page.type === 'IfPageTextSchema') {
 			problem = (<div>
-					<Text page={page.toIfPageTextSchema()} editable={false} handleSubmit={(noop)} handleChange={ () => {} }/>
+					<Text page={page.toIfPageTextSchema()} editable={false}  readonly={true} onChange={ () => {} }/>
 				</div>);
 
 		} else if(page.type === 'IfPageParsonsSchema') {
 			problem = (<div>
-					<Parsons page={page.toIfPageParsonsSchema()} editable={false} handleChange={ () => {} } />
+					<Parsons page={page.toIfPageParsonsSchema()} readonly={true} editable={false} onChange={ () => {} } />
 				</div>);
 
 
 		} else if(page.type === 'IfPageSliderSchema') {
 			problem = (<div>
-					<Slider page={page.toIfPageSliderSchema()} readonly={false} editable={false}  handleChange={ () => {} } handleSubmit={ () => {} } />
+					<Slider page={page.toIfPageSliderSchema()} readonly={false} editable={false}  onChange={ () => {} } />
 				</div>);
 
 		} else if(page.type === 'IfPageShortTextAnswerSchema') {
-			problem = (<div><ShortTextAnswer page={page.toIfPageShortTextAnswerSchema()} readonly={true} editable={false} handleChange={()=> {}} handleSubmit={()=> {} }/></div>);
+			problem = (<div><ShortTextAnswer page={page.toIfPageShortTextAnswerSchema()} readonly={true} editable={false} onChange={()=> {}} onSubmit={ ()=> {}} /></div>);
+
+		} else if(page.type === 'IfPageLongTextAnswerSchema') {
+			problem = (<div><LongTextAnswer page={page.toIfPageLongTextAnswerSchema()} readonly={true} editable={false} handleChange={()=> {}} handleSubmit={()=> {} }/></div>);
 
 		} else if(page.type === 'IfPageNumberAnswerSchema') {
-			problem = (<div><ShortTextAnswer page={page.toIfPageNumberAnswerSchema()} readonly={true} editable={false} handleChange={()=> {}} handleSubmit={()=> {} }/></div>);
+			problem = (<div><ShortTextAnswer page={page.toIfPageNumberAnswerSchema()} readonly={true} editable={false} onChange={()=> {}} onSubmit={()=> {} }/></div>);
 
 		} else if(page.type === 'IfPageSqlSchema') {
-			problem = (<div><SqlQuery page={page.toIfPageSqlSchema()} readonly={true} editable={true} handleChange={()=> {}} handleSubmit={()=> {} }/></div>);
+			problem = (<div><SqlQuery page={page.toIfPageSqlSchema()} readonly={true} editable={true} onChange={()=> {}} onValidate={()=>{}} onSubmit={()=> {} }/></div>);
 
 		} else if(page.type === 'IfPageChoiceSchema') {
 			// Show range of choice only if the user was wrong.  If no right answer,
 			// then correct will be null.
 			
 			problem = (<div>
-					<Choice page={page.toIfPageChoiceSchema()} showSolution={true} editable={false}  handleChange={ () => {} }  />
+					<Choice page={page.toIfPageChoiceSchema()} show_solution={true} readonly={true} editable={false}  onChange={ () => {} }  />
 				</div>);
 
 		} else {

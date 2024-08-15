@@ -14,12 +14,24 @@ interface PropsType {
 	onSubmit: () => void;
 }
 
+/*
+interface StateType {
+	number: number|null;
+}
+*/
 const ID = 'NumberAnswerFieldInput';
 
 /**
 	A page shows an input for a number answer.
 */
 export default class NumberAnswer extends React.Component<PropsType> {
+
+	/*
+	constructor(props) {
+		super(props);
+		this.state = { number: props.page.client === null ? '' : props.page.client };
+	}
+*/
 
 	componentDidMount = () => {
 		// If there is an input field, then set its focus.
@@ -35,15 +47,27 @@ export default class NumberAnswer extends React.Component<PropsType> {
 		}	
 	}	
 
+	// Validate input
+	clean = ( s: string ) => {
+		const result = parseInt(s.replace(/\D/g, ''), 10);
+		console.log(s);
+		console.log(result);
+		if(Number.isNaN(result) || result == null) {
+			this.props.onChange({ client: '' });
+		} else {
+			this.props.onChange({ client: result });
+		}
+	}
+
 	// Build out the table 
 	// Doesn't need to actually return anything, as the description will be shown 
 	// by the containing object.
 	render = (): React.ReactElement => {
-		const value = this.props.page.client === null ? '' : this.props.page.client;
-		
+		const s = this.props.page.client ? this.props.page.client + '' : '';
+
 		if(!this.props.editable) {
 			return (
-				<div>{ value }</div>
+				<div>{ s }</div>
 			);
 		}
 
@@ -51,12 +75,12 @@ export default class NumberAnswer extends React.Component<PropsType> {
 			<div>
 				<FormControl 
 					id={ID}
-					type='text'
+					type='input'
 					autoComplete='off'
-					value={ value }
+					value={ s }
 					readOnly={ this.props.readonly }
-					placeholder='Type a number'
-					onChange={ (e) => this.props.onChange({ client: e.target.value}) }
+					placeholder='Type a number in the box'
+					onChange={ (e) => this.clean( e.target.value) }
 				/>
 			</div>
 			);

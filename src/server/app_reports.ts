@@ -140,15 +140,23 @@ router.get('/recent/', nocache, user_require_logged_in,
 		if(!is_faculty_result) throw new Error('User does not have permission to review questions');
 
 		// Set a default interval (in minutes) of 1 week. Otherwise, use passed 'updated'
-		// Assumes passed interval is in days.
+		// Assumes passed interval is in minutes.
 		const INTERVAL = typeof req.query.updated === 'undefined' 
-				? 7*1 + ' DAY'  // 1 week
-				: parseInt( to_string_from_possible_array(req.query.updated) , 10) + ' DAY'; 
+				? 7*1*24*60 + ' MINUTE'  // 1 week
+				: parseInt( to_string_from_possible_array(req.query.updated) , 10) + ' MINUTE'; 
 
 		const sql_where_clauses = ['iflevels.updated > NOW() - INTERVAL ' + INTERVAL];
 		const sql_where_values: any[] = [];
 		
-		const fields = turn_object_keys_into_array(IfLevelPagelessSchema._level_schema_no_pages());
+		// Should we return with or withpage pages?
+		// Default to false unless provided and with a 0 (false)
+		const pageless = typeof req.query.pageless !=='undefined' && req.query.pageless == '0' ? false : true;
+		const pageless_sql = pageless ? '"IfLevelPagelessSchema" as type,' : 'type,';
+		
+
+		const fields = pageless 
+			? turn_object_keys_into_array(IfLevelPagelessSchema._level_schema_no_pages())
+			: turn_object_keys_into_array(IfLevelSchema._level_schema_no_history());
 		const fields_as_string = fields.map( (l: any) => 'iflevels.'+l).join(', ');
 
 
@@ -174,7 +182,7 @@ router.get('/recent/', nocache, user_require_logged_in,
 
 		// Build SQL statement.
 		const sql = `
-SELECT distinct "IfLevelPagelessSchema" as type, ${fields_as_string}
+SELECT distinct ${pageless_sql} ${fields_as_string}
 FROM iflevels
 INNER JOIN users ON iflevels.username = users.username
 INNER JOIN users_sections ON users.iduser = users_sections.iduser
@@ -191,7 +199,10 @@ WHERE  ` + sql_where_clauses.join(' AND ') +
 
 		if(select_results.length === 0) return res.json([]);
 
-		let iflevels = select_results.map( (l: any): any => (new IfLevelPagelessSchema(l)) );
+		// Do we return with or withotu pages?
+		let iflevels = pageless 
+			? select_results.map( (l: any): any => (new IfLevelPagelessSchema(l)) )
+			: select_results.map( (l: any): any => (new IfLevelSchema(l)) );
 
 		// Remove secret fields and transmit.
 		//iflevels = iflevels.map( (l: any): any => return_tagged_level(l) );

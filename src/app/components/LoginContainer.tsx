@@ -36,14 +36,20 @@ Process:
 For Amazon Mechanical Turk, use
 	.../login/amt=1
 
+For feedback,
+	.../?url=path-to-item (hypens will be replaced with / characters.)
+
 This will automatically setup the account and join to the AMT group.
 */
 
 export default function LoginContainer() { 
 	const search = new URLSearchParams(window.location.search);
 	const isAMT = search.has('amt'); 
-	let url = search.has('url') ? (search.get('url') || '/') : '/';
 
+	// Replace all - with / characters in url
+	const url_with_hypthens = search.has('url') ? (search.get('url') || '/') : '/';
+	const url = url_with_hypthens.replaceAll('-', '/');
+	
 	const [message, setMessage] = useState( isAMT ? 'Please wait while we log you in' : '')
 	const [messageStyle, setMessageStyle] = useState('');
 	const [isLoading, setIsLoading] = useState(isAMT);
@@ -104,10 +110,6 @@ export default function LoginContainer() {
 		setMessage('Please wait while we create your account.');
 		setMessageStyle( 'info' );
 
-		// See if we should prompt the user to create a password after creating (i.e., for non-anon users)
-		if(username.length > 0 && username.indexOf('@') !== -1) {
-			url = '/profile';
-		}
 
 		// Fire AJAX.
 		fetch('/api/users/create_user/', {
@@ -128,7 +130,18 @@ export default function LoginContainer() {
 				setMessageStyle('success')
 		
 				setTimeout( () => {
-					navigate( '/'+url)
+					// See if we should prompt the user to create a password after creating (i.e., for non-anon users)
+					if(username.length > 0 && username.indexOf('@') !== -1) {
+						if(url_with_hypthens.length > 2) {
+							navigate('/profile?url='+url_with_hypthens);
+						} else {
+							// Real user, go to profile page
+							navigate('/profile');
+						}
+					} else {
+						// Anon user, just go to URL
+						navigate('/'+url);
+					}
 				}, location.host === 'localhost:8080' ? 1000 : 0);  // short delay if we're developing.
 				
 			})

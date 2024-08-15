@@ -13,6 +13,7 @@ import Harsons from './IfPlayComponents/Harsons';
 import NumberAnswer from './IfPlayComponents/NumberAnswer';
 import Slider from './IfPlayComponents/Slider';
 import ShortTextAnswer from './IfPlayComponents/ShortTextAnswer';
+import LongTextAnswer from './IfPlayComponents/LongTextAnswer';
 import Timer from './../components/Timer';
 import SqlQuery from './IfPlayComponents/SqlQuery';
 
@@ -164,6 +165,14 @@ export function render_exercise_panel(
 
 	} else if(page.type === 'IfPageShortTextAnswerSchema') {
 		problem = <ShortTextAnswer page={page.toIfPageShortTextAnswerSchema()} 
+					readonly={ isLoading }
+					editable={ true } 
+					onChange={handleChange} 
+					onSubmit={handleSubmit } />;
+
+
+	} else if(page.type === 'IfPageLongTextAnswerSchema') {
+		problem = <LongTextAnswer page={page.toIfPageLongTextAnswerSchema()} 
 					readonly={ isLoading }
 					editable={ true } 
 					onChange={handleChange} 

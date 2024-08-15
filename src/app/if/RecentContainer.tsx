@@ -40,7 +40,7 @@ export default function IfRecentContainer(): ReactElement {
 		if(filter.levels != '') args.push('code='+filter.levels);
 		if(filter.sections !== '') args.push('idsection='+filter.sections);
 		if(filter.users !== '') args.push('iduser='+filter.users);
-		if(filter.days !== '') args.push('updated='+filter.days);
+		if(filter.days !== '') args.push('updated='+filter.days*24*60); // convert into minutes
 
 		setIsLoading(true);
 		setMessage('Loading data');

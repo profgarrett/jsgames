@@ -14,4 +14,4 @@ exports.VISLIT_DISTORTION_MEDIUM = 0.6;
 exports.VISLIT_DISTORTION_SMALL = 0.3;
 
 // Blank out usernames? Useful for giving a demo
-exports.DEMO_MODE = true;
+exports.DEMO_MODE = false;

@@ -24,7 +24,8 @@ export default function ProfileContainer() {
 	const navigate = useNavigate();
 	const user = getUserFromBrowser();
 	const username = user.username;
-	const url = search.has('url') ? (search.get('url') || '/') : '/';
+	const url_with_hypthens = search.has('url') ? (search.get('url') || '/') : '/';
+	const url = url_with_hypthens.replaceAll('-', '/');
 
 	const update_profile = (password: string ) => {
         if(username === '') throw new Error('You can not update profile if your username is not set');
@@ -56,7 +57,7 @@ export default function ProfileContainer() {
 				setIsLoading(false);
 
 				setTimeout( () => {
-					navigate(url);
+					navigate('/'+url);
 				}, location.host === 'localhost:8080' ? 1000 : 0);  // add a short delay if on dev.
 
 			})

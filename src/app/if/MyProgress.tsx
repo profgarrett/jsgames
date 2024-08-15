@@ -384,6 +384,13 @@ export default class MyProgress extends React.Component<PropsType, StateType> {
 				? null 
 				: <p style={{ fontSize: 8, textAlign: 'right' }}><i>Course: {this.state.section.title}</i></p>;
 
+		// If admin?
+		let feedback_link;
+		if( user.username == 'garrettn') {
+			feedback_link = <Link to={'/ifgame/feedback/' + this.state.section.idsection} >
+				<Button size='lg' style={{ marginBottom: 10 }} variant='outline-info'>Feedback</Button>
+			</Link>;
+		}
 
 		// If teacher?
 		let teacher_link;
@@ -446,7 +453,7 @@ export default class MyProgress extends React.Component<PropsType, StateType> {
 
 		// Return card.
 		return <>
-			{ teacher_link }
+			{ teacher_link } {feedback_link }
 			<div className='card' style={{ backgroundColor: '#f5f5f5', marginBottom: 40 }}>
 				<div className='card-body'>
 					<div className='card-text'>

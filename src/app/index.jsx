@@ -180,6 +180,8 @@ import QuestionsContainer from './if/QuestionsContainer';
 import KCContainer from './if/KCContainer';
 import LevelRawContainer from './if/LevelRawContainer';
 import PreviewContainer from './if/PreviewContainer';
+import FeedbackContainer from './if/FeedbackContainer';
+import FeedbackRouter from './if/FeedbackRouter';
 
 
 function ErrorPage() {
@@ -189,7 +191,7 @@ function ErrorPage() {
 	return (
 	  <div id="error-page">
 		<h1>Oops!</h1>
-		<p>Sorry, an unexpected error has occurred.</p>
+		<p>Sorry, an unexpected error has occurred. Please contact profgarrett@gmail.com for help.</p>
 		<p>
 		  <i>{error.statusText || error.message}</i>
 		</p>
@@ -237,6 +239,10 @@ const router = createBrowserRouter([
 	{ path: '/ifgame/kcs/:_idsection', element: t('KCs', <KCContainer /> ) },
 	{ path: '/ifgame/questions/:_idsection', element: t('Questions', <QuestionsContainer />) },
 	{ path: '/ifgame/recent/:_idsection', element: t('Recent', <RecentContainer />) },
+
+	// Feedback
+	{ path: '/ifgame/feedback/:_sectionid', element: t('Feedback', <FeedbackContainer />) },
+	{ path: '/ifgame/feedback/create/:_code', element: t('Create level', <FeedbackRouter />) },
 
 	// All users
 	{ path: '/login', element: t('Excel.fun Login', <LoginContainer />) },

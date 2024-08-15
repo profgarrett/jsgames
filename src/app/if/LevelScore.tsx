@@ -12,6 +12,7 @@ import Parsons from './IfPlayComponents/Parsons';
 import NumberAnswer from './IfPlayComponents/NumberAnswer';
 import Slider from './IfPlayComponents/Slider';
 import ShortTextAnswer from './IfPlayComponents/ShortTextAnswer';
+import LongTextAnswer  from './IfPlayComponents/LongTextAnswer';
 import SqlQuery from './IfPlayComponents/SqlQuery';
 import HistorySlider from './HistorySlider';
 
@@ -126,6 +127,9 @@ export class LevelScorePage extends React.Component<ScorePropsType, ScoreStateTy
 		} else if(page_at.type === 'IfPageParsonsSchema') {
 			problem = (<div><Parsons page={page_at.toIfPageParsonsSchema()} onChange={noop } readonly={true} editable={false} show_solution={page_final.correct === false} /></div>);
 
+		} else if(page_at.type === 'IfPageLongTextAnswerSchema') {
+			problem = (<div><LongTextAnswer page={page_at.toIfPageLongTextAnswerSchema()} readonly={true} editable={false} show_solution={page_final.correct === false} onChange={noop} onSubmit={noop }/></div>);
+
 		} else if(page_at.type === 'IfPageShortTextAnswerSchema') {
 			problem = (<div><ShortTextAnswer page={page_at.toIfPageShortTextAnswerSchema()} readonly={true} editable={false} show_solution={page_final.correct === false} onChange={noop} onSubmit={noop }/></div>);
 
@@ -135,7 +139,7 @@ export class LevelScorePage extends React.Component<ScorePropsType, ScoreStateTy
 			problem = (<div><Choice page={page_at.toIfPageChoiceSchema()}  onChange={noop}  readonly={true} editable={false} show_solution={page_final.correct === false} /></div>);
 
 		} else if(page_at.type === 'IfPageSqlSchema') {
-			problem = (<div><SqlQuery page={page_at.toIfPageSqlSchema()} readonly={true} editable={false} show_solution={page_final.correct === false} onChange={noop} onSubmit={noop }/></div>);
+			problem = (<div><SqlQuery page={page_at.toIfPageSqlSchema()} readonly={true} onValidate={() => {}} editable={false} show_solution={page_final.correct === false} onChange={noop} onSubmit={noop }/></div>);
 
 			
 		} else {
