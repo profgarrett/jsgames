@@ -36,7 +36,7 @@ router.get('/sections',
 		const sql = `SELECT distinct sections.*, users_sections.role FROM users 
 				INNER JOIN users_sections on users.iduser = users_sections.iduser
 			    INNER JOIN sections on users_sections.idsection = sections.idsection
-				WHERE (users.username = ?)
+				WHERE (users.username = ?) AND year >= 2023
 				ORDER BY title`;
 		const params = [username];
 
