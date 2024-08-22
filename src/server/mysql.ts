@@ -19,6 +19,8 @@ import { sql14 } from './../../sql/sql14.js';
 import { sql15 } from './../../sql/sql15.js';
 import { sql16 } from './../../sql/sql16.js';
 import { sql17 } from './../../sql/sql17.js';
+import { sql18 } from './../../sql/sql18.js';
+
 
 /**
 	Initialize MYSQL with credentials from secret.js.
@@ -110,7 +112,6 @@ const to_utc = (dt: Date): number => {
 ////////////////////////////////////////////////////////////////////////
 
 async function update_mysql_database_schema(): Promise<any> {
-	
 	const old_version = await _update_get_version();
 
 	if(old_version < 1) await _update_update_version( sql01 );
@@ -123,6 +124,7 @@ async function update_mysql_database_schema(): Promise<any> {
 		await _update_fix_bad_page_data6();
 		await _update_update_version( sql06 );
 	}
+	console.log(1);
 	if(old_version < 7 ) await _update_update_version( sql07 );
 	if(old_version < 8 ) await _update_update_version( sql08 );
 	if(old_version < 9 ) await _update_update_version( sql09 );
@@ -134,6 +136,7 @@ async function update_mysql_database_schema(): Promise<any> {
 	if(old_version < 15 ) await _update_update_version( sql15 );
 	if(old_version < 16 ) await _update_update_version( sql16 );
 	if(old_version < 17 ) await _update_update_version( sql17 );
+	if(old_version < 18 ) await _update_update_version( sql18 );
 
 	await _update_all_levels_to_latest_props();
 	
@@ -228,6 +231,9 @@ async function update_level_in_db(level: IfLevelSchema ): Promise<any> {
 	Update to latest version. May take a long time during upgrades.
 */
 async function _update_all_levels_to_latest_props(): Promise<any> {
+
+	// Function currently disabled due to issues updating on dreamhost
+	return false;
 	console.log('Updating old props');
 	const sql_old_levels = 'select * from iflevels WHERE props_version is null or props_version < ?';
 	

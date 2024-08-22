@@ -136,7 +136,7 @@ export default function FeedbackContainer() {
 		}, REFRESH_TIME_IN_MS);
 	};
 		 
-	const response_url = '/ifgame/feedback/create/' + feedbackType;
+	const response_url = 'https://excel.fun/ifgame/feedback/create/' + feedbackType;
 
 	const qr = feedbackType == '' 
 		? null 

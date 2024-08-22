@@ -171,6 +171,14 @@ router.get('/recent/', nocache, user_require_logged_in,
 			sql_where_clauses.push('sections.idsection = ?');
 		}
 
+		if(typeof req.query.completed !=='undefined') {
+			if(! (req.query.completed == '0' || req.query.completed == '1')) {
+				throw new Error('Invalid completed value, must be 0 or 1, of '+req.query.completed);
+			} 
+			sql_where_values.push(req.query.completed);
+			sql_where_clauses.push('iflevels.completed = ?');
+		}
+
 		if(typeof req.query.code !=='undefined') {
 			sql_where_values.push(req.query.code);
 			sql_where_clauses.push('iflevels.code = ?');
@@ -199,7 +207,7 @@ WHERE  ` + sql_where_clauses.join(' AND ') +
 
 		if(select_results.length === 0) return res.json([]);
 
-		// Do we return with or withotu pages?
+		// Do we return with or without pages?
 		let iflevels = pageless 
 			? select_results.map( (l: any): any => (new IfLevelPagelessSchema(l)) )
 			: select_results.map( (l: any): any => (new IfLevelSchema(l)) );
