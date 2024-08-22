@@ -152,7 +152,7 @@ router.get('/recent/', nocache, user_require_logged_in,
 		// Default to false unless provided and with a 0 (false)
 		const pageless = typeof req.query.pageless !=='undefined' && req.query.pageless == '0' ? false : true;
 		const pageless_sql = pageless ? '"IfLevelPagelessSchema" as type,' : 'type,';
-		
+		console.log([pageless, pageless_sql]);
 
 		const fields = pageless 
 			? turn_object_keys_into_array(IfLevelPagelessSchema._level_schema_no_pages())

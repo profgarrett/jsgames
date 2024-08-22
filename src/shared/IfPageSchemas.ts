@@ -695,7 +695,7 @@ class IfPageTextSchema extends IfPageBaseSchema {
 
 	// Return a nicely formatted view of the client's input. 
 	toString(): string {
-		return '';
+		return 'read';
 	}
 }
 
