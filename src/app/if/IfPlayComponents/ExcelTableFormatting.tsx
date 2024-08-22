@@ -39,7 +39,7 @@ const format = (p_input, format) => {
 	if(input === '') return '';
 
 	// Undefined format.  Guess!
-	if(typeof format === 'undefined' || format === null || format === '' || format === null ) {
+	if(typeof format === 'undefined' || format === null || format === '' ) {
 		if(typeof input === 'number') 
 			return input.toLocaleString('en-US');
 		else

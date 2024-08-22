@@ -100,7 +100,7 @@ export default class LevelPlayFeedbackModal extends React.Component<IProps> {
 						// Should we show the solution to the user?
 						if(feedback.length > 0) {
 							// No, still feedback.
-							body.push(<div>Try to resolve the problems above. Once you do that, and if you&apos;re still stuck, you can come back here for the solution</div>);
+							body.push(<div>Try to resolve the problems above. Once you do that, and if you&apos;re still stuck, you can come back here for the solution after 5 minutes.</div>);
 
 						} else if ( typedPage.correct ) {
 							body.push(<div>Correct answer!</div>);
@@ -149,7 +149,7 @@ export default class LevelPlayFeedbackModal extends React.Component<IProps> {
 						// Should we show the solution to the user?
 						if(feedback.length > 0) {
 							// No, still feedback.
-							body.push(<div>Try to resolve the problems above. Once you do that, and if you&apos;re still stuck, you can come back here for the solution</div>);
+							body.push(<div>Try to resolve the problems above. Once you do that, and if you&apos;re still stuck, you can come back here for the solution after 5 minutes.</div>);
 
 						} else if ( typedPage.correct ) {
 							body.push(<div>Correct answer!</div>);
@@ -200,7 +200,6 @@ export default class LevelPlayFeedbackModal extends React.Component<IProps> {
 						onKeyDown = { (e) => { 
 							e.preventDefault(); 
 							this.props.onHideModal(); 
-							return false;
 						}}
 						onClick = { (e) => { 
 							e.preventDefault(); 

@@ -304,23 +304,22 @@ export default class SqlQuery extends React.Component<PropsType, StateType> {
 		
 		// Update the state. This will keep onChange from 
 		// triggering a second time while we update the screen.
-		this.setState( (state, props) => {
-			client_sql: formatted
-		}, () => {
-			// update the editor window with the formatted value.
-			// @ts-ignore
-			this.editor.setValue(formatted);
+		this.setState( (state, props) => { return { client_sql: formatted }; }, 
+			() => {
+				// update the editor window with the formatted value.
+				// @ts-ignore
+				this.editor.setValue(formatted);
 
-			// Now that we've updated the state, trigger the update
-			// and screen refresh
-			this.props.onChange({ client_sql: formatted });
-			
-			if(validate_only) {
-				this.props.onValidate();
-			} else {
-				this.props.onSubmit();
-			}
-		});
+				// Now that we've updated the state, trigger the update
+				// and screen refresh
+				this.props.onChange({ client_sql: formatted });
+				
+				if(validate_only) {
+					this.props.onValidate();
+				} else {
+					this.props.onSubmit();
+				}
+			});
 
 	}
 	

@@ -200,11 +200,11 @@ export class KCCharts extends React.Component<PropsType, StateType> {
                 </thead>
                 <tbody>
                 {
-                sorted_answers.map( a => <tr>
+                sorted_answers.map( (a,i) => <tr key={'kcanswerexpandable'+i}>
                         <td>{ DEBUG ? '*****' : a.username}</td>
                         <td>{a.seconds}</td>
                         <td>{ a.solution_pretty }</td>
-                        <td>{ a.answers.map( a => <p>{ a }</p> ) }</td>
+                        <td>{ a.answers.map( (a,i) => <p key={'kcanswersmap'+i}>{ a }</p> ) }</td>
                         <td><Button onClick={ () => this.show_modal( a.level_id, a.sequence_in_level ) }>View</Button></td>
                     </tr> )
                 }
