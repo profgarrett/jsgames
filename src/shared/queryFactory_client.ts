@@ -210,14 +210,17 @@ async function proto_queryFactory_getSolutionResults(json: any, SQL: any): Promi
 			throw new Error('No values returned for '+ sql);
 		}
 
+		// use structuredClone to avoid issues with the closing the db.
 		return {
-			titles: res[0].columns, 
-			rows: res[0].values,
+			titles: structuredClone(res[0].columns), 
+			rows: structuredClone(res[0].values),
 			error: null,
 		};
 
 	} catch (e) {
 		throw new Error('proto_queryFactory_getSolutionResults error "'+e +'", for SQL ' + sql);
+	} finally {
+		db.close();
 	}
 	
 
@@ -231,7 +234,7 @@ async function proto_queryFactory_getSolutionResults(json: any, SQL: any): Promi
 	Can be run on the server side or client side.
 */
 async function proto_queryFactory_getClientResults(json: any, SQL: any): Promise<{ rows: any[], titles: string[], error: string | null }> {
-	const db = new SQL.Database();
+	let db;
 	let res;
 
 	// Don't run query if there isn't a client SQL statement.
@@ -242,6 +245,8 @@ async function proto_queryFactory_getClientResults(json: any, SQL: any): Promise
 
 	// Run query
 	try {
+		db = new SQL.Database();
+		
 		// Create sql database
 		db.exec(return_create_tables(json));
 		db.exec(return_insert_intos(json));
@@ -254,6 +259,17 @@ async function proto_queryFactory_getClientResults(json: any, SQL: any): Promise
 		if(json.client_sql.toLowerCase().indexOf('order by') === -1) {
 			apply_default_sort_if_no_order_by_clause(res[0].values);
 		}
+
+		// Results can zero at this point, for example WHERE false 
+		if(res.length !== 1) {
+			return { titles: [], rows: [], error: 'No records returned'};	
+		}
+
+		return {
+			titles: structuredClone(res[0].columns), 
+			rows: structuredClone(res[0].values),
+			error: null,
+		};
 
 	} catch (e: any) {		
 		let message = '';
@@ -270,18 +286,11 @@ async function proto_queryFactory_getClientResults(json: any, SQL: any): Promise
 			throw new Error('Invalid option for proto_queryfacotry_getclientresults')
 		}
 		return { titles: [], rows: [], error: message };
+
+	} finally {
+		db.close();
 	}
 
-	// Results can zero at this point, for example WHERE false 
-	if(res.length !== 1) {
-		return { titles: [], rows: [], error: 'No records returned'};	
-	}
-
-	return {
-		titles: res[0].columns, 
-		rows: res[0].values,
-		error: null,
-	};
 
 }
 

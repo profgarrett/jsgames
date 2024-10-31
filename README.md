@@ -93,7 +93,8 @@ After loading the files, be sure to npm install to get all local packages.
 Check node by running which node.
 
 Next, install pm2 (https://pm2.keymetrics.io/docs/usage/quick-start/)
-Add the app file to auto-run
+Add the app file to auto-run.
+You can also get the status by -list or -status.
 ```
 pm2 start app.js --name jsgames --watch
 ```
