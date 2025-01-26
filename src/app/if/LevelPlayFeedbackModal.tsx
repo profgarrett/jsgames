@@ -146,12 +146,12 @@ export default class LevelPlayFeedbackModal extends React.Component<IProps> {
 					// Show correct solution
 					if(typedPage.solution_sql !== null && typedPage.solution_sql.length > 0) {
 
-						// Should we show the solution to the user?
-						if(feedback.length > 0) {
-							// No, still feedback.
-							body.push(<div>Try to resolve the problems above. Once you do that, and if you&apos;re still stuck, you can come back here for the solution after 5 minutes.</div>);
+						// Timeout?
+						console.log(typedPage.get_time_in_seconds_since_first_history());
+						console.log(MINIMUM_TIME_BETWEEN_SUBMIT_EVENTS);
 
-						} else if ( typedPage.correct ) {
+						// Should we show the solution to the user?
+						if(typedPage.correct ) {
 							body.push(<div>Correct answer!</div>);
 						
 						} else if( typedPage.get_time_in_seconds_since_first_history() < TIME_BEFORE_SHOWING_SOLUTION ) {
@@ -160,7 +160,7 @@ export default class LevelPlayFeedbackModal extends React.Component<IProps> {
 							body.push(<div>Sorry, but that answer is not correct.<br/><br/>
 								You have spent around {typedPage.get_time_in_seconds_since_first_history()} seconds
 								trying to solve the problem on your own. Please try for 
-								at least three minutes. You can then 
+								at least five minutes. You can then 
 								come back here for the solution.</div>);
 						
 						} else {
