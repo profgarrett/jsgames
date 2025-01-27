@@ -368,7 +368,7 @@ const test_pages_quotes = [
 			'col1': 'popColumn(pig weight,pig height)'
 		}
 	}, { 	..._baseX_quotes,
-		description: `Retrieve Name and {col1} from the dogs table.`,
+		description: `Retrieve Name and {col1} from the pigs table.`,
 		solution_sql: 'SELECT name, "{col1}" FROM pigs',
 		template_values: {
 			'col1': 'popColumn(pig weight,pig height)'
