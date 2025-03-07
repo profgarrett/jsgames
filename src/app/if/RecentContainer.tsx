@@ -97,6 +97,7 @@ export default function IfRecentContainer(): ReactElement {
 			{ value: 14, label: '2 weeks' },
 			{ value: 21, label: '3 weeks' },
 			{ value: 28, label: '4 weeks' },
+			{ value: 356, label: '1 year' },
 		]
 	};
 
