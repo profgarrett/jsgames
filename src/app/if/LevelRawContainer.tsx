@@ -1,8 +1,7 @@
 import React, { ReactElement, useEffect, useState } from 'react';
 
 import Container from 'react-bootstrap/Container';
-import { useParams, useNavigate } from 'react-router-dom';
-
+import { useParams } from 'react-router-dom';
 
 import { Row, Col, Breadcrumb, Button  } from 'react-bootstrap';
 import { Message, Loading } from '../components/Misc';
@@ -23,9 +22,7 @@ export default function LevelScoreContainer() {
 	const [pageIndex, setpageIndex] = useState<any>(null);
 
 	const params = useParams();
-	const navigate = useNavigate();
 	const _id = params._id ? params._id : null;
-	const _pageIndex = params._pageIndex ? params._pageIndex : null;
 
     // Call to remove a page from an object.
     // Uses array indexing, so i starts with 0.

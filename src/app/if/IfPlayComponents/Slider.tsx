@@ -1,6 +1,6 @@
 import React from 'react';
-import { FormControl } from 'react-bootstrap';
-import { Slider, Rail, Handles, Tracks, Ticks } from 'react-compound-slider'
+import Slider from 'rc-slider';
+import 'rc-slider/assets/index.css';
 
 import { IfPageSliderSchema } from '../../../shared/IfPageSchemas';
 import type { IStringIndexJsonObject } from '../../components/Misc';
@@ -14,109 +14,64 @@ interface PropsType {
   
 const ID = 'SliderInput';
 
-// ************************************************************************
-// Code for Slider Component
-// ************************************************************************
 
-const sliderStyle = { // Give the slider some width
-  position: 'relative',
-  width: '100%',
-  height: 80,
-  border: '0px',
-}
+const sliderStyles = {
+  // Container style
+  container: {
+    padding: 30,
+    position: 'relative' as const,
+    height: 80,
+  },
+  // Custom styles for the slider
+  slider: {
+    marginTop: 35,
+    marginBottom: 25,
+  }
+};
 
-const railStyle = { 
-  position: 'absolute',
-  width: '100%',
+// Custom handle style to match original blue design
+const handleStyle = {
+  backgroundColor: '#2C4870',
+  borderColor: '#2C4870',
+  boxShadow: 'none',
+  width: 30,
+  height: 30,
+  marginTop: -10,
+  opacity: 1,
+};
+
+// Custom track style to match original design
+const trackStyle = {
+  backgroundColor: '#546C91',
   height: 10,
-  marginTop: 35,
-  borderRadius: 5,
+};
+
+// Custom rail style to match original design  
+const railStyle = {
   backgroundColor: 'rgb(187, 187, 187)',
-}
+  height: 10,
+};
 
-
-export function Handle({
-    handle: { id, value, percent }, 
-    getHandleProps
-}: any) {
-    return (
-        <div
-        style={{
-        left: `${percent}%`,
-        position: 'absolute',
-        marginLeft: -15,
-        marginTop: 25,
-        zIndex: 2,
-        width: 30,
-        height: 30,
-        border: 0,
-        textAlign: 'center',
-        cursor: 'pointer',
-        borderRadius: '50%',
-        backgroundColor: '#2C4870',
-        color: '#333',
-        }}
-        {...getHandleProps(id)}
-        >
-        </div>
-  )
-}
-
-function Track({ source, target, getTrackProps }) { // your own track component
-  return (
-    <div
-      style={{
-        position: 'absolute',
-        height: 10,
-        zIndex: 1,
-        marginTop: 35,
-        backgroundColor: '#546C91',
-        borderRadius: 5,
-        cursor: 'pointer',
-        left: `${source.percent}%`,
-        width: `${target.percent - source.percent}%`,
-      }}
-      {...getTrackProps()} // this will set up events if you want it to be clickeable (optional)
-    />
-  )
-}
-
-function Tick({ tick, count }) {  // your own tick component
-  return (
-    <div>
-      <div
-        style={{
-          position: 'absolute',
-          marginTop: 52,
-          marginLeft: -0.5,
-          width: 1,
-          height: 8,
-          backgroundColor: 'silver',
-          left: `${tick.percent}%`,
-        }}
-      />
-      <div
-        style={{
-          position: 'absolute',
-          marginTop: 60,
-          fontSize: 20,
-          textAlign: 'center',
-          marginLeft: `${-(100 / count) / 2}%`,
-          width: `${100 / count}%`,
-          left: `${tick.percent}%`,
-        }}
-      >
-        {tick.value}%
-      </div>
-    </div>
-  )
-}
+// Custom marks for percentage display (every 10%)
+const marks = {
+  0: '0%',
+  10: '10%',
+  20: '20%',
+  30: '30%',
+  40: '40%',
+  50: '50%',
+  60: '60%',
+  70: '70%',
+  80: '80%',
+  90: '90%',
+  100: '100%',
+};
 
 // ************************************************************************
 
 
 /**
-  A page shows an input for a number answer.
+  A page shows an input for a number answer using rc-slider.
 */
 export default class NumberSlider extends React.Component<PropsType> {
 
@@ -127,6 +82,7 @@ export default class NumberSlider extends React.Component<PropsType> {
       if(node) node.focus();
     }
   }
+  
   componentDidUpdate = () => {
     if(this.props.editable) {
       let node = document.getElementById(ID);
@@ -134,96 +90,61 @@ export default class NumberSlider extends React.Component<PropsType> {
     }	
   }
 
+  handleChange = (value: number | number[]): void => {
+    // rc-slider can return number or number[], we expect single number
+    const n = Array.isArray(value) ? value[0] : value;
+    
+    if (typeof n !== 'number') return;
+    if (Number.isNaN(n)) return;
 
-    /*
-  handleSubmit(event: any): any {
-    if(event.key === 'Enter' ) {
-      this.props.handleSubmit(document.getElementById(ID).text);
+    if (n !== this.props.page.client) {
+      this.props.onChange({ client: n });
     }
-    event.preventDefault(); // cancel any keypress.
-  }
-    */
-
-  handleChange =(v: readonly number[]): any => {
-	let value = [ ...v ];
-	const n = value.pop(); // top number.
-
-	if( typeof n !== 'number') return;
-	if( Number.isNaN(n)) return;  // component sometimes returns NaN
-
-
-	if(n !== this.props.page.client) {
-		this.props.onChange({ client: n});
-	}
   }
 
-  // Build out the table 
-  // Doesn't need to actually return anything, as the description will be shown 
-  // by the containing object.
+  // Build out the slider component
   render = (): React.ReactElement => {
-    const value = Number.isNaN(this.props.page.client) || this.props.page.client === null || typeof this.props.page.client === 'undefined' 
+    const value = Number.isNaN(this.props.page.client) || 
+                  this.props.page.client === null || 
+                  typeof this.props.page.client === 'undefined' 
             ? 0 
             : this.props.page.client;
         
     const disabled = this.props.readonly;
 
-	if( !this.props.editable ) {
-		return (<div>{ value }</div>);
-	}
+    if (!this.props.editable) {
+      return (<div>{value}%</div>);
+    }
 
     return (
-      <div style={{ padding: 30 }}>
+      <div style={sliderStyles.container}>
         <Slider
+          id={ID}
+          min={0}
+          max={100}
+          step={1}
+          value={value}
           disabled={disabled}
-                    rootStyle={sliderStyle}
-                    domain={[0, 100]}
-                    step={1}
-                    mode={2}
-                    onUpdate={ (e) => this.handleChange(e) }
-                    values={[value]} >
-                    <Rail>
-                        {({ getRailProps }) => (  // adding the rail props sets up events on the rail
-                            <div style={railStyle} {...getRailProps()} /> 
-                        )}
-                    </Rail>
-                    <Handles>
-                        {({ handles, getHandleProps }) => (
-                            <div className="slider-handles">
-                                {handles.map(handle => (
-                                    <Handle
-                                        key={handle.id}
-                                        handle={handle}
-                                        getHandleProps={getHandleProps}
-                                    />
-                                ))}
-                            </div>
-                        )}
-                    </Handles>
-                    <Tracks right={false}>
-                        {({ tracks, getTrackProps }) => (
-                            <div className="slider-tracks">
-                                {tracks.map(({ id, source, target }) => (
-                                    <Track
-                                        key={id}
-                                        source={source}
-                                        target={target}
-                                        getTrackProps={getTrackProps}
-                                    />
-                                ))}
-                            </div>
-                        )}
-                    </Tracks>
-                    <Ticks count={10}>
-                        {({ ticks }) => (
-                            <div className="slider-ticks">
-                                {ticks.map(tick => (
-                                    <Tick key={tick.id} tick={tick} count={ticks.length} />
-                                ))}
-                            </div>
-                        )}
-                    </Ticks>
-                </Slider>
-            </div>
-      );
+          onChange={this.handleChange}
+          marks={marks}
+          included={true}
+          handleStyle={handleStyle}
+          trackStyle={trackStyle}
+          railStyle={railStyle}
+          dotStyle={{ display: 'none' }} // Hide dots on marks
+          activeDotStyle={{ display: 'none' }} // Hide active dots
+        />
+        {/* Display current value */}
+        <div style={{ 
+          textAlign: 'center', 
+          marginTop: 10, 
+          fontSize: '16px',
+          fontWeight: 'bold',
+          color: '#2C4870'
+        }}>
+          Current Value: {value}%
+        </div>
+      </div>
+    );
   }
 }

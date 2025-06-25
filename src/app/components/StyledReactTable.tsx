@@ -1,136 +1,185 @@
-import React, { ReactElement } from 'react';
-
-import { useTable, useFilters, useSortBy } from 'react-table';
-import { Table, Button, Modal } from 'react-bootstrap';
-
+import React, { ReactElement, useState, useMemo } from 'react';
+import { Table, Form, Button } from 'react-bootstrap';
 
 interface TablePropColumnType {
 	id: string;
 	Header: string;
-	width: number|null; 
-	accessor: Function|null;
+	width: number | null; 
+	accessor: string | Function | null;
 }
 
 interface TablePropsType {
 	columns: Array<TablePropColumnType>;
 	data: Array<any>;
-};
+}
 
+type SortDirection = 'asc' | 'desc' | null;
 
-
-
-// Standard Column Filter Setup
-const ColumnFilter = ({ column: { filterValue, setFilter, filter } }) => {
-
-    return (
-        <input style={{ width: '90%' }}
-        value={filterValue || ''}
-        onChange={e => {
-            setFilter(e.target.value || undefined); // Set undefined to remove the filter entirely
-        }}
-        placeholder={`Search ${filter ? filter : ''}...`}
-        />
-    );
-};
-
+interface SortConfig {
+	key: string;
+	direction: SortDirection;
+}
 
 export function StyledReactTable(props: TablePropsType): ReactElement {
+	const [filters, setFilters] = useState<Record<string, string>>({});
+	const [sortConfig, setSortConfig] = useState<SortConfig>({ key: '', direction: null });
 
-    const m_props = props; // React.useMemo( () => props, props.data );
+	// Helper function to get cell value
+	const getCellValue = (row: any, column: TablePropColumnType) => {
+		if (typeof column.accessor === 'function') {
+			return column.accessor(row);
+		} else if (typeof column.accessor === 'string') {
+			return row[column.accessor];
+		} else if (column.id) {
+			return row[column.id];
+		}
+		return '';
+	};
 
-    // Different type of filters.
-    const filterTypes = {
+	// Filter data based on current filters
+	const filteredData = useMemo(() => {
+		return props.data.filter(row => {
+			return props.columns.every(column => {
+				const filterValue = filters[column.id];
+				if (!filterValue) return true;
+				
+				const cellValue = getCellValue(row, column);
+				return String(cellValue)
+					.toLowerCase()
+					.includes(filterValue.toLowerCase());
+			});
+		});
+	}, [props.data, props.columns, filters]);
 
-        // Default text.
-        text: (rows, id, filterValue) => {
-        return rows.filter(row => {
-            const rowValue = row.values[id];
-            return rowValue !== undefined
-            ? String(rowValue)
-                .toLowerCase()
-                .startsWith(String(filterValue).toLowerCase())
-            : true;
-        });
-        }
-    };
+	// Sort data based on current sort configuration
+	const sortedData = useMemo(() => {
+		if (!sortConfig.key || !sortConfig.direction) {
+			return filteredData;
+		}
 
-    // Standard Column.
-    const defaultColumn = {
-        // Let's set up our default Filter UI
-        Filter: ColumnFilter
-    };
+		const column = props.columns.find(col => col.id === sortConfig.key);
+		if (!column) return filteredData;
 
+		return [...filteredData].sort((a, b) => {
+			const aValue = getCellValue(a, column);
+			const bValue = getCellValue(b, column);
 
-    const tableInstance = useTable(
-        {   columns: m_props.columns, 
-            defaultColumn: defaultColumn,
-            filterTypes: filterTypes,
-            data: m_props.data 
-        },
-        useFilters,
-        useSortBy,
-    );
+			// Handle different data types
+			let comparison = 0;
+			if (typeof aValue === 'number' && typeof bValue === 'number') {
+				comparison = aValue - bValue;
+			} else {
+				comparison = String(aValue).localeCompare(String(bValue));
+			}
 
+			return sortConfig.direction === 'asc' ? comparison : -comparison;
+		});
+	}, [filteredData, sortConfig, props.columns]);
 
+	// Handle column sorting
+	const handleSort = (columnId: string) => {
+		let direction: SortDirection = 'asc';
+		if (sortConfig.key === columnId && sortConfig.direction === 'asc') {
+			direction = 'desc';
+		} else if (sortConfig.key === columnId && sortConfig.direction === 'desc') {
+			direction = null;
+		}
+		setSortConfig({ key: columnId, direction });
+	};
 
-    const {
-        getTableProps,
-        getTableBodyProps,
-        headerGroups,
-        rows,
-        prepareRow,
-    } = tableInstance;
+	// Handle filter changes
+	const handleFilterChange = (columnId: string, value: string) => {
+		setFilters(prev => ({
+			...prev,
+			[columnId]: value
+		}));
+	};
 
+	// Clear all filters
+	const clearFilters = () => {
+		setFilters({});
+	};
 
+	// Get sort indicator
+	const getSortIndicator = (columnId: string) => {
+		if (sortConfig.key !== columnId) return '';
+		if (sortConfig.direction === 'asc') return ' ↑';
+		if (sortConfig.direction === 'desc') return ' ↓';
+		return '';
+	};
 
-    return (
-    // apply the table props
-        <Table {...getTableProps()}>
-            <thead>
-            {// Loop over the header rows
-            headerGroups.map(headerGroup => (
-                // Apply the header row props
-                <tr {...headerGroup.getHeaderGroupProps()}>
-                {// Loop over the headers in each row
-                headerGroup.headers.map(column => (
-                    // Apply the header cell props
-                    <th {...column.getHeaderProps(column.getSortByToggleProps())} 
-                        style={{ 'minWidth':  typeof (column.width) === 'number' ? column.width : 100  + 'px' }}>
-                        {// Render the header
-                        column.render('Header')}
-                        <span>{ column.isSorted ? (column.isSortedDesc ? ' (up)' : ' (down)' ) : '' }</span>
-                        {/* Render the columns filter UI */}
-                        <div 
-                        >{column.canFilter ? column.render("Filter") : null}</div>
-                    </th>
-                ))}
-                </tr>
-            ))}
-            </thead>
-            {/* Apply the table body props */}
-            <tbody {...getTableBodyProps()}>
-            {// Loop over the table rows
-            rows.map(row => {
-                // Prepare the row for display
-                prepareRow(row)
-                return (
-                // Apply the row props
-                <tr {...row.getRowProps()}>
-                    {// Loop over the rows cells
-                    row.cells.map(cell => {
-                    // Apply the cell props
-                    return (
-                        <td {...cell.getCellProps()}>
-                        {// Render the cell contents
-                        cell.render('Cell')}
-                        </td>
-                    )
-                    })}
-                </tr>
-                )
-            })}
-            </tbody>
-        </Table>
-    );
+	return (
+		<div>
+			{/* Filter controls */}
+			{Object.keys(filters).length > 0 && (
+				<div className="mb-3">
+					<Button variant="outline-secondary" size="sm" onClick={clearFilters}>
+						Clear All Filters
+					</Button>
+				</div>
+			)}
 
+			<Table striped bordered hover responsive>
+				<thead className="table-dark">
+					{/* Header row */}
+					<tr>
+						{props.columns.map(column => (
+							<th 
+								key={column.id}
+								style={{ 
+									minWidth: typeof column.width === 'number' ? `${column.width}px` : '100px',
+									cursor: 'pointer',
+									userSelect: 'none'
+								}}
+								onClick={() => handleSort(column.id)}
+							>
+								<div>
+									{column.Header}
+									{getSortIndicator(column.id)}
+								</div>
+							</th>
+						))}
+					</tr>
+					{/* Filter row */}
+					<tr>
+						{props.columns.map(column => (
+							<th key={`filter-${column.id}`} className="bg-light">
+								<Form.Control
+									size="sm"
+									type="text"
+									placeholder={`Filter ${column.Header}...`}
+									value={filters[column.id] || ''}
+									onChange={(e) => handleFilterChange(column.id, e.target.value)}
+								/>
+							</th>
+						))}
+					</tr>
+				</thead>
+				<tbody>
+					{sortedData.length === 0 ? (
+						<tr>
+							<td colSpan={props.columns.length} className="text-center text-muted">
+								No data found
+							</td>
+						</tr>
+					) : (
+						sortedData.map((row, rowIndex) => (
+							<tr key={rowIndex}>
+								{props.columns.map(column => (
+									<td key={`${rowIndex}-${column.id}`}>
+										{getCellValue(row, column)}
+									</td>
+								))}
+							</tr>
+						))
+					)}
+				</tbody>
+			</Table>
+
+			{/* Table info */}
+			<div className="text-muted small">
+				Showing {sortedData.length} of {props.data.length} rows
+			</div>
+		</div>
+	);
 };

@@ -1,5 +1,5 @@
 import React, { useState, useEffect} from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import {  useNavigate } from 'react-router-dom';
 
 import { Container, Row, Col } from 'react-bootstrap';
 
@@ -15,7 +15,6 @@ import { getUserFromBrowser } from '../components/Authentication';
 export default function FeedbackRouter() {
 
 	// Get user information
-	const params = useParams();
 	const navigate = useNavigate();
 	const [message, setMessage] = useState('Loading data from server')
 	const [isLoading, setIsLoading] = useState(true);

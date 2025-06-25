@@ -1,6 +1,6 @@
-import { MYSQL_HOST, MYSQL_USER, MYSQL_PASSWORD, MYSQL_DATABASE } from './secret.js'; 
+import { MYSQL_HOST, MYSQL_USER, MYSQL_PASSWORD, MYSQL_DATABASE, MYSQL_DEBUG_QUERIES, DEBUG } from './secret.js'; 
 import { IfLevelSchema, LEVEL_DERIVED_PROPS_VERSION } from './../shared/IfLevelSchema';
-import mysql from 'promise-mysql';
+//import mysql from 'promise-mysql';
 
 import { sql01 } from './../../sql/sql01.js';
 import { sql02 } from './../../sql/sql02.js';
@@ -32,6 +32,7 @@ import { sql18 } from './../../sql/sql18.js';
 */
 
 // Create a new flow definition for MYSQL, as we are using a version providing Promises.
+/*
 declare type ConnectionT = {
 	then: Function,
 	query: Function,
@@ -41,28 +42,53 @@ declare type MysqlErrorT = {
 	code: string,
 	sqlMessage: string
 };
+*/
+import mysql from 'mysql2/promise';
 
-function get_mysql_connection(): ConnectionT {
-	
-	let conn = mysql.createConnection({
-		host: MYSQL_HOST,
-		user: MYSQL_USER,
-		password: MYSQL_PASSWORD,
-		database: MYSQL_DATABASE,
-		timezone: '+0000'
-	});
 
-	// @ts-ignore
-	return conn;
-}
+/**
+ * Execute a MYSQL query synchronously.
+ * 
+ * @param sql Query
+ * @param values Array of values to insert into the query for each ? placeholder.
+ * @returns Either an array of results, an empty array, or insertId if an insert, affectedRows if not a select.
+ */
+async function run_mysql_query(sql: string, values?: Array<any>): Promise<Array<any>| any> {
+	let connection: mysql.Connection | null = null;
+	let queryResults: Array<any> = [];
+	if(!sql || sql.length === 0) {
+		throw new Error('SQL query is empty');
+	}
 
-async function run_mysql_query(sql: string, values?: Array<any>) {
-	let results = await get_mysql_connection().then( (conn: ConnectionT): Array<Object> => {
-		let r = conn.query(sql, values);
-		conn.end();
-		return r;
-	});
-	return results;
+	try {
+		connection = await mysql.createConnection({
+			host: MYSQL_HOST,
+			user: MYSQL_USER,
+			password: MYSQL_PASSWORD,
+			database: MYSQL_DATABASE,
+		});
+
+		if(MYSQL_DEBUG_QUERIES) {
+			console.log('Running query: ' + sql);
+			if(values) console.log('With values: ' + JSON.stringify(values));
+		}
+
+		let [results, fields] = await connection.query(sql, values);
+		queryResults = results as Array<any>;
+		
+	} catch (error: any) {
+		if(DEBUG) {
+			console.error('Error in run_mysql_query: ' + error.code + ' ' + error.sqlMessage);
+		}
+		throw new Error('Error in run_mysql_query: ' + error.code + ' ' + error.sqlMessage);
+	} finally {
+		// If we have a connection, close it.
+		if(connection && connection.end) {
+			await connection.end();
+		}
+	}
+
+	return queryResults;
 }
 
 
@@ -124,7 +150,6 @@ async function update_mysql_database_schema(): Promise<any> {
 		await _update_fix_bad_page_data6();
 		await _update_update_version( sql06 );
 	}
-	console.log(1);
 	if(old_version < 7 ) await _update_update_version( sql07 );
 	if(old_version < 8 ) await _update_update_version( sql08 );
 	if(old_version < 9 ) await _update_update_version( sql09 );
@@ -149,9 +174,15 @@ async function update_mysql_database_schema(): Promise<any> {
 */
 async function _update_update_version(sqls: Array<string> ): Promise<void> {
 	for(let i=0; i<sqls.length; i++) {
-		await get_mysql_connection().then( (conn: ConnectionT) => {
-			return conn.query(sqls[i]);
-		});
+		try {
+			const result = await run_mysql_query(sqls[i]);
+			if(MYSQL_DEBUG_QUERIES) {
+				console.log('Update query ' + i + ' completed: ' + result);
+			}
+		} catch (e: any) {
+			console.error('Error in update query ' + i + ': ' + e.code + ' ' + e.sqlMessage);
+			throw new Error('Error in update query ' + i + ': ' + e.code + ' ' + e.sqlMessage);
+		}
 	}
 }
 
@@ -297,7 +328,7 @@ async function _update_fix_bad_page_data6(): Promise<any> {
 export {
 	to_utc, from_mysql_to_utc, from_utc_to_myql,
 	is_faculty,
-	get_mysql_connection, run_mysql_query,
+	run_mysql_query,
 	update_mysql_database_schema,
 	update_level_in_db,
 };

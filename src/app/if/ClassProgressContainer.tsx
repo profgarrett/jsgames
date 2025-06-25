@@ -1,7 +1,7 @@
 import React, { ReactElement, useEffect, useState } from 'react';
 
 import { Container, Row, Col, Tabs, Tab, Breadcrumb, Navbar  } from 'react-bootstrap';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 import { ClassProgressChart } from './ClassProgressChart';
 import  ClassProgressGrades from './ClassProgressGrades';
@@ -21,7 +21,6 @@ export default function ClassProgressContainer() {
 	const [isLoading, setIsLoading] = useState(true);
 	const [pageless_levels, setLevels] = useState<IfLevelPagelessSchema[]>([]);
 
-	const params = useParams();
 	const navigate = useNavigate();
 	const search = new URLSearchParams(window.location.search);
 	const url = window.location.href.split('/');

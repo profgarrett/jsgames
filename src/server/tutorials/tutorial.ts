@@ -1,5 +1,3 @@
-///const {  LinearGen, ShuffleGen } = require('./../Gens');
-//const { IfPageFormulaSchema, IfPagePredictFormulaSchema } = require( './../../shared/IfPageSchemas');
 import type { GenType } from '../Gens';
 import type { LevelSchemaFactoryType } from '../IfLevelSchemaFactory';
 
@@ -112,73 +110,6 @@ const gen_on_choices: GenType = {
 	]
 };
 
-/*
-const gen_on_harsons: GenType = {
-	gen_type: LinearGen,
-	pages: [
-		{	type: 'IfPageTextSchema',
-			description: `Some formulas are created with drag and drop blocks. 
-					Blocks click into place when you line up their "sticky" left side with another block.
-					<br/><br/>
-					Click on each block you want, drag it with your mouse to the 
-					dotted area below, and then let go. You should see a formula
-					being written in the table below as you work!
-					<br/><br/>
-					` + formatBigGif('/static/HarsonsTutorial.gif'),
-			instruction: 'Click the "Next page" to try it on the next screen.'
-		},
-		{	type: 'IfPageHarsonsSchema',
-			description: 'Drag the blocks into the white space below.',
-			instruction: 'Create the formula <code>={ref1_ref} + {n}</code>',
-			tests: [ 
-				{ 'a': 9, b: 123 },
-				{ 'a': 8, b: 48 },
-				{ 'a': 2, b: 91 }
-			],
-			template_values: {
-				'ref1': 'popCell()',
-				'n': '[20-40]'
-			},			
-			solution_f: '={ref1_ref} + {n}',
-			toolbox: [
-				{ 'has': 'values', args: ['{n}'] },
-				{ 'has': 'references', args: ['{ref1_ref}'] },
-				{ 'has': 'symbols', args: ['+'] }
-			],
-			code: 'tutorial'
-		},
-
-
-
-		{	type: 'IfPageHarsonsSchema',
-			description: `You will also sometimes need to input text or numbers.  You can tell that a field
-					is text (instead of a number) by the "quotes" around it.
-					<br/><br/>
-					Be sure to not leave any
-					extra blocks in the workspace, as that will prevent the formula from working.
-					Blocks can be deleted by dragging them back into the toolbox, or by right-clicking
-					and choosing the delete option.
-					<br/><br/>
-					` + formatGif('/static/blockly3.gif'),
-			instruction: 'Create the formula <code>=LEFT("Longname", A1)</code>',
-			tests: [ 
-				{ 'a': 1 },
-				{ 'a': 3 }, 
-				{ 'a': 5 },
-				{ 'a': 10 }
-			],
-			solution_f: '=LEFT("Longname", A1)',
-			toolbox: [
-				{ 'has': 'values', args: ['string?'] },
-				{ 'has': 'references', args: ['a1'] },
-				{ 'has': 'functions', args: ['left'] }
-			],
-			correct_required: false,
-			code: 'tutorial'
-		}
-	]
-};
-*/
 
 
 const gen_on_interface: GenType = {
@@ -193,41 +124,6 @@ const gen_on_interface: GenType = {
 		}
 	]
 };
-
-/*
-const gen_on_predict: GenType = {
-	gen_type: 'LinearGen',
-	pages: [
-		{	type: 'IfPagePredictFormulaSchema',
-			description: `Some formulas ask you to predict the right answer for 
-					each row <i>before</i> typing the formula. 
-					
-					<br/><br/>
-					To answer these questions, you will:
-					<ol>
-						<li>Drag each answer into the right row.</li>
-						<li>Type in the actual formula.</li>
-					<ol>
-					<br/><br/>
-					You can also double-click each answer to put it in the next available slot.`,
-			instruction: 'For the formula <code>=a1+b1</code>, drag each answer into the right row, and then type in the formula.',
-			column_titles: ['Year 1', 'Year 2' ],
-			tests: [
-				{ 'a': 100, 'b': 100, },
-				{ 'a': 200, 'b': 200, },
-				{ 'a': 400, 'b': 400, },
-			],
-			solution_f: '=a1+b1',
-			feedback: [
-				{ 'has': 'no_values' },
-				{ 'has': 'symbols', args: ['+'] },
-				{ 'has': 'references', args: ['a1', 'b1'] }
-			],
-			code: 'tutorial'
-		}
-	]
-};
-*/
 
 
 const gen_closing: GenType = {

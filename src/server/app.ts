@@ -10,10 +10,7 @@ import compression from 'compression';
 // @ts-ignore
 import cookieParser from 'cookie-parser';
 
-import Bugsnag from '@bugsnag/js';
-import BugsnagPluginExpress from '@bugsnag/plugin-express';
-
-let { BUGSNAG_API, DEBUG, VERSION } = require('./secret'); 
+import { BUGSNAG_API, DEBUG, VERSION } from './secret.js'; 
 
 // Add a more realistic delay when in debug, useful for making that loading status screens work properly.
 const DEBUG_DELAY = DEBUG ? 500 : 0;
@@ -53,28 +50,6 @@ function shouldCompress (req: Request, res: Response): boolean {
   // fallback to standard filter function
   return compression.filter(req, res);
 }
-
-
-// Load bugsnag if it is defined in secret.js.
-if(DEBUG === false && typeof BUGSNAG_API !== 'undefined' && BUGSNAG_API.length > 0) {
-	console.log('loading bugsnag');
-
-	Bugsnag.start({
-		apiKey: BUGSNAG_API,
-		plugins: [BugsnagPluginExpress],
-	})
-
-	var middleware = Bugsnag.getPlugin('express')
-
-	// This must be the first piece of middleware in the stack.
-	// It can only capture errors in downstream middleware
-	if( typeof middleware == 'undefined') throw new Error('Unable to load express middleware in app.js')
-	app.use(middleware.requestHandler)
-
-	/* all other middleware and application routes go here */
-
-}
-
 
 
 // Set parsing for application/x-www-form-urlencoded

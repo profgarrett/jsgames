@@ -5,9 +5,7 @@ import { IfPageSqlSchema } from '../../../shared/IfPageSchemas';
 
 import type { IStringIndexJsonObject } from '../../components/Misc';
 import Editor from '@monaco-editor/react';
-import { formatDialect, sqlite } from 'sql-formatter';
-import { debug } from 'webpack';
-
+import { format } from 'sql-formatter';
 
 
 
@@ -194,10 +192,10 @@ export default class SqlQuery extends React.Component<PropsType, StateType> {
 		if(typeof s === 'undefined') return '';
 
 		try {
-			formatted = formatDialect(s, {
-				dialect: sqlite,
-				tabWidth: 2,
-				keywordCase: 'upper'
+			formatted = format(s, { 
+				language: 'sqlite', 
+				keywordCase: 'upper', 
+				tabWidth: 2
 			});
 		} catch (e: any) {
 			// If any error parsing, then revert to the starting string.

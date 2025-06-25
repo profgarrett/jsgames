@@ -1,5 +1,5 @@
 import { fill_template } from './template';
-import { IfPageFormulaSchema, IfPageHarsonsSchema, IfPagePredictFormulaSchema, IfPageSqlSchema } from './../shared/IfPageSchemas';
+import { IfPageFormulaSchema, IfPageSqlSchema } from './../shared/IfPageSchemas';
 import { parseFeedback } from './parseFeedback';
 
 // Feedback types are used by the server to create custom feedback for page submissions.
@@ -19,7 +19,7 @@ function s(a: any): string {
 
 // Ensure that the given page uses all of the given references.
 // Returns either null or the missing references.
-const references = (page: IfPageFormulaSchema | IfPageHarsonsSchema, values: string[]): string|null => {
+const references = (page: IfPageFormulaSchema, values: string[]): string|null => {
 	let missing: any[] = [];
 	let value: string;
 	
@@ -48,7 +48,7 @@ const references = (page: IfPageFormulaSchema | IfPageHarsonsSchema, values: str
 // Ensure that the given page has the given values in it.
 // This is *not* case sensitive.
 // @TODO Add case sensitivity again.
-const values = (page: IfPageFormulaSchema | IfPageHarsonsSchema, values: number[]|string[]): string|null => {
+const values = (page: IfPageFormulaSchema, values: number[]|string[]): string|null => {
 	let missing: any[] = [];
 	let value: string;
 
@@ -75,7 +75,7 @@ const values = (page: IfPageFormulaSchema | IfPageHarsonsSchema, values: number[
 
 
 // Ensure that the given page has no numbers in it.  It should only use references and symbols.
-const no_values = (page: IfPageFormulaSchema | IfPageHarsonsSchema ): string|null => {
+const no_values = (page: IfPageFormulaSchema ): string|null => {
 	if(page.client_f === null || page.client_f === '' || page.client_f.length < 2 ) return null;
 
 	const feedback = parseFeedback(page.client_f);
@@ -91,7 +91,7 @@ const no_values = (page: IfPageFormulaSchema | IfPageHarsonsSchema ): string|nul
 
 
 // Ensure that the given page has given symbols.
-const symbols = (page: IfPageFormulaSchema | IfPageHarsonsSchema, symbols: string[] ): string|null => {
+const symbols = (page: IfPageFormulaSchema , symbols: string[] ): string|null => {
 	let missing: any[] = [];
 	let symbol: string;
 
@@ -117,7 +117,7 @@ const symbols = (page: IfPageFormulaSchema | IfPageHarsonsSchema, symbols: strin
 };
 
 // Ensure that the given page has none of the matching symbols.
-const no_symbols = (page: IfPageFormulaSchema | IfPageHarsonsSchema, symbols: string[] ): string|null => {
+const no_symbols = (page: IfPageFormulaSchema , symbols: string[] ): string|null => {
 	let missing: any[] = [];
 	let symbol: string;
 
@@ -145,7 +145,7 @@ const no_symbols = (page: IfPageFormulaSchema | IfPageHarsonsSchema, symbols: st
 
 
 // Ensure that the given page has the given functions in it.
-const functions =  (page: IfPageFormulaSchema | IfPageHarsonsSchema, values: string[] ): string|null => {
+const functions =  (page: IfPageFormulaSchema, values: string[] ): string|null => {
 	let missing: any[] = [];
 	let func = '';
  
@@ -187,7 +187,7 @@ const has = {
 
 // Return feedback for a completed answer.
 // Only used in the server-side, where we have the solution_rules populated.
-const get_feedback = (that: IfPageFormulaSchema | IfPageHarsonsSchema | IfPagePredictFormulaSchema): string[]|null => {
+const get_feedback = (that: IfPageFormulaSchema ): string[]|null => {
 	let response: any = '';
 	let responses: any[] = [];
 

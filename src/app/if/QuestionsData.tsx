@@ -114,7 +114,7 @@ function create_summary_level( levels: Array<IfLevelSchema>): any {
 	const all_formula_pages = !USE_FORMULA_PAGES_ONLY 
 			? all_pages 
 			: all_pages.filter( 
-				l => l.type === 'IfPageFormulaSchema' || l.type === 'IfPageHarsonsSchema' || l.type === 'IfPagePredictFormulaSchema' );
+				l => l.type === 'IfPageFormulaSchema' );
 
 	const page_map = turn_array_into_map(all_formula_pages, 
 		(p: IfPageBaseSchema): string => 
@@ -163,7 +163,7 @@ function create_summary_question( pages: Array<IfPageBaseSchema>): any {
 	summary_question.breaks_average = summary_question.breaks / summary_question.n;
 
 	// 
-	if(pages[0].type === 'IfPageFormulaSchema' || pages[0].type === 'IfPageHarsonsSchema' || pages[0].type === 'IfPagePredictFormulaSchema') {
+	if(pages[0].type === 'IfPageFormulaSchema' ) {
 		// $FlowFixMe
 		let p: IfPageFormulaSchema = pages[0]; // not 100% correct, but close enough for typing.
 
@@ -249,8 +249,8 @@ function create_summary_answer( page: IfPageBaseSchema, ): any {
 		});
 	}
 
-	// Harsons and/or formulas
-	if( page.type === 'IfPageHarsonsSchema' || page.type === 'IfPageFormulaSchema' || page.type === 'IfPagePredictFormulaSchema' ) {
+	// Formulas
+	if( page.type === 'IfPageFormulaSchema' ) {
 
 		const hints_parsed = page.history.filter( h => typeof h.hints_parsed !== 'undefined' ).length;
 		const hints_viewsolution = page.history.filter( h => typeof h.hints_viewsolution !== 'undefined' ).length;

@@ -161,17 +161,10 @@ const page_hint_button = (page: IfPageBaseSchema, isLoading: boolean, onclick: F
 	// Use a different color.
 	
 	// Hint for formula.
-	if(	page.type === 'IfPageFormulaSchema' || 
-		page.type === 'IfPagePredictFormulaSchema' || 
-		page.type ==='IfPageHarsonsSchema') {
+	if(	page.type === 'IfPageFormulaSchema' ) {
 		// No hints for test pages.
 		if (page.code !== 'tutorial') return <></>;
-		
-		// no hints for predict pages that haven't yet been solved.
-		if(page.type === 'IfPagePredictFormulaSchema' &&
-				!page.toIfPagePredictFormulaSchema().predictions_correct())
-				return <></>;
-		
+				
 		return <Button id='_render_page_hint_button' 
 			style={{ marginRight: '5px' }}
 			onClick = { (e) => { e.preventDefault(); onclick(); } }

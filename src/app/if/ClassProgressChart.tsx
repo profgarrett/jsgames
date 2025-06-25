@@ -1,16 +1,13 @@
 import React, { ReactElement } from 'react';
-import { Table, Modal, Button } from 'react-bootstrap';
+import { Button } from 'react-bootstrap';
 import { turn_array_into_map, turn_object_keys_into_array } from '../../shared/misc';
-import { ResponsiveBar, Bar } from '@nivo/bar'
+import {  Bar } from '@nivo/bar'
 import { LevelModal } from './LevelModal';
 import { IStringIndexJsonObject, prettyDateAsString } from '../components/Misc';
-import { IfLevelSchema, IfLevelPagelessSchema, GREEN_GRADE, PASSING_GRADE, DEFAULT_TUTORIAL_LEVEL_LIST } from '../../shared/IfLevelSchema';
-import { IfPageBaseSchema, IfPageFormulaSchema } from '../../shared/IfPageSchemas';
+import { IfLevelPagelessSchema, DEFAULT_TUTORIAL_LEVEL_LIST } from '../../shared/IfLevelSchema';
 import { StyledReactTable } from '../components/StyledReactTable';
 
-//import 'react-table/react-table.css';
 
-import { IfLevels } from '../../shared/IfLevelSchema';
 import { DEMO_MODE } from '../configuration';
 
 

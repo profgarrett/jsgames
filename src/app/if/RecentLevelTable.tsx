@@ -11,7 +11,6 @@ import { DEMO_MODE } from '../configuration';
 
 import { Link } from 'react-router-dom';
 
-
 type PropsType = {
 	levels: Array<IfLevelPagelessSchema>
 };

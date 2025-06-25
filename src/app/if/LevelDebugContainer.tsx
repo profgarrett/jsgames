@@ -14,9 +14,7 @@ export default function IfLevelScoreContainer() {
 	const [isLoading, setIsLoading] = useState(true);
 	const [level, setLevel] = useState<null|IfLevelSchema>(null);
 	const params = useParams();
-	const _id = params._id
-
-	const navigate = useNavigate();
+	const _id = params._id || '';
 
 	useEffect( () => {
 

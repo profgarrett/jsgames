@@ -5,7 +5,7 @@ import { Loading } from './Misc';
 
 import PasswordChange from './PasswordChange';
 import PasswordRequest from './PasswordRequest';
-import { useNavigate } from 'react-router';
+import { useNavigate } from 'react-router-dom';
 
 //import 'url-search-params-polyfill';
 

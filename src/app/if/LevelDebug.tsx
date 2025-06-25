@@ -5,8 +5,6 @@ import { fill_template } from '../../shared/template';
 import ExcelTable from './IfPlayComponents/ExcelTable';
 import Text from './IfPlayComponents/Text';
 import Choice from './IfPlayComponents/Choice';
-import Parsons from './IfPlayComponents/Parsons';
-import Harsons from './IfPlayComponents/Harsons';
 import NumberAnswer from './IfPlayComponents/NumberAnswer';
 import Slider from './IfPlayComponents/Slider';
 import ShortTextAnswer from './IfPlayComponents/ShortTextAnswer';
@@ -14,9 +12,9 @@ import LongTextAnswer from  './IfPlayComponents/LongTextAnswer';
 import SqlQuery from './IfPlayComponents/SqlQuery';
 
 import { IfLevelSchema } from '../../shared/IfLevelSchema';
-import { IfPageBaseSchema, IfPageFormulaSchema, IfPageHarsonsSchema, IfPageChoiceSchema } from '../../shared/IfPageSchemas';
+import { IfPageBaseSchema } from '../../shared/IfPageSchemas';
 
-import { Container, Card, Row, Col, Breadcrumb, Button  } from 'react-bootstrap';
+import {  Card, } from 'react-bootstrap';
 
 import { buildChart } from './charts/Charts';
 
@@ -72,9 +70,7 @@ class LevelDebugPage extends React.Component<ScorePropsType> {
 		// Figure out which control to use for the page.
 		let problem, solution;
 
-		if(page.type === 'IfPageFormulaSchema' 
-				|| page.type === 'IfPageHarsonsSchema' 
-				|| page.type === 'IfPagePredictFormulaSchema') {
+		if(page.type === 'IfPageFormulaSchema') {
 			// Show solution?
 
 			let page2 = page.toIfPageFormulaSchema();
@@ -103,12 +99,6 @@ class LevelDebugPage extends React.Component<ScorePropsType> {
 					<Text page={page.toIfPageTextSchema()} editable={false}  readonly={true} onChange={ () => {} }/>
 				</div>);
 
-		} else if(page.type === 'IfPageParsonsSchema') {
-			problem = (<div>
-					<Parsons page={page.toIfPageParsonsSchema()} readonly={true} editable={false} onChange={ () => {} } />
-				</div>);
-
-
 		} else if(page.type === 'IfPageSliderSchema') {
 			problem = (<div>
 					<Slider page={page.toIfPageSliderSchema()} readonly={false} editable={false}  onChange={ () => {} } />
@@ -118,7 +108,7 @@ class LevelDebugPage extends React.Component<ScorePropsType> {
 			problem = (<div><ShortTextAnswer page={page.toIfPageShortTextAnswerSchema()} readonly={true} editable={false} onChange={()=> {}} onSubmit={ ()=> {}} /></div>);
 
 		} else if(page.type === 'IfPageLongTextAnswerSchema') {
-			problem = (<div><LongTextAnswer page={page.toIfPageLongTextAnswerSchema()} readonly={true} editable={false} handleChange={()=> {}} handleSubmit={()=> {} }/></div>);
+			problem = (<div><LongTextAnswer page={page.toIfPageLongTextAnswerSchema()} onChange={()=>{}} onSubmit={()=>{}} readonly={true} editable={false} /></div>);
 
 		} else if(page.type === 'IfPageNumberAnswerSchema') {
 			problem = (<div><ShortTextAnswer page={page.toIfPageNumberAnswerSchema()} readonly={true} editable={false} onChange={()=> {}} onSubmit={()=> {} }/></div>);

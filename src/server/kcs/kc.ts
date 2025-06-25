@@ -231,15 +231,6 @@ const makeInertiaGenFromKC = (kc: InertiaKC): GenType => {
 
 	const tutorial_pages = kc.tutorial_pages;
 
-	// Convert to IfPagePredictSchema?
-	/*
-	if(true) {	
-		tutorial_pages
-			.filter( p => p.type === 'IfPageFormulaSchema' )
-			.forEach( p => p.type = 'IfPagePredictFormulaSchema' )
-	}
-	*/
-
 	// Setup initial params.
 	const pages = [	...tutorial_pages ];
 	const until_correct = typeof kc.until_correct !== 'number' ? INERTIA_QUESTIONS_CORRECT_GOAL_COUNT : kc.until_correct;

@@ -53,9 +53,7 @@ export default class LevelPlayFeedbackModal extends React.Component<IProps> {
 				// Complete but wrong
 				body.push(<div>Sorry, but that is not the correct answer.</div>);
 
-				if(	page.type === 'IfPageFormulaSchema' || 
-					page.type === 'IfPagePredictFormulaSchema' || 
-					page.type === 'IfPageHarsonsSchema' ) {
+				if(	page.type === 'IfPageFormulaSchema' ) {
 					// Formula page.
 					typedPage = page.toIfPageFormulaSchema();
 
@@ -79,9 +77,7 @@ export default class LevelPlayFeedbackModal extends React.Component<IProps> {
 				// Wrong, but not submitted.
 
 				// Formulas
-				if(	page.type === 'IfPageFormulaSchema' || 
-					page.type === 'IfPagePredictFormulaSchema' ||
-					page.type === 'IfPageHarsonsSchema' ) {
+				if(	page.type === 'IfPageFormulaSchema' ) {
 
 					// Formula page
 					typedPage = page.toIfPageFormulaSchema();

@@ -546,18 +546,11 @@ class IfPageBaseSchema extends Schema {
 		return this;
 	}
 
-	toIfPagePredictFormulaSchema(): IfPagePredictFormulaSchema { 
-		if( this.type !== 'IfPagePredictFormulaSchema') throw new Error('Invalid type convertion to IfPagePredictFormulaSchema');
-		// @ts-ignore
-		return this;
-	}
 
 	// Type coercion for ts not liking subtypes.
 	// Note: allow sub-typing of Harsons to Formula.
 	toIfPageFormulaSchema(): IfPageFormulaSchema {
-		if( this.type !== 'IfPageFormulaSchema' &&
-			this.type !== 'IfPageHarsonsSchema' &&
-			this.type !== 'IfPagePredictFormulaSchema' ) throw new Error('Invalid type convertion to IfPageFormulaSchema');
+		if( this.type !== 'IfPageFormulaSchema' ) throw new Error('Invalid type convertion to IfPageFormulaSchema');
 		// @ts-ignore
 		return this;
 	}
@@ -574,12 +567,6 @@ class IfPageBaseSchema extends Schema {
 		return this;
 	}
 	// Type coercion for ts not liking subtypes.
-	toIfPageParsonsSchema(): IfPageParsonsSchema {
-		if( this.type !== 'IfPageParsonsSchema') throw new Error('Invalid type convertion to IfPageParsonsSchema');
-		// @ts-ignore
-		return this;
-	}
-	// Type coercion for ts not liking subtypes.
 	toIfPageTextSchema(): IfPageTextSchema {
 		if( this.type !== 'IfPageTextSchema') throw new Error('Invalid type convertion to IfPageTextSchema');
 		// @ts-ignore 
@@ -589,12 +576,6 @@ class IfPageBaseSchema extends Schema {
 	toIfPageShortTextAnswerSchema(): IfPageShortTextAnswerSchema {
 		if( this.type !== 'IfPageShortTextAnswerSchema') throw new Error('Invalid type convertion to IfPageShortTextAnswerSchema');
 		// @ts-ignore 
-		return this;
-	}
-	// Type coercion for ts not liking subtypes.
-	toIfPageHarsonsSchema(): IfPageHarsonsSchema {
-		if( this.type !== 'IfPageHarsonsSchema') throw new Error('Invalid type convertion to IfPageHarsonsSchema');
-		// @ts-ignore
 		return this;
 	}
 	// Type coercion for ts not liking subtypes.
@@ -1605,155 +1586,6 @@ class IfPageFormulaSchema extends IfPageBaseSchema {
 
 
 
-/*
-	This page holds a single exercise for formula using a horizontal parsons (harsons).
-	It's the same as the FormulaSchema, with the addition of a toolbox.
-*/
-class IfPageHarsonsSchema extends IfPageFormulaSchema {
-	toolbox!: Array<string>;
-
-
-	// Apply json to this obj, signally no parent classes to do the setting for us.
-	constructor( json?: any) {
-		super(true);
-
-		if(json === true) return;
-		
-		this.initialize(json, this.schema);
-		if(this.solution_test_results.length === 0)	this.updateSolutionTestResults();
-		if(this.client_test_results.length === 0) this.updateClientTestResults();
-		this.updateCorrect();
-	}
-
-	get type(): string {
-		return 'IfPageHarsonsSchema';
-	}
-
-	// NOTE: This is copied from the parent class. Don't modify w/o updating parent.
-	get schema(): any {
-		let inherit = common_schema();
-
-		return {
-			...inherit,
-
-			// Used by this.parse to test client_f against solution_f.
-			tests: { type: 'Array', initialize: (a: any) => isDef(a) && isArray(a) ? revive_dates_recursively(a) : [] },
-			column_titles: { type: 'Array', initialize: (a: any[]) => isDef(a) && isArray(a) ? noObjectsInArray(a) : [] },
-			column_formats: { type: 'Array', initialize: (a: any[]) => isDef(a) && isArray(a) ? noObjectsInArray(a) : [] },
-			
-			client_f: { type: 'Javascript', initialize: (s: any) => isDef(s) ? s : null },
-			client_f_format: { type: 'String', initialize: (s: any) => isDef(s) ? s : '' },
-			client_test_results: { type: 'Array', initialize: (a: any) => isDef(a) && isArray(a) ? a : [] },
-
-			solution_f: { type: 'Javascript', initialize: (s: any) => isDef(s) ? s : null },
-			solution_test_results: { type: 'Array', initialize: (a: any) => isDef(a) && isArray(a) ? a : [] },
-
-			// Should we show students the results of the solutions, or the solutions themselves?
-			solution_f_visible: { type: 'Boolean', initialize: (s: any) => isDef(s) ? bool(s) : false },
-			solution_test_results_visible: { type: 'Boolean', initialize: (s: any) => isDef(s) ? s : false },
-
-			// What blockly blocks should be included?
-			// This should be an array of strings.
-			toolbox: { type: 'Array', initialize: (a: any) => isDef(a) && isArray(a) ? a : [] }
-		};
-	}
-}
-
-
-/**
-	Holds a sub-type of formula page.
-	Used to trigger different interface
-*/
-class IfPagePredictFormulaSchema extends IfPageFormulaSchema {
-	predicted_answers_used!: Array<number>;
-
-
-	// Apply json to this obj, signally no parent classes to do the setting for us.
-	constructor( json?: any) {
-		super(true);
-
-		if(json === true) return;
-
-		this.initialize(json, this.schema);
-		if(this.solution_test_results.length === 0)	this.updateSolutionTestResults();
-		if(this.client_test_results.length === 0) this.updateClientTestResults();
-		this.updateCorrect();
-	}
-
-	get type(): string {
-		return 'IfPagePredictFormulaSchema';
-	}
-	
-
-	// NOTE: This is copied from the parent class. Don't modify w/o updating parent.
-	get schema(): any {
-		let inherit = common_schema();
-
-		return {
-			...inherit,
-
-			// Used by this.parse to test client_f against solution_f.
-			tests: { type: 'Array', initialize: (a: any) => isDef(a) && isArray(a) ? revive_dates_recursively(a) : [] },
-			column_titles: { type: 'Array', initialize: (a: any[]) => isDef(a) && isArray(a) ? noObjectsInArray(a) : [] },
-			column_formats: { type: 'Array', initialize: (a: any[]) => isDef(a) && isArray(a) ? noObjectsInArray(a) : [] },
-			
-			client_f: { type: 'Javascript', initialize: (s: any) => isDef(s) ? s : null },
-			client_f_format: { type: 'String', initialize: (s: any) => isDef(s) ? s : '' },
-			client_test_results: { type: 'Array', initialize: (a: any) => isDef(a) && isArray(a) ? a : [] },
-
-			solution_f: { type: 'Javascript', initialize: (s: any) => isDef(s) ? s : null },
-			solution_test_results: { type: 'Array', initialize: (a: any) => isDef(a) && isArray(a) ? a : [] },
-
-			// Should we show students the results of the solutions, or the solutions themselves?
-			solution_f_visible: { type: 'Boolean', initialize: (s: any) => isDef(s) ? bool(s) : false },
-			solution_test_results_visible: { type: 'Boolean', initialize: (s: any) => isDef(s) ? s : false },
-
-			// What answers should be shown to the user to match?
-			// This should be an array of strings.
-			predicted_answers_used: { type: 'Array', initialize: (a: any) => isDef(a) && isArray(a) ? a : [] },
-		};
-	}
-	
-	// Loop through predictions to see if the correct items have been chosen.
-	predictions_correct(): boolean {
-		let answer_index = -1;
-		//if(this.predicted_answers_correct.length !== this.tests.length) 
-		//		throw new Error("Predicted answers not equal to tests in IfPagePredictFormulaSchema");
-
-		// If the lengths don't match, then we haven't initialized this by the client yet.
-		if(this.predicted_answers_used.length !== this.solution_test_results.length) return false;
-
-		// Go through the items to make sure that the numbers match the current row.
-		// Note that we can have duplicate items, in which case we don't care about the row index,
-		// 	but instead about the actual value for each row.
-		for(let i=0; i<this.predicted_answers_used.length; i++) {
-			answer_index = this.predicted_answers_used[i];
-
-			// Unset answer option.
-			if(answer_index === -1 ) return false; 
-
-			// See if the answer for the given index matches the answer
-			// for that row. 
-			if(	this.solution_test_results[answer_index].result !== 
-				this.solution_test_results[i].result) return false;
-		}
-		return true;
-	}
-
-
-	// Update fields. Note that super will generate a history object.
-	updateUserFields(json: any) {
-		// Look to see if we have a new client_f. If so, need to update the client parsed results.
-		// Empty out the old results. Will be reset by .updateCorrect().
-		if(typeof json.client_f !== 'undefined' && json.client_f !== this.client_f) {
-			this.client_test_results = [];
-		}
-
-		this._updateUserFields(json, 
-				['client_f', 'predicted_answers_used', 
-				'time_limit_expired', 'hints_parsed', 'hints_viewsolution']);
-	}
-}
 
 
 /**
@@ -2136,13 +1968,10 @@ function get_page_schema_as_class(json: any): IfPageBaseSchema {
 		'IfPageTextSchema': IfPageTextSchema,
 		'IfPageChoiceSchema': IfPageChoiceSchema,
 		'IfPageFormulaSchema': IfPageFormulaSchema,
-		'IfPageParsonsSchema': IfPageParsonsSchema,
-		'IfPageHarsonsSchema': IfPageHarsonsSchema,
 		'IfPageNumberAnswerSchema': IfPageNumberAnswerSchema,
 		'IfPageSliderSchema': IfPageSliderSchema,
 		'IfPageShortTextAnswerSchema': IfPageShortTextAnswerSchema,
 		'IfPageLongTextAnswerSchema': IfPageLongTextAnswerSchema,
-		'IfPagePredictFormulaSchema': IfPagePredictFormulaSchema,
 		'IfPageSqlSchema': IfPageSqlSchema,
 	}[type];
 
@@ -2196,7 +2025,7 @@ function build_answers_from_level( level: IfLevelSchema ): Array<IfPageAnswer> {
     let a: IfPageAnswer;
 
     level.pages.forEach( (p,i)=> {
-        if(p.type !== 'IfPageFormulaSchema' && p.type !== 'IfPageHarsonsSchema') return;
+        if(p.type !== 'IfPageFormulaSchema') return;
 
         a = new IfPageAnswer();
         a.level_code = level.code;
@@ -2244,9 +2073,6 @@ export {
 	IfPageTextSchema,
 	IfPageChoiceSchema,
 	IfPageFormulaSchema,
-	IfPageParsonsSchema,
-	IfPageHarsonsSchema,
-	IfPagePredictFormulaSchema,
 	IfPageNumberAnswerSchema,
 	IfPageSliderSchema,
 	IfPageShortTextAnswerSchema,

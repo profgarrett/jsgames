@@ -23,7 +23,6 @@ export default function LevelScoreContainer() {
 	const [level, setLevel] = useState<IfLevelSchema|null>(null);
 
 	const params = useParams();
-	const navigate = useNavigate();
 	const _id = params._id ? params._id : null;
 	
 	const url = DEBUG 

@@ -73,12 +73,9 @@ export default function QuestionsContainer() {
 		</Breadcrumb>
 		);
 
-	const default_type =  'IfPageSqlSchema';  // 'IfPageFormulaSchema|IfPageHarsonsSchema|IfPagePredictFormulaSchema';
+	const default_type =  'IfPageSqlSchema';  // 'IfPageFormulaSchema
 	const default_output = 'table';
 	const default_level = 'sql_selectfrom';
-
-		//'IfPageChoice'; 
-		//'IfPageNumberAnswerSchema'; //'IfPageFormulaSchema|IfPageHarsonsSchema'
 	const search = new URLSearchParams(window.location.search);
 	const filter_defaults = search.has('idsection') 
 		? { pagetypes: default_type, outputs: default_output, levels: default_level, sections: search.get('idsection') }

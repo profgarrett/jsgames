@@ -733,11 +733,6 @@ const ENTRY_TESTS = [
 			const parsed  = parseFeedback(client_f);
 			const values = parsed.filter( has => has.has === 'values' );
 
-			// Remove any default values (0 and abc) is this is harsens.
-			if(page.type === 'IfPageHarsonsSchema') {
-				values[0].args = values[0].args.filter( v => v !== 'abc' && v !== 0);
-			}
-
 			// If no values in client string, then we are ok!
 			if(values.length !== 1 ) return false;
 
@@ -771,9 +766,6 @@ const ENTRY_TESTS = [
 			{ triggered: false, solution_f: '="b"&"c"', client_f: '="c"', page: { type: '' }  },
 			{ triggered: false, solution_f: '="CDE"', client_f: '="CD"', page: { type: '' }  },
 			{ triggered: false, solution_f: '="CDE', client_f: '=CdE', page: { type: '' }  },
-			// Harsons.
-			{ triggered: false, solution_f: '=', client_f: '=0', page: { type: 'IfPageHarsonsSchema' }  },
-			{ triggered: false, solution_f: '=', client_f: '="abc"', page: { type: 'IfPageHarsonsSchema' }  },
 			// Text in parts.
 			{ triggered: false, solution_f: '="CDE"', client_f: '="C"&"DE"', page: { type: '' }  },
 
@@ -810,15 +802,9 @@ if(DEBUG) {
 function return_tagged_level(level: IfLevelSchema): IfLevelSchema {
 
 	level.pages = level.pages.map( (untyped_page: typeof IfPageBaseSchema) => {
-		const page = untyped_page.type === 'IfPageFormulaSchema' 
-			? untyped_page.toIfPageFormulaSchema()
-			: untyped_page.type === 'IfPageHarsonsSchema' 
-				? untyped_page.toIfPageHarsonsSchema()
-				: untyped_page;
+		const page = untyped_page.toIfPageFormulaSchema();
 
-		if( !(page.type === 'IfPageFormulaSchema' || page.type === 'IfPageHarsonsSchema' 
-				|| page.type === 'IfPagePredictFormulaSchema'
-				|| page.type === 'XXXXIfPageSqlSchema') ) 
+		if( !(page.type === 'IfPageFormulaSchema' ) ) 
 			return page; // don't do any tags on non-formula pages.
 
 		// Clean-up history.

@@ -218,9 +218,7 @@ async function _initialize_json(level: IfLevelSchema, original_json: any): Promi
 
 
 
-	} else if(json.type === 'IfPageFormulaSchema' 
-				|| json.type === 'IfPageHarsonsSchema'
-				|| json.type === 'IfPagePredictFormulaSchema') {
+	} else if(json.type === 'IfPageFormulaSchema') {
 					
 		// Setup the major important fields based off of type.
 		if(json.code === 'tutorial') {
@@ -238,15 +236,6 @@ async function _initialize_json(level: IfLevelSchema, original_json: any): Promi
 
 		} else {
 			throw new Error('Invalid formula code '+json.code+' in baseifgame');
-		}
-
-		// Look to see if no feedback/toolbox has been defined.  If so, then automatically
-		// parse out the elements and create the toolbox.
-		if( json.type === 'IfPageHarsonsSchema' 
-				&& typeof json.toolbox === 'undefined') {
-			const feedback = parseFeedback( json.solution_f );
-			json.feedback = feedback;
-			json.toolbox = feedback;
 		}
 
 		// Pull the setting from level to see if we should allow skipping a tutorial page.
@@ -396,65 +385,9 @@ const IfLevelSchemaFactory = {
 		// Check result of gen function.
 		if(new_page_json !== null) {
 			// Since a non-null result was given, we should add a new page.
-			// If the level is requesting a seed value for tutorials based on username, 
-			// then go ahead and change type for half of all users.
-			if(level.harsons_randomly_on_username 
-					&& new_page_json.type === 'IfPageFormulaSchema' 
-					&& random_boolean_from_string(level.username) ) {
-
-				new_page_json.type = 'IfPageHarsonsSchema';
-			}
-
-			// If we're the admin (garrettn), then switch to Harsons
-			if(level.harsons_randomly_on_username 
-					&& new_page_json.type === 'IfPageFormulaSchema' 
-					&& level.username === 'garrettn') {
-				new_page_json.type = 'IfPageHarsonsSchema';
-			}
-
-
-			if(level.predict_randomly_on_username 
-					&& new_page_json.type === 'IfPageFormulaSchema' 
-					&& random_boolean_from_string(level.username) ) {
-
-				new_page_json.type = 'IfPagePredictFormulaSchema';
-			}
-
-			// If we're the admin (garrettn), then switch to Predict to better test.
-			if(level.predict_randomly_on_username 
-					&& new_page_json.type === 'IfPageFormulaSchema' 
-					&& level.username === 'garrettn') {
-				new_page_json.type = 'IfPagePredictFormulaSchema';
-
-			}
-
-			if(new_page_json.type === 'IfPagePredictFormulaSchema') {
-				// Randomize the tests. Prevents people from sharing row/by/row solutions.
-				DataFactory.randomizeListInPlace(new_page_json.tests);
-			}
-				
-
-
-			// Harsons uses toolboxes, but ifPageFormulaSchemas do not.  Since some types automatically change
-			// back and forth from Formula pages to Harsons, we need to delete the toolbox if it's not
-			// going to be transformed.
-			if(new_page_json.type === 'IfPageFormulaSchema' && typeof new_page_json.toolbox !== 'undefined') {
-				// DO NOT DELETE HERE!  
-				// @TODO Fix this
-				// SHould be enabled, but causes a problem because we have a single copy of each template.  Deleting here
-				// screws up the next person.
-				/*
-				delete new_page_json.toolbox;
-				// Delete any versions of the toolbox as well.
-				if(typeof new_page_json.versions !== 'undefined') {
-					new_page_json.versions.forEach( v => delete v.toolbox );
-				}
-				*/
-			}
 
 			// setup new page 
 			const initialized_json = await _initialize_json(level, new_page_json);
-
 
 			let new_page = get_page_schema_as_class(initialized_json);
 

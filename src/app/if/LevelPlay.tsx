@@ -1,7 +1,6 @@
 import React, { ReactElement } from 'react';
 
 import { Button, Table, Card, Popover, OverlayTrigger, Modal } from 'react-bootstrap';
-import { CSSTransition } from 'react-transition-group';
 
 import CSS from 'csstype';
 
@@ -55,7 +54,9 @@ type StateType = {
 	// moving to a new page.
 	lastPageI_displayed_at_time: any,
 	// handle, used to track js event.
-	handle: any
+	handle: any,
+	// Track transition state for page changes
+	isTransitioning: boolean
 };
 
 
@@ -70,6 +71,7 @@ export default class IfLevelPlay extends React.Component<PropsType, StateType> {
 			lastPageI: 0,
 			lastPageI_displayed_at_time: new Date(),
 			handle: setInterval( this._on_tick, 500),
+			isTransitioning: false,
 		};
 	}
 
@@ -139,7 +141,7 @@ export default class IfLevelPlay extends React.Component<PropsType, StateType> {
 		} else {
 			
 			// Handle keypresses for advancing tutorial window.
-			if(	page.type === 'IfPageFormulaSchema' || page.type === 'IfPagePredictFormulaSchema')  {
+			if(	page.type === 'IfPageFormulaSchema')  {
 				// Normally, enter will submit the form.  However, if a validate option is 
 				// present, and the answer is wrong, we should instead validate.
 				//
@@ -181,9 +183,14 @@ export default class IfLevelPlay extends React.Component<PropsType, StateType> {
 		// If the i page has changed, then fire a scroll back to top.
 		if( state.lastPageI !== pageI) {
 			//window.scrollTo(1,1);
-			return { ...state, lastPageI: pageI, lastPageI_displayed_at_time: new Date() };
+			return { 
+				...state, 
+				lastPageI: pageI, 
+				lastPageI_displayed_at_time: new Date(),
+				isTransitioning: true
+			};
 		} else {
-			return state;
+			return { ...state, isTransitioning: false };
 		}
 	}
 
@@ -227,12 +234,16 @@ export default class IfLevelPlay extends React.Component<PropsType, StateType> {
 		return (
 			<div onCopy={onCopyHandler} draggable={false} onDragStart={onCopyHandler}>
 				<div key={'iflevelplay'+this.props.selected_page_index} id='iflevelplay' style={{position: 'relative', opacity: this.props.show_feedback ? 0.5 : 1 }}>
-					<CSSTransition 
-							timeout={20}
-							classNames='levelplay-transition'
-							in={true}
-							>
-						<form key={'formkey' + this.state.lastPageI} name='c' onSubmit={this.handleNext}>
+					<div 
+						key={'formkey' + this.state.lastPageI}
+						className={`levelplay-container ${this.state.isTransitioning ? 'levelplay-enter' : 'levelplay-enter-active'}`}
+						style={{
+							transition: 'opacity 20ms ease-in-out, transform 20ms ease-in-out',
+							opacity: this.state.isTransitioning ? 0.8 : 1,
+							transform: this.state.isTransitioning ? 'translateY(-2px)' : 'translateY(0)'
+						}}
+					>
+						<form name='c' onSubmit={this.handleNext}>
 							{ page_lead }
 							{ chart }
 							{ exercise_panel }
@@ -266,7 +277,7 @@ export default class IfLevelPlay extends React.Component<PropsType, StateType> {
 									>Exit</Button>
 							</div>
 						</form>
-					</CSSTransition>
+					</div>
 				</div>
 				{ feedback_modal }
 			</div>

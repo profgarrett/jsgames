@@ -1,7 +1,7 @@
 import React, { ReactElement } from 'react';
 import { Table, FormControl, Button, Tabs, Tab, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import { HtmlSpan, BlueSpan } from './../../components/Misc';
-import { IfPageFormulaSchema, IfPagePredictFormulaSchema } from './../../../shared/IfPageSchemas';
+import { IfPageFormulaSchema } from './../../../shared/IfPageSchemas';
 import { headerStyle, tdStyle, tdFirstColumnStyle, 
 		clean, 
 		addDangerColor, addInfoColor, addCorrectColor, addCSSProperty} from './ExcelTableFormatting';
@@ -11,7 +11,7 @@ import CSS from 'csstype';
 
 
 type PropsType = {
-	page: IfPageFormulaSchema | IfPagePredictFormulaSchema,
+	page: IfPageFormulaSchema ,
 	editable: boolean, // 
 	readonly: boolean,
 	onChange: (json: IStringIndexJsonObject) => void;
@@ -59,8 +59,7 @@ export default class FormulaExcelTable extends React.Component<PropsType> {
 				&& !this.props.page.correct_required 
 				&& !this.props.page.correct  
 				&& 
-					(this.props.page.type === 'IfPageFormulaSchema'
-					|| this.props.page.type === 'IfPagePredictFormulaSchema')) {
+					(this.props.page.type === 'IfPageFormulaSchema')) {
 			event.preventDefault(); // cancel any keypress.
 			this.props.onValidate();
 		}

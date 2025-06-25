@@ -1,16 +1,10 @@
 import React, { ReactElement, useState } from 'react';
-import { Collapse, Accordion, Card, Popover, Table, Modal, Button } from 'react-bootstrap';
+import { Collapse, Card, Table, Button } from 'react-bootstrap';
 import { turn_array_into_map, turn_object_keys_into_array, turn_object_values_into_array } from '../../shared/misc';
-import { HtmlDiv } from '../components/Misc';
 import { Pie } from '@nivo/pie'
 import { Line } from '@nivo/line'
-import { prettyDateAsString } from '../components/Misc';
-import { IfLevelSchema, GREEN_GRADE, PASSING_GRADE, DEFAULT_TUTORIAL_LEVEL_LIST } from '../../shared/IfLevelSchema';
-import { IfPageAnswer, IfPageBaseSchema, IfPageFormulaSchema } from '../../shared/IfPageSchemas';
-import { fill_template } from '../../shared/template';
+import { IfPageAnswer } from '../../shared/IfPageSchemas';
 import { LevelModal } from './LevelModal';
-
-//import 'react-table/react-table.css';
 
 import { IfLevels } from '../../shared/IfLevelSchema';
 import { DEMO_MODE } from '../configuration';

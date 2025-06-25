@@ -1,17 +1,12 @@
 import React, { ReactElement } from 'react';
-import { Table, Modal, Tooltip, OverlayTrigger, Container, Card, Row, Col, Breadcrumb, Button  } from 'react-bootstrap';
-
+import { Modal, Card, Button  } from 'react-bootstrap';
 
 import { HtmlDiv } from '../components/Misc';
 import { fill_template } from '../../shared/template';
 
-
 import ExcelTable from './IfPlayComponents/ExcelTable';
 import Text from './IfPlayComponents/Text';
 import Choice from './IfPlayComponents/Choice';
-import Parsons from './IfPlayComponents/Parsons';
-import Harsons from './IfPlayComponents/Harsons';
-import NumberAnswer from './IfPlayComponents/NumberAnswer';
 import Slider from './IfPlayComponents/Slider';
 import ShortTextAnswer from './IfPlayComponents/ShortTextAnswer';
 import LongTextAnswer  from './IfPlayComponents/LongTextAnswer';
@@ -19,11 +14,8 @@ import SqlQuery from './IfPlayComponents/SqlQuery';
 
 
 import { IfLevelSchema } from '../../shared/IfLevelSchema';
-import { IfPageBaseSchema, IfPageFormulaSchema, IfPageHarsonsSchema, IfPageChoiceSchema } from '../../shared/IfPageSchemas';
 import type { IStringIndexJsonObject } from '../components/Misc';
 
-
-import { buildChart } from './charts/Charts';
 
 
 type PreviewLevelPropsType = {
@@ -45,9 +37,7 @@ const PreviewPage = (props: any ): ReactElement => {
 	// Figure out which control to use for the page.
 	let problem, solution;
 
-	if(page.type === 'IfPageFormulaSchema' 
-		|| page.type === 'IfPageHarsonsSchema' 
-		|| page.type === 'IfPagePredictFormulaSchema') {
+	if(page.type === 'IfPageFormulaSchema' ) {
 
 		let page2 = page.toIfPageFormulaSchema();
 
@@ -62,9 +52,6 @@ const PreviewPage = (props: any ): ReactElement => {
 
 	} else if(page.type === 'IfPageTextSchema') {
 		problem = <Text page={page.toIfPageTextSchema()} readonly={true} editable={false}  onChange={ noop }/>;
-
-	} else if(page.type === 'IfPageParsonsSchema') {
-		problem = <Parsons page={page.toIfPageParsonsSchema()} readonly={true} editable={false} onChange={ noop } />;
 
 	} else if(page.type === 'IfPageSliderSchema') {
 		problem = <Slider page={page.toIfPageSliderSchema()} readonly={false} editable={false}  onChange={ noop } />;

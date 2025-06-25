@@ -8,7 +8,6 @@ import { fill_template } from '../../shared/template';
 import ExcelTable from './IfPlayComponents/ExcelTable';
 import Text from './IfPlayComponents/Text';
 import Choice from './IfPlayComponents/Choice';
-import Parsons from './IfPlayComponents/Parsons';
 import NumberAnswer from './IfPlayComponents/NumberAnswer';
 import Slider from './IfPlayComponents/Slider';
 import ShortTextAnswer from './IfPlayComponents/ShortTextAnswer';
@@ -84,16 +83,11 @@ export class LevelScorePage extends React.Component<ScorePropsType, ScoreStateTy
 		let problem, solution;
 
 
-		if(page_at.type === 'IfPageFormulaSchema' || page_at.type === 'IfPageHarsonsSchema' || page_at.type === 'IfPagePredictFormulaSchema') {
+		if(page_at.type === 'IfPageFormulaSchema') {
 			// Show solution?
 
-			if(page_at.type === 'IfPageFormulaSchema' || page_at.type === 'IfPagePredictFormulaSchema') {
-				page_at = page_at.toIfPageFormulaSchema();
-				page_final = page_final.toIfPageFormulaSchema();
-			} else {
-				page_at = page_at.toIfPageHarsonsSchema();
-				page_final = page_final.toIfPageHarsonsSchema();
-			}
+			page_at = page_at.toIfPageFormulaSchema();
+			page_final = page_final.toIfPageFormulaSchema();
 
 			solution = page_at.solution_f && page_at.solution_f.length > 0 
 					? <div>Solution: <code>{ page_at.solution_f}</code></div>
@@ -123,9 +117,6 @@ export class LevelScorePage extends React.Component<ScorePropsType, ScoreStateTy
 
 		} else if(page_at.type === 'IfPageTextSchema') {
 			problem = (<div><Text page={page_at.toIfPageTextSchema()} onChange={ noop }  readonly={true} editable={false} /></div>);
-
-		} else if(page_at.type === 'IfPageParsonsSchema') {
-			problem = (<div><Parsons page={page_at.toIfPageParsonsSchema()} onChange={noop } readonly={true} editable={false} show_solution={page_final.correct === false} /></div>);
 
 		} else if(page_at.type === 'IfPageLongTextAnswerSchema') {
 			problem = (<div><LongTextAnswer page={page_at.toIfPageLongTextAnswerSchema()} readonly={true} editable={false} show_solution={page_final.correct === false} onChange={noop} onSubmit={noop }/></div>);

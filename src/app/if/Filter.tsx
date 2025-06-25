@@ -62,11 +62,9 @@ export default class Filter extends React.Component<PropsType, ContainerStateTyp
 				{ value: 'All', label:'All' },
 				{ value: 'IfGameNumberAnswerSchema', label:'Numbers' },
 				{ value: 'IfPageChoiceSchema',  label:'Choice' },
-				{ value: 'IfPageHarsonsSchema', label:'Harsons' },
 				{ value: 'IfPageFormulaSchema', label:'Formula' },
 				{ value: 'IfPageSqlSchema', label:'SQL' },
-				{ value: 'IfPageFormulaSchema|IfPageHarsonsSchema|IfPagePredictFormulaSchema', label:'Harsons/Predict/Formula' },
-				{ value: 'IfPageParsonsSchema', label:'Parsons' }
+				{ value: 'IfPageFormulaSchema', label:'Formula' },
 				];
 		}
 

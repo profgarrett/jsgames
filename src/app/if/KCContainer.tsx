@@ -1,7 +1,6 @@
 import React, { ReactElement, useEffect, useState } from 'react';
 
 import { Container, Breadcrumb, Row, Col, Button } from 'react-bootstrap';
-import { useParams, useNavigate } from 'react-router-dom';
 
 import { IfPageAnswer } from '../../shared/IfPageSchemas';
 import { ClassProgressChart } from './ClassProgressChart';
@@ -23,11 +22,6 @@ export default function KCContainer() {
 
 	const [modalLevel, setModalLevel] = useState<IfLevelSchema|null>(null);
 	const [isModalLoading, setIsModalLoading] = useState(false);
-
-	const params = useParams();
-	const navigate = useNavigate();
-	const _id = params._id ? params._id : null;
-	
 
 	const onReady = (filter: any) => {
 		setIsLoading(false);

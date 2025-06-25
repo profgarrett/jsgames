@@ -1,5 +1,5 @@
 import React, { ReactElement } from 'react';
-import { IfPageBaseSchema, IfPageFormulaSchema, IfPageHarsonsSchema, IfPageChoiceSchema, IfPageNumberAnswerSchema } from './../../shared/IfPageSchemas';
+import { IfPageBaseSchema} from './../../shared/IfPageSchemas';
 
 import { IfLevelSchema } from './../../shared/IfLevelSchema';
 import { formatDate, padL } from './../../shared/misc';

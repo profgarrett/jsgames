@@ -8,8 +8,6 @@ import {  IStringIndexJsonObject, HtmlDiv, htmlDiv,
 import ExcelTable from './IfPlayComponents/ExcelTable';
 import Text from './IfPlayComponents/Text';
 import Choice from './IfPlayComponents/Choice';
-import Parsons from './IfPlayComponents/Parsons';
-import Harsons from './IfPlayComponents/Harsons';
 import NumberAnswer from './IfPlayComponents/NumberAnswer';
 import Slider from './IfPlayComponents/Slider';
 import ShortTextAnswer from './IfPlayComponents/ShortTextAnswer';
@@ -123,31 +121,11 @@ export function render_exercise_panel(
 					onValidate={handleValidate}
 					onEnter={handleEnter} />;
 
-	} else if(page.type === 'IfPagePredictFormulaSchema') {
-		problem = <ExcelTable page={page.toIfPagePredictFormulaSchema()} 
-					readonly={ isLoading }
-					editable={ true } 
-					onChange={handleChange}
-					onValidate={handleValidate}
-					onEnter={handleEnter} />;
-
-	} else if(page.type === 'IfPageParsonsSchema') {
-		problem = <Parsons page={page.toIfPageParsonsSchema()} 
-					readonly={ isLoading }
-					editable={ true } 
-					onChange={handleChange} />;
-
 	} else if(page.type === 'IfPageChoiceSchema') {
 		problem = <Choice page={page.toIfPageChoiceSchema()} 
 					readonly={ isLoading }
 					editable={ true } 
 					show_solution = { false }
-					onChange={handleChange} />;
-
-	} else if(page.type === 'IfPageHarsonsSchema') {
-		problem = <Harsons page={page.toIfPageHarsonsSchema()} 
-					readonly={ isLoading }
-					editable={ true } 
 					onChange={handleChange} />;
 
 	} else if(page.type === 'IfPageTextSchema') {

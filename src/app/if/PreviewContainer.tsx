@@ -1,13 +1,9 @@
 import React, { useState, useEffect} from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { Container, Button, Row, Col, Card, Alert, Navbar } from 'react-bootstrap';
 
 import { Message, Loading } from '../components/Misc';
 import { getUserFromBrowser } from '../components/Authentication';
-
-//import { IfLevelSchema } from '../../shared/IfLevelSchema';
-import { Link } from 'react-router-dom';
-
 
 import CacheBuster from '../components/CacheBuster';
 import PreviewList from './PreviewList';

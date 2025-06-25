@@ -8,12 +8,10 @@ import RecentAnswerTable from './RecentAnswerTable';
 import { Message, Loading, IStringIndexJsonObject } from '../components/Misc';
 import Filter from './Filter';
 
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 
 import { IfLevelSchema } from '../../shared/IfLevelSchema';
 import ForceLogin from '../components/ForceLogin';
-
-
 
 
 export default function IfRecentContainer(): ReactElement {
@@ -23,7 +21,6 @@ export default function IfRecentContainer(): ReactElement {
 	const [ levels, setLevels ] = useState([]);
 
 	const params = useParams();
-	const navigate = useNavigate();
 	const _idsection = params._idsection ? params._idsection : null;
 
 	const onReady = (filter: any) => {

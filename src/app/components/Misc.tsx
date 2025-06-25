@@ -4,7 +4,11 @@ import { Row, Col, Alert } from 'react-bootstrap';
 import { ClipLoader, ScaleLoader } from 'react-spinners';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faHandPointRight, faCheck, faCheckSquare, faPencilAlt, faMinusCircle } from '@fortawesome/free-solid-svg-icons';
+import { faHandPointRight } from '@fortawesome/free-solid-svg-icons/faHandPointRight';
+import { faCheck } from '@fortawesome/free-solid-svg-icons/faCheck';
+import { faCheckSquare } from '@fortawesome/free-solid-svg-icons/faCheckSquare';
+import { faPencilAlt } from '@fortawesome/free-solid-svg-icons/faPencilAlt';
+import { faMinusCircle } from '@fortawesome/free-solid-svg-icons/faMinusCircle';
 
 // REMOVE
 //  Old browser compatability.

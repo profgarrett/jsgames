@@ -4,7 +4,7 @@ import { get_page_schema_as_class, IfPageBaseSchema } from './IfPageSchemas';
 /*
 IfPageTextSchema, IfPageChoiceSchema, 
 		IfPageFormulaSchema, IfPageSliderSchema,
-		IfPageParsonsSchema, IfPageHarsonsSchema,
+		,
 IfPageNumberAnswerSchema, IfPageShortTextAnswerSchema 
 */
 

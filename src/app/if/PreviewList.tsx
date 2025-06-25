@@ -1,13 +1,6 @@
 import { useState, ReactElement } from 'react';
 import { IfLevels, IfLevelSchema, DEFAULT_TUTORIAL_LEVEL_LIST, GREEN_GRADE, PASSING_GRADE } from '../../shared/IfLevelSchema';
 import { Table, Modal, Tooltip, OverlayTrigger, Button } from 'react-bootstrap';
-import { getUserFromBrowser } from '../components/Authentication';
-
-//import type { IfLevelType } from './../../app/if/IfTypes';
-import { Link } from 'react-router-dom';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faThumbsUp, faMinus, faCheck } from '@fortawesome/free-solid-svg-icons';
-import { PrettyDate } from '../components/Misc';
 import CSS from 'csstype';
 
 

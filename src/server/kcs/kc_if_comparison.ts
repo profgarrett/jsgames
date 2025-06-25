@@ -28,7 +28,7 @@ const pig_data = {
 
 
 const tutorial = {
-	type: 'IfPageFormulaSchema', // IfPagePredictFormulaSchema' OR 'IfPageFormulaSchema',
+	type: 'IfPageFormulaSchema', 
 	code: 'tutorial',
     client_f_format: 'boolean',
 }
