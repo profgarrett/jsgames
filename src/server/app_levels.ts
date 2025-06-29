@@ -299,23 +299,25 @@ router.get('/level/:id/:tagged?',
 });
 
 
-/** Delete
+/** 
 	This end-point is only used for testing purposes.  Hard-coded for test user and *all*  test pages.
 */
-router.delete('/level/:id', 
+router.get('/clear_all_profgarrett_test_pages/', 
 	nocache, user_require_logged_in,
 	async (req: Request, res: Response, next: NextFunction): Promise<any> => {
 	try {
-		const sql = 'DELETE FROM iflevels WHERE username = "test" '; // AND _id = ?
+		const sql = 'DELETE FROM iflevels WHERE username = "test" OR username = "profgarrett+test@gmail.com"'; // AND _id = ?
 		const username = user_get_username_or_emptystring(req, res);
 
-		if(username !== 'test') {
+		if(username !== 'profgarrett+test@gmail.com' && username !== 'garrettn') {
 			return res.sendStatus(401); // unauthorized.
 		}
 
-		let delete_results = await run_mysql_query(sql); //, [_id]);
+		let delete_results = await run_mysql_query(sql); 
 
-		res.json({success: (delete_results.affectedRows >= 1)});
+		res.json({
+			message: `Deleted ${delete_results.affectedRows} levels for test user.`
+		});
 
 	} catch (e) {
 		log_error(e);

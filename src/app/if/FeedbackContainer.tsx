@@ -112,7 +112,9 @@ export default function FeedbackContainer() {
 	// Fetch levels
 	const updateLevels = (sectionid: number, feedbackType: string, startTimeout: Function) => { 
 
-		fetch('/api/reports/recent?pageless=0&updated=10&code='+feedbackType + '&idsection='+sectionid, {
+		fetch('/api/reports/recent?pageless=0&updated=10&code='+
+					encodeURIComponent(feedbackType) + 
+					'&idsection=' + encodeURIComponent(sectionid), {
 				credentials: 'include'
 			})
 			.then( response => response.json() )
@@ -135,7 +137,7 @@ export default function FeedbackContainer() {
 		}, REFRESH_TIME_IN_MS);
 	};
 		 
-	const response_url = 'https://excel.fun/ifgame/feedback/create/' + feedbackType;
+	const response_url = 'https://excel.fun/ifgame/feedback/create/' + encodeURIComponent(feedbackType);
 
 	const qr = feedbackType == '' 
 		? null 

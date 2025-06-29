@@ -88,7 +88,7 @@ export default function MyProgressContainer() {
 
 	// Fetch grades
 	useEffect(() => {
-		fetch('/api/reports/grades?username=' + user.username, {
+		fetch('/api/reports/grades?username=' + encodeURIComponent(user.username), {
 				method: 'get',
 				credentials: 'include',
 				headers: {

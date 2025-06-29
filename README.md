@@ -22,7 +22,6 @@ The garrettn role is a super administration by default.
 
 ```javascript
 export const ADMIN_USERNAME = '';
-export const USER_CREATION_SECRET = '';
 export const JWT_AUTH_SECRET = '';
 export const MYSQL_USER = '';
 export const MYSQL_PASSWORD = '';
@@ -41,6 +40,31 @@ export const EMAIL_PORT = 465;
 
 export const ADMIN_OVER_PASSWORD = '';
 ```
+You also need to setup a secret.distribution.js file in the root folder. This is used by the deploy script (which you'll need to adjust to your own deployment). It should look like this:
+
+```javascript
+// ... same as above
+const ADMIN_OVER_PASSWORD = ''; 
+
+module.exports = {
+    ADMIN_USERNAME,
+    USER_CREATION_SECRET,
+    JWT_AUTH_SECRET,
+    MYSQL_USER,
+    MYSQL_PASSWORD,
+    MYSQL_HOST,
+    MYSQL_DATABASE,
+    BUGSNAG_API,
+    DEBUG,
+    VERSION,
+    GOOGLEID,
+    EMAIL_ADDRESS,
+    EMAIL_PASSWORD,
+    EMAIL_HOST,
+    EMAIL_PORT,
+    EMAIL_REPLYTO,
+    ADMIN_OVER_PASSWORD
+};
 
 You can modify other settings in /configuration.js
 
@@ -57,24 +81,33 @@ Verify:
 - Server (db) works:  http://localhost:9000/api/sql
 - Client (react) works: http://localhost:8080
 
-Next, run a deploy. This is required for any static files, even when in development mode. This will create a build folder in the root directory.  Note, you probably need to chmod +x deploy.sh to run the script. You'll to update the specifics of the deploy script to your own server.
+Next, run a build. This is required for any static files, even when in development mode. This will create a build folder in the root directory.  Note, you probably need to chmod +x deploy.sh to run the script. You'll to update the specifics of the deploy script to your own server.
 
 ```bash
-./deploy.sh
+./build.sh
 ```
 
-Tun tests. Replace x with the code used to create users on your system. Note that this requires the test tutorial file to be uploaded.
-```
-http://hostname/ifgame/test/?USER_CREATION_SECRET=x
-```
+Add a section with 'anonymous' as its code. New users w/o a username will be added to this group.
 
-After installing, add a section with 'anonymous' as its code. New users w/o a username will
-be added to this group.
 
 
 ## Deploying
 
 The react application is contained the build folder.  The backend is handled by the node application in the server/app.js file.  
+
+Setup ssh to enable auto login to the server.
+
+```bash
+ssh-keygen -t rsa -b 4096 -C "your_email@example.com"
+ssh-copy-id username@remote_host
+```
+
+Log in  and install the node modules.  This is because the node modules are not included in the git repository.  You can do this by running the following command in the root directory after copying the package.json file to the server.
+
+```bash
+npm install
+npm update
+```
 
 I find it easiest to create an alias to the build folder and the app.js file.
 ```
@@ -82,7 +115,7 @@ ln -s jsgames/build/public/ public
 ln -s jsgames/build/server/app.js app.js
 ```
 
-If you're having trouble getting npm packages to update, npm-install-missing is very useful.
+See more notes in Dreamhost below.
 
 ### Dreamhost
 
@@ -103,11 +136,14 @@ Check node by running *which node*.
 
 Install pm2 (https://pm2.keymetrics.io/docs/usage/quick-start/)
 Add the app file to auto-run.
-You can also get the status by -list or -status.
+You can also get the status by -list or -status. For debuging, use pm2 logs jsgames
+
 
 ```bash
-pm2 start app.js --name jsgames --watch
+pm2 start app.js --name jsgames --watch 
+pm2 save
 ```
+
 
 I use a custom .htaccess file on the server. Look in the build folder.  This file forces https.
 
@@ -125,10 +161,18 @@ Authorization
 	Logout
 	Ensure that only current user has access to its own page (and no others)
 	Ensure that logged in status is required for any subfolder access
+	Test email for new users and password reset
 Website introduction
 	Run through all pages as normal user (not admin)
 	Each tutorial
 
+## Load Test
+
+Load test uses the user profgarrett+test@gmail.com.
+Hit the api endpoint to remove all test pages when finished.
+http://localhost:8080/api/levels/clear_all_profgarrett_test_pages
+https://excel.fun/api/levels/clear_all_profgarrett_test_pages
+You must be logged in as profgarrett+test@gmail.com to run this.
 
 ## Author
 

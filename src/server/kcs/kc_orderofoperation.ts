@@ -1,7 +1,4 @@
-import { KC_NAMES, add_if_undefined } from './../kcs/kc';
-
-import type { AdaptiveKC } from './kc';
-
+import { KC_NAMES } from './../kcs/kc';
 
 /*
 	Parens
@@ -113,88 +110,106 @@ const tutorial_pages = [
 					target="_blank">Khan Academy Tutorial on Order of Operations</a>`,
 		kcs: [KC_NAMES.ORDEROFOPERATION]
 	},
-	{	type: 'IfPageParsonsSchema',
-		description: `Use PEMDAS to arrange the following expression in order.
-				Remember to go from left to right.
-				<br/><br/>
-				Place them in order, with the first operator to be evaluated on top, 
-				and the final one on the bottom.`,
-		instruction: 'Solve <code>=1 + (2 - 3) - 1</code>',
+	{	type: 'IfPageChoiceSchema',
+		description: `Use PEMDAS to solve the following expression.
+				Remember to go from left to right.`,
+		instruction: 'In the expression <code>=1 + (2 - 3) - 1</code>, which operator will be evaluated *first*?',
 		code: 'tutorial',
-		solution_items: [ 
+		client_items: [ 
 				'=1 + (2 <kbd>-</kbd> 3) - 1', 
 				'=1 <kbd>+</kbd> (2 - 3) - 1', 
 				'=1 + (2 - 3) <kbd>-</kbd> 1', 
 			],
+		solution: '=1 + (2 <kbd>-</kbd> 3) - 1',
 		kcs: [KC_NAMES.ORDEROFOPERATION]
 	},
-	{	type: 'IfPageParsonsSchema',
-		description: `Use PEMDAS to arrange the following expression in order.
-				Remember to go from left to right.
-				<br/><br/>
-				Place them in order, with the first operator to be evaluated on top, 
-				and the final one on the bottom.`,
-		instruction: 'Solve <code>=(2 - 3) * 4 ^ 2</code>',
+	{	type: 'IfPageChoiceSchema',
+		description: `Use PEMDAS to solve the following expression.
+				Remember to go from left to right.`,
+		instruction: 'In the expression <code>=1 + (2 - 3) - 1</code>, which operator will be evaluated *last*?',
 		code: 'tutorial',
-		solution_items: [ 
+		client_items: [ 
+				'=1 + (2 <kbd>-</kbd> 3) - 1', 
+				'=1 <kbd>+</kbd> (2 - 3) - 1', 
+				'=1 + (2 - 3) <kbd>-</kbd> 1', 
+			],
+		solution: '=1 + (2 - 3) <kbd>-</kbd> 1',
+		kcs: [KC_NAMES.ORDEROFOPERATION]
+	},
+	{	type: 'IfPageChoiceSchema',
+		description: `Use PEMDAS to solve the following expression.
+				Remember to go from left to right.`,
+		instruction: 'In the expression <code>=(2 - 3) * 4 ^ 2</code>, which operator will be evaluated <b>first</b>?',
+		code: 'tutorial',
+		client_items: [ 
 				'=(2 <kbd>-</kbd> 3) * 4 ^ 2', 
 				'=(2 - 3) * 4 <kbd>^</kbd> 2', 
 				'=(2 - 3) <kbd>*</kbd> 4 ^ 2'
 			],
+		solution: '=(2 <kbd>-</kbd> 3) * 4 ^ 2',
 		kcs: [KC_NAMES.ORDEROFOPERATION]
 	},
-	{	type: 'IfPageParsonsSchema',
-		description: `Use PEMDAS to arrange the following expression in order.
-				Remember to go from left to right.
-				<br/><br/>
-				Place them in order, with the first operator to be evaluated on top, 
-				and the final one on the bottom.`,
-		instruction: 'Solve <code>=2 ^ 3 * 4 ^ 2 / 4</code>',
+	{	type: 'IfPageChoiceSchema',
+		description: `Use PEMDAS to solve the following expression.
+				Remember to go from left to right.`,
+		instruction: 'In the expression <code>=2 ^ 3 * 4 ^ 2 / 4</code>, which operator will be evaluated <b>second</b>?',
 		code: 'tutorial',
-		solution_items: [ 
+		client_items: [ 
 				'=2 <kbd>^</kbd> 3 * 4 ^ 2 / 4', 
 				'=2 ^ 3 * 4 <kbd>^</kbd> 2 / 4', 
 				'=2 ^ 3 <kbd>*</kbd> 4 ^ 2 / 4', 
 				'=2 ^ 3 * 4 ^ 2 <kbd>/</kbd> 4', 
 			],
+		solution: '=2 ^ 3 <kbd>*</kbd> 4 ^ 2 / 4',
 		kcs: [KC_NAMES.ORDEROFOPERATION]
 	},
-	{	type: 'IfPageParsonsSchema',
-		description: `Use PEMDAS to arrange the following expression in order.
-				Remember to go from left to right.
-				<br/><br/>
-				Place them in order, with the first operator to be evaluated on top, 
-				and the final one on the bottom.`,
-		instruction: 'Solve <code>=1 + (2 - 3) * 4 ^ 2 / 5 </code>',
+	{	type: 'IfPageChoiceSchema',
+		description: `Use PEMDAS to solve the following expression.
+				Remember to go from left to right.`,
+		instruction: 'In the expression <code>=2 ^ 3 * 4 ^ 2 / 4</code>, which operator will be evaluated <b>last</b>?',
 		code: 'tutorial',
-		solution_items: [ 
+		client_items: [ 
+				'=2 <kbd>^</kbd> 3 * 4 ^ 2 / 4', 
+				'=2 ^ 3 * 4 <kbd>^</kbd> 2 / 4', 
+				'=2 ^ 3 <kbd>*</kbd> 4 ^ 2 / 4', 
+				'=2 ^ 3 * 4 ^ 2 <kbd>/</kbd> 4', 
+			],
+		solution: '=2 ^ 3 * 4 ^ 2 <kbd>/</kbd> 4',
+		kcs: [KC_NAMES.ORDEROFOPERATION]
+	},
+	
+	{	type: 'IfPageChoiceSchema',
+		description: `Use PEMDAS to solve the following expression.
+				Remember to go from left to right.`,
+		instruction: 'In the expression <code>=1 + (2 - 3) * 4 ^ 2 / 5</code>, which operator will be evaluated first?',
+		code: 'tutorial',
+		client_items: [ 
 				'=1 + (2 <kbd>-</kbd> 3) * 4 ^ 2 / 5', 
 				'=1 + (2 - 3) * 4 <kbd>^</kbd> 2 / 5', 
 				'=1 + (2 - 3) <kbd>*</kbd> 4 ^ 2 / 5', 
 				'=1 + (2 - 3) * 4 ^ 2 <kbd>/</kbd> 5', 
 				'=1 <kbd>+</kbd> (2 - 3 ) * 4 ^ 2 / 5'
 			],
+		solution: '=1 + (2 <kbd>-</kbd> 3) * 4 ^ 2 / 5',
 		kcs: [KC_NAMES.ORDEROFOPERATION]
 	},
-	{	type: 'IfPageParsonsSchema',
-		description: `Keep using PEMDAS to arrange the following expression in order.
-				Remember to go from left to right.
-				<br/><br/>
-				Place them in order, with the first operator to be evaluated on top, 
-				and the final one on the bottom.`,
-		instruction: 'Solve <code>=8 + (10 - 2) ^ 2 * 2 + 3</code>',
+	{	type: 'IfPageChoiceSchema',
+		description: `Keep using PEMDAS to solve the following expression.
+				Remember to go from left to right.`,
+		instruction: 'In the expression <code>=8 + (10 - 2) ^ 2 * 2 + 3</code>, which operator will be evaluated <b>third</b>?',
 		code: 'tutorial',
-		solution_items: [ 
+		client_items: [ 
 				'=8 + (10 <kbd>-</kbd> 2) ^ 2 * 2 + 3', 
 				'=8 + (10 - 2) <kbd>^</kbd> 2 * 2 + 3', 
 				'=8 + (10 - 2) ^ 2 <kbd>*</kbd> 2 + 3', 
 				'=8 <kbd>+</kbd> (10 - 2) ^ 2 * 2 + 3', 
 				'=8 + (10 - 2) ^ 2 * 2 <kbd>+</kbd> 3'
 				],
+		solution: '=8 + (10 - 2) ^ 2 <kbd>*</kbd> 2 + 3',
 		kcs: [KC_NAMES.ORDEROFOPERATION]
 	},
 	{	type: 'IfPageFormulaSchema',
-		description: `Why don't you try some problems?
+		description: `Why don't you try a problem using order of operations?
 					<br/><br/>
 					What is a tenth of the total profit for each region?`,
 		instruction: 'Add together the two profit figures, and then use division to figure out a tenth of that amount.',
@@ -218,76 +233,126 @@ const tutorial_pages = [
 
 
 const _base = {
-	type: 'IfPageParsonsSchema',
-	description: `Use PEMDAS to arrange the following expression in order.
-				Remember to go from left to right.
-				<br/><br/>
-				Place them in order, with the first operator to be evaluated on top, 
-				and the final one on the bottom.`,
+	type: 'IfPageChoiceSchema',
+	description: `Use PEMDAS to solve the following expression.
+				Remember to go from left to right.`,
 	code: 'test',
 	kcs: [ KC_NAMES.ORDEROFOPERATION ],
 };
 
 const test_pages = [
 	{	..._base,
-		instruction: 'Solve <code>=1 + (2 + 3) - 1</code>',
-		solution_items: [ 
+		instruction: 'In the expression <code>=1 + (2 + 3) - 1</code>, which operator will be evaluated first?',
+		client_items: [ 
 				'=1 + (2 <kbd>+</kbd> 3) - 1', 
 				'=1 <kbd>+</kbd> (2 + 3) - 1', 
-				'=1 + (2 + 3) <kbd>+</kbd> 1', 
-		]
+				'=1 + (2 + 3) <kbd>-</kbd> 1', 
+		],
+		solution: '=1 + (2 <kbd>+</kbd> 3) - 1'
 	},
 	{	..._base,
-		instruction: 'Solve <code>=1 * (2 + 3) / 1</code>',
-		solution_items: [ 
+		instruction: 'In the expression <code>=1 * (2 + 3) / 1</code>, which operator will be evaluated first?',
+		client_items: [ 
 				'=1 * (2 <kbd>+</kbd> 3) / 1', 
 				'=1 <kbd>*</kbd> (2 + 3) / 1', 
 				'=1 * (2 + 3) <kbd>/</kbd> 1', 
-		]
+		],
+		solution: '=1 * (2 <kbd>+</kbd> 3) / 1'
 	},
 	{	..._base,
-		instruction: 'Solve <code>=(1 - (2 + 3)) / 1</code>',
-		solution_items: [ 
+		instruction: 'In the expression <code>=(1 - (2 + 3)) / 1</code>, which operator will be evaluated first?',
+		client_items: [ 
 				'=(1 - (2 <kbd>+</kbd> 3)) / 1', 
 				'=(1 <kbd>-</kbd> (2 + 3)) / 1', 
 				'=(1 - (2 + 3)) <kbd>/</kbd> 1', 
-		]
+		],
+		solution: '=(1 - (2 <kbd>+</kbd> 3)) / 1'
 	},
 	{	..._base,
-		instruction: 'Solve <code>=1 * 2 + 3 / 1</code>',
-		solution_items: [ 
+		instruction: 'In the expression <code>=1 * 2 + 3 / 1</code>, which operator will be evaluated first?',
+		client_items: [ 
 				'=1 <kbd>*</kbd> 2 + 3 / 1', 
 				'=1 * 2 + 3 <kbd>/</kbd> 1', 
 				'=1 * 2 <kbd>+</kbd> 3 / 1', 
-		]
+		],
+		solution: '=1 <kbd>*</kbd> 2 + 3 / 1'
 	},
 	{	..._base,
-		instruction: 'Solve <code>=1 - 2 + 3 ^ 1</code>',
-		solution_items: [ 
+		instruction: 'In the expression <code>=1 - 2 + 3 ^ 1</code>, which operator will be evaluated first?',
+		client_items: [ 
 				'=1 - 2 + 3 <kbd>^</kbd> 1', 
 				'=1 <kbd>-</kbd> 2 + 3 ^ 1', 
 				'=1 - 2 <kbd>+</kbd> 3 ^ 1', 
-		]
+		],
+		solution: '=1 - 2 + 3 <kbd>^</kbd> 1'
 	},
 	{	..._base,
-		instruction: 'Solve <code>=1 - 2 + 3 ^ (4 + 5)</code>',
-		solution_items: [ 
+		instruction: 'In the expression <code>=1 - 2 + 3 ^ (4 + 5)</code>, which operator will be evaluated first?',
+		client_items: [ 
 				'=1 - 2 + 3 ^ (4 <kbd>+</kbd> 5)', 
 				'=1 - 2 + 3 <kbd>^</kbd> (4 + 5)', 
 				'=1 <kbd>-</kbd> 2 + 3 ^ (4 + 5)', 
 				'=1 - 2 <kbd>+</kbd> 3 ^ (4 + 5)', 
-		]
+		],
+		solution: '=1 - 2 + 3 ^ (4 <kbd>+</kbd> 5)'
 	},
 	{	..._base,
-		instruction: 'Solve <code>=1 ^ 2 + 3 / 1 / 1</code>',
-		solution_items: [ 
+		instruction: 'In the expression <code>=1 ^ 2 + 3 / 1 / 1</code>, which operator will be evaluated first?',
+		client_items: [ 
 				'=1 <kbd>^</kbd> 2 + 3 / 1 / 1', 
 				'=1 ^ 2 + 3 <kbd>/</kbd> 1 / 1', 
 				'=1 ^ 2 + 3 / 1 <kbd>/</kbd> 1', 
 				'=1 ^ 2 <kbd>+</kbd> 3 / 1 / 1', 
-		]
+		],
+		solution: '=1 <kbd>^</kbd> 2 + 3 / 1 / 1'
 	},
-
+{	..._base,
+		instruction: 'In the expression <code>=(1 - (2 + 3)) / 1</code>, which operator will be evaluated last?',
+		client_items: [ 
+				'=(1 - (2 <kbd>+</kbd> 3)) / 1', 
+				'=(1 <kbd>-</kbd> (2 + 3)) / 1', 
+				'=(1 - (2 + 3)) <kbd>/</kbd> 1', 
+		],
+		solution: '=(1 - (2 + 3)) <kbd>/</kbd> 1'
+	},
+	{	..._base,
+		instruction: 'In the expression <code>=1 * 2 + 3 / 1</code>, which operator will be evaluated last?',
+		client_items: [ 
+				'=1 <kbd>*</kbd> 2 + 3 / 1', 
+				'=1 * 2 + 3 <kbd>/</kbd> 1', 
+				'=1 * 2 <kbd>+</kbd> 3 / 1', 
+		],
+		solution: '=1 * 2 + 3 <kbd>/</kbd> 1'
+	},
+	{	..._base,
+		instruction: 'In the expression <code>=1 - 2 + 3 ^ 1</code>, which operator will be evaluated last?',
+		client_items: [ 
+				'=1 - 2 + 3 <kbd>^</kbd> 1', 
+				'=1 <kbd>-</kbd> 2 + 3 ^ 1', 
+				'=1 - 2 <kbd>+</kbd> 3 ^ 1', 
+		],
+		solution: '=1 - 2 <kbd>+</kbd> 3 ^ 1'
+	},
+	{	..._base,
+		instruction: 'In the expression <code>=1 - 2 + 3 ^ (4 + 5)</code>, which operator will be evaluated last?',
+		client_items: [ 
+				'=1 - 2 + 3 ^ (4 <kbd>+</kbd> 5)', 
+				'=1 - 2 + 3 <kbd>^</kbd> (4 + 5)', 
+				'=1 <kbd>-</kbd> 2 + 3 ^ (4 + 5)', 
+				'=1 - 2 <kbd>+</kbd> 3 ^ (4 + 5)', 
+		],
+		solution: '=1 - 2 <kbd>+</kbd> 3 ^ (4 + 5)'
+	},
+	{	..._base,
+		instruction: 'In the expression <code>=1 ^ 2 + 3 / 1 / 1</code>, which operator will be evaluated second?',
+		client_items: [ 
+				'=1 <kbd>^</kbd> 2 + 3 / 1 / 1', 
+				'=1 ^ 2 + 3 <kbd>/</kbd> 1 / 1', 
+				'=1 ^ 2 + 3 / 1 <kbd>/</kbd> 1', 
+				'=1 ^ 2 <kbd>+</kbd> 3 / 1 / 1', 
+		],
+		solution: '=1 ^ 2 + 3 <kbd>/</kbd> 1 / 1'
+	},
 
 ];
 

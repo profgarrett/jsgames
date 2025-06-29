@@ -6,7 +6,7 @@ import { DataFactory } from './../shared/DataFactory';
 import { get_compiled_template_values } from './../shared/template';
 import { arrayDifferent, random_boolean_from_string, clean_text_of_tabs_and_newlines } from './../shared/misc';
 
-
+import { loadtest } from './tutorials/loadtest';
 import { tutorial } from './tutorials/tutorial';
 import { math1, math1review } from './tutorials/math1';
 import { math2, math2review } from './tutorials/math2';
@@ -29,7 +29,7 @@ import { surveycharts_amt, surveycharts_wu } from './tutorials/surveycharts';
 
 import { sql_selectfrom, sql_orderby, sql_where, sql_where_and_or, sql_join_inner, sql_join_leftouter, sql_join_keys, sql_join_self, sql_groupby } from './tutorials/sql';
 
-import { parseFeedback } from './parseFeedback';
+
 import type { GenType } from './Gens';
 
 import { queryFactory_getSolutionResults } from './../shared/queryFactory';
@@ -56,6 +56,7 @@ export type LevelSchemaFactoryType = {
 
 // Have a list of levels useful for the the factory later on.
 const LEVEL_GENS: IStringIndexJsonObject = { 
+	loadtest,
 	tutorial,
 	math1, math1review, 
 	math2, math2review,
@@ -159,23 +160,6 @@ async function _initialize_json(level: IfLevelSchema, original_json: any): Promi
 		if(level.allow_skipping_tutorial) {
 			json.correct_required = false;
 		}
-
-	} else if(json.type === 'IfPageParsonsSchema') {
-
-		// Randomize the list until it's not the same order as the solution.
-		do {
-			json.potential_items = DataFactory.randomizeList(json.solution_items);
-		} while (!arrayDifferent( json.potential_items, json.solution_items ));
-
-		// Set flags as needed based off of the code.
-		if(json.code === 'tutorial') {
-			json.correct_required = json.correct_required == false ? false : true;
-		} else if(json.code === 'test') {
-			json.correct_required = false;
-		} else {
-			throw new Error('Invalid formula code '+json.code+' in baseifgame');
-		}
-
 
 	} else if(json.type === 'IfPageChoiceSchema') {
 		// Mark that correct is normally required for all. This is needed to help keep track of 

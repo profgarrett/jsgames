@@ -93,7 +93,7 @@ type PropsType = {
 };
 
 type StateType = {
-	section: iSection;
+	section: iSection | null;
 };
 
 interface iGetLevelsReturn {
@@ -199,15 +199,6 @@ export default class MyProgress extends React.Component<PropsType, StateType> {
 			trs.push(<tr key={'MyProgressRow'+counter++}>{tds}</tr>);
 		}
 
-		// Push total row.
-		/*
-		trs.push( <tr>
-				<td>Total</td>
-				<td rowSpan={5}>{ grades.reduce( (sum, g) => g + sum, 0) / grades.length }</td>
-			</tr>);
-		*/
-
-
 		return (<Table bordered style={{ fontSize: '80%', marginTop: 15 }}>
 					<thead className='thead-dark'>{ header_tr }</thead>
 					<tbody>
@@ -279,7 +270,10 @@ export default class MyProgress extends React.Component<PropsType, StateType> {
 	*/
 	get_list = (): string[] => {
 		
-		const list = this.props.sections.length === 0 || this.state.section.levels === null || this.state.section.levels === ''
+		const list = this.state.section == null || 
+				this.props.sections.length === 0 || 
+				this.state.section.levels === null || 
+				this.state.section.levels === ''
 			? DEFAULT_TUTORIAL_LEVEL_LIST 
 			: this.state.section.levels.split(',');
 
@@ -382,19 +376,18 @@ export default class MyProgress extends React.Component<PropsType, StateType> {
 				? 'My individual progress' 
 				: 'Excel.fun';
 
-		const section = this.props.sections.length == 0 
+		const section = this.props.sections.length == 0  || this.state.section == null
 				? null 
 				: <p style={{ fontSize: 8, textAlign: 'right' }}><i>Course: {this.state.section.title}</i></p>;
 
 		// If admin?
 		let feedback_link;
-		if( user.username == 'garrettn') {
+		let recent_link;
+		if( user.username == 'garrettn' && this.state.section !== null) {
 			feedback_link = <Link to={'/ifgame/feedback/' + this.state.section.idsection} >
 				<Button size='lg' style={{ marginBottom: 10 }} variant='outline-info'>Feedback</Button>
 			</Link>;
-		}
-		let recent_link;
-		if( user.username == 'garrettn') {
+
 			recent_link = <Link to={'/ifgame/recent/' + this.state.section.idsection} >
 				<Button size='lg' style={{ marginBottom: 10 }} variant='outline-info'>Recent</Button>
 			</Link>;
@@ -402,7 +395,7 @@ export default class MyProgress extends React.Component<PropsType, StateType> {
 
 		// If teacher?
 		let teacher_link;
-		if( this.props.sections.length > 0 && this.state.section.role == 'faculty') {
+		if( this.state.section !== null && this.props.sections.length > 0 && this.state.section.role == 'faculty') {
 			teacher_link = <Link to={'/ifgame/progress/' + this.state.section.idsection} >
 				<Button size='lg' style={{ marginBottom: 10 }} variant='outline-info'>View students' progress in my class</Button>
 			</Link>;
@@ -437,7 +430,7 @@ export default class MyProgress extends React.Component<PropsType, StateType> {
 						onSelect={this.handleSectionChange}
 						variant='primary' 
 						size='sm'
-						title= {this.state.section.title} 
+						title= {this.state.section?.title || 'Select a section'} 
 						style= {{ marginBottom: 5 }}
 						key='select_code' id='select_code'>
 							{ this.props.sections.map( (section,i) => 
@@ -449,15 +442,6 @@ export default class MyProgress extends React.Component<PropsType, StateType> {
 					</DropdownButton>
 				</ButtonToolbar>);
 		}
-
-		/*
-		const surveycharts_amt = (this.state.section !== null && this.state.section.levels === 'surveycharts_amt');
-
-		// only show table *if* they've completed any mandatory surveys.
-		const table =  waiver_completed && !surveycharts_amt
-				? this._render_table(levels)
-				: null;
-		*/
 
 		// Return card.
 		return <>

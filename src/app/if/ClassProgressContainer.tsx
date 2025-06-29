@@ -42,7 +42,7 @@ export default function ClassProgressContainer() {
 		setIsLoading(true);
 		setMessage('Loading progress data');
 		
-		fetch('/api/reports/progress?idsection='+filter.sections, {
+		fetch('/api/reports/progress?idsection='+encodeURIComponent(filter.sections), {
 				method: 'get',
 				credentials: 'include',
 				headers: {

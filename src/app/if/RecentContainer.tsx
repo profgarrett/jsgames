@@ -33,9 +33,9 @@ export default function IfRecentContainer(): ReactElement {
 	const onRefreshData = (filter: any) => {
 		const args: IStringIndexJsonObject = [];
 		
-		if(filter.levels != '') args.push('code='+filter.levels);
-		if(filter.sections !== '') args.push('idsection='+filter.sections);
-		if(filter.users !== '') args.push('iduser='+filter.users);
+		if(filter.levels != '') args.push('code='+encodeURIComponent(filter.levels));
+		if(filter.sections !== '') args.push('idsection='+encodeURIComponent(filter.sections));
+		if(filter.users !== '') args.push('iduser='+encodeURIComponent(filter.users));
 		if(filter.days !== '') args.push('updated='+filter.days*24*60); // convert into minutes
 		args.push('pageless=0'); // return with pages
 

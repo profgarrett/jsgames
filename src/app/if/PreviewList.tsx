@@ -1,4 +1,4 @@
-import { useState, ReactElement } from 'react';
+import React, { useState, ReactElement } from 'react';
 import { IfLevels, IfLevelSchema, DEFAULT_TUTORIAL_LEVEL_LIST, GREEN_GRADE, PASSING_GRADE } from '../../shared/IfLevelSchema';
 import { Table, Modal, Tooltip, OverlayTrigger, Button } from 'react-bootstrap';
 import CSS from 'csstype';

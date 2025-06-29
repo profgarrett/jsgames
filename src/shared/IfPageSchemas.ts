@@ -78,7 +78,7 @@ const bool = function(unknown: any): boolean|null {
 const noObjectsInArray = (i_array: Array<any>): Array<any> => {
 	if(!(i_array instanceof Array)) throw new Error('noObjects can only be passed arrays.');
 	i_array.forEach( v => {
-		if(!(typeof v === 'string' || typeof v === 'number')) throw new Error('Invalid object passed to IfPageParsonsSchema._def_items');
+		if(!(typeof v === 'string' || typeof v === 'number')) throw new Error('Invalid object passed to ._def_items');
 	});
 	return i_array;
 };
@@ -1084,114 +1084,6 @@ class IfPageChoiceSchema extends IfPageBaseSchema {
 }
 
 
-/*
-	A page holds a single exercise.
-
-	Pages used tests to validate the results of the client_f against solution_f.
-
-	The solution fields are not sent to the client unless they have the _visible tag set.
-*/
-class IfPageParsonsSchema extends IfPageBaseSchema {
-	helpblock!: string;
-	potential_items!: Array<string>;
-	solution_items!: Array<string>;
-	client_items!: Array<string>|null;
-
-	// Apply json to this obj, signally no parent classes to do the setting for us.
-	constructor( json?: any) {
-		super(true);
-		if(json === true) return;
-		this.initialize(json, this.schema);
-		this.updateCorrect();
-	}
-
-	get type(): string {
-		return 'IfPageParsonsSchema';
-	}
-
-	get schema(): any {
-		let inherit = common_schema();
-
-		return {
-			...inherit,
-			helpblock: { type: 'String', initialize: (s: any) => isDef(s) ? s : null },
-			potential_items: { type: 'Array', initialize: (a: any[]) => isDef(a) && isArray(a) ? noObjectsInArray(a) : [] },
-			solution_items: { type: 'Array', initialize: (a: any[]) => isDef(a) && isArray(a) ? noObjectsInArray(a) : [] },
-			client_items: { type: 'Array', initialize: (a: any[]) => isDef(a) && isArray(a) ? noObjectsInArray(a) : null }, 
-			// client_items is set to null to show user hasn't submitted anything yet.
-
-		};
-	}
-
-	// Has the user provided input?
-	client_has_answered(): boolean {
-		return this.client_items !== null && this.client_items.length > 0;
-	}
-
-	// Remove all client input
-	clear_answer_and_all_results(): void {
-		this.clientclient_items = null;
-		this.correct = false;
-		this.completed = false;
-		this.client_feedback = [];
-	}
-
-
-	// Turn solution into a string and return.
-	get_solution(): string {
-		return this.solution_items.join(', ');
-	}
-
-	// Automatically fill in the answer.
-	// Used for testing out on the server.  Not usable on client side, as 
-	// solution_f will not be present.
-	debug_answer() {
-		if(typeof this.solution_items === 'undefined' || this.solution_items.length < 1) {
-			throw new Error('You can not debug answer without solution_items being present');
-		}
-		this.client_items = this.solution_items;
-		this.updateCorrect();
-	}		
-
-
-	updateUserFields(json: any) {
-		this._updateUserFields(json, ['client_items', 'time_limit_expired']);
-	}
-
-
-	/*
-		If solutions is available, refresh the this.correct variable.
-		If solution tests aren't run (or available), then don't modify this.correct.
-	*/
-	updateCorrect() {
-		// See if the user has submitted anything yet.  If not, then set to null.
-		if(this.client_items === null) {
-			this.correct = null;
-			return;
-		}
-
-		// Check to see if we can provide a solution.
-		// Solutions are not always available (ie, if we're on the client)
-		if(this.solution_items.length < 1) return;
-
-		// Start testing with the assumption of correctness.
-		this.correct = true;
-
-		// Check individual answers
-		for(let i=0; i<this.solution_items.length && this.correct; i++) {
-			this.correct = (this.client_items[i] == this.solution_items[i]);
-		}
-
-		this.client_feedback = [];
-	}
-
-	// Return a nicely formatted view of the client's input. 
-	toString(): string {
-		let items = this.client_items === null ? [] : this.client_items.slice().reverse();
-		return items.reduce( (accum, item) => item+(accum.length>0 ? ', ': '')+accum, '');
-	}
-
-}
 
 // Used for defining an interface for the hot formula parser results.
 interface iParseCellValue {

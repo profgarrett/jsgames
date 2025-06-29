@@ -28,10 +28,10 @@ export default function QuestionsContainer() {
 		const args: string[] = [];
 
 		// Set server-level filters for the http request.
-		if(filter.levels !== '') args.push('code='+filter.levels);
-		if(filter.sections !== '') args.push('idsection='+filter.sections);
+		if(filter.levels !== '') args.push('code='+encodeURIComponent(filter.levels));
+		if(filter.sections !== '') args.push('idsection='+encodeURIComponent(filter.sections));
 		
-		if(filter.users !== '') args.push('iduser='+filter.users);
+		if(filter.users !== '') args.push('iduser='+encodeURIComponent(filter.users));
 		
 		// Set local filters, which are applied locally.
 		if(filter.pagetypes !== '') setPagetype(filter.pagetypes);

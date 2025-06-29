@@ -421,7 +421,8 @@ WHERE ` + sql_where_clauses.join(' AND ') + ' ORDER BY iflevels.updated desc ';
 
 		} else {
 			// Make sure that we're getting records for the current user.
-			if(username !== req.query.username ) throw new Error('You can not view grades for another user');
+			if(username !== req.query.username ) 
+				throw new Error('You can not view grades for another user (' + req.query.username + ' != ' + username + ')');
 
 			// Set perms to only get results for the current logged in user.
 			sql_where_values.push(username);

@@ -170,7 +170,7 @@ export default class QuestionsPagesExcelFormula extends React.Component<DetailPr
 		question.answers.map( answer => {
 			// Only track completed pages.
 			if(!answer.page.completed) return;
-			if(answer.page.type === 'IfPageChoiceSchema' || answer.page.type === 'IfPageTextSchema' || answer.page.type === 'IfPageParsonsSchema') return;
+			if(answer.page.type === 'IfPageChoiceSchema' || answer.page.type === 'IfPageTextSchema' ) return;
 
 			let history = answer.page.history.filter( h => typeof h.client_f !== 'undefined' && h.code === 'client_update' );
 

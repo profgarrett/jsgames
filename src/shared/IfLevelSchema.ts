@@ -16,6 +16,7 @@ IfPageNumberAnswerSchema, IfPageShortTextAnswerSchema
 	Code value must match the filename in server/tutorial/...js
 */
 const IfLevels = [
+	{ code: 'loadtest', title: 'Website Load Testing', description: 'Used to measure performance of the server.' },
 	{ code: 'tutorial', title: 'Website Introduction', description: 'Learn how to create formulas.' },
 
 	{ code: 'math1', title: 'Math 1', description: 'Use addition, subtraction, multiplication, and division' },

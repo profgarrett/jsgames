@@ -10,26 +10,6 @@ import { faCheckSquare } from '@fortawesome/free-solid-svg-icons/faCheckSquare';
 import { faPencilAlt } from '@fortawesome/free-solid-svg-icons/faPencilAlt';
 import { faMinusCircle } from '@fortawesome/free-solid-svg-icons/faMinusCircle';
 
-// REMOVE
-//  Old browser compatability.
-//import 'whatwg-fetch'; // ajax support.
-//import Promise from 'promise-polyfill';
-//if (!window.Promise) { window.Promise = Promise; }
-
-
-/*
-export class PageHeader extends React.Component {
-	render() {
-		return (
-		<div className='pb-2 mt-4 mb-2 border-bottom'>
-			<h5>{ this.props.header }</h5>
-		</div>);
-	}
-}
-PageHeader.propTypes = {
-	header: PropTypes.string.isRequired
-};
-*/
 
 export interface IStringIndexJsonObject {
 	[key: string]: any
@@ -302,50 +282,6 @@ export class PageNotFound extends React.Component {
 }
 
 
-export class Menu extends React.Component {
-	render() {
-		return <span />;
-		/*
-		Disabled menu to make it easier to embed.
-		let styles = {
-			marginTop: 0,
-			visible: false,
-			hidden: true
-		};
-
-		return (
-			<Row style={styles}>
-				<Col>
-				<Navbar className='navbar navbar-dark bg-dark'>
-					<Navbar.Header>
-						<LinkContainer to='/'>
-							<Navbar.Brand>JS Games</Navbar.Brand>
-						</LinkContainer>
-					</Navbar.Header>
-					<Navbar.Collapse>
-						<Nav pullRight>
-							<LinkContainer to='/ifgame'>
-								<NavItem >If Game</NavItem>
-							</LinkContainer>
-							<LinkContainer to='/logout'>
-								<NavItem >Logout</NavItem>
-							</LinkContainer>
-						</Nav>
-					</Navbar.Collapse>
-				</Navbar>
-				</Col>
-			</Row>
-		);
-		*/
-	}
-}
-
-/*
-
-*/
-
-
-
 interface LoadingPropsType {
 	loading: boolean;
 }
@@ -417,28 +353,3 @@ export class Message extends React.Component<MessagePropsType, MessageStateType>
 		);
 	}
 }
-
-/*
-// Return the cookie with the given name.  If not found, return null.
-export function get_cookie(arg) {
-	let cookies = document.cookie.split(';').map( c => c.trim());
-	cookies = cookies.map( c=> { return {'name': c.split('=')[0], 'value': c.split('=')[1] }} );
-	let match = cookies.filter( c=> c.name === arg );
-
-	return match.length === 0 ? null : match[0].value;
-}
-
-export function get_username_or_emptystring() {
-	let cookie =  get_cookie('x-access-token-username');
-	if(cookie === null) return '';
-	return cookie;
-	
-}
-
-// Return boolean with if the user is an administrator or not.
-export function get_user_is_admin() {
-	const username = get_username_or_emptystring();
-	return (username === secret.ADMIN_USERNAME);
-}
-
-*/

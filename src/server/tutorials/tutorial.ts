@@ -91,16 +91,6 @@ const gen_on_functions: GenType =  {
 const gen_on_choices: GenType = {
 	gen_type: 'LinearGen',
 	pages: [
-		{	type: 'IfPageParsonsSchema',
-			description: `Some exercises ask you to sort items.
-			<br/><br/>
-			You can also double-click on items to quickly move them from one list to another.			
-			`,
-			instruction: `Drag the items from the left column to the right column.  
-					Put them in order with smallest on top and largest on bottom.`,
-			solution_items: ['10','100','1000'],
-			code: 'tutorial'
-		},
 		{	type: 'IfPageChoiceSchema',
 			description: 'Some page ask you to select an item from a list.',
 			instruction: 'How comfortable are you with this tutorial?',
