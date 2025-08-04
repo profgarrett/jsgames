@@ -1,4 +1,5 @@
 import CSS from 'csstype';
+import React, { ReactElement } from 'react';
 
 // This file contains functions used by both ExcelPredict and ExcelFormula.
 // It primarily provides formatting functions to ensure consistency.
