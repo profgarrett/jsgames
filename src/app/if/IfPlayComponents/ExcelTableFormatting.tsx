@@ -1,5 +1,5 @@
 import CSS from 'csstype';
-import React, { ReactElement } from 'react';
+import React, { ReactElement } from 'react';  // NDG 9/4/2025 need import here, export not working otherwise.
 
 // This file contains functions used by both ExcelPredict and ExcelFormula.
 // It primarily provides formatting functions to ensure consistency.

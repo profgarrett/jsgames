@@ -316,7 +316,7 @@ const kc_if_and_boolean_logic = ({
             
 			description: `Which pigs have a weight between <code>{n1}</code> and <code>{n2}</code> (exclusive)?`,
 
-			solution_f: '=AND({n1}<B1, B1<{n1})',
+			solution_f: '=AND({n1}<B1, B1<{n2})',
             template_values: {
                 'n1': '[50-100]',
                 'n2': 'randOf(143, 234)',
