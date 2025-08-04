@@ -40,6 +40,9 @@ export const EMAIL_PORT = 465;
 
 export const ADMIN_OVER_PASSWORD = '';
 ```
+
+Note that garrettn is also hard-coded as an admin in the code. This is used for testing and development purposes. Please search+replace to update.
+
 You also need to setup a secret.distribution.js file in the root folder. This is used by the deploy script (which you'll need to adjust to your own deployment). It should look like this:
 
 ```javascript

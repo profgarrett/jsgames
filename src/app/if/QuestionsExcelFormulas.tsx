@@ -58,13 +58,13 @@ export default class QuestionsPagesExcelFormula extends React.Component<DetailPr
 			// 'a_html',
 			
 			//'a_tag_ABS_REF', 
-			
+			/*
 			'a_tag_NO_STARTING_EQUAL', 
 			'a_tag_NON_ROW_1_REFERENCE', 
 			'a_tag_NON_EXISTANT_COLUMN_REFERENCE', 'a_tag_USES_A_REFERENCE_NOT_IN_SOLUTION', 'a_tag_MISSING_A_REFERENCE_USED_IN_SOLUTION', 
 			'a_tag_USES_FUNCTION_NOT_IN_SOLUTION', 'a_tag_FUNCTION_WITHOUT_PAREN', 
 			'a_tag_USES_VALUE_NOT_IN_SOLUTION', 
-			
+			*/
 			//'a_tag_USES_NUMBER_IN_QUOTES',
 			
 			'a_history_clientf_nonintermediate_length',
@@ -183,6 +183,7 @@ export default class QuestionsPagesExcelFormula extends React.Component<DetailPr
 				'a_completed': answer.completed ? 1 : 0, 
 				'a_html': answer.html,
 				
+				/*
 				'a_tag_ABS_REF': get_tag_n(answer.tags, 'ABS_REF'),
 				'a_tag_NO_STARTING_EQUAL': get_tag_n(answer.tags, 'NO_STARTING_EQUAL'),
 				'a_tag_NON_ROW_1_REFERENCE': get_tag_n(answer.tags, 'NON_ROW_1_REFERENCE'),
@@ -196,6 +197,7 @@ export default class QuestionsPagesExcelFormula extends React.Component<DetailPr
 				'a_tag_INTERMEDIATE': get_tag_n(answer.tags, 'INTERMEDIATE'),
 				'a_tag_TYPO': get_tag_n(answer.tags, 'TYPO'),
 				'a_tag_CORRECT': get_tag_n(answer.tags, 'CORRECT'),
+				*/
 				a_history_length: answer.page.history.length,
 				
 				a_history_clientf_nonintermediate_length: answer.page.history
@@ -309,7 +311,6 @@ export default class QuestionsPagesExcelFormula extends React.Component<DetailPr
 			'textAlign': 'right'
 		};
 
-
 		// Go through each map of levels and return a table for each.
 		const trs = rows.map( 
 			(answer, n) => {
@@ -330,12 +331,15 @@ export default class QuestionsPagesExcelFormula extends React.Component<DetailPr
 		const ths = columns.map( (col,i) => <th key={'excel_ths_'+i} style={td_style}>{col}</th>);
 
 		// If empty, return a div.
-		if(rows.length < 1) return <table/>;
+		if(rows.length < 1) return <div>Empty results</div>;
 
-		return (<table>
+		return (<div>
+				<h1>Results</h1>
+				<table>
 				<thead><tr>{ ths }</tr></thead>
 				<tbody>{ trs }</tbody>
-				</table>);
+				</table>
+				</div>);
 	}
 }
 

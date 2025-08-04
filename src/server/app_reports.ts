@@ -70,6 +70,11 @@ router.get('/questions/', nocache, user_require_logged_in,
 				? '*' 
 				: parseInt(to_string_from_possible_array(req.query.iduser), 0);
 
+		const param_pagetype = (typeof req.query.pagetype === 'undefined') 
+				? '' 
+				: to_string_from_possible_array(req.query.pagetype);
+
+
 		const sql_params = [
 			param_code, param_code, param_code,
 			param_idsection, param_idsection,
@@ -116,10 +121,33 @@ router.get('/questions/', nocache, user_require_logged_in,
 
 		if(select_results.length === 0) return res.json([]);
 
-		let iflevels = select_results.map( (l: any): any => (new IfLevelSchema(l)) );
+		// Remove all pages in schemas that do not match the given code.
+		
+		select_results = select_results.map( (level_json: any) => {
+			//console.log('level_json', level_json);
+			let pages = JSON.parse(level_json.pages);
+			let matching_pages = pages.filter( (p: any) => p.type === param_pagetype );
+			let pages_as_text = JSON.stringify(matching_pages);
+			level_json.pages = pages_as_text;
+			console.log('filtered out ', pages.length - matching_pages.length, 'pages');
+			return level_json
+		});
+
+
+		let iflevels = select_results.map( (l: any): any => {
+			// Allow errors.
+			try {
+				return new IfLevelSchema(l);
+			} catch (e) {
+				console.log(l);
+				console.error('Error creating IfLevelSchema', e);
+				return null;
+			}
+		}).filter((l: any) => l !== null);
+
 
 		// Remove secret fields and transmit.
-		iflevels = iflevels.map( (l: any): any => return_tagged_level(l) );
+		//iflevels = iflevels.map( (l: any): any => return_tagged_level(l) );
 		iflevels = iflevels.map( (l: any): any => return_level_prepared_for_transmit(l, false));
 
 		res.json(iflevels);

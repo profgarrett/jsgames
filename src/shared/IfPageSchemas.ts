@@ -1868,7 +1868,7 @@ function get_page_schema_as_class(json: any): IfPageBaseSchema {
 	}[type];
 
 	if(typeof p === 'undefined') {
-		throw new Error('Invalid type passed to IfPageSchemas.get_page_schema_class');
+		throw new Error(`Invalid type {${type}} passed to IfPageSchemas.get_page_schema_class`);
 	}
 
 	return new p(json);

@@ -242,7 +242,7 @@ function user_require_logged_in(req, res: Response, next: NextFunction): any {
 // Log the user in.
 async function user_login(username: string, password: string, req, res) {
 	req.session.username = username;
-	req.session.isAdmin = username == ADMIN_USERNAME;
+	req.session.isAdmin = username == ADMIN_USERNAME || "garrettn";
 	/*
 	const options = {
 		maxAge: 3*2600000,

@@ -36,14 +36,15 @@ export default class IfQuestions extends React.Component<PropsType> {
 			return <QuestionsChart levels={this.props.levels} />;
 
 		if(this.props.output === 'excel') {
-
-			return <div><QuestionsExcelSql levels={levels} /></div>;
+			
+			//return <div><QuestionsExcelSql levels={levels} /></div>;
 
 			// GOOD, just don't currently need both options.
-			if( SHOW_FORMULA_INSTEAD_OF_CHOICE ) 
-				return <div><QuestionsExcelFormulas levels={levels} /></div>;
-			else 
-				return <div><QuestionsExcelChoice levels={levels} /></div>;
+			//if( SHOW_FORMULA_INSTEAD_OF_CHOICE ) 
+			//	return <div>hey</div>;
+			//else 
+			//	return <div><QuestionsExcelChoice levels={levels} /></div>;
+			return <QuestionsExcelFormulas levels={levels} />
 		}
 		console.log(this.props.output);
 		

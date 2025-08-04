@@ -802,9 +802,10 @@ if(DEBUG) {
 function return_tagged_level(level: IfLevelSchema): IfLevelSchema {
 
 	level.pages = level.pages.map( (untyped_page: typeof IfPageBaseSchema) => {
+		
 		const page = untyped_page.toIfPageFormulaSchema();
-
-		if( !(page.type === 'IfPageFormulaSchema' ) ) 
+		
+		if( !(untyped_page.type === 'IfPageFormulaSchema' ) ) 
 			return page; // don't do any tags on non-formula pages.
 
 		// Clean-up history.

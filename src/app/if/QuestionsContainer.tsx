@@ -33,8 +33,12 @@ export default function QuestionsContainer() {
 		
 		if(filter.users !== '') args.push('iduser='+encodeURIComponent(filter.users));
 		
-		// Set local filters, which are applied locally.
-		if(filter.pagetypes !== '') setPagetype(filter.pagetypes);
+		// Set local filters, which are applied locally and at the server.
+		if(filter.pagetypes !== '') {
+			args.push('pagetype='+encodeURIComponent(filter.pagetypes));
+			setPagetype(filter.pagetypes);
+		}
+
 		if(filter.outputs !== '') setOutputs( filter.outputs);
 
 		setIsLoading(true);
@@ -73,9 +77,9 @@ export default function QuestionsContainer() {
 		</Breadcrumb>
 		);
 
-	const default_type =  'IfPageSqlSchema';  // 'IfPageFormulaSchema
-	const default_output = 'table';
-	const default_level = 'sql_selectfrom';
+	const default_type =  'IfPageFormulaSchema';  // IfPageSqlSchema
+	const default_output = 'excel'; // 'tags'; // 'table'; // 'chart';
+	const default_level = 'math4'; //sql_selectfrom
 	const search = new URLSearchParams(window.location.search);
 	const filter_defaults = search.has('idsection') 
 		? { pagetypes: default_type, outputs: default_output, levels: default_level, sections: search.get('idsection') }
