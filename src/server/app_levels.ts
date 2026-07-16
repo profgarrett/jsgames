@@ -19,6 +19,12 @@ import { queryFactory_updateClientResults } from './../shared/queryFactory';
 import type { Request, Response, NextFunction } from 'express';
 import { IfPageBaseSchema, IfPageSqlSchema } from '../shared/IfPageSchemas.js';
 
+// Convert a route parameter into a string. If it is an array, then grab the first item. If it is undefined, then return the fallback value.
+const getRouteParamString = (value: string | string[] | undefined, fallback = ''): string => {
+	if (typeof value === 'undefined') return fallback;
+	if (Array.isArray(value)) return value[0] ?? fallback;
+	return value;
+};
 
 ////////////////////////////////////////////////////////////////////////
 //  If Game
@@ -30,7 +36,7 @@ router.post('/new_level_by_code/:code',
 	nocache, user_require_logged_in,
 	async (req: Request, res: Response, next: NextFunction): Promise<any> => {
 	try {
-		const code = req.params.code;
+		const code = getRouteParamString(req.params.code);
 		const username = user_get_username_or_emptystring(req, res);
 		const level = await IfLevelSchemaFactory.create(code, username);
 		const now = from_utc_to_myql(to_utc(new Date()));
@@ -85,7 +91,7 @@ router.get('/levels/byCode/:code',
 	async (req: Request, res: Response, next: NextFunction): Promise<any> => {
 	try {
 		const sql = 'SELECT * FROM iflevels WHERE username = ? AND (code = ? OR ? = "all")';
-		const code = req.params.code;
+		const code = getRouteParamString(req.params.code);
 		const username = user_get_username_or_emptystring(req, res);
 
 		let iflevels = await run_mysql_query(sql, [username, code, code]);
@@ -110,7 +116,7 @@ router.get('/levels/byCompleted/:code',
 	async (req: Request, res: Response, next: NextFunction): Promise<any> => {
 	try {
 		const sql = 'SELECT * FROM iflevels WHERE username = ? AND (completed = ?)';
-		const code = req.params.code === 'true' || req.params.code === 'True';
+		const code = getRouteParamString(req.params.code) === 'true' || getRouteParamString(req.params.code) === 'True';
 		const username = user_get_username_or_emptystring(req, res);
 
 		let iflevels = await run_mysql_query(sql, [username, code, code]);
@@ -138,7 +144,7 @@ router.get('/levels/byCompleted/:code',
 router.get('/debuglevel/:code', nocache, user_require_logged_in,
 	async (req: Request, res: Response, next: NextFunction): Promise<any> => {
 	try {
-		const param_code = req.params.code; // level code.
+		const param_code = getRouteParamString(req.params.code); // level code.
 		const username = user_get_username_or_emptystring(req, res);
 		let results;
 
@@ -187,7 +193,7 @@ router.get('/debuglevel/:code', nocache, user_require_logged_in,
 router.get('/previewlevel/:code', nocache,
 	async (req: Request, res: Response, next: NextFunction): Promise<any> => {
 	try {
-		const param_code = req.params.code; // level code.
+		const param_code = getRouteParamString(req.params.code); // level code.
 		let results;
 
 		// Make sure that the given code is valid. If not, then immediately fail
@@ -243,7 +249,7 @@ function to_string_from_possible_array( s: string | Array<any>): string {
 
 // Select object, provide it is owned by the logged in user OR a faculty teaching a section that
 // the student is enrolled in.
-router.get('/level/:id/:tagged?', 
+router.get(['/level/:id', '/level/:id/:tagged'], 
 	nocache, user_require_logged_in,
 	async (req: Request, res: Response, next: NextFunction): Promise<any> => {
 	try {
@@ -251,8 +257,8 @@ router.get('/level/:id/:tagged?',
 		let sql = '';
 		let params;
 
-		const _id = req.params.id;
-		const _tagged = typeof req.params.tagged === 'undefined' ? false : req.params.tagged === 'tagged';
+		const _id = getRouteParamString(req.params.id);
+		const _tagged = getRouteParamString(req.params.tagged, 'false') === 'tagged';
 
 		if(username === 'garrettn' ) {
 			// Allow admin access to any item
@@ -336,7 +342,7 @@ router.post('/level/:id/delete',
 	async (req: Request, res: Response, next: NextFunction): Promise<any> => {
 	try {
 		const sql = 'DELETE FROM iflevels WHERE _id = ? ';
-		const _id = req.params.id;
+		const _id = getRouteParamString(req.params.id);
 		const username = user_get_username_or_emptystring(req, res);
 
 		if(username !== ADMIN_USERNAME) {
@@ -363,7 +369,7 @@ router.post('/level/:id',
 		const validate_only = req.query.validate_only === '1'; // do we just check the current page?
 		const username = user_get_username_or_emptystring(req, res);
 		const is_admin = ADMIN_USERNAME === username;
-		const _id = req.params.id;
+		const _id = getRouteParamString(req.params.id);
 		const sql_select = 'SELECT * FROM iflevels WHERE _id = ?';
 		
 

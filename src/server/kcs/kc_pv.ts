@@ -746,8 +746,8 @@ const kc_pv_annuity_adjust = ({
         {	...test,
             ...pv_quiz_data,
             
-			description: `Assuming that time are shown in months, and interest rates for a month, 
-                what is the present value for each row? Hint: adjust the interest rate`,
+			description: `Assuming that time are shown in <b>years</b>, and interest rates for a <b>month</b>, 
+                what is the present value for each row? Hint: multiply years by 12 to turn them into months`,
 			solution_f: '=PV(A1*12, B1, C1, 0)',
 
         },{ ...test,

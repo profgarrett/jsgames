@@ -146,6 +146,12 @@ app.get('/api/error', nocache,
 	}
 });
 
+const getRouteParamString = (value: string | string[] | undefined, fallback = ''): string => {
+	if (typeof value === 'undefined') return fallback;
+	if (Array.isArray(value)) return value[0] ?? fallback;
+	return value;
+};
+
 const build_path = (filename: string): string => {
 	if(DEBUG) 
 		return path.join(__dirname, '../../build/public/'+filename);
@@ -172,10 +178,12 @@ app.get('/meta.json', (req: Request, res: Response) => {
 	res.sendFile(build_path('meta.json'));
 });
 app.get('/main:p.js', (req: Request, res: Response) => {
-	res.sendFile(build_path('main'+req.params.p+'.js'));
+	const p = getRouteParamString(req.params.p);
+	res.sendFile(build_path('main'+p+'.js'));
 });
 app.get('/main:p.js.map', (req: Request, res: Response) => {
-	res.sendFile(build_path('main' + req.params.p + '.js.map'));
+	const p = getRouteParamString(req.params.p);
+	res.sendFile(build_path('main' + p + '.js.map'));
 });
 
 
@@ -188,9 +196,9 @@ app.use('/static', express.static(build_path('static')));
 // Default case that returns the general index page.
 // Needed for when client is on a subpage and refreshes the page to return the react app.
 // Should be last.
-app.get('*', (req: Request, res: Response) => {
+app.get(/^(.*)$/, (req: Request, res: Response) => {
 	// If on local, don't add jsgames. On server, code is in subfolder.
-	log_error( build_path('index.html'));
+	log_error(build_path('index.html'));
 	res.sendFile(build_path('index.html'));
 });
 

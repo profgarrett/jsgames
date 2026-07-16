@@ -258,7 +258,7 @@ WHERE  ` + sql_where_clauses.join(' AND ') +
 	Get progress for a list of users.
 	Requires a section id.
 */
-router.get('/progress?', nocache, user_require_logged_in,
+router.get(['/progress'], nocache, user_require_logged_in,
 	async (req: Request, res: Response, next: NextFunction): Promise<any> => {
 	try {
 		const username = user_get_username_or_emptystring(req, res);
@@ -318,7 +318,7 @@ ORDER BY iflevels.updated desc `;
 /**
 	Get IfAnswers for the passed section and level.
 */
-router.get('/answers?', nocache, user_require_logged_in,
+router.get('/answers', nocache, user_require_logged_in,
 	async (req: Request, res: Response, next: NextFunction): Promise<any> => {
 	try {
 		const username = user_get_username_or_emptystring(req, res);
@@ -386,7 +386,7 @@ ORDER BY iflevels.updated desc `;
 	
 	If the param username is passed, then return that user's information only.
 */
-router.get('/grades?', nocache, user_require_logged_in,
+router.get('/grades', nocache, user_require_logged_in,
 	async (req: Request, res: Response, next: NextFunction): Promise<any> => {
 	try {
 		let sql = ''; 
