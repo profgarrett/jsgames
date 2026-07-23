@@ -80,7 +80,7 @@ async function run_mysql_query(sql: string, values?: Array<any>): Promise<Array<
 		if(DEBUG) {
 			console.error('Error in run_mysql_query: ' + error.code + ' ' + error.sqlMessage);
 		}
-		throw new Error('Error in run_mysql_query: ' + error.code + ' ' + error.sqlMessage);
+		throw error;
 	} finally {
 		// If we have a connection, close it.
 		if(connection && connection.end) {
@@ -213,8 +213,12 @@ async function _update_get_version(): Promise<any> {
 		return result[0].idversion;
 	}
 	catch( e: any ) {
-		// since version table isn't created, assume 0 version.
-		if(e.code === 'ER_NO_SUCH_TABLE') return 0; 
+		// if version table isn't created, assume 0 version.
+		if(e.code === 'ER_NO_SUCH_TABLE'){ 
+			console.log('No table found, assuming need to install');
+			return 0;
+		}
+		console.error('Error in _update_get_version: ' + e.code + ' ' + e.sqlMessage);
 		throw new Error(e.code);
 	}
 }

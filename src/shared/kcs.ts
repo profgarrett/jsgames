@@ -1,6 +1,5 @@
 import { parseFeedback } from './parseFeedback';
 
-const DEBUG = false;
 
 
 /**
@@ -37,18 +36,6 @@ const get_function_kcs = ( solution_f: string ): Array<any> => {
 	return kcs;
 };
 
-
-if(DEBUG) {
-	const f_tests = [
-		{ kc: 'FUNCTION_RANGE', solution_f: '=sum(1)' },
-		{ kc: 'FUNCTION_RANGE', solution_f: '=sum(1)+min(1)' },
-	];
-
-	f_tests.map( test => {
-		const result = get_function_kcs( test.solution_f )[0].tag === test.kc;
-		if(!result) console.log([ 'FAILED TEST', test.kc, get_function_kcs( test.solution_f )[0] ]);
-	});
-}
 
 
 const RULES = [
@@ -140,22 +127,6 @@ const RULES = [
 	},
 ];
 
-// Test out complexity rules.
-if(DEBUG) {
-	console.log('TESTING COMPLEXITY');
-
-	RULES.map( rule => {
-		rule.tests.map( t => {
-			let triggered = rule.if(t.solution_f, parseFeedback(t.solution_f) );
-			if( triggered !== t.triggered ) {
-				console.log('Failed rule '+rule.tag);
-				console.log(t);
-				console.log(parseFeedback(t.solution_f));
-			}
-		});
-	});
-}
-
 
 // Return a complexity analysis of the ideal solution.
 function get_kcs( page: any  ): Array<Object> {
@@ -193,4 +164,6 @@ function get_kcs( page: any  ): Array<Object> {
 	//return kcs;
 }
 
-export { get_kcs }
+// get_function_kcs and RULES are exported for the test suite (test/kcs.test.cjs).
+// They are not used elsewhere at runtime; get_kcs remains the public entry point.
+export { get_kcs, get_function_kcs, RULES }

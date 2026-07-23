@@ -30,7 +30,7 @@ export const MYSQL_DATABASE = 'jsgames_excel_fun';
 export conast MYSQL_DEBUG_QUERIES = false;
 export const BUGSNAG_API = '';
 export const DEBUG = true;
-export const VERSION = 4;
+export const VERSION = 5;
 
 export const EMAIL_ADDRESS = 'nathan@excel.fun';
 export const EMAIL_PASSWORD = '';

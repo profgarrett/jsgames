@@ -1,7 +1,6 @@
-///
-// DUPLICATE OF SHARED FILE - @FIXME
-
-
+// Canonical formula parser for the app. Imported by src/shared (feedback, kcs)
+// and src/server (tag.ts via ../shared/parseFeedback). A former duplicate at
+// src/server/parseFeedback.js was removed as dead code.
 
 // Parser is used by permission from URL below.
 // 
