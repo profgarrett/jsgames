@@ -5,17 +5,21 @@
 import express from 'express';
 const router = express.Router();
 import crypto from 'crypto';
+import { OAuth2Client } from 'google-auth-library';
 
 import { from_utc_to_myql, run_mysql_query, to_utc } from './mysql';
 import { send_email } from './email';
-import { 
-		hash_password, is_matching_mysql_user, nocache, 
-		user_logout, user_login, 
-		user_require_admin, user_get_username_or_emptystring, 
-		log_error, 
+import {
+		hash_password, is_matching_mysql_user, nocache,
+		user_logout, user_login,
+		user_require_admin, user_get_username_or_emptystring,
+		log_error,
 		user_require_logged_in} from './network';
 
-import { ADMIN_OVER_PASSWORD } from './secret'; 
+import { ADMIN_OVER_PASSWORD, GOOGLE_CLIENT_ID } from './secret';
+
+// Client used to verify Google ID tokens sent from the browser.
+const google_client = new OAuth2Client(GOOGLE_CLIENT_ID);
 
 interface IStringIndexJsonObject {
 	[key: string]: any
@@ -45,6 +49,52 @@ const type_params = ( body: any, params: Array<string> ): any => {
 	}
 
 };
+
+
+// Pull the client IP from the request (behind a proxy, via x-forwarded-for).
+function get_request_ip( req: Request ): string {
+	const ip_long =
+		typeof req.headers['x-forwarded-for'] === 'undefined'
+			? ''
+			: req.headers['x-forwarded-for'] || '';
+	return to_string_from_possible_array(ip_long).substr(0, 255);
+}
+
+
+/*
+	Resolve a section join code to an idsection.
+
+	@code   section join code. '' means "no section".
+
+	Returns { idsection: number } for a valid code, { idsection: null } for an
+	empty code, or { error: 'InvalidCode' } if the code does not match a section.
+*/
+async function resolve_section_code(
+	code: string
+): Promise<{ idsection?: number | null, error?: string }> {
+	if( code.length === 0 ) return { idsection: null };
+
+	const sql_select_idsection = 'SELECT idsection FROM sections WHERE LOWER(code) = ?';
+	const rows = await run_mysql_query(sql_select_idsection, [code.toLowerCase()]);
+	if( rows.length === 0 ) return { error: 'InvalidCode' };
+	return { idsection: rows[0].idsection };
+}
+
+
+/*
+	Ensure a user belongs to a section (idempotent). Adds a 'student' membership row
+	only if one does not already exist, so re-supplying a join code is harmless.
+*/
+async function ensure_section_membership( iduser: number, idsection: number ): Promise<void> {
+	const existing = await run_mysql_query(
+		'SELECT idusers_sections FROM users_sections WHERE iduser = ? AND idsection = ? LIMIT 1',
+		[iduser, idsection]);
+	if( existing.length > 0 ) return;
+
+	await run_mysql_query(
+		`INSERT INTO users_sections (iduser, idsection, role) VALUES (?, ?, ?)`,
+		[iduser, idsection, 'student']);
+}
 
 
 ////////////////////////////////////////////////////////////////////////
@@ -125,11 +175,13 @@ Excel.fun Administrator
 `;
 
 		// See if there is a valid email username in the system.
-		const select_sql = 'SELECT iduser FROM users where username = ?';
+		// Only password (non-Google) accounts may reset a password; Google accounts
+		// authenticate through Google and have no usable password.
+		const select_sql = "SELECT iduser FROM users where username = ? AND auth_provider = 'password'";
 		const select_results = await run_mysql_query(select_sql, [username]);
 
 		// Make sure a user matches the given username/email. If not, don't continue.
-		if(select_results.length == 0) { 
+		if(select_results.length == 0) {
 			res.json({ success: false });
 			return;
 		}
@@ -166,10 +218,11 @@ router.post('/passwordreset',
 		// Check length of password.
 		if(password.length < 8) return res.json({ error: 'Invalid password', logged_in: false });
 
-		// See if we have matching information.
-		const sql_select_user = `SELECT distinct users.iduser, users.username FROM users 
+		// See if we have matching information. Only password (non-Google) accounts
+		// may complete a reset, even if a code somehow exists for a Google account.
+		const sql_select_user = `SELECT distinct users.iduser, users.username FROM users
 			inner join passwordresets on users.iduser = passwordresets.iduser
-			where passwordresets.code = ? AND used = 0`;
+			where passwordresets.code = ? AND used = 0 AND users.auth_provider = 'password'`;
 
 		const select_user_results = await run_mysql_query(sql_select_user, [passwordreset]);
 		if(select_user_results.length !== 1) return res.json({ error: 'No matching reset codes. Have you already reset your password?', logged_in: false });
@@ -218,14 +271,15 @@ router.post('/profileupdate',
 		if(password.length < 8) return res.json({ error: 'Invalid password, it must be at least 8 characters', logged_in: true });
 		if(password === username) return res.json({ error: 'Invalid password, it can not be the same as your username', logged_in: true });
 
-		// See if we have matching information.
-		const sql_select_user = `SELECT distinct users.iduser, users.username FROM users where username = ?`;
+		// See if we have matching information. Only password (non-Google) accounts may
+		// set a password; Google accounts authenticate through Google and never hold one.
+		const sql_select_user = `SELECT distinct users.iduser, users.username FROM users where username = ? AND auth_provider = 'password'`;
 
 		const select_user_results = await run_mysql_query(sql_select_user, [username]);
-		if(select_user_results.length !== 1) return res.json({ error: 'No matching users found.', logged_in: false });
+		if(select_user_results.length !== 1) return res.json({ error: 'Password changes are not available for Google accounts.', logged_in: true });
 		const iduser = select_user_results[0].iduser;
 
-		// Change password on user 
+		// Change password on user
 		const sql_update_user = 'UPDATE users SET hashed_password = ? WHERE iduser = ?';
 		const sql_update_user_results = await run_mysql_query(sql_update_user, [hashedpassword, iduser]);
 		if(sql_update_user_results.changedRows !== 1) return res.sendStatus(500);
@@ -305,8 +359,17 @@ router.get('/login/status',
 });
 
 
+//	Public client config. The Google client id is not secret (it is exposed in the
+//	browser by design), so we hand it to the client rather than hardcoding it twice.
+router.get('/config',
+	nocache,
+	(req: Request, res: Response) => {
+	res.json({ google_client_id: GOOGLE_CLIENT_ID });
+});
+
+
 //	Login user.
-router.post('/login', 
+router.post('/login',
 	nocache, 
 	async (req: Request, res: Response, next: NextFunction): Promise<any> => {
 	try {
@@ -330,6 +393,93 @@ router.post('/login',
 
 
 
+//	Login (or auto-create) a user with a Google account.
+//	The browser obtains a Google ID token ("credential") via Google Identity Services
+//	and posts it here. We verify it server-side, then match/create/bind the account.
+router.post('/google_login',
+	nocache,
+	async (req: Request, res: Response, next: NextFunction): Promise<any> => {
+	try {
+		const params: any = type_params(req.body, ['credential', 'section_code']);
+
+		// 1. Verify the ID token with Google (checks signature, audience, and expiry).
+		const ticket = await google_client.verifyIdToken({
+			idToken: params.credential,
+			audience: GOOGLE_CLIENT_ID,
+		});
+		const payload = ticket.getPayload();
+
+		// Require a verified email. Reject anything else.
+		if( !payload || !payload.email || payload.email_verified !== true ) {
+			return res.sendStatus(401);
+		}
+
+		const email = payload.email.toLowerCase().trim();
+		const sub = payload.sub;
+
+		// 2. Validate the join code up front (if any). This applies whether the account
+		//    is being created now or already exists, so a returning user who supplies a
+		//    code still gets added to that section.
+		const section = await resolve_section_code(params.section_code);
+		if( section.error === 'InvalidCode' ) return res.json({ success: false, error: 'InvalidCode' });
+
+		// 3. Find the account: prefer the immutable google_sub binding, then fall back
+		//    to email (the first-time / migration case, since usernames are emails).
+		let rows = await run_mysql_query(
+			'SELECT iduser, username, google_sub FROM users WHERE google_sub = ? LIMIT 1', [sub]);
+		if( rows.length === 0 ) {
+			rows = await run_mysql_query(
+				'SELECT iduser, username, google_sub FROM users WHERE username = ? LIMIT 1', [email]);
+		}
+
+		let iduser: number;
+		let login_username: string;
+
+		if( rows.length === 0 ) {
+			// 4a. New user: create it with an unusable random password (no section yet).
+			const password = 'g' + crypto.randomBytes(24).toString('hex');
+			const hashed_password = hash_password(password);
+			const insert_results = await run_mysql_query(
+				'INSERT INTO users (username, hashed_password, ip, google_sub, auth_provider) VALUES (?, ?, ?, ?, ?)',
+				[email, hashed_password, get_request_ip(req), sub, 'google']);
+			if( insert_results.affectedRows !== 1 ) return res.sendStatus(500);
+			iduser = insert_results.insertId;
+			login_username = email;
+
+		} else {
+			iduser = rows[0].iduser;
+			// Use the stored username for existing accounts (keeps their data linkage
+			// stable if they later change their Google email).
+			login_username = rows[0].username;
+
+			// Existing password user signing in with Google for the first time: bind it.
+			if( !rows[0].google_sub ) {
+				await run_mysql_query(
+					`UPDATE users SET google_sub = ?, auth_provider = 'google' WHERE iduser = ?`,
+					[sub, iduser]);
+			}
+		}
+
+		// 5. If a valid join code was supplied, add them to that section (idempotent).
+		//    Works for brand-new and returning users alike.
+		if( section.idsection != null ) {
+			await ensure_section_membership(iduser, section.idsection);
+		}
+
+		// 6. Log in exactly like the password path.
+		await user_login(login_username, '', req, res);
+
+		return res.json({ username: login_username, logged_in: true });
+	}
+	catch (e) {
+		log_error(e);
+		next(e);
+	}
+});
+
+
+
+
 // Grab first item from query.
 // any = ParsedQs from req.query.code
 function to_string_from_possible_array( s: string | string[] | any ): string {
@@ -343,134 +493,9 @@ function to_string_from_possible_array( s: string | string[] | any ): string {
 }
 
 
-//  Create a user.
-router.post('/create_user', 
-	nocache, 
-	async (req: Request, res: Response, next: NextFunction): Promise<any> => {
-	try {
-		const params: any = type_params( req.body, ['username', 'section_code']);
-		// If an empty username/password was passed, then create a random user and password.
-		const isAnon = params.username === '';
-		const username = isAnon ? 'anon' + Math.floor(Math.random()*900000000000) : (''+params.username).toLowerCase().trim();
-		const password = 'p' + Math.floor(Math.random()*900000000000);
-		const hashed_password = hash_password(password);
-		let code = params.section_code;
-		
-		// Do some basic checking on the username.
-		const BANNED = [ '<', '>', '=', '\'', '"', '/', '\\'];
-		for(let i=0; i<BANNED.length; i++) {
-			if(username.indexOf(BANNED[i]) !== -1) {
-				return res.json({ success: false, error: 'BadUsername'}); 
-			}
-		}
-
-		// Make sure that username is an email
-		// Very simple regex, string@string.string
-		if( !isAnon ) {
-			var re = /\S+@\S+\.\S+/;
-			if(!re.test(username)) {
-				return res.json({ success: false, error: 'BadUsername'}); 
-			}
-
-			if(username.length < 3) {
-				return res.json({ success: false, error: 'BadUsername'}); 	
-			}
-		}
-
-		
-		// Make sure that that user doesn't already exists.
-		const sql_select_user = `SELECT distinct iduser, username FROM users 
-			where username = ? `; //and used = 0
-
-		const select_user_results = await run_mysql_query(sql_select_user, [username]);
-		if(select_user_results.length > 0) {
-			return res.json({ success: false, error: 'ExistingUser'});
-		}
-
-		// If we have any code, make sure that it works and is valid.
-		let idsection = '';
-
-		// If a  user was passed without a code, add to find the anonymous group.
-		
-		if(code === '') code = 'anonymous'; 
-
-		if(code.length > 0) {
-			// Find section join code (if present)
-			const sql_select_idsection = 'SELECT idsection FROM sections WHERE LOWER(code) = ?';
-			const select_idsection_results = await run_mysql_query(sql_select_idsection, [code.toLowerCase()]) ;
-
-			if(select_idsection_results.length === 0 && code !== '') {
-				return res.json({ success: false, error: 'InvalidCode'});
-			} else {
-				idsection = select_idsection_results[0].idsection;
-			}
-		}
-
-//return res.json({ success: false, error: '?', u: username, c: code, p: password, i: isAnon, idsection: idsection });
-
-		// All validation is passed! Create records.
-
-		// Create the user account.
-		/* const ip =  typeof req.connection.remoteAddress === 'string' 
-			? req.connection.remoteAddress.substr(0, 255)
-			: ''; */
-		
-		const ip_long = 
-			typeof req.headers['x-forwarded-for'] === 'undefined' 
-				? '' 
-				: req.headers['x-forwarded-for'] || '';
-		const ip =   to_string_from_possible_array(ip_long).substr(0,255);
-
-		let user = { username: username, hashed_password: hashed_password, ip: ip };
-		const insert_sql = 'INSERT INTO users (username, hashed_password, ip) VALUES (?, ?, ?)';
-		let insert_results = await run_mysql_query(insert_sql, [user.username, user.hashed_password, ip]);
-			
-		if(insert_results.affectedRows !== 1) return res.sendStatus(500);
-		const iduser = insert_results.insertId;
-
-
-		// If we have any code, then create the new row.
-		if(code.length > 0) {
-			// Add id section
-			const insert_section_id_sql = `INSERT INTO users_sections (iduser, idsection, role) 
-				VALUES (?, ?, ?)`;
-			const insert_section_id_results = await run_mysql_query(insert_section_id_sql, [iduser, idsection, 'student']);
-			if(insert_section_id_results.affectedRows < 0 ) {
-				return res.sendStatus(500);
-			}
-		}
-
-		// Login the user.
-		const login_results = await user_login(username, password, req, res); 
-		const created = from_utc_to_myql(to_utc(new Date()));
-
-		// setup email
-		if( !isAnon) {
-				//const reset_code = crypto.randomBytes(12).toString('hex');
-				const message = `Hello ${username};
-
-Thanks for creating an account on Excel.fun. If you ever need help logging in, please visit http://excel.fun/password
-
-If you have any questions, feel free to email me.
-
-Nathan Garrett, 
-Excel.fun Administrator
-		`;
-
-			// Send email to setup password as long as have a @ symbol.
-			if(user.username.indexOf('@') !== -1) {
-				await send_email( user.username, 'New account at Excel.fun', message);
-			}
-		}
-
-		return res.json({ success: false, username: username, logged_in: true, 'test': true });
-
-	}
-	catch (e) {
-		log_error(e);
-		next(e);
-	}
-});
+// NOTE: Manual account creation has been removed. Accounts are created only via
+// Google sign-in (POST /google_login). The former POST /create_user endpoint was
+// deleted so accounts cannot be created by directly posting to the API.
 
 
 const app_users = router;

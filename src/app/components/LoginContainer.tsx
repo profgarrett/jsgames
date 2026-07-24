@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Container, Row, Col, Card, Alert, Navbar } from 'react-bootstrap';
-import LoginCreateUser from './LoginCreateUser';
 import LoginCurrentUser from './LoginCurrentUser';
+import LoginGoogle from './LoginGoogle';
 import { Loading } from './Misc';
 import { Link, useNavigate } from 'react-router-dom';
 
@@ -106,13 +106,12 @@ export default function LoginContainer() {
 	}
 
 
-	const create_user = (username: string, section_code: string) => {
-		setMessage('Please wait while we create your account.');
+	const google_login = (credential: string, section_code: string) => {
+		setMessage('Please wait while we log you in.');
 		setMessageStyle( 'info' );
+		setIsLoading(true);
 
-
-		// Fire AJAX.
-		fetch('/api/users/create_user/', {
+		fetch('/api/users/google_login/', {
 				method: 'POST',
 				credentials: 'include',
 				mode: 'same-origin',
@@ -120,42 +119,32 @@ export default function LoginContainer() {
 					'Accept': 'application/json',
 					'Content-Type': 'application/json'
 				},
-				body: JSON.stringify({ username, section_code })
+				body: JSON.stringify({ credential, section_code })
 			})
-			.then( response => response.json() )
+			.then( response => {
+				if(response.status === 403 || response.status === 401) {
+					throw Error('Google sign-in was not accepted. Please try again.');
+				}
+				return response.json();
+			})
 			.then( json => {
-				if(json.error) throw new Error(json.error); 
+				if(json.error) throw new Error(json.error);
 
-				setMessage('Success creating your account!  If you provided an email, you will receive a link to verify your account.')
-				setMessageStyle('success')
-		
+				setMessage( 'Success logging in!');
+				setMessageStyle( 'success' );
+				setIsLoading(false);
+
 				setTimeout( () => {
-					// See if we should prompt the user to create a password after creating (i.e., for non-anon users)
-					if(username.length > 0 && username.indexOf('@') !== -1) {
-						if(url_with_hypthens.length > 2) {
-							navigate('/profile?url='+url_with_hypthens);
-						} else {
-							// Real user, go to profile page
-							navigate('/profile');
-						}
-					} else {
-						// Anon user, just go to URL
-						navigate('/'+url);
-					}
-				}, location.host === 'localhost:8080' ? 1000 : 0);  // short delay if we're developing.
-				
+					navigate('/'+url);
+				}, location.host === 'localhost:8080' ? 1000 : 0);
 			})
 			.catch( error => {
 				setMessage( error.message );
 				setMessageStyle( 'danger' );
 				setIsLoading(false);
-			});
+		});
 	}
 
-	// TODO: FIX
-	//if(isAMT) {
-	//	create_user('', 'amt');
-	//}
 
 	let messageAlert;
 
@@ -196,26 +185,31 @@ return (
 				<Loading loading={isLoading } />
 				{ messageAlert }
 
-				<Row>
-					<Col sm={7}>
+				<Row className='mb-3'>
+					<Col>
 						<Card>
 						<div className='card'>
 						<div className='card-body'>
-							<div className='card-title h4'>Current user login</div>
+							<div className='card-title h4'>Sign in with Google</div>
 							<div className='card-text'>
-								<LoginCurrentUser submit={login} disabled={isLoading} />
+								<div className='mt-2'>
+									<LoginGoogle submit={google_login} disabled={isLoading} />
+								</div>
 							</div>
 						</div>
 						</div>
 						</Card>
 					</Col>
-					<Col sm={5}>
+				</Row>
+
+				<Row>
+					<Col sm={7}>
 						<Card>
-						<div className='card bg-dark text-white'>
+						<div className='card'>
 						<div className='card-body'>
-							<div className='card-title h6'>Create a new account</div>
+							<div className='card-title h6'>Administrator Login</div>
 							<div className='card-text'>
-								<LoginCreateUser submit={create_user} disabled={isLoading} />
+								<LoginCurrentUser submit={login} disabled={isLoading} />
 							</div>
 						</div>
 						</div>

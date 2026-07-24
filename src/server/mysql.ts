@@ -20,6 +20,7 @@ import { sql15 } from './../../sql/sql15.js';
 import { sql16 } from './../../sql/sql16.js';
 import { sql17 } from './../../sql/sql17.js';
 import { sql18 } from './../../sql/sql18.js';
+import { sql19 } from './../../sql/sql19.js';
 
 
 /**
@@ -162,6 +163,7 @@ async function update_mysql_database_schema(): Promise<any> {
 	if(old_version < 16 ) await _update_update_version( sql16 );
 	if(old_version < 17 ) await _update_update_version( sql17 );
 	if(old_version < 18 ) await _update_update_version( sql18 );
+	if(old_version < 19 ) await _update_update_version( sql19 );
 
 	await _update_all_levels_to_latest_props();
 	

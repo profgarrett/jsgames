@@ -21,24 +21,31 @@ The Bugsnag API is optional, or use DEBUG. Local bugs are pushed to a log.txt fi
 The garrettn role is a super administration by default.
 
 ```javascript
-export const ADMIN_USERNAME = '';
-export const JWT_AUTH_SECRET = '';
-export const MYSQL_USER = '';
-export const MYSQL_PASSWORD = '';
-export const MYSQL_HOST = 'localhost';
-export const MYSQL_DATABASE = 'jsgames_excel_fun';
-export conast MYSQL_DEBUG_QUERIES = false;
-export const BUGSNAG_API = '';
 export const DEBUG = true;
 export const VERSION = 5;
+
+export const ADMIN_USERNAME = 'profgarrett';
+export const ADMIN_OVER_PASSWORD = '';
+export const TEST_USERNAME = 'profgarrett+test@gmail.com';
+export const TEST_PASSWORD = '';
+
+export const USER_CREATION_SECRET = '';
+export const JWT_AUTH_SECRET = '';
+export const GOOGLE_CLIENT_ID ='';
+
+export const MYSQL_USER = 'jsgamesuser';
+export const MYSQL_PASSWORD = '';
+export const MYSQL_HOST = 'localhost';
+export const MYSQL_DATABASE = 'jsgames_dev'; // 'excel_fun';
+export const MYSQL_DEBUG_QUERIES = false; // Set to true to log all MySQL queries for debugging purposes
+
+export const BUGSNAG_API = '';
 
 export const EMAIL_ADDRESS = 'nathan@excel.fun';
 export const EMAIL_PASSWORD = '';
 export const EMAIL_HOST = 'mail.excel.fun';
 export const EMAIL_REPLYTO = 'profgarrett@gmail.com';
 export const EMAIL_PORT = 465;
-
-export const ADMIN_OVER_PASSWORD = '';
 ```
 
 Note that garrettn is also hard-coded as an admin in the code. This is used for testing and development purposes. Please search+replace to update.
@@ -51,6 +58,9 @@ const ADMIN_OVER_PASSWORD = '';
 
 module.exports = {
     ADMIN_USERNAME,
+    TEST_USERNAME,
+    GOOGLE_CLIENT_ID,
+    TEST_PASSWORD,
     USER_CREATION_SECRET,
     JWT_AUTH_SECRET,
     MYSQL_USER,
@@ -94,8 +104,6 @@ Next, run a build. This is required for any static files, even when in developme
 ```bash
 ./build.sh
 ```
-
-Add a section with 'anonymous' as its code. New users w/o a username will be added to this group.
 
 ## Database Setup
 
