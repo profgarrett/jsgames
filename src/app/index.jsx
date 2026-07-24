@@ -22,6 +22,7 @@ import LevelRawContainer from './if/LevelRawContainer';
 import PreviewContainer from './if/PreviewContainer';
 import FeedbackContainer from './if/FeedbackContainer';
 import FeedbackRouter from './if/FeedbackRouter';
+import { loadUserFromServer } from './components/Authentication';
 
 /*
 function ErrorPage() {
@@ -54,32 +55,38 @@ function ErrorPage() {
 	*/
 // 				<Route path="/ifgame/*" element={<Root />} />
 
-ReactDOM.createRoot(document.getElementById("root")).render(
-	<React.StrictMode>
-			<BrowserRouter>
-				<Routes>
-					<Route path="/" element={<PreviewContainer />} />
-					<Route path="/login" element={<LoginContainer />} />
-					<Route path="/logout" element={<Logout />} />
-					<Route path="/profile" element={<ProfileContainer />} />
-					<Route path="/password" element={<PasswordContainer />} />
+function renderApp() {
+	ReactDOM.createRoot(document.getElementById("root")).render(
+		<React.StrictMode>
+				<BrowserRouter>
+					<Routes>
+						<Route path="/" element={<PreviewContainer />} />
+						<Route path="/login" element={<LoginContainer />} />
+						<Route path="/logout" element={<Logout />} />
+						<Route path="/profile" element={<ProfileContainer />} />
+						<Route path="/password" element={<PasswordContainer />} />
 
-					<Route path="/ifgame" element={<MyProgressContainer />} />
-					<Route path="/ifgame/levels/:_code" element={<LevelListContainer />} />
-					<Route path="/ifgame/level/:_id/debug" element={<LevelDebugContainer />} />
-					<Route path="/ifgame/level/:_id/play" element={<LevelPlayContainer />} />
-					<Route path="/ifgame/level/:_id/score" element={<LevelScoreContainer />} />
-					<Route path="/ifgame/level/:_id/raw" element={<LevelRawContainer />} />
-					<Route path="/ifgame/progress/:_idsection" element={<ClassProgressContainer />} />
-					<Route path="/ifgame/kcs/:_idsection" element={<KCContainer />} />
-					<Route path="/ifgame/questions/:_idsection" element={<QuestionsContainer />} />
-					<Route path="/ifgame/recent/:_idsection" element={<RecentContainer />} />
-					<Route path="/ifgame/feedback/:_sectionid" element={<FeedbackContainer />} />
-					<Route path="/ifgame/feedback/create/:_code" element={<FeedbackRouter />} />
-				</Routes>
-			</BrowserRouter>
-	</React.StrictMode>
-  );
+						<Route path="/ifgame" element={<MyProgressContainer />} />
+						<Route path="/ifgame/levels/:_code" element={<LevelListContainer />} />
+						<Route path="/ifgame/level/:_id/debug" element={<LevelDebugContainer />} />
+						<Route path="/ifgame/level/:_id/play" element={<LevelPlayContainer />} />
+						<Route path="/ifgame/level/:_id/score" element={<LevelScoreContainer />} />
+						<Route path="/ifgame/level/:_id/raw" element={<LevelRawContainer />} />
+						<Route path="/ifgame/progress/:_idsection" element={<ClassProgressContainer />} />
+						<Route path="/ifgame/kcs/:_idsection" element={<KCContainer />} />
+						<Route path="/ifgame/questions/:_idsection" element={<QuestionsContainer />} />
+						<Route path="/ifgame/recent/:_idsection" element={<RecentContainer />} />
+						<Route path="/ifgame/feedback/:_sectionid" element={<FeedbackContainer />} />
+						<Route path="/ifgame/feedback/create/:_code" element={<FeedbackRouter />} />
+					</Routes>
+				</BrowserRouter>
+		</React.StrictMode>
+	  );
+}
+
+// Load the current user (httpOnly cookie => must ask the server) before first render,
+// so getUserFromBrowser() returns the right identity synchronously everywhere.
+loadUserFromServer().finally(renderApp);
 
 //		<ErrorBoundary>
 

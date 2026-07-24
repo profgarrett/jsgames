@@ -1025,7 +1025,7 @@ export class LevelScoreChart extends React.Component<LevelPropsType> {
 
 		const user = getUserFromBrowser();
 
-		const details = (user.username === 'garrettn')
+		const details = (user.username === 'profgarrett')
 			? <div><h3>Detailed Results</h3>
 						{ results.map( r => r.divs ) }</div>
 			: <></>;

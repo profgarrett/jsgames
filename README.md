@@ -18,7 +18,7 @@ Create a secret.js file in the root/src/server folder. Create a secret.distribut
 
 The Bugsnag API is optional, or use DEBUG. Local bugs are pushed to a log.txt file by default.
 
-The garrettn role is a super administration by default.
+The profgarrett role is a super administration by default.
 
 ```javascript
 export const DEBUG = true;
@@ -48,7 +48,7 @@ export const EMAIL_REPLYTO = 'profgarrett@gmail.com';
 export const EMAIL_PORT = 465;
 ```
 
-Note that garrettn is also hard-coded as an admin in the code. This is used for testing and development purposes. Please search+replace to update.
+Note that profgarrett is also hard-coded as an admin in the code. This is used for testing and development purposes. Please search+replace to update.
 
 You also need to setup a secret.distribution.js file in the root folder. This is used by the deploy script (which you'll need to adjust to your own deployment). It should look like this:
 

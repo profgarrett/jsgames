@@ -53,7 +53,7 @@ router.get('/questions/', nocache, user_require_logged_in,
 		// Only allow faculty to have access to questions
 		const username = user_get_username_or_emptystring(req, res);
 
-		if(username !=='garrettn') throw new Error('Only admins have access to this report');
+		if(username !=='profgarrett') throw new Error('Only admins have access to this report');
 
 		const is_faculty_result = await is_faculty(username);
 		if(!is_faculty_result) throw new Error('User do not have permission to review questions');

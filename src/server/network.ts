@@ -137,7 +137,9 @@ function session_initialize() {
 		name: 'session',
 		keys: [ JWT_AUTH_SECRET ],
 		maxAge: 356 * 24 * 60 * 60 * 1000, // 356 days
-		httpOnly: false,
+		httpOnly: true,           // not readable by client JS (mitigates XSS cookie theft)
+		sameSite: 'lax',          // sent on top-level navigations, not cross-site requests
+		secure: !DEBUG,           // require HTTPS in production; allow http on localhost dev
 	});
 
 }
@@ -187,12 +189,17 @@ function user_logout(req, res) {
 	Middleware requiring the user to be an admin.
 */
 function user_require_admin( req, res, next: NextFunction): any {
-	if( 	req.session.username != '' && 
+	if( 	req.session.username != '' &&
 			req.session.username == ADMIN_USERNAME ) {
 		 next();
 	} else {
 		return res.sendStatus(401);
 	}
+}
+
+// Is the current session an admin? Single source of truth for the admin check.
+function user_get_isadmin( req ): boolean {
+	return req.session.username === ADMIN_USERNAME;
 }
 
 /**
@@ -242,7 +249,7 @@ function user_require_logged_in(req, res: Response, next: NextFunction): any {
 // Log the user in.
 async function user_login(username: string, password: string, req, res) {
 	req.session.username = username;
-	req.session.isAdmin = username == ADMIN_USERNAME || "garrettn";
+	req.session.isAdmin = username === ADMIN_USERNAME;
 	/*
 	const options = {
 		maxAge: 3*2600000,
@@ -328,6 +335,7 @@ export {
 	user_logout,
 	user_login,
 	user_get_username_or_emptystring,
+	user_get_isadmin,
 	user_require_logged_in,
 	user_require_admin,
 };

@@ -383,7 +383,7 @@ export default class MyProgress extends React.Component<PropsType, StateType> {
 		// If admin?
 		let feedback_link;
 		let recent_link;
-		if( user.username == 'garrettn' && this.state.section !== null) {
+		if( user.username == 'profgarrett' && this.state.section !== null) {
 			feedback_link = <Link to={'/ifgame/feedback/' + this.state.section.idsection} >
 				<Button size='lg' style={{ marginBottom: 10 }} variant='outline-info'>Feedback</Button>
 			</Link>;

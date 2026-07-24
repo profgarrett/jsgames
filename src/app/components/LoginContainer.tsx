@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Container, Row, Col, Card, Alert, Navbar } from 'react-bootstrap';
 import LoginCurrentUser from './LoginCurrentUser';
 import LoginGoogle from './LoginGoogle';
+import { loadUserFromServer } from './Authentication';
 import { Loading } from './Misc';
 import { Link, useNavigate } from 'react-router-dom';
 
@@ -94,7 +95,8 @@ export default function LoginContainer() {
 				setIsLoading(false);
 
 				setTimeout( () => {
-					navigate('/'+url);
+					// Refresh the cached identity (httpOnly cookie) before navigating.
+					loadUserFromServer().finally( () => navigate('/'+url) );
 				}, location.host === 'localhost:8080' ? 1000 : 0);  // add a short delay if on dev.
 
 			})
@@ -135,7 +137,8 @@ export default function LoginContainer() {
 				setIsLoading(false);
 
 				setTimeout( () => {
-					navigate('/'+url);
+					// Refresh the cached identity (httpOnly cookie) before navigating.
+					loadUserFromServer().finally( () => navigate('/'+url) );
 				}, location.host === 'localhost:8080' ? 1000 : 0);
 			})
 			.catch( error => {

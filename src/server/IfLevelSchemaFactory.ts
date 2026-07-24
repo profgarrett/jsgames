@@ -298,11 +298,11 @@ const IfLevelSchemaFactory = {
 	create: async function(code: string, username: string): Promise<IfLevelSchema> {
 		if(typeof LEVEL_GENS[code] === 'undefined') throw new Error('Invalid type '+code+' passed to IfLevelModelFactory.create');
 
-		const allow_skipping_tutorial = (username === 'garrettnxxx');
+		const allow_skipping_tutorial = (username === 'profgarrettxxx');
 
 		// If we are the admin, or 1/2th of users, then standardize the display 
 		// of formula cases.
-		const standardize_formula_case = false; //random_boolean_from_string(username)  || (username === 'garrettn');
+		const standardize_formula_case = false; //random_boolean_from_string(username)  || (username === 'profgarrett');
 
 		// Give starting values 
 		const defaults = {

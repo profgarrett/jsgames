@@ -12,7 +12,7 @@ import { send_email } from './email';
 import {
 		hash_password, is_matching_mysql_user, nocache,
 		user_logout, user_login,
-		user_require_admin, user_get_username_or_emptystring,
+		user_require_admin, user_get_username_or_emptystring, user_get_isadmin,
 		log_error,
 		user_require_logged_in} from './network';
 
@@ -350,12 +350,12 @@ router.get('/login',
 
 
 // Simple end-point to test if the user is logged in or not.
-router.get('/login/status', 
+router.get('/login/status',
 	nocache,
 	(req: Request, res: Response) => {
 	let u: string = user_get_username_or_emptystring(req, res);
 
-	res.json({ 'logged_in': u!=='', username: u });
+	res.json({ 'logged_in': u!=='', username: u, isAdmin: user_get_isadmin(req) });
 });
 
 

@@ -128,7 +128,7 @@ _render_modal() {
 
         // We're good!
         // If admin, then show build on bottom-right corner. If clicked, force reload.
-        if(user.username === 'garrettn') {
+        if(user.username === 'profgarrett') {
             return <div onClick={ () => { console.log('click'); this.load_version(); } } style={ divStyle}>{this.state.build}</div>
         }
 

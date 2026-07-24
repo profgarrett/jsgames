@@ -24,7 +24,7 @@ import type { Request, Response, NextFunction } from 'express';
 
 
 // List a list of classes that the logged in user has access to.
-// Allow access to all by garrettn (admin)
+// Allow access to all by profgarrett (admin)
 router.get('/sections', 
 	nocache, user_require_logged_in, 
 	async (req: Request, res: Response, next: NextFunction): Promise<any> => {

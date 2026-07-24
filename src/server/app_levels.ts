@@ -260,7 +260,7 @@ router.get(['/level/:id', '/level/:id/:tagged'],
 		const _id = getRouteParamString(req.params.id);
 		const _tagged = getRouteParamString(req.params.tagged, 'false') === 'tagged';
 
-		if(username === 'garrettn' ) {
+		if(username === 'profgarrett' ) {
 			// Allow admin access to any item
 			sql = 'SELECT * FROM iflevels WHERE _id = ?' 
 			params = [_id];
@@ -315,7 +315,7 @@ router.get('/clear_all_profgarrett_test_pages/',
 		const sql = 'DELETE FROM iflevels WHERE username = "test" OR username = "profgarrett+test@gmail.com"'; // AND _id = ?
 		const username = user_get_username_or_emptystring(req, res);
 
-		if(username !== 'profgarrett+test@gmail.com' && username !== 'garrettn') {
+		if(username !== 'profgarrett+test@gmail.com' && username !== 'profgarrett') {
 			return res.sendStatus(401); // unauthorized.
 		}
 

@@ -30,7 +30,7 @@
  *   --verbose         log every lesson/step
  *   --help            show this help
  *
- * The cleanup endpoint only authorizes the test user or `garrettn`, matching
+ * The cleanup endpoint only authorizes the test user or `profgarrett`, matching
  * the README. Only run this against a server you own.
  */
 
