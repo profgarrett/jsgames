@@ -22,6 +22,9 @@ import LevelRawContainer from './if/LevelRawContainer';
 import PreviewContainer from './if/PreviewContainer';
 import FeedbackContainer from './if/FeedbackContainer';
 import FeedbackRouter from './if/FeedbackRouter';
+import PageListContainer from './pages/PageListContainer.tsx';
+import PageSectionContainer from './pages/PageSectionContainer.tsx';
+import PageViewContainer from './pages/PageViewContainer.tsx';
 import { loadUserFromServer } from './components/Authentication';
 
 /*
@@ -65,6 +68,10 @@ function renderApp() {
 						<Route path="/logout" element={<Logout />} />
 						<Route path="/profile" element={<ProfileContainer />} />
 						<Route path="/password" element={<PasswordContainer />} />
+
+						<Route path="/pages" element={<PageSectionContainer />} />
+						<Route path="/pages/list" element={<PageListContainer />} />
+						<Route path="/pages/:slug" element={<PageViewContainer />} />
 
 						<Route path="/ifgame" element={<MyProgressContainer />} />
 						<Route path="/ifgame/levels/:_code" element={<LevelListContainer />} />

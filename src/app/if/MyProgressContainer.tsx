@@ -2,7 +2,7 @@ import React, { useState, useEffect} from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import Container from 'react-bootstrap/Container';
-import { Row, Col, Navbar, Breadcrumb } from 'react-bootstrap';
+import { Row, Col, Navbar, Nav, Breadcrumb } from 'react-bootstrap';
 
 import { Message, Loading } from '../components/Misc';
 import { getUserFromBrowser } from '../components/Authentication';
@@ -52,7 +52,7 @@ export default function MyProgressContainer() {
 
 	// Fetch sections.
 	useEffect(() => {
-		fetch('/api/sections/sections', {
+		fetch('/api/sections', {
 				credentials: 'include'
 			})
 			.then( response => response.json() )
@@ -161,6 +161,9 @@ export default function MyProgressContainer() {
 				<Navbar bg='dark' variant='dark'>
 					<Container fluid>
 						<Navbar.Brand href='/'>Excel.fun</Navbar.Brand>
+						<Nav>
+							<Nav.Link href='/pages'>Pages</Nav.Link>
+						</Nav>
 					</Container>
 				</Navbar>
 				{ crumbs }

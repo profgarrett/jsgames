@@ -21,6 +21,9 @@ npx babel src --out-dir build --presets @babel/preset-typescript --extensions ".
 # This keeps the static version in sync with the build version
 cp node_modules/sql.js/dist/sql-wasm.* static/
 
+# Markdown page content lives in static/pages and is copied along with the
+# rest of the static assets by the next step.
+
 # Copy static files into build folder
 mkdir build/public/static
 cp -r static/* build/public/static/

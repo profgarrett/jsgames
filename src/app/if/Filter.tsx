@@ -141,7 +141,7 @@ export default class Filter extends React.Component<PropsType, ContainerStateTyp
 			});
 
 			// Request.
-			fetch('/api/sections/sections', {
+			fetch('/api/sections', {
 					method: 'get',
 					credentials: 'include',
 					headers: {

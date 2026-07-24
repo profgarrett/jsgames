@@ -493,10 +493,6 @@ function to_string_from_possible_array( s: string | string[] | any ): string {
 }
 
 
-// NOTE: Manual account creation has been removed. Accounts are created only via
-// Google sign-in (POST /google_login). The former POST /create_user endpoint was
-// deleted so accounts cannot be created by directly posting to the API.
-
 
 const app_users = router;
 export {app_users}

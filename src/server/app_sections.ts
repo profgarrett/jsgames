@@ -11,7 +11,7 @@ import { user_require_logged_in, nocache, log_error, user_get_username_or_emptys
 interface IStringIndexJsonObject {
 	[key: string]: any
 }
-		
+
 
 import type { Request, Response, NextFunction } from 'express';
 
@@ -20,12 +20,8 @@ import type { Request, Response, NextFunction } from 'express';
 //  Server-side functions relating to classes.
 ////////////////////////////////////////////////////////////////////////
 
-
-
-
 // List a list of classes that the logged in user has access to.
-// Allow access to all by profgarrett (admin)
-router.get('/sections', 
+router.get('/', 
 	nocache, user_require_logged_in, 
 	async (req: Request, res: Response, next: NextFunction): Promise<any> => {
 	try {
@@ -33,10 +29,12 @@ router.get('/sections',
 
 		if(username === '') throw new Error('Invalid username '+username+' for sections');
 
+		console.log(username+' requesting sections');
+
 		const sql = `SELECT distinct sections.*, users_sections.role FROM users 
 				INNER JOIN users_sections on users.iduser = users_sections.iduser
 			    INNER JOIN sections on users_sections.idsection = sections.idsection
-				WHERE (users.username = ?) AND year >= 2023
+				WHERE (users.username = ?)
 				ORDER BY title`;
 		const params = [username];
 
