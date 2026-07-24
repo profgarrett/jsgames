@@ -9,6 +9,8 @@
   "main": "index.js",
   "scripts": {
     "test": "node --require ./test/register.cjs --test \"test/**/*.test.cjs\"",
+    "loadtest": "node scripts/loadtest.mjs",
+    "createadmin": "node scripts/createadmin.cjs",
     "lint": "eslint.js",
     "deployA": "webpack --config webpack.production.config.js",
     "startreact": "webpack-dev-server --hot --config ./webpack.config.js --static build",

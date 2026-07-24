@@ -84,6 +84,11 @@ Verify:
 - Server (db) works:  http://localhost:9000/api/sql
 - Client (react) works: http://localhost:8080
 
+Tests:
+- npm run test
+- npm run loadtest
+
+
 Next, run a build. This is required for any static files, even when in development mode. This will create a build folder in the root directory.  Note, you probably need to chmod +x deploy.sh to run the script. You'll to update the specifics of the deploy script to your own server.
 
 ```bash
@@ -92,6 +97,19 @@ Next, run a build. This is required for any static files, even when in developme
 
 Add a section with 'anonymous' as its code. New users w/o a username will be added to this group.
 
+## Database Setup
+
+You'll need to setup the MySQL database (on your local test, and on the server).
+
+In your browser, create the db
+```
+http://localhost:9000/api/sql
+```
+
+Setup the admin account. This uses the username and password in the secret.js file.  You can run the following command to create the admin user.  This is only needed once, and should be done after the database is created.
+```bash 
+npm run createadmin
+```
 
 
 ## Deploying
@@ -171,11 +189,27 @@ Website introduction
 
 ## Load Test
 
-Load test uses the user profgarrett+test@gmail.com.
-Hit the api endpoint to remove all test pages when finished.
+Load test uses the user profgarrett+test@gmail.com (or whatever you defined in secret.js).  You can run the load test against localhost or a remote server.  The load test will create and delete pages automatically.  You can also run the load test with multiple concurrent users.
+
+```
+# 1 sequential run against localhost
+TEST_PASSWORD=... npm run loadtest
+
+# 10 concurrent virtual users for 30 seconds against a chosen host
+TEST_PASSWORD=... npm run loadtest -- --url https://excel.fun --concurrency 10 --duration 30
+```
+
+Env: `BASE_URL` (default http://localhost:8080), `TEST_USER`
+(default profgarrett+test@gmail.com), `TEST_PASSWORD` (required).
+Flags: `--concurrency N`, `--iterations N`, `--duration S`, `--url URL`,
+`--no-clean`, `--verbose`, `--help`.
+
+The runner clears test pages automatically when finished (unless `--no-clean`).
+To remove them manually, hit the api endpoint:
 http://localhost:8080/api/levels/clear_all_profgarrett_test_pages
 https://excel.fun/api/levels/clear_all_profgarrett_test_pages
 You must be logged in as profgarrett+test@gmail.com to run this.
+
 
 ## Author
 
