@@ -4,7 +4,7 @@ const assert = require('node:assert');
 const {
 	resolve_selected_section,
 	get_page_for_section,
-} = require('../src/app/pages/PageSectionPicker.js');
+} = require('../src/app/pages/PageSectionPicker.tsx');
 
 describe('page section selection helpers', () => {
 	test('defaults to the first section that has a matching page', () => {

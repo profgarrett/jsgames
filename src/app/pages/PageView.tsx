@@ -1,10 +1,13 @@
-import React, { ReactElement, useEffect, useMemo, useRef } from 'react';
+import React, { ReactElement, useEffect, useMemo, useRef, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeSanitize from 'rehype-sanitize';
+import { Button } from 'react-bootstrap';
 
 import iPage from './iPage';
+import PageFlashcards, { extractFlashcards } from './PageFlashcards';
 import './pageview_toc_style.css'; // Import the CSS file for TOC styling
+import { ImgHTMLAttributes } from 'react';
 
 interface IPageViewProps {
 	page: iPage | null;
@@ -100,34 +103,41 @@ const convert_images_by_adding_folder_path = (markdown: string, slug: string): s
 
 
 
-const CustomImage = ({ alt, src, ...props }) => {
-  // Extract custom ID from alt text if it matches {#id}
-  const idMatch = alt?.match(/\{#([^}]+)\}/);
-  const customId = idMatch ? idMatch[1] : undefined;
-  const cleanAlt = alt?.replace(/\{#[^}]+\}/, '').trim();
 
-  return (
-    <img 
-      src={src} 
-      alt={cleanAlt} 
-      id={customId} 
-      {...props} 
-    />
-  );
+
+const CustomImage: React.FC<ImgHTMLAttributes<HTMLImageElement>> = ({ alt, src = '', ...props }) => {
+	// Extract custom ID from alt text if it matches {#id}
+	const altStr = typeof alt === 'string' ? alt : undefined;
+	const idMatch = altStr?.match(/\{#([^}]+)\}/);
+	const customId = idMatch ? idMatch[1] : undefined;
+	const cleanAlt = altStr?.replace(/\{#[^}]+\}/, '').trim();
+
+	return (
+		<img
+			src={src}
+			alt={cleanAlt}
+			id={customId}
+			{...props}
+		/>
+	);
 };
 
 
 function PageView({ page }: IPageViewProps): ReactElement {
-	if (page === null) return <></>;
-
-	const markdown_content = useMemo(() => convert_images_by_adding_folder_path(page.markdown, page.slug), [page.markdown, page.slug]);
+	// Hooks must run unconditionally on every render, so compute against safe
+	// defaults when page is null and defer the empty-render until after the hooks.
+	const markdown_content = useMemo(() => (page ? convert_images_by_adding_folder_path(page.markdown, page.slug) : ''), [page?.markdown, page?.slug]);
 	const tocEntries = useMemo(() => extractTableOfContents(markdown_content), [markdown_content]);
 	const headingIdMap = useMemo(() => new Map(tocEntries.map((entry) => [normalizeHeadingText(entry.text), entry.id])), [tocEntries]);
+	const flashcards = useMemo(() => extractFlashcards(markdown_content), [markdown_content]);
+	const [showFlashcards, setShowFlashcards] = useState(false);
 	const renderedFirstH1 = useRef(false);
 
 	useEffect(() => {
 		renderedFirstH1.current = false;
 	}, [markdown_content]);
+
+	if (page === null) return <></>;
 
 	const renderHeading = (level: 2 | 3 | 4 | 5 | 6) => ({ children }: { children?: React.ReactNode }) => {
 		const text = getTextContent(children);
@@ -162,6 +172,25 @@ function PageView({ page }: IPageViewProps): ReactElement {
 
 	return (
 		<div className='markdown-page'>
+			{flashcards.length > 0 ? (
+				<div className='pageview-toolbar'>
+					<Button
+						variant={showFlashcards ? 'secondary' : 'outline-secondary'}
+						size='sm'
+						onClick={() => setShowFlashcards((show) => !show)}
+						aria-pressed={showFlashcards}
+					>
+						{ showFlashcards
+							? 'Back to reading'
+							: `Flashcards (${flashcards.length})` }
+					</Button>
+				</div>
+			) : <h1>no terms</h1>}
+
+			{showFlashcards ? (
+				<PageFlashcards markdown={markdown_content} />
+			) : (
+			<>
 			{tocEntries.length > 0 ? (
 				<div id='toc' className='toc'>
 					<div className='toc-block'>
@@ -183,6 +212,8 @@ function PageView({ page }: IPageViewProps): ReactElement {
 			>
 				{ markdown_content }
 			</ReactMarkdown>
+			</>
+			)}
 		</div>
 	);
 }
