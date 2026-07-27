@@ -26,6 +26,7 @@ import PageListContainer from './pages/PageListContainer.tsx';
 import PageSectionContainer from './pages/PageSectionContainer.tsx';
 import PageViewContainer from './pages/PageViewContainer.tsx';
 import { loadUserFromServer } from './components/Authentication';
+import PageviewTracker from './components/PageviewTracker.tsx';
 
 
 // Load Google Analytics gtag.js script and initialize it
@@ -51,6 +52,7 @@ function renderApp() {
 	ReactDOM.createRoot(document.getElementById("root")).render(
 		<React.StrictMode>
 				<BrowserRouter>
+					<PageviewTracker />
 					<Routes>
 						<Route path="/" element={<PreviewContainer />} />
 						<Route path="/login" element={<LoginContainer />} />

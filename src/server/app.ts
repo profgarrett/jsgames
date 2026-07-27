@@ -105,6 +105,9 @@ app.use('/api/users', app_users);
 import { app_pages } from './app_pages';
 app.use('/api/pages', app_pages);
 
+import { app_pageviews } from './app_pageviews';
+app.use('/api/pageviews', app_pageviews);
+
 
 ////////////////////////////////////////////////////////////////////////
 //  Some basic routes.
