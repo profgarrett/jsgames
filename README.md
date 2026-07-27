@@ -81,6 +81,9 @@ module.exports = {
 
 You can modify other settings in /configuration.js
 
+Update the google Tag in /src/app/index.jsx to use your own Google Analytics ID.  You can also remove the Google Analytics code if you don't want to use it.
+
+
 Develop locallly using the following commands (in 2 windows). 
 
 ```bash

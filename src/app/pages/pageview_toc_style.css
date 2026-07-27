@@ -1,0 +1,62 @@
+.toc {
+    padding: 10px;
+    margin: 0px 0px 30px 30px;
+    max-width: 300px;
+    float: right;
+}
+
+.toc-block {
+    padding: 10px;  
+    border: 1px solid #a2a9b1;
+    background-color: #f8f9fa;
+    border-radius: 4px;
+}
+
+.toc-title {
+    font-weight: bold;
+    font-size: 1.1em;
+    margin-bottom: 10px;
+}
+
+.toc-list {
+    list-style: none;
+    padding-left: 0px !important;
+    margin: 0;
+}
+
+.toc-item {
+    margin: 3px 0;
+}
+
+
+/** Center images in markdown body **/
+.markdown-page img {
+    display: block;
+    margin: 0 auto;
+    max-width: 80%;
+    max-height: 500px;
+}
+
+.toc-level-h2 { padding-left: 0; }
+.toc-level-h3 { padding-left: 15px; }
+.toc-level-h4 { padding-left: 30px; }
+.toc-level-h5 { padding-left: 45px; }
+.toc-level-h6 { padding-left: 60px; }
+
+.toc-list a {
+    text-decoration: none;
+    color: #0645ad;
+}
+
+.toc-list a:hover {
+    text-decoration: underline;
+}
+
+#course-logo-container {
+    display: block;
+    margin: 20px auto;
+    height: auto;
+    background-color: #002855;
+    text-align: left;
+    padding: 0px !important;
+}

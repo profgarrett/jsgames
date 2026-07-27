@@ -27,36 +27,25 @@ import PageSectionContainer from './pages/PageSectionContainer.tsx';
 import PageViewContainer from './pages/PageViewContainer.tsx';
 import { loadUserFromServer } from './components/Authentication';
 
-/*
-function ErrorPage() {
-	const error = useRouteError();
-	console.error('Route Error:', error);
-  
-	// Determine error message and status
-	const errorMessage = error?.message || error?.statusText || 'Unknown error occurred';
-	const errorStatus = error?.status || error?.statusText || '';
-  
-	return (
-	  <div id="error-page" style={{ padding: '2rem', textAlign: 'center' }}>
-		<h1>Oops!</h1>
-		<p>Sorry, an unexpected error has occurred. Please contact profgarrett@gmail.com for help.</p>
-		{errorStatus && <p><strong>Status:</strong> {errorStatus}</p>}
-		<p>
-		  <i>{errorMessage}</i>
-		</p>
-		{process.env.NODE_ENV === 'development' && error?.stack && (
-		  <details style={{ textAlign: 'left', marginTop: '1rem' }}>
-			<summary>Error Details (Development)</summary>
-			<pre style={{ whiteSpace: 'pre-wrap', fontSize: '0.8rem' }}>
-			  {error.stack}
-			</pre>
-		  </details>
-		)}
-	  </div>
-	);
+
+// Load Google Analytics gtag.js script and initialize it
+// NOTE: Update the tracking ID to your own Google Analytics property ID
+function loadGtag() {
+    const script = document.createElement('script');
+    script.async = true;
+    script.src = 'https://www.googletagmanager.com/gtag/js?id=G-FW5XCZZEW1';
+    document.head.appendChild(script);
+
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){ dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-FW5XCZZEW1');
 }
-	*/
-// 				<Route path="/ifgame/*" element={<Root />} />
+
+// Wait for the DOM to be fully loaded
+document.addEventListener('DOMContentLoaded', function() {
+    loadGtag();
+});
 
 function renderApp() {
 	ReactDOM.createRoot(document.getElementById("root")).render(
