@@ -8,6 +8,10 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" >
 	<link rel="shortcut icon" href="/static/favicon.ico">
 
+	<!-- Speed up connections to third-party origins before they are requested -->
+	<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+	<link rel="preconnect" href="https://accounts.google.com">
+
 	<!-- force client to reload index. -->
 	<meta http-equiv="cache-control" content="max-age=0" >
 	<meta http-equiv="cache-control" content="no-cache" >
@@ -28,15 +32,27 @@
   crossorigin></script>
 -->
   
+<!-- Bootstrap CSS: preload then swap to stylesheet so it does not block first paint -->
 <link
-  rel="stylesheet"
+  rel="preload"
+  as="style"
   href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css"
   integrity="sha384-SgOJa3DmI69IUzQ2PVdRZhwQ+dy64/BUtbMJw1MZ8t5HZApcHrRKUc4W0kG879m7"
   crossorigin="anonymous"
+  onload="this.onload=null;this.rel='stylesheet'"
 />
+<noscript>
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css"
+    integrity="sha384-SgOJa3DmI69IUzQ2PVdRZhwQ+dy64/BUtbMJw1MZ8t5HZApcHrRKUc4W0kG879m7"
+    crossorigin="anonymous"
+  />
+</noscript>
 
 
-	<script src="/static/sql-wasm.js" ></script>
+	<!-- sql-wasm is only needed lazily (window.initSqlJs) when a SQL exercise runs -->
+	<script src="/static/sql-wasm.js" defer></script>
 
 	<!-- Google Identity Services (Sign in with Google) -->
 	<script src="https://accounts.google.com/gsi/client" async defer></script>

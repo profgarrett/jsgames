@@ -185,7 +185,7 @@ function PageView({ page }: IPageViewProps): ReactElement {
 							: `Flashcards (${flashcards.length})` }
 					</Button>
 				</div>
-			) : <h1>no terms</h1>}
+			) : null}
 
 			{showFlashcards ? (
 				<PageFlashcards markdown={markdown_content} />
