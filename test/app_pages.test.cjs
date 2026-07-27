@@ -23,11 +23,14 @@ describe('is_valid_slug', () => {
 	test('rejects path traversal and unsafe characters', () => {
 		assert.strictEqual(is_valid_slug('../secret'), false);
 		assert.strictEqual(is_valid_slug('..'), false);
-		assert.strictEqual(is_valid_slug('a/b'), false);
 		assert.strictEqual(is_valid_slug('/etc/passwd'), false);
 		assert.strictEqual(is_valid_slug('Welcome'), false); // uppercase
 		assert.strictEqual(is_valid_slug('foo.md'), false);   // dot
 		assert.strictEqual(is_valid_slug(''), false);
+	});
+
+	test('accepts nested slugs inside pages folders', () => {
+		assert.strictEqual(is_valid_slug('course_dv/dv00-files/index'), true);
 	});
 });
 
@@ -51,6 +54,7 @@ describe('list_pages', () => {
 		const slugs = pages.map((p) => p.slug);
 		assert.ok(slugs.includes('welcome'), 'expected welcome page');
 		assert.ok(slugs.includes('getting-started'), 'expected getting-started page');
+		assert.ok(slugs.includes('course_dv/dv00-files/index'), 'expected nested page slug');
 
 		const titles = pages.map((p) => p.title);
 		const sorted = [...titles].sort((a, b) => a.localeCompare(b));
@@ -69,6 +73,20 @@ describe('read_page', () => {
 
 	test('returns null for an unknown slug', () => {
 		assert.strictEqual(read_page('does-not-exist'), null);
+	});
+
+	test('returns markdown for a nested page slug', () => {
+		const page = read_page('course_dv/dv00-files/index');
+		assert.notStrictEqual(page, null);
+		assert.strictEqual(page.slug, 'course_dv/dv00-files/index');
+		assert.ok(page.markdown.length > 0);
+	});
+
+	test('ignores a trailing .md extension when reading page paths', () => {
+		const page = read_page('course_dv/dv00-files/index.md');
+		assert.notStrictEqual(page, null);
+		assert.strictEqual(page.slug, 'course_dv/dv00-files/index');
+		assert.ok(page.markdown.length > 0);
 	});
 
 	test('returns null for a traversal attempt instead of file contents', () => {

@@ -27,9 +27,16 @@ const PAGES_DIR = [
 
 // Slugs map 1:1 to filenames (minus the .md extension). Restrict to a safe
 // charset so a slug can never escape PAGES_DIR via traversal or absolute paths.
-const SLUG_RE = /^[a-z0-9-]+$/;
+const SLUG_RE = /^[a-z0-9_/-]+$/;
 
-const is_valid_slug = (slug: string): boolean => SLUG_RE.test(slug);
+const normalize_slug = (slug: string): string => slug.endsWith('.md') ? slug.slice(0, -3) : slug;
+
+const is_valid_slug = (slug: string): boolean => {
+	if (!SLUG_RE.test(slug)) return false;
+	if (slug.startsWith('/') || slug.endsWith('/')) return false;
+	if (slug.includes('//')) return false;
+	return !slug.split('/').includes('..');
+};
 
 // Derive a display title from the first markdown H1 (`# Title`), falling back
 // to the slug if none is present.
@@ -44,7 +51,23 @@ const extract_title = (markdown: string, slug: string): string => {
 
 // List available pages as [{ slug, title }], sorted by title.
 const list_pages = (): { slug: string; title: string }[] => {
-	const files = fs.readdirSync(PAGES_DIR).filter((f) => f.endsWith('.md'));
+	const files: string[] = [];
+
+	const walk = (dir: string, rel: string): void => {
+		for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+			if (entry.name.startsWith('.')) continue;
+			const entryPath = path.join(dir, entry.name);
+			const entryRel = rel ? `${rel}/${entry.name}` : entry.name;
+
+			if (entry.isDirectory()) {
+				walk(entryPath, entryRel);
+			} else if (entry.isFile() && entry.name.endsWith('.md')) {
+				files.push(entryRel);
+			}
+		}
+	};
+
+	walk(PAGES_DIR, '');
 
 	const pages = files.map((file) => {
 		const slug = file.replace(/\.md$/, '');
@@ -60,14 +83,15 @@ const list_pages = (): { slug: string; title: string }[] => {
 // file does not exist. Re-resolves and confirms the path stays within
 // PAGES_DIR as defense in depth on top of the slug charset check.
 const read_page = (slug: string): { slug: string; title: string; markdown: string } | null => {
-	if (!is_valid_slug(slug)) return null;
+	const normalizedSlug = normalize_slug(slug);
+	if (!is_valid_slug(normalizedSlug)) return null;
 
-	const file = path.join(PAGES_DIR, slug + '.md');
-	if (path.dirname(file) !== PAGES_DIR) return null;
+	const file = path.resolve(PAGES_DIR, normalizedSlug + '.md');
+	if (!file.startsWith(PAGES_DIR + path.sep)) return null;
 	if (!fs.existsSync(file)) return null;
 
 	const markdown = fs.readFileSync(file, 'utf8');
-	return { slug, title: extract_title(markdown, slug), markdown };
+	return { slug: normalizedSlug, title: extract_title(markdown, normalizedSlug), markdown };
 };
 
 
@@ -90,11 +114,12 @@ router.get('/',
 
 
 // Return a single page's raw markdown.
-router.get('/:slug',
+router.get(/^\/(.+)$/, 
 	nocache, user_require_logged_in,
 	async (req: Request, res: Response, next: NextFunction): Promise<any> => {
 	try {
-		const slug = typeof req.params.slug === 'string' ? req.params.slug : '';
+		const rawSlug = (req.params as any)[0];
+		const slug = normalize_slug(typeof rawSlug === 'string' ? rawSlug : '');
 		const page = read_page(slug);
 
 		if (page === null) {

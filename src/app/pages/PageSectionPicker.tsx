@@ -68,13 +68,7 @@ export function PageListSectionPicker(props: PropsType): ReactElement {
 		setSection(selected_section);
 		props.onSelectSection(selected_section);
 	}
-	
-	// Only 1 section
-	//if(props.sections.length <= 1) {
-	//	return <></>;
-	//}
-	console.log(props.sections);
-console.log('PageListSectionPicker: sections.length = ', props.sections.length, ' pages.length = ', props.pages.length, ' selected section = ', section);
+		
 	// Return card.
 	return <>
 		<div className='card' style={{ backgroundColor: '#f5f5f5', marginBottom: 40 }}>

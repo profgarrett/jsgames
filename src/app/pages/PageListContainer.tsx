@@ -89,6 +89,7 @@ export default function PageListContainer(): ReactElement {
 					{ pages.map( p => (
 						<li key={p.slug}>
 							<Link to={'/pages/' + p.slug}>{ p.title }</Link>
+							{ p.slug.includes('/') ? <span style={{ color: '#666', marginLeft: '0.5rem' }}>({p.slug})</span> : null }
 						</li>
 					)) }
 				</ul>

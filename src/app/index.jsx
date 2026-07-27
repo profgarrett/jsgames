@@ -71,7 +71,7 @@ function renderApp() {
 
 						<Route path="/pages" element={<PageSectionContainer />} />
 						<Route path="/pages/list" element={<PageListContainer />} />
-						<Route path="/pages/:slug" element={<PageViewContainer />} />
+					<Route path="/pages/*" element={<PageViewContainer />} />
 
 						<Route path="/ifgame" element={<MyProgressContainer />} />
 						<Route path="/ifgame/levels/:_code" element={<LevelListContainer />} />

@@ -2,6 +2,7 @@
 	Node main event loop
 */
 import express from 'express';
+import fs from 'fs';
 import path from 'path';
 import bodyParser from 'body-parser';
 
@@ -191,10 +192,19 @@ app.get('/main:p.js.map', (req: Request, res: Response) => {
 
 
 
-// Load static files. 
-// When published for real, this should be set through .htaccess to avoid hitting express
-// However, it's useful to have this in place for development.
-app.use('/static', express.static(build_path('static')));
+// Load static files.
+// When published for real, this should be set through .htaccess to avoid hitting express.
+// In development we serve both built assets and the in-repo static tree so markdown images
+// and other page assets resolve correctly under /static.
+const staticRoots = [
+	build_path('static'),
+	path.resolve(__dirname, '../public/static'),
+	path.resolve(__dirname, '../../static'),
+].filter((candidate) => fs.existsSync(candidate));
+
+for (const staticRoot of staticRoots) {
+	app.use('/static', express.static(staticRoot));
+}
 
 // Default case that returns the general index page.
 // Needed for when client is on a subpage and refreshes the page to return the react app.
