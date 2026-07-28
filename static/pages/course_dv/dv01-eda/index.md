@@ -4,6 +4,7 @@ EDA is a foundational skill for our course. It is a process for learning about a
 
 **Outcomes**:
 
+- Define key terms
 - Distinguish between EDA, CDA, and AI/ML 
 - List steps in the EDA process
 - Explain why we use a visual approach
@@ -61,7 +62,7 @@ Charts can reveal patterns not seen through normal statistical measures.  One cl
 Source: Wikimedia Commons, By Anscombe.svg: Schutz: Avenue - Anscombe.svg, CC BY-SA 3.0, https://commons.wikimedia.org/w/index.php?curid=9838454
 
 
-My favorite validation is the [Datasaurus Dozen](https://en.wikipedia.org/wiki/Datasaurus_dozen). This also has statistical properties matching to the 2nd decimal place, but look very different when graphed.
+My favorite validation is the [Datasaurus Dozen](https://en.wikipedia.org/wiki/Datasaurus_dozen). These data points have statistical properties matching to the 2nd decimal place, but they look very different when graphed.
 
 ![Datasaurus Dozen](datasaurus.jpg)
 Source: Wikimedia Commons, By IngmundForberg - Own work, CC BY-SA 4.0, https://commons.wikimedia.org/w/index.php?curid=138051422
@@ -69,17 +70,26 @@ Source: Wikimedia Commons, By IngmundForberg - Own work, CC BY-SA 4.0, https://c
 
 ## What is a visualization?
 
-Tables are not charts! A table is a structured arrangement of data in rows and columns. While tables are useful for organizing information, they do not provide the visual cues necessary for quick comprehension and pattern recognition.
+Tables are not charts! A *table* is a structured arrangement of data in rows and columns. While tables are useful for organizing information, they do not provide the visual cues necessary for quick comprehension and pattern recognition.
 
-Charts, on the other hand, are graphical representations of data that use visual elements like bars, lines, and points to illustrate relationships and trends. Charts leverage our brain's ability to process visual information rapidly, making it easier to identify patterns, outliers, and correlations within the data.
+*Charts*, on the other hand, are graphical representations of data that use visual elements like bars, lines, and points to illustrate relationships and trends. Charts leverage our brain's ability to process visual information rapidly, making it easier to identify patterns, outliers, and correlations within the data.
 
 Chart designs must align with people's visual perception systems. Poorly designed charts can mislead viewers. Creating effective charts requires understanding how to map data to visual attributes and how people perceive these visuals.
+
+A *visualization* is any graphic representation of information. This includes charts, but also diagrams, maps, and infographics. Every chart is a visualization, but not every visualization is a chart.
+
 
 ## Good examples
 
 - 2 minute video on [12,100 years of population change, visualized](https://www.youtube.com/shorts/S4qkMsPTtsE)
 - Infographic on [Households with no income](https://www.visualcapitalist.com/mapped-share-of-households-with-no-income-by-u-s-state/)
 - Report on [where vacation homes are located in the US?](https://www.construction-physics.com/p/where-are-vacation-homes-located)
+
+
+## For Fun
+
+![Venn Diagram of Backstreet Boys](venn_backstreet.jpg)
+Source: Inthefallofasparrow.
 
 
 ## Terms

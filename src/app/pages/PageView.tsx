@@ -6,6 +6,9 @@ import { Button } from 'react-bootstrap';
 
 import iPage from './iPage';
 import PageFlashcards, { extractFlashcards } from './PageFlashcards';
+import PageQuiz, { extractQuizQuestions, removeQuizSection } from './PageQuiz';
+import PageQuizResults from './PageQuizResults';
+import { getUserFromBrowser } from './../components/Authentication';
 import './pageview_toc_style.css'; // Import the CSS file for TOC styling
 import { ImgHTMLAttributes } from 'react';
 
@@ -127,15 +130,31 @@ function PageView({ page }: IPageViewProps): ReactElement {
 	// Hooks must run unconditionally on every render, so compute against safe
 	// defaults when page is null and defer the empty-render until after the hooks.
 	const markdown_content = useMemo(() => (page ? convert_images_by_adding_folder_path(page.markdown, page.slug) : ''), [page?.markdown, page?.slug]);
-	const tocEntries = useMemo(() => extractTableOfContents(markdown_content), [markdown_content]);
+	// The Practice Questions section is hidden from the reading view (it lists
+	// the correct answer first), but is still parsed from the full markdown to
+	// build the quiz.
+	const reading_content = useMemo(
+		() => (extractQuizQuestions(markdown_content).length > 0 ? removeQuizSection(markdown_content) : markdown_content),
+		[markdown_content],
+	);
+	const tocEntries = useMemo(() => extractTableOfContents(reading_content), [reading_content]);
 	const headingIdMap = useMemo(() => new Map(tocEntries.map((entry) => [normalizeHeadingText(entry.text), entry.id])), [tocEntries]);
 	const flashcards = useMemo(() => extractFlashcards(markdown_content), [markdown_content]);
-	const [showFlashcards, setShowFlashcards] = useState(false);
+	const quizQuestions = useMemo(() => extractQuizQuestions(markdown_content), [markdown_content]);
+	// 'read' | 'flashcards' | 'quiz' | 'results' -- the modes are mutually exclusive.
+	const [mode, setMode] = useState<'read' | 'flashcards' | 'quiz' | 'results'>('read');
+	// The results panel is for the admin (profgarrett) only. The API enforces
+	// this as well; hiding the button just keeps it out of everyone else's way.
+	const isAdmin = getUserFromBrowser().isAdmin;
 	const renderedFirstH1 = useRef(false);
 
 	useEffect(() => {
 		renderedFirstH1.current = false;
+		setMode('read');
 	}, [markdown_content]);
+
+	const toggleMode = (next: 'flashcards' | 'quiz' | 'results'): void =>
+		setMode((current) => (current === next ? 'read' : next));
 
 	if (page === null) return <></>;
 
@@ -172,22 +191,54 @@ function PageView({ page }: IPageViewProps): ReactElement {
 
 	return (
 		<div className='markdown-page'>
-			{flashcards.length > 0 ? (
+			{flashcards.length > 0 || quizQuestions.length > 0 ? (
 				<div className='pageview-toolbar'>
-					<Button
-						variant={showFlashcards ? 'secondary' : 'outline-secondary'}
-						size='sm'
-						onClick={() => setShowFlashcards((show) => !show)}
-						aria-pressed={showFlashcards}
-					>
-						{ showFlashcards
-							? 'Back to reading'
-							: `Flashcards (${flashcards.length})` }
-					</Button>
+					{quizQuestions.length > 0 ? (
+						<Button
+							variant={mode === 'quiz' ? 'primary' : 'outline-primary'}
+							size='sm'
+							className='me-2'
+							onClick={() => toggleMode('quiz')}
+							aria-pressed={mode === 'quiz'}
+						>
+							{ mode === 'quiz'
+								? 'Back to reading'
+								: `Start quiz (${quizQuestions.length})` }
+						</Button>
+					) : null}
+
+					{flashcards.length > 0 ? (
+						<Button
+							variant={mode === 'flashcards' ? 'secondary' : 'outline-secondary'}
+							size='sm'
+							onClick={() => toggleMode('flashcards')}
+							aria-pressed={mode === 'flashcards'}
+						>
+							{ mode === 'flashcards'
+								? 'Back to reading'
+								: `Flashcards (${flashcards.length})` }
+						</Button>
+					) : null}
+
+					{isAdmin && quizQuestions.length > 0 ? (
+						<Button
+							variant={mode === 'results' ? 'dark' : 'outline-dark'}
+							size='sm'
+							className='ms-2'
+							onClick={() => toggleMode('results')}
+							aria-pressed={mode === 'results'}
+						>
+							{ mode === 'results' ? 'Back to reading' : 'Quiz results' }
+						</Button>
+					) : null}
 				</div>
 			) : null}
 
-			{showFlashcards ? (
+			{mode === 'results' ? (
+				<PageQuizResults page={page.slug} />
+			) : mode === 'quiz' ? (
+				<PageQuiz markdown={markdown_content} page={page.slug} />
+			) : mode === 'flashcards' ? (
 				<PageFlashcards markdown={markdown_content} />
 			) : (
 			<>
@@ -210,7 +261,7 @@ function PageView({ page }: IPageViewProps): ReactElement {
 				rehypePlugins={[rehypeSanitize]}
 				components={components}
 			>
-				{ markdown_content }
+				{ reading_content }
 			</ReactMarkdown>
 			</>
 			)}

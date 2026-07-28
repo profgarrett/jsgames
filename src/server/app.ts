@@ -108,6 +108,9 @@ app.use('/api/pages', app_pages);
 import { app_pageviews } from './app_pageviews';
 app.use('/api/pageviews', app_pageviews);
 
+import { app_quizviews } from './app_quizviews';
+app.use('/api/quizviews', app_quizviews);
+
 
 ////////////////////////////////////////////////////////////////////////
 //  Some basic routes.
