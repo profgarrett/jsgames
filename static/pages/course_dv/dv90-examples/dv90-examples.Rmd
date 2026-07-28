@@ -1,0 +1,95 @@
+--- 
+title: "Tableau"
+output: 
+  html_document:
+    theme: united
+
+---
+
+Hans Rosling storytelling: https://www.youtube.com/watch?v=hVimVzgtD6w
+
+# Sample data
+
+
+https://yougov.com/en-us/articles/41556-americans-misestimate-small-subgroups-population
+
+City of Chicago Data Portal
+
+NPS API - https://www.nps.gov/subjects/developer/api-documentation.htm
+
+
+# Sample Data Presentations
+
+
+[Title Drops](https://www.titledrops.net/)
+
+[131m Buildings](https://tech.marksblogg.com/ornl-fema-buildings.html)
+
+[UX of Lego Panels](https://interactionmagic.com/UX-LEGO-Interfaces/)
+
+[Are songs becoming more negative?](https://www.statsignificant.com/p/how-have-song-lyrics-changed-since)
+
+
+[Hans Rosling, the Best Stats You've Ever Seen](https://www.youtube.com/watch?v=hVimVzgtD6w)
+
+[Unemployement rates in the US](https://www.reddit.com/media?url=https%3A%2F%2Fi.redd.it%2Fkwk9n01qp2ob1.png)
+
+[Life after Death by PowerPoint](https://www.youtube.com/watch?v=KbSPPFYxx3o)
+
+# Sample Dashboards
+
+[Canals](https://dsl.richmond.edu/panorama/canals/#canal=22&year=1849&loc=8/0.464/17.040)
+[Productivity Tips](https://app.powerbi.com/discover/gallery/0579b437-67ba-4acf-b2c8-4bebc64b9899)
+
+
+# Sample Charts
+
+[US Mortgages](https://www.visualcapitalist.com/us-mortgage-rate-vs-existing-home-sales-chart/)
+
+[Squid chart example](https://www.census.gov/content/dam/Census/library/visualizations/2022/comm/population-age-sex-china-india-us.jpg)
+
+[World Indicators](https://www.reddit.com/r/dataisbeautiful/comments/xpa3mt/oc_largest_countries_in_the_world_by_area_size/)
+
+http://wdi.worldbank.org/table/WV.1
+
+
+Fourth-grade math scores fell for all groups from 2019 to 2022, but this change was more pronounced for students of color
+
+https://www.reddit.com/r/dataisbeautiful/comments/16fxal3/fourthgrade_math_scores_fell_for_all_groups_from/
+
+
+School Bullying
+https://www.smartick.com/data/decoding-school-bullying/
+
+Degrees With Dividends: Ranking the Bachelor’s Programs with the Highest ROI in America
+https://brokescholar.com/bachelors-programs-with-the-highest-roi-in-america
+
+CPI
+https://www.visualcapitalist.com/inflation-chart-tracks-price-changes-us-goods-services/?utm_source=feedly&utm_medium=rss&utm_campaign=inflation-chart-tracks-price-changes-us-goods-services
+
+Good maps
+https://www.reddit.com/media?url=https%3A%2F%2Fi.redd.it%2Ftfxtvd3yglgc1.png
+
+Cost of living
+https://www.reddit.com/r/dataisbeautiful/comments/1chnovz/oc_cost_of_living_by_county_2023/?share_id=f-J9xwy8naRLE4boIdUlI
+
+How does a Pizze place make money?
+https://www.reddit.com/r/dataisbeautiful/comments/1dy4usi/oc_how_a_pizza_place_makes_money_proforma/?share_id=SGHNuW1mkwtP3ItquUqxq
+
+
+Poverty Rates
+https://www.visualcapitalist.com/mapped-poverty-rates-by-u-s-state/
+
+
+# Tips
+
+Make the title match the message in the graph
+
+![Elderly Deer](dv10-effective-reports-elderlydeer.png)
+
+
+# Projects
+
+Sample projects / datasets
+
+[Dataquest Projects](https://github.com/AiCorsair/Dataquest-Data-Science-Analysis-Projects)
