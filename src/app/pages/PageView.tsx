@@ -114,7 +114,10 @@ const convert_images_by_adding_folder_path = (markdown: string, slug: string): s
 	Input: ![caption {#id}](image.png)
 	Output: <img src='image.png', alt='caption', id='id'
 */
-const CustomImage: React.FC<ImgHTMLAttributes<HTMLImageElement>> = ({ alt, src = '', ...props }) => {
+// react-markdown v9+ passes a `node` prop (the hast AST node) to every custom
+// component. It must be stripped before spreading onto a DOM element, or React
+// renders it as the attribute node="[object Object]".
+const CustomImage: React.FC<ImgHTMLAttributes<HTMLImageElement> & { node?: unknown }> = ({ alt, src = '', node: _node, ...props }) => {
 	const altStr = typeof alt === 'string' ? alt : undefined;
 	const idMatch = altStr?.match(/\{#([^}]+)\}/);
 	const customId = idMatch ? idMatch[1] : undefined;
@@ -135,12 +138,13 @@ const CustomImage: React.FC<ImgHTMLAttributes<HTMLImageElement>> = ({ alt, src =
 
 	Adds a className='table'
 */
-const CustomTable: React.FC<TableHTMLAttributes<HTMLTableElement>> = ({
+const CustomTable: React.FC<TableHTMLAttributes<HTMLTableElement> & { node?: unknown }> = ({
 	children,
 	className,
+	node: _node,
 	...props
 }) => {
-	const tableClassName = ['table', className]
+	const tableClassName = ['table table-striped table-hover flexible-width-table', className]
 		.filter(Boolean)
 		.join(' ');
 

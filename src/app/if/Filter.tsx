@@ -79,17 +79,24 @@ export default class Filter extends React.Component<PropsType, ContainerStateTyp
 		this.loadFilters();
 	}
 
-	onChange =(key: any, e: any) => {
-		const label = e.target.innerText;
-		const name = e.target.name.split('_')[0]; // grab first half of "field_1"
+	// Dropdown.Item passes back its eventKey, which we encode as "<filter>_<index>"
+	// (see render). Reading the filter and item out of the key avoids depending on
+	// the rendered DOM (innerText / a name attribute), which broke when two items
+	// shared a label.
+	onChange = (eventKey: string | null): void => {
+		if(eventKey === null) return;
+
+		const separator = eventKey.lastIndexOf('_');
+		const name = eventKey.substr(0, separator);
+		const index = Number(eventKey.substr(separator+1));
+		const items = this.state.filters[name];
+
+		if(separator < 0 || !items || !items[index])
+			throw new Error('Invalid key for Filter.onChange '+eventKey);
+
 		const newState = { 'selection': { ...this.state.selection} };
+		newState.selection[name] = items[index].value;
 
-		// Find matching value from the label.
-		let value = this.state.filters[name].filter( item => item.label === label);
-		if(value.length !== 1) throw new Error('Invalid key for Filter.onChange '+label);
-
-		newState.selection[name] = value[0].value;
-		
 		// Update filter args.
 		/*
 		const search = new URLSearchParams(window.location.search);
@@ -282,11 +289,10 @@ export default class Filter extends React.Component<PropsType, ContainerStateTyp
 						key={'select_code_'+filter} >
 							{ this.state.filters[filter].map( (value,i) => 
 								<Dropdown.Item
-									key={'select_code_dropdownitem_'+filter+i} 
-									eventKey={value.code}
-									name={filter +'_'+i}
+									key={'select_code_dropdownitem_'+filter+i}
+									eventKey={filter +'_'+ i}
 									>{value.label}
-								</Dropdown.Item> 
+								</Dropdown.Item>
 							)}
 				</DropdownButton>;
 				buttons.push(button);

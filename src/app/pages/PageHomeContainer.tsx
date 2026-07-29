@@ -4,7 +4,12 @@ import { Link } from 'react-router-dom';
 
 import { Message, Loading } from '../components/Misc';
 import ForceLogin from '../components/ForceLogin';
-import { get_localstorage_section, PageListSectionPicker} from './PageSectionPicker';
+import {
+	get_localstorage_section,
+	get_page_for_section,
+	resolve_selected_section,
+	PageListSectionPicker,
+} from './PageSectionPicker';
 import iPage from './iPage';
 import iSection from  './iSection';
 import PageView from './PageView';
@@ -17,6 +22,7 @@ export default function PageListContainer(): ReactElement {
 	const [sections, setSections] = useState<iSection[]>([]);
 	const [pages, setPages] = useState<iPage[]>([]);
 	const [page, setPage] = useState<iPage | null>(null);
+	const [selectedSection, setSelectedSection] = useState<iSection | null>(null);
 
 	useEffect(() => {
 		Promise.all([
@@ -50,14 +56,14 @@ export default function PageListContainer(): ReactElement {
 				window.location.href = '/pages/list';
 			}
 			
-			// Get the default selected section from localstorage if present, otherwise use the first section in the list.
-			let sticky_section =  get_localstorage_section();
-			if(sticky_section == null) { sticky_section = sectionsData[0] }
+			// Prefer the section stored in localstorage; fall back to the first
+			// section that actually has a matching page. This mirrors the
+			// resolution the picker does, so the two stay in sync.
+			const sticky_section = get_localstorage_section();
+			const resolved = resolve_selected_section(sectionsData, pagesData, sticky_section);
 
-			// Find matching class.
-			let sticky_class = pagesData.filter( p => p.slug === (sticky_section ? sticky_section.code : '') );
-
-			setPage(sticky_class[0] || null);
+			setSelectedSection(resolved);
+			setPage(get_page_for_section(resolved, pagesData));
 			setIsLoading(false);
 		})
 		.catch(error => {
@@ -78,11 +84,10 @@ export default function PageListContainer(): ReactElement {
 
 	const sectionsPicker = sections.length > 0
 			? <>
-				<PageListSectionPicker sections={sections} onSelectSection={(s: string) => {
-					const selected = sections.find(sec => sec.code === s) || null;
-					setSelectedSection(selected);
+				<PageListSectionPicker sections={sections} pages={pages} onSelectSection={(s: iSection) => {
+					setSelectedSection(s);
+					setPage(get_page_for_section(s, pages));
 				}} />
-				{ selectedSection ? <p>Selected Section: {selectedSection.title} ({selectedSection.code})</p> : null }	
 			</>
 			: null;
 
@@ -101,7 +106,7 @@ export default function PageListContainer(): ReactElement {
 				<Message message={message} style={messageStyle} />
 				<Loading loading={isLoading} />
 				{ sectionsPicker }
-				{ selectedSection ? Page(}
+				{ selectedSection ? <PageView page={page} /> : null }
 				{ empty }
 			</Col>
 		</Row>

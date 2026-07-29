@@ -1,3 +1,39 @@
+/** display *************/
+
+
+.markdown-page {
+    max-width: 1012px;
+    margin-left: auto;
+    margin-right: auto;
+    padding-top: 20px;
+    font-size: 16px;
+    line-height: 1.5;
+}
+
+.markdown-page h1, h2, h3, h4 {
+    padding-bottom: 0.3em;
+}
+
+.markdown-page h1 {
+    padding-top: 1em;
+    font-size: 2em;
+    border-bottom: 1px solid #eaecef;
+}
+
+.markdown-page h2 {
+    padding-top: 0.5em;
+    font-size: 1.5em;
+    border-bottom: 1px solid #eaecef;
+}
+
+.markdown-page h3 {
+    padding-top: 0.25em;
+    font-size: 1.25em;
+}
+
+
+/** toc *************/
+
 .toc {
     padding: 10px;
     margin: 0px 0px 30px 30px;
@@ -37,11 +73,11 @@
     max-height: 500px;
 }
 
-.toc-level-h2 { padding-left: 0; }
-.toc-level-h3 { padding-left: 15px; }
-.toc-level-h4 { padding-left: 30px; }
-.toc-level-h5 { padding-left: 45px; }
-.toc-level-h6 { padding-left: 60px; }
+.toc-level-2 { padding-left: 0; }
+.toc-level-3 { padding-left: 15px; }
+.toc-level-4 { padding-left: 30px; }
+.toc-level-5 { padding-left: 45px; }
+.toc-level-6 { padding-left: 60px; }
 
 .toc-list a {
     text-decoration: none;
@@ -61,6 +97,14 @@
     padding: 0px !important;
 }
 
+
+/** Markdown Tables ****************/
+
+table.flexible-width-table {
+  width: auto !important;
+  max-width: none !important;
+  min-width: 0 !important;
+}
 
 /** Flashcards ******************************************************/
 

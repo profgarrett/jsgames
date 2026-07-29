@@ -67,15 +67,16 @@ module.exports = {
 	],
 	
 	optimization: {
-		/*
 		minimize: true,
 		minimizer: [new TerserPlugin({
-			terserOptions: { sourceMap: true }
-		})],
-		*/
-		minimize: false
+			parallel: true,
+			terserOptions: {
+				format: { comments: false }
+			},
+			extractComments: false
+		})]
 	},
-	
+
 	output: {
 		filename: '[name].[chunkhash].js',
 		sourceMapFilename: "[name].[chunkhash].js.map",
