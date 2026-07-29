@@ -1,4 +1,4 @@
-import React, { ReactElement, useEffect, useMemo, useRef, useState } from 'react';
+import React, { ReactElement, useEffect, useMemo, useRef, useState, TableHTMLAttributes } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeSanitize from 'rehype-sanitize';
@@ -107,9 +107,14 @@ const convert_images_by_adding_folder_path = (markdown: string, slug: string): s
 
 
 
+/* 
+	Markdown component for images.
 
+	Looks at markdown, and parses out an ID field.
+	Input: ![caption {#id}](image.png)
+	Output: <img src='image.png', alt='caption', id='id'
+*/
 const CustomImage: React.FC<ImgHTMLAttributes<HTMLImageElement>> = ({ alt, src = '', ...props }) => {
-	// Extract custom ID from alt text if it matches {#id}
 	const altStr = typeof alt === 'string' ? alt : undefined;
 	const idMatch = altStr?.match(/\{#([^}]+)\}/);
 	const customId = idMatch ? idMatch[1] : undefined;
@@ -125,6 +130,26 @@ const CustomImage: React.FC<ImgHTMLAttributes<HTMLImageElement>> = ({ alt, src =
 	);
 };
 
+/*
+	Markdown component for a table.
+
+	Adds a className='table'
+*/
+const CustomTable: React.FC<TableHTMLAttributes<HTMLTableElement>> = ({
+	children,
+	className,
+	...props
+}) => {
+	const tableClassName = ['table', className]
+		.filter(Boolean)
+		.join(' ');
+
+	return (
+			<table className={tableClassName} {...props}>
+				{children}
+			</table>
+	);
+};
 
 function PageView({ page }: IPageViewProps): ReactElement {
 	// Hooks must run unconditionally on every render, so compute against safe
@@ -187,6 +212,7 @@ function PageView({ page }: IPageViewProps): ReactElement {
 		h5: renderHeading(5),
 		h6: renderHeading(6),
 		img: CustomImage,
+		table: CustomTable,
 	};
 
 	return (
