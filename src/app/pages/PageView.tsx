@@ -1,4 +1,5 @@
 import React, { ReactElement, useEffect, useMemo, useRef, useState, TableHTMLAttributes } from 'react';
+import { createPortal } from 'react-dom';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeSanitize from 'rehype-sanitize';
@@ -107,29 +108,118 @@ const convert_images_by_adding_folder_path = (markdown: string, slug: string): s
 
 
 
-/* 
+/*
+	Fullscreen overlay for a single image.
+
+	Rendered into document.body with a portal rather than in place, so that the
+	overlay escapes `.markdown-page` (which is width-capped and would clip it)
+	and any stacking context created by ancestors.
+*/
+const ImageLightbox: React.FC<{ src: string; alt?: string; onClose: () => void }> = ({ src, alt, onClose }) => {
+	// Actual-size mode matters for the wide tables and charts used in the
+	// readings, which are unreadable when scaled to fit a laptop screen.
+	const [actualSize, setActualSize] = useState(false);
+
+	useEffect(() => {
+		const onKeyDown = (e: KeyboardEvent): void => {
+			if (e.key === 'Escape') onClose();
+		};
+		document.addEventListener('keydown', onKeyDown);
+
+		// Stop the page behind the overlay from scrolling with the wheel.
+		const priorOverflow = document.body.style.overflow;
+		document.body.style.overflow = 'hidden';
+
+		return () => {
+			document.removeEventListener('keydown', onKeyDown);
+			document.body.style.overflow = priorOverflow;
+		};
+	}, [onClose]);
+
+	return createPortal(
+		<div
+			className='image-lightbox'
+			role='dialog'
+			aria-modal='true'
+			aria-label={alt ? `Full screen: ${alt}` : 'Full screen image'}
+			onClick={onClose}
+		>
+			<button type='button' className='image-lightbox-close' onClick={onClose} aria-label='Close full screen'>
+				&times;
+			</button>
+
+			<div className={`image-lightbox-stage${actualSize ? ' is-actual-size' : ''}`}>
+				<img
+					className='image-lightbox-img'
+					src={src}
+					alt={alt}
+					// Clicking the image zooms rather than closes; the backdrop closes.
+					onClick={(e) => {
+						e.stopPropagation();
+						setActualSize((current) => !current);
+					}}
+				/>
+			</div>
+
+			<div className='image-lightbox-caption'>
+				{alt ? <span className='image-lightbox-caption-text'>{alt}</span> : null}
+				<span className='image-lightbox-hint'>
+					{ actualSize ? 'Click image to fit screen' : 'Click image to zoom' } &middot; Esc or click outside to close
+				</span>
+			</div>
+		</div>,
+		document.body,
+	);
+};
+
+/*
 	Markdown component for images.
 
 	Looks at markdown, and parses out an ID field.
 	Input: ![caption {#id}](image.png)
 	Output: <img src='image.png', alt='caption', id='id'
+
+	The image is wrapped in a button so that it advertises itself as clickable
+	(cursor, outline and a magnifier badge on hover) and opens full screen when
+	activated, by mouse or by keyboard.
 */
 // react-markdown v9+ passes a `node` prop (the hast AST node) to every custom
 // component. It must be stripped before spreading onto a DOM element, or React
 // renders it as the attribute node="[object Object]".
 const CustomImage: React.FC<ImgHTMLAttributes<HTMLImageElement> & { node?: unknown }> = ({ alt, src = '', node: _node, ...props }) => {
+	const [expanded, setExpanded] = useState(false);
 	const altStr = typeof alt === 'string' ? alt : undefined;
 	const idMatch = altStr?.match(/\{#([^}]+)\}/);
 	const customId = idMatch ? idMatch[1] : undefined;
 	const cleanAlt = altStr?.replace(/\{#[^}]+\}/, '').trim();
 
+	// The caption is the alt text. It is rendered as a sibling of the button
+	// rather than inside it so that students can still select and copy it;
+	// the shared figure card is what ties the two together visually.
 	return (
-		<img
-			src={src}
-			alt={cleanAlt}
-			id={customId}
-			{...props}
-		/>
+		<>
+			<span className='markdown-figure' role='group' aria-label={cleanAlt ? `Figure: ${cleanAlt}` : 'Figure'}>
+				<button
+					type='button'
+					className='markdown-image-trigger'
+					onClick={() => setExpanded(true)}
+					aria-label={cleanAlt ? `View full screen: ${cleanAlt}` : 'View image full screen'}
+					title='Click to view full screen'
+				>
+					<img
+						src={src}
+						alt={cleanAlt}
+						id={customId}
+						{...props}
+					/>
+					<span className='markdown-image-badge' aria-hidden='true'>&#9906;</span>
+				</button>
+
+				{ cleanAlt ? <span className='markdown-figure-caption'>{cleanAlt}</span> : null }
+			</span>
+
+			{ expanded ? <ImageLightbox src={src} alt={cleanAlt} onClose={() => setExpanded(false)} /> : null }
+		</>
 	);
 };
 

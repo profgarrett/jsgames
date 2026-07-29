@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="920" height="732" viewBox="0 0 460 366" role="img" aria-labelledby="eyeT eyeD">
+<title id="eyeT">Cross-section of the eye showing the fovea and the optic disc</title>
+<desc id="eyeD">Light entering through the cornea and lens is focused onto the fovea, a small marked patch at the center of the retina where vision is sharpest. Just beside it, the optic nerve exits through the optic disc, a region of retina with no photoreceptors, which produces the blind spot.</desc>
+
+<style>
+  .ttl  { font: 600 13px var(--font-sans, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif); fill: var(--text-primary, #191919); }
+  .lab  { font: 400 11.5px var(--font-sans, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif); fill: var(--text-secondary, #4a4a4a); }
+  .sm   { font: 400 10.5px var(--font-sans, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif); fill: var(--text-muted, #7d7d7d); }
+  .acc  { font: 600 11.5px var(--font-sans, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif); fill: var(--text-accent, #b8562f); }
+  .ink  { fill: none; stroke: var(--text-primary, #191919); stroke-width: 1.5; }
+  .soft { fill: none; stroke: var(--border-strong, #c9c9c9); stroke-width: 1; }
+  .hair { fill: none; stroke: var(--border, #e2e2e2); stroke-width: 1; }
+  .as   { fill: none; stroke: var(--text-accent, #b8562f); stroke-width: 1.5; }
+</style>
+
+<text class="ttl" x="16" y="26">Inside the eye</text>
+
+<circle cx="215" cy="180" r="95" fill="var(--surface-1, #f7f7f5)" stroke="var(--border-strong, #c9c9c9)" stroke-width="1"/>
+<path d="M145,116 C105,135 105,225 145,244" class="ink"/>
+<ellipse cx="160" cy="180" rx="13" ry="33" fill="var(--surface-2, #eeeeec)" stroke="var(--text-primary, #191919)" stroke-width="1.3"/>
+<path d="M182.5,90.7 A95,95 0 1 1 182.5,269.3" class="ink" stroke-width="2.5"/>
+<path d="M305.8,207.8 L370.8,227.7" stroke="var(--border-strong, #c9c9c9)" stroke-width="12" stroke-linecap="round" fill="none"/>
+
+<path d="M28,145 L155,158 L310,180" class="soft"/>
+<path d="M28,215 L155,202 L310,180" class="soft"/>
+<text class="sm" x="26" y="136">incoming light</text>
+
+<path d="M309.1,166.8 A95,95 0 0 1 309.1,193.2" class="as" stroke-width="5"/>
+<circle cx="310" cy="180" r="3.5" fill="var(--text-accent, #b8562f)"/>
+<path d="M313,175 L323,164" class="hair"/>
+<text class="acc" x="327" y="162">fovea</text>
+<text class="sm"  x="327" y="176">sharpest vision</text>
+
+<path d="M307.6,201.4 A95,95 0 0 1 303.7,214" class="as" stroke-width="5" stroke-dasharray="2 2"/>
+<path d="M303,213 L293,278" class="hair"/>
+<text class="acc" x="300" y="289" text-anchor="end">optic disc</text>
+<text class="sm"  x="300" y="303" text-anchor="end">no photoreceptors &#8594; blind spot</text>
+
+<path d="M108,113 L152,153" class="hair"/>
+<text class="lab" x="104" y="108" text-anchor="end">lens</text>
+<path d="M255,113 L262,101" class="hair"/>
+<text class="lab" x="250" y="119" text-anchor="end">retina</text>
+
+<text class="sm" x="16" y="336">Light focuses on the fovea, a tiny patch of densely packed cones.</text>
+<text class="sm" x="16" y="350">The optic nerve exits beside it, leaving a hole in the receptor layer.</text>
+</svg>

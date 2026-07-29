@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1240" height="508" viewBox="0 0 620 254" role="img" aria-labelledby="bsT bsD">
+<title id="bsT">How the brain fills in the blind spot</title>
+<desc id="bsD">Two rows of evenly spaced dots. The top row, labeled signal leaving the retina, has a gap of three missing dots where the optic disc has no photoreceptors. The bottom row, labeled what you perceive, is unbroken: the missing region is shaded to show that the brain has reconstructed it from the surrounding pattern.</desc>
+
+<style>
+  .ttl  { font: 600 13px var(--font-sans, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif); fill: var(--text-primary, #191919); }
+  .lab  { font: 400 11.5px var(--font-sans, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif); fill: var(--text-secondary, #4a4a4a); }
+  .sm   { font: 400 10.5px var(--font-sans, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif); fill: var(--text-muted, #7d7d7d); }
+  .acc  { font: 600 11.5px var(--font-sans, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif); fill: var(--text-accent, #b8562f); }
+  .as   { fill: none; stroke: var(--text-accent, #b8562f); stroke-width: 1.5; }
+  .dot  { fill: var(--text-primary, #191919); }
+</style>
+
+<text class="ttl" x="16" y="26">Filling in the blind spot</text>
+
+<text class="lab" x="16" y="58">Signal leaving the retina</text>
+<g class="dot">
+  <circle cx="40" cy="84" r="5"/><circle cx="70" cy="84" r="5"/><circle cx="100" cy="84" r="5"/>
+  <circle cx="130" cy="84" r="5"/><circle cx="160" cy="84" r="5"/><circle cx="190" cy="84" r="5"/>
+  <circle cx="220" cy="84" r="5"/><circle cx="250" cy="84" r="5"/>
+  <circle cx="370" cy="84" r="5"/><circle cx="400" cy="84" r="5"/><circle cx="430" cy="84" r="5"/>
+  <circle cx="460" cy="84" r="5"/><circle cx="490" cy="84" r="5"/><circle cx="520" cy="84" r="5"/>
+  <circle cx="550" cy="84" r="5"/><circle cx="580" cy="84" r="5"/>
+</g>
+<rect x="265" y="68" width="90" height="32" rx="3" class="as" stroke-dasharray="4 3"/>
+<text class="acc" x="310" y="116" text-anchor="middle">no receptors</text>
+
+<text class="lab" x="16" y="150">What you perceive</text>
+<rect x="265" y="160" width="90" height="32" rx="3" fill="var(--text-accent, #b8562f)" opacity="0.12"/>
+<g class="dot">
+  <circle cx="40" cy="176" r="5"/><circle cx="70" cy="176" r="5"/><circle cx="100" cy="176" r="5"/>
+  <circle cx="130" cy="176" r="5"/><circle cx="160" cy="176" r="5"/><circle cx="190" cy="176" r="5"/>
+  <circle cx="220" cy="176" r="5"/><circle cx="250" cy="176" r="5"/><circle cx="280" cy="176" r="5"/>
+  <circle cx="310" cy="176" r="5"/><circle cx="340" cy="176" r="5"/><circle cx="370" cy="176" r="5"/>
+  <circle cx="400" cy="176" r="5"/><circle cx="430" cy="176" r="5"/><circle cx="460" cy="176" r="5"/>
+  <circle cx="490" cy="176" r="5"/><circle cx="520" cy="176" r="5"/><circle cx="550" cy="176" r="5"/>
+  <circle cx="580" cy="176" r="5"/>
+</g>
+
+<text class="sm" x="16" y="224">You never notice the gap. The brain reconstructs it from the surrounding</text>
+<text class="sm" x="16" y="238">color and pattern — and the other eye covers what this one misses.</text>
+</svg>

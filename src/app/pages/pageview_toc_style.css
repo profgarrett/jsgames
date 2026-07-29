@@ -12,6 +12,7 @@
 
 .markdown-page h1, h2, h3, h4 {
     padding-bottom: 0.3em;
+    font-weight: bold;
 }
 
 .markdown-page h1 {
@@ -31,6 +32,11 @@
     font-size: 1.25em;
 }
 
+.markdown-page h4 {
+    padding-top: 0.25em;
+    font-size: 1em;
+}
+
 
 /** toc *************/
 
@@ -39,6 +45,7 @@
     margin: 0px 0px 30px 30px;
     max-width: 300px;
     float: right;
+    background-color: white;
 }
 
 .toc-block {
@@ -71,6 +78,203 @@
     margin: 0 auto;
     max-width: 80%;
     max-height: 500px;
+}
+
+
+/** Markdown figures (image + caption) ******************************/
+
+/* The figure card is what binds a caption to its image: one bordered, tinted
+   block around both, so there is no ambiguity about which caption belongs to
+   which image when several appear in sequence.
+
+   width: fit-content keeps the card hugging the image instead of stretching
+   across the whole text column. The image's own percentage cap is dropped
+   here (it would resolve against the shrink-to-fit width) and the 80% ceiling
+   moved onto the card. */
+.markdown-figure {
+    display: block;
+    width: fit-content;
+    max-width: 80%;
+    margin: 24px auto;
+    padding: 8px;
+    border: 1px solid #d8dde3;
+    border-radius: 8px;
+    background-color: #f8f9fa;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.markdown-figure:hover,
+.markdown-figure:focus-within {
+    border-color: #002855;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+}
+
+/* Separated from the image by a rule and marked with a left accent bar in the
+   site navy, so it reads as an annotation on the image above rather than as
+   body text that happens to follow it. */
+.markdown-figure-caption {
+    display: block;
+    margin-top: 8px;
+    padding: 8px 4px 2px 10px;
+    border-top: 1px solid #e3e7eb;
+    border-left: 3px solid #002855;
+    font-size: 0.875em;
+    line-height: 1.45;
+    color: #444;
+    text-align: left;
+}
+
+/* The image itself is a button so it is keyboard-reachable; it is stripped
+   back so the surrounding figure card carries all the visible chrome. */
+.markdown-image-trigger {
+    display: block;
+    position: relative;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    border: none;
+    background: none;
+    border-radius: 4px;
+    cursor: zoom-in;
+    line-height: 0;
+}
+
+.markdown-image-trigger img {
+    max-width: 100%;
+    max-height: 500px;
+}
+
+.markdown-image-trigger:focus-visible {
+    outline: 2px solid #002855;
+    outline-offset: 2px;
+}
+
+/* The magnifier badge appears only on hover/focus, so the reading view stays
+   clean but the affordance is discoverable. */
+.markdown-image-badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background-color: rgba(0, 40, 85, 0.85);
+    color: #fff;
+    font-size: 16px;
+    line-height: 1;
+    opacity: 0;
+    transition: opacity 0.15s ease;
+    pointer-events: none;
+}
+
+.markdown-figure:hover .markdown-image-badge,
+.markdown-image-trigger:focus-visible .markdown-image-badge {
+    opacity: 1;
+}
+
+
+/** Fullscreen image overlay ****************************************/
+
+.image-lightbox {
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px 20px 20px;
+    background-color: rgba(0, 0, 0, 0.85);
+    cursor: zoom-out;
+}
+
+.image-lightbox-stage {
+    flex: 1 1 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 0;
+    max-width: 100%;
+    overflow: auto;
+}
+
+.image-lightbox-img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    background-color: #fff;
+    border-radius: 4px;
+    cursor: zoom-in;
+}
+
+/* Actual size: drop the fit constraints and let the stage scroll instead. */
+.image-lightbox-stage.is-actual-size {
+    align-items: flex-start;
+    justify-content: flex-start;
+}
+
+.image-lightbox-stage.is-actual-size .image-lightbox-img {
+    max-width: none;
+    max-height: none;
+    cursor: zoom-out;
+}
+
+.image-lightbox-caption {
+    flex: 0 0 auto;
+    max-width: 900px;
+    margin-top: 14px;
+    text-align: center;
+    color: #fff;
+}
+
+.image-lightbox-hint {
+    display: block;
+    margin-top: 4px;
+    font-size: 0.8em;
+    opacity: 0.65;
+}
+
+.image-lightbox-close {
+    position: absolute;
+    top: 10px;
+    right: 16px;
+    width: 40px;
+    height: 40px;
+    border: none;
+    background: none;
+    color: #fff;
+    font-size: 32px;
+    line-height: 1;
+    cursor: pointer;
+    opacity: 0.75;
+}
+
+.image-lightbox-close:hover,
+.image-lightbox-close:focus-visible {
+    opacity: 1;
+}
+
+/* Match the reading view: the caption is the emphasised element, the
+   keyboard/zoom hint is secondary. */
+/* inline-block so the accent bar hugs the text and the whole thing still
+   centres under the image. */
+.image-lightbox-caption-text {
+    display: inline-block;
+    max-width: 100%;
+    padding-left: 12px;
+    border-left: 3px solid #7fa4d4;
+    font-size: 1em;
+    text-align: left;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .markdown-figure,
+    .markdown-image-badge {
+        transition: none;
+    }
 }
 
 .toc-level-2 { padding-left: 0; }

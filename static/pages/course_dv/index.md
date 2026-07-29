@@ -40,8 +40,8 @@ Optional Reading:
 ### Week 2 - August 24, 2026
 
 - [dv20. Understand data values and structure](dv20-data/index)
-- [dv30. Pre-attentive attributes](dv30-preattentive/index)
-- [dv35. Visual perception](dv35-visual-perception/index)
+- [dv30. Visual perception](dv30-visualperception/index)
+- [dv31. Visual channels](dv31-visualchannels/index)
 - [dv36. Colors](dv36-colors/index)
 
 
