@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 330" width="720" height="330" font-family="Helvetica, Arial, sans-serif">
+  <rect width="720" height="330" fill="#ffffff"/>
+  <text x="20" y="28" font-size="16" font-weight="bold" fill="#222222">Walk the audience through the chart, in this order</text>
+
+  <rect x="30" y="56" width="360" height="230" fill="#fcfcfc" stroke="#e8e8e8"/>
+  <line x1="70" y1="80" x2="70" y2="250" stroke="#cccccc"/>
+  <line x1="70" y1="250" x2="370" y2="250" stroke="#cccccc"/>
+  <polyline points="70,200 130,190 190,205 250,185 310,215 370,195" fill="none" stroke="#c4c4c4" stroke-width="2"/>
+  <polyline points="70,175 130,165 190,180 250,150 310,190 370,160" fill="none" stroke="#c4c4c4" stroke-width="2"/>
+  <polyline points="70,140 130,130 190,120 250,125 310,110 370,100" fill="none" stroke="#0f5fa6" stroke-width="2.5"/>
+  <text x="364" y="92" font-size="10" fill="#0f5fa6" text-anchor="end">Northeast</text>
+  <text x="70" y="266" font-size="10" fill="#999999">Jan</text>
+  <text x="370" y="266" font-size="10" fill="#999999" text-anchor="end">Dec</text>
+  <text transform="translate(52,195) rotate(-90)" font-size="10" fill="#999999">Revenue ($000s)</text>
+
+  <circle cx="436" cy="90" r="13" fill="#0f5fa6"/>
+  <text x="436" y="94" font-size="12" fill="#ffffff" text-anchor="middle">1</text>
+  <text x="462" y="88" font-size="13" font-weight="bold" fill="#222222">Axes</text>
+  <text x="462" y="104" font-size="11" fill="#666666">What each axis measures</text>
+
+  <circle cx="436" cy="142" r="13" fill="#0f5fa6"/>
+  <text x="436" y="146" font-size="12" fill="#ffffff" text-anchor="middle">2</text>
+  <text x="462" y="140" font-size="13" font-weight="bold" fill="#222222">Encoding</text>
+  <text x="462" y="156" font-size="11" fill="#666666">What each line represents</text>
+
+  <circle cx="436" cy="194" r="13" fill="#0f5fa6"/>
+  <text x="436" y="198" font-size="12" fill="#ffffff" text-anchor="middle">3</text>
+  <text x="462" y="192" font-size="13" font-weight="bold" fill="#222222">Pattern</text>
+  <text x="462" y="208" font-size="11" fill="#666666">What to notice in the shape</text>
+
+  <circle cx="436" cy="246" r="13" fill="#0f5fa6"/>
+  <text x="436" y="250" font-size="12" fill="#ffffff" text-anchor="middle">4</text>
+  <text x="462" y="244" font-size="13" font-weight="bold" fill="#222222">Meaning</text>
+  <text x="462" y="260" font-size="11" fill="#666666">Why that pattern matters</text>
+
+  <text x="30" y="310" font-size="12" fill="#666666">Steps 1 and 2 feel slow in rehearsal. They are not slow to a first-time viewer.</text>
+</svg>

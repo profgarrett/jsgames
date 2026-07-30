@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 330" width="720" height="330" font-family="Helvetica, Arial, sans-serif">
+  <rect width="720" height="330" fill="#ffffff"/>
+  <text x="20" y="28" font-size="16" font-weight="bold" fill="#222222">From topic to thesis</text>
+  <text x="20" y="48" font-size="12" fill="#666666">A topic names a subject. A thesis makes a claim you could argue with.</text>
+
+  <rect x="144" y="68" width="556" height="52" fill="#f7f7f7" stroke="#dddddd"/>
+  <text x="132" y="99" font-size="11" fill="#999999" text-anchor="end">TOPIC</text>
+  <text x="164" y="99" font-size="14" fill="#777777">This presentation is about marketing.</text>
+
+  <polygon points="414,124 426,124 420,134" fill="#cccccc"/>
+
+  <rect x="144" y="140" width="556" height="52" fill="#f7f7f7" stroke="#dddddd"/>
+  <text x="132" y="171" font-size="11" fill="#999999" text-anchor="end">WEAK</text>
+  <text x="164" y="171" font-size="14" fill="#555555">Marketing affects customer retention.</text>
+
+  <polygon points="414,196 426,196 420,206" fill="#0f5fa6"/>
+
+  <rect x="144" y="212" width="556" height="52" fill="#f0f6fb" stroke="#0f5fa6" stroke-width="2"/>
+  <text x="132" y="243" font-size="11" fill="#0f5fa6" text-anchor="end">STRONG</text>
+  <text x="164" y="243" font-size="14" font-weight="bold" fill="#222222">Email campaigns raised 90-day retention by 20%.</text>
+
+  <rect x="144" y="286" width="133" height="26" fill="#ffffff" stroke="#0f5fa6"/>
+  <text x="210" y="303" font-size="11" fill="#0f5fa6" text-anchor="middle">names variables</text>
+  <rect x="285" y="286" width="133" height="26" fill="#ffffff" stroke="#0f5fa6"/>
+  <text x="351" y="303" font-size="11" fill="#0f5fa6" text-anchor="middle">direction</text>
+  <rect x="426" y="286" width="133" height="26" fill="#ffffff" stroke="#0f5fa6"/>
+  <text x="492" y="303" font-size="11" fill="#0f5fa6" text-anchor="middle">magnitude</text>
+  <rect x="567" y="286" width="133" height="26" fill="#ffffff" stroke="#0f5fa6"/>
+  <text x="633" y="303" font-size="11" fill="#0f5fa6" text-anchor="middle">time window</text>
+</svg>

@@ -1,0 +1,92 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 345" width="720" height="345" font-family="Helvetica, Arial, sans-serif">
+  <rect width="720" height="345" fill="#ffffff"/>
+  <text x="20" y="26" font-size="16" font-weight="bold" fill="#222222">Give the reader an entry point</text>
+
+  <text x="24" y="56" font-size="10" fill="#999999">WEAK &#8212; the report, on a wall</text>
+  <rect x="24" y="64" width="320" height="240" fill="#ffffff" stroke="#cccccc"/>
+  <rect x="36" y="76" width="120" height="7" fill="#d0d0d0"/>
+
+  <rect x="36" y="92" width="140" height="64" fill="#f7f7f7" stroke="#e4e4e4"/>
+  <rect x="42" y="100" width="120" height="4" fill="#e0e0e0"/>
+  <rect x="42" y="110" width="128" height="4" fill="#e0e0e0"/>
+  <rect x="42" y="120" width="112" height="4" fill="#e0e0e0"/>
+  <rect x="42" y="130" width="124" height="4" fill="#e0e0e0"/>
+  <rect x="42" y="140" width="106" height="4" fill="#e0e0e0"/>
+
+  <rect x="184" y="92" width="148" height="50" fill="#f7f7f7" stroke="#e4e4e4"/>
+  <rect x="190" y="100" width="132" height="4" fill="#e0e0e0"/>
+  <rect x="190" y="110" width="126" height="4" fill="#e0e0e0"/>
+  <rect x="190" y="120" width="134" height="4" fill="#e0e0e0"/>
+  <rect x="190" y="130" width="118" height="4" fill="#e0e0e0"/>
+
+  <rect x="36" y="164" width="96" height="60" fill="#f7f7f7" stroke="#e4e4e4"/>
+  <rect x="42" y="172" width="80" height="4" fill="#e0e0e0"/>
+  <rect x="42" y="182" width="74" height="4" fill="#e0e0e0"/>
+  <rect x="42" y="192" width="82" height="4" fill="#e0e0e0"/>
+  <rect x="42" y="202" width="70" height="4" fill="#e0e0e0"/>
+
+  <rect x="140" y="150" width="92" height="74" fill="#f7f7f7" stroke="#e4e4e4"/>
+  <rect x="146" y="158" width="76" height="4" fill="#e0e0e0"/>
+  <rect x="146" y="168" width="80" height="4" fill="#e0e0e0"/>
+  <rect x="146" y="178" width="72" height="4" fill="#e0e0e0"/>
+  <rect x="146" y="188" width="78" height="4" fill="#e0e0e0"/>
+  <rect x="146" y="198" width="68" height="4" fill="#e0e0e0"/>
+
+  <rect x="240" y="150" width="92" height="58" fill="#f7f7f7" stroke="#e4e4e4"/>
+  <rect x="248" y="158" width="76" height="42" fill="#ededed"/>
+  <rect x="252" y="180" width="8" height="16" fill="#cccccc"/>
+  <rect x="264" y="172" width="8" height="24" fill="#cccccc"/>
+  <rect x="276" y="184" width="8" height="12" fill="#cccccc"/>
+  <rect x="288" y="176" width="8" height="20" fill="#cccccc"/>
+
+  <rect x="36" y="232" width="296" height="60" fill="#f7f7f7" stroke="#e4e4e4"/>
+  <rect x="42" y="240" width="280" height="4" fill="#e0e0e0"/>
+  <rect x="42" y="250" width="272" height="4" fill="#e0e0e0"/>
+  <rect x="42" y="260" width="284" height="4" fill="#e0e0e0"/>
+  <rect x="42" y="270" width="258" height="4" fill="#e0e0e0"/>
+  <rect x="42" y="280" width="266" height="4" fill="#e0e0e0"/>
+
+  <text x="376" y="56" font-size="10" fill="#0f5fa6">STRONG &#8212; one finding, one dominant chart</text>
+  <rect x="376" y="64" width="320" height="240" fill="#ffffff" stroke="#0f5fa6" stroke-width="2"/>
+  <rect x="388" y="76" width="296" height="34" fill="#0f5fa6"/>
+  <text x="536" y="93" font-size="9" fill="#ffffff" text-anchor="middle">SANTA'S GIFTS COST THE SAME AS OURS</text>
+  <text x="536" y="104" font-size="6.5" fill="#cfe0f0" text-anchor="middle">N. Garrett &#183; West Virginia University</text>
+
+  <rect x="388" y="116" width="296" height="26" fill="#dce9f5" stroke="#0f5fa6"/>
+  <text x="536" y="133" font-size="7.5" fill="#0f5fa6" text-anchor="middle">A $0.42 difference on a $34 gift. Santa is us.</text>
+
+  <rect x="388" y="150" width="54" height="7" fill="#0f5fa6"/>
+  <rect x="388" y="164" width="88" height="4" fill="#e0e0e0"/>
+  <rect x="388" y="174" width="80" height="4" fill="#e0e0e0"/>
+  <rect x="388" y="184" width="84" height="4" fill="#e0e0e0"/>
+  <rect x="388" y="200" width="48" height="7" fill="#0f5fa6"/>
+  <rect x="388" y="214" width="86" height="4" fill="#e0e0e0"/>
+  <rect x="388" y="224" width="76" height="4" fill="#e0e0e0"/>
+  <rect x="388" y="234" width="82" height="4" fill="#e0e0e0"/>
+
+  <rect x="490" y="150" width="92" height="86" fill="#fafafa" stroke="#e4e4e4"/>
+  <rect x="496" y="200" width="10" height="30" fill="#dddddd"/>
+  <rect x="510" y="186" width="10" height="44" fill="#dddddd"/>
+  <rect x="524" y="204" width="10" height="26" fill="#dddddd"/>
+  <rect x="538" y="170" width="10" height="60" fill="#0f5fa6"/>
+  <rect x="552" y="208" width="10" height="22" fill="#dddddd"/>
+  <rect x="566" y="192" width="10" height="38" fill="#dddddd"/>
+  <rect x="490" y="244" width="84" height="4" fill="#e0e0e0"/>
+  <rect x="490" y="252" width="62" height="4" fill="#e0e0e0"/>
+
+  <rect x="592" y="150" width="50" height="7" fill="#0f5fa6"/>
+  <rect x="592" y="164" width="88" height="4" fill="#e0e0e0"/>
+  <rect x="592" y="174" width="82" height="4" fill="#e0e0e0"/>
+  <rect x="592" y="184" width="86" height="4" fill="#e0e0e0"/>
+  <rect x="592" y="200" width="44" height="7" fill="#0f5fa6"/>
+  <rect x="592" y="214" width="80" height="4" fill="#e0e0e0"/>
+  <rect x="592" y="224" width="72" height="4" fill="#e0e0e0"/>
+  <rect x="656" y="240" width="28" height="28" fill="#ffffff" stroke="#999999"/>
+  <rect x="660" y="244" width="8" height="8" fill="#666666"/>
+  <rect x="672" y="244" width="8" height="8" fill="#666666"/>
+  <rect x="660" y="256" width="8" height="8" fill="#666666"/>
+  <rect x="672" y="256" width="5" height="5" fill="#666666"/>
+
+  <text x="24" y="326" font-size="11" fill="#666666">No title bar, no takeaway, nine equal boxes.</text>
+  <text x="376" y="326" font-size="11" fill="#666666">Title, takeaway, three columns, one dominant chart.</text>
+</svg>

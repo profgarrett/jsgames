@@ -44,23 +44,23 @@ Optional Reading:
 - [dv31. Visual channels](dv31-visualchannels/index)
 
 
-## Module 2: Tableau
 
 ### Week 3 - August 31, 2026
 
 - [dv40. Colors](dv40-colors/index)
-
 - [dv45. Presentations](dv45-presentations/index)
 - [dv46. Writing an effective report](dv46-report/index)
+- [dv47. Creating a poster](dv47-poster/index)
 
+
+## Module 2: Tableau
+
+### Week 4 - September 7, 2026
 
 - *DataCamp: Introduction to Tableau*
 - [tb01. Tableau interface and data](tb01-interface/index)
 - [tb41. Tableau basic charts](tb41-basic-charts/index)
 - [tb42. Tableau basic features](tb42-basic-features/index)
-
-### Week 4 - September 7, 2026
-
 - [tb43. Chart refinements](tb43-chart-refinements/index)
 - [tb44. Data refinements](tb44-data-refinements/index)
 

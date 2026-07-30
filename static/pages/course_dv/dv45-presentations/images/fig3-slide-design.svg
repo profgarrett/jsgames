@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 310" width="720" height="310" font-family="Helvetica, Arial, sans-serif">
+  <rect width="720" height="310" fill="#ffffff"/>
+  <text x="20" y="24" font-size="16" font-weight="bold" fill="#222222">One idea per slide</text>
+
+  <text x="24" y="46" font-size="10" fill="#999999">WEAK</text>
+  <rect x="24" y="52" width="320" height="180" fill="#ffffff" stroke="#cccccc"/>
+  <text x="40" y="78" font-size="13" fill="#666666">Regional Sales</text>
+  <circle cx="44" cy="100" r="2.5" fill="#bbbbbb"/><rect x="54" y="96" width="250" height="7" fill="#e8e8e8"/>
+  <circle cx="44" cy="120" r="2.5" fill="#bbbbbb"/><rect x="54" y="116" width="230" height="7" fill="#e8e8e8"/>
+  <circle cx="44" cy="140" r="2.5" fill="#bbbbbb"/><rect x="54" y="136" width="265" height="7" fill="#e8e8e8"/>
+  <circle cx="44" cy="160" r="2.5" fill="#bbbbbb"/><rect x="54" y="156" width="215" height="7" fill="#e8e8e8"/>
+  <circle cx="44" cy="180" r="2.5" fill="#bbbbbb"/><rect x="54" y="176" width="245" height="7" fill="#e8e8e8"/>
+  <circle cx="44" cy="200" r="2.5" fill="#bbbbbb"/><rect x="54" y="196" width="200" height="7" fill="#e8e8e8"/>
+
+  <text x="376" y="46" font-size="10" fill="#0f5fa6">STRONG</text>
+  <rect x="376" y="52" width="320" height="180" fill="#ffffff" stroke="#0f5fa6" stroke-width="2"/>
+  <text x="392" y="78" font-size="13" font-weight="bold" fill="#0f5fa6">The Northeast Carried Q3</text>
+  <rect x="400" y="172" width="34" height="40" fill="#dddddd"/>
+  <rect x="448" y="157" width="34" height="55" fill="#dddddd"/>
+  <rect x="496" y="164" width="34" height="48" fill="#dddddd"/>
+  <rect x="544" y="117" width="34" height="95" fill="#0f5fa6"/>
+  <rect x="592" y="170" width="34" height="42" fill="#dddddd"/>
+  <rect x="640" y="152" width="34" height="60" fill="#dddddd"/>
+  <line x1="396" y1="212" x2="682" y2="212" stroke="#cccccc"/>
+
+  <text x="24" y="256" font-size="11" fill="#666666">Six bullets is usually six slides, or one chart, in disguise.</text>
+  <text x="376" y="256" font-size="11" fill="#666666">Title states the idea. The chart carries the evidence.</text>
+  <text x="24" y="290" font-size="12" fill="#666666">If someone read only your slide titles in order, they should get the whole argument.</text>
+</svg>
