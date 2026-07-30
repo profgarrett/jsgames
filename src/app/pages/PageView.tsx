@@ -192,6 +192,37 @@ const CustomImage: React.FC<ImgHTMLAttributes<HTMLImageElement> & { node?: unkno
 	const idMatch = altStr?.match(/\{#([^}]+)\}/);
 	const customId = idMatch ? idMatch[1] : undefined;
 	const cleanAlt = altStr?.replace(/\{#[^}]+\}/, '').trim();
+	const isVideo = /\.(mp4|webm|ogv)(?:[?#].*)?$/i.test(src);
+
+	// Allow authors to use the same Markdown asset syntax for images and videos:
+	// ![Dot illusion](colors-illusion-dots.mp4)
+	//
+	// An <img> cannot display a video, so render video assets directly. Do not
+	// spread image props here: React's image attributes are not all valid video
+	// attributes.
+	if (isVideo) {
+		return (
+			<span
+				className='markdown-figure'
+				role='group'
+				aria-label={cleanAlt ? `Video: ${cleanAlt}` : 'Video'}
+			>
+				<video
+					src={src}
+					id={customId}
+					className={props.className}
+					controls
+					playsInline
+					preload='metadata'
+					aria-label={cleanAlt}
+				>
+					{cleanAlt || 'Your browser does not support embedded video.'}
+				</video>
+
+				{ cleanAlt ? <span className='markdown-figure-caption'>{cleanAlt}</span> : null }
+			</span>
+		);
+	}
 
 	// The caption is the alt text. It is rendered as a sibling of the button
 	// rather than inside it so that students can still select and copy it;

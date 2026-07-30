@@ -42,15 +42,17 @@ Optional Reading:
 - [dv20. Understand data values and structure](dv20-data/index)
 - [dv30. Visual perception](dv30-visualperception/index)
 - [dv31. Visual channels](dv31-visualchannels/index)
-- [dv36. Colors](dv36-colors/index)
 
 
 ## Module 2: Tableau
 
 ### Week 3 - August 31, 2026
 
-- [dv11. Presentations](dv11-presentations/index)
-- [dv10. Writing an effective report](dv10-report/index)
+- [dv40. Colors](dv40-colors/index)
+
+- [dv45. Presentations](dv45-presentations/index)
+- [dv46. Writing an effective report](dv46-report/index)
+
 
 - *DataCamp: Introduction to Tableau*
 - [tb01. Tableau interface and data](tb01-interface/index)
