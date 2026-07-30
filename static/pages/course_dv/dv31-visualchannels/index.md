@@ -74,8 +74,7 @@ Encoding categories with a magnitude channel implies a ranking that does not exi
 *Channels for numbers*, listed roughly from most to least accurate:
 
 - Position on a common scale
-- Position on unaligned scales
-- Length
+- Position on unaligned scales or Length
 - Tilt or angle
 - Area (2D as size)
 - Depth (3D as position)
@@ -107,8 +106,6 @@ This first chart compares five bar-chart designs, not five different channels.
 
 - **T1–T3** are **position on a common scale**: the two bars being compared both sit on the same baseline. Accuracy drops slightly as the bars get farther apart.
 - **T4–T5** are **length**: the segments being compared float inside a stacked bar and do not share a baseline, so the reader must judge length instead of position.
-
-<!-- Verify the exact geometry of each of T1-T5 against Figure 1 of Cleveland & McGill (1984) before lecture. The T1-T3 / T4-T5 split is solid; the specific separation distances per type are worth double-checking. -->
 
 ![Cleveland and McGill results: log error rises steadily from T1 through T5](images/error01.png)
 
@@ -149,7 +146,7 @@ Area is one of the least accurate channels. This includes bubble charts, where t
 | Scatterplot | Position on two common scales | High |
 | Stacked bar, bottom segment | Position on a common scale | High |
 | Stacked bar, upper segments | Length | Moderate |
-| Small multiples / separate panels | Position on unaligned scales | Moderate |
+| Small multiples / separate panels | Length | Moderate |
 | Pie or donut chart | Angle, arc length, and area | Moderate |
 | Bubble chart | Area | Low |
 | Treemap | Area | Low |
@@ -167,6 +164,155 @@ Accuracy is not the only thing that matters. A treemap handles hundreds of categ
 2. You have a stacked bar chart of revenue by region and product line. Which comparisons are easy, and which are hard?
 3. Why does a bubble chart understate large values?
 4. A dashboard encodes "department" using a blue-to-red gradient. What is wrong with that choice?
+
+
+## Key terms
+
+- **Chart**: A visual representation of data that maps numbers to visual elements through a consistent function. Used interchangeably with *graph*.
+- **Diagram**: A visual that has graphical elements but does not map those elements to numbers, such as SmartArt. A diagram is not a chart.
+- **Table**: A grid of rows and columns holding individual data values, used for looking up exact numbers rather than seeing patterns.
+- **Visual channel**: A visual property, such as position, length, or hue, used to represent a data value.
+- **Number data**: Quantitative values such as sales, hours, or temperature, which need a channel with an ordered magnitude.
+- **Categorical data**: Values such as region, product line, or department, which need a channel that separates groups without implying order.
+- **Position on a common scale**: Encoding values as locations along a shared baseline or axis. The most accurate channel.
+- **Position on unaligned scales or Length**: Encoding values as positions that do not share a baseline, such as bars in separate small-multiple panels, or segments in a stacked bar.
+- **Tilt or angle**: Encoding a value as the rotation or opening between lines, as in a pie slice.
+- **Area**: Encoding a value as two-dimensional size, as in a bubble chart or treemap. A low-accuracy channel.
+- **Depth**: Encoding a value as apparent 3D position, which is read less accurately than 2D position.
+- **Color luminance**: Encoding a value as brightness or lightness, as in a heatmap.
+- **Color saturation**: Encoding a value as color intensity or vividness.
+- **Curvature**: Encoding a value as the amount of bend in a line.
+- **Volume**: Encoding a value as three-dimensional size. The least accurate channel.
+- **Hue**: The color name, such as red or blue. A categorical channel with no inherent order.
+- **Shape**: The form of a marker, such as circle or triangle. A categorical channel.
+- **Texture**: A fill pattern such as hatching or dots. A categorical channel.
+- **Pre-attentive** describes what your eye detects in under a quarter of a second, without searching. A single red dot in a field of gray dots "pops out." This is about *noticing*.
+- **Accuracy** describes how well you can judge *how much* a visual element represents.
+
+
+
+## Practice questions
+
+1. What makes something a chart rather than a diagram?
+   - It maps numbers to visual elements through a consistent function
+   - It uses more than one color
+   - It was created in charting software rather than drawing software
+   - It contains a title and axis labels
+
+1. Which statement about tables is correct?
+   - A table is not a chart, but it can contain charts through conditional formatting
+   - A table is a type of chart because it displays data
+   - A table can never include any graphical elements
+   - A table is always better than a chart for showing patterns
+
+1. When should you use a table instead of a chart?
+   - When readers need to look up exact individual values
+   - When you have hundreds of data points
+   - When readers need to see a trend over time
+   - When you want to compare two groups quickly
+
+1. When should you use a chart instead of a table?
+   - When readers need a pattern, trend, or comparison across many values
+   - When readers need to cite exact figures in a memo
+   - When there are only three numbers to show
+   - When each value will be looked up individually
+
+1. What does "pre-attentive" describe?
+   - What your eye detects in under a quarter of a second without searching
+   - How precisely you can estimate a magnitude
+   - How quickly software renders a chart
+   - How much training a reader needs to interpret a chart
+
+1. What does "accuracy" describe in the context of visual channels?
+   - How well a reader can judge how much a visual element represents
+   - How fast a reader notices an element
+   - Whether the underlying data is correct
+   - Whether the chart has the right number of gridlines
+
+1. Which channel pops out instantly but is poor for judging magnitude?
+   - Color hue
+   - Position on a common scale
+   - Length
+   - Position on unaligned scales
+
+1. Which set of channels is appropriate for number data?
+   - Position, length, angle, area, luminance
+   - Hue, shape, texture
+   - Shape, hue, curvature only
+   - Texture, hue, and outline style
+
+1. Which set of channels is appropriate for categorical data?
+   - Hue, shape, texture
+   - Position, length, area
+   - Luminance, saturation, volume
+   - Angle, depth, curvature
+
+1. What is wrong with encoding a categorical variable using a magnitude channel?
+   - It implies a ranking that does not exist in the data
+   - It uses too much ink on the page
+   - It makes the chart render more slowly
+   - It prevents you from adding a legend
+
+1. What is the cost of encoding a quantity using hue?
+   - You throw away most of your reading precision
+   - You lose the ability to add a title
+   - The values become impossible to sort
+   - Readers cannot tell the categories apart
+
+1. Which channel is the most accurate for reading quantities?
+   - Position on a common scale
+   - Length
+   - Area
+   - Color luminance
+
+1. Which channel is the least accurate for reading quantities?
+   - Volume
+   - Curvature
+   - Area
+   - Tilt or angle
+
+1. Why does an ordinary bar chart outperform a stacked bar chart for comparing values?
+   - Position on a common scale beats length
+   - Stacked bars use too many colors
+   - Stacked bars cannot be sorted
+   - Ordinary bars can hold more categories
+
+1. In a stacked bar chart, which segment is read most accurately?
+   - The bottom segment, because it sits on a common baseline
+   - The top segment, because it is closest to the label
+   - The middle segment, because it is surrounded by references
+   - All segments are read equally well
+
+1. Which channels does a pie chart combine?
+   - Angle, arc length, and area
+   - Position and length
+   - Luminance and saturation
+   - Depth and volume
+
+1. How accurate are pie charts compared to bar charts?
+   - Measurably less accurate, landing in the moderate group
+   - More accurate, because circles are read easily
+   - Equally accurate, since both encode the same values
+   - Less accurate only when there are exactly two slices
+
+1. Why does a bubble chart understate large values?
+   - People systematically underestimate large areas
+   - The circles overlap and hide each other
+   - Bubble charts always use a log scale
+   - Larger circles are drawn with lighter fills
+
+1. Which shape is read more accurately when comparing areas?
+   - Rectangles
+   - Circles
+   - Triangles
+   - Hexagons
+
+1. When is it still reasonable to choose a low-accuracy channel such as area or color?
+   - When you need rough magnitude, many categories, or a secondary variable
+   - Never, because accuracy is the only thing that matters
+   - Only when the audience is not technical
+   - Only when the data has fewer than five values
+
 
 
 ## References

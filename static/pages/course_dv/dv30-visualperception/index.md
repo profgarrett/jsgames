@@ -242,3 +242,186 @@ Three of the most common sources of proportionality errors are:
 3. A company's stock rose from $400 to $404. Which chart design makes this look dramatic, and which makes it look accurate? Which is the honest choice, and what does your answer depend on?
 4. Find a chart in a news article or annual report. Estimate its Lie Factor and identify which of the five proportionality errors above it commits, if any.
 5. Your reader missed the annotation you added to the chart's most important point. Using a term from this page, explain why—and name two changes that would fix it.
+
+
+
+## Key Terms
+
+- **Visual system**: The eyes and brain working together to convert light into meaning.
+- **Fovea**: The small, densely packed cluster of cone cells at the center of the retina that provides sharp detail, accurate color, and fine discrimination.
+- **Peripheral vision**: Low-resolution vision outside the fovea that detects motion, contrast, and general shapes but not fine detail.
+- **Saccade**: A rapid eye movement that brings a new part of a scene into the fovea.
+- **Saccadic suppression**: The brain's temporary reduction of visual sensitivity just before and during a saccade, which hides the motion smear.
+- **Continuity illusion**: The brain stitching stable snapshots between saccades into a smooth, continuous sense of the world.
+- **Blind spot**: The region of the retina where the optic nerve exits and no photoreceptors exist, so no light is detected there.
+- **Filling-in**: The brain painting over missing visual areas using nearby colors, textures, and patterns.
+- **Eye travel**: The distance the eye must move between related chart elements, such as data and its legend; less travel means more accurate reading.
+- **Inattentional blindness**: Failing to notice a visible object because attention is directed elsewhere, as in the Simons & Chabris gorilla study.
+- **Subitizing**: Instantly and accurately counting a small number of items, roughly up to four.
+- **Shape coding limit**: The practical maximum of about five or six distinct shapes before readers can no longer discriminate categories without a legend.
+- **Color coding limit**: The practical maximum of roughly six to twelve categorical colors, depending on mark size, background, and color separation.
+- **Crowding**: The interference that makes an item easy to identify in isolation hard to identify when similar items sit close beside it.
+- **Ensemble averaging**: The ability to judge the average property of a crowded group, such as overall tilt, even when individual items cannot be identified.
+- **Pre-attentive processing**: Low-level visual processing of features like edges, color, and orientation that happens almost instantly and without deliberate search.
+- **Pop-out**: The immediate visibility of an item that differs on a single pre-attentive feature.
+- **Slow visual search**: Deliberate, item-by-item inspection required when a target cannot be resolved by low-level features.
+- **Weber's Law**: The smallest detectable change in a stimulus is a constant proportion of the starting value, so people judge change relatively rather than absolutely.
+- **Just noticeable difference (JND)**: The smallest change between two stimuli that a person can reliably detect.
+- **Stevens' Power Law**: A model relating physical stimulus intensity to perceived intensity, where the relationship may be expansive, compressive, or near one-to-one.
+- **Miller's Law**: The claim that working memory holds about seven plus or minus two discrete items.
+- **Working memory**: Short-term memory that temporarily holds a limited number of items during a task.
+- **Chunk**: A meaningful unit of information; grouping items into chunks expands what fits in working memory.
+- **Cowan's limit**: The revised working-memory estimate of about four chunks once rehearsal and grouping strategies are removed; plan designs for four.
+- **Exploratory visualization**: A chart made to investigate a dataset, which may be deliberately overloaded with information.
+- **Confirmatory visualization**: A simplified chart made to communicate a finding to an audience.
+- **Proximity**: The Gestalt principle that items placed close together are perceived as related.
+- **White space**: Empty space used to separate unrelated elements so they are not perceived as a group.
+- **Alignment point**: An edge or center line that the eye catches on; reducing alignment points, such as by left-aligning instead of centering, makes layouts easier to scan.
+- **Data-ink ratio**: Tufte's measure of what share of the ink on a page encodes actual data.
+- **Clutter**: Any chart element that consumes reader attention without carrying information.
+- **Redundant encoding**: Showing the same variable more than once, such as a legend plus direct labels plus a color scale.
+- **Direct labeling**: Placing labels next to the data instead of requiring a legend lookup.
+- **Cognitive load**: The mental effort a chart demands of its reader.
+- **Proportionality Principle**: The requirement that the size, length, area, or angle of a visual element be proportional to the data value it encodes.
+- **Lie Factor**: Tufte's measure of chart distortion, calculated as the size of the effect shown in the graphic divided by the size of the effect in the data.
+- **Truncated axis**: An axis that does not start at zero, which exaggerates differences in bar charts.
+
+## Practice Questions
+
+1. Which part of the eye provides sharp detail and accurate color?
+   - The fovea
+   - The optic disc
+   - The blind spot
+   - The peripheral retina
+
+1. What do saccades accomplish?
+   - They bring different parts of a scene into the fovea
+   - They widen the total field of view
+   - They increase the number of cone cells in use
+   - They slow down image processing so detail improves
+
+1. Why do you not notice a smear while your eyes jump between fixation points?
+   - Saccadic suppression briefly lowers visual sensitivity
+   - The eye moves too slowly to create a smear
+   - The fovea shuts off color processing during motion
+   - Both eyes move in opposite directions and cancel the blur
+
+1. Why can't you see your blind spot?
+   - The brain fills it in using nearby colors and textures
+   - The blind spot contains extra rod cells that compensate
+   - Your eyelid covers that part of the retina
+   - The blind spot is smaller than a single photoreceptor
+
+1. What makes the two eyes' blind spots less of a problem?
+   - They fall in different locations, so each eye covers what the other misses
+   - They shrink when the pupils dilate
+   - They overlap exactly, so the brain can subtract them
+   - They only appear in low light
+
+1. What is the main design implication of having a small high-resolution focal area?
+   - Only a small portion of a chart can be read accurately at once
+   - Charts should be printed as large as possible
+   - Readers can process an unlimited number of categories
+   - Color is more reliable than length for encoding values
+
+1. Why does moving labels next to the data improve a chart?
+   - It reduces eye travel between the data and its meaning
+   - It increases the data-ink ratio above 1.0
+   - It converts a conjunction search into a pop-out
+   - It removes the need for a zero baseline
+
+1. In the Simons & Chabris (1999) study, viewers counting basketball passes failed to notice a person in a gorilla suit. What does this demonstrate?
+   - Inattentional blindness
+   - Crowding
+   - Saccadic suppression
+   - Weber's Law
+
+1. About how many items can people count instantly and accurately?
+   - 4
+   - 7
+   - 12
+   - 20
+
+1. What happens to counting beyond the subitizing limit?
+    - It becomes slow and deliberate, though estimation still works well
+    - It becomes impossible in any form
+    - It becomes faster because the brain switches to grouping
+    - It becomes exact only when items are colored differently
+
+1. Roughly how many distinct shapes can a chart use as a category code before discrimination breaks down?
+    - 5 or 6
+    - 2 or 3
+    - 10 or 12
+    - 20 or more
+
+1. Roughly how many categorical colors work well, depending on mark size, background, and separation?
+    - 6 to 12
+    - 2 to 4
+    - 15 to 20
+    - There is no practical limit
+
+1. What is crowding?
+    - Nearby similar items interfere with identifying an individual item
+    - Too many charts are placed on one dashboard
+    - Colors blend together when printed at low resolution
+    - Data marks overlap and hide each other's values
+
+1. Although crowded items are hard to identify individually, what are people still good at?
+    - Averaging the group, such as judging its overall tilt
+    - Counting the exact number of items present
+    - Naming the color of each individual item
+    - Recalling the items later from memory
+
+1. Why does a bright object in a field of dark items "pop out"?
+    - It differs on a low-level feature processed pre-attentively
+    - It is larger than the surrounding items
+    - The brain rehearses it in working memory
+    - It sits inside the fovea no matter where you look
+
+1. Why is finding a square that is gray on top and black on bottom, among squares that are black on top and gray on bottom, slow?
+    - It requires item-by-item inspection
+    - Weber's law say that gray is difficult to process
+    - The shapes exceed the shape coding limit
+    - Bar length is the only encoding processed quickly
+
+1. What does Weber's Law state?
+    - The smallest detectable change is a constant proportion of the starting value
+    - Perceived intensity always doubles when physical intensity doubles
+    - People detect absolute changes equally well at any starting value
+    - Working memory holds about four chunks
+
+1. Weber's Law explains why a 1 lb change is obvious when holding 1 lb but undetectable when holding 100 lbs. What is this smallest detectable change called?
+    - The just noticeable difference
+    - The lie factor
+    - The data-ink ratio
+    - The subitizing threshold
+
+1. According to Stevens' Power Law, why do bar charts work well?
+    - Perceived length is close to one-to-one with actual length
+    - Length is a compressive encoding, so errors shrink
+    - Length is an expansive encoding, so differences feel larger
+    - Length is processed only after color and orientation
+
+1. Which stimulus is described as expansive, where a small increase feels like a large one?
+    - Electric shock
+    - Brightness
+    - Length
+    - Area
+
+1. What did Cowan (2001) conclude about the practical working memory limit?
+    - About 4 chunks, once rehearsal and grouping are removed
+    - About 7 chunks, confirming Miller exactly
+    - About 12 chunks, if the items are colored
+    - There is no measurable limit in short-term memory
+
+1. Why is "1492" potentially one chunk rather than four?
+    - A chunk is a meaningful unit, not necessarily a single item
+    - Digits are always stored as a single item
+    - Working memory ignores numbers under 2000
+    - Four items exceed the subitizing limit and are merged
+
+1. Which Gestalt principle explains why charts placed close together are read as related?
+    - Proximity
+    - Similarity
+    - Enclosure
+    - Connection
