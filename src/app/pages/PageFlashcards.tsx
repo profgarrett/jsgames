@@ -1,4 +1,4 @@
-import React, { ReactElement, useMemo, useState } from 'react';
+import React, { ReactElement, useEffect, useMemo, useRef, useState } from 'react';
 import { Button, ButtonGroup } from 'react-bootstrap';
 
 export interface IFlashcard {
@@ -58,13 +58,37 @@ interface IFlashcardDeckProps {
 
 /*
 	Renders an interactive flashcard deck built from the marked terms in a page's
-	markdown. One card is shown at a time; click the card (or press Space/Enter)
-	to flip between the term and its definition. Prev/Next step through the deck.
+	markdown. One card is shown at a time.
+
+	The card starts with only the prompt visible. Clicking the card, pressing
+	Space/Enter, or clicking Next reveals the answer directly below the prompt.
+	Once the answer is showing, Next moves on to the following card.
+
+	The middle button swaps which side is the prompt: terms first (the default,
+	term -> definition) or definitions first (definition -> term).
+
+	Prev/Next (and the arrow keys) page between *cards* only -- the revealed
+	answer is part of the current card, not a separate page -- so the deck is
+	always `cards.length` steps long.
+
+	The Next button takes keyboard focus as soon as the deck mounts, so the whole
+	deck can be worked through with the space bar alone.
 */
 function PageFlashcards({ markdown }: IFlashcardDeckProps): ReactElement {
 	const cards = useMemo(() => extractFlashcards(markdown), [markdown]);
 	const [index, setIndex] = useState(0);
-	const [flipped, setFlipped] = useState(false);
+	const [revealed, setRevealed] = useState(false);
+	// false: term is the prompt (term -> definition). true: the reverse.
+	const [definitionFirst, setDefinitionFirst] = useState(false);
+	const nextRef = useRef<HTMLButtonElement>(null);
+
+	// The deck is mounted only while flashcard mode is on, so focusing on mount
+	// puts the keyboard on Next as soon as the deck becomes active: space then
+	// reveals the definition and steps through the terms without any clicking.
+	// preventScroll keeps the page from jumping to the button on activation.
+	useEffect(() => {
+		nextRef.current?.focus({ preventScroll: true });
+	}, []);
 
 	if (cards.length === 0) {
 		return (
@@ -82,61 +106,99 @@ function PageFlashcards({ markdown }: IFlashcardDeckProps): ReactElement {
 	const safeIndex = Math.min(index, cards.length - 1);
 	const card = cards[safeIndex];
 
+	const promptLabel = definitionFirst ? 'Definition' : 'Term';
+	const answerLabel = definitionFirst ? 'Term' : 'Definition';
+	const promptText = definitionFirst ? card.definition : card.term;
+	const answerText = definitionFirst ? card.term : card.definition;
+
+	// Paging always lands on a card with its answer hidden again.
 	const goTo = (next: number): void => {
 		const wrapped = (next + cards.length) % cards.length;
 		setIndex(wrapped);
-		setFlipped(false);
+		setRevealed(false);
 	};
 
-	const flip = (): void => setFlipped((f) => !f);
+	// Swapping sides re-hides the answer, so the new prompt is a fresh question.
+	const swapSides = (): void => {
+		setDefinitionFirst((d) => !d);
+		setRevealed(false);
+	};
 
-	const handleKey = (event: React.KeyboardEvent): void => {
+	// Space / Enter / the card itself / Next all do the same thing: show the
+	// answer, or advance to the next card if it is already showing.
+	const revealOrAdvance = (): void => {
+		if (revealed) goTo(safeIndex + 1);
+		else setRevealed(true);
+	};
+
+	// Space/Enter on the card itself. A real <button> already fires onClick for
+	// these keys, so this only covers the card div, which is not a button.
+	const handleCardKey = (event: React.KeyboardEvent): void => {
 		if (event.key === ' ' || event.key === 'Enter') {
 			event.preventDefault();
-			flip();
-		} else if (event.key === 'ArrowRight') {
+			revealOrAdvance();
+		}
+	};
+
+	// Arrow keys are handled on the wrapper so they work wherever focus sits in
+	// the deck -- including the Next button, which is focused on mount.
+	const handleDeckKey = (event: React.KeyboardEvent): void => {
+		if (event.key === 'ArrowRight') {
+			event.preventDefault();
 			goTo(safeIndex + 1);
 		} else if (event.key === 'ArrowLeft') {
+			event.preventDefault();
 			goTo(safeIndex - 1);
 		}
 	};
 
 	return (
-		<div className='flashcards'>
+		// eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions
+		<div className='flashcards' onKeyDown={handleDeckKey}>
 			<div className='flashcards-progress'>
 				Card { safeIndex + 1 } of { cards.length }
 			</div>
 
 			<div
-				className={`flashcard${flipped ? ' is-flipped' : ''}`}
+				className={`flashcard${revealed ? ' is-revealed' : ''}`}
 				role='button'
 				tabIndex={0}
-				onClick={flip}
-				onKeyDown={handleKey}
-				aria-label='Flashcard. Activate to flip.'
+				onClick={revealOrAdvance}
+				onKeyDown={handleCardKey}
+				aria-label={revealed
+					? `Flashcard showing ${promptLabel.toLowerCase()} and ${answerLabel.toLowerCase()}. Activate for the next card.`
+					: `Flashcard. Activate to reveal the ${answerLabel.toLowerCase()}.`}
 			>
-				<div className='flashcard-inner'>
-					<div className='flashcard-face flashcard-front'>
-						<span className='flashcard-label'>Term</span>
-						<span className='flashcard-text'>{ card.term }</span>
-						<span className='flashcard-hint'>Click to reveal definition</span>
-					</div>
-					<div className='flashcard-face flashcard-back'>
-						<span className='flashcard-label'>Definition</span>
-						<span className='flashcard-text'>{ card.definition }</span>
-						<span className='flashcard-hint'>{ card.term }</span>
-					</div>
+				<div className='flashcard-prompt'>
+					<span className='flashcard-label'>{ promptLabel }</span>
+					<span className='flashcard-text'>{ promptText }</span>
 				</div>
+
+				{ revealed ? (
+					<div className='flashcard-answer'>
+						<span className='flashcard-label'>{ answerLabel }</span>
+						<span className='flashcard-text'>{ answerText }</span>
+					</div>
+				) : (
+					<span className='flashcard-hint'>
+						Click, or press space, to reveal the { answerLabel.toLowerCase() }
+					</span>
+				) }
 			</div>
 
 			<ButtonGroup className='flashcards-controls'>
 				<Button variant='outline-secondary' onClick={() => goTo(safeIndex - 1)}>
 					&larr; Prev
 				</Button>
-				<Button variant='outline-primary' onClick={flip}>
-					Flip
+				<Button
+					variant='outline-primary'
+					onClick={swapSides}
+					aria-pressed={definitionFirst}
+					title='Swap which side of the card is shown first'
+				>
+					{ definitionFirst ? 'Definitions first' : 'Terms first' }
 				</Button>
-				<Button variant='outline-secondary' onClick={() => goTo(safeIndex + 1)}>
+				<Button ref={nextRef} variant='outline-secondary' onClick={revealOrAdvance}>
 					Next &rarr;
 				</Button>
 			</ButtonGroup>
