@@ -122,6 +122,11 @@ Setup the admin account. This uses the username and password in the secret.js fi
 npm run createadmin
 ```
 
+To create an individual account, run the command below.  It prompts for a username, a password (hidden), a section join code, and a role (defaults to `student`).  If the username already exists, the password is updated and the user is added to the section.
+```bash
+npm run createuser
+```
+
 
 ## Deploying
 
