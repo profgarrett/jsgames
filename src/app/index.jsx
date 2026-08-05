@@ -25,6 +25,7 @@ import FeedbackRouter from './if/FeedbackRouter';
 import PageListContainer from './pages/PageListContainer.tsx';
 import PageSectionContainer from './pages/PageSectionContainer.tsx';
 import PageViewContainer from './pages/PageViewContainer.tsx';
+import LiveQuizJoin from './pages/LiveQuizJoin.tsx';
 import { loadUserFromServer } from './components/Authentication';
 import PageviewTracker from './components/PageviewTracker.tsx';
 
@@ -63,6 +64,7 @@ function renderApp() {
 						<Route path="/pages" element={<PageSectionContainer />} />
 						<Route path="/pages/list" element={<PageListContainer />} />
 					<Route path="/pages/*" element={<PageViewContainer />} />
+						<Route path="/live" element={<LiveQuizJoin />} />
 
 						<Route path="/ifgame" element={<MyProgressContainer />} />
 						<Route path="/ifgame/levels/:_code" element={<LevelListContainer />} />

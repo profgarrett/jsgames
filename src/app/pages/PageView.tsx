@@ -9,6 +9,7 @@ import iPage from './iPage';
 import PageFlashcards, { extractFlashcards } from './PageFlashcards';
 import PageQuiz, { extractQuizQuestions, removeQuizSection } from './PageQuiz';
 import PageQuizResults from './PageQuizResults';
+import LiveQuizInstructor from './LiveQuizInstructor';
 import { getUserFromBrowser } from './../components/Authentication';
 import './pageview_toc_style.css'; // Import the CSS file for TOC styling
 import { ImgHTMLAttributes } from 'react';
@@ -291,8 +292,8 @@ function PageView({ page }: IPageViewProps): ReactElement {
 	const headingIdMap = useMemo(() => new Map(tocEntries.map((entry) => [normalizeHeadingText(entry.text), entry.id])), [tocEntries]);
 	const flashcards = useMemo(() => extractFlashcards(markdown_content), [markdown_content]);
 	const quizQuestions = useMemo(() => extractQuizQuestions(markdown_content), [markdown_content]);
-	// 'read' | 'flashcards' | 'quiz' | 'results' -- the modes are mutually exclusive.
-	const [mode, setMode] = useState<'read' | 'flashcards' | 'quiz' | 'results'>('read');
+	// 'read' | 'flashcards' | 'quiz' | 'results' | 'live' -- the modes are mutually exclusive.
+	const [mode, setMode] = useState<'read' | 'flashcards' | 'quiz' | 'results' | 'live'>('read');
 	// The results panel is for the admin (profgarrett) only. The API enforces
 	// this as well; hiding the button just keeps it out of everyone else's way.
 	const isAdmin = getUserFromBrowser().isAdmin;
@@ -303,7 +304,7 @@ function PageView({ page }: IPageViewProps): ReactElement {
 		setMode('read');
 	}, [markdown_content]);
 
-	const toggleMode = (next: 'flashcards' | 'quiz' | 'results'): void =>
+	const toggleMode = (next: 'flashcards' | 'quiz' | 'results' | 'live'): void =>
 		setMode((current) => (current === next ? 'read' : next));
 
 	if (page === null) return <></>;
@@ -382,10 +383,24 @@ function PageView({ page }: IPageViewProps): ReactElement {
 							{ mode === 'results' ? 'Back to reading' : 'Quiz results' }
 						</Button>
 					) : null}
+
+					{isAdmin && quizQuestions.length > 0 ? (
+						<Button
+							variant={mode === 'live' ? 'danger' : 'outline-danger'}
+							size='sm'
+							className='ms-2'
+							onClick={() => toggleMode('live')}
+							aria-pressed={mode === 'live'}
+						>
+							{ mode === 'live' ? 'Back to reading' : 'Start live session' }
+						</Button>
+					) : null}
 				</div>
 			) : null}
 
-			{mode === 'results' ? (
+			{mode === 'live' ? (
+				<LiveQuizInstructor quizQuestions={quizQuestions} page={page.slug} />
+			) : mode === 'results' ? (
 				<PageQuizResults page={page.slug} />
 			) : mode === 'quiz' ? (
 				<PageQuiz markdown={markdown_content} page={page.slug} />

@@ -359,35 +359,10 @@ table.flexible-width-table {
 }
 
 .flashcard {
-    perspective: 1200px;
     width: 100%;
-    height: 280px;
+    min-height: 280px;
     cursor: pointer;
     outline: none;
-}
-
-.flashcard:focus-visible .flashcard-inner {
-    box-shadow: 0 0 0 3px #002855;
-    border-radius: 10px;
-}
-
-.flashcard-inner {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    transition: transform 0.5s;
-    transform-style: preserve-3d;
-}
-
-.flashcard.is-flipped .flashcard-inner {
-    transform: rotateY(180deg);
-}
-
-.flashcard-face {
-    position: absolute;
-    inset: 0;
-    -webkit-backface-visibility: hidden;
-    backface-visibility: hidden;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -395,17 +370,27 @@ table.flexible-width-table {
     padding: 25px;
     border: 1px solid #a2a9b1;
     border-radius: 10px;
+    background-color: #f8f9fa;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
 }
 
-.flashcard-front {
-    background-color: #f8f9fa;
+.flashcard:focus-visible {
+    box-shadow: 0 0 0 3px #002855;
 }
 
-.flashcard-back {
-    background-color: #002855;
-    color: #fff;
-    transform: rotateY(180deg);
+.flashcard-prompt,
+.flashcard-answer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+}
+
+/* The answer sits directly below the prompt, on the same card. */
+.flashcard-answer {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid #d3d8dd;
 }
 
 .flashcard-label {
@@ -421,8 +406,12 @@ table.flexible-width-table {
     line-height: 1.4;
 }
 
-.flashcard-front .flashcard-text {
+.flashcard-prompt .flashcard-text {
     font-weight: bold;
+}
+
+.flashcard-answer .flashcard-label {
+    color: #002855;
 }
 
 .flashcard-hint {
@@ -656,6 +645,84 @@ table.flexible-width-table {
 
 .quiz-results-answer.is-correct .quiz-results-answer-fill {
     background-color: #1a7f37;
+}
+
+
+/** Live quiz session (instructor + student) ***********************/
+
+.live-quiz {
+    max-width: 640px;
+    margin: 20px auto 40px auto;
+}
+
+.live-quiz-message {
+    color: #666;
+    font-style: italic;
+    margin-top: 16px;
+}
+
+.live-quiz-error {
+    color: #b42318;
+    margin-top: 12px;
+}
+
+.live-quiz-waiting {
+    text-align: center;
+    padding: 40px 25px;
+    border: 1px solid #a2a9b1;
+    border-radius: 10px;
+    background-color: #f8f9fa;
+}
+
+.live-quiz-instructions {
+    color: #666;
+    margin-bottom: 10px;
+}
+
+.live-quiz-code {
+    font-size: 3em;
+    font-weight: bold;
+    letter-spacing: 0.15em;
+    color: #002855;
+    margin-bottom: 10px;
+}
+
+.live-quiz-participant-count {
+    color: #666;
+    margin-bottom: 20px;
+}
+
+.live-quiz-progress {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.9em;
+    color: #666;
+    margin-bottom: 10px;
+}
+
+.live-quiz-tally {
+    font-weight: bold;
+}
+
+.live-quiz-option-display {
+    cursor: default;
+}
+
+.live-quiz-leaderboard {
+    margin: 20px 0;
+    padding: 20px 25px;
+    border: 1px solid #a2a9b1;
+    border-radius: 10px;
+    background-color: #f8f9fa;
+}
+
+.live-quiz-leaderboard h4 {
+    margin-bottom: 10px;
+}
+
+.live-quiz-leaderboard ol {
+    margin: 0;
+    padding-left: 1.5em;
 }
 
 .quiz-results-answer-count {

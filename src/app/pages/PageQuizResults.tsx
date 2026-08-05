@@ -10,34 +10,16 @@
 	well, so this is a convenience rather than the security boundary.
 */
 import React, { ReactElement, useEffect, useState } from 'react';
-import { Table } from 'react-bootstrap';
 
-export interface IQuizAnswerSummary {
-	answer: string;
-	count: number;
-	correct: boolean;
-}
+import QuizResultsTable, { IQuizQuestionSummary } from './QuizResultsTable';
 
-export interface IQuizQuestionSummary {
-	question: string;
-	total: number;
-	correct: number;
-	percent_correct: number;
-	answers: IQuizAnswerSummary[];
-}
+export type { IQuizAnswerSummary, IQuizQuestionSummary } from './QuizResultsTable';
+export { answer_share } from './QuizResultsTable';
 
 interface IPageQuizResultsProps {
 	// Page slug whose results should be shown.
 	page: string;
 }
-
-/*
-	Percent of this question's answers that picked a given option. Used for the
-	inline bar; returns 0 rather than NaN when a question has no answers.
-	Exported for unit testing.
-*/
-export const answer_share = (count: number, total: number): number =>
-	(total <= 0 ? 0 : Math.round((count / total) * 100));
 
 function PageQuizResults({ page }: IPageQuizResultsProps): ReactElement {
 	const [questions, setQuestions] = useState<IQuizQuestionSummary[] | null>(null);
@@ -98,53 +80,7 @@ function PageQuizResults({ page }: IPageQuizResultsProps): ReactElement {
 				{ answered } answers across { questions.length } questions, hardest first.
 			</p>
 
-			<Table className='quiz-results-table' bordered>
-				<thead>
-					<tr>
-						<th>Question</th>
-						<th className='quiz-results-numeric'>% correct</th>
-						<th className='quiz-results-numeric'>Answers</th>
-					</tr>
-				</thead>
-				<tbody>
-					{ questions.map((question) => (
-						<React.Fragment key={question.question}>
-							<tr className='quiz-results-question-row'>
-								<td>{ question.question }</td>
-								<td className='quiz-results-numeric'>
-									<b>{ question.percent_correct }%</b>
-								</td>
-								<td className='quiz-results-numeric'>{ question.total }</td>
-							</tr>
-							<tr className='quiz-results-answers-row'>
-								<td colSpan={3}>
-									<ul className='quiz-results-answers'>
-										{ question.answers.map((answer) => (
-											<li
-												key={`${answer.answer}-${answer.correct ? 'c' : 'i'}`}
-												className={answer.correct ? 'quiz-results-answer is-correct' : 'quiz-results-answer'}
-											>
-												<span className='quiz-results-answer-text'>
-													{ answer.correct ? '✓ ' : '' }{ answer.answer }
-												</span>
-												<span className='quiz-results-answer-bar'>
-													<span
-														className='quiz-results-answer-fill'
-														style={{ width: `${answer_share(answer.count, question.total)}%` }}
-													/>
-												</span>
-												<span className='quiz-results-answer-count'>
-													{ answer.count } ({ answer_share(answer.count, question.total) }%)
-												</span>
-											</li>
-										)) }
-									</ul>
-								</td>
-							</tr>
-						</React.Fragment>
-					)) }
-				</tbody>
-			</Table>
+			<QuizResultsTable questions={questions} />
 		</div>
 	);
 }

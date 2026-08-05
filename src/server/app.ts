@@ -111,6 +111,9 @@ app.use('/api/pageviews', app_pageviews);
 import { app_quizviews } from './app_quizviews';
 app.use('/api/quizviews', app_quizviews);
 
+import { app_quizsessions } from './app_quizsessions';
+app.use('/api/quizsessions', app_quizsessions);
+
 
 ////////////////////////////////////////////////////////////////////////
 //  Some basic routes.
