@@ -1,34 +1,39 @@
 /*
 	Instructor-facing live quiz session.
 
-	Kahoot-style flow, built on top of the same "## Practice Questions" deck as
-	the async quiz (PageQuiz.tsx): create (or resume) a session for this page,
-	show the join code in a waiting room, step through questions while students
-	answer on their own devices, then show the shared results + leaderboard
-	once the instructor ends it.
+	Built on top of the same "## Practice Questions" deck as the async quiz
+	(PageQuiz.tsx): create (or resume) a session for this page, show the join
+	code, then start it. Students work through the deck at their own pace once
+	started (see LiveQuizPlay.tsx) -- there's no single "current question" for
+	the instructor to drive, so this screen just tracks who has joined and lets
+	the instructor start/end the session. Ending shows the shared results +
+	leaderboard, once every student's answers have been rolled up.
 
 	The server is the source of truth for session state; this component mostly
 	polls GET /api/quizsessions/:idsession/state and posts actions. See
 	src/server/app_quizsessions.ts for the API this talks to.
 */
 import React, { ReactElement, useEffect, useState } from 'react';
-import { Button, ButtonGroup } from 'react-bootstrap';
+import { Button } from 'react-bootstrap';
 
 import { IQuizQuestion, buildQuiz } from './PageQuiz';
 import LiveQuizResultsView, { ILiveQuizResults } from './LiveQuizResultsView';
 
 const POLL_INTERVAL_MS = 2000;
 
+interface IParticipantProgress {
+	username: string;
+	completed: number;
+}
+
 interface ISessionState {
 	idsession: number;
 	code: string;
 	page: string;
 	status: 'waiting' | 'active' | 'ended';
-	current_question_index: number;
-	total_questions: number;
-	question: { prompt: string; options: string[] } | null;
 	participant_count: number;
-	answered_count: number;
+	usernames: string[];
+	participants: IParticipantProgress[];
 }
 
 interface ILiveQuizInstructorProps {
@@ -79,7 +84,7 @@ function LiveQuizInstructor({ quizQuestions, page }: ILiveQuizInstructorProps): 
 		return () => { cancelled = true; };
 	}, [page]);
 
-	// Poll for participant/answer counts (and to notice the session ending
+	// Poll for the joined-student count (and to notice the session ending
 	// from elsewhere) while the session is in progress.
 	useEffect(() => {
 		if (!session || session.status === 'ended') return;
@@ -110,7 +115,7 @@ function LiveQuizInstructor({ quizQuestions, page }: ILiveQuizInstructorProps): 
 		return () => { cancelled = true; };
 	}, [session?.status, session?.idsession, results]);
 
-	const callAction = async (action: 'next' | 'end'): Promise<void> => {
+	const callAction = async (action: 'start' | 'end'): Promise<void> => {
 		if (!session) return;
 		try {
 			const res = await fetch(`/api/quizsessions/${session.idsession}/${action}`, {
@@ -134,65 +139,56 @@ function LiveQuizInstructor({ quizQuestions, page }: ILiveQuizInstructorProps): 
 		return <div className='live-quiz'><p className='live-quiz-message'>Starting live session&hellip;</p></div>;
 	}
 
-	if (session.status === 'waiting') {
-		return (
-			<div className='live-quiz'>
-				<div className='live-quiz-waiting'>
-					<p className='live-quiz-instructions'>Students join at <b>/live</b> with this code:</p>
-					<div className='live-quiz-code'>{ session.code }</div>
-					<p className='live-quiz-participant-count'>
-						{ session.participant_count } student{ session.participant_count === 1 ? '' : 's' } joined
-					</p>
-					<Button variant='primary' size='lg' onClick={() => callAction('next')}>
-						Start session
-					</Button>
-					{ error !== '' ? <p className='live-quiz-error'>{ error }</p> : null }
-				</div>
-			</div>
-		);
-	}
+	if (session.status === 'ended') return <LiveQuizResultsView results={results} />;
 
-	if (session.status === 'active' && session.question) {
-		const isLast = session.current_question_index + 1 >= session.total_questions;
+	const joinedLabel = `${session.participant_count} student${session.participant_count === 1 ? '' : 's'} joined`;
 
-		return (
-			<div className='live-quiz'>
-				<div className='live-quiz-progress'>
-					Question { session.current_question_index + 1 } of { session.total_questions }
-					<span className='live-quiz-tally'>{ session.answered_count } / { session.participant_count } answered</span>
-				</div>
+	return (
+		<div className='live-quiz'>
+			<div className='live-quiz-waiting'>
+				<p className='live-quiz-instructions'>Students join at <b>/live</b> with this code:</p>
+				<div className='live-quiz-code'>{ session.code }</div>
+				<p className='live-quiz-participant-count'>{ joinedLabel }</p>
 
-				<div className='quiz-card'>
-					<p className='quiz-prompt'>{ session.question.prompt }</p>
-					<ul className='quiz-options'>
-						{ session.question.options.map((option, i) => (
-							<li key={option}>
-								<div className='quiz-option live-quiz-option-display'>
-									<span className='quiz-option-marker'>{ i + 1 }</span>
-									<span className='quiz-option-text'>{ option }</span>
-								</div>
-							</li>
-						)) }
-					</ul>
-				</div>
-
-				<ButtonGroup className='quiz-controls'>
-					{ !isLast ? (
-						<Button variant='outline-primary' onClick={() => callAction('next')}>
-							Next question →
+				{ session.status === 'waiting' ? (
+					<>
+						{ session.usernames.length > 0 ? (
+							<ul className='live-quiz-joined-names'>
+								{ session.usernames.map((username) => <li key={username}>{ username }</li>) }
+							</ul>
+						) : null }
+						<Button variant='primary' size='lg' onClick={() => callAction('start')}>
+							Start session
 						</Button>
-					) : null }
+					</>
+				) : (
+					<>
+						<p className='live-quiz-message'>Students are answering at their own pace.</p>
+						{ session.participants.length > 0 ? (
+							<ul className='live-quiz-progress-list'>
+								{ session.participants.map((participant) => (
+									<li key={participant.username}>
+										<span className='live-quiz-progress-name'>{ participant.username }</span>
+										<span className='live-quiz-progress-count'>
+											{ participant.completed } completed
+										</span>
+									</li>
+								)) }
+							</ul>
+						) : null }
+					</>
+				) }
+
+				<div className='mt-3'>
 					<Button variant='outline-danger' onClick={() => callAction('end')}>
 						End session
 					</Button>
-				</ButtonGroup>
+				</div>
+
 				{ error !== '' ? <p className='live-quiz-error'>{ error }</p> : null }
 			</div>
-		);
-	}
-
-	// Ended.
-	return <LiveQuizResultsView results={results} />;
+		</div>
+	);
 }
 
 export default LiveQuizInstructor;

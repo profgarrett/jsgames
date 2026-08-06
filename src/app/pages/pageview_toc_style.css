@@ -692,6 +692,46 @@ table.flexible-width-table {
     margin-bottom: 20px;
 }
 
+.live-quiz-joined-names {
+    list-style: none;
+    margin: 0 0 20px 0;
+    padding: 0;
+    max-height: 220px;
+    overflow-y: auto;
+    columns: 2;
+}
+
+.live-quiz-joined-names li {
+    color: #333;
+    padding: 2px 0;
+}
+
+.live-quiz-progress-list {
+    list-style: none;
+    margin: 0 0 20px 0;
+    padding: 0;
+    max-height: 300px;
+    overflow-y: auto;
+    text-align: left;
+}
+
+.live-quiz-progress-list li {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 4px 0;
+    border-bottom: 1px solid #e9ecef;
+    color: #333;
+}
+
+.live-quiz-progress-name {
+    font-weight: bold;
+}
+
+.live-quiz-progress-count {
+    color: #666;
+}
+
 .live-quiz-progress {
     display: flex;
     justify-content: space-between;
@@ -700,12 +740,20 @@ table.flexible-width-table {
     margin-bottom: 10px;
 }
 
-.live-quiz-tally {
+.live-quiz-my-score {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
     font-weight: bold;
+    margin-bottom: 14px;
 }
 
-.live-quiz-option-display {
-    cursor: default;
+.live-quiz-my-score-correct {
+    color: #1a7f37;
+}
+
+.live-quiz-my-score-incorrect {
+    color: #b42318;
 }
 
 .live-quiz-leaderboard {

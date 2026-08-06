@@ -26,6 +26,8 @@ import { sql21 } from './../../sql/sql21.js';
 import { sql22 } from './../../sql/sql22.js';
 import { sql23 } from './../../sql/sql23.js';
 import { sql24 } from './../../sql/sql24.js';
+import { sql25 } from './../../sql/sql25.js';
+import { sql26 } from './../../sql/sql26.js';
 
 
 /**
@@ -174,6 +176,8 @@ async function update_mysql_database_schema(): Promise<any> {
 	if(old_version < 22 ) await _update_update_version( sql22 );
 	if(old_version < 23 ) await _update_update_version( sql23 );
 	if(old_version < 24 ) await _update_update_version( sql24 );
+	if(old_version < 25 ) await _update_update_version( sql25 );
+	if(old_version < 26 ) await _update_update_version( sql26 );
 
 	await _update_all_levels_to_latest_props();
 	

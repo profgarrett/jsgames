@@ -1,15 +1,19 @@
 /**
-	Server-side routes for live (synchronous) quiz sessions.
+	Server-side routes for live quiz sessions.
 
 	An instructor starts a session while viewing a page; the client sends the
 	already-shuffled question deck (built with buildQuiz() in PageQuiz.tsx) once,
-	and the server freezes it as the session's source of truth so every
-	participant sees the same question/option order. Students join with a short
-	code, then poll /:idsession/state while the instructor steps through
-	questions with /next and finishes with /end. Results (including which
-	option was correct) are only ever returned for the *current* question after
-	a student has answered it, or for the whole session once it has ended --
-	never revealed in advance.
+	and the server freezes it as the session's source of truth. Every student
+	answers the same set of questions exactly once, but in an order unique to
+	them -- shuffled the moment they join (see shuffle_indices) and stored on
+	their participant row, so it stays put across refreshes/rejoins. Students
+	move through their own order at their own pace (GET /:idsession/question +
+	POST /:idsession/answer) once the instructor starts the session. The
+	instructor's screen just tracks who has joined and starts/ends the session
+	-- there's no shared "current question" to drive.
+	Results (including which option was correct) are only ever returned for a
+	student's own next question after they've answered it, or for the whole
+	session once it has ended -- never revealed in advance.
 */
 import express from 'express';
 
@@ -55,7 +59,6 @@ interface ISessionRow {
 	page: string;
 	status: 'waiting' | 'active' | 'ended';
 	questions_json: string;
-	current_question_index: number;
 }
 
 
@@ -124,6 +127,75 @@ const generate_code = (): string => {
 // The option flagged correct for a stored question. Exported for unit testing.
 const correct_option_text = (question: IStoredQuizQuestion): string =>
 	question.options.find((option) => option.isCorrect)?.text ?? '';
+
+/*
+	A fresh Fisher-Yates permutation of [0, length), used to give each student
+	their own random order through the (otherwise shared, frozen) question
+	deck. Exported for unit testing.
+*/
+const shuffle_indices = (length: number): number[] => {
+	const order = Array.from({ length }, (_, i) => i);
+	for (let i = order.length - 1; i > 0; i--) {
+		const j = Math.floor(Math.random() * (i + 1));
+		[order[i], order[j]] = [order[j], order[i]];
+	}
+	return order;
+};
+
+/*
+	A participant's stored question_order, validated against the deck it's
+	meant to index into: must be a JSON array containing each of
+	[0, total_questions) exactly once. Falls back to sequential order for
+	anything unusable -- most importantly `null`, which covers participant
+	rows created before question_order existed. Exported for unit testing.
+*/
+const parse_question_order = (raw: string | null, total_questions: number): number[] => {
+	const sequential = Array.from({ length: total_questions }, (_, i) => i);
+	if (raw === null) return sequential;
+
+	try {
+		const parsed = JSON.parse(raw);
+		if (!Array.isArray(parsed) || parsed.length !== total_questions) return sequential;
+
+		const seen = new Set<number>();
+		for (const value of parsed) {
+			if (!Number.isInteger(value) || value < 0 || value >= total_questions || seen.has(value)) return sequential;
+			seen.add(value);
+		}
+		return parsed;
+	} catch {
+		return sequential;
+	}
+};
+
+interface IParticipantAnswerRow {
+	question_index: number;
+	correct: number;
+}
+
+export interface IParticipantProgress {
+	// Index of the question this participant hasn't answered yet.
+	next_index: number;
+	correct_count: number;
+	incorrect_count: number;
+}
+
+/*
+	Where a participant is in the deck, derived from their own answer rows
+	rather than stored separately -- students answer strictly in order (the
+	server rejects an out-of-order submission), so the count of answers so far
+	*is* the index of the next question. Self-correcting on refresh, and keeps
+	"my score" and "my next question" both driven by the same source of truth.
+	Exported for unit testing.
+*/
+const compute_participant_progress = (rows: IParticipantAnswerRow[]): IParticipantProgress => {
+	const correct_count = rows.filter((row) => Number(row.correct) === 1).length;
+	return {
+		next_index: rows.length,
+		correct_count,
+		incorrect_count: rows.length - correct_count,
+	};
+};
 
 interface ISessionAnswerRow {
 	question_index: number;
@@ -251,40 +323,36 @@ const generate_unique_code = async (): Promise<string> => {
 	throw new Error('Could not generate a unique session code');
 };
 
-// Build the polling payload shared by /state, /next, and /end.
+// Build the polling payload shared by /state, /mine/active, /start, and /end.
+// Students move through the deck independently, so this is just overall
+// session status, who has joined, and (while active) how many questions each
+// of them has completed so far -- never their correct/incorrect split, which
+// stays private to the student until results are shown.
 const build_state_payload = async (session: ISessionRow): Promise<any> => {
-	const questions: IStoredQuizQuestion[] = JSON.parse(session.questions_json);
-
 	const participantRows = await run_mysql_query(
-		'SELECT COUNT(*) AS n FROM quizsession_participants WHERE idsession = ?',
+		`SELECT quizsession_participants.username AS username,
+				COUNT(quizsession_answers.idanswer) AS completed
+			FROM quizsession_participants
+			LEFT JOIN quizsession_answers
+				ON quizsession_answers.idparticipant = quizsession_participants.idparticipant
+			WHERE quizsession_participants.idsession = ?
+			GROUP BY quizsession_participants.idparticipant, quizsession_participants.username
+			ORDER BY quizsession_participants.username ASC`,
 		[session.idsession],
 	);
-	const participant_count = Number(participantRows[0]?.n) || 0;
 
-	let answered_count = 0;
-	let question: { prompt: string; options: string[] } | null = null;
-
-	if (session.status === 'active') {
-		const answeredRows = await run_mysql_query(
-			'SELECT COUNT(*) AS n FROM quizsession_answers WHERE idsession = ? AND question_index = ?',
-			[session.idsession, session.current_question_index],
-		);
-		answered_count = Number(answeredRows[0]?.n) || 0;
-
-		const current = questions[session.current_question_index];
-		if (current) question = { prompt: current.prompt, options: current.options.map((o) => o.text) };
-	}
+	const participants = Array.isArray(participantRows)
+		? participantRows.map((row: any) => ({ username: row.username, completed: Number(row.completed) || 0 }))
+		: [];
 
 	return {
 		idsession: session.idsession,
 		code: session.code,
 		page: session.page,
 		status: session.status,
-		current_question_index: session.current_question_index,
-		total_questions: questions.length,
-		question,
-		participant_count,
-		answered_count,
+		participant_count: participants.length,
+		usernames: participants.map((p) => p.username),
+		participants,
 	};
 };
 
@@ -312,8 +380,8 @@ router.post('/',
 		const code = await generate_unique_code();
 
 		const sql = `INSERT INTO quizsessions
-			(code, username, iduser, page, status, questions_json, current_question_index, created_datetime)
-			VALUES (?, ?, ?, ?, 'waiting', ?, -1, ?)`;
+			(code, username, iduser, page, status, questions_json, created_datetime)
+			VALUES (?, ?, ?, ?, 'waiting', ?, ?)`;
 		const result = await run_mysql_query(sql, [code, username, iduser, page, JSON.stringify(questions), now_mysql()]);
 
 		res.json({ idsession: result.insertId, code });
@@ -368,11 +436,17 @@ router.post('/:code/join',
 		const username = (req as any).session.username;
 		const iduser = await lookup_iduser(username);
 
+		// Only takes effect on first join -- ON DUPLICATE KEY UPDATE deliberately
+		// leaves question_order alone, so rejoining doesn't reshuffle a student
+		// mid-quiz.
+		const questions: IStoredQuizQuestion[] = JSON.parse(session.questions_json);
+		const questionOrder = JSON.stringify(shuffle_indices(questions.length));
+
 		await run_mysql_query(
-			`INSERT INTO quizsession_participants (idsession, username, iduser, joined_datetime)
-				VALUES (?, ?, ?, ?)
+			`INSERT INTO quizsession_participants (idsession, username, iduser, question_order, joined_datetime)
+				VALUES (?, ?, ?, ?, ?)
 				ON DUPLICATE KEY UPDATE joined_datetime = VALUES(joined_datetime)`,
-			[session.idsession, username, iduser, now_mysql()],
+			[session.idsession, username, iduser, questionOrder, now_mysql()],
 		);
 
 		res.json({ idsession: session.idsession, page: session.page, status: session.status });
@@ -406,7 +480,79 @@ router.get('/:idsession/state',
 });
 
 
-// Submit an answer to the current question.
+interface IParticipantRow {
+	idparticipant: number;
+	question_order: string | null;
+}
+
+// Look up a participant's row (including their personal question order),
+// requiring that they've joined this session.
+const get_participant = async (idsession: number, username: string): Promise<IParticipantRow | null> => {
+	const rows = await run_mysql_query(
+		'SELECT idparticipant, question_order FROM quizsession_participants WHERE idsession = ? AND username = ? LIMIT 1',
+		[idsession, username],
+	);
+	if (!Array.isArray(rows) || rows.length === 0) return null;
+	return rows[0] as IParticipantRow;
+};
+
+const get_participant_progress = async (idparticipant: number): Promise<IParticipantProgress> => {
+	const rows = await run_mysql_query(
+		'SELECT question_index, correct FROM quizsession_answers WHERE idparticipant = ?',
+		[idparticipant],
+	);
+	return compute_participant_progress(Array.isArray(rows) ? rows : []);
+};
+
+// A student's own next question (or their finished summary), plus their
+// running correct/incorrect tally. Each student progresses independently.
+router.get('/:idsession/question',
+	nocache, user_require_logged_in,
+	async (req: Request, res: Response, next: NextFunction): Promise<any> => {
+	try {
+		const idsession = Number(req.params.idsession);
+		if (!Number.isInteger(idsession)) return res.status(400).json({ error: 'invalid session' });
+
+		const session = await get_session(idsession);
+		if (session === null) return res.status(404).json({ error: 'session not found' });
+		if (session.status !== 'active') return res.status(400).json({ error: 'session is not active' });
+
+		const username = (req as any).session.username;
+		const participant = await get_participant(idsession, username);
+		if (participant === null) return res.status(403).json({ error: 'join the session first' });
+
+		const progress = await get_participant_progress(participant.idparticipant);
+		const questions: IStoredQuizQuestion[] = JSON.parse(session.questions_json);
+
+		if (progress.next_index >= questions.length) {
+			return res.json({
+				finished: true,
+				total_questions: questions.length,
+				correct_count: progress.correct_count,
+				incorrect_count: progress.incorrect_count,
+			});
+		}
+
+		const order = parse_question_order(participant.question_order, questions.length);
+		const questionIndex = order[progress.next_index];
+		const question = questions[questionIndex];
+		res.json({
+			finished: false,
+			question_index: questionIndex,
+			total_questions: questions.length,
+			prompt: question.prompt,
+			options: question.options.map((o) => o.text),
+			correct_count: progress.correct_count,
+			incorrect_count: progress.incorrect_count,
+		});
+	} catch (e) {
+		log_error(e);
+		next(e);
+	}
+});
+
+
+// Submit an answer to the student's own current question.
 router.post('/:idsession/answer',
 	nocache, user_require_logged_in,
 	async (req: Request, res: Response, next: NextFunction): Promise<any> => {
@@ -421,22 +567,26 @@ router.post('/:idsession/answer',
 
 		const session = await get_session(idsession);
 		if (session === null) return res.status(404).json({ error: 'session not found' });
-
-		if (session.status !== 'active' || question_index !== session.current_question_index) {
-			return res.status(400).json({ error: 'question is no longer active' });
-		}
+		if (session.status !== 'active') return res.status(400).json({ error: 'session is not active' });
 
 		const username = (req as any).session.username;
-		const participantRows = await run_mysql_query(
-			'SELECT idparticipant FROM quizsession_participants WHERE idsession = ? AND username = ? LIMIT 1',
-			[idsession, username],
-		);
-		if (!Array.isArray(participantRows) || participantRows.length === 0) {
-			return res.status(403).json({ error: 'join the session before answering' });
-		}
-		const idparticipant = participantRows[0].idparticipant;
+		const participant = await get_participant(idsession, username);
+		if (participant === null) return res.status(403).json({ error: 'join the session before answering' });
+		const idparticipant = participant.idparticipant;
 
+		const progress = await get_participant_progress(idparticipant);
 		const questions: IStoredQuizQuestion[] = JSON.parse(session.questions_json);
+
+		if (progress.next_index >= questions.length) {
+			return res.status(400).json({ error: 'you have answered every question' });
+		}
+
+		const order = parse_question_order(participant.question_order, questions.length);
+		const expectedIndex = order[progress.next_index];
+		if (question_index !== expectedIndex) {
+			return res.status(400).json({ error: 'that is not your current question' });
+		}
+
 		const question = questions[question_index];
 		const correctAnswer = correct_option_text(question);
 		const correct = answer === correctAnswer ? 1 : 0;
@@ -447,7 +597,12 @@ router.post('/:idsession/answer',
 					VALUES (?, ?, ?, ?, ?, ?)`,
 				[idsession, idparticipant, question_index, answer, correct, now_mysql()],
 			);
-			return res.json({ correct: correct === 1, correct_answer: correctAnswer });
+			return res.json({
+				correct: correct === 1,
+				correct_answer: correctAnswer,
+				correct_count: progress.correct_count + correct,
+				incorrect_count: progress.incorrect_count + (correct === 1 ? 0 : 1),
+			});
 		} catch (e: any) {
 			// Already answered this question -- return the locked-in answer instead of erroring.
 			if (e && e.code === 'ER_DUP_ENTRY') {
@@ -456,7 +611,12 @@ router.post('/:idsession/answer',
 					[idparticipant, question_index],
 				);
 				if (Array.isArray(existing) && existing.length > 0) {
-					return res.json({ correct: Number(existing[0].correct) === 1, correct_answer: correctAnswer });
+					return res.json({
+						correct: Number(existing[0].correct) === 1,
+						correct_answer: correctAnswer,
+						correct_count: progress.correct_count,
+						incorrect_count: progress.incorrect_count,
+					});
 				}
 			}
 			throw e;
@@ -468,8 +628,8 @@ router.post('/:idsession/answer',
 });
 
 
-// Move to the next question (or out of the waiting room for the first one).
-router.post('/:idsession/next',
+// Open the session up for students to start answering, at their own pace.
+router.post('/:idsession/start',
 	nocache, user_require_admin,
 	async (req: Request, res: Response, next: NextFunction): Promise<any> => {
 	try {
@@ -479,21 +639,12 @@ router.post('/:idsession/next',
 		const session = await get_session(idsession);
 		if (session === null) return res.status(404).json({ error: 'session not found' });
 		if (session.username !== (req as any).session.username) return res.sendStatus(403);
-		if (session.status === 'ended') return res.status(400).json({ error: 'session has ended' });
+		if (session.status !== 'waiting') return res.status(400).json({ error: 'session has already started' });
 
-		const questions: IStoredQuizQuestion[] = JSON.parse(session.questions_json);
-		const nextIndex = session.status === 'waiting' ? 0 : session.current_question_index + 1;
-
-		if (nextIndex >= questions.length) {
-			return res.status(400).json({ error: 'no more questions; end the session' });
-		}
-
-		const wasWaiting = session.status === 'waiting';
-		const sql = wasWaiting
-			? `UPDATE quizsessions SET status = 'active', current_question_index = ?, started_datetime = ? WHERE idsession = ?`
-			: `UPDATE quizsessions SET current_question_index = ? WHERE idsession = ?`;
-		const values = wasWaiting ? [nextIndex, now_mysql(), idsession] : [nextIndex, idsession];
-		await run_mysql_query(sql, values);
+		await run_mysql_query(
+			`UPDATE quizsessions SET status = 'active', started_datetime = ? WHERE idsession = ?`,
+			[now_mysql(), idsession],
+		);
 
 		const updated = await get_session(idsession);
 		res.json(await build_state_payload(updated as ISessionRow));
@@ -583,7 +734,8 @@ const app_quizsessions = router;
 export {
 	app_quizsessions,
 	sanitize_text, sanitize_page, sanitize_questions,
-	generate_code, correct_option_text,
+	generate_code, correct_option_text, compute_participant_progress,
+	shuffle_indices, parse_question_order,
 	summarize_session_results, build_leaderboard,
 	MAX_TEXT_LENGTH, MAX_PAGE_LENGTH,
 };

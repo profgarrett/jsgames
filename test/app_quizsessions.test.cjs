@@ -1,8 +1,10 @@
 // Tests for src/server/app_quizsessions.ts
 //
 // Exercises the pure helpers backing the live-quiz-session routes: input
-// sanitization, join-code generation, and the results/leaderboard math. The
-// DB-touching routes themselves are integration-tested separately.
+// sanitization, join-code generation, each student's independently-shuffled
+// question order and self-paced progress tracking, and the
+// results/leaderboard math. The DB-touching routes themselves are
+// integration-tested separately.
 
 const { test, describe } = require('node:test');
 const assert = require('node:assert');
@@ -13,6 +15,9 @@ const {
 	sanitize_questions,
 	generate_code,
 	correct_option_text,
+	compute_participant_progress,
+	shuffle_indices,
+	parse_question_order,
 	summarize_session_results,
 	build_leaderboard,
 	MAX_TEXT_LENGTH,
@@ -134,6 +139,79 @@ describe('correct_option_text', () => {
 	test('returns the text of the option flagged correct', () => {
 		assert.strictEqual(correct_option_text(VALID_QUESTIONS[0]), 'John Tukey');
 		assert.strictEqual(correct_option_text(VALID_QUESTIONS[1]), '4');
+	});
+});
+
+describe('shuffle_indices', () => {
+	test('is a permutation of [0, length)', () => {
+		const order = shuffle_indices(6);
+		assert.deepStrictEqual([...order].sort((a, b) => a - b), [0, 1, 2, 3, 4, 5]);
+	});
+
+	test('handles length 0 and 1', () => {
+		assert.deepStrictEqual(shuffle_indices(0), []);
+		assert.deepStrictEqual(shuffle_indices(1), [0]);
+	});
+
+	test('does not always produce the same order (sanity check on randomness)', () => {
+		const orders = new Set();
+		for (let i = 0; i < 30; i++) orders.add(JSON.stringify(shuffle_indices(8)));
+		assert.ok(orders.size > 1, 'expected at least two distinct shuffles across 30 tries');
+	});
+});
+
+describe('parse_question_order', () => {
+	test('returns a valid stored order unchanged', () => {
+		assert.deepStrictEqual(parse_question_order('[2,0,1]', 3), [2, 0, 1]);
+	});
+
+	test('falls back to sequential order for null (pre-migration participant rows)', () => {
+		assert.deepStrictEqual(parse_question_order(null, 4), [0, 1, 2, 3]);
+	});
+
+	test('falls back to sequential order for unparseable JSON', () => {
+		assert.deepStrictEqual(parse_question_order('not json', 3), [0, 1, 2]);
+	});
+
+	test('falls back to sequential order when the length does not match the deck', () => {
+		assert.deepStrictEqual(parse_question_order('[0,1]', 3), [0, 1, 2]);
+	});
+
+	test('falls back to sequential order for an out-of-range index', () => {
+		assert.deepStrictEqual(parse_question_order('[0,1,5]', 3), [0, 1, 2]);
+	});
+
+	test('falls back to sequential order for a duplicate index', () => {
+		assert.deepStrictEqual(parse_question_order('[0,1,1]', 3), [0, 1, 2]);
+	});
+});
+
+describe('compute_participant_progress', () => {
+	test('a student with no answers yet is on question 0 with a clean tally', () => {
+		assert.deepStrictEqual(compute_participant_progress([]), { next_index: 0, correct_count: 0, incorrect_count: 0 });
+	});
+
+	test('next_index is the count of questions answered so far', () => {
+		const rows = [{ question_index: 0, correct: 1 }, { question_index: 1, correct: 0 }];
+		assert.strictEqual(compute_participant_progress(rows).next_index, 2);
+	});
+
+	test('splits the tally into correct and incorrect', () => {
+		const rows = [
+			{ question_index: 0, correct: 1 },
+			{ question_index: 1, correct: 0 },
+			{ question_index: 2, correct: 1 },
+		];
+		const progress = compute_participant_progress(rows);
+		assert.strictEqual(progress.correct_count, 2);
+		assert.strictEqual(progress.incorrect_count, 1);
+	});
+
+	test('handles string 1/0 correct flags from the mysql driver', () => {
+		const rows = [{ question_index: 0, correct: '1' }, { question_index: 1, correct: '0' }];
+		const progress = compute_participant_progress(rows);
+		assert.strictEqual(progress.correct_count, 1);
+		assert.strictEqual(progress.incorrect_count, 1);
 	});
 });
 
