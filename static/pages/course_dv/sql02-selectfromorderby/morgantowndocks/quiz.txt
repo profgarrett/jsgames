@@ -1,0 +1,9 @@
+FIB	How many days had over 1/10 of an inch of snow with temperature over freezing?	13
+FIB	How many days have NULL values for tMax in 1930?	333
+FIB	How many unique station names are in the dataset?	3
+FIB	What is the lowest minimum temperature in 2000?	0
+FIB	What is the lowest minimum temperature in 2000-2010?	-4
+FIB	How many days had over 1/10 of an inch of snow while the maximum temperature was exactly 31 degrees?	31
+FIB	How many days have NULL values for tMin in 1950?	0
+FIB	How many unique years are in the dataset?	171
+FIB	What is the highest maximum temperature between 1990-1995?	96

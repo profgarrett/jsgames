@@ -1,0 +1,9 @@
+FIB	Find the average tmax for each month. Exclude all NULL values. Order by month. What month has the highest average tmax? Give your answer as a 01, 02, etc.	07
+FIB	Find the sum of all snow for each year. Exclude all NULL values. Order by year. What year has the most snow?	1982
+FIB	Find the highest average snow depth for each year. Exclude all NULL values. Order by average snow depth. What year has the highest average snow depth?	1928
+FIB	Find the average tmax for each station. Exclude all NULL values. Order by station name. What is the average tmax for the station "Morgantown Lock and Dam, WV US"? Round your answer to a single decimal.	64.2
+FIB	Find the average rain for each year. Exclude all NULL values. Order by rain average. What is the highest average rain? Round to a single decimal.	0.2
+FIB	Find the average snow depth for each month. Exclude all NULL values. Order by month. What month has the *3rd* highest average snow depth? Give your answer as a 01, 02, etc.	12
+FIB	Find the count of days with over 1 inch of snowfall for each year. Exclude all NULL values. Order by snowfall. What year has the most days with over 1 inch of snowfall?	1922
+FIB	Find which months have over 10 days with rain falling in 2020. Order by month. Exclude all months that do not have 10 days of rain, meaning that you will need to use a HAVING clause. How many months have more than 10 days with rain in 2020?	8
+FIB	Find the average tmax for each month in 2020. Exclude all NULL values. Order by month. Exclude any months with an average tmax less than 10 (i.e., HAVING). How many months are returned?	2

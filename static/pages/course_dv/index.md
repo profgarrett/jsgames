@@ -86,10 +86,7 @@ Optional Reading:
 
 ### Week 8 - October 5, 2026 
 
-- *MLearn: Get Started 1/2 and 2/2*
-- *MLearn: Get data in PowerBI*
-- *MLearn: Clean, Transform, and load*
-
+- *MLearn: Get Started, Get data in PowerBI, and Clean, Transform, and load*
 - [bi01. PowerBI Introduction](bi01-intro/index)
 
 ### Week 9 - October 12, 2026 

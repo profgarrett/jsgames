@@ -1,0 +1,10 @@
+FIB	Find all movies that have been rented using an INNER JOIN. Hint: we need to go through the film and rental tables. Show the title and rental date, and order by rental date and inventory id. What is the title of the 4th movie in the list?	LOVE SUICIDES
+FIB	Group the prior query to find the total number of rentals per movie. Sort by total rentals in descending order. What is the title of the movie with the most rentals?	BUCKET BROTHERHOOD
+FIB	Find all films and their language using an INNER JOIN. Show the title and language name. Filter out all films that are in English. How many films are not in English?	8
+FIB	Group the prior query to find the total number of films per language. Show the language name and the number of films. What is the most common language besides English?	Mandarin
+FIB	Modify the prior to find all languages and the number of films, even those with no films. Use a LEFT JOIN. How many languages have no films?	2
+FIB	Find all films and their actors using an INNER JOIN. Show the title and actor first and last name. You will need to go from film, to the film_actor, and then the actor table. Use all inner joins. What is the title of the 11th movie in the list?	ACE GOLDFINGER
+FIB	Now we will reverse the prior query to find all actors and their films. Show the first and last name of the actor, and the title of the film. Start with the actor table, then go to film_actor, and then the film table. Use all inner joins. What is the title of the 5th row film?	CHEAPER CLYDE
+FIB	Now we will group the prior query to find the total number of films per actor. Show the first and last name of the actor, and the number of films. Sort by the number of films in descending order. What is the first name of the actor with the most films?	SUSAN
+FIB	We will now modify the prior to find all actors without a matching film. Use a LEFT JOIN. Show the first and last name of the actor. How many actors have no films?	5
+FIB	Find each film's category using an INNER JOIN. Show the title and category name. You will need to go from film, to the film_category, and then the category table. What is the title of the 3rd movie in the list?	ADAPTATION HOLES
