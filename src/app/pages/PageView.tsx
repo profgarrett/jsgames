@@ -344,12 +344,28 @@ function PageView({ page }: IPageViewProps): ReactElement {
 	return (
 		<div className='markdown-page'>
 			{flashcards.length > 0 || quizQuestions.length > 0 ? (
+
 				<div className='pageview-toolbar'>
+
+					{flashcards.length > 0 ? (
+						<Button
+							variant={mode === 'flashcards' ? 'primary' : 'outline-primary'}
+							size='sm'
+							className='me-2'
+							onClick={() => toggleMode('flashcards')}
+							aria-pressed={mode === 'flashcards'}
+						>
+							{ mode === 'flashcards'
+								? 'Back to reading'
+								: `Flashcards (${flashcards.length})` }
+						</Button>
+					) : null}
+					
+					
 					{quizQuestions.length > 0 ? (
 						<Button
 							variant={mode === 'quiz' ? 'primary' : 'outline-primary'}
 							size='sm'
-							className='me-2'
 							onClick={() => toggleMode('quiz')}
 							aria-pressed={mode === 'quiz'}
 						>
@@ -359,18 +375,7 @@ function PageView({ page }: IPageViewProps): ReactElement {
 						</Button>
 					) : null}
 
-					{flashcards.length > 0 ? (
-						<Button
-							variant={mode === 'flashcards' ? 'secondary' : 'outline-secondary'}
-							size='sm'
-							onClick={() => toggleMode('flashcards')}
-							aria-pressed={mode === 'flashcards'}
-						>
-							{ mode === 'flashcards'
-								? 'Back to reading'
-								: `Flashcards (${flashcards.length})` }
-						</Button>
-					) : null}
+
 
 					{isAdmin && quizQuestions.length > 0 ? (
 						<Button
@@ -384,9 +389,9 @@ function PageView({ page }: IPageViewProps): ReactElement {
 						</Button>
 					) : null}
 
-					{isAdmin && quizQuestions.length > 0 ? (
+					{isAdmin && quizQuestions.length + flashcards.length  > 0 ? (
 						<Button
-							variant={mode === 'live' ? 'danger' : 'outline-danger'}
+							variant={mode === 'live' ? 'dark' : 'outline-dark'}
 							size='sm'
 							className='ms-2'
 							onClick={() => toggleMode('live')}
@@ -399,7 +404,7 @@ function PageView({ page }: IPageViewProps): ReactElement {
 			) : null}
 
 			{mode === 'live' ? (
-				<LiveQuizInstructor quizQuestions={quizQuestions} page={page.slug} />
+				<LiveQuizInstructor quizQuestions={quizQuestions} flashcards={flashcards} page={page.slug} />
 			) : mode === 'results' ? (
 				<PageQuizResults page={page.slug} />
 			) : mode === 'quiz' ? (

@@ -25,7 +25,13 @@ interface IQuestionPayload {
 	total_questions: number;
 	correct_count: number;
 	incorrect_count: number;
+	// Canonical deck index -- identifies the question for POST /answer, but not
+	// meaningful as a display position since each student sees questions in
+	// their own shuffled order.
 	question_index?: number;
+	// This student's position (0-based) in their own shuffled order -- what to
+	// show as "Question N of total_questions".
+	sequence_index?: number;
 	prompt?: string;
 	options?: string[];
 }
@@ -178,7 +184,7 @@ function LiveQuizPlay({ idsession }: ILiveQuizPlayProps): ReactElement {
 			{ scoreTracker }
 
 			<div className='live-quiz-progress'>
-				Question { (question.question_index ?? 0) + 1 } of { question.total_questions }
+				Question { (question.sequence_index ?? 0) + 1 } of { question.total_questions }
 			</div>
 
 			<div className='quiz-card'>

@@ -538,7 +538,15 @@ router.get('/:idsession/question',
 		const question = questions[questionIndex];
 		res.json({
 			finished: false,
+			// Canonical deck index -- echoed back on /answer, and what
+			// results/leaderboard group by. Not meant for display: it's
+			// wherever this question happens to sit in the frozen deck, which
+			// has nothing to do with the order this student is seeing questions in.
 			question_index: questionIndex,
+			// This student's position in their own shuffled order (0-based),
+			// i.e. "this is the Nth question they've been shown" -- what the
+			// UI should display as "Question N of total_questions".
+			sequence_index: progress.next_index,
 			total_questions: questions.length,
 			prompt: question.prompt,
 			options: question.options.map((o) => o.text),
