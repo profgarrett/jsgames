@@ -1,10 +1,13 @@
-<script src="/course_dv/toc.js"></script>
-
 # Tableau Interface
 
-This module covers the Tableau interface: how to install Tableau, connect to a data file, read the interface, and build a basic table. Everything in later Tableau modules assumes the vocabulary introduced here.
+This module covers the Tableau interface: how to install Tableau, connect to a data file, read the interface, and build a basic table. 
 
-Why not just use Excel? Excel asks you to *build* a chart by specifying its parts. Tableau asks you to *describe* your data by dragging fields onto shelves, and then draws the chart for you. That trade makes Tableau much faster, but only once you understand how Tableau classifies each field. Most beginner frustration in Tableau is a field classification problem, not a chart problem.
+Tableau is very different from Excel:
+
+- Excel asks you to select a chart, and then lets you pick columns for specific aspect of the chart
+- Tableau asks you to *describe* your data by dragging fields onto shelves. You don't really pick a chart - you describe how different aspects of the dataset map to visual properties.
+
+Most beginner frustration in Tableau is a field classification problem.
 
 **Outcomes**:
 
@@ -21,12 +24,11 @@ Why not just use Excel? Excel asks you to *build* a chart by specifying its part
 **Links**:
 
 - See DataCamp *Introduction to Tableau*
-- [Quizlet](https://quizlet.com/1128041976/tb01-interface-and-data-flash-cards/?i=2up6jq&x=1jqt)
 - [Tableau's official interface reference](https://help.tableau.com/current/pro/desktop/en-us/environment_workspace.htm)
 
 ## Before Class: Installation
 
-Install Tableau **before** the first Tableau class meeting. Do not wait; activation problems take time to resolve.
+Install Tableau **before** the first Tableau class meeting.
 
 - Download the [latest version of Tableau Desktop](https://www.tableau.com/tft/activation).
 - Click the link above and select "Download Tableau Desktop." On the form, enter your school email address for Business E-mail and the name of your school for Organization.
@@ -35,11 +37,12 @@ Install Tableau **before** the first Tableau class meeting. Do not wait; activat
 
 You also need a **Tableau Public account**, which is free and separate from your Desktop license. Create it at [public.tableau.com](https://public.tableau.com) before class.
 
+
 ## The Interface
 
 Tableau's window has five regions you will use constantly. Open any workbook and find each one before continuing.
 
-![Annotated Tableau interface](interface_annotated.webp)
+![Tableau interface](interface.png)
 
 | Region | Location | What it does |
 | --- | --- | --- |
@@ -55,27 +58,25 @@ Sheets, dashboards, and stories are managed by the tabs along the bottom of the 
 
 Buttons worth knowing on the toolbar:
 
-- **Undo / Redo** — Tableau's undo history is deep. Use it freely; experimenting is cheap.
-- **Show Me** — suggests chart types for the fields you have selected. Useful for learning, but it hides what is actually happening. Build charts manually in this course unless told otherwise.
-- **Clear Sheet** — removes all pills and starts over.
+- `Undo / Redo`  Tableau's undo history is deep. Use it freely; experimenting is cheap.
+- `Show Me` — suggests chart types for the fields you have selected. Useful for learning, but it hides what is actually happening. Build charts manually in this course unless told otherwise.
+- `Clear Sheet` — removes all pills and starts over.
 
 Handy shortcut: hold **Ctrl** (Windows) or **Option** (Mac) while dragging a pill to *copy* it rather than move it.
 
 ### Saving
 
-There are two Tableau file formats, and picking the wrong one is the most common way to lose credit on an assignment.
+There are two Tableau file formats.  Submit all work in this class as a packaged workbook (`.twbx`).
+Go to  `File` → `Save As` → choose *Tableau Packaged Workbook*.
 
-| Extension | Name | Contains data? |
-| --- | --- | --- |
-| `.twb` | Workbook | **No.** Only a pointer to the file on your computer. |
-| `.twbx` | Packaged workbook | **Yes.** Data is bundled inside. |
+| Extension | Name | Contains data? | Should you use it? |
+| --- | --- | --- | -- |
+| `.twb` | Workbook | Only a pointer to the file on your computer. | **No** |
+| `.twbx` | Packaged workbook | Data is bundled inside. | **Yes**  |
 
-A `.twb` opens correctly on your machine and appears broken on everyone else's, because the data file it points to does not exist there.
-
-> **Submit all work in this class as a packaged workbook (`.twbx`).**
-> `File` → `Save As` → choose *Tableau Packaged Workbook*.
 
 You may also publish to **Tableau Public**, which hosts your workbook on the web. Anything you publish there is visible to anyone with the link and is indexed publicly. Never publish sensitive, confidential, or personally identifying data to Tableau Public.
+
 
 ## Connecting to Data
 
@@ -89,7 +90,7 @@ Tableau connects to many sources — databases, spreadsheets, flat files, and cl
 | File size | Larger | Smaller |
 | Opens in anything | No | Yes |
 
-The last two rows matter most. Because a CSV stores no type information, Tableau has to *guess* the type of every column when it connects. It guesses well, but not always: leading zeros in a ZIP code get dropped, and an ID column becomes a number Tableau wants to add up. Always check the types on the Data Source tab after connecting to a CSV.
+Because a CSV stores no type information, Tableau has to *guess* the type of every column when it connects. Always check the types on the Data Source tab after connecting to a CSV.
 
 Once connected, Tableau shows a preview on the **Data Source** tab. Do basic cleaning here before building anything:
 
@@ -114,23 +115,24 @@ Two clarifications that trip students up:
 
 **Geographic is not a data type either.** Country, state, county, city, and ZIP are **geographic roles** layered on top of a string or number. Assign one with right-click → `Geographic Role`. Once assigned, Tableau generates Latitude and Longitude fields so the field can be mapped. Maps are covered in tb45.
 
-Dates are more flexible than students expect. Tableau parses many written formats and does **not** require a full day/month/year — a column of years, or of year-months, works fine. What Tableau cannot do is parse an inconsistent column, so check the Data Source preview for nulls after connecting.
+Tableau parses many written formats and does **not** require a full day/month/year — a column of years, or of year-months, works fine. However, when you turn the column into a date or date/time, Tableau will infer the missing values. So, a column holding `February` and `March` will turn into `February 1, 1900` and `March 1, 1900`.
+
 
 ## The Two Questions Tableau Asks About Every Field
 
-This is the central idea of the module. For every pill you place, Tableau needs two independent answers:
+Tableau needs two independent answers for every field:
 
-1. **Role — is it a dimension or a measure?** Dimensions *slice* the data; measures get *aggregated*. Tableau separates these in the Data pane.
-2. **Type — is it discrete or continuous?** Discrete pills are **blue** and produce headers. Continuous pills are **green** and produce axes.
+1. **Role: is it a dimension or a measure?** Dimensions *slice* the data; measures get *aggregated*.
+2. **Type: is it discrete or continuous?** Discrete pills are **blue** and produce headers. Continuous pills are **green** and produce axes.
 
-These are two separate questions, not one. A field can be any of the four combinations.
+A field can be any of the four combinations.
 
 | | **Discrete (blue) — headers** | **Continuous (green) — axes** |
 | --- | --- | --- |
-| **Dimension**<br>*slices the data* | `Neighbourhood`, `Room Type`<br>(the common case) | `Order Date` as a continuous timeline |
-| **Measure**<br>*gets aggregated* | `SUM(Price)` used as a text label in a table | `SUM(Price)` on an axis<br>(the common case) |
+| **Dimension** slices the data | `Neighbourhood`, `Room Type` | `Order Date` as a continuous timeline |
+| **Measure** gets aggregated | `SUM(Price)` used as a text label in a table | `SUM(Price)` on an axis |
 
-**The default: dimensions are discrete and measures are continuous.** That covers most of what you build. The other two cells exist, and you will use them, but they are the exception.
+By default, most dimensions are discrete and most measures are continuous. The other two cells exist, and you will use them, but they are the exception.
 
 You can change either answer:
 
@@ -141,16 +143,13 @@ A common real case for changing the role: a `Zip Code` or `Store ID` column arri
 
 ### Why Blue and Green Matter Visually
 
-- **Blue (discrete)** → Tableau draws a **header** — one labeled slot per distinct value, in whatever sort order you set.
-- **Green (continuous)** → Tableau draws an **axis** — a number line, which may include values not present in your data.
+- *Blue (discrete)* → Tableau draws a **header** — one labeled slot per distinct value, in whatever sort order you set.
+- *Green (continuous)* → Tableau draws an **axis** — a number line, which may include values not present in your data.
 
-![Blue header versus green axis](pill_blue_green.webp)
-
-Dates show this clearly. Drag a date onto Columns and you get a blue `YEAR(Date)` pill — a discrete header per year, with a `+` to drill into quarters and months. Right-click it and choose the green continuous version and you get an unbroken timeline instead. Line charts usually want the green version.
 
 ## Aggregation
 
-**Tableau aggregates measures automatically.** Drag `Price` onto a shelf and the pill reads `SUM(Price)` — one number, the total of every row. This surprises nearly everyone the first time. Tableau is not showing you rows; it is showing you a summary of the rows in each cell of your view.
+**Tableau aggregates measures automatically.** Drag `Price` onto a shelf and the pill reads `SUM(Price)` — one number, the total of every row. Tableau is not showing you rows; it is showing you a summary.
 
 The dimensions in your view control the level of that summary. `SUM(Price)` with no dimensions is one grand total. Add `Neighbourhood` to Rows and it becomes one sum per neighborhood.
 
@@ -165,34 +164,10 @@ To change the function, click the pill → `Measure` → and choose:
 | `COUNTD` | Number of *distinct* values |
 | `MIN` / `MAX` | Smallest / largest value |
 
-"Average" is ambiguous in everyday speech, and the three meanings give different answers on skewed data:
-
-- **Mean** — sum ÷ count. Pulled hard by outliers.
-- **Median** — the middle value when sorted. Resistant to outliers.
-- **Mode** — the most common value. Tableau has no `MODE` aggregation; it requires a calculated field.
+"Average" is ambiguous in everyday speech, and the three meanings give different answers on skewed data. Mean is most affected by outliers, and median is more resistant. Mode is rarely useful in a numeric column, but it is the only average that makes sense for categorical data.
 
 Airbnb prices are a good illustration: a handful of $2,000/night listings pull the mean well above the median. Report the median unless you have a reason not to.
 
-## Build a Table
-
-The exercise uses `airbnb_listings.csv`, posted on eCampus. It has one row per listing, with fields including `Neighbourhood`, `Room Type`, `Price`, `Bedrooms`, `Review Scores Rating`, and `Last Review`.
-
-**Process — average price by neighborhood and room type:**
-
-1. `Connect` → `To a File` → `Text file` → select `airbnb_listings.csv`.
-2. On the Data Source tab, confirm the types. `Price` should be Number (decimal); `Last Review` should be Date.
-3. Click `Sheet 1`.
-4. Drag `Neighbourhood` to **Rows**. Tableau draws a blue header — one row per neighborhood, no numbers yet.
-5. Drag `Room Type` to **Columns**. You now have an empty grid.
-6. Drag `Price` to **Marks → Text**. The pill reads `SUM(Price)`.
-7. Click the `SUM(Price)` pill → `Measure` → `Average`. It now reads `AVG(Price)`.
-8. Right-click `Price` in the Data pane → `Default Properties` → `Number Format` → `Currency (Standard)`, 0 decimals.
-9. Sort by clicking the sort icon on the `Neighbourhood` header.
-10. `File` → `Save As` → **Tableau Packaged Workbook (.twbx)**.
-
-Then, to see the aggregation idea directly: change `AVG` to `MEDIAN` and watch which neighborhoods move most. Those are the ones with a few very expensive listings.
-
-![Finished crosstab](table_airbnb_crosstab.webp)
 
 ### Is a Table a Chart?
 
@@ -203,103 +178,28 @@ That distinction is what module dv30 covers under *pre-attentive attributes*. Th
 ![Table example with highlight](table_25_years_oftv.webp)
 Source: <https://www.reddit.com/r/dataisbeautiful/comments/1qaq7kz/a_quarter_century_of_television_oc/> by gammafission00
 
-## Vocabulary
+## Key terms
 
-| Term | Meaning |
-| --- | --- |
-| Pill | A field placed on a shelf |
-| Dimension | A field that slices data into groups |
-| Measure | A field that gets aggregated |
-| Discrete | Blue pill; produces headers |
-| Continuous | Green pill; produces an axis |
-| Shelf | A drop zone (Columns, Rows, Filters, Pages) |
-| Marks card | Controls color, size, label, detail, and mark type |
-| Aggregation | The function collapsing many rows to one value |
-| `.twb` | Workbook — does **not** contain data |
-| `.twbx` | Packaged workbook — contains data |
-| Geographic role | A mapping role assigned on top of a string or number |
-
-## Check Your Understanding
-
-1. You drag `Price` onto Rows and see a single bar. Why, and what do you add to break it apart?
-2. `Zip Code` appears under Measures. What is wrong, and how do you fix it?
-3. A classmate emails you a `.twb` and it will not open. What happened?
-4. When would you deliberately want a green (continuous) dimension?
-5. Mean nightly price is \$210 and median is \$140. What does that gap tell you about the listings?
-
-## Submission
-
-Submit a `.twbx` containing one sheet: median price by neighborhood and room type, sorted descending by median price, with currency formatting applied. Include a caption sheet naming the neighborhood with the largest mean-to-median gap.
-
----
-
-<!--
-AUTHOR NOTES — delete before publishing.
-
-FIGURES TO SHOOT (3 new, 1 reused):
-
-1. interface_annotated.webp
-   Full Tableau Desktop window, airbnb_listings.csv connected, a sheet in
-   progress so all regions have content in them (empty shelves photograph
-   badly). Five numbered callouts in a consistent accent color, matching the
-   table order in the text: 1 Data pane, 2 Columns/Rows shelves, 3 Marks card,
-   4 Canvas, 5 Filters shelf. Add a sixth small callout on a single pill
-   labeled "pill." Crop out OS chrome. Shoot at >=1600px wide so the field
-   names stay legible when the page scales down.
-
-2. pill_blue_green.webp
-   Side-by-side, same data both panels. LEFT: blue discrete YEAR(Last Review)
-   on Columns -> labeled headers. RIGHT: same field as green continuous ->
-   axis with tick marks. Caption each half "Blue = header" / "Green = axis."
-   The point is the visual difference in the resulting view, so crop tight to
-   the shelf plus the top of the canvas. Keep the pill colors true; do not
-   apply a filter or color grade to the screenshot.
-
-3. table_airbnb_crosstab.webp
-   The finished step-10 crosstab: neighborhoods down Rows, room types across
-   Columns, currency-formatted AVG(Price), sorted. Include the shelves and
-   Marks card in frame so students can check their own work against the pill
-   placement, not just the output.
-
-4. table_25_years_oftv.webp
-   Already have this one; reused unchanged.
-
-VERIFY BEFORE PUBLISHING:
-
-- Copy-a-pill shortcut. Ctrl+drag on Windows is certain; Option+drag on Mac is
-  from memory and worth one test on your machine.
-- No MODE aggregation in Tableau. Confident, but confirm in the current
-  version's Measure menu since students will go looking.
-- Dataset field names. I used Inside Airbnb-style names (Neighbourhood with
-  the British spelling, Room Type, Last Review). Swap in whatever your posted
-  CSV actually uses, in the walkthrough and in the exercise.
-- Tableau Public account as a prerequisite. Added to the install section on
-  the assumption you want it done before class; drop it if publishing comes
-  later in the term.
-
-CROSS-REFERENCES ADDED:
-- dv30 (pre-attentive attributes) from the table-vs-chart section
-- tb45 (maps) from the geographic roles paragraph
-- SQL modules from the data sources paragraph
-Note that dv20 covers discrete/continuous generically in Week 2, one week
-after this module. This chapter now defines the terms in Tableau-specific
-form (blue/green pills) first, so dv20 may want a back-reference rather than
-a fresh definition.
-
-CHANGES FROM THE ORIGINAL:
-- Fixed the inverted sentence. Original read "We commonly use discrete
-  measures and continuous dimensions"; the default is the reverse.
-- Split role (dimension/measure) from type (discrete/continuous) into two
-  independent questions with a 2x2. Originally discrete/continuous appeared as
-  bullets under dimensions, implying it was a sub-type.
-- Rewrote the money passage. Original said money is "an integer that records
-  the number of pennies"; SQL Server's MONEY is fixed-point with four decimal
-  places, and Tableau has no money type at all.
-- Moved geographic from data types to geographic roles.
-- Dropped the claim that dates require day + month + year.
-- Removed mode from the aggregation list and explained why.
-- Added: auto-aggregation, .twb/.twbx extensions, Tableau Public account,
-  the walkthrough, vocabulary table, check-your-understanding, submission.
-- Reframed table vs chart around text-vs-visual encoding rather than
-  pre-attentive attributes, since a plain bar chart has neither color nor size.
--->
+- **Excel Datasource**: A spreadsheet file that stores data in XML format. Provides some data type information to Tableau. Has multiple sheets.
+- **CSV Datasource**: A file that stores data in plain text format. Tableau has to guess the type of every column.
+- **Pill**: A field placed on a shelf in Tableau.
+- **Dimension**: A field that slices data into groups or categories.
+- **Measure**: A field that is aggregated, such as with sum, average, or count.
+- **Discrete**: A blue pill that creates headers rather than an axis.
+- **Continuous**: A green pill that creates an axis and supports a numeric scale.
+- **Shelf**: A drop zone such as Columns, Rows, Filters, or Pages.
+- **Marks card**: Controls how marks are displayed, including color, size, label, detail, tooltip, and mark type.
+- **Aggregation**: A function that collapses many rows into one summary value.
+- **Average**: A general term that can refer to different summaries, especially the mean, median, or mode.
+- **Mean**: The arithmetic average; the sum of values divided by the count. It is sensitive to outliers.
+- **Median**: The middle value when data are sorted. It is more resistant to outliers than the mean.
+- **Mode**: The most common value in a dataset.
+- **Geographic role**: A mapping role assigned to a field so Tableau can place it on a map.
+- **.twb**: A Tableau workbook file that does not contain the underlying data.
+- **.twbx**: A packaged Tableau workbook that includes the data.
+- **String**: text such as names and categories
+- **Number (whole)**: integers, no decimal point
+- **Number (decimal)**: values with a decimal point, stored as floating point
+- **Boolean**: True or False
+- **Date**: a calendar date with day, month, and year
+- **Date & Time**: a date with a time of day

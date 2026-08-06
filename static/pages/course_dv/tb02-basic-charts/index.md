@@ -1,5 +1,3 @@
-<script src="/course_dv/toc.js"></script>
-
 # Tableau Basic Charts
 
 This module introduces basic chart types in Tableau. We will cover how to create and customize common visualizations such as bar charts, line charts, scatter plots, histograms, box plots, heat maps, pie charts, and combo charts.
@@ -15,41 +13,66 @@ This module introduces basic chart types in Tableau. We will cover how to create
 
 - [Improving a line chart](https://nrennie.rbind.io/blog/accessible-line-chart/) — accessibility tips, referenced again in the Line section
 
+
 ## Terminology
 
 Most charts have an x-axis and a y-axis. In Tableau, these are called *Columns* and *Rows*, respectively. The x-axis (Columns) is horizontal (from left to right). The y-axis (Rows) is vertical (up and down).
 
 When both axes are numeric, best practices suggest the x-axis (Columns) should contain the independent variable (cause) and the y-axis (Rows) the dependent variable (effect). This rule applies to scatterplots and time series. It does *not* apply when one axis holds a category — the category on the x-axis of a bar chart is not a "cause" of anything.
 
-![Axis Terminology](axis_ex.jpg)
+![Axis Terminology](images/axis_ex.jpg)
 
-### Dimensions and measures
 
-Two distinctions drive almost everything in this chapter:
+## The Two Questions Tableau Asks About Every Field
 
-- **Dimension vs. measure.** A *dimension* categorizes or labels (Region, Product, Order Date). A *measure* is a number you aggregate (Sales, Profit, Age). Tableau guesses when you connect to data; you can change it.
-- **Discrete vs. continuous.** *Discrete* fields (blue) create headers — separate panes or category labels. *Continuous* fields (green) create axes. Dimensions are usually discrete and measures are usually continuous, but either can be converted, which is why "a numeric dimension" and "a measure" are not the same thing.
+Tableau needs two independent answers for every field:
 
-Getting a scatterplot instead of a grid of boxes, or an axis instead of a row of labels, almost always comes down to whether the field is green or blue.
+1. **Role: is it a dimension or a measure?** Dimensions *slice* the data; measures get *aggregated*.
+2. **Type: is it discrete or continuous?** Discrete pills are **blue** and produce headers. Continuous pills are **green** and produce axes.
+
+A field can be any of the four combinations.
+
+| | **Discrete (blue) — headers** | **Continuous (green) — axes** |
+| --- | --- | --- |
+| **Dimension** slices the data | `Neighbourhood`, `Room Type` | `Order Date` as a continuous timeline |
+| **Measure** gets aggregated | `SUM(Price)` used as a text label in a table | `SUM(Price)` on an axis |
+
+By default, most dimensions are discrete and most measures are continuous. The other two cells exist, and you will use them, but they are the exception.
+
+You can change either answer:
+
+- Change the **role**: right-click the field in the Data pane → `Convert to Dimension` / `Convert to Measure`
+- Change the **type**: right-click a pill on a shelf → `Discrete` / `Continuous`
+
+A common real case for changing the role: a `Zip Code` or `Store ID` column arrives as a number, so Tableau files it under Measures and tries to sum it. Summing ZIP codes is meaningless. Convert it to a dimension.
+
+### Why Blue and Green Matter Visually
+
+- *Blue (discrete)* → Tableau draws a **header** — one labeled slot per distinct value, in whatever sort order you set.
+- *Green (continuous)* → Tableau draws an **axis** — a number line, which may include values not present in your data.
 
 ### Reading "n" in this chapter
 
 Each chart below lists limits in terms of `n`. Because `n` means different things in different contexts, this chapter always says which:
 
-- **n(categories)** — the number of distinct values in the dimension you are plotting
-- **n(rows)** — the number of records in the data
+- *n(categories)* are the number of distinct values in the dimension you are plotting
+- *n(rows)* are the number of records in the data
 
 Treat every threshold as a rough heuristic, not a rule. A scatterplot with 25 points can be perfectly readable; the guidance simply reflects where each chart usually works best.
 
 ## Aggregated vs. disaggregated data
 
-This is the single hardest idea in the chapter, and it affects scatterplots and boxplots most. Two *separate* controls are involved, and they are often confused:
+One of the hardest ideas is aggregation. Two *separate* controls are involved:
 
 **1. `Analysis` → `Aggregate Measures` (a checkbox).**
 When checked (the default), Tableau combines all rows that share the same level of detail into one mark — typically a SUM or AVG. When unchecked, Tableau draws **one mark per row** in the underlying data.
 
+![Aggregate Measures](images/aggregate_checkbox.png)
+
 **2. `Marks` → `Detail` (adding a field).**
 Dragging a field to Detail changes the view's *level of detail*: Tableau now draws one mark per value of that field, without giving it an axis or a color. This does not turn aggregation off — it changes what is being aggregated *to*.
+
+![Detail](images/aggregate_detail.png)
 
 So "one mark per customer" and "one mark per row of data" are different requests. The first uses Detail; the second unchecks Aggregate Measures.
 
@@ -57,22 +80,25 @@ So "one mark per customer" and "one mark per row of data" are different requests
 
 ## Choosing a chart
 
-| Dimensions | Measures | Analysis goal | Chart |
+| Chart | Dimensions | Measures | Analysis goal |
 |---|---|---|---|
-| 0 | 1 | See the shape of a distribution | Histogram |
-| 1 categorical | 1 | Compare a value across categories | Bar |
-| 1 categorical | 1 (disaggregated) | Compare distributions across categories | Boxplot |
-| 0 | 2 | Show a relationship between two numbers | Scatterplot |
-| 1 date | 1 | Show a trend over time | Line |
-| 1 categorical (small) | 1 | Show parts of a whole | Pie |
-| 2 categorical | 1 | Spot patterns across a grid | Heat map |
-| 1 date | 2 | Two trends with different units | Combo (dual axis) |
+| Histogram | 0 | 1 | See the shape of a distribution |
+| Bar | 1 categorical | 1 | Compare a value across categories |
+| Boxplot | 1 categorical | 1 (disaggregated) | Compare distributions across categories |
+| Scatterplot | 0 | 2 | Show a relationship between two numbers |
+| Line | 1 date | 1 | Show a trend over time |
+| Pie | 1 categorical (small) | 1 | Show parts of a whole |
+| Heat map | 2 categorical | 1 | Spot patterns across a grid |
+| Combo (dual axis) | 1 date | 2 | Two trends with different units |
 
 ### Why pre-attentive attributes matter here
 
-Each section below lists the pre-attentive attributes the chart relies on. This is not trivia — it is the argument that organizes the whole chapter. People decode **position on a common scale** and **length** far more accurately than they decode **angle**, **area**, or **color**.
+Each section below lists the pre-attentive attributes for each chart.
 
-That ranking explains most of the advice that follows. Bar charts and scatterplots use the accurate channels, which is why they are the default answer to most questions. Pie charts (angle, area) and heat maps (color) use weaker channels, which is why they are limited to small numbers of categories and to spotting rough patterns rather than reading precise values.
+Bar charts and scatterplots use the most accurate channels, which is why they are the default answer to most questions. 
+
+Pie charts (angle, area) and heat maps (color) use weaker channels, which is why they are limited to small numbers of categories and to spotting rough patterns rather than reading precise values.
+
 
 ## Heat Map
 
@@ -98,7 +124,6 @@ Process:
 - Click the color legend → `Edit Colors` and choose a sequential or diverging palette
 - (Optional) Use the sort icons in the toolbar, or click a header, to sort by measure value
 
-<!-- TODO: add example image, e.g. heatmap_ex.jpg -->
 
 ## Bar
 
@@ -126,7 +151,6 @@ Process:
 
 > Horizontal bars are usually easier to read when category names are long.
 
-<!-- TODO: add example image, e.g. bar_ex.jpg -->
 
 ## Histogram
 
@@ -153,17 +177,16 @@ Process:
 - (If needed) Change the mark type to Bar
 - (Optional) Drag a **measure** to Marks → Color for a sequential or diverging palette
 
-<!-- TODO: add example image, e.g. histogram_ex.jpg -->
 
 ## Scatterplot
 
 A scatterplot shows the relationship between two numeric variables. Depending on how you set it up, each point represents either a row in the dataset or a group of rows.
 
-![scatterplot - pet fun versus effort](scatter_fun_v_effort_pets.jpg)
+![scatterplot - pet fun versus effort](images/scatter_fun_v_effort_pets.jpg)
 
 A common analytical technique is to split the graph into four quadrants using a reference line on each axis. When both scales have a meaningful zero, use zero; when they do not — a 1–5 survey scale, for example — use the scale midpoint or the mean, and say which you used.
 
-![scatterplot - doctor](scatter_trust_doctor.jpg)
+![scatterplot - doctor](images/scatter_trust_doctor.jpg)
 
 - Best for
   - 2 measures (continuous), one on each axis
@@ -217,13 +240,12 @@ Process:
 - (Optional) Drag another dimension to Rows or Columns to produce a separate boxplot per category
 - Right-click the box → `Edit` to set whisker extent and mark visibility
 
-<!-- TODO: add example image, e.g. boxplot_ex.jpg -->
 
 ## Line
 
 A line chart shows trends over an ordered scale. In practice this is almost always a *date* dimension, though any ordered continuous variable (dose, distance, week number) works.
 
-![Line Chart - Who is old?](line_who_is_old.jpg)
+![Line Chart - Who is old?](images/line_who_is_old.jpg)
 
 - Best for
   - 1 date (or other ordered continuous field)
@@ -244,13 +266,12 @@ Process:
 - Right-click the date pill to choose the date level, and to switch between discrete (blue, separate headers) and continuous (green, unbroken axis)
 - (Optional) Drag a dimension to Marks → Color to draw one line per category
 
-> For labeling, color, and accessibility choices on line charts, see [Improving a line chart](https://nrennie.rbind.io/blog/accessible-line-chart/).
 
 ## Pie Charts
 
-Pie charts get a lot of criticism because angle and area are decoded less accurately than length or position. They are still reasonable for part-to-whole relationships with a small number of categories.
+Pie charts get a lot of criticism because angle and area are decoded less accurately than length or position. However, they are still reasonable for part-to-whole relationships with a small number of categories.
 
-![Pie Chart - Pyramid](pie_pyramid.jpg)
+![Pie Chart - Pyramid](images/pie_pyramid.jpg)
 
 - Best for
   - 1 dimension (a category)
@@ -301,8 +322,27 @@ Process:
 - On the Marks card, a separate panel now exists for each measure. Select each one and set its mark type (for example, Bar for the first, Line for the second)
 - Give each axis a clear title (right-click → `Edit Axis`)
 
-<!-- TODO: add example image, e.g. combo_ex.jpg -->
 
-## Notes on Tableau versions
+## Key terms
 
-Menu paths in this chapter reflect recent versions of Tableau Desktop and Tableau Public. Minor wording differences appear between versions, and `Show Me` options depend on which fields you have selected. When a menu item is missing, check whether the field is a dimension or a measure and whether it is discrete (blue) or continuous (green) — that is the cause most of the time.
+- **Dimension**: A field used to slice data into categories or groups.
+- **Measure**: A field used to aggregate numeric values, such as with sum, average, or count.
+- **Discrete**: A blue pill that creates headers rather than an axis.
+- **Continuous**: A green pill that creates an axis and supports a numeric scale.
+- **Aggregation**: A summary operation that collapses many rows into one value.
+- **Bar chart**: A chart that uses rectangles on a common axis, with length representing a value.
+- **Bar chart purpose**: To show an aggregated value for a small number of categories 
+- **Line chart**: A chart that connects points to show change over time or another ordered variable.
+- **Line chart purpose**: To show trends over time or another ordered variable.
+- **Scatterplot**: A chart that plots points on two axes, one for each numeric variable.
+- **Scatterplot purpose**: To show whether two numeric variables are related.
+- **Histogram**: A chart made of adjacent bars that shows the distribution of one numeric variable.
+- **Histogram purpose**: To show the shape of a distribution and the frequency of values.
+- **Boxplot**: A chart that summarizes a distribution with a box and whiskers.
+- **Boxplot purpose**: To compare spreads and medians across groups.
+- **Heat map**: A grid of colored cells that encodes values by color.
+- **Heat map purpose**: To spot patterns across two categorical dimensions.
+- **Pie chart**: A circular chart divided into slices by proportion.
+- **Pie chart purpose**: To show parts of a whole for a small number of categories.
+- **Combo chart**: A chart that combines two chart types, often a bar and a line.
+- **Combo chart purpose**: To compare different measures with different scales in one view.

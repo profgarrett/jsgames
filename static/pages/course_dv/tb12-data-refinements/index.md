@@ -46,7 +46,7 @@ Common functions include:
 - Dates
   - `DATEDIFF()` shows the difference between two dates, allowing you to pick the return type (i.e., days, months, years)
   - `DATEPART()` extracts a specific part of a date (i.e., year, month, day). Note that this returns a number, and not a date.
-  - `makeDATE()` creates a date from year, month, and day components. This is used to construct dates from separate fields.
+  - `MAKEDATE()` creates a date from year, month, and day components. This is used to construct dates from separate fields.
 - Logical
   - `IF test THEN 1 ELSE 2 END` is the basic structure of an IF statement in Tableau.
 - Null Handling
@@ -66,7 +66,8 @@ You may also want to create custom bins using calculated fields. For example, yo
 
 For example, to round 123 to the nearest 10, you can use:
 
-```FLOOR([Value] / 10) * 10
+```
+FLOOR([Value] / 10) * 10
 ```
 
 Be sure to use floor instead of round, since round will round up values (i.e., 125 would round to 130, while floor would round to 120).

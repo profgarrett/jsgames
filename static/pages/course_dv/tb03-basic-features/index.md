@@ -1,10 +1,8 @@
-<script src="/course_dv/toc.js"></script>
-
 # Shaping Data in Tableau
 
 This module is about everything that happens to your data *before* a chart appears. You will reshape a source file, combine two tables, remove rows you do not want, and control the order things are drawn in.
 
-The reason to treat these together is that Tableau applies them in a fixed sequence, called the **order of operations**. Most of the confusing results in this module — a filter that ignores what you told it, a total that is three times too large — are not bugs. They are the pipeline running in an order you did not expect.
+The reason to treat these together is that Tableau applies them in a fixed sequence, called the **order of operations**. Many confusing results are the pipeline running in an order you did not expect.
 
 **Outcomes**:
 
@@ -40,9 +38,6 @@ Tableau runs these steps in order, top to bottom. You do not choose the order; y
 
 If you know SQL, steps 4–6 are already familiar: a row-level filter is `WHERE`, and an aggregate filter is `HAVING`. `WHERE` throws out rows before `GROUP BY` runs; `HAVING` throws out groups after. Tableau works the same way with different words.
 
-Keep this table nearby. Every section below is a step in it.
-
----
 
 ## Step 1: Reshaping at the Source
 
@@ -56,13 +51,25 @@ When Tableau detects this, a **Use Data Interpreter** checkbox appears in the le
 
 ### Pivot: wide to tall
 
-Data collected by humans is usually **wide** — one column per year, per month, or per product. Tableau wants it **tall** — one column holding the category, one column holding the value.
+Data collected by humans is usually **wide**, with one column per year, per month, or per product. Tableau wants it **tall**, with one column holding the category, one column holding the value.
 
-| Wide (hard for Tableau) | | | | Tall (what Tableau wants) | |
-| --- | --- | --- | --- | --- | --- |
-| **State** | **2024** | **2023** | **2022** | **State** | **Year** / **Income** |
-| Alabama | 65,560 | 62,230 | 63,870 | Alabama | 2024 / 65,560 |
-| Alaska | 91,260 | 100,700 | 95,670 | Alabama | 2023 / 62,230 |
+**Wide (hard for Tableau)**
+
+| State | 2024 | 2023 | 2022 |
+| --- | ---: | ---: | ---: |
+| Alabama | 65,560 | 62,230 | 63,870 |
+| Alaska | 91,260 | 100,700 | 95,670 |
+
+**Tall (what Tableau wants)**
+
+| State | Year | Income |
+| --- | --- | --- |
+| Alabama | 2024 | 65,560 |
+| Alabama | 2023 | 62,230 |
+| Alabama | 2022 | 63,870 |
+| Alaska | 2024 | 91,260 |
+| Alaska | 2023 | 100,700 |
+| Alaska | 2022 | 95,670 |
 
 Wide data cannot be charted over time, because "year" is not a field — it is spread across three field *names*. Pivoting turns those names into values.
 
@@ -74,7 +81,6 @@ Process:
 - Rename the two new fields. Tableau names them `Pivot Field Names` and `Pivot Field Values`; call them something like `Year` and `Median Income`
 - Set the data type on the new fields — a pivoted year usually arrives as a string
 
-> **Pivot is available for file-based sources** (Excel, CSV, Google Sheets) and some connectors, but not all. For a database connection that does not offer it, you reshape in SQL instead.
 
 ### Split
 
@@ -88,6 +94,9 @@ Split breaks one text field into several using a delimiter. `Autauga County, Ala
 Always **rename** the new fields (`Split 1` tells you nothing) and **check the data type**. A field split off a text column arrives as text even when it looks numeric.
 
 Some fields need two passes. `Alabama, AL - South` split on the comma gives `Alabama` and ` AL - South`; a custom split of that second field on ` - ` gives `AL` and `South`.
+
+It's generally safer to pick `Custom Split` and tell Tableau exactly what to do, rather than relying on its guess. Also tell it it pick only the first item, or only the last item, if you know that is what you want. Otherwise it will create multiple new fields if you have a row in your datasource containing multiple delimiters.
+
 
 ### Relationships vs. Joins
 
@@ -136,9 +145,8 @@ Two defenses:
 1. **Use a relationship instead of a join.** Relationships preserve each table's own level of detail and do not inflate `SUM()`. This is the single best reason they exist.
 2. **Check your row count.** Before and after combining tables, put `Number of Records` (or `COUNT()`) on a sheet. If it jumped by a clean multiple, you inflated.
 
-> **Check your work:** click any mark → `View Data`. If one county shows three rows, you have a fan-out.
+> **Check your work:** click any mark → `View Data`. If one county shows three rows, you have a problem.
 
----
 
 ## Steps 2–6: Filtering
 
@@ -191,7 +199,7 @@ Use context filters sparingly. They create a temporary table, which costs perfor
 
 ### Data source and extract filters
 
-These sit at the very top of the pipeline and remove rows before anything else runs. You will not need them for this module's assignment, because the datasets are small files. They matter when you are pulling from a large database or building an extract — see tb46, where extracts are covered.
+These sit at the very top of the pipeline and remove rows before anything else runs. You will not need them for this module's assignment, because the datasets are small files. They matter when you are pulling from a large database or building an extract.
 
 ### Filter display options
 
@@ -208,17 +216,16 @@ Right-click a filter on the Filters shelf → `Show Filter` to give the reader a
 
 Drag a field to the `Pages` shelf to try it. Use it to animate change over time in a presentation. Do not use it to remove data — that is what the Filters shelf is for.
 
----
 
 ## Step 7: The View
 
 ### Sorting
 
-An unsorted bar chart makes readers compare bars in an arbitrary order. Sorting turns it into a ranking, which is most of what makes bar charts readable (tb41). Sort almost every categorical chart you build.
+An unsorted bar chart makes readers compare bars in an arbitrary order. Sorting turns it into a ranking, which is most of what makes bar charts readable. Sort almost every categorical chart you build.
 
 Three ways to sort, in increasing order of control:
 
-1. **Toolbar buttons.** The ascending/descending buttons sort the view by the measure. Fastest, and the right choice most of the time.
+1. **Toolbar buttons.** The ascending/descending buttons sort the view by the measure.
 2. **Hover icons.** Hover over an axis or a header and a small sort icon appears. Click to cycle through sort states.
 3. **Right-click a pill → `Sort`.** The full dialog:
    - `Data source order` — the order rows appear in the file
@@ -237,180 +244,21 @@ The tooltip is the panel that appears when a reader hovers a mark. It is free re
 - A **dimension** on Tooltip is wrapped in `ATTR()`. If it displays `*`, that means the mark covers more than one value of that field. That is information, not an error — it tells you your level of detail is coarser than you assumed.
 - **Viz in Tooltip:** in the tooltip editor, `Insert` → `Sheets` → pick another worksheet. Hovering a mark now shows an entire chart inside the tooltip, filtered to that mark. It is one click and it is the most impressive thing in this module.
 
----
 
-## Walkthrough: County Distress Data
+## Key terms
 
-Uses `tb42_countydata.xlsx`, which has three sheets you need: `dci_counties` (one row per county), `State` (one row per state), and `State Income` (median household income, wide by year, with a messy header).
-
-**Part A — connect and clean**
-
-1. `Connect` → `To a File` → `Microsoft Excel` → select `tb42_countydata.xlsx`.
-2. Drag `dci_counties` onto the canvas. Confirm `County ID` and `StateFIP` are **text**, not numbers — leading zeros matter.
-3. Right-click `County` → `Split`. Tableau splits on the comma into county name and state name. Rename both.
-4. Drag `State` onto the canvas next to `dci_counties`. Tableau draws a noodle and proposes `StateFIP` = `StateID`. Confirm the key.
-5. Right-click the `State` field → `Split` on the comma, then `Custom Split` the remainder on ` - ` to get the abbreviation and the region. Rename all three.
-
-**Part B — pivot and combine**
-
-6. Drag `State Income` onto the canvas. Its header row is buried under a title and a URL, so check **Use Data Interpreter** in the left pane, then `Review the results`.
-7. On the Data Source preview, select the `2024`, `2023`, and `2022` columns. Right-click → `Pivot`.
-8. Rename `Pivot Field Names` → `Year` and `Pivot Field Values` → `Median Income`. Set `Median Income` to a number.
-9. Relate `State Income` to `State` on the FIPS code. Check the type on both keys first.
-10. **Verify you did not inflate.** New sheet, drag `dci_counties (Count)` to Text. It should read 3,136. If it reads 9,408, you joined instead of related — go back to step 9.
-
-**Part C — filter and sort**
-
-11. New sheet. `Region` to Rows, `Median Income` to Text, set the aggregation to `AVG`.
-12. Notice the United States total row (FIPS `00`) contaminating the results. Drag `State Name` to Filters → `Exclude` → `The United States`. That is a row-level filter.
-13. New sheet. `State Name` to Rows, `Total Population` to Columns as `SUM`.
-14. Drag `Total Population` to Filters again. In the dialog choose `Sum`, then set a minimum of 5,000,000. That is an **aggregate** filter — it removes states, not counties. Compare it to choosing `All values`, which would remove individual counties instead.
-15. Sort descending with the toolbar button.
-16. Now the context filter: filter `State Name` to West Virginia, then add a Top 10 filter on your split county-name field by distress score. Note the wrong result. Right-click the state filter → `Add to Context`. Note the fix.
-
-**Part D — finish**
-
-17. Add `County Type` and `MSA` to Marks → Tooltip on your county sheet.
-18. `File` → `Save As` → **Tableau Packaged Workbook (.twbx)**.
-
----
-
-## Vocabulary
-
-| Term | Meaning |
-| --- | --- |
-| Order of operations | The fixed sequence Tableau applies filters and aggregations in |
-| Pivot | Turning wide columns into tall rows |
-| Data Interpreter | Tableau's cleanup pass for messy spreadsheet headers |
-| Split | Breaking one text field into several on a delimiter |
-| Logical layer | The default Data Source canvas, where relationships live |
-| Physical layer | Inside a table, where joins live |
-| Relationship | A flexible link that preserves each table's level of detail |
-| Join | A flattening combination that can duplicate rows |
-| Fan-out / join inflation | Row duplication from a one-to-many join, which inflates `SUM()` |
-| Row-level filter | Removes rows before aggregation — SQL's `WHERE` |
-| Aggregate filter | Removes groups after aggregation — SQL's `HAVING` |
-| Context filter | A filter promoted to run before other filters and Top N |
-| `ATTR()` | Tableau's tooltip aggregation for dimensions; `*` means multiple values |
-| Pages | Splits a view into a steppable sequence — not a filter |
-
-## Check Your Understanding
-
-1. You have a column for each of 2022, 2023, and 2024. Why can you not build a line chart, and what fixes it?
-2. Your join key is `01` in one table and `1` in the other. What happens, and why?
-3. After combining two tables, total population jumps from 340 million to 1.02 billion. What did you do, and what are two ways to fix it?
-4. You filter to Ohio and add a Top 5 filter. You get five counties, none of them in Ohio. Explain using the order of operations.
-5. You want to show only counties with population over 50,000. You want to show only *states* whose counties total over 5 million. Which filter is which, and which dialog option do you pick for each?
-6. A tooltip shows `*` where you expected a county type. What is Tableau telling you?
-
-## Submission
-
-Submit a `.twbx` containing:
-
-- One sheet showing average median household income by region, across all three years, with the national total row excluded.
-- One sheet showing the 10 most distressed counties in a state of your choice, correctly filtered using a context filter, sorted descending, with county type in the tooltip.
-- One caption sheet stating your record count after combining tables and one sentence explaining why it is or is not what you expected.
-
----
-
-<!--
-AUTHOR NOTES — delete before publishing.
-
-SCOPE CHANGES FROM THE ORIGINAL:
-
-- CUT Dashboards / Stories entirely. tb46 covers it properly, and the original
-  chapter deferred to tb46 in its own filter section. The dashboard-filter
-  bullets go there too.
-- MOVED "Create a calculated field" to tb44, which already lists calculated
-  fields, IF, ZN, date functions, and bins as outcomes. tb42 no longer teaches
-  calculations.
-- KEPT Split, contrary to my first recommendation. Once I opened the data file
-  it was clear Split belongs here: it is a Data Source tab reshaping operation
-  in the same family as pivot, it requires no functions, and the posted
-  exercise depends on it. Only calculated fields moved.
-- RETITLED "Tableau Basic Features" -> "Shaping Data in Tableau." The old title
-  described nothing; the module number tb42 still identifies it.
-- REORDERED around the order of operations, so pivot/join come first (they
-  happen first) and sort/tooltip come last.
-
-ERRORS FIXED:
-
-- Context filters. The original said they are "used when clicking on items in a
-  dashboard." That is a dashboard filter action. Rewritten as an
-  order-of-operations concept with the Top N example.
-- "Dimension/Measure can be filtered on a row-level." Muddled. Dimension
-  filters are always row-level; measure filters default to aggregate and
-  require "All values" for row-level.
-- Pages described as "a different style of filter." It is not a filter.
-- Extract/data source filters dismissed as "we don't use these," which
-  contradicts tb46 listing extracts under common exam mistakes. Now points
-  forward instead.
-
-CONTENT ADDED:
-
-- The pipeline table as the chapter spine, with the WHERE/HAVING mapping.
-- Relationships vs. joins, logical vs. physical layer. Biggest gap in the
-  original; modern Tableau shows a noodle, not a Venn diagram, so students
-  following the old two-bullet instruction get lost immediately.
-- Join types and join inflation. The fan-out example is real: relating
-  State Income (3 rows per state after pivot) to 3,136 counties triples
-  SUM(Total Population). This is the highest-stakes error for an accounting
-  audience and it produces no error message.
-- Data Interpreter. The State Income sheet in the posted file has a title and
-  a FRED URL above the header row, so students hit this immediately.
-- Leading zeros on FIPS join keys, tied back to tb01.
-- Custom split, two-pass split, string-only restriction.
-- Manual sort, sort-by-another-field.
-- ATTR() and the asterisk; Viz in Tooltip.
-- Walkthrough, vocabulary table, check-your-understanding, submission.
-
-ACTION ITEMS FOR YOU:
-
-1. UPDATE THE TASK SHEET in tb42_countydata.xlsx. It currently asks for a
-   decile calculated field ("try round -1, then ceiling"). Since calculated
-   fields moved to tb44, that task should move with them — it is a good tb44
-   exercise. Replace with the pivot/join/context-filter task in Part C.
-2. REPOST THE SOLUTION AS .twbx. It is currently tb42_solution.twb, and tb01
-   tells students in bold never to submit .twb.
-3. VERIFY THE ROW COUNT in walkthrough step 10. I read 3,136 data rows in
-   dci_counties from the file, but confirm what Tableau reports after the
-   Data Interpreter pass.
-4. CHECK THE STATE FIELD SPLIT. The State sheet stores "Alabama, AL - South".
-   I assumed Tableau auto-detects the comma and needs a custom split for
-   " - ". Worth one test — Tableau sometimes offers a multi-delimiter guess.
-5. WEST VIRGINIA in the context filter example is a placeholder that will
-   resonate with your students; any state works.
-
-FIGURES TO SHOOT (4 new):
-
-1. datasource_relationship_vs_join.webp
-   Side by side. LEFT: logical layer, two tables with the noodle between them.
-   RIGHT: physical layer (double-clicked into a table), same two tables with
-   the Venn icon and the join-type picker open. Label each half. This is the
-   single most important figure in the chapter — students cannot follow the
-   join instructions without seeing which canvas they should be on.
-
-2. pivot_before_after.webp
-   The State Income sheet on the Data Source preview, before and after the
-   pivot. Show the three year columns selected with the right-click menu open
-   on "Pivot" in the before shot; show Pivot Field Names/Values in the after.
-
-3. filter_measure_dialog.webp
-   The dialog that appears when you drop a measure on Filters, with "All
-   values" and "Sum" both visible in the same frame. Circle "All values."
-   Students click past it constantly.
-
-4. context_filter_topn.webp
-   Three panels: (a) state filter alone, correct list; (b) Top 10 added,
-   wrong list, with the changed names highlighted; (c) after Add to Context,
-   correct list, with the gray pill visible on the Filters shelf. The gray
-   pill needs to be legible — that color change is the only visual confirmation
-   students get.
-
-CROSS-REFERENCES:
-- tb01 (data types, leading zeros, .twb vs .twbx) from the join key warning
-- tb41 (bar charts, position/length) from the sorting section
-- tb44 (calculated fields, grouping, bins) from the split section
-- tb46 (dashboards, dashboard filter actions, extracts) from context filters
-  and from data source filters
--->
+- **Order of operations**: The order of filters and aggregations.
+- **Pivot**: Turning wide columns into tall rows.
+- **Wide data**: One column per year, month, or product.
+- **Tall data**: One column for the category, one column for the value.
+- **Data Interpreter**: A feature that removes rows above a table and other spreadsheet problems.
+- **Split**: Breaking one text field into several on a delimiter.
+- **Delimiter**: A character that separates values in a text field, such as a comma or a dash.
+- **Relationship**: A flexible link that preserves each table's level of detail.
+- **Join**: A flattening combination that can duplicate rows, similar to a SQL join.
+- **Fan-out / join inflation**: Row duplication from a one-to-many join, which inflates `SUM()`.
+- **Row-level filter**: Removes rows before aggregation, similar to SQL's `WHERE`.
+- **Aggregate filter**: Removes groups after aggregation, similar to SQL's `HAVING`.
+- **Context filter**: A filter promoted to run before other filters and Top N. Expensive, as it creates a temporary table.
+- **Pages**: Splits a view into a steppable sequence — not a filter.
+- **Tooltip**: The panel that appears when a reader hovers a mark, which can contain text, fields, and even another chart.

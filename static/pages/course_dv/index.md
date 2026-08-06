@@ -44,9 +44,9 @@ Optional Reading:
 - [dv31. Visual channels](dv31-visualchannels/index)
 
 
-
 ### Week 3 - August 31, 2026
 
+- *DataCamp: Introduction to Tableau, Part 1*
 - [dv40. Colors](dv40-colors/index)
 - [dv45. Presentations](dv45-presentations/index)
 - [dv46. Writing an effective report](dv46-report/index)
@@ -57,36 +57,38 @@ Optional Reading:
 
 ### Week 4 - September 7, 2026
 
-- *DataCamp: Introduction to Tableau*
+- *DataCamp: Introduction to Tableau, Parts 2-4*
 - [tb01. Tableau interface and data](tb01-interface/index)
-- [tb41. Tableau basic charts](tb41-basic-charts/index)
-- [tb42. Shaping data in Tableau](tb42-basic-features/index)
-- [tb43. Chart refinements](tb43-chart-refinements/index)
-- [tb44. Data refinements](tb44-data-refinements/index)
+- [tb02. Tableau basic charts](tb02-basic-charts/index)
+- [tb03. Shaping data in Tableau](tb03-basic-features/index)
 
 ### Week 5 - September 14, 2026 
 
 *Exam 1*
 
-- *DataCamp: Analyzing Data with Tableau Parts 3 & 4*
-- [tb45. Tableau maps](tb45-maps/index)
+- *DataCamp: Analyzing Data with Tableau, Parts 1-2*
+- [tb11. Chart refinements](tb11-chart-refinements/index)
+- [tb12. Data refinements](tb12-data-refinements/index)
 
 ### Week 6 - September 21, 2026 
 
-- *DataCamp: Creating Dashboards with Tableau*
-- [tb46. Dashboards](tb46-dashboards/index)
-- [tb48. Tableau Table Calculations](tb48-tablecalculations/index)
+- *DataCamp: Analyzing Data with Tableau, Parts 3-4*
+- [tb21. Tableau maps](tb21-maps/index)
+- [tb22. Dashboards](tb22-dashboards/index)
 
 ### Week 7 - September 28, 2026 
+
+- *DataCamp: Creating Dashboards with Tableau*
+- [tb31. Tableau Table Calculations](tb31-tablecalculations/index)
 
 
 ## Module 3: PowerBI
 
+### Week 8 - October 5, 2026 
+
 - *MLearn: Get Started 1/2 and 2/2*
 - *MLearn: Get data in PowerBI*
 - *MLearn: Clean, Transform, and load*
-
-### Week 8 - October 5, 2026 
 
 - [bi01. PowerBI Introduction](bi01-intro/index)
 
@@ -104,7 +106,6 @@ Optional Reading:
 ## Module 4: SQL
 
 ### Week 11 - October 26, 2026 
-
 
 - [sql01. SQL Introduction](sql01-introduction/index)
 - [sql02. SQL Select, From, Order By, Where](sql02-selectfromorderby/index)
@@ -134,8 +135,6 @@ Continue Python
 *Spring Break - No activities*
 
 ### Week 16 - November 30, 2026 
-
-*Project*
 
 [Exam 4](exams/exam4.html)
 
