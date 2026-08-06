@@ -60,7 +60,7 @@ Optional Reading:
 - *DataCamp: Introduction to Tableau*
 - [tb01. Tableau interface and data](tb01-interface/index)
 - [tb41. Tableau basic charts](tb41-basic-charts/index)
-- [tb42. Tableau basic features](tb42-basic-features/index)
+- [tb42. Shaping data in Tableau](tb42-basic-features/index)
 - [tb43. Chart refinements](tb43-chart-refinements/index)
 - [tb44. Data refinements](tb44-data-refinements/index)
 
