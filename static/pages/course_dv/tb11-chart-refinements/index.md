@@ -75,3 +75,9 @@ Process:
   - Order matters: add the bar measure first (on the left) so the line is drawn on top of it
 - (If needed) Change the second measure's mark type to Line
 - (If both measures share a unit) Right-click either axis → `Synchronize Axis`
+
+### Log Axis
+
+Using a log axis can help you map wildly different magnitudes of data on the same chart. For example, a log axis can help you visualize both the size and lifespan of animals, which vary by orders of magnitude.
+
+![Log axis demo from https://xkcd.com/3283/](https://imgs.xkcd.com/comics/size_and_lifespan_2x.png)
