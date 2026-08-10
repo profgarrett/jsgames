@@ -1,6 +1,6 @@
 import React, { useState, useEffect} from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Container, Button, Row, Col, Card, Alert, Navbar } from 'react-bootstrap';
+import { Container, Button, Row, Col, Card, Alert } from 'react-bootstrap';
 
 import { Message, Loading } from '../components/Misc';
 import { getUserFromBrowser } from '../components/Authentication';
@@ -78,12 +78,8 @@ export default function PreviewContainer() {
 	return (
 
 		<Container fluid>
-			<Navbar bg='dark' variant='dark'>
-				<Container fluid>
-					<Navbar.Brand href='/'>Excel.fun</Navbar.Brand>
-				</Container>
-			</Navbar>
-
+			{/* The navbar that used to sit here now lives in components/SiteHeader.tsx,
+				rendered globally from index.jsx so every page gets it. */}
 			<Row><Col>
 				<div className='card' style={{ backgroundColor: '#f5f5f5' }}>
 					<div className='card-body'>

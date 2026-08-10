@@ -102,6 +102,9 @@ app.use('/api/sections',app_sections);
 import { app_users } from './app_users';
 app.use('/api/users', app_users);
 
+import { app_admin } from './app_admin';
+app.use('/api/admin', app_admin);
+
 import { app_pages } from './app_pages';
 app.use('/api/pages', app_pages);
 

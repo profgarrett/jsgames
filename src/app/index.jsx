@@ -26,8 +26,10 @@ import PageListContainer from './pages/PageListContainer.tsx';
 import PageSectionContainer from './pages/PageSectionContainer.tsx';
 import PageViewContainer from './pages/PageViewContainer.tsx';
 import LiveQuizJoin from './pages/LiveQuizJoin.tsx';
+import AdminContainer from './admin/AdminContainer.tsx';
 import { loadUserFromServer } from './components/Authentication';
 import PageviewTracker from './components/PageviewTracker.tsx';
+import SiteHeader from './components/SiteHeader.tsx';
 
 
 // Load Google Analytics gtag.js script and initialize it
@@ -54,12 +56,15 @@ function renderApp() {
 		<React.StrictMode>
 				<BrowserRouter>
 					<PageviewTracker />
+					<SiteHeader />
 					<Routes>
 						<Route path="/" element={<PreviewContainer />} />
 						<Route path="/login" element={<LoginContainer />} />
 						<Route path="/logout" element={<Logout />} />
 						<Route path="/profile" element={<ProfileContainer />} />
 						<Route path="/password" element={<PasswordContainer />} />
+
+						<Route path="/admin" element={<AdminContainer />} />
 
 						<Route path="/pages" element={<PageSectionContainer />} />
 						<Route path="/pages/list" element={<PageListContainer />} />
