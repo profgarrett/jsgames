@@ -173,8 +173,8 @@ return (
 		<Card.Body>
 			<Card.Title>Sign in with Google</Card.Title>
 				<div>
-					Please sign in with your Google account. 
-					Use your school email address, <i>@mix.wvu.edu</i>
+					Please use your <i>@mix.wvu.edu</i> email address.  
+					If you are a new student, please enter your course code.
 					<br/>
 					<LoginGoogle submit={google_login} disabled={isLoading} />
 				</div>

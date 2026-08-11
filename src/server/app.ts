@@ -11,7 +11,7 @@ import compression from 'compression';
 // @ts-ignore
 import cookieParser from 'cookie-parser';
 
-import { BUGSNAG_API, DEBUG, VERSION } from './secret.js'; 
+import { BUGSNAG_API, DEBUG } from './secret.js'; 
 
 // Add a more realistic delay when in debug, useful for making that loading status screens work properly.
 const DEBUG_DELAY = DEBUG ? 500 : 0;
@@ -142,7 +142,7 @@ app.get('/api/version', nocache, (req: Request, res: Response) => {
 	const os = require( 'os' );
 	const ipheader = req.headers['x-forwarded-for'];
 
-	res.json({ version: VERSION, 
+	res.json({ 
 		environment: process.env.NODE_ENV, 
 		debug: DEBUG,
 		ip: ip,

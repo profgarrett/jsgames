@@ -1,5 +1,5 @@
 import React, { ReactElement, useEffect, useState } from 'react';
-import { Container, Nav, Navbar } from 'react-bootstrap';
+import { Container, Nav, Navbar, Row, Col } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 
 import { getUserFromBrowser } from './Authentication';
@@ -25,6 +25,8 @@ export default function SiteHeader(): ReactElement {
 	}, []);
 
 	return (
+		<Container fluid style={{  }}>
+			<Row><Col>
 		<Navbar bg='dark' variant='dark'>
 			<Container fluid>
 				<Navbar.Brand href='/'>Excel.fun</Navbar.Brand>
@@ -35,5 +37,7 @@ export default function SiteHeader(): ReactElement {
 					: null}
 			</Container>
 		</Navbar>
+		</Col></Row>
+		</Container>
 	);
 }

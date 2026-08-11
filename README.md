@@ -22,7 +22,6 @@ The profgarrett role is a super administration by default.
 
 ```javascript
 export const DEBUG = true;
-export const VERSION = 5;
 
 export const ADMIN_USERNAME = 'profgarrett';
 export const ADMIN_OVER_PASSWORD = '';
@@ -69,7 +68,6 @@ module.exports = {
     MYSQL_DATABASE,
     BUGSNAG_API,
     DEBUG,
-    VERSION,
     GOOGLEID,
     EMAIL_ADDRESS,
     EMAIL_PASSWORD,

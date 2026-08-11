@@ -59,7 +59,7 @@ export default class LoginCurrentUser extends React.Component<PropsType, StateTy
 					onSubmit={this.submitForm}
 				>
 				<Form.Group className='mb-3'>
-				<Form.Label >Email address</Form.Label>
+				<Form.Label >Username</Form.Label>
 					<Form.Control 
 						name='username'
 						onChange={this.onChange}
@@ -81,7 +81,7 @@ export default class LoginCurrentUser extends React.Component<PropsType, StateTy
 					/>
 				</Form.Group>
 					<Button type='submit' variant='primary' disabled={this.props.disabled}>Login</Button>
-					<span style={{ marginLeft: 10}}><Link to='/password'>reset your password</Link></span>
+					<span style={{ marginLeft: 10}}><Link to='/password'>reset</Link></span>
 			</Form>
 			</div>
 		);

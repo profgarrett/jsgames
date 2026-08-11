@@ -6,8 +6,6 @@ import { Message, Loading } from '../components/Misc';
 import ForceLogin from '../components/ForceLogin';
 import CacheBuster from '../components/CacheBuster';
 import { getUserFromBrowser } from '../components/Authentication';
-import { get_sticky_section_id } from '../pages/PageSectionPicker';
-import iSection from '../pages/iSection';
 
 import {
 	IfLevelSchema,
@@ -17,10 +15,9 @@ import {
 import { get_levels, iGrade, LevelProgressTable, NextLesson } from '../if/levelProgress';
 
 /*
-	The logged-in view of '/', which replaced /ifgame.
+	The logged-in view of '/'
 
-	Deliberately identical for every user: no section picker, and section.levels
-	is not consulted. Everyone sees the same Excel and SQL tutorial lists. The
+	Everyone sees the same Excel and SQL tutorial lists. The
 	only thing that varies is the admin block.
 */
 export default function HomeLoggedIn(): ReactElement {
@@ -30,7 +27,6 @@ export default function HomeLoggedIn(): ReactElement {
 	const [isLoadingUncompletedLevels, setIsLoadingUncompletedLevels] = useState(true);
 	const [grades, setGrades] = useState<iGrade[]>([]);
 	const [levels, setLevels] = useState<IfLevelSchema[]>([]);
-	const [adminSectionId, setAdminSectionId] = useState<number|null>(null);
 	const [user] = useState( getUserFromBrowser() );
 	const navigate = useNavigate();
 
@@ -71,18 +67,6 @@ export default function HomeLoggedIn(): ReactElement {
 				setIsLoadingGrades(false);
 			});
 		}, [] );
-
-	// Sections are needed only to resolve the admin progress link, so don't ask
-	// for them at all otherwise. Nothing on this page renders per-section.
-	useEffect(() => {
-		if(!user.isAdmin) return;
-
-		fetch('/api/sections', { credentials: 'include' })
-			.then( response => response.json() )
-			.then( (json: iSection[]) => setAdminSectionId( get_sticky_section_id(json) ) )
-			.catch( () => setAdminSectionId(null) );
-		}, [user.isAdmin] );
-
 
 	// Start a fresh attempt at a tutorial and jump straight into it.
 	const insertGame = (code: string): void => {
@@ -133,27 +117,24 @@ export default function HomeLoggedIn(): ReactElement {
 	const course_links = (
 		<div style={{ marginBottom: 30 }}>
 			<div className='h5'>Course pages</div>
-			<Link to='/pages/course_dv'>
-				<Button variant='outline-primary' style={{ marginRight: 10 }}>Data Visualization</Button>
+			<Link to='/pages/course_dv/index'>
+				<Button variant='outline-primary' style={{ marginRight: 10 }}>Data Analytics Textbook</Button>
 			</Link>
-			<Link to='/pages/course_python'>
-				<Button variant='outline-primary'>Python</Button>
+			<Link to='/pages/course_python/index'>
+				<Button variant='outline-primary'>Python Textbook</Button>
 			</Link>
 		</div>);
 
-	// Admin-only. The progress link needs a section id; hide it if we can't
-	// resolve one. Everything section-scoped otherwise lives on /admin.
+	// Admin-only. 
 	const admin_links = !user.isAdmin ? null : (
 		<div style={{ marginBottom: 30 }}>
 			<div className='h5'>Admin</div>
 			<Link to='/admin'>
 				<Button variant='outline-info' style={{ marginRight: 10 }}>Admin</Button>
 			</Link>
-			{ adminSectionId === null
-				? null
-				: <Link to={'/ifgame/progress/'+adminSectionId}>
+			<Link to={'/ifgame/progress/'}>
 					<Button variant='outline-info'>Class progress</Button>
-				</Link> }
+			</Link>
 		</div>);
 
 	return (
@@ -165,9 +146,9 @@ export default function HomeLoggedIn(): ReactElement {
 					<div style={{ paddingTop: 10}} />
 					<Message message={message} style={messageStyle} />
 					<Loading loading={is_loading} />
-					{ body }
-					{ course_links }
 					{ admin_links }
+					{ course_links }
+					{ body }
 				</Col>
 			</Row>
 		</Container>

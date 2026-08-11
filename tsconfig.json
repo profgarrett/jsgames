@@ -1,11 +1,11 @@
 {
 	"$schema": "https://json.schemastore.org/tsconfig",
-	"display": "Create React App",
+	"display": "Excelfun React Application",
   
   
 	"compilerOptions": {
 	  "lib": ["dom", "dom.iterable", "esnext"],
-	  "module": "CommonJS",
+	  "module": "preserve",
 	  "target": "es2015",
   
 	  "allowJs": true,
@@ -14,7 +14,6 @@
 	  "forceConsistentCasingInFileNames": true,
 	  "isolatedModules": true,
 	  "jsx": "react-jsx",
-	  "moduleResolution": "node",
 	  "noEmit": true,
 	  "noFallthroughCasesInSwitch": true,
 	  "resolveJsonModule": true,

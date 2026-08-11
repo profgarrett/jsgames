@@ -76,14 +76,13 @@ export default function LoginGoogle({ submit, disabled }: PropsType) {
 
 	return (
 		<div>
-			<Form.Group className='mb-2'>
-				<Form.Label>Course join code (optional)</Form.Label>
+			<Form.Group className='mb-2' style={{ maxWidth: 400, paddingTop: 10 }}>
 				<Form.Control
 					type='text'
 					value={sectionCode}
 					disabled={disabled}
 					onChange={e => setSectionCode(e.target.value)}
-					placeholder='Enter only if joining a class'
+					placeholder='course code for new students (optional)'
 				/>
 			</Form.Group>
 			<div ref={divRef} />
