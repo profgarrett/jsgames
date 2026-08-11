@@ -107,7 +107,7 @@ export default function PageSectionContainer(): ReactElement {
 
 	const crumbs = (
 			<Breadcrumb>
-				<Breadcrumb.Item title='home' href='/ifgame/'>If Games</Breadcrumb.Item>
+				<Breadcrumb.Item title='home' href='/'>Home</Breadcrumb.Item>
 				<Breadcrumb.Item title='Pages' active>Pages</Breadcrumb.Item>
 			</Breadcrumb>
 			);

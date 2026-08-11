@@ -1,14 +1,23 @@
-import React, { useState, ReactElement } from 'react';
-import { IfLevels, IfLevelSchema, DEFAULT_TUTORIAL_LEVEL_LIST, GREEN_GRADE, PASSING_GRADE } from '../../shared/IfLevelSchema';
-import { Table, Modal, Tooltip, OverlayTrigger, Button } from 'react-bootstrap';
+import React, { ReactElement } from 'react';
+import { IfLevels, DEFAULT_TUTORIAL_LEVEL_LIST } from '../../shared/IfLevelSchema';
+import { Table, Button } from 'react-bootstrap';
 import CSS from 'csstype';
 
 
 type PropsType = {
-	onPreviewLevel: (level_code: string) => void
+	onPreviewLevel: (level_code: string) => void;
+
+	// Which tutorials to list, and the heading above them. Defaulted so the
+	// original single-table call site keeps working; the logged-out home passes
+	// the Excel and SQL slices to render this component twice.
+	codes?: string[];
+	title?: string;
 };
 
 export default function PreviewList(props: PropsType ) {
+	const codes = props.codes || DEFAULT_TUTORIAL_LEVEL_LIST;
+	const title = props.title || 'Preview a tutorial';
+
 	const handleShow = (e) => { 
 		const level = e.target.getAttribute('data-level');
 		props.onPreviewLevel(level);
@@ -24,9 +33,7 @@ export default function PreviewList(props: PropsType ) {
 		const levels = IfLevels.filter( l => levels_codes.includes(l.code) );
 
 		// Style
-		const td_c: CSS.Properties = { textAlign: 'center', verticalAlign: 'middle', width: '6%' };
 		const td_l: CSS.Properties = { textAlign: 'left', verticalAlign: 'middle'};
-		const td_disabled = { ...td_c, color: 'lightgray'};
 
 		// Return tds.
 		const trs: ReactElement[] = [];
@@ -63,12 +70,12 @@ export default function PreviewList(props: PropsType ) {
 	}
 
 
-	const table = _render_table(DEFAULT_TUTORIAL_LEVEL_LIST);
+	const table = _render_table(codes);
 
 	// Return card.
 	return (
 		<div style={{ marginTop: 50, marginBottom: 40 }}>
-			<div className='h5'>Preview a tutorial</div>
+			<div className='h5'>{ title }</div>
 			<div>
 				<span style={{ marginBottom: 10}} /> 
 				{ table }

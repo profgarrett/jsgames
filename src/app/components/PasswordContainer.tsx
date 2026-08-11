@@ -36,7 +36,7 @@ export default function PasswordContainer() {
 	}
 
 	const submit_request = (username: string) => {
-		const url = '/ifgame';
+		const url = '/';
 
 		setIsLoading(true);
 		setMessage('Sending email with your information');

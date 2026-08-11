@@ -72,7 +72,7 @@ export default function QuestionsContainer() {
 
 	const crumbs = (
 		<Breadcrumb>
-			<Breadcrumb.Item title='home' href='/ifgame/'>If Games</Breadcrumb.Item>
+			<Breadcrumb.Item title='home' href='/'>Home</Breadcrumb.Item>
 			<Breadcrumb.Item title='Questions' active>Questions</Breadcrumb.Item>
 		</Breadcrumb>
 		);

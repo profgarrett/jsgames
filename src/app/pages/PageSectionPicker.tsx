@@ -42,6 +42,28 @@ export function set_localstorage_section(section: iSection): void {
 	window.localStorage.setItem('ExcelFunMyProgressSection', JSON.stringify(section));
 }
 
+/**
+	The idsection to use for section-scoped links that have no picker of their
+	own -- currently the admin progress link on the home page.
+
+	Prefers whatever the user last chose in the pages picker, but only if it is
+	still in the given list (a stale localStorage entry for a section they were
+	dropped from would otherwise produce a dead link). Falls back to the first
+	section, and null if there are none.
+*/
+export function get_sticky_section_id(sections: iSection[]): number | null {
+	if(sections.length === 0) return null;
+
+	const sticky = get_localstorage_section();
+
+	if(sticky !== null) {
+		const match = sections.find( s => s.idsection === sticky.idsection );
+		if(match !== undefined) return match.idsection;
+	}
+
+	return sections[0].idsection;
+}
+
 
 export function PageListSectionPicker(props: PropsType): ReactElement {
 	const [section, setSection] = useState<iSection | null>(null);

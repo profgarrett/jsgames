@@ -58,7 +58,7 @@ export default function LevelScoreContainer() {
 
 	const crumbs = level ?
 		<Breadcrumb>
-			<Breadcrumb.Item href={'/ifgame/'}>Home</Breadcrumb.Item>
+			<Breadcrumb.Item href={'/'}>Home</Breadcrumb.Item>
 			<Breadcrumb.Item active>{ level.title }</Breadcrumb.Item>
 		</Breadcrumb>
 		: <></>;
@@ -66,7 +66,7 @@ export default function LevelScoreContainer() {
 	const back = level ?
 		<Button variant='primary' 
 				style={{ marginBottom: 20, marginTop: 20 }} 
-				href={ '/ifgame/' }>
+				href={ '/' }>
 				Back to home page
 		</Button>
 		: <></>;

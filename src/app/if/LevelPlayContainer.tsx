@@ -189,7 +189,7 @@ export default function LevelPlayContainer() {
 						navigate('/ifgame/level/'+ifLevel._id+'/score');
 					} else {
 						// Back to home page w/o any results shown.
-						navigate('/ifgame');
+						navigate('/');
 					}
 					return;
 				} 
@@ -279,7 +279,6 @@ export default function LevelPlayContainer() {
 	const crumbs = (level == null) ? <></> :
 		<Breadcrumb>
 			<Breadcrumb.Item href={'/'}>Home</Breadcrumb.Item>
-			<Breadcrumb.Item href={'/ifgame/'}>My Progress</Breadcrumb.Item>
 			<Breadcrumb.Item active>{  level.title }</Breadcrumb.Item>
 		</Breadcrumb>;
 

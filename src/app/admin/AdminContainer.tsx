@@ -8,6 +8,7 @@ import { Loading, Message } from '../components/Misc';
 import AdminCreateSectionForm, { iNewSection } from './AdminCreateSectionForm';
 import AdminCreateUserForm, { iNewUser } from './AdminCreateUserForm';
 import AdminJoinSectionForm from './AdminJoinSectionForm';
+import AdminSectionReports from './AdminSectionReports';
 import AdminUserTable from './AdminUserTable';
 import { iAdminSection, iAdminUser, iAdminUserSection } from './iAdmin';
 
@@ -186,7 +187,7 @@ export default function AdminContainer(): ReactElement {
 
 	const crumbs = (
 		<Breadcrumb>
-			<Breadcrumb.Item title='home' href='/ifgame/'>If Games</Breadcrumb.Item>
+			<Breadcrumb.Item title='home' href='/'>Home</Breadcrumb.Item>
 			<Breadcrumb.Item title='Admin' active>Admin</Breadcrumb.Item>
 		</Breadcrumb>
 	);
@@ -228,6 +229,10 @@ export default function AdminContainer(): ReactElement {
 					users={users}
 					sections={sections}
 					onJoin={handleJoin}
+				/>
+
+				<AdminSectionReports
+					sections={sections}
 				/>
 
 				<h4>Users ({users.length})</h4>

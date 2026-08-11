@@ -73,7 +73,6 @@ export default function IfRecentContainer(): ReactElement {
 	const crumbs = (
 		<Breadcrumb>
 			<Breadcrumb.Item title='home' href='/'>Home</Breadcrumb.Item>
-			<Breadcrumb.Item title='My Progress' href='/ifgame' >My Progress</Breadcrumb.Item>
 			<Breadcrumb.Item title='Recent activity' active>Recent</Breadcrumb.Item>
 		</Breadcrumb>
 		);

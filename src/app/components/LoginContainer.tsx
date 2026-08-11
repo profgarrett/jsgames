@@ -165,66 +165,35 @@ export default function LoginContainer() {
 
 return (
 <Container fluid>
-		<Navbar bg='dark' variant='dark'>
-			<Container fluid>
-				<Navbar.Brand href='/'>Excel.fun</Navbar.Brand>
-			</Container>
-		</Navbar>
+	<Loading loading={isLoading } />
+	{ messageAlert }
 
-	<Row><Col>
-	<div className='card' style={{ backgroundColor: '#f5f5f5' }}>
-		<div className='card-body'>
-			<div className='card-text'>
-	
-				<h3>A free Excel tutorial system</h3>
-				This website teaches you how to write formulas and functions in Microsoft Excel.
-				<br/><br/>
-				It is a research project developed by <a href='http://profgarrett.com'>Nathan Garrett</a>.
-				The <a href='https://github.com/profgarrett/jsgames'>code</a> is free for public use, and 
-				future publications <a href='https://scholar.google.com/citations?user=UJXCwEcAAAAJ&hl=en&oi=ao'>will be posted online</a>.
-				<br/><br/>
-				For any questions or comments, please contact me at <a href='mailto:profgarrett@gmail.com'>profgarrett@gmail.com</a>.
-				
-				<Loading loading={isLoading } />
-				{ messageAlert }
-
-				<Row className='mb-3'>
-					<Col>
-						<Card>
-						<div className='card'>
-						<div className='card-body'>
-							<div className='card-title h4'>Sign in with Google</div>
-							<div className='card-text'>
-								<div className='mt-2'>
-									<LoginGoogle submit={google_login} disabled={isLoading} />
-								</div>
-							</div>
-						</div>
-						</div>
-						</Card>
-					</Col>
-				</Row>
-
-				<Row>
-					<Col sm={7}>
-						<Card>
-						<div className='card'>
-						<div className='card-body'>
-							<div className='card-title h6'>Administrator Login</div>
-							<div className='card-text'>
-								<LoginCurrentUser submit={login} disabled={isLoading} />
-							</div>
-						</div>
-						</div>
-						</Card>
-					</Col>
-				</Row>
-
+	<Row><Col className='col-md-9' style={{ paddingRight: 0 }}>
+	<Card style={{ backgroundColor: '#f5f5f5', marginTop: 10 }}>
+		<Card.Body>
+			<Card.Title>Sign in with Google</Card.Title>
+				<div>
+					Please sign in with your Google account. 
+					Use your school email address, <i>@mix.wvu.edu</i>
+					<br/>
+					<LoginGoogle submit={google_login} disabled={isLoading} />
 				</div>
-		</div>
-	</div>
+		</Card.Body>
+	</Card>
+	</Col>
 
+	<Col className='col-md-3'>
+		<Card style={{ marginTop: 10 }}>
+			<Card.Body>
+				<Card.Title>Administrator Login</Card.Title>
+				<div>
+					<LoginCurrentUser submit={login} disabled={isLoading} />
+				</div>
+			</Card.Body>
+		</Card>
 	</Col></Row>
+
+
 </Container>
 );
 }

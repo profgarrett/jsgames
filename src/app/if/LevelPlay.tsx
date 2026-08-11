@@ -273,7 +273,7 @@ export default class IfLevelPlay extends React.Component<PropsType, StateType> {
 								<Button 
 									style={{ color: 'gray' }}
 									variant='link' disabled={this.props.isLoading}
-									href={'/ifgame/' } 
+									href={'/' } 
 									>Exit</Button>
 							</div>
 						</form>

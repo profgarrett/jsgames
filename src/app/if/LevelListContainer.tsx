@@ -212,7 +212,6 @@ export default function LevelListContainer() {
 		const p_style = { fontStyle: 'italic', marginBottom: '1rem'};
 		const crumbs = (<Breadcrumb>
 				<Breadcrumb.Item href={'/'}>Home</Breadcrumb.Item>
-				<Breadcrumb.Item href={'/ifgame/'}>My Progress</Breadcrumb.Item>
 				<Breadcrumb.Item active>{ page_level.title } List</Breadcrumb.Item>
 			</Breadcrumb>);
 

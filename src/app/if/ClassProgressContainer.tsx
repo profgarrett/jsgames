@@ -28,7 +28,7 @@ export default function ClassProgressContainer() {
 
 	// Invalid ID value
 	if(Number.isNaN(_id)) {
-		navigate('/ifgame');
+		navigate('/');
 	}
 
 	const onReady = (filter: any) => {
@@ -69,7 +69,6 @@ export default function ClassProgressContainer() {
 	const crumbs = (
 		<Breadcrumb>
 			<Breadcrumb.Item title='home' href='/'>Home</Breadcrumb.Item>
-			<Breadcrumb.Item title='My Progress' href='/ifgame/'>My Progress</Breadcrumb.Item>
 			<Breadcrumb.Item title='Class' active>Class Progress</Breadcrumb.Item>
 		</Breadcrumb>
 		);

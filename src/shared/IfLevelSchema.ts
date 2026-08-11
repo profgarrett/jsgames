@@ -496,6 +496,21 @@ const DEFAULT_TUTORIAL_LEVEL_LIST = [
 	];
 
 
+/*
+	The home page shows Excel and SQL as two separate tables. Both are slices of
+	DEFAULT_TUTORIAL_LEVEL_LIST rather than hand-maintained lists, so adding a
+	tutorial above automatically lands it in the right table -- SQL levels are
+	exactly those whose code begins 'sql_'.
+*/
+const SQL_LEVEL_CODE_PREFIX = 'sql_';
+
+const EXCEL_TUTORIAL_LEVEL_LIST = DEFAULT_TUTORIAL_LEVEL_LIST.filter(
+	code => code.substr(0, SQL_LEVEL_CODE_PREFIX.length) !== SQL_LEVEL_CODE_PREFIX);
+
+const SQL_TUTORIAL_LEVEL_LIST = DEFAULT_TUTORIAL_LEVEL_LIST.filter(
+	code => code.substr(0, SQL_LEVEL_CODE_PREFIX.length) === SQL_LEVEL_CODE_PREFIX);
+
+
 // Common setting to establish passing grades.
 const GREEN_GRADE = 85;
 const PASSING_GRADE = 75;
@@ -507,6 +522,8 @@ export {
 	IfLevelSchema,
 	IfLevelPagelessSchema,
 	DEFAULT_TUTORIAL_LEVEL_LIST,
+	EXCEL_TUTORIAL_LEVEL_LIST,
+	SQL_TUTORIAL_LEVEL_LIST,
 	GREEN_GRADE,
 	PASSING_GRADE,
 	LEVEL_DERIVED_PROPS_VERSION,

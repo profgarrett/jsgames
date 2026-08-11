@@ -93,7 +93,7 @@ export default function KCContainer() {
 	// Render
 	const crumbs = (
 			<Breadcrumb>
-				<Breadcrumb.Item title='home' href='/ifgame/'>If Games</Breadcrumb.Item>
+				<Breadcrumb.Item title='home' href='/'>Home</Breadcrumb.Item>
 				<Breadcrumb.Item title='KC Analysis' active>KC Analysis</Breadcrumb.Item>
 			</Breadcrumb>
 			);
