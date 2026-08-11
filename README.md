@@ -1,6 +1,6 @@
 # JS Games
 
-This is a research project from Nathan Garrett. It provide a set of software tutorials.
+This is a research project from Nathan Garrett. It provide a set of tutorials for Excel, as well a a simple markdown page hosting system.
 
 ## Installing
 
@@ -16,7 +16,7 @@ npm install ts-node nodemon
 
 Create a secret.js file in the root/src/server folder. Create a secret.distribution.js file in the root folder. It is used by the deploy script (which you'll need to adjust to your own deployment).
 
-The Bugsnag API is optional, or use DEBUG. Local bugs are pushed to a log.txt file by default.
+Use DEBUG to push l ocal bugs log.txt file.
 
 The profgarrett role is a super administration by default.
 
@@ -35,10 +35,8 @@ export const GOOGLE_CLIENT_ID ='';
 export const MYSQL_USER = 'jsgamesuser';
 export const MYSQL_PASSWORD = '';
 export const MYSQL_HOST = 'localhost';
-export const MYSQL_DATABASE = 'jsgames_dev'; // 'excel_fun';
+export const MYSQL_DATABASE = 'jsgames_dev';
 export const MYSQL_DEBUG_QUERIES = false; // Set to true to log all MySQL queries for debugging purposes
-
-export const BUGSNAG_API = '';
 
 export const EMAIL_ADDRESS = 'nathan@excel.fun';
 export const EMAIL_PASSWORD = '';
@@ -66,7 +64,6 @@ module.exports = {
     MYSQL_PASSWORD,
     MYSQL_HOST,
     MYSQL_DATABASE,
-    BUGSNAG_API,
     DEBUG,
     GOOGLEID,
     EMAIL_ADDRESS,

@@ -1,8 +1,19 @@
 {
 	"$schema": "https://json.schemastore.org/tsconfig",
 	"display": "Excelfun React Application",
-  
-  
+
+	/* ts-node (used by `npm run startnode` via nodemon) must run the server as
+	   CommonJS. The top-level "module": "preserve" below is for type-checking
+	   the webpack-bundled client; if ts-node uses it, it treats src/server/*.ts
+	   as ESM, which breaks extensionless imports and .ts loading. */
+	"ts-node": {
+		"transpileOnly": true,
+		"compilerOptions": {
+			"module": "commonjs",
+			"moduleResolution": "node"
+		}
+	},
+
 	"compilerOptions": {
 	  "lib": ["dom", "dom.iterable", "esnext"],
 	  "module": "preserve",

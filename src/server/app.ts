@@ -11,7 +11,7 @@ import compression from 'compression';
 // @ts-ignore
 import cookieParser from 'cookie-parser';
 
-import { BUGSNAG_API, DEBUG } from './secret.js'; 
+import { DEBUG } from './secret.js'; 
 
 // Add a more realistic delay when in debug, useful for making that loading status screens work properly.
 const DEBUG_DELAY = DEBUG ? 500 : 0;
