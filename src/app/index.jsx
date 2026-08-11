@@ -27,7 +27,7 @@ import PageViewContainer from './pages/PageViewContainer.tsx';
 import LiveQuizJoin from './pages/LiveQuizJoin.tsx';
 import AdminContainer from './admin/AdminContainer.tsx';
 import { loadUserFromServer } from './components/Authentication';
-import PageviewTracker from './components/PageviewTracker.tsx';
+import PageviewTracker from './pages/PageviewTracker.tsx';
 import SiteHeader from './components/SiteHeader.tsx';
 
 

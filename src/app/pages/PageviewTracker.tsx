@@ -24,7 +24,7 @@
 import { useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 
-import { getUserFromBrowser } from './Authentication';
+import { getUserFromBrowser } from '../components/Authentication';
 import {
 	compute_state,
 	is_active,

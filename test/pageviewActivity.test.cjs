@@ -1,4 +1,4 @@
-// Tests for src/app/components/pageviewActivity.ts
+// Tests for src/app/pages/pageviewActivity.ts
 //
 // The engagement rules behind PageviewTracker: deciding whether a page counts
 // as active, and which state changes are worth an immediate heartbeat.
@@ -18,7 +18,7 @@ const {
 	total_seconds,
 	credit_timestamp,
 	IDLE_MS,
-} = require('../src/app/components/pageviewActivity.ts');
+} = require('../src/app/pages/pageviewActivity.ts');
 
 // Convenience: a reading of a page being actively used.
 const reading = (over = {}) => ({
