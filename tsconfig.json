@@ -18,7 +18,12 @@
 	  "lib": ["dom", "dom.iterable", "esnext"],
 	  "module": "preserve",
 	  "target": "es2015",
+	  "rootDir": "./src",
   
+	  // Pin to node10 approach. 
+	   "ignoreDeprecations": "6.0",
+	   "moduleResolution": "node10",
+	   
 	  "allowJs": true,
 	  "allowSyntheticDefaultImports": true,
 	  "esModuleInterop": true,

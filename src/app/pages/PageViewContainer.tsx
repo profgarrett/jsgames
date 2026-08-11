@@ -109,7 +109,6 @@ export default function PageViewContainer(): ReactElement {
 	const crumbs = (
 			<Breadcrumb>
 				<Breadcrumb.Item title='home' href='/'>Home</Breadcrumb.Item>
-				<Breadcrumb.Item title='Pages' href='/pages'>Pages</Breadcrumb.Item>
 				{ parentPages.map((parentPage) => (
 					<Breadcrumb.Item key={parentPage.slug} title={parentPage.title} href={'/pages/' + parentPage.slug}>
 						{ parentPage.title }

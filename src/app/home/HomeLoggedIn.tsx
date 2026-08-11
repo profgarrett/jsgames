@@ -118,10 +118,10 @@ export default function HomeLoggedIn(): ReactElement {
 		<div style={{ marginBottom: 30 }}>
 			<div className='h5'>Course pages</div>
 			<Link to='/pages/course_dv/index'>
-				<Button variant='outline-primary' style={{ marginRight: 10 }}>Data Analytics Textbook</Button>
+				<Button variant='outline-primary' style={{ marginRight: 10 }}>Business Analytics Textbook</Button>
 			</Link>
 			<Link to='/pages/course_python/index'>
-				<Button variant='outline-primary'>Python Textbook</Button>
+				<Button variant='outline-primary'>Modeling with Python Textbook</Button>
 			</Link>
 		</div>);
 

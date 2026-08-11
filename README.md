@@ -129,17 +129,29 @@ The react application is contained the build folder.  The backend is handled by 
 
 Setup ssh to enable auto login to the server.
 
+
 ```bash
 ssh-keygen -t rsa -b 4096 -C "your_email@example.com"
 ssh-copy-id username@remote_host
 ```
 
-Log in  and install the node modules.  This is because the node modules are not included in the git repository.  You can do this by running the following command in the root directory after copying the package.json file to the server.
+I use a bash deploy script to handle setup on the server and copying files.  You can run the script with the following command.  Note, you probably need to chmod +x deploy.sh to run the script. You'll to update the specifics of the deploy script to your own server.
 
 ```bash
+./deploy.sh
+```
+
+
+Log in  and install the node modules.  This is because the node modules are not included in the git repository.  You can do this by running the following command in the root directory after copying the package.json file to the server.
+
+If doing an update, it's safest to delete the old and redo them all.
+```bash
+
 npm install
 npm update
 ```
+
+
 
 I find it easiest to create an alias to the build folder and the app.js file.
 ```
@@ -158,18 +170,26 @@ Install NVM and Node: https://help.dreamhost.com/hc/en-us/articles/360029083351-
 Switch to correct version of NVM (note, all version numbers need to be incremented)
 
 ```bash
-nvm use 9.4.0
-nvm alias default v20.whatever.1
+nvm install v24.19.0
+nvm alias default v24.19.0
 ```
 
-After loading the files, be sure to npm install to get all local packages.
+As of Fall 2026, Dreamhost has a new security policy that requires you to set the user.pax.flags attribute on the node, npm, and npx binaries.  You can do this by running the following command:
 
-Check node by running *which node*.
+```bash
+setfattr -n user.pax.flags -v "mr" $(which node npm npx)
+```
+
+After loading the files, be sure to npm install to get all local packages. Check node by running *which node*.
 
 Install pm2 (https://pm2.keymetrics.io/docs/usage/quick-start/)
+
+```bash
+npm install pm2@latest -g
+```
+
 Add the app file to auto-run.
 You can also get the status by -list or -status. For debuging, use pm2 logs jsgames
-
 
 ```bash
 pm2 start app.js --name jsgames --watch 
@@ -184,10 +204,14 @@ Test the server by going to excel.fun:9000/api/version
 You now need to add a proxy server. Bind /api and /sql to port 9000.
 This is generally done through the Dreamhost interface.
 
+
+
+
+
 ## Test Plan
 
 Authorization
-	New user (anon and join class)
+	New user (regular and joined to a class)
 	Forgot password
 	Reset password
 	Logout

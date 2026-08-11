@@ -3,7 +3,9 @@
 # Must be done through bash/zsh to have access to scp
 
 set -e  # Exit on any error
-#set -x  # Print commands before executing them
+
+# Turn execution tracing ON
+set -x 
 
 # Setup build folder structure
 rm -rf build
@@ -11,7 +13,7 @@ mkdir build
 mkdir build/public
 
 # Build webpack client-side 
-npm run deployA
+npm run buildwebpackclientside
 
 # Build the server-side, stripping out typescript
 npx babel src --out-dir build --presets @babel/preset-typescript --extensions ".ts"

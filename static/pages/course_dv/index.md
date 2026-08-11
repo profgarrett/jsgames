@@ -1,4 +1,11 @@
-<!-- ![Course logo {#course-logo-container}](logo.png) -->
+# Business Analytics Textbook
+
+**Nathan Garrett, PhD CPA**
+
+*Department of Accounting and Information Systems*
+
+*West Virginia University*
+
 
 <!---- 
 # Data Viz Study Notes
@@ -14,13 +21,7 @@ https://nrennie.rbind.io/blog/year-in-data-viz-2025/
 	- https://github.com/zhu-xlab/GlobalBuildingAtlas?tab=readme-ov-file
 
 ---->
-# Business Data Analytics
 
-**Nathan Garrett, PhD CPA**
-
-*Department of Accounting and Information Systems*
-
-*West Virginia University*
 
 
 This course introduces students to data analysis through visualization. Students will learn how to clean, understanding, and visualize data using Tableau and PowerBI. They will also learn foundational SQL concepts, as well as be exposed to Python.
