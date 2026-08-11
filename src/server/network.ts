@@ -46,10 +46,10 @@ const _strip_secrets = function(input: IStringIndexJsonObject): any {
 	}
 	
 	// create a clean new object.
-	let new_json: IStringIndexJsonObject = {};
+	const new_json: IStringIndexJsonObject = {};
 
 	// recursively iterate through.
-	for(let property in input ) {
+	for(const property in input ) {
 		if(input.hasOwnProperty(property)) {
 			if(typeof input[property+'_visible'] !== 'undefined' && input[property+'_visible'] === false ) {
 				// strip this property.
@@ -85,10 +85,10 @@ const return_level_without = (input: any, without: any): any => {
 	}
 	
 	// create a clean new object.
-	let new_json: IStringIndexJsonObject = {};
+	const new_json: IStringIndexJsonObject = {};
 
 	// recursively iterate through.
-	for(let property in input ) {
+	for(const property in input ) {
 		if(input.hasOwnProperty(property)) {
 			if(!without.includes(property)) {
 
@@ -114,7 +114,7 @@ const return_level_prepared_for_transmit = (level: any, secure: boolean): any =>
 	if(typeof secure === 'undefined') throw Error('Secure level network/return_level_prepared_for_transmit?');
 
 	const json = level.toJson();
-	let clean_json = secure ? _strip_secrets(json) : json ;
+	const clean_json = secure ? _strip_secrets(json) : json ;
 
 	clean_json.updated = from_mysql_to_utc(clean_json.updated); 
 	clean_json.created = from_mysql_to_utc(clean_json.created); 
@@ -311,9 +311,9 @@ const log_error = function (arg?: any) {
 	if(DEBUG) {
 		console.log(arg);
 	} else {
-		let logFile = fs.createWriteStream('log.txt', { flags: 'a' });
-		let maybe = JSON.stringify(arg);
-		let s = typeof maybe !== 'string' ? 'Unknown error' : maybe + '\n\n';
+		const logFile = fs.createWriteStream('log.txt', { flags: 'a' });
+		const maybe = JSON.stringify(arg);
+		const s = typeof maybe !== 'string' ? 'Unknown error' : maybe + '\n\n';
 		logFile.write(s );
 		//ogStdout.write(util.format.apply(null, arguments) + '\n');
 	}

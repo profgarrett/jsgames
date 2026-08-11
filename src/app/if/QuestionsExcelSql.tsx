@@ -127,7 +127,7 @@ export default class QuestionsPagesExcelFormula extends React.Component<DetailPr
 
 			if(answer.page.type !== 'IfPageSqlSchema' ) return;
 
-			let history = answer.page.history.filter( h => typeof h.client_sql !== 'undefined' && h.code === 'client_update' );
+			const history = answer.page.history.filter( h => typeof h.client_sql !== 'undefined' && h.code === 'client_update' );
 
 			const local = {
 				'a_username': DEMO_MODE ? '****' : answer.username, 

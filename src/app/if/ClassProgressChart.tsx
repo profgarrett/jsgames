@@ -56,11 +56,11 @@ export class ClassProgressChart extends React.Component<PropsType, StateType> {
     }
 
     _render_bar = (levels: Array<IfLevelPagelessSchema>): ReactElement => {
-        let keys = [ ...DEFAULT_TUTORIAL_LEVEL_LIST].reverse();
+        const keys = [ ...DEFAULT_TUTORIAL_LEVEL_LIST].reverse();
         const map_classifications = turn_array_into_map( levels, l => l.props.classification );
         let a_classifications = turn_object_keys_into_array(map_classifications);
 
-        let c_data : any[] = [];
+        const c_data : any[] = [];
         let code_levels : any[] = [];
 
         // Build by code and completion
@@ -71,7 +71,7 @@ export class ClassProgressChart extends React.Component<PropsType, StateType> {
             code_levels = levels.filter( l => l.code === key ).sort( (a, b) => a.username > b.username ? 1 : -1 );
 
             // Return object for the chart.
-            let o: IStringIndexJsonObject = {};
+            const o: IStringIndexJsonObject = {};
             o.key = key;
 
             // Build classification for 'Completed' as a higher priority than all others.
@@ -104,7 +104,7 @@ export class ClassProgressChart extends React.Component<PropsType, StateType> {
 		
 		// Remove all items with a value of zero
 		c_data2 = c_data2.map( o => {
-			let new_o = {...o};
+			const new_o = {...o};
 			if(new_o.Completed == 0) delete new_o.Completed;
 			if(new_o.Fail == 0) delete new_o.Fail;
 			if(new_o.Uncompleted == 0) delete new_o.Uncompleted;

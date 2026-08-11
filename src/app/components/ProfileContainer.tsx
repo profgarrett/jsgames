@@ -69,7 +69,7 @@ export default function ProfileContainer() {
 	}
 
 
-	let messageAlert = message === '' 
+	const messageAlert = message === '' 
 		? null
 		: <Alert variant={messageStyle}>{message}</Alert>;
 		

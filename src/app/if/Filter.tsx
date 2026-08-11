@@ -39,7 +39,7 @@ export default class Filter extends React.Component<PropsType, ContainerStateTyp
 
 		// Initialize selection to make sure that there is a value for each item.
 		// Empty array is uninitialized.
-		for(let filter in filters) {
+		for(const filter in filters) {
 			if(filters.hasOwnProperty(filter)) {
 				if( typeof selection[filter] === 'undefined' ) {
 					selection[filter] = '';
@@ -119,7 +119,7 @@ export default class Filter extends React.Component<PropsType, ContainerStateTyp
 	getFilter = (): any => {
 		const values = {};
 
-		for(let filter in this.state.filters) {
+		for(const filter in this.state.filters) {
 			if(this.state.filters.hasOwnProperty(filter)) {
 				values[filter] = this.state.selection[filter];
 			}
@@ -268,7 +268,7 @@ export default class Filter extends React.Component<PropsType, ContainerStateTyp
 		let button: React.ReactElement;
 
 		// Build buttons for each filter.
-		for(let filter in this.state.filters) {
+		for(const filter in this.state.filters) {
 			if(this.state.filters.hasOwnProperty(filter)) {
 
 				// Find the matching title for the selected item (if any)

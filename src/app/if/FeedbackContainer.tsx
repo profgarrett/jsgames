@@ -202,7 +202,7 @@ export default function FeedbackContainer() {
 		</div>;
 	
 	// Filter out bad entries
-	let levels_sorted = levels.filter( l => {
+	const levels_sorted = levels.filter( l => {
 			if(l.pages.length < 1) return false;
 			if( typeof l.pages[0].client == 'undefined' 
 				|| l.pages[0].client == null
@@ -210,7 +210,7 @@ export default function FeedbackContainer() {
 			return ('' + l.pages[0].client).length > 0;
 		}).sort( (a, b) => a.created > b.created ? 1 : -1 );
 
-	let client_sorted = levels_sorted.map( l => l.pages[0].client );
+	const client_sorted = levels_sorted.map( l => l.pages[0].client );
 
 	const results = feedbackType == 'feedback_n'
 		? build_chart_of_numeric_responses(client_sorted) 

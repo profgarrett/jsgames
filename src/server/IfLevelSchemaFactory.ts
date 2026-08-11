@@ -88,11 +88,11 @@ const LEVEL_GENS: IStringIndexJsonObject = {
 	WARNING: original_json 
  */
 async function _initialize_json(level: IfLevelSchema, original_json: any): Promise<any> {
-	let json = { ...original_json};
+	const json = { ...original_json};
 	let version_i: number = 0;
 	let version: IStringIndexJsonObject = {};
 	let randomly_sorted_versions: any[] = [];
-	let seed = level.seed;
+	const seed = level.seed;
 	const page_count = level.pages.length;
 	
 	// Initialize different versions of the page based on the levels seed object.
@@ -113,7 +113,7 @@ async function _initialize_json(level: IfLevelSchema, original_json: any): Promi
 		version = randomly_sorted_versions[version_i];
 
 		// Initialize contained objects.
-		for(let key in version) {
+		for(const key in version) {
 			if( Object.prototype.hasOwnProperty.call(version, key) ) {
 				if(typeof version[key] === 'function') {
 					// If function, run
@@ -253,7 +253,7 @@ async function _initialize_json(level: IfLevelSchema, original_json: any): Promi
 		}
 		
 		// Update solution results
-		let results = await queryFactory_getSolutionResults(json);
+		const results = await queryFactory_getSolutionResults(json);
 		if(results.error !== null) {
 			throw new Error('Invalid SQL solution result for IfPageSqlSchema in IfLevelSchema Factory, ' + results.error );
 		}
@@ -373,7 +373,7 @@ const IfLevelSchemaFactory = {
 			// setup new page 
 			const initialized_json = await _initialize_json(level, new_page_json);
 
-			let new_page = get_page_schema_as_class(initialized_json);
+			const new_page = get_page_schema_as_class(initialized_json);
 
 			if(typeof new_page === 'undefined') throw new Error('Invalid get_new_page(type) param of ' + new_page_json.type);
 

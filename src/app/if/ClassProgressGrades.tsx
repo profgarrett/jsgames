@@ -16,8 +16,8 @@ type PropsType = {
 
 // Return the average of the given items.
 const avg_of = function(obj: any, arr: Array<any>): number {
-	let totals = arr.map( a => typeof obj[a] === 'undefined' ? 0 : obj[a] );
-	let sum = totals.reduce( (sum, i) => sum + i, 0);
+	const totals = arr.map( a => typeof obj[a] === 'undefined' ? 0 : obj[a] );
+	const sum = totals.reduce( (sum, i) => sum + i, 0);
 	return Math.round(sum / arr.length);
 };
 

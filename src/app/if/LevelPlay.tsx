@@ -176,7 +176,7 @@ export default class IfLevelPlay extends React.Component<PropsType, StateType> {
 	static getDerivedStateFromProps = (props: PropsType, state: StateType): StateType => {
 		// Render the current page, or if we are reviewing last submission, n-1.
 		// Use previous submitted index to figure out which to shown feedback on.
-		let pageI = props.show_feedback
+		const pageI = props.show_feedback
 				? props.show_feedback_on
 				: props.selected_page_index; // used to keep track of the page #
 

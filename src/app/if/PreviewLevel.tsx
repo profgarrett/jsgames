@@ -39,7 +39,7 @@ const PreviewPage = (props: any ): ReactElement => {
 
 	if(page.type === 'IfPageFormulaSchema' ) {
 
-		let page2 = page.toIfPageFormulaSchema();
+		const page2 = page.toIfPageFormulaSchema();
 
 		problem = (
 			<Card >

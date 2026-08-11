@@ -107,11 +107,11 @@ export default function PasswordContainer() {
 	}
 
 	
-	let messageAlert = message === '' ? 
+	const messageAlert = message === '' ? 
 					null : 
 					<Alert variant={messageStyle}>{message}</Alert>;
 	
-	let control = ( passwordreset === '') 
+	const control = ( passwordreset === '') 
 		? <PasswordRequest username={ username } submit={ submit_request} disabled={ isLoading } />
 		: <PasswordChange passwordreset={ passwordreset } submit={ submit_change } disabled={isLoading} />;
 

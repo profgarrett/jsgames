@@ -44,7 +44,7 @@ export default function FeedbackRouter() {
 		.then( response => response.json() )
 		.then( json => {
 
-			let newLevel = new IfLevelSchema(json);
+			const newLevel = new IfLevelSchema(json);
 			navigate('/ifgame/level/'+newLevel._id+'/play');
 
 		}).catch( error => {

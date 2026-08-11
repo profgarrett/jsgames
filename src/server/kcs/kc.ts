@@ -179,7 +179,7 @@ const makeAdaptiveReviewGenFromKC = (kc: AdaptiveKC, min_correct: number, limit:
 	if(typeof kc.tutorial_pages === 'undefined' || typeof kc.test_pages == 'undefined')
 		throw new Error('Invalid KC object passed to makeAdaptiveReviewGenFromKC');
 
-	let adapt = ({
+	const adapt = ({
 		gen_type: 'AdaptiveGen',
 
 		questions_for_passing: min_correct,

@@ -242,7 +242,7 @@ class IfLevelPagelessSchema extends Schema {
 */
 class IfLevelSchema extends IfLevelPagelessSchema {
 	page!: typeof IfPageBaseSchema[];
-	history!: Array<Object>;
+	history!: Array<object>;
 
 	// Apply json to this obj, signally no parent classes to do the setting for us.
 	constructor( json?: any) {
@@ -292,7 +292,7 @@ class IfLevelSchema extends IfLevelPagelessSchema {
 	// Saves the new props in this classes' derived_props object.
 	// Should be hit before saving to the database.
 	refresh_derived_props(): any {
-		let props = new IfLevelDerivedProps({
+		const props = new IfLevelDerivedProps({
 			type: 'IfLevelDerivedProps',
 			pages_length: this.pages.length,
 			test_score_as_percent: this.completed ? this.get_test_score_as_percent() : null,
@@ -349,7 +349,7 @@ class IfLevelSchema extends IfLevelPagelessSchema {
 
 
 		// Map
-		let results = this.pages.map( (p: IfPageBaseSchema): Array<any> => {
+		const results = this.pages.map( (p: IfPageBaseSchema): Array<any> => {
 
 			if(p.correct === null) return unscored_but_completed; 
 			if(p.correct_required && p.correct) return y;

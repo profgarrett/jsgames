@@ -5,7 +5,7 @@ const assert = require('assert').strict;
 
 export type GenType = {
 	gen_type: string,
-	pages: typeof IfPageBaseSchema[] | GenType[] | Object[],
+	pages: typeof IfPageBaseSchema[] | GenType[] | object[],
 
 	// Optional Parameters
 	until_correct?: number,
@@ -164,7 +164,7 @@ const LinearGen = (seed: number, pages: typeof IfPageBaseSchema[], gen: GenType)
 const ShuffleGen = (seed: number, pages: typeof IfPageBaseSchema[], gen: GenType): any => {
 
 	// Create a new gen that is randomized by the given seed.
-	let randomized_gen = {
+	const randomized_gen = {
 		...gen,
 		pages: DataFactory.randomizeList(gen.pages.slice(), seed)
 	};
@@ -192,7 +192,7 @@ const ShuffleGenUntilLimit = (seed: number, pages: typeof IfPageBaseSchema[], ge
 	const until_correct = typeof gen.until_correct === 'number' ? gen.until_correct : 999999;
 
 	// Create a new linear gen with the randomized list of items limited to @until_total.
-	let randomized_gen: GenType = {
+	const randomized_gen: GenType = {
 		gen_type: 'LinearGen',
 		pages: DataFactory.randomizeList(gen.pages.slice(), seed).slice(0, until_total),
 		until_correct: gen.until_correct,
@@ -221,7 +221,7 @@ const ShuffleGenUntilLimit = (seed: number, pages: typeof IfPageBaseSchema[], ge
 // Should have only a single page in the gen.pages array.  Will continue creating pages from
 // that page until the UNTIL conditions are met.
 const UntilGen = (seed: number, pages: typeof IfPageBaseSchema[], gen: GenType): any => {
-	let until_results: any[] = [];
+	const until_results: any[] = [];
 	let last_page = null;
 	let correct = 0;
 	let incorrect = 0;
@@ -390,7 +390,7 @@ const runGen_copy = (seed: number, param_pages: typeof IfPageBaseSchema[], gen: 
 	//	 the previous page entries.
 	const pages = param_pages.slice();
 
-	let new_json = runGen_nocopy(seed, pages, gen);
+	const new_json = runGen_nocopy(seed, pages, gen);
 
 	// Parse and stringify returned template, as sometimes references will get passed along and 
 	// modified later on. Don't want those changes to influence the templates.
@@ -415,7 +415,7 @@ const runGen_nocopy = (seed: number, pages: typeof IfPageBaseSchema[], gen: stri
 
 	if(typeof translate[gen.gen_type] === 'undefined') throw new Error('Invalid gen type ' + gen.gen_type + ' send to Gens.g');
 
-	let new_json = translate[gen.gen_type](seed, pages, gen);
+	const new_json = translate[gen.gen_type](seed, pages, gen);
 	return new_json;
 }
 
@@ -526,7 +526,7 @@ if(TEST) (() => {
 	assert.ok( results.pop() === null, 'Gen.LinearChild: UntilCorrect Bad test' );
 
 	// Test a structure where two linear gens are in order.
-	let test_linear_gen1: GenType = {
+	const test_linear_gen1: GenType = {
 		gen_type: 'LinearGen',
 		pages: [
 			{ ...testPage, description: 'Linear1' }
@@ -543,7 +543,7 @@ if(TEST) (() => {
 		],
 	};
 
-	let test_linear_genparent: GenType = {
+	const test_linear_genparent: GenType = {
 		gen_type: 'LinearGen',
 		pages: [
 			test_linear_gen1, test_linear_gen2
@@ -846,7 +846,7 @@ if(TEST) (() => {
 	console.log('\nTesting AdaptiveGen');
 
 	// Test failure case.
-	let results: any = [];
+	const results: any = [];
 	results.push( runGen_copy(1, results, test_gen) );  // test1
 	results.push( runGen_copy(1, results, test_gen) );  // test 2
 	results.push( runGen_copy(1, results, test_gen) ); // tutorial

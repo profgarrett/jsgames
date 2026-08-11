@@ -136,7 +136,7 @@ router.post('/feedback',
 					
 		const values = [ username, message, created, data, code ];
 
-		let insert_results = await run_mysql_query(insert_sql, values);
+		const insert_results = await run_mysql_query(insert_sql, values);
 
 		send_email('profgarrett@gmail.com', 'Feedback from ' + username, message);
 
@@ -305,9 +305,9 @@ router.post('/login_clear_test_user',
 		const sql1 = 'DELETE FROM iflevels WHERE username = "test"';
 		const sql2 = 'DELETE FROM users WHERE username = "test"';
 
-		let results0 = await run_mysql_query(sql0);
-		let results1 = await run_mysql_query(sql1);
-		let results2 = await run_mysql_query(sql2);
+		const results0 = await run_mysql_query(sql0);
+		const results1 = await run_mysql_query(sql1);
+		const results2 = await run_mysql_query(sql2);
 		return res.json({ success: true, affectedRows: results2.affectedRows});
 		
 	} catch (e) {
@@ -353,7 +353,7 @@ router.get('/login',
 router.get('/login/status',
 	nocache,
 	(req: Request, res: Response) => {
-	let u: string = user_get_username_or_emptystring(req, res);
+	const u: string = user_get_username_or_emptystring(req, res);
 
 	res.json({ 'logged_in': u!=='', username: u, isAdmin: user_get_isadmin(req) });
 });

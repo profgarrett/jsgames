@@ -36,13 +36,13 @@ export default class NumberAnswer extends React.Component<PropsType> {
 	componentDidMount = () => {
 		// If there is an input field, then set its focus.
 		if(this.props.editable) {
-			let node = document.getElementById(ID);
+			const node = document.getElementById(ID);
 			if(node) node.focus();
 		}
 	}
 	componentDidUpdate = () => {
 		if(this.props.editable) {
-			let node = document.getElementById(ID);
+			const node = document.getElementById(ID);
 			if(node) node.focus();
 		}	
 	}	

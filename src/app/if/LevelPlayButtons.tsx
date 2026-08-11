@@ -23,7 +23,7 @@ const page_validate_button = (page: IfPageBaseSchema, isLoading: boolean, onclic
 
 	//  Button style. If required, primary. Else secondary.
 	let button_style = 'primary';
-	let button_text = 'Check answer';
+	const button_text = 'Check answer';
 
 	// All pages should be tutorials at this point. 
 	if(page.client_has_answered() && !page.correct) {
@@ -106,7 +106,7 @@ const page_submit_button = (page: IfPageBaseSchema, isLoading: boolean, lastPage
 	let button_style = 'primary';
 	let button_text = 'Next page';
 	let button_disabled = false;
-	let time_page_displayed_in_ms = new Date().getTime() - lastPageI_displayed_at_time.getTime();
+	const time_page_displayed_in_ms = new Date().getTime() - lastPageI_displayed_at_time.getTime();
 
 	// Disable button if the user needs to take longer on a problem.
 	/*

@@ -125,9 +125,9 @@ router.get('/questions/', nocache, user_require_logged_in,
 		
 		select_results = select_results.map( (level_json: any) => {
 			//console.log('level_json', level_json);
-			let pages = JSON.parse(level_json.pages);
-			let matching_pages = pages.filter( (p: any) => p.type === param_pagetype );
-			let pages_as_text = JSON.stringify(matching_pages);
+			const pages = JSON.parse(level_json.pages);
+			const matching_pages = pages.filter( (p: any) => p.type === param_pagetype );
+			const pages_as_text = JSON.stringify(matching_pages);
 			level_json.pages = pages_as_text;
 			console.log('filtered out ', pages.length - matching_pages.length, 'pages');
 			return level_json
@@ -231,7 +231,7 @@ INNER JOIN users as faculty
 WHERE  ` + sql_where_clauses.join(' AND ') +
 ' ORDER BY iflevels.updated desc LIMIT 100';
 
-		let select_results = await run_mysql_query(sql, sql_where_values);
+		const select_results = await run_mysql_query(sql, sql_where_values);
 
 		if(select_results.length === 0) return res.json([]);
 
@@ -461,11 +461,11 @@ WHERE ` + sql_where_clauses.join(' AND ') + ' ORDER BY iflevels.updated desc ';
 			WHERE username = ? and completed = 1`;
 		}
 
-		let select_results = await run_mysql_query(sql, sql_where_values);
+		const select_results = await run_mysql_query(sql, sql_where_values);
 		
 		if(select_results.length === 0) return res.json([ ]);
 
-		let iflevels = select_results.map( (l: any) => new IfLevelPagelessSchema(l) );
+		const iflevels = select_results.map( (l: any) => new IfLevelPagelessSchema(l) );
 
 		const users = turn_array_into_map(iflevels, (l: any) => {
 			return l.username.toLowerCase().trim();

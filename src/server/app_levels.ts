@@ -72,7 +72,7 @@ router.post('/new_level_by_code/:code',
 				JSON.stringify(level.props.toJson()),
 				];
 
-		let insert_results = await run_mysql_query(insert_sql, values);
+		const insert_results = await run_mysql_query(insert_sql, values);
 
 		level._id = insert_results.insertId;
 
@@ -286,7 +286,7 @@ router.get(['/level/:id', '/level/:id/:tagged'],
 			params =  [_id, username, _id, username];
 		}
 
-		let select_results = await run_mysql_query(sql, params);
+		const select_results = await run_mysql_query(sql, params);
 
 		if(select_results.length === 0) return res.sendStatus(404);
 		
@@ -319,7 +319,7 @@ router.get('/clear_all_profgarrett_test_pages/',
 			return res.sendStatus(401); // unauthorized.
 		}
 
-		let delete_results = await run_mysql_query(sql); 
+		const delete_results = await run_mysql_query(sql); 
 
 		res.json({
 			message: `Deleted ${delete_results.affectedRows} levels for test user.`
@@ -349,7 +349,7 @@ router.post('/level/:id/delete',
 			return res.sendStatus(401); // unauthorized.
 		}
 
-		let delete_results = await run_mysql_query(sql, [_id] );
+		const delete_results = await run_mysql_query(sql, [_id] );
 
 		res.json({success: (delete_results.affectedRows >= 1)});
 
@@ -373,7 +373,7 @@ router.post('/level/:id',
 		const sql_select = 'SELECT * FROM iflevels WHERE _id = ?';
 		
 
-		let select_results = await run_mysql_query(sql_select, [ _id ]);
+		const select_results = await run_mysql_query(sql_select, [ _id ]);
 
 		// Return 404 if no results match.
 		if(select_results.length === 0) return res.sendStatus(404);

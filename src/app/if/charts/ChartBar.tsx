@@ -56,7 +56,7 @@ const THEMES = {
 
 export function ChartBar_TopLabelNoAxis(cd_param: ChartDef): ReactElement {
 	//const data = cd.data;
-	let cd = { ..._default, ...cd_param };
+	const cd = { ..._default, ...cd_param };
 	const theme = THEMES[cd.theme];
 	
 	// If Keys aren't defined, then go ahead and dynamically pull them out of the passed data.
@@ -65,7 +65,7 @@ export function ChartBar_TopLabelNoAxis(cd_param: ChartDef): ReactElement {
 		if(typeof cd_param.data[0].Year !== 'undefined') {
 			cd.indexBy = 'Year';
 			cd.keys = [];
-			for(let key in cd_param.data[0]) {
+			for(const key in cd_param.data[0]) {
 				if(cd_param.data[0].hasOwnProperty(key) && key !== 'Year') {
 					cd.keys.push(key);
 				}
@@ -84,7 +84,7 @@ export function ChartBar_TopLabelNoAxis(cd_param: ChartDef): ReactElement {
 	// axis value to MaxValue*Distortion.  Each chart automatically sets the max
 	// axis value to the max data value.
 	const min_value = cd.data.reduce( (accum, d) => {
-		let keys = Object.keys(d).filter( d => d !== 'Year'); // look in all values but the year
+		const keys = Object.keys(d).filter( d => d !== 'Year'); // look in all values but the year
 		let new_min = accum;
 
 		keys.forEach( key => {
@@ -94,7 +94,7 @@ export function ChartBar_TopLabelNoAxis(cd_param: ChartDef): ReactElement {
 	}, 99999);
 
 	const sum_value = cd.data.reduce( (accum, d) => {
-		let keys = Object.keys(d).filter( d => d !== 'Year'); // look in all values but the year
+		const keys = Object.keys(d).filter( d => d !== 'Year'); // look in all values but the year
 
 		return d[keys[0]] + accum;
 	}, 0);
@@ -108,7 +108,7 @@ export function ChartBar_TopLabelNoAxis(cd_param: ChartDef): ReactElement {
 		}
 		// Create a new data map that adjusts the data to cut off the {distortion} portion.
 		cd.data = cd.data.map( d => {
-			let new_d = {};
+			const new_d = {};
 			if(d.Year) new_d.Year = d.Year;
 			// Calculate, maxing sure that we don't end up with negative numbers.  Set to 0 instead.
 			cd.keys.map( key => new_d[key] = Math.max(0, d[key] - distortion));

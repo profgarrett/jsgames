@@ -82,8 +82,8 @@ export class LevelModal extends React.Component<PropsType, StateType> {
 			return <div>Loading...<Loading loading={true } /></div>
 					
 		} else {
-			let level = this.state.modal_level;
-			let page = this.props.sequence_in_level === null || typeof this.props.sequence_in_level === 'undefined'
+			const level = this.state.modal_level;
+			const page = this.props.sequence_in_level === null || typeof this.props.sequence_in_level === 'undefined'
 				? null
 				: level.pages[this.props.sequence_in_level];
 			

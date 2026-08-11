@@ -112,7 +112,7 @@ export default class QuestionsPagesExcelChoice extends React.Component<DetailPro
 			if(!answer.page.completed) return;
 			if(answer.page.type !== 'IfPageChoiceSchema') return;
 
-			let history = answer.page.history.filter( h => typeof h.client_f !== 'undefined' && h.code === 'client_update' );
+			const history = answer.page.history.filter( h => typeof h.client_f !== 'undefined' && h.code === 'client_update' );
 
 			const local = {
 				'a_username': DEMO_MODE ? '****' : answer.username, 

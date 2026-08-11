@@ -129,7 +129,7 @@ const RULES = [
 
 
 // Return a complexity analysis of the ideal solution.
-function get_kcs( page: any  ): Array<Object> {
+function get_kcs( page: any  ): Array<object> {
 
 	//console.log(page.kcs);
 	return page.kcs;

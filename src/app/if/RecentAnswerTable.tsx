@@ -80,7 +80,7 @@ export default function RecentAnswerTable(props: PropsType): ReactElement {
 	const sorted_question_keys = Array.from(questions.keys()).sort();
 
 	// Create headers td contents
-	let question_elements: Array<ReactElement> = [];
+	const question_elements: Array<ReactElement> = [];
 	sorted_question_keys.forEach( (key: string, i: number ) => {
 		const question = questions.get(key);
 		if(typeof question == 'undefined') throw new Error('Invalid question key');

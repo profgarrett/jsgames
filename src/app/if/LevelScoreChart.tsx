@@ -126,7 +126,7 @@ const _render_chart = (page: IfPageBaseSchema ): ReactElement => {
 // Render a pop-up for either one or two choice pages.
 const choicePagePopup = ( (title: string, p1: IfPageChoiceSchema, p2: null|IfPageChoiceSchema) => {
 	let content: ReactElement;
-	let noop = (json: IStringIndexJsonObject) => {};
+	const noop = (json: IStringIndexJsonObject) => {};
 
 	if(typeof p2 !== 'undefined' && p2 !== null) {
 		content = (<Table style={{ fontSize: '60%' }}><tbody>

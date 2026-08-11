@@ -26,7 +26,7 @@ export default class FormulaExcelTable extends React.Component<PropsType> {
 	// If there is an input field, then set its focus.
 	componentDidMount() {
 		if(this.props.editable) {
-			let node = document.getElementById('ExcelTableRenderFieldInput');
+			const node = document.getElementById('ExcelTableRenderFieldInput');
 			if(node) node.focus();
 		}
 	}
@@ -77,7 +77,7 @@ export default class FormulaExcelTable extends React.Component<PropsType> {
 			marginBottom: 5,
 			paddingLeft: 5
 		};
-		let helpblock = page.helpblock ? <div style={helpblockStyle}><HtmlSpan html={ page.helpblock } /></div> : '';
+		const helpblock = page.helpblock ? <div style={helpblockStyle}><HtmlSpan html={ page.helpblock } /></div> : '';
 	
 		return (
 			<div>
@@ -116,7 +116,7 @@ export default class FormulaExcelTable extends React.Component<PropsType> {
 
 
 		// Build table.
-		let rows: ReactElement[] = [];
+		const rows: ReactElement[] = [];
 		let fieldFormula: ReactElement = <></>;
 		let fieldResult: ReactElement = <></>;
 		let fieldSolution: ReactElement = <></>;

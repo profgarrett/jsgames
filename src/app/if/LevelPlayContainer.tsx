@@ -88,8 +88,8 @@ export default function LevelPlayContainer() {
 			const i = selectedPageIndex;
 			
 			// Create a fresh page.
-			let page_json = level.pages[i].toJson();
-			let page = get_page_schema_as_class(page_json);
+			const page_json = level.pages[i].toJson();
+			const page = get_page_schema_as_class(page_json);
 
 			// Update fresh page with new values.
 			page.updateUserFields( json );
@@ -121,7 +121,7 @@ export default function LevelPlayContainer() {
 		if( selectedPageIndex < level.pages.length-1 )
 			throw new Error('current_page_i < this.state.level.pages.length-1 in LevelPlayContainer.onSubmit');
 
-		let id = level._id, 
+		const id = level._id, 
 			current_page_i = selectedPageIndex,
 			current_page = level.pages[current_page_i];
 	
@@ -259,7 +259,7 @@ export default function LevelPlayContainer() {
 			.then( response => response.json() )
 			.then( json => new IfLevelSchema(json) )
 			.then( ifLevel => {
-				let latest_page_i = ifLevel.pages.length-1;
+				const latest_page_i = ifLevel.pages.length-1;
 
 				setLevel( ifLevel);
 				setSelectedPageIndex( latest_page_i);

@@ -58,7 +58,7 @@ const THEMES = {
 }
 
 export function ChartLine_StockDollar(cd_param: ChartDef): ReactElement {
-	let cd = { ..._default, ...cd_param };
+	const cd = { ..._default, ...cd_param };
 	const theme = THEMES[cd.theme];
 
 	let distortion = typeof cd.distortion !== 'undefined' ? cd.distortion : 0;

@@ -73,7 +73,7 @@ class LevelDebugPage extends React.Component<ScorePropsType> {
 		if(page.type === 'IfPageFormulaSchema') {
 			// Show solution?
 
-			let page2 = page.toIfPageFormulaSchema();
+			const page2 = page.toIfPageFormulaSchema();
 
 			if(page2.solution_f && page2.solution_f.length > 0) {
 				solution = (

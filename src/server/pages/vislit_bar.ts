@@ -69,8 +69,8 @@ const LIKERT_GROWTH = [
 // Adjust: percentage.
 function wrap( d: Array<any>, as: string, adjust: number): Array<any> {
     const y1 = 2019-7;
-    let a = d.map( (v, i) => { 
-        let o = { 'Year': y1+i+'' };
+    const a = d.map( (v, i) => { 
+        const o = { 'Year': y1+i+'' };
 		// @ts-ignore
         o[as] =  Math.round(adjust * v);
         return o;

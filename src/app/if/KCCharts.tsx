@@ -66,7 +66,7 @@ export class KCCharts extends React.Component<PropsType, StateType> {
 							style={{ clear: 'both' }}>{ level.title }</h3>);
 
             // Add each KC as a separate chart.
-            let answers = answer_map.get(level.code)
+            const answers = answer_map.get(level.code)
             if(typeof answers === 'undefined' || answers === null ) {
                 throw new Error('Missing answers.code for ' + level.code);
             } else {
@@ -235,7 +235,7 @@ export class KCCharts extends React.Component<PropsType, StateType> {
             const slow = typeof(data['Correct, but slow']) === 'undefined' ? 0 : data['Correct, but slow'];
             const max = (incorrect + correct + slow) / 100;
 	
-            let chart_data = [   
+            const chart_data = [   
                 {
                     id: 'Wrong',
                     value: Math.round(incorrect / max) ,
@@ -355,9 +355,9 @@ function get_distinct_values_from_answers( answers: Array<IfPageAnswer>, prop: s
     []
 */
 function get_classification_by_kcs( answers: Array<IfPageAnswer> ): any {
-    let kcs = get_distinct_values_from_answers(answers, 'kcs_as_string');
-    let classifications = get_distinct_values_from_answers(answers, 'classification');
-    let data_o = {};
+    const kcs = get_distinct_values_from_answers(answers, 'kcs_as_string');
+    const classifications = get_distinct_values_from_answers(answers, 'classification');
+    const data_o = {};
 
     // Create a new data element for each kc, with a value for each classification.
     kcs.forEach( key => {

@@ -14,7 +14,7 @@ interface DetailPropsType {
 
 
 function array_to_object( a: Array<string> ): any {
-	var o = {};
+	const o = {};
 	a.map( s => o[s] = true );
 	return o;
 }
@@ -27,7 +27,7 @@ export default class QuestionsTags extends React.Component<DetailPropsType> {
 	build_row( data: any, columns: any, i: number ): ReactElement {
 		const tds: ReactElement[] = [];
 
-		for(let index in columns) {
+		for(const index in columns) {
 			if( columns.hasOwnProperty(index)) {
 				tds.push(<td key={'ifquestionstd'+index}>{ 
 						typeof data[index] !== 'undefined' 
@@ -43,7 +43,7 @@ export default class QuestionsTags extends React.Component<DetailPropsType> {
 
 
 
-	build_row_data = ( rows: Array<Object>, question: any) => {
+	build_row_data = ( rows: Array<object>, question: any) => {
 
 		const question_base = {
 			level: question.level,
@@ -97,7 +97,7 @@ export default class QuestionsTags extends React.Component<DetailPropsType> {
 
 
 		const columns = data.reduce( (accum, d: any) => {
-			for(let index in d) {
+			for(const index in d) {
 				if(d.hasOwnProperty(index)) {
 					if(accum[index] !== true) accum[index] = true;
 				}
@@ -107,7 +107,7 @@ export default class QuestionsTags extends React.Component<DetailPropsType> {
 
 		const ths: ReactElement[] = [];
 
-		for(let index in columns) {
+		for(const index in columns) {
 			if( columns.hasOwnProperty(index)) {
 				ths.push(<th key={'thkey'+index}>{ index }</th>);
 			}

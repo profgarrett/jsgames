@@ -237,7 +237,7 @@ export class PrettyDate extends React.Component<iPrettyDate> {
 
 export function prettyDateAsString(d: Date): string {
 
-	let diff = (((new Date()).getTime() - d.getTime()) / 1000),
+	const diff = (((new Date()).getTime() - d.getTime()) / 1000),
 		day_diff = Math.floor(diff / 86400);
 
 	let message = '';

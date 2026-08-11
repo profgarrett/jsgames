@@ -50,7 +50,7 @@ const format = (p_input, format) => {
 	// Test to see if this is a string version of a date (i.e., json)
 	// If so, change back to date.
 	if (typeof input === 'string' && input.length === 24 ) {
-		let regex_result_input = input.match( /^\d{4}-\d{2}-\d{2}T\d\d:\d\d/ );
+		const regex_result_input = input.match( /^\d{4}-\d{2}-\d{2}T\d\d:\d\d/ );
 		if(regex_result_input !== null && regex_result_input.length > 0) {
 			input = new Date(input);
 		}
@@ -191,7 +191,7 @@ export const addDangerColor = e => {
 
 
 export const addCSSProperty = ( css: CSS.Properties, property: string, value: string): CSS.Properties => {
-	let newCss = { ...css};
+	const newCss = { ...css};
 	newCss[property] = value;
 	return newCss;
 }

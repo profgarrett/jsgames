@@ -102,7 +102,7 @@ export default function RecentQuestionTable(props: PropsType): ReactElement {
 	const sorted_user_keys = Array.from(user_answers.keys()).sort();
 
 	// Create headers td contents
-	let tr_header_ths: Array<ReactElement> = [<th key={'recentquestiontabletdusername'}>User</th>];
+	const tr_header_ths: Array<ReactElement> = [<th key={'recentquestiontabletdusername'}>User</th>];
 	sorted_question_keys.forEach( (key: string, i: number ) => {
 		const title = unique_questions.get(key)?.level + ': ' +  
 				unique_questions.get(key)?.description + " " +

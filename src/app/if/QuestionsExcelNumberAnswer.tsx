@@ -81,7 +81,7 @@ export default class QuestionsPagesExcelNumberAnswer extends React.Component<Det
 			if(!answer.page.completed) return;
 			if(answer.page.type !== 'IfPageNumberAnswerSchema') return;
 
-			let history = answer.page.history.filter( h => typeof h.client_f !== 'undefined' && h.code === 'client_update' );
+			const history = answer.page.history.filter( h => typeof h.client_f !== 'undefined' && h.code === 'client_update' );
 
 			const local = {
 				'a_username': DEMO_MODE ? '****' : answer.username, 

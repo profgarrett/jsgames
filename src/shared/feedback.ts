@@ -20,7 +20,7 @@ function s(a: any): string {
 // Ensure that the given page uses all of the given references.
 // Returns either null or the missing references.
 const references = (page: IfPageFormulaSchema, values: string[]): string|null => {
-	let missing: any[] = [];
+	const missing: any[] = [];
 	let value: string;
 	
 	if(page.client_f === null) return null;
@@ -49,7 +49,7 @@ const references = (page: IfPageFormulaSchema, values: string[]): string|null =>
 // This is *not* case sensitive.
 // @TODO Add case sensitivity again.
 const values = (page: IfPageFormulaSchema, values: number[]|string[]): string|null => {
-	let missing: any[] = [];
+	const missing: any[] = [];
 	let value: string;
 
 	if(page.client_f === null) return null;
@@ -92,7 +92,7 @@ const no_values = (page: IfPageFormulaSchema ): string|null => {
 
 // Ensure that the given page has given symbols.
 const symbols = (page: IfPageFormulaSchema , symbols: string[] ): string|null => {
-	let missing: any[] = [];
+	const missing: any[] = [];
 	let symbol: string;
 
 	if(page.client_f === null || page.client_f === '' || page.client_f.length < 2 ) return null;
@@ -118,7 +118,7 @@ const symbols = (page: IfPageFormulaSchema , symbols: string[] ): string|null =>
 
 // Ensure that the given page has none of the matching symbols.
 const no_symbols = (page: IfPageFormulaSchema , symbols: string[] ): string|null => {
-	let missing: any[] = [];
+	const missing: any[] = [];
 	let symbol: string;
 
 	if(page.client_f === null) return null;
@@ -146,7 +146,7 @@ const no_symbols = (page: IfPageFormulaSchema , symbols: string[] ): string|null
 
 // Ensure that the given page has the given functions in it.
 const functions =  (page: IfPageFormulaSchema, values: string[] ): string|null => {
-	let missing: any[] = [];
+	const missing: any[] = [];
 	let func = '';
  
 	if(page.client_f === null) return null;
@@ -189,7 +189,7 @@ const has = {
 // Only used in the server-side, where we have the solution_rules populated.
 const get_feedback = (that: IfPageFormulaSchema ): string[]|null => {
 	let response: any = '';
-	let responses: any[] = [];
+	const responses: any[] = [];
 
 	if(that.feedback === null) return null;
 
@@ -230,7 +230,7 @@ const get_feedback = (that: IfPageFormulaSchema ): string[]|null => {
 // Ensure that the given page has the given values in it.
 // This is *not* case sensitive.
 const sql = (page: IfPageSqlSchema, values: number[]|string[]): string|null => {
-	let missing: any[] = [];
+	const missing: any[] = [];
 	let value: string;
 
 	if(page.client_sql === null) return null;
@@ -259,7 +259,7 @@ const sql = (page: IfPageSqlSchema, values: number[]|string[]): string|null => {
 // Ensure that the given page has the given values in it.
 // This is *not* case sensitive.
 const no_sql = (page: IfPageSqlSchema, values: number[]|string[]): string|null => {
-	let missing: any[] = [];
+	const missing: any[] = [];
 	let value: string;
 
 	if(page.client_sql === null) return null;
@@ -295,7 +295,7 @@ const has_sql = {
 // Only used in the server-side, where we have the solution_rules populated.
 const get_feedback_sql = (that: IfPageSqlSchema): string[]|null => {
 	let response: any = '';
-	let responses: any[] = [];
+	const responses: any[] = [];
 
 	// Do not give feedback on un-submitted items.
 	if(!that.client_has_answered) return null;

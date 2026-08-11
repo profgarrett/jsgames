@@ -89,7 +89,7 @@ const getColor = ( obj: any, theme: object): string => {
 
 export function ChartWaterfall_Plain(cd_param: ChartDef): ReactElement {
 	//const data = cd.data;
-	let cd = { ..._default, ...cd_param };
+	const cd = { ..._default, ...cd_param };
 	const theme = THEMES[cd.theme];
 	
 	// If Keys aren't defined, then go ahead and dynamically pull them out of the passed data.
@@ -98,7 +98,7 @@ export function ChartWaterfall_Plain(cd_param: ChartDef): ReactElement {
 		if(typeof cd_param.data[0].Year !== 'undefined') {
 			cd.indexBy = 'Year';
 			cd.keys = [];
-			for(let key in cd_param.data[0]) {
+			for(const key in cd_param.data[0]) {
 				if(cd_param.data[0].hasOwnProperty(key) && key !== 'Year') {
 					cd.keys.push(key);
 				}
@@ -117,7 +117,7 @@ export function ChartWaterfall_Plain(cd_param: ChartDef): ReactElement {
 
 		// Create a new data map that adjusts the data to cut off the {distortion} portion.
 		cd.data = cd.data.map( d => {
-			let new_d = {};
+			const new_d = {};
 			if(d.Year) new_d.Year = d.Year;
 			cd.keys.map( key => new_d[key] = d[key] - distortion);
 			return new_d;

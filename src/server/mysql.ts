@@ -82,7 +82,7 @@ async function run_mysql_query(sql: string, values?: Array<any>): Promise<Array<
 			if(values) console.log('With values: ' + JSON.stringify(values));
 		}
 
-		let [results, fields] = await connection.query(sql, values);
+		const [results, fields] = await connection.query(sql, values);
 		queryResults = results as Array<any>;
 		
 	} catch (error: any) {
@@ -114,17 +114,17 @@ const from_mysql_to_utc = (dt_or_string: Date | string): number => {
 	if(dt_or_string instanceof Date) {
 		return to_utc(dt_or_string);
 	}
-	let dt = new Date(dt_or_string);
+	const dt = new Date(dt_or_string);
 
 	return to_utc(dt);
 };
 
 // Convert a utc int value into a textual format usable for inserting into mysql
 const from_utc_to_myql = (i: number): string => {
-	let dt = new Date(i);
+	const dt = new Date(i);
 
 	// pull out the T and replace with a space.
-	let mysql = dt.toISOString().slice(0, 19).replace('T', ' ');
+	const mysql = dt.toISOString().slice(0, 19).replace('T', ' ');
 
 	return mysql;
 };
@@ -135,7 +135,7 @@ const to_utc = (dt: Date): number => {
 	if(!(dt instanceof Date)) {
 		throw new Error(dt + ' is not an instance of date, but instead ' + typeof dt);
 	}
-	let int = Date.UTC(dt.getUTCFullYear(), dt.getUTCMonth(), dt.getUTCDate(), 
+	const int = Date.UTC(dt.getUTCFullYear(), dt.getUTCMonth(), dt.getUTCDate(), 
 			dt.getUTCHours(), dt.getUTCMinutes(), dt.getUTCSeconds());
 	
 	return int;
@@ -227,7 +227,7 @@ async function _update_get_version(): Promise<any> {
 	const sql = 'select max(idversion) as idversion from schema_version';
 
 	try {
-		let result = await run_mysql_query(sql);
+		const result = await run_mysql_query(sql);
 		return result[0].idversion;
 	}
 	catch( e: any ) {
@@ -264,7 +264,7 @@ async function update_level_in_db(level: IfLevelSchema ): Promise<any> {
 	const props = JSON.stringify(level.props.toJson());
 
 	// Note: Use pages.toJson() to make sure that they properly convert to json.
-	let values = [
+	const values = [
 		level.completed ? 1 : 0, 
 		JSON.stringify(level.pages.map( (p: any ): any => p.toJson() )), 
 		JSON.stringify(level.history), 
@@ -307,14 +307,14 @@ async function _update_all_levels_to_latest_props(): Promise<any> {
 async function _update_fix_bad_page_data6(): Promise<any> {
 	const sql_select = 'SELECT * FROM iflevels';
 	const sql_update = 'UPDATE iflevels SET pages = ? WHERE _id = ?';
-	let select_results = await run_mysql_query(sql_select);
+	const select_results = await run_mysql_query(sql_select);
 
 	let values: any[] = [];
 	let ifLevel: IfLevelSchema;
 	let json;
 
 	// Remove any solution_feedback entries
-	for(var i=0; i<select_results.length; i++) {
+	for(let i=0; i<select_results.length; i++) {
 		ifLevel = new IfLevelSchema(select_results[i]);
 
 		ifLevel.pages = ifLevel.pages.map( (p: any) => {
@@ -338,7 +338,7 @@ async function _update_fix_bad_page_data6(): Promise<any> {
 		});
 		json = ifLevel.pages.map( (p: any ): any => p.toJson() )
 		values = [JSON.stringify(json), ifLevel._id];
-		let update_results = await run_mysql_query(sql_update, values);
+		const update_results = await run_mysql_query(sql_update, values);
 		//console.log(update_results); //update_results);
 		//console.log(ifLevel.pages);
 		//console.log(values);

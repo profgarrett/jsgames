@@ -72,7 +72,7 @@ function rollup_tags(pages: Array<IfPageBaseSchema>): Array<any> {
 			if(typeof h.tags === 'undefined') return;
 
 			h.tags.map( tag => {
-				let tag_summary = get_first_matching_tag(tags, tag.tag);
+				const tag_summary = get_first_matching_tag(tags, tag.tag);
 				if(tag_summary == null) {
 					tags.push({ tag: tag.tag, n: 1});
 				} else {
@@ -165,16 +165,16 @@ function create_summary_question( pages: Array<IfPageBaseSchema>): any {
 	// 
 	if(pages[0].type === 'IfPageFormulaSchema' ) {
 		// $FlowFixMe
-		let p: IfPageFormulaSchema = pages[0]; // not 100% correct, but close enough for typing.
+		const p: IfPageFormulaSchema = pages[0]; // not 100% correct, but close enough for typing.
 
 		summary_question.kcs = get_kcs( p );
 		summary_question.solution_f = p.solution_f ;
 
 	} else if (pages[0].type === 'IfPageChoiceSchema') {
-		let p: IfPageChoiceSchema = pages[0].toIfPageChoiceSchema();
+		const p: IfPageChoiceSchema = pages[0].toIfPageChoiceSchema();
 		summary_question.solution_f = p.solution;
 	} else if (pages[0].type === 'IfPageNumberAnswerSchema') {
-		let p: IfPageNumberAnswerSchema = pages[0].toIfPageNumberAnswerSchema();
+		const p: IfPageNumberAnswerSchema = pages[0].toIfPageNumberAnswerSchema();
 		summary_question.solution_f = p.solution.toString();
 	} else if (pages[0].type === 'IfPageSqlSchema') {
 		summary_question.solution_sql = pages[0].solution_sql;

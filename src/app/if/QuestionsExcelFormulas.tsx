@@ -112,7 +112,7 @@ export default class QuestionsPagesExcelFormula extends React.Component<DetailPr
 		// Add KC columns  
 		if(ADD_KC_COLUMNS) {
 			const kcs = this.add_kc_order_column_by_user(rows);
-			for(let kc in kcs) {
+			for(const kc in kcs) {
 				columns.push(kc);
 			}
 		}
@@ -172,7 +172,7 @@ export default class QuestionsPagesExcelFormula extends React.Component<DetailPr
 			if(!answer.page.completed) return;
 			if(answer.page.type === 'IfPageChoiceSchema' || answer.page.type === 'IfPageTextSchema' ) return;
 
-			let history = answer.page.history.filter( h => typeof h.client_f !== 'undefined' && h.code === 'client_update' );
+			const history = answer.page.history.filter( h => typeof h.client_f !== 'undefined' && h.code === 'client_update' );
 
 			const local = {
 				a_standardize_formula_case: answer.page.standardize_formula_case ? 1 : 0,
@@ -288,7 +288,7 @@ export default class QuestionsPagesExcelFormula extends React.Component<DetailPr
 		// Can't do it the first time, as we didn't know all of the KCs prior to going through.
 		for(i=0; i<rows.length; i++) {
 
-			for(let kc in kcs) {
+			for(const kc in kcs) {
 				if(typeof rows[i][kc] === 'undefined') {
 					rows[i][kc] = 0;
 				}

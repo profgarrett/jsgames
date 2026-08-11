@@ -44,10 +44,10 @@ export default class SqlQuery extends React.Component<PropsType, StateType> {
 	_render_tables = (): React.ReactElement => {
 		const p = this.props.page;
 
-		let solution = this.__render_table('sol', 'Solution', p.solution_results_titles, p.solution_results_formats, p.solution_results_rows );
+		const solution = this.__render_table('sol', 'Solution', p.solution_results_titles, p.solution_results_formats, p.solution_results_rows );
 
 
-		let items: any[] = [];
+		const items: any[] = [];
 
 		let t;
 		
@@ -88,7 +88,7 @@ export default class SqlQuery extends React.Component<PropsType, StateType> {
 
 	__render_table = (id:string, name: string, column_titles: string[], column_formats: string[], rows: any[]): React.ReactElement => {
 		const p = this.props.page;
-		let fixed_column_formats: string[] = column_formats.length > 0 
+		const fixed_column_formats: string[] = column_formats.length > 0 
 			? column_formats.map( s_or_i => '' + s_or_i )  
 			: p.get_column_formats_based_on_title(column_titles);
 
@@ -97,16 +97,16 @@ export default class SqlQuery extends React.Component<PropsType, StateType> {
 		}
 
 		// Column headers
-		let th = column_titles.map( (s,i) => <th style={{ textAlign: 'center' }} key={'sqlquery_'+id+'th'+i}>{ s }</th>);
+		const th = column_titles.map( (s,i) => <th style={{ textAlign: 'center' }} key={'sqlquery_'+id+'th'+i}>{ s }</th>);
 
 		// Define function to take in data and return tds
-		let ftr = (row_data: string[], id: string): ReactElement[] => 
+		const ftr = (row_data: string[], id: string): ReactElement[] => 
 				row_data.map( 
 					(data_in_td: string, i: number): ReactElement => 
 						this.__render_table_td(fixed_column_formats, id, data_in_td, i) );
 
 		// Translate each data row into a tr
-		let trs = rows.map( (row_data: string[], i: number) => 
+		const trs = rows.map( (row_data: string[], i: number) => 
 				<tr key={'sqlquery'+id+'row'+i}>{ ftr(row_data, id+'sqlqueryrow'+i) }</tr> );
 
 		return (<div id={'sqlquery_table_'+id} style={{ overflow: 'auto', height: '200px' }}>
@@ -119,7 +119,7 @@ export default class SqlQuery extends React.Component<PropsType, StateType> {
 
 	// Return a formatted value.
 	__render_table_td = (column_formats: string[], key: string, value: string | number, index: number): ReactElement => {
-		let format = column_formats[index];
+		const format = column_formats[index];
 		let formatted_value = <span>{ value }</span>;
 		let leftAlign = false;
 
@@ -242,8 +242,8 @@ export default class SqlQuery extends React.Component<PropsType, StateType> {
 					//if (!match) {
 					//	return []
 					//}
-					var word = model.getWordUntilPosition(position);
-					var range = {
+					const word = model.getWordUntilPosition(position);
+					const range = {
 						startLineNumber: position.lineNumber,
 						endLineNumber: position.lineNumber,
 						startColumn: word.startColumn,

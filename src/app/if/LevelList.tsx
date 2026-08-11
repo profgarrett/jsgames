@@ -12,7 +12,7 @@ export default class IfLevelList extends React.Component<PropsType> {
 	_render_link = (level: IfLevelSchema): ReactElement => {
 
 		if(level.completed) {
-			let d = level.get_last_update_date() || level.created;
+			const d = level.get_last_update_date() || level.created;
 			// Go to score
 			return <Link to={'/ifgame/level/'+level._id+'/score'}>
 						Scored { level.get_test_score_as_percent() }% on <PrettyDate date={ d } />
@@ -29,7 +29,7 @@ export default class IfLevelList extends React.Component<PropsType> {
 
 	render = (): ReactElement => {
 		// Filter levels into finished and unfinished.
-		let aLevels = this.props.levels;
+		const aLevels = this.props.levels;
 
 		// Put in most recent first order.
 		aLevels.sort( (a, b) => a.created > b.created ? -1 : 1 );

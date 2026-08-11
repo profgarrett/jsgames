@@ -1,12 +1,12 @@
 function turn_array_into_map( a: any[], get_p: any, sort_order_alpha: boolean = true ): Map<string, any> {
 	
-	var m = new Map();
-	var index = '';
+	const m = new Map();
+	let index = '';
 
 	// Create a new array that is properly sorted by get_p
 	// Map uses insertion order, so this sets insertion order 
 	// the get_p function's result (i.e., string, date, etc..)
-	var sorted_a = sort_order_alpha
+	const sorted_a = sort_order_alpha
 		? a.slice().sort( (a,b) => get_p(a) < get_p(b) ? -1 : 1 )
 		: a.slice().sort( (a,b) => get_p(a) > get_p(b) ? -1 : 1 );
 
@@ -34,7 +34,7 @@ function turn_object_keys_into_array( o: any): Array<any> {
 
 	} else {
 		// Assume regular object.
-		for( let key in o ) {
+		for( const key in o ) {
 			if( Object.prototype.hasOwnProperty.call(o, key) ) {
 				results_a.push(key);
 			}
@@ -48,7 +48,7 @@ function turn_object_keys_into_array( o: any): Array<any> {
 
 function turn_object_values_into_array( o: any): Array<any> {
     const results_a: any[] = [];
-    for( let key in o ) {
+    for( const key in o ) {
         if( Object.prototype.hasOwnProperty.call(o, key) ) {
             results_a.push(o[key]);
         }
@@ -58,7 +58,7 @@ function turn_object_values_into_array( o: any): Array<any> {
 }
 
 // Turn a string into a y/n value.
-let random_boolean_from_string = (s: string): boolean => {
+const random_boolean_from_string = (s: string): boolean => {
 	//const s_as_number = s.split('').reduce( (i, s) => s.charCodeAt(0) + i, 1 );
 	//return (s_as_number % 2) === 0;
 	return seededRandom(1, 0, s) == 1;
@@ -66,7 +66,7 @@ let random_boolean_from_string = (s: string): boolean => {
 
 // Return a random number in the given range using a text seed.
 // Returns an integer, not double.
-let seededRandom = function(max: number, min: number, text_seed: string ): number  {
+const seededRandom = function(max: number, min: number, text_seed: string ): number  {
 	const s_as_number = text_seed.split('').reduce( (i, s) => s.charCodeAt(0) + i, 1 );
  
     const rnd = ( (s_as_number * 9301 + 49297) % 233280) / 233280;

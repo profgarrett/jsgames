@@ -67,7 +67,7 @@ app.set('trust proxy', true); //'loopback, linklocal');
 if(DEBUG)
 	app.use(
 		(req: Request, res: Response, next: NextFunction) => {
-			let keys = Object.keys(req.params);
+			const keys = Object.keys(req.params);
 
 			if(req.url !== '/favicon.ico') {
 				console.log(req.method, req.url, keys);
@@ -128,7 +128,7 @@ app.get('/api/sql/',
 	async (req: Request, res: Response, next: NextFunction): Promise<any> => {
 	
 	try {
-		let v = await update_mysql_database_schema();
+		const v = await update_mysql_database_schema();
 		res.json(v);
 	} catch(e){
 		log_error(e);

@@ -134,7 +134,7 @@ function get_all_excel_row1_references(page: IPage): IExcelRow1Reference[] {
 		// No test defined.
 		if(typeof page.tests === 'undefined') return [];
 
-		for(let key in page.tests[0]) {
+		for(const key in page.tests[0]) {
 			if( Object.prototype.hasOwnProperty.call(page.tests[0], key) ) {
 				cols.push(key.toLowerCase() + '1');
 			}
@@ -175,11 +175,11 @@ function get_compiled_template_values(page: IPage, level?: ILevel): IStringIndex
 	let filter_refs: any[] = [];
 
 	// Return result
-	let return_values: IStringIndexJsonObject = {};
+	const return_values: IStringIndexJsonObject = {};
 
 	// Go through each index value.
 	// See if they should have logic applied. If so, update.
-	for(let key in page.template_values) {
+	for(const key in page.template_values) {
 		if(	Object.prototype.hasOwnProperty.call( page.template_values, key) ) {
 			
 			// No alterations are needed on number.
@@ -321,7 +321,7 @@ function fill_template(s: string | number, values: IStringIndexJsonObject): stri
 
 	// Replace every key values in the string.
 	let result = s;
-	for(let key in values) {
+	for(const key in values) {
 		if(	Object.prototype.hasOwnProperty.call( values, key) ) {
 			result = result.replace( new RegExp( '{'+key+'}', 'g'), ''+values[key] );
 		}

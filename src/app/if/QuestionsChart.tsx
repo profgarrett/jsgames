@@ -76,7 +76,7 @@ export default class IfQuestionsChart extends React.Component<DetailPropsType> {
         ]
 
     */
-    flatten_levels(levels: Array<IfLevelSchema>, oKeys: any): Array<Object> {
+    flatten_levels(levels: Array<IfLevelSchema>, oKeys: any): Array<object> {
         const results: any[] = [];
         const aKeys = Object.keys(oKeys);
 
@@ -113,7 +113,7 @@ export default class IfQuestionsChart extends React.Component<DetailPropsType> {
     }
 
     // Return a table showing a list of questions.
-    render_questions(oKeys: any, aKeys: Array<Object>, levels: Array<Object>): ReactElement {
+    render_questions(oKeys: any, aKeys: Array<string>, levels: Array<object>): ReactElement {
 
 		const td_style = {
 			'border': 'solid 1px black',

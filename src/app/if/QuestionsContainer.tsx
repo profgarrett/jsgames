@@ -110,10 +110,10 @@ export default function QuestionsContainer() {
 	// Filter returned values based off of pagetype filter set in state.
 	const filterpagetype = (type: string) => pagetype === 'All' || pagetype.split('|').includes( type );
 
-	let filtered_levels = levels.map( (level: IfLevelSchema) => { 
+	const filtered_levels = levels.map( (level: IfLevelSchema) => { 
 		// Note: filtering by level will break some of the table functionalisty (i.e., linking the raw version
 		// of a page).
-		let new_level = new IfLevelSchema(level.toJson()); // create a new level.
+		const new_level = new IfLevelSchema(level.toJson()); // create a new level.
 		new_level.pages = new_level.pages.filter(p => filterpagetype(p.type) ); // filter page.
 		return new_level;
 	});

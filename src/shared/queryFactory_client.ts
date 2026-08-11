@@ -83,7 +83,7 @@ function _return_create_table(name: string, titles: string[], formats: string[])
 // Get the SQL text to create tables t1-tn
 // Note that we can have any of the t1 to t3 options.
 function return_create_tables(json: any): string {
-		let lines: string[] = [];
+		const lines: string[] = [];
 
 		if(typeof json.t1_name !== 'undefined' && json.t1_name !== null && json.t1_name.length > 0) {
 			lines.push(_return_create_table(json.t1_name, json.t1_titles, json.t1_formats));
@@ -102,7 +102,7 @@ function return_create_tables(json: any): string {
 
 	// Insert items into each row.
 function return_insert_intos(json: any): string {
-		let lines: string[] = [];
+		const lines: string[] = [];
 
 		// T1
 		if(typeof json.t1_rows !== 'undefined') {

@@ -33,7 +33,7 @@ export default class Text extends React.Component<PropsType, StateType> {
 
 	// Set focus on the submit button (if present)
 	componentDidMount(): void {
-		let btn = document.getElementById('_render_page_submit_button');
+		const btn = document.getElementById('_render_page_submit_button');
 		if(this.props.editable && btn) btn.focus();
 	}
 

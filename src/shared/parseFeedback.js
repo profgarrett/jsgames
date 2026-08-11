@@ -268,7 +268,7 @@ function f_token(value, type, subtype) {
 
 function f_tokens() {
   
-  this.items = new Array();
+  this.items = [];
   
   this.add = function(value, type, subtype) { 
       if (!subtype) subtype = ""; 
@@ -291,7 +291,7 @@ function f_tokens() {
 
 function f_tokenStack() {
 
-  this.items = new Array();
+  this.items = [];
   
   this.push = function(token) { this.items.push(token); };
   this.pop = function() { var token = this.items.pop(); return (new f_token("", token.type, TOK_SUBTYPE_STOP)); };

@@ -1,4 +1,4 @@
-var seedrandom = require('seedrandom');
+const seedrandom = require('seedrandom');
 
 
 
@@ -24,8 +24,8 @@ const DataFactory = {
 	// Return a date before or after today by a certain range.
 	// @seed is optional.
 	randDate(plus_or_minus_days: number = 0, seed?: number): Date {
-		let d = new Date();
-		let offset = DataFactory.randB(-plus_or_minus_days, plus_or_minus_days, seed);
+		const d = new Date();
+		const offset = DataFactory.randB(-plus_or_minus_days, plus_or_minus_days, seed);
 		d.setDate(d.getDate() + offset);
 		return d;
 	},
@@ -65,7 +65,7 @@ const DataFactory = {
 	// Return one of the given array.
 	// @seed is optional.
 	randOf: (a: Array<string | number>, seed?: number ): any => {
-		let i = Math.floor( 
+		const i = Math.floor( 
 					(typeof seed === 'undefined' ?  Math.random() : seed )
 					* a.length);
 		return a[i];
@@ -73,7 +73,7 @@ const DataFactory = {
 
 	randNumbers: (rows: number, cols: number = 3, max_n: number = 10, seed?: number): Array<number> =>{
 		const alpha = 'abcdefghijklmnopqrstuvwxyz';
-		let results = Array();
+		const results: any[] = [];
 		let result = {};
 
 		for(let i=0; i<rows; i++) {
@@ -88,8 +88,8 @@ const DataFactory = {
 	},
 
 	randDates: (rows: number, columns: number = 1, 
-				options: any={ a_range: 600, b_range: 600, c_range: 600}): Array<Object> => {
-		let results : any[] = [];
+				options: any={ a_range: 600, b_range: 600, c_range: 600}): Array<object> => {
+		const results : any[] = [];
 		// ugly/lazy hacks
 		for(let i=0; i<rows; i++) {
 			// @ts-ignore
@@ -106,23 +106,23 @@ const DataFactory = {
 		return DataFactory.randOf(NAMES.first, seed);
 	},
 
-	randPeople: (rows: number): Array<Object> => {
-		let results: any[] = [];
+	randPeople: (rows: number): Array<object> => {
+		const results: any[] = [];
 		for(let i=0; i<rows; i++) {
 			results.push({ 'a': DataFactory.randOf(NAMES.first), 'b': DataFactory.randOf(NAMES.last) });
 		}
 		return results;
 	},
 
-	randNumbersAndColors: (rows: number): Array<Object> => {
-		let results: any[] = [];
+	randNumbersAndColors: (rows: number): Array<object> => {
+		const results: any[] = [];
 		for(let i=0; i<rows; i++)
 			results.push({ a: DataFactory.randB(0, 10), b: DataFactory.randOf(['red', 'blue', 'yellow', 'green']) });
 		return results;
 	},
 
-	randAddress: (rows: number): Array<Object> => {
-		let results: any[] = [];
+	randAddress: (rows: number): Array<object> => {
+		const results: any[] = [];
 		for(let i=0; i<rows; i++)
 			results.push({ 
 				a: DataFactory.randB(100, 1000).toString() + ' ' + DataFactory.randOf(STREET_NAMES),
@@ -143,7 +143,7 @@ const DataFactory = {
 		const r = typeof seed !== 'undefined' ? seedrandom(seed) : Math.random;
 
 		for (let i = array.length - 1; i > 0; i--) {
-			let j = Math.floor(r() * (i + 1));
+			const j = Math.floor(r() * (i + 1));
 			// $FlowFixMe
 			[array[i], array[j]] = [array[j], array[i]];
 		}
@@ -156,11 +156,11 @@ const DataFactory = {
 	// in an answer at https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array
 	// May be identical to original list.
 	randomizeList: (old_array: Array<any>, seed?: number): Array<any> => {
-		let array = old_array.slice(0);
+		const array = old_array.slice(0);
 		const r = typeof seed !== 'undefined' ? seedrandom(seed) : Math.random;
 
 		for (let i = array.length - 1; i > 0; i--) {
-			let j = Math.floor(r() * (i + 1));
+			const j = Math.floor(r() * (i + 1));
 			// $FlowFixMe
 			[array[i], array[j]] = [array[j], array[i]];
 		}

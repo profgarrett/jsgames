@@ -491,7 +491,7 @@ const ENTRY_TESTS = [
 
 			for(let i=0; i<references.length; i++) {
 				for(let j=0; j<references[i].args.length; j++) {
-					let ref = references[i].args[j].substr(0,1);
+					const ref = references[i].args[j].substr(0,1);
 
 					if(typeof page.tests[0][ref.toLowerCase()] === 'undefined' &&
 						typeof page.tests[0][ref.toUpperCase()] === 'undefined' ) return true;
@@ -788,7 +788,7 @@ if(DEBUG) {
 		console.log('Testing '+test.tag);
 		test.tests.forEach( t => {
 			// $FlowFixMe
-			let triggered = test.if(t.solution_f, t.client_f, t.page);
+			const triggered = test.if(t.solution_f, t.client_f, t.page);
 			if( triggered !== t.triggered ) {
 				console.log(['Failed tag test', t]);
 			}
@@ -822,7 +822,7 @@ function return_tagged_level(level: IfLevelSchema): IfLevelSchema {
 		let parsed = {};
 
 		// Fill template, so that {n} turns into 1, or {cell1_ref}  turns into A1.
-		let t_solution_f = typeof page.solution_f !== 'undefined' ?
+		const t_solution_f = typeof page.solution_f !== 'undefined' ?
 								fill_template(page.solution_f, page.template_values) :
 								fill_template(page.solution_sql, page.template_values);
 		

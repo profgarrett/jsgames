@@ -73,7 +73,7 @@ function glyph( p: IfPageBaseSchema, i: number ): ReactElement {
 
 // Build the score list at the bottom of the page.
 export default function level_play_score(pages: Array<IfPageBaseSchema>): ReactElement {
-	let glyphs = pages.map( (p: IfPageBaseSchema, i: number): ReactElement => glyph(p, i) );
+	const glyphs = pages.map( (p: IfPageBaseSchema, i: number): ReactElement => glyph(p, i) );
 	return <div>{ glyphs }</div>;
 };
 

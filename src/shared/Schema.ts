@@ -64,7 +64,7 @@ class Schema {
 			}
 		}
 
-		let v = null;
+		const v = null;
 		// Load each default value from schema
 		// Use the set to load the correct type of object, using json values to initialize
 		for(const key of Object.keys(schema)) {
@@ -103,8 +103,8 @@ class Schema {
 		will properly handle int initialize values.
 	*/
 	toJson(new_values_json?: any) {
-		let schema = this.schema;
-		let json: IStringIndexJsonObject = {
+		const schema = this.schema;
+		const json: IStringIndexJsonObject = {
 			type: this.type // make sure that we pick up the type, which is coded as getter.
 		};
 
@@ -124,7 +124,7 @@ class Schema {
 				// Do not encode functions.  Relies upon them being server-side only, set
 				//		by the tutorial code.  They aren't serialized over the wire or 
 				//		saved to the db.
-				let items = this[key].filter( (obj: any) => typeof obj !== 'function');
+				const items = this[key].filter( (obj: any) => typeof obj !== 'function');
 
 				json[key] = items.map( 
 						(item: any) => (typeof item.toJson === 'function') ? item.toJson() : item 
@@ -165,13 +165,13 @@ class Schema {
 
 	// Convert to a string for use as a body in a JSON post request.
 	toJsonString() {
-		let json = this.toJson();
+		const json = this.toJson();
 		return JSON.stringify(json);
 	}
 
 	// Update all fields.
 	updateFields(json: any, filter: any = '') {
-		let schema = this.schema;
+		const schema = this.schema;
 
 		for(const key of Object.keys(schema)) {
 			if(typeof json[key] !== 'undefined' && (key==filter || filter=='')) {
@@ -185,13 +185,13 @@ class Schema {
 } 
 
 // Convenience function for initializing schema.
-let isDef = function(v: any): boolean {
+const isDef = function(v: any): boolean {
 	return typeof v !== 'undefined';
 };
-let isArray = function(u: any): boolean {
+const isArray = function(u: any): boolean {
 	return (u instanceof Array);
 };
-let isObject = function(o: any): boolean {
+const isObject = function(o: any): boolean {
 	return typeof o === 'object'
 };
 
@@ -222,7 +222,7 @@ function revive_dates_recursively(obj: any): any {
 	}
 
 	if(typeof obj === 'object' ) {
-		for(let name in obj) {
+		for(const name in obj) {
 			if(obj.hasOwnProperty(name)) {
 				if( revive_dates_recursively_test(obj[name]) ) {
 					obj[name] = new Date(obj[name]);

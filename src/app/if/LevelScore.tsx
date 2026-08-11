@@ -76,7 +76,7 @@ export class LevelScorePage extends React.Component<ScorePropsType, ScoreStateTy
 		const history = this.props.page.history.filter( (h: any) => h.code =='client_update');
 		const noop = () => {};
 
-		let lead = <HtmlDiv className='lead' html={ ""+desc } />;
+		const lead = <HtmlDiv className='lead' html={ ""+desc } />;
 
 
 		// Figure out which control to use for the page.
@@ -202,8 +202,8 @@ export class LevelScore extends React.Component<LevelPropsType> {
 const build_score = (pages: Array<IfPageBaseSchema>): any => 
 		pages.map( (p: IfPageBaseSchema, i: number): any => {
 	let g: ReactElement;
-	let title = '';
-	let html = '';
+	const title = '';
+	const html = '';
 	const desc = fill_template(p.description, p.template_values);
 
 	if(p.code === 'tutorial') {

@@ -69,7 +69,7 @@ export default class CacheBuster extends React.Component<unknown, StateType> {
         if (caches) {
             // Service worker cache should be cleared with caches.delete()
             caches.keys().then(function(names) {
-                for (let name of names) caches.delete(name);
+                for (const name of names) caches.delete(name);
             });
         }
 

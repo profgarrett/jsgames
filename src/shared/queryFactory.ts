@@ -27,7 +27,7 @@ async function queryFactory_updateClientResults(page: { client_results_rows: any
 	if(refresh_client_results_regardless_of_non_null_prior_results 
 			|| page.client_results_rows === null 
 			|| page.client_results_titles === null) {
-		let results = await queryFactory_getClientResults(page);
+		const results = await queryFactory_getClientResults(page);
 		page.client_results_rows = results.rows;
 		page.client_results_titles = results.titles;
 		page.client_feedback = [];

@@ -14,7 +14,7 @@ function is_server(): boolean {
 
 interface IHistory { 
 	[key: string]: any
-	code?: String
+	code?: string
 	dt?: Date
 }
 
@@ -184,7 +184,7 @@ class IfPageBaseSchema extends Schema {
 	correct_required!: boolean;
 	completed!: boolean;
 	show_feedback_on!: boolean;
-	history!: Array<Object>;
+	history!: Array<object>;
 	kcs!: Array<string>;
 	time_minimum!: number;
 	time_limit!: number;
@@ -309,7 +309,7 @@ class IfPageBaseSchema extends Schema {
 		// If no history, then return.
 		if(!generate_history) return;
 
-		let history: IHistory = {};
+		const history: IHistory = {};
 
 		// Filter changes to avoid having history save all previous history changes as a change.
 		// and then record each change in the new history item.
@@ -356,13 +356,13 @@ class IfPageBaseSchema extends Schema {
 		const last = this.get_last_update_date();
 
 		// Filter history to only have client_udpates.
-		let history0 = this.history.filter( (h: IHistory) => h.code === 'client_update' );
+		const history0 = this.history.filter( (h: IHistory) => h.code === 'client_update' );
 
 		// Early data didn't code client_update properly, doing it on the server.
 		// Add filter to pull out anything any history item with a time earlier
 		// than a previous entry.
 
-		let history: Array<IHistory> = history0.reduce( (accum: Array<IHistory>, h: IHistory) => {
+		const history: Array<IHistory> = history0.reduce( (accum: Array<IHistory>, h: IHistory) => {
 			if(accum.length === 0) {
 				// First.
 				accum.push(h);
@@ -379,7 +379,7 @@ class IfPageBaseSchema extends Schema {
 
 		if(first === null || last === null || history.length < 1) return [];
 
-		let abandoned: any[] = [];
+		const abandoned: any[] = [];
 		let last_ms_time = convert_to_date_if_string( history[0].dt ).getTime();
 		let current_ms_time = 0;
 
@@ -445,12 +445,12 @@ class IfPageBaseSchema extends Schema {
 		const last = this.get_last_update_date();
 
 		// Filter history to only have client_udpates.
-		let history0 = this.history.filter( (h: IHistory) => h.code === 'client_update' );
+		const history0 = this.history.filter( (h: IHistory) => h.code === 'client_update' );
 
 		// Early data didn't code client_update properly, doing it on the server.
 		// Add filter to pull out anything any history item with a time earlier
 		// than a previous entry.
-		let history = history0.reduce( (accum: any[], h: IHistory) => {
+		const history = history0.reduce( (accum: any[], h: IHistory) => {
 			if(accum.length === 0) {
 				// First.
 				accum.push(h);
@@ -508,17 +508,17 @@ class IfPageBaseSchema extends Schema {
 			if(s === null || s === '') return;
 
 			const block_reg = /<code>(.*?)<\/code>/g;
-			let matches = s.match(block_reg);
+			const matches = s.match(block_reg);
 
 			if(matches && matches !== null) {
 				matches.map( (dirty: string) => {
 					// Split formula into sections along " (double quotes)
 					// Lowercase only if not inside.
-					let splits = dirty.split('"');
+					const splits = dirty.split('"');
 					for(let i=0; i<splits.length; i++) {
 						if( i%2 === 0) splits[i] = splits[i].toLowerCase();
 					}
-					let clean = splits.join('"');
+					const clean = splits.join('"');
 
 					// Done!  Replace original.
 					s = s.replace(dirty, clean);
@@ -614,7 +614,7 @@ class IfPageTextSchema extends IfPageBaseSchema {
 	}
 
 	get schema(): any {
-		let inherit = common_schema();
+		const inherit = common_schema();
 
 		return {
 			...inherit,
@@ -703,7 +703,7 @@ class IfPageNumberAnswerSchema extends IfPageBaseSchema {
 	}
 
 	get schema(): any {
-		let inherit = common_schema();
+		const inherit = common_schema();
 
 		return {
 			...inherit,
@@ -805,7 +805,7 @@ class IfPageSliderSchema extends IfPageBaseSchema {
 	}
 
 	get schema(): any {
-		let inherit = common_schema();
+		const inherit = common_schema();
 
 		return {
 			...inherit,
@@ -890,7 +890,7 @@ class IfPageShortTextAnswerSchema extends IfPageBaseSchema {
 	}
 
 	get schema(): any {
-		let inherit = common_schema();
+		const inherit = common_schema();
 
 		return {
 			...inherit,
@@ -1002,7 +1002,7 @@ class IfPageChoiceSchema extends IfPageBaseSchema {
 	}
 
 	get schema(): any {
-		let inherit = common_schema();
+		const inherit = common_schema();
 
 		return {
 			...inherit,
@@ -1145,7 +1145,7 @@ class IfPageFormulaSchema extends IfPageBaseSchema {
 
 	// NOTE: This is copied into the child classes. Don't modify w/o updating children.
 	get schema(): any {
-		let inherit = common_schema();
+		const inherit = common_schema();
 
 		return {
 			...inherit,
@@ -1314,7 +1314,7 @@ class IfPageFormulaSchema extends IfPageBaseSchema {
 		Utility function to fix issues with parser function
 	*/
 	__clean_parse_formula( dirty_formula: string ): string {
-		let d = /\d/;
+		const d = /\d/;
 		let formula = dirty_formula.trim(); 
 
 		// Issue 1: Parser doesn't work with .1, so change to 0.1
@@ -1371,7 +1371,7 @@ class IfPageFormulaSchema extends IfPageBaseSchema {
 
 		// Update test results.
 		//let columns = Object.keys(this.tests[0]);
-		let parser = new FormulaParser();
+		const parser = new FormulaParser();
 
 		let res: { result: string|null, error: string|null } = { 
 				result: null,
@@ -1379,7 +1379,7 @@ class IfPageFormulaSchema extends IfPageBaseSchema {
 			};
 
 		// Get int position of a letter.
-		let i_to_alpha = (i: number): string => 'abcdefghijklmnopqrstuvwxyz'.substr(i, 1);
+		const i_to_alpha = (i: number): string => 'abcdefghijklmnopqrstuvwxyz'.substr(i, 1);
 
 		// Add a hook for getting variables.
 		// Requires that all passed coordinates are on the first row.
@@ -1387,21 +1387,21 @@ class IfPageFormulaSchema extends IfPageBaseSchema {
 
 			if( typeof cellCoord.label == 'undefined') throw new Error('Error, should be a .label here?');
 
- 			let coor = cellCoord.label.toLowerCase();
+ 			const coor = cellCoord.label.toLowerCase();
 			if(coor.substr(1) !== '1') {
 				throw new Error('#REF '+ coor);
 			}
 			if(typeof current_test[coor.substr(0,1)] === 'undefined') {
 				throw new Error('#REF' + coor);
 			}
-			let res = current_test[coor.substr(0,1)];
+			const res = current_test[coor.substr(0,1)];
 			done(typeof res ==='string' ? res /*. NDG toLowerCase()*/ : res );
 		});
 
 
 		// Add hook for getting ranges.
 		parser.on('callRangeValue', function(startCellCoord: iParseRangeValue, endCellCoord: iParseRangeValue, done: any) {
-			let fragment: any[] = [];
+			const fragment: any[] = [];
 
 			if( typeof startCellCoord.row == 'undefined') throw new Error('Error, should be .row.index here');
 			if( typeof endCellCoord.row == 'undefined') throw new Error('Error, should be .row.index here');
@@ -1415,7 +1415,7 @@ class IfPageFormulaSchema extends IfPageBaseSchema {
 			//	var rowData = data[row];
 			//	var colFragment: any[] = [];
 
-			for (var col = startCellCoord.column.index; col <= endCellCoord.column.index; col++) {
+			for (let col = startCellCoord.column.index; col <= endCellCoord.column.index; col++) {
 				if( typeof current_test[ i_to_alpha(col) ] !== 'undefined') {
 					fragment.push( current_test[ i_to_alpha(col) ] );
 				} else {
@@ -1431,7 +1431,7 @@ class IfPageFormulaSchema extends IfPageBaseSchema {
 		});
 
 		// Clean-up stuff that causes an error.
-		let clean_formula = this.__clean_parse_formula(formula);
+		const clean_formula = this.__clean_parse_formula(formula);
 
 		// Require formulas must start with `=`.  
 		if(clean_formula !== null && clean_formula.substr(0,1) === '=') {
@@ -1537,7 +1537,7 @@ class IfPageSqlSchema extends IfPageBaseSchema {
 	}
 
 	get schema(): any {
-		let inherit = common_schema();
+		const inherit = common_schema();
 
 		return {
 			...inherit,
@@ -1856,7 +1856,7 @@ class IfPageSqlSchema extends IfPageBaseSchema {
 function get_page_schema_as_class(json: any): IfPageBaseSchema {
 	const type = json.type;
 	// @ts-ignore
-	let p = {
+	const p = {
 		'IfPageTextSchema': IfPageTextSchema,
 		'IfPageChoiceSchema': IfPageChoiceSchema,
 		'IfPageFormulaSchema': IfPageFormulaSchema,
@@ -1899,7 +1899,7 @@ class IfPageAnswer {
 	constructor(json?: any) {
 		if(typeof json === 'undefined') return;
 		
-		for(let key in json) {
+		for(const key in json) {
 			// eslint-disable-next-line no-prototype-builtins
 			if(json.hasOwnProperty(key)) {
 				// @ts-ignore

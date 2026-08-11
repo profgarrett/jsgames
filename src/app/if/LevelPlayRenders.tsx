@@ -68,10 +68,10 @@ export function render_page_lead(page: IfPageBaseSchema, pageId: number): ReactE
 		// Make a little prettier by replacing linebreaks with div.lead.
 		// Looks better spacing-wise, as we have instructions below the lead in 
 		// a div.lead.
-		let desc = ''+fill_template(page.description, page.template_values);
-		let sDescriptions: string[] = desc.split('<br/><br/>');
+		const desc = ''+fill_template(page.description, page.template_values);
+		const sDescriptions: string[] = desc.split('<br/><br/>');
 
-		let elDescriptions = sDescriptions.map( (d: string, i: number): ReactElement =>
+		const elDescriptions = sDescriptions.map( (d: string, i: number): ReactElement =>
 				<HtmlDiv ariaLive='alert' className='lead' style={{ marginBottom: '1rem' }} key={i} html={ d } /> );
 
 		return <div>{ elDescriptions }</div>;

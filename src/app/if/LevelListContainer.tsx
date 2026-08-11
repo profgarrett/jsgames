@@ -32,7 +32,7 @@ export default function LevelListContainer() {
 			})
 			.then( response => response.json() )
 			.then( json => {
-				let ifLevels = json.map( j => new IfLevelSchema(j) );
+				const ifLevels = json.map( j => new IfLevelSchema(j) );
 				setLevels(ifLevels);
 				setMessage('');
 				setMessageStyle('info');
@@ -58,7 +58,7 @@ export default function LevelListContainer() {
 				})
 				.then( response => response.json() )
 				.then( json => {
-					let ifLevels = json.map( j => new IfLevelSchema(j) );
+					const ifLevels = json.map( j => new IfLevelSchema(j) );
 					setReviews(ifLevels);
 					setMessage('');
 					setMessageStyle('info');
@@ -90,7 +90,7 @@ export default function LevelListContainer() {
 			.then( response => response.json() )
 			.then( json => {
 
-				let newLevel = new IfLevelSchema(json);
+				const newLevel = new IfLevelSchema(json);
 				navigate('/ifgame/level/'+newLevel._id+'/play');
 
 			}).catch( error => {
@@ -135,8 +135,8 @@ export default function LevelListContainer() {
 
 	const _get_highest_grade = (levels: IfLevelSchema[]): number|null => {
 
-		let completed = levels.filter( l=> l.completed );
-		let grades: number[] = completed.map( l => l.get_test_score_as_percent() );
+		const completed = levels.filter( l=> l.completed );
+		const grades: number[] = completed.map( l => l.get_test_score_as_percent() );
 		if(grades.length == 0) return null;
 		return grades.sort((a,b) => b-a )[0];
 		/*

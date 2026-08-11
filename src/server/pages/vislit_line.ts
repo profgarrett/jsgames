@@ -90,9 +90,9 @@ const DATA = {
 
 
 function wrap( d: any, as: string): Array<any> {
-    let data: any[] = [];
+    const data: any[] = [];
 
-    for( let key in d ){
+    for( const key in d ){
         if(d.hasOwnProperty(key)) {
 			// @ts-ignore
             data.push( { id: key, data: wrapInner( d[key], as) } );

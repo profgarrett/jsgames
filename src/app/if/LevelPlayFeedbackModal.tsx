@@ -42,7 +42,7 @@ export default class LevelPlayFeedbackModal extends React.Component<IProps> {
 				? [] 
 				: page.client_feedback;
 		
-		let body: ReactElement[] = [];
+		const body: ReactElement[] = [];
 		let typedPage: IfPageBaseSchema;
 
 		if(page.completed) {
