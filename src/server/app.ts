@@ -25,8 +25,29 @@ import type { Request, Response, NextFunction } from 'express';
 
 const app = express();
 
-// Trust the proxy, as is used during development.
+// Trust the proxy. Required both in development and on DreamHost, where Apache
+// mod_proxy sits in front of this daemon and forwards the real scheme and client IP
+// in X-Forwarded-* headers.
 app.set('trust proxy', 1)
+
+/*
+	Force HTTPS.
+
+	This used to live in .htaccess. Under DreamHost's proxy server the document root is
+	no longer served by Apache, so none of the .htaccess rules run any more and the
+	redirect has to happen here.
+
+	Deliberately keyed on the header being present and equal to 'http' rather than on
+	`!req.secure`. If Apache ever stops sending X-Forwarded-Proto, `!req.secure` would be
+	true for every request and the app would redirect to itself forever; this version
+	simply stops redirecting instead.
+*/
+app.use((req: Request, res: Response, next: NextFunction) => {
+	if (!DEBUG && req.headers['x-forwarded-proto'] === 'http') {
+		return res.redirect(301, 'https://' + req.headers.host + req.originalUrl);
+	}
+	next();
+});
 
 app.use( session_initialize() ) ;
 app.use( session_refresh) ;
@@ -59,8 +80,9 @@ app.use(bodyParser.urlencoded({ limit: '10mb', extended: false }));
 
 app.use(cookieParser());
 
-// Allow trusting the IP from the proxy forwarding
-app.set('trust proxy', true); //'loopback, linklocal');
+// Note: 'trust proxy' is already set to 1 at the top of this file, which trusts
+// exactly one hop (DreamHost's Apache mod_proxy). Do not set it to `true` here --
+// that trusts every hop and lets a client spoof X-Forwarded-For / X-Forwarded-Proto.
 
 
 // Log requests and arguments to the console for easier debugging.
@@ -181,6 +203,7 @@ app.get('/test', (req: Request, res: Response) => {
 	res.send("<h1>Refresh 2</h1>");
 });
 
+/*
 app.get('/favicon.ico', (req: Request, res: Response) => {
 	res.sendFile(build_path('favicon.ico'));
 });
@@ -201,7 +224,7 @@ app.get('/main:p.js.map', (req: Request, res: Response) => {
 	const p = getRouteParamString(req.params.p);
 	res.sendFile(build_path('main' + p + '.js.map'));
 });
-
+*/
 
 
 // Load static files.
@@ -218,22 +241,57 @@ for (const staticRoot of staticRoots) {
 	app.use('/static', express.static(staticRoot));
 }
 
+/*
+	Real 404s for /api and /static.
+
+	These must come before the SPA catch-all below. Without them a mistyped API route
+	or a missing image returns index.html with status 200, which makes every proxy or
+	deploy problem ambiguous -- the browser sees "success" and renders HTML where it
+	expected JSON or a PNG. Diagnose once, and this pays for itself.
+*/
+app.use('/api', (req: Request, res: Response) => {
+	res.status(404).json({ error: 'Not found', path: req.originalUrl });
+});
+
+app.use('/static', (req: Request, res: Response) => {
+	res.status(404).type('text/plain').send('Not found');
+});
+
 // Default case that returns the general index page.
 // Needed for when client is on a subpage and refreshes the page to return the react app.
 // Should be last.
+// Only run when in production, signaled by DEBUG = false.  
+// In development, webpack-dev-server handles this.
+/*
 app.get(/^(.*)$/, (req: Request, res: Response) => {
-	// If on local, don't add jsgames. On server, code is in subfolder.
-	log_error(build_path('index.html'));
+	// Note: do NOT log_error() here. In production log_error appends to log.txt, and
+	// this route fires on every single page load, so logging grows the file without
+	// bound and opens a write stream per request.
 	res.sendFile(build_path('index.html'));
 });
-
-
+*/
+//if (process.env.NODE_ENV !== 'production') {
+//    app.use(express.static(path.join(__dirname, 'build')));
+//    app.get(/^(?!\/api\/).*/, (req, res) => res.sendFile(indexPath));
+//}
 
 process.on('uncaughtException', function (er: any) {
   log_error(er);
   process.exit(1);
 });
 
-app.listen(DEBUG ? 9000 : 80, function(){
-	console.log('app started ' + (DEBUG ? 9000 : 80) + ' - ' + (new Date()).toString() );
+/*
+	Listen port.
+
+	Deliberately NOT tied to DEBUG. DreamHost's proxy server only forwards to ports
+	8000-65535, so binding 80 in production means the proxy can never reach this daemon
+	and the site goes dark. The port and the debug flag are independent concerns; keeping
+	them coupled meant turning DEBUG off would take production down.
+
+	Override with PORT if the proxy is ever pointed somewhere else.
+*/
+const PORT = Number(process.env.PORT) || 9000;
+
+app.listen(PORT, function(){
+	console.log('app started on port ' + PORT + ' (debug=' + DEBUG + ') - ' + (new Date()).toString() );
 });

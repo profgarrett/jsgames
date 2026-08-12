@@ -309,7 +309,7 @@ function PageView({ page }: IPageViewProps): ReactElement {
 
 	if (page === null) return <></>;
 
-	const renderHeading = (level: 2 | 3 | 4 | 5 | 6) => ({ children }: { children?: React.ReactNode }) => {
+	const renderHeading = (level: 1 | 2 | 3 | 4 | 5 | 6) => ({ children }: { children?: React.ReactNode }) => {
 		const text = getTextContent(children);
 		const id = headingIdMap.get(normalizeHeadingText(text));
 		//const headingProps = id ? { id } : {};
@@ -318,6 +318,7 @@ function PageView({ page }: IPageViewProps): ReactElement {
 	};
 
 	const components = {
+		/*
 		h1: ({ children }: { children?: React.ReactNode }) => {
 			if (!renderedFirstH1.current) {
 				renderedFirstH1.current = true;
@@ -332,6 +333,8 @@ function PageView({ page }: IPageViewProps): ReactElement {
 			const id = headingIdMap.get(normalizeHeadingText(text));
 			return <h1 id={id}>{children}</h1>;
 		},
+		*/
+		h1: renderHeading(1),
 		h2: renderHeading(2),
 		h3: renderHeading(3),
 		h4: renderHeading(4),

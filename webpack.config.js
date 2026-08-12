@@ -39,6 +39,11 @@ module.exports = {
 	resolve: {
 		extensions: ['.js', '.jsx', '.ts', '.tsx' ],
 	},
+	performance: {
+		hints: 'warning', // or 'error' if you want to fail the build
+		maxAssetSize: 10000000, // Bytes allowed for a single asset (10MB)
+		maxEntrypointSize: 10000000 // Bytes allowed for an entry point (10MB)
+	},
 	module: {
 		rules: [
 			{

@@ -1,11 +1,16 @@
-// require('@babel/polyfill');
-
 const HTMLWebpackPlugin = require('html-webpack-plugin');
 const webpack = require('webpack');
 
 const TerserPlugin = require('terser-webpack-plugin');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
-//const { GOOGLEID } = require('./secret.distribution.js');
+
+// Local build timestamp, YYYYMMDD-HHMMSS. Embedded in the bundle filename so a
+// deployed build can be dated at a glance without opening meta.json.
+const BUILD_DT = (() => {
+	const d = new Date();
+	const p = n => String(n).padStart(2, '0');
+	return `${d.getFullYear()}${p(d.getMonth() + 1)}${p(d.getDate())}-${p(d.getHours())}${p(d.getMinutes())}${p(d.getSeconds())}`;
+})();
 
 module.exports = {
 	mode: 'production',
@@ -78,8 +83,8 @@ module.exports = {
 	},
 
 	output: {
-		filename: '[name].[chunkhash].js',
-		sourceMapFilename: "[name].[chunkhash].js.map",
+		filename: `[name].${BUILD_DT}.[chunkhash].js`,
+		sourceMapFilename: `[name].${BUILD_DT}.[chunkhash].js.map`,
 		publicPath: '/',
 		path:   __dirname + '/build/public'
 	},

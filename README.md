@@ -146,11 +146,9 @@ Log in  and install the node modules.  This is because the node modules are not 
 
 If doing an update, it's safest to delete the old and redo them all.
 ```bash
-
 npm install
 npm update
 ```
-
 
 
 I find it easiest to create an alias to the build folder and the app.js file.
@@ -188,24 +186,30 @@ Install pm2 (https://pm2.keymetrics.io/docs/usage/quick-start/)
 npm install pm2@latest -g
 ```
 
-Add the app file to auto-run.
-You can also get the status by -list or -status. For debuging, use pm2 logs jsgames
+Add the app file to auto-run. See deploy script for setting up pm2.
+
+Node listens on **port 9000** (override with the `PORT` env var). Do not change this to 80 --
+DreamHost's proxy only forwards to ports 8000-65535, so binding 80 means the proxy can never
+reach the daemon. The proxy is added by the deploy script, which loads nginx setting.
+
+The proxy handles only `/api`. Everything else -- `index.html`, the webpack
+bundle, and `/static` -- is served directly out of `public/` (symlinked to
+`jsgames/build/public`).
+
+Verify which mode you are in:
 
 ```bash
-pm2 start app.js --name jsgames --watch 
-pm2 save
+# Reaches Node, and confirms the proxy preserves the /api prefix
+curl https://excel.fun/api/version
+
+# Should be 404, never 200 HTML
+curl -I https://excel.fun/api/does-not-exist
+curl -I https://excel.fun/static/does-not-exist.png
 ```
 
+### Cron
 
-I use a custom .htaccess file on the server. Look in the build folder.  This file forces https.
-
-Test the server by going to excel.fun:9000/api/version
-
-You now need to add a proxy server. Bind /api and /sql to port 9000.
-This is generally done through the Dreamhost interface.
-
-
-
+Shared hosting on Dreamhost won't honor pm2. Add a cron job to check if the process is running, and restart it if not.   See dreamhostconfig/cron/pm2-check.sh for an example.
 
 
 ## Test Plan
