@@ -244,12 +244,32 @@ TEST_PASSWORD=... npm run loadtest
 
 # 10 concurrent virtual users for 30 seconds against a chosen host
 TEST_PASSWORD=... npm run loadtest -- --url https://excel.fun --concurrency 10 --duration 30
+
+# Include the SPA shell and its static assets, not just the API
+TEST_PASSWORD=... npm run loadtest -- --url https://excel.fun --concurrency 10 --duration 30 --assets
 ```
 
 Env: `BASE_URL` (default http://localhost:8080), `TEST_USER`
 (default profgarrett+test@gmail.com), `TEST_PASSWORD` (required).
 Flags: `--concurrency N`, `--iterations N`, `--duration S`, `--url URL`,
-`--no-clean`, `--verbose`, `--help`.
+`--assets`, `--no-clean`, `--verbose`, `--help`.
+
+`--assets` loads `/` once per lesson and then every same-origin script,
+stylesheet and icon it references -- including `sql-wasm.wasm`, which
+`sql-wasm.js` pulls at runtime and which is the largest single download a
+student makes. Asset URLs are parsed out of the shell rather than hard-coded,
+so the test follows whatever hash webpack stamped on the current bundle.
+Cross-origin URLs (the jsdelivr Bootstrap CSS, Google's `gsi/client`) are
+skipped: we are measuring this server. Without `--assets` the run is API-only
+and says nothing about static serving through DreamHost's proxy.
+
+Results are reported per endpoint, not as one aggregate, because
+`new_level_by_code` (run the Gen, INSERT a row) and `POST /level/:id` (SELECT,
+evaluate the formula test rows, append a page, UPDATE) cost very different
+amounts. Successful and failed requests are kept in separate latency
+distributions -- a fast 500 must not be allowed to pull the success p50 down.
+`submit_page` is also broken out by step number, since the client reposts the
+whole level and the payload grows by one page each time.
 
 The runner clears test pages automatically when finished (unless `--no-clean`).
 To remove them manually, hit the api endpoint:
