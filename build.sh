@@ -21,24 +21,34 @@ npx babel src --out-dir build --presets @babel/preset-typescript --extensions ".
 
 # Copy the wasm for sql to both the local static
 # This keeps the static version in sync with the build version
-cp node_modules/sql.js/dist/sql-wasm.* static/
+cp -p node_modules/sql.js/dist/sql-wasm.* static/
 
 # Markdown page content lives in static/pages and is copied along with the
 # rest of the static assets by the next step.
 
-# Copy static files into build folder
+# Check file permissions BEFORE the copy. In the past, some files were included w/o read
+# permissions, which caused a 403 error. This has to run first: cp carries the source
+# mode bits through to build/public/static, so fixing static/ afterwards left the current
+# build broken and only corrected the *next* one.
+./scripts/fix-static-permissions.sh
+
+# Copy static files into build folder.
+#
+# -p preserves mtimes, and that matters more than it looks. Nginx derives ETag and
+# Last-Modified from the file's timestamp, and rsync decides what to send by comparing
+# size + mtime. A plain `cp -r` stamps all ~305MB of static with the current time on
+# every build, so every deploy looks like a full content change to both: browsers
+# re-download assets that never changed, and rsync ships the whole tree. With -p an
+# untouched image keeps its original timestamp and gets a cheap 304 instead.
 mkdir build/public/static
-cp -r static/* build/public/static/
-cp static/favicon.ico build/public/favicon.ico 
-cp secret.distribution.js build/server/secret.js
-cp node_modules/sql.js/dist/sql-wasm.* build/public/static/
-cp node_modules/sql.js/dist/sql-wasm.* static/
+cp -rp static/* build/public/static/
+cp -p static/favicon.ico build/public/favicon.ico
+cp -p secret.distribution.js build/server/secret.js
+cp -p node_modules/sql.js/dist/sql-wasm.* build/public/static/
+cp -p node_modules/sql.js/dist/sql-wasm.* static/
 
 # Used to detect if a stale cache is present.
 node build_metajson.js
-
-# Check file permissions. In the past, some files were included w/o read permissions, which caused a 403 error.
-./scripts/fix-static-permissions.sh
 
 
 # Guard: never ship a debug build to production.
