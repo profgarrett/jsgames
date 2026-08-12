@@ -211,6 +211,14 @@ curl -I https://excel.fun/static/does-not-exist.png
 
 Shared hosting on Dreamhost won't honor pm2. Add a cron job to check if the process is running, and restart it if not.   See dreamhostconfig/cron/pm2-check.sh for an example.
 
+crontab -e
+
+Add these lines to the crontab.  The first line runs the check at reboot, and the second line runs it every 5 minutes.  Adjust the paths as needed.
+```
+@reboot     /home/profgarrett/bin/pm2-check.sh >> /home/profgarrett/logs/pm2.log 2>&1
+*/5 * * * * /home/profgarrett/bin/pm2-check.sh >> /home/profgarrett/logs/pm2.log 2>&1
+```
+
 
 ## Test Plan
 

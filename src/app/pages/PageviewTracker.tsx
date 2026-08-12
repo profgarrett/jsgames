@@ -1,10 +1,19 @@
 /*
 	Client-side pageview tracking.
 
-	Rendered once inside <BrowserRouter> (see index.jsx). On each route change it
-	posts an initial "load" event to /api/pageviews and then sends a heartbeat
-	every 30 seconds that advances the row's end_datetime. When the route changes
-	or the tab closes, a final heartbeat is sent so the last timestamp is captured.
+	Rendered once inside <BrowserRouter> (see index.jsx), so it sees every route
+	change, but it only tracks the content pages under /pages/ — see
+	should_track in pageviewActivity.ts. On any other route it does nothing at
+	all: no row, no heartbeats, no listeners.
+
+	On entering a tracked page it posts a "load" event to /api/pageviews and
+	then sends a heartbeat every 30 seconds that advances the row's
+	end_datetime. When the route changes or the tab closes, a final heartbeat is
+	sent so the last timestamp is captured.
+
+	The scheduled heartbeat only fires while the page is actually being used. A
+	hidden, unfocused, or idle page stops the loop until the student comes back,
+	so end_datetime reflects time on the page rather than time the tab existed.
 
 	Each heartbeat also reports engagement (see pageviewActivity.ts):
 
@@ -28,6 +37,7 @@ import { getUserFromBrowser } from '../components/Authentication';
 import {
 	compute_state,
 	is_active,
+	should_track,
 	heartbeat_url,
 	transition_heartbeat,
 	new_total,
@@ -67,6 +77,11 @@ export default function PageviewTracker(): null {
 	useEffect(() => {
 		// Only track logged-in users; the API would 401 otherwise.
 		if (getUserFromBrowser().username === '') return;
+
+		// Only track the content pages. Leaving early here means the homepage,
+		// login, admin, and the game routes register no listeners and open no
+		// row — the component is inert everywhere else.
+		if (!should_track(location.pathname)) return;
 
 		const page = location.pathname;
 		let cancelled = false;
@@ -238,11 +253,27 @@ export default function PageviewTracker(): null {
 			createRow();
 		};
 
-		// 1. Post the initial load event, then start the heartbeat loop.
+		/*
+			1. Post the initial load event, then start the heartbeat loop.
+
+			The loop re-reads the browser every tick but only reports while the
+			page is actually being used. A hidden, unfocused, or idle page has
+			nothing new to say: active_seconds has stopped growing, and
+			advancing end_datetime would record a tab left open in another
+			window as a long visit.
+
+			Nothing is lost by staying quiet. The transition *out* of active
+			already sent a heartbeat carrying the closed-out total (syncState),
+			and the transition back in sends another. If the student is away
+			long enough for the server to call the row stale, that returning
+			heartbeat gets a 409 and restartSession opens a fresh row — which is
+			the right record: two sittings, not one long one.
+		*/
 		createRow();
 		interval = setInterval(() => {
 			applyState(read_state());
-			sendHeartbeat(is_active(state));
+			if (!is_active(state)) return;
+			sendHeartbeat(true);
 		}, HEARTBEAT_MS);
 
 		INTERACTION_EVENTS.forEach((name) => {

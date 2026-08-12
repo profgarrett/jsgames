@@ -117,6 +117,34 @@ const compute_state = (reading: ActivityReading, idle_ms: number = IDLE_MS): Pag
 const is_active = (state: PageState): boolean => state === 'active';
 
 /*
+	Which routes are worth a pageview row.
+
+	Only the content pages under /pages/ — the reading material a student
+	actually spends time on. The homepage, login, profile, admin, and the game
+	routes are navigation or interaction, not reading, and tracking them filled
+	the table with rows whose duration means nothing.
+
+	Two paths under /pages are excluded because they are indexes rather than
+	content: /pages itself (the section list) and /pages/list. Both are
+	way-stations a student passes through on the way to a page.
+
+	Kept here rather than in the component so the rule can be unit tested
+	without a router.
+*/
+const TRACKED_PREFIX = '/pages/';
+const UNTRACKED_PATHS = ['/pages', '/pages/list'];
+
+const should_track = (pathname: unknown): boolean => {
+	if (typeof pathname !== 'string') return false;
+	// Trailing slashes and case vary with how the link was written; the route
+	// they resolve to does not.
+	const path = pathname.trim().toLowerCase().replace(/\/+$/, '');
+	if (path === '') return false;
+	if (UNTRACKED_PATHS.includes(path)) return false;
+	return path.startsWith(TRACKED_PREFIX);
+};
+
+/*
 	Heartbeat URL.
 
 	Both figures ride in the query string rather than a body because
@@ -150,6 +178,7 @@ const transition_heartbeat = (from: PageState, to: PageState): { send: boolean, 
 export {
 	compute_state,
 	is_active,
+	should_track,
 	heartbeat_url,
 	transition_heartbeat,
 	new_total,

@@ -9,6 +9,7 @@ const assert = require('node:assert');
 const {
 	compute_state,
 	is_active,
+	should_track,
 	heartbeat_url,
 	transition_heartbeat,
 	new_total,
@@ -26,6 +27,49 @@ const reading = (over = {}) => ({
 	focused: true,
 	ms_since_interaction: 0,
 	...over,
+});
+
+describe('should_track', () => {
+	test('content pages under /pages/ are tracked', () => {
+		assert.strictEqual(should_track('/pages/excel-basics'), true);
+		assert.strictEqual(should_track('/pages/module1/intro'), true);
+	});
+
+	test('the /pages indexes are not tracked', () => {
+		// Way-stations on the route to a page, not reading material.
+		assert.strictEqual(should_track('/pages'), false);
+		assert.strictEqual(should_track('/pages/'), false);
+		assert.strictEqual(should_track('/pages/list'), false);
+		assert.strictEqual(should_track('/pages/list/'), false);
+	});
+
+	test('every other route is untracked', () => {
+		assert.strictEqual(should_track('/'), false);
+		assert.strictEqual(should_track('/login'), false);
+		assert.strictEqual(should_track('/profile'), false);
+		assert.strictEqual(should_track('/admin'), false);
+		assert.strictEqual(should_track('/live'), false);
+		assert.strictEqual(should_track('/ifgame/level/12/play'), false);
+	});
+
+	test('a prefix that merely starts with /pages is not tracked', () => {
+		// Guards against a bare startsWith('/pages') check.
+		assert.strictEqual(should_track('/pagesomething'), false);
+		assert.strictEqual(should_track('/pages-list/foo'), false);
+	});
+
+	test('case and trailing slashes do not change the answer', () => {
+		assert.strictEqual(should_track('/Pages/Excel'), true);
+		assert.strictEqual(should_track('/pages/excel/'), true);
+		assert.strictEqual(should_track('  /pages/excel  '), true);
+	});
+
+	test('a missing or non-string path is not tracked', () => {
+		assert.strictEqual(should_track(undefined), false);
+		assert.strictEqual(should_track(null), false);
+		assert.strictEqual(should_track(''), false);
+		assert.strictEqual(should_track(42), false);
+	});
 });
 
 describe('compute_state', () => {

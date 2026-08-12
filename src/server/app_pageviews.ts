@@ -10,11 +10,16 @@
 	  (active_datetime - start_datetime)  when engagement last happened
 	  active_seconds                      how long it was actually being used
 
-	They differ because a tab left open in the background keeps sending
-	heartbeats. Each heartbeat carries an `active` flag (see PageviewTracker:
-	tab visible + window focused + recent interaction); only active heartbeats
-	advance active_datetime, so it is a high-water mark that still includes any
-	idle gaps mid-visit.
+	They differ because a visit contains gaps. Each heartbeat carries an
+	`active` flag (see PageviewTracker: tab visible + window focused + recent
+	interaction); only active heartbeats advance active_datetime, so it is a
+	high-water mark that still includes any idle gaps mid-visit.
+
+	The client stops its scheduled heartbeats once the page goes hidden, idle,
+	or unfocused, sending one last inactive heartbeat on the way out. So a
+	backgrounded tab no longer stretches end_datetime — and a row that stops
+	being updated for longer than the reuse window is treated as a finished
+	sitting (see the end_datetime predicate in build_heartbeat_update).
 
 	active_seconds is the true sum of the engaged intervals, with the gaps
 	excluded. Only the client can see focus, visibility, and interaction, so the
