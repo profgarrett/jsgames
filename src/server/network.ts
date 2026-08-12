@@ -145,7 +145,22 @@ function session_initialize() {
 }
 
 
+// Guard against a silent auth failure. cookie-session is configured with secure:true
+// in production; if the proxy in front of us stops forwarding X-Forwarded-Proto then
+// req.protocol is 'http', the cookie write throws inside cookie-session, and
+// cookie-session catches and discards that error. Sessions then stop being written
+// with no error anywhere. Warn once at startup rather than debugging it again later.
+let _warned_insecure_proxy = false;
+
 function session_refresh(req, res, next) {
+	if(!DEBUG && !_warned_insecure_proxy && req.protocol !== 'https') {
+		_warned_insecure_proxy = true;
+		console.error(
+			'FATAL-ish: req.protocol is "' + req.protocol + '" in production. The proxy is not ' +
+			'sending X-Forwarded-Proto, so no session cookie can be set or cleared. ' +
+			'Add `proxy_set_header X-Forwarded-Proto $scheme;` to the nginx /api/ location.');
+	}
+
 	req.session.nowInMinutes = Math.floor(Date.now() / 60e3)
 	next()
 }
