@@ -1,6 +1,3 @@
-// REMOVE require('@babel/polyfill');
-// import "core-js/stable";
-
 const HTMLWebpackPlugin = require('html-webpack-plugin');
 
 const HTMLWebpackPluginConfig = new HTMLWebpackPlugin({

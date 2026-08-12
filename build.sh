@@ -37,6 +37,10 @@ cp node_modules/sql.js/dist/sql-wasm.* static/
 # Used to detect if a stale cache is present.
 node build_metajson.js
 
+# Check file permissions. In the past, some files were included w/o read permissions, which caused a 403 error.
+./scripts/fix-static-permissions.sh
+
+
 # Guard: never ship a debug build to production.
 # secret.distribution.js is gitignored, so nothing stops a stray `DEBUG = true` from
 # being edited in for local testing and then silently deployed.

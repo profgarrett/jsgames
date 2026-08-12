@@ -159,13 +159,93 @@ app.get('/api/sql/',
 	}
 });
 
+/*
+	Version and build metadata for /api/version.
+
+	The version string comes from package.json. The build date comes from the webpack
+	bundle filename, which webpack.production.config.js stamps as
+	main.YYYYMMDD-HHMMSS.[chunkhash].js. Reading the timestamp off the filename rather
+	than the file's mtime is deliberate: scp/rsync rewrite mtimes on deploy, so the
+	filename is the only record of when the bundle was actually built.
+
+	Neither value can change while the process is running, so both are read once and
+	cached.
+*/
+type VersionInfo = {
+	version: string | null;
+	build_file: string | null;
+	build_dt: string | null;
+};
+
+// The layout differs between development (src/server) and the VPS
+// (jsgames/build/server, with package.json two levels further up in excel.fun/),
+// so walk up rather than hard-coding either path.
+const find_package_json = (): string | null => {
+	let dir = __dirname;
+
+	for (let i = 0; i < 6; i++) {
+		const candidate = path.join(dir, 'package.json');
+		if (fs.existsSync(candidate)) return candidate;
+
+		const parent = path.dirname(dir);
+		if (parent === dir) break;
+		dir = parent;
+	}
+	return null;
+};
+
+const read_build_info = (): { build_file: string | null, build_dt: string | null } => {
+	try {
+		const main = fs.readdirSync(build_path(''))
+			.find( f => /^main\..*\.js$/.test(f) );
+
+		if(!main) return { build_file: null, build_dt: null };
+
+		const m = main.match(/^main\.(\d{4})(\d{2})(\d{2})-(\d{2})(\d{2})(\d{2})\./);
+		if(!m) return { build_file: main, build_dt: null };
+
+		/*
+			Returned without a timezone offset on purpose. The stamp is the build
+			machine's local time, and the server that reads it here may well be in
+			a different zone, so appending 'Z' or the server's own offset would
+			produce a confidently wrong instant.
+		*/
+		const build_dt = `${m[1]}-${m[2]}-${m[3]}T${m[4]}:${m[5]}:${m[6]}`;
+
+		return { build_file: main, build_dt: build_dt };
+	} catch (e) {
+		return { build_file: null, build_dt: null };
+	}
+};
+
+let version_info: VersionInfo | null = null;
+
+const get_version_info = (): VersionInfo => {
+	if(version_info !== null) return version_info;
+
+	let version: string | null = null;
+
+	try {
+		const p = find_package_json();
+		if(p) version = JSON.parse(fs.readFileSync(p, 'utf8')).version ?? null;
+	} catch (e) {
+		version = null;
+	}
+
+	version_info = { version, ...read_build_info() };
+	return version_info;
+};
+
 app.get('/api/version', nocache, (req: Request, res: Response) => {
 	const ip = req.connection.remoteAddress;
-	const os = require( 'os' );
 	const ipheader = req.headers['x-forwarded-for'];
+	const info = get_version_info();
 
-	res.json({ 
-		environment: process.env.NODE_ENV, 
+	res.json({
+		version: info.version,
+		build_file: info.build_file,
+		build_dt: info.build_dt,
+		environment: process.env.NODE_ENV,
 		debug: DEBUG,
 		ip: ip,
 		ipheader: ipheader,
