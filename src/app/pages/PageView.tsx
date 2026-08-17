@@ -9,6 +9,7 @@ import iPage from './iPage';
 import PageFlashcards, { extractFlashcards } from './PageFlashcards';
 import PageQuiz, { extractQuizQuestions, removeQuizSection } from './PageQuiz';
 import PageQuizResults from './PageQuizResults';
+import { CustomPre, CustomCode } from './PageCodeBlock';
 import LiveQuizInstructor from './LiveQuizInstructor';
 import { getUserFromBrowser } from './../components/Authentication';
 import './pageview_toc_style.css'; // Import the CSS file for TOC styling
@@ -417,6 +418,8 @@ function PageView({ page }: IPageViewProps): ReactElement {
 		a: CustomLink,
 		img: CustomImage,
 		table: CustomTable,
+		pre: CustomPre,
+		code: CustomCode,
 	};
 
 	return (

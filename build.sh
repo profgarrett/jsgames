@@ -46,6 +46,7 @@ cp -p static/favicon.ico build/public/favicon.ico
 cp -p secret.distribution.js build/server/secret.js
 cp -p node_modules/sql.js/dist/sql-wasm.* build/public/static/
 cp -p node_modules/sql.js/dist/sql-wasm.* static/
+cp -p static/favicon.svg build/public/favicon.svg
 
 # Used to detect if a stale cache is present.
 node build_metajson.js
