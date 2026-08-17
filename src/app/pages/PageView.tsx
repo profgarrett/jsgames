@@ -12,7 +12,7 @@ import PageQuizResults from './PageQuizResults';
 import LiveQuizInstructor from './LiveQuizInstructor';
 import { getUserFromBrowser } from './../components/Authentication';
 import './pageview_toc_style.css'; // Import the CSS file for TOC styling
-import { ImgHTMLAttributes } from 'react';
+import { AnchorHTMLAttributes, ImgHTMLAttributes } from 'react';
 
 interface IPageViewProps {
 	page: iPage | null;
@@ -107,6 +107,46 @@ const convert_images_by_adding_folder_path = (markdown: string, slug: string): s
 };
 
 
+/*
+	File types that live next to the markdown in static/pages rather than being
+	pages in their own right: notebook templates, datafiles, Word exercises, and
+	so on. Add to this list when a reading starts linking a new kind of file.
+
+	Images and video are listed too, so that a plain link to one (rather than an
+	embed) resolves as well.
+*/
+const ASSET_EXTENSIONS = /\.(ipynb|csv|tsv|xlsx?|xlsm|docx?|pptx?|potx|pdf|zip|txt|json|sql|py|r|html?|png|jpe?g|gif|svg|webp|mp4|webm|ogv)$/i;
+
+/*
+	Search markdown for links to local files and rewrite them the same way
+	images are rewritten.
+
+	Without this, `[template](template.ipynb)` renders as <a href='template.ipynb'>,
+	which the browser resolves against the *page route* (/pages/course_model/...)
+	rather than against /static/pages. That URL then reaches app_pages.ts, whose
+	SLUG_RE rejects any slug containing a '.', so every notebook, datafile and
+	Word exercise on the site 404s.
+
+	Example: [template](template.ipynb)
+	Output:  [template](/static/pages/course_model/ml01-modeling-gems/template.ipynb)
+
+	Markdown links are deliberately left alone: '.md' is stripped by
+	normalize_slug on the server, so page-to-page links already resolve, and
+	keeping them relative lets the SPA router handle them.
+*/
+export const convert_asset_links_by_adding_folder_path = (markdown: string, slug: string): string => {
+	// The leading (!?) captures the image marker so that images -- already
+	// handled above -- can be passed through untouched. Matching them here
+	// rather than excluding them with a lookbehind also keeps back-to-back
+	// links, `[a](x.csv)[b](y.csv)`, from swallowing each other.
+	return markdown.replace(/(!?)\[([^\]]*)\]\(([^)\s]+)\)/g, (match, imageMarker, text, href) => {
+		if (imageMarker) return match;
+		if (/^([a-z][a-z0-9+.-]*:|\/|#)/i.test(href)) return match;
+		if (!ASSET_EXTENSIONS.test(href)) return match;
+
+		return `[${text}](${getPageAssetPath(slug, href)})`;
+	});
+};
 
 
 /*
@@ -256,6 +296,36 @@ const CustomImage: React.FC<ImgHTMLAttributes<HTMLImageElement> & { node?: unkno
 };
 
 /*
+	Markdown component for a link.
+
+	Static assets (notebook templates, datafiles, Word exercises) and external
+	sites open in a new tab, so that a student who downloads a template does not
+	lose their place in the reading. Page-to-page links navigate in place.
+
+	`target` and `rel` are set here rather than in the markdown on purpose:
+	rehype-sanitize strips attributes it does not recognise, so an author cannot
+	add them by hand.
+*/
+const CustomLink: React.FC<AnchorHTMLAttributes<HTMLAnchorElement> & { node?: unknown }> = ({
+	href = '',
+	children,
+	node: _node,
+	...props
+}) => {
+	const opensInNewTab = href.startsWith('/static/pages/') || /^https?:\/\//i.test(href);
+
+	return (
+		<a
+			href={href}
+			{...(opensInNewTab ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+			{...props}
+		>
+			{children}
+		</a>
+	);
+};
+
+/*
 	Markdown component for a table.
 
 	Adds a className='table'
@@ -280,7 +350,11 @@ const CustomTable: React.FC<TableHTMLAttributes<HTMLTableElement> & { node?: unk
 function PageView({ page }: IPageViewProps): ReactElement {
 	// Hooks must run unconditionally on every render, so compute against safe
 	// defaults when page is null and defer the empty-render until after the hooks.
-	const markdown_content = useMemo(() => (page ? convert_images_by_adding_folder_path(page.markdown, page.slug) : ''), [page?.markdown, page?.slug]);
+	const markdown_content = useMemo(() => {
+		if (!page) return '';
+		const with_images = convert_images_by_adding_folder_path(page.markdown, page.slug);
+		return convert_asset_links_by_adding_folder_path(with_images, page.slug);
+	}, [page?.markdown, page?.slug]);
 	// The Practice Questions section is hidden from the reading view (it lists
 	// the correct answer first), but is still parsed from the full markdown to
 	// build the quiz.
@@ -340,6 +414,7 @@ function PageView({ page }: IPageViewProps): ReactElement {
 		h4: renderHeading(4),
 		h5: renderHeading(5),
 		h6: renderHeading(6),
+		a: CustomLink,
 		img: CustomImage,
 		table: CustomTable,
 	};

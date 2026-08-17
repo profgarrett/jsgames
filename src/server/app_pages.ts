@@ -69,11 +69,16 @@ const list_pages = (): { slug: string; title: string }[] => {
 
 	walk(PAGES_DIR, '');
 
-	const pages = files.map((file) => {
-		const slug = file.replace(/\.md$/, '');
-		const markdown = fs.readFileSync(path.join(PAGES_DIR, file), 'utf8');
-		return { slug, title: extract_title(markdown, slug) };
-	});
+	const pages = files
+		.map((file) => file.replace(/\.md$/, ''))
+		// Only list slugs that read_page() will actually serve. Without this,
+		// vendored files (README.md, LICENSE.md) and oddly-named files show up
+		// in the index but 404 when opened.
+		.filter((slug) => is_valid_slug(slug))
+		.map((slug) => {
+			const markdown = fs.readFileSync(path.join(PAGES_DIR, slug + '.md'), 'utf8');
+			return { slug, title: extract_title(markdown, slug) };
+		});
 
 	pages.sort((a, b) => a.title.localeCompare(b.title));
 	return pages;

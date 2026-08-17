@@ -49,25 +49,42 @@ describe('extract_title', () => {
 });
 
 describe('list_pages', () => {
-	test('includes the sample pages, sorted by title', () => {
+	test('lists markdown pages, sorted by title', () => {
 		const pages = list_pages();
-		const slugs = pages.map((p) => p.slug);
-		assert.ok(slugs.includes('welcome'), 'expected welcome page');
-		assert.ok(slugs.includes('getting-started'), 'expected getting-started page');
-		assert.ok(slugs.includes('course_dv/dv00-files/index'), 'expected nested page slug');
+		assert.ok(pages.length > 0, 'expected at least one page');
+
+		// Every entry is a usable slug (no .md suffix, no leading slash).
+		for (const p of pages) {
+			assert.ok(is_valid_slug(p.slug), `invalid slug: ${p.slug}`);
+			assert.ok(!p.slug.endsWith('.md'), `slug kept extension: ${p.slug}`);
+			assert.ok(typeof p.title === 'string' && p.title.length > 0);
+		}
 
 		const titles = pages.map((p) => p.title);
 		const sorted = [...titles].sort((a, b) => a.localeCompare(b));
 		assert.deepStrictEqual(titles, sorted);
 	});
+
+	test('includes nested pages from subfolders', () => {
+		const pages = list_pages();
+		assert.ok(
+			pages.some((p) => p.slug.includes('/')),
+			'expected at least one nested page slug'
+		);
+	});
 });
 
 describe('read_page', () => {
-	test('returns markdown and title for a known slug', () => {
-		const page = read_page('welcome');
+	test('returns markdown and title for a listed slug', () => {
+		// Drive off list_pages() rather than a hardcoded page so content
+		// changes in static/pages do not break this test.
+		const [first] = list_pages();
+		assert.ok(first, 'expected at least one page to read');
+
+		const page = read_page(first.slug);
 		assert.notStrictEqual(page, null);
-		assert.strictEqual(page.slug, 'welcome');
-		assert.strictEqual(page.title, 'Welcome');
+		assert.strictEqual(page.slug, first.slug);
+		assert.strictEqual(page.title, first.title);
 		assert.ok(page.markdown.length > 0);
 	});
 
@@ -76,16 +93,22 @@ describe('read_page', () => {
 	});
 
 	test('returns markdown for a nested page slug', () => {
-		const page = read_page('course_dv/dv00-files/index');
+		const nested = list_pages().find((p) => p.slug.includes('/'));
+		assert.ok(nested, 'expected at least one nested page');
+
+		const page = read_page(nested.slug);
 		assert.notStrictEqual(page, null);
-		assert.strictEqual(page.slug, 'course_dv/dv00-files/index');
+		assert.strictEqual(page.slug, nested.slug);
 		assert.ok(page.markdown.length > 0);
 	});
 
 	test('ignores a trailing .md extension when reading page paths', () => {
-		const page = read_page('course_dv/dv00-files/index.md');
+		const nested = list_pages().find((p) => p.slug.includes('/'));
+		assert.ok(nested, 'expected at least one nested page');
+
+		const page = read_page(nested.slug + '.md');
 		assert.notStrictEqual(page, null);
-		assert.strictEqual(page.slug, 'course_dv/dv00-files/index');
+		assert.strictEqual(page.slug, nested.slug);
 		assert.ok(page.markdown.length > 0);
 	});
 
