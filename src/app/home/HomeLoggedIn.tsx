@@ -113,14 +113,13 @@ export default function HomeLoggedIn(): ReactElement {
 		</>;
 
 	// Course material lives under /pages. These are the same for everyone;
-	// note course_python has no content yet.
 	const course_links = (
 		<div style={{ marginBottom: 30 }}>
 			<div className='h5'>Course pages</div>
 			<Link to='/pages/course_dv/index'>
 				<Button variant='outline-primary' style={{ marginRight: 10 }}>Business Analytics Textbook</Button>
 			</Link>
-			<Link to='/pages/course_python/index'>
+			<Link to='/pages/course_model/index'>
 				<Button variant='outline-primary'>Modeling with Python Textbook</Button>
 			</Link>
 		</div>);

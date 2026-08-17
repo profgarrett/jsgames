@@ -55,6 +55,85 @@ declare type MysqlErrorT = {
 import mysql from 'mysql2/promise';
 
 
+////////////////////////////////////////////////////////////////////////
+// Database availability
+////////////////////////////////////////////////////////////////////////
+
+/*
+	Tell "the database is unreachable" apart from "this query is broken".
+
+	Everything in this set means the daemon could not be talked to at all (it is
+	stopped, the host/port is wrong, the credentials or database name are wrong, the
+	connection was dropped mid-flight). None of them are the caller's fault, and all of
+	them should turn into a 503 with a human message rather than a 500 stack trace.
+
+	A syntax error or a bad column name is NOT in this set: that is a bug in our code,
+	and it should keep bubbling up as a plain 500 so it stays noisy.
+*/
+const DB_UNAVAILABLE_CODES: Set<string> = new Set([
+	'ECONNREFUSED',            // nothing listening (mysqld stopped)
+	'ETIMEDOUT',               // host unreachable / firewalled
+	'ENOTFOUND',               // MYSQL_HOST does not resolve
+	'EHOSTUNREACH',
+	'ENETUNREACH',
+	'ECONNRESET',
+	'EPIPE',
+	'PROTOCOL_CONNECTION_LOST',    // server closed the connection
+	'PROTOCOL_SEQUENCE_TIMEOUT',
+	'ER_CON_COUNT_ERROR',          // too many connections
+	'ER_ACCESS_DENIED_ERROR',      // wrong user/password in secret.js
+	'ER_BAD_DB_ERROR',             // database does not exist
+	'ER_DBACCESS_DENIED_ERROR',
+	'ER_SERVER_SHUTDOWN',
+	'ER_NO_SUCH_TABLE',            // schema never installed; site cannot work
+]);
+
+/*
+	Deliberately a tagged plain Error rather than a `class ... extends Error`.
+
+	Babel transpiles this project down to ES5 (browserslist still lists IE 10), and an
+	ES5-transpiled subclass of a builtin breaks `instanceof`. A boolean property that
+	survives any transpile target is boring and always works. Check it with
+	is_db_unavailable_error() rather than by hand.
+*/
+type DatabaseUnavailableError = Error & {
+	db_unavailable: true,
+	error_code: 'DB_UNAVAILABLE',
+	cause?: any,
+};
+
+function make_db_unavailable_error(cause: any): DatabaseUnavailableError {
+	const code = cause && cause.code ? cause.code : 'unknown';
+	const e = new Error('The database is unavailable (' + code + ')') as DatabaseUnavailableError;
+
+	e.db_unavailable = true;
+	e.error_code = 'DB_UNAVAILABLE';
+	e.cause = cause;
+
+	return e;
+}
+
+/*
+	True when this error means the database itself could not be reached.
+	Accepts either an error already wrapped by run_mysql_query, or a raw mysql2 error.
+*/
+function is_db_unavailable_error(e: any): boolean {
+	if(!e) return false;
+	if(e.db_unavailable === true) return true;
+
+	return typeof e.code === 'string' && DB_UNAVAILABLE_CODES.has(e.code);
+}
+
+/*
+	Cheapest possible round trip to the database. Used by /api/health and by the
+	startup check in app.ts. Throws (a DatabaseUnavailableError) when the DB is down.
+*/
+async function db_ping(): Promise<boolean> {
+	await run_mysql_query('SELECT 1');
+	return true;
+}
+
+
 /**
  * Execute a MYSQL query synchronously.
  * 
@@ -89,6 +168,12 @@ async function run_mysql_query(sql: string, values?: Array<any>): Promise<Array<
 		if(DEBUG) {
 			console.error('Error in run_mysql_query: ' + error.code + ' ' + error.sqlMessage);
 		}
+
+		// Connection-level failures get tagged here, in the one place every query passes
+		// through, so callers (and the error handler in app.ts) can answer 503 instead of
+		// leaking a 500 stack trace. Query bugs are rethrown untouched.
+		if(is_db_unavailable_error(error)) throw make_db_unavailable_error(error);
+
 		throw error;
 	} finally {
 		// If we have a connection, close it.
@@ -351,6 +436,10 @@ export {
 	to_utc, from_mysql_to_utc, from_utc_to_myql,
 	is_faculty,
 	run_mysql_query,
+	db_ping,
+	is_db_unavailable_error,
+	make_db_unavailable_error,
+	DB_UNAVAILABLE_CODES,
 	update_mysql_database_schema,
 	update_level_in_db,
 };

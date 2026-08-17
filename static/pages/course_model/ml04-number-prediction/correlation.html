@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Correlation Scatterplot</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        canvas {
+            border: 1px solid #ddd;
+            background-color: #fafafa;
+            display: block;
+            margin: 20px auto;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .info {
+            color: #666;
+            font-size: 14px;
+            margin-top: 15px;
+        }
+        .controls {
+            margin: 15px 0;
+        }
+        select {
+            padding: 8px 12px;
+            font-size: 14px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+            background-color: white;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        .stats {
+            background-color: #f0f0f0;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 15px;
+            text-align: left;
+        }
+        .stats p {
+            margin: 8px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+        }
+        .stat-label {
+            font-weight: bold;
+            color: #333;
+        }
+        .slider-container {
+            margin: 15px 0;
+            text-align: left;
+        }
+        .slider-group {
+            margin-bottom: 15px;
+        }
+        .slider-label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #333;
+        }
+        .slider-value {
+            font-weight: bold;
+            color: #2196F3;
+        }
+        input[type="range"] {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: #ddd;
+            outline: none;
+            -webkit-appearance: none;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #2196F3;
+            cursor: pointer;
+        }
+        input[type="range"]::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #2196F3;
+            cursor: pointer;
+            border: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Correlation Scatterplot</h1>
+        <canvas id="scatterCanvas" width="600" height="500"></canvas>
+        <div class="controls">
+            <label for="patternSelect">Pattern:</label>
+            <select id="patternSelect" onchange="changePattern()">
+                <option value="linear">Linear</option>
+                <option value="exponential">Exponential</option>
+                <option value="circle">Circle</option>
+                <option value="sigmoid">Sigmoid</option>
+            </select>
+            <button onclick="generateNewData()">Generate New Data</button>
+        </div>
+        <div class="slider-container">
+            <div class="slider-group">
+                <label class="slider-label">
+                    Correlation Strength: <span class="slider-value" id="correlationStrengthValue">0.0</span>
+                </label>
+                <input type="range" id="correlationStrengthSlider" min="-1" max="1" step="0.1" value="0" oninput="updateSliders()">
+            </div>
+            <div class="slider-group">
+                <label class="slider-label">
+                    Noise Level: <span class="slider-value" id="noiseLevelValue">5</span>
+                </label>
+                <input type="range" id="noiseLevelSlider" min="0" max="100" step="1" value="5" oninput="updateSliders()">
+            </div>
+        </div>
+        <div class="stats">
+            <p><span class="stat-label">Correlation Coefficient:</span> <span id="correlationValue">-</span></p>
+            <p><span class="stat-label">95% Confidence Interval:</span> <span id="ci">-</span></p>
+            <p><span class="stat-label">P-value:</span> <span id="pValueValue">-</span> <br/><i>(probability of observing the data if the null hypothesis is true)</i></p>
+        </div>
+        <div class="info">
+            <p>Scatterplot of 100 randomly generated points</p>
+        </div>
+    </div>
+
+    <!-- Source: https://cdn.jsdelivr.net/gh/stdlib-js/stats-pcorrtest@umd/browser.js
+        Downloaded by NDG 2/4/26
+        See project at https://github.com/stdlib-js/stats-pcorrtest/tree/umd
+      -->
+    <script type='text/javascript' src="stdlib-js-stats-pcorrtest-umd-stats-browser.js"></script>
+
+    <script>
+        const canvas = document.getElementById('scatterCanvas');
+        const ctx = canvas.getContext('2d');
+        let dataPoints = [];
+        let currentPattern = 'linear';
+        let correlationStrength = 0.5;
+        let noiseLevel = 5;
+
+        function addNoise(value, amount = 5) {
+            // Add a small amount of random noise to a value
+            v = value + (Math.random() - 0.5) * amount;
+            // Have a random chance to randomly place between values of 0-100.
+            if(Math.random()*100 < amount){
+                v = Math.random() * 100;
+            }
+            return v;
+        }
+
+        function updateStats() {
+            const xValues = dataPoints.map(p => p.x);
+            const yValues = dataPoints.map(p => p.y);
+            const result = pcorrtest(xValues, yValues);
+                         
+            document.getElementById('correlationValue').textContent = result.pcorr.toFixed(4);
+            document.getElementById('pValueValue').textContent = result.pValue < 0.0001 ? '< 0.0001' : result.pValue.toFixed(4);
+            document.getElementById('ci').textContent = `[${result.ci[0].toFixed(4)}, ${result.ci[1].toFixed(4)}]`;
+        }
+
+        function generateRandomPoints(count = 100) {
+            dataPoints = [];
+            const pattern = document.getElementById('patternSelect').value;
+            const strength = parseFloat(document.getElementById('correlationStrengthSlider').value);
+            const noise = parseFloat(document.getElementById('noiseLevelSlider').value);
+
+            for (let i = 0; i < count; i++) {
+                let x, y;
+
+                if (pattern === 'linear') {
+                    // y = slope * x + intercept, centered at (50, 50)
+                    // Adjust slope based on strength (-1 to 1)
+                    x = Math.random() * 100;
+                    const slope = strength * 1.2;
+                    const intercept = 50 - slope * 50;
+                    y = slope * x + intercept;
+                    y = addNoise(y, noise);
+                } else if (pattern === 'exponential') {
+                    // Adjust exponential rate based on strength (-1 to 1), centered at (50, 50)
+                    x = Math.random() * 100;
+                    const rate = strength * 0.05;
+                    const expValue = Math.exp(rate * (x - 50));
+                    y = strength >= 0 ? 50 + 30 * (expValue - 1) : 50 - 30 * (expValue - 1);
+                    y = addNoise(y, noise);
+                    y = Math.min(Math.max(y, 0), 100);
+                } else if (pattern === 'circle') {
+                    // Circle centered at (50, 50), adjust radius and tightness based on strength
+                    const angle = Math.random() * 2 * Math.PI;
+                    const absStrength = Math.abs(strength);
+                    const baseRadius = 20 + absStrength * 20;
+                    const radiusVariation = (1 - absStrength) * 15;
+                    const radius = baseRadius + (Math.random() - 0.5) * radiusVariation;
+                    x = 50 + radius * Math.cos(angle);
+                    y = 50 + radius * Math.sin(angle);
+                    x = Math.max(0, Math.min(100, x));
+                    y = Math.max(0, Math.min(100, y));
+                } else if (pattern === 'sigmoid') {
+                    // Sigmoid: adjust steepness based on strength, centered at (50, 50)
+                    x = Math.random() * 100;
+                    const steepness = strength * 0.2;
+                    const sigmoidValue = 1 / (1 + Math.exp(-steepness * (x - 50)));
+                    y = strength >= 0 ? 50 + 40 * (sigmoidValue - 0.5) : 50 - 40 * (sigmoidValue - 0.5);
+                    y = addNoise(y, noise);
+                }
+
+                dataPoints.push({
+                    x: Math.max(0, Math.min(100, x)),
+                    y: Math.max(0, Math.min(100, y))
+                });
+            }
+        }
+
+        function drawScatterplot() {
+            // Clear canvas
+            ctx.fillStyle = '#fafafa';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Draw grid and axes
+            drawAxes();
+
+            // Draw correlation line
+            drawCorrelationLine();
+
+            // Draw points
+            ctx.fillStyle = '#2196F3';
+            ctx.beginPath();
+            dataPoints.forEach(point => {
+                const pixelX = 50 + (point.x / 100) * (canvas.width - 100);
+                const pixelY = canvas.height - 50 - (point.y / 100) * (canvas.height - 100);
+                ctx.moveTo(pixelX, pixelY);
+                ctx.arc(pixelX, pixelY, 4, 0, 2 * Math.PI);
+            });
+            ctx.fill();
+        }
+
+        function drawCorrelationLine() {
+            if (dataPoints.length < 2) return;
+
+            const xValues = dataPoints.map(p => p.x);
+            const yValues = dataPoints.map(p => p.y);
+
+            // Calculate linear regression line: y = a + b*x
+            const n = xValues.length;
+            const meanX = xValues.reduce((a, b) => a + b) / n;
+            const meanY = yValues.reduce((a, b) => a + b) / n;
+
+            let numerator = 0;
+            let denominator = 0;
+            for (let i = 0; i < n; i++) {
+                numerator += (xValues[i] - meanX) * (yValues[i] - meanY);
+                denominator += (xValues[i] - meanX) * (xValues[i] - meanX);
+            }
+
+            const slope = denominator === 0 ? 0 : numerator / denominator;
+            const intercept = meanY - slope * meanX;
+
+            // Draw line
+            ctx.strokeStyle = '#FF6B6B';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+
+            // Start point (x = 0)
+            const startX = 0;
+            const startY = intercept;
+            const startPixelX = 50 + (startX / 100) * (canvas.width - 100);
+            const startPixelY = canvas.height - 50 - (startY / 100) * (canvas.height - 100);
+
+            // End point (x = 100)
+            const endX = 100;
+            const endY = intercept + slope * endX;
+            const endPixelX = 50 + (endX / 100) * (canvas.width - 100);
+            const endPixelY = canvas.height - 50 - (endY / 100) * (canvas.height - 100);
+
+            ctx.moveTo(startPixelX, startPixelY);
+            ctx.lineTo(endPixelX, endPixelY);
+            ctx.stroke();
+        }
+
+        function drawAxes() {
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 2;
+            ctx.font = '12px Arial';
+            ctx.fillStyle = '#333';
+
+            // X-axis
+            ctx.beginPath();
+            ctx.moveTo(50, canvas.height - 50);
+            ctx.lineTo(canvas.width - 30, canvas.height - 50);
+            ctx.stroke();
+
+            // Y-axis
+            ctx.beginPath();
+            ctx.moveTo(50, 20);
+            ctx.lineTo(50, canvas.height - 50);
+            ctx.stroke();
+
+            // Axis labels
+            ctx.textAlign = 'center';
+            ctx.fillText('X', canvas.width - 15, canvas.height - 30);
+            
+            ctx.save();
+            ctx.translate(20, canvas.height / 2);
+            ctx.rotate(-Math.PI / 2);
+            ctx.textAlign = 'center';
+            ctx.fillText('Y', 0, 0);
+            ctx.restore();
+
+            // Grid lines and tick labels
+            ctx.strokeStyle = '#ddd';
+            ctx.lineWidth = 1;
+            ctx.textAlign = 'right';
+            ctx.textBaseline = 'middle';
+
+            for (let i = 0; i <= 100; i += 20) {
+                const pixelX = 50 + (i / 100) * (canvas.width - 100);
+                const pixelY = canvas.height - 50 - (i / 100) * (canvas.height - 100);
+
+                // X grid
+                ctx.beginPath();
+                ctx.moveTo(pixelX, canvas.height - 50);
+                ctx.lineTo(pixelX, 20);
+                ctx.stroke();
+                ctx.fillText(i.toString(), pixelX, canvas.height - 30);
+
+                // Y grid
+                ctx.beginPath();
+                ctx.moveTo(50, pixelY);
+                ctx.lineTo(canvas.width - 30, pixelY);
+                ctx.stroke();
+                ctx.fillText(i.toString(), 40, pixelY);
+            }
+        }
+
+        function generateNewData() {
+            generateRandomPoints();
+            drawScatterplot();
+            updateStats();
+        }
+
+        function changePattern() {
+            generateNewData();
+        }
+
+        function updateSliders() {
+            // Update display values
+            document.getElementById('correlationStrengthValue').textContent = 
+                parseFloat(document.getElementById('correlationStrengthSlider').value).toFixed(1);
+            document.getElementById('noiseLevelValue').textContent = 
+                document.getElementById('noiseLevelSlider').value;
+            
+            // Regenerate with new parameters
+            generateNewData();
+        }
+
+        // Initialize on page load
+        window.addEventListener('load', () => {
+            // Set random correlation strength and noise level
+            const randomCorrelation = (Math.random() * 2 - 1).toFixed(1); // -1 to 1
+            const randomNoise = Math.floor(Math.random() * 51); // 0 to 50
+            
+            document.getElementById('correlationStrengthSlider').value = randomCorrelation;
+            document.getElementById('noiseLevelSlider').value = randomNoise;
+            
+            // Update display values
+            document.getElementById('correlationStrengthValue').textContent = randomCorrelation;
+            document.getElementById('noiseLevelValue').textContent = randomNoise;
+            
+            // Generate and display the visualization
+            generateRandomPoints();
+            drawScatterplot();
+            updateStats();
+        });
+    </script>
+</body>
+</html>

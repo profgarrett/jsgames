@@ -3,6 +3,8 @@ import { Container, Row, Col, Card, Alert, Navbar } from 'react-bootstrap';
 import LoginCurrentUser from './LoginCurrentUser';
 import LoginGoogle from './LoginGoogle';
 import { loadUserFromServer } from './Authentication';
+import { postJson } from './Api';
+import ServiceHealthBanner from './ServiceHealth';
 import { Loading } from './Misc';
 import { Link, useNavigate } from 'react-router-dom';
 
@@ -64,88 +66,80 @@ export default function LoginContainer() {
 	//}
 
 	
-	const login = (username: string, password: string) => {
+	/*
+		Copy for the failure a student is most likely to hit and least likely to
+		understand. It goes out of its way to say "not your password", because the
+		default assumption at a login box is that you typed something wrong.
+	*/
+	const DB_DOWN_MESSAGE =
+		'The site\'s database is temporarily unavailable, so we can\'t log you in right now. '
+		+ 'This is a problem on our end — your username and password are fine. '
+		+ 'Please try again in a few minutes. If it is still down after 15 minutes, email '
+		+ 'profgarrett@gmail.com and mention error code DB_UNAVAILABLE.';
+
+	// A failure that is the user's fault reads as a warning; one that is ours reads as
+	// an error. UNAUTHORIZED is the only one in the first group.
+	const style_for = (error: any): string =>
+		(error && error.api_code === 'UNAUTHORIZED') ? 'warning' : 'danger';
+
+	// Shared success path for both sign-in routes.
+	const on_logged_in = () => {
+		setMessage( 'Success logging in!');
+		setMessageStyle( 'success' );
+		setIsLoading(false);
+
+		setTimeout( () => {
+			// Refresh the cached identity (httpOnly cookie) before navigating.
+			loadUserFromServer().finally( () => navigate('/'+url) );
+		}, location.host === 'localhost:8080' ? 1000 : 0);  // add a short delay if on dev.
+	};
+
+
+	const login = async (username: string, password: string) => {
 		const token = '';
 		setMessage('Please wait while we log you in.');
 		setMessageStyle( 'info' );
 
-		// Fire AJAX.
-		fetch('/api/users/login/', {
-				method: 'POST',
-				credentials: 'include',
-				mode: 'same-origin',
-				headers: {
-					'Accept': 'application/json',
-					'Content-Type': 'application/json'
-				},
-				body: JSON.stringify({ username, password, token })
-			})
-			.then( response => {
-				if(response.status === 403 || response.status === 401) {
-					throw Error('Invalid username or password');
-				}
-				return response;
-			})
-			.then( response => response.json() )
-			.then( json => {
-				if(json._error) throw new Error(json._error); 
+		try {
+			// postJson turns a 503, a 401, an HTML error page or a dead server into an
+			// Error whose .message is already presentable. See Api.ts.
+			await postJson('/api/users/login/', { username, password, token }, {
+				action: 'log you in',
+				db_message: DB_DOWN_MESSAGE,
+				unauthorized_message: 'Invalid username or password.',
+			});
 
-				setMessage( 'Success logging in!');
-				setMessageStyle( 'success' );
-				setIsLoading(false);
+			on_logged_in();
 
-				setTimeout( () => {
-					// Refresh the cached identity (httpOnly cookie) before navigating.
-					loadUserFromServer().finally( () => navigate('/'+url) );
-				}, location.host === 'localhost:8080' ? 1000 : 0);  // add a short delay if on dev.
-
-			})
-			.catch( error => {
-				setMessage( error.message == 'Error: 401' ? 'Invalid username or password' : error.message );
-				setMessageStyle( error.message == 'Error: 401' ? 'warning' : 'danger' );
-				setIsLoading(false);
-		});
+		} catch(error: any) {
+			// Tokens like 'ExistingUser' arrive here as the message and are rendered as
+			// their own alerts further down.
+			setMessage( error.message );
+			setMessageStyle( style_for(error) );
+			setIsLoading(false);
+		}
 	}
 
 
-	const google_login = (credential: string, section_code: string) => {
+	const google_login = async (credential: string, section_code: string) => {
 		setMessage('Please wait while we log you in.');
 		setMessageStyle( 'info' );
 		setIsLoading(true);
 
-		fetch('/api/users/google_login/', {
-				method: 'POST',
-				credentials: 'include',
-				mode: 'same-origin',
-				headers: {
-					'Accept': 'application/json',
-					'Content-Type': 'application/json'
-				},
-				body: JSON.stringify({ credential, section_code })
-			})
-			.then( response => {
-				if(response.status === 403 || response.status === 401) {
-					throw Error('Google sign-in was not accepted. Please try again.');
-				}
-				return response.json();
-			})
-			.then( json => {
-				if(json.error) throw new Error(json.error);
+		try {
+			await postJson('/api/users/google_login/', { credential, section_code }, {
+				action: 'log you in',
+				db_message: DB_DOWN_MESSAGE,
+				unauthorized_message: 'Google sign-in was not accepted. Please try again.',
+			});
 
-				setMessage( 'Success logging in!');
-				setMessageStyle( 'success' );
-				setIsLoading(false);
+			on_logged_in();
 
-				setTimeout( () => {
-					// Refresh the cached identity (httpOnly cookie) before navigating.
-					loadUserFromServer().finally( () => navigate('/'+url) );
-				}, location.host === 'localhost:8080' ? 1000 : 0);
-			})
-			.catch( error => {
-				setMessage( error.message );
-				setMessageStyle( 'danger' );
-				setIsLoading(false);
-		});
+		} catch(error: any) {
+			setMessage( error.message );
+			setMessageStyle( style_for(error) );
+			setIsLoading(false);
+		}
 	}
 
 
@@ -166,6 +160,10 @@ export default function LoginContainer() {
 return (
 <Container fluid>
 	<Loading loading={isLoading } />
+
+	{/* Warns before anything is typed, and clears itself when the database returns. */}
+	<ServiceHealthBanner action='sign in' />
+
 	{ messageAlert }
 
 	<Row><Col className='col-md-9' style={{ paddingRight: 0 }}>

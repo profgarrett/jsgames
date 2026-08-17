@@ -1,6 +1,6 @@
 import { DEBUG, JWT_AUTH_SECRET, ADMIN_USERNAME } from './secret.js'; 
 import { IfLevelSchema, IfLevelPagelessSchema } from './../shared/IfLevelSchema';
-import { from_mysql_to_utc, run_mysql_query } from './mysql';
+import { from_mysql_to_utc, run_mysql_query, is_db_unavailable_error } from './mysql';
 
 // @ts-ignore
 import bcrypt from 'bcryptjs';
@@ -321,18 +321,108 @@ function nocache(req: Request, res: Response, next: NextFunction) {
 
 
 
+/*
+	Serialize a thrown value for the log file.
+
+	JSON.stringify(new Error('x')) is '{}' -- message, stack and code are all
+	non-enumerable, so the old code wrote an empty object into log.txt for every real
+	error. Pull the interesting fields off by hand first.
+*/
+function serialize_error_for_log(arg: any): string {
+	if(arg instanceof Error) {
+		const e: any = arg;
+		const parts: any = {
+			name: e.name,
+			message: e.message,
+			code: e.code,             // 'ECONNREFUSED', 'ER_PARSE_ERROR', ...
+			error_code: e.error_code, // our own tag, eg 'DB_UNAVAILABLE'
+			sqlMessage: e.sqlMessage,
+			stack: e.stack,
+		};
+		if(e.cause) parts.cause = { message: e.cause.message, code: e.cause.code };
+
+		return JSON.stringify(parts);
+	}
+
+	const maybe = JSON.stringify(arg);
+	return typeof maybe === 'string' ? maybe : String(arg);
+}
+
 // If we're not debugging, throw all errors to log file.
 const log_error = function (arg?: any) {
 	if(DEBUG) {
 		console.log(arg);
 	} else {
 		const logFile = fs.createWriteStream('log.txt', { flags: 'a' });
-		const maybe = JSON.stringify(arg);
-		const s = typeof maybe !== 'string' ? 'Unknown error' : maybe + '\n\n';
+		const s = (new Date()).toISOString() + ' ' + serialize_error_for_log(arg) + '\n\n';
 		logFile.write(s );
 		//ogStdout.write(util.format.apply(null, arguments) + '\n');
 	}
 };
+
+
+////////////////////////////////////////////////////////////////////////
+// API error responses
+////////////////////////////////////////////////////////////////////////
+
+/*
+	Copy shown to a student when the database is unreachable.
+
+	Kept generic on purpose: this same text is used for a level save, a password reset
+	and a login. The client adds the "so we can't log you in" clause for the specific
+	action it was attempting (see src/app/components/Api.ts).
+*/
+const DB_UNAVAILABLE_MESSAGE =
+	'The site\'s database is temporarily unavailable. This is a problem on our end, not with ' +
+	'anything you typed. Please try again in a few minutes.';
+
+const SERVER_ERROR_MESSAGE =
+	'Something went wrong on our end. Please try again in a few minutes.';
+
+type ApiErrorResponse = {
+	status: number,
+	headers: { [key: string]: string },
+	body: {
+		error_code: string,
+		message: string,
+		debug?: { message: string, code?: string, stack?: string },
+	},
+};
+
+/*
+	Turn a thrown value into the JSON body the API answers with.
+
+	Pure, so it can be unit tested without standing up express or a database
+	(see test/api_error_handling.test.cjs). app.ts wraps it in the error middleware.
+
+	@param err   the value passed to next(e) / thrown by an async route
+	@param debug true in development: adds the message and stack to the response
+*/
+function build_api_error_response(err: any, debug: boolean): ApiErrorResponse {
+	const db_down = is_db_unavailable_error(err);
+
+	const response: ApiErrorResponse = {
+		status: db_down ? 503 : 500,
+		// Ask well-behaved clients (and any proxy) to back off rather than hammer a
+		// database that is already struggling.
+		headers: db_down ? { 'Retry-After': '60' } : {},
+		body: {
+			error_code: db_down ? 'DB_UNAVAILABLE' : 'SERVER_ERROR',
+			message: db_down ? DB_UNAVAILABLE_MESSAGE : SERVER_ERROR_MESSAGE,
+		},
+	};
+
+	// Never in production: stacks in this project contain absolute filesystem paths.
+	if(debug && err) {
+		response.body.debug = {
+			message: String(err.message || err),
+			code: err.code,
+			stack: err.stack,
+		};
+	}
+
+	return response;
+}
 
 export {
 	hash_password,
@@ -343,6 +433,11 @@ export {
 	
 	nocache,
 	log_error,
+	serialize_error_for_log,
+
+	build_api_error_response,
+	DB_UNAVAILABLE_MESSAGE,
+	SERVER_ERROR_MESSAGE,
 
 	session_initialize,
 	session_refresh,

@@ -11,13 +11,13 @@ import compression from 'compression';
 // @ts-ignore
 import cookieParser from 'cookie-parser';
 
-import { DEBUG } from './secret.js'; 
+import { DEBUG, MYSQL_HOST, MYSQL_DATABASE } from './secret.js';
 
 // Add a more realistic delay when in debug, useful for making that loading status screens work properly.
 const DEBUG_DELAY = DEBUG ? 500 : 0;
 
-import { update_mysql_database_schema } from './mysql';
-import { nocache, log_error, session_refresh, session_initialize } from './network';
+import { update_mysql_database_schema, db_ping, is_db_unavailable_error } from './mysql';
+import { nocache, log_error, session_refresh, session_initialize, build_api_error_response } from './network';
 
 
 import type { Request, Response, NextFunction } from 'express';
@@ -153,9 +153,42 @@ app.get('/api/sql/',
 		const v = await update_mysql_database_schema();
 		res.json(v);
 	} catch(e){
-		log_error(e);
-		res.json(e);
+		// Note: only next(e). This used to also res.json(e) first, which sent an empty
+		// {} (Error fields are non-enumerable) and then made express throw
+		// ERR_HTTP_HEADERS_SENT on top of the original problem. The error middleware at
+		// the bottom of this file now writes the response.
 		return next(e);
+	}
+});
+
+
+/*
+	Health check.
+
+	Answers 200 {db:'up'} or 503 {db:'down'}. Three uses:
+		1. the client shows a banner before a student types anything (Api.ts / ServiceHealth.tsx),
+		2. something to curl during a deploy,
+		3. a URL for uptime monitoring that actually exercises the database rather than
+		   just proving node is listening.
+
+	Deliberately does NOT log_error(): this endpoint can be polled, and in production
+	log_error appends to log.txt on every call.
+*/
+app.get('/api/health', nocache,
+	async (req: Request, res: Response): Promise<any> => {
+
+	const started = Date.now();
+
+	try {
+		await db_ping();
+		return res.json({ status: 'ok', db: 'up', ms: Date.now() - started });
+	} catch(e: any) {
+		return res.status(503).set('Retry-After', '60').json({
+			status: 'degraded',
+			db: 'down',
+			error_code: is_db_unavailable_error(e) ? 'DB_UNAVAILABLE' : 'SERVER_ERROR',
+			ms: Date.now() - started,
+		});
 	}
 });
 
@@ -355,6 +388,44 @@ app.get(/^(.*)$/, (req: Request, res: Response) => {
 //    app.get(/^(?!\/api\/).*/, (req, res) => res.sendFile(indexPath));
 //}
 
+/*
+	Error handler. MUST be last, and MUST take four arguments.
+
+	Without this, express falls back to its own default handler, which answers with an
+	HTML page -- a full stack trace (absolute paths and all) in development, the string
+	"Internal Server Error" in production. Every API caller in src/app then does
+	response.json() on that HTML, gets a SyntaxError, and shows the student
+	"Unexpected token '<'..." in a red box. That is what a stopped database looked like
+	from the login screen.
+
+	Four arguments is not decoration: express decides a middleware is an error handler
+	by its arity. Drop the unused `next` and this silently stops running.
+
+	Note also that the /api and /static 404 handlers above are ordinary middleware, so
+	express skips them once an error is in flight -- they cannot do this job.
+*/
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+app.use((err: any, req: Request, res: Response, next: NextFunction) => {
+
+	// Something already started writing (eg a route that sent a partial response and
+	// then blew up). Hand back to express, which will close the connection.
+	if(res.headersSent) return next(err);
+
+	log_error(err);
+
+	const { status, headers, body } = build_api_error_response(err, DEBUG);
+
+	res.status(status).set(headers);
+
+	// API callers get JSON (that is the whole point). A browser asking for a page gets
+	// the same sentence as plain text rather than a JSON blob it cannot read.
+	if(req.path.indexOf('/api') === 0) {
+		return res.json(body);
+	}
+	return res.type('text/plain').send(body.message);
+});
+
+
 process.on('uncaughtException', function (er: any) {
   log_error(er);
   process.exit(1);
@@ -372,6 +443,22 @@ process.on('uncaughtException', function (er: any) {
 */
 const PORT = Number(process.env.PORT) || 9000;
 
-app.listen(PORT, function(){
+app.listen(PORT, async function(){
 	console.log('app started on port ' + PORT + ' (debug=' + DEBUG + ') - ' + (new Date()).toString() );
+
+	/*
+		Prove the database is reachable at startup instead of finding out from a student.
+		Deliberately non-fatal: the process stays up so /api/health can report what is
+		wrong, and so a database that comes back on its own needs no restart here.
+	*/
+	try {
+		await db_ping();
+		console.log('database connection ok (' + MYSQL_HOST + '/' + MYSQL_DATABASE + ')');
+	} catch(e: any) {
+		console.error(
+			'DATABASE UNREACHABLE at startup: ' + (e && e.code ? e.code : e) + '. ' +
+			'Logins, saves and reports will all fail until this is fixed. Check that mysqld ' +
+			'is running and that MYSQL_HOST / MYSQL_USER / MYSQL_PASSWORD / MYSQL_DATABASE ' +
+			'in src/server/secret.js are right. /api/health reports current status.');
+	}
 });

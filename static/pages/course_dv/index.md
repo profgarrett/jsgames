@@ -53,7 +53,6 @@ Optional Reading:
 - [dv46. Writing an effective report](dv46-report/index)
 - [dv47. Creating a poster](dv47-poster/index)
 
-
 ## Module 2: Tableau
 
 ### Week 4 - September 7, 2026
@@ -64,8 +63,6 @@ Optional Reading:
 - [tb03. Shaping data in Tableau](tb03-basic-features/index)
 
 ### Week 5 - September 14, 2026 
-
-*Exam 1*
 
 - *DataCamp: Analyzing Data with Tableau, Parts 1-2*
 - [tb11. Chart refinements](tb11-chart-refinements/index)
@@ -114,8 +111,6 @@ Optional Reading:
 - [sql04. SQL Aggregation](sql04-aggregation/index)
 - [sql05. SQL Joins](sql05-joins/index)
 
-[Exam 3](exams/exam3.html)
-
 
 ## Module 5: Python
 
@@ -134,7 +129,6 @@ Continue Python
 
 ### Week 16 - November 30, 2026 
 
-[Exam 4](exams/exam4.html)
 
 ### Week 17 - December 7, 2026 
 

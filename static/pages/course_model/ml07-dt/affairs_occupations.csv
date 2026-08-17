@@ -1,0 +1,9 @@
+﻿occupation_category_group,occupation_group,occupation_education
+1,"Higher executive, major professional",Post college
+2,"Business manager, etc.",college graduated
+3,Administrative personnel,part college or post high school training
+4,"Clerical and sales, technicians",High school graduate
+5,Skilled manual,Part high school
+6,"Machine operators, semi-skilled workers",Part high school
+7,Unskilled,Part high school
+8,Never employed,NA

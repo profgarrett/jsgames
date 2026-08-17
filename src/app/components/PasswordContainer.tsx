@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import Container from 'react-bootstrap/Container';
 import { Row, Col, Navbar, Alert } from 'react-bootstrap';
 import { Loading } from './Misc';
+import { postJson } from './Api';
+import ServiceHealthBanner from './ServiceHealth';
 
 import PasswordChange from './PasswordChange';
 import PasswordRequest from './PasswordRequest';
@@ -35,75 +37,61 @@ export default function PasswordContainer() {
 		window.history.replaceState({}, document.title, clean_uri);
 	}
 
-	const submit_request = (username: string) => {
-		const url = '/';
-
+	const submit_request = async (username: string) => {
 		setIsLoading(true);
 		setMessage('Sending email with your information');
 		setMessageStyle( 'info' );
 
-		// Fire AJAX.
-		fetch('/api/users/passwordresetrequest/', {
-				method: 'POST',
-				credentials: 'include',
-				mode: 'same-origin',
-				headers: {
-					'Accept': 'application/json',
-					'Content-Type': 'application/json'
-				},
-				body: JSON.stringify({ username })
-			})
-			.then( (x) => {
-				setIsLoading(false);
-				setMessage('An email has been sent to you with a reset link. It usually takes around 5 minutes to arrive, so please be patient.');
-				setMessageStyle( 'success' );
+		/*
+			Note the await. This used to report success from a bare .then() with no
+			status check at all, so a 500 (or a database that was down) still told the
+			student "an email has been sent" and left them waiting for mail that was
+			never going to arrive.
+		*/
+		try {
+			await postJson('/api/users/passwordresetrequest/', { username }, {
+				action: 'send your reset email',
 			});
 
+			setIsLoading(false);
+			setMessage('An email has been sent to you with a reset link. It usually takes around 5 minutes to arrive, so please be patient.');
+			setMessageStyle( 'success' );
+
+		} catch(error: any) {
+			setIsLoading(false);
+			setMessage( error.message );
+			setMessageStyle( 'danger' );
+		}
 	}
 
-	const submit_change = (password: string) => {
+	const submit_change = async (password: string) => {
 		setIsLoading(true);
 		setMessage('Saving change');
 		setMessageStyle( 'info' );
 
-		const params = { 
-				passwordreset: passwordreset, 
+		const params = {
+				passwordreset: passwordreset,
 				password: password
 			};
 
-		// Fire AJAX to reset password and login with the new password.
-		fetch('/api/users/passwordreset/', {
-				method: 'POST',
-				credentials: 'include',
-				mode: 'same-origin',
-				headers: {
-					'Accept': 'application/json',
-					'Content-Type': 'application/json'
-				},
-				body: JSON.stringify(params)
-			})
-			.then( response => {
-				return response.json();
-			})
-			.then( json => {
-				if(json.error) throw new Error(json.error); 
-
-				setIsLoading(false);
-				setMessage('Password changed successfully!');
-				setMessageStyle( 'success' );
-
-				setTimeout( () => {
-					navigate(url);
-				}, 1000);
-
-			})
-			.catch( error => {
-				console.log(error);
-				setIsLoading(false);
-				setMessage(error.message);
-				setMessageStyle( 'danger' );
+		try {
+			await postJson('/api/users/passwordreset/', params, {
+				action: 'change your password',
 			});
 
+			setIsLoading(false);
+			setMessage('Password changed successfully!');
+			setMessageStyle( 'success' );
+
+			setTimeout( () => {
+				navigate(url);
+			}, 1000);
+
+		} catch(error: any) {
+			setIsLoading(false);
+			setMessage( error.message );
+			setMessageStyle( 'danger' );
+		}
 	}
 
 	
@@ -128,6 +116,8 @@ export default function PasswordContainer() {
 							<Navbar.Brand href='/'>Function Trainer</Navbar.Brand>
 						</Container>
 					</Navbar>
+
+					<ServiceHealthBanner action='reset your password' />
 
 					{ messageAlert}
 					<div className='card' style={{ backgroundColor: '#f5f5f5' }}>
