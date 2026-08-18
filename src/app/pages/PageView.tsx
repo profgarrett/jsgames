@@ -6,7 +6,7 @@ import rehypeSanitize from 'rehype-sanitize';
 import { Button } from 'react-bootstrap';
 
 import iPage from './iPage';
-import PageFlashcards, { extractFlashcards } from './PageFlashcards';
+import PageFlashcards, { extractFlashcards, appendKeyTermsSection } from './PageFlashcards';
 import PageQuiz, { extractQuizQuestions, removeQuizSection } from './PageQuiz';
 import PageQuizResults from './PageQuizResults';
 import { CustomPre, CustomCode } from './PageCodeBlock';
@@ -363,7 +363,16 @@ function PageView({ page }: IPageViewProps): ReactElement {
 		() => (extractQuizQuestions(markdown_content).length > 0 ? removeQuizSection(markdown_content) : markdown_content),
 		[markdown_content],
 	);
-	const tocEntries = useMemo(() => extractTableOfContents(reading_content), [reading_content]);
+	// Every reading ends with a Key Terms section: the same terms the flashcard
+	// deck is built from, alphabetised. Generated here rather than authored into
+	// the markdown so the list can never drift from the deck. Terms are read from
+	// the full markdown, so the count matches the Flashcards button. Applied
+	// before the TOC is extracted, so the section gets a Contents entry.
+	const reading_with_key_terms = useMemo(
+		() => appendKeyTermsSection(reading_content, markdown_content),
+		[reading_content, markdown_content],
+	);
+	const tocEntries = useMemo(() => extractTableOfContents(reading_with_key_terms), [reading_with_key_terms]);
 	const headingIdMap = useMemo(() => new Map(tocEntries.map((entry) => [normalizeHeadingText(entry.text), entry.id])), [tocEntries]);
 	const flashcards = useMemo(() => extractFlashcards(markdown_content), [markdown_content]);
 	const quizQuestions = useMemo(() => extractQuizQuestions(markdown_content), [markdown_content]);
@@ -513,7 +522,7 @@ function PageView({ page }: IPageViewProps): ReactElement {
 				rehypePlugins={[rehypeSanitize]}
 				components={components}
 			>
-				{ reading_content }
+				{ reading_with_key_terms }
 			</ReactMarkdown>
 			</>
 			)}

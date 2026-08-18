@@ -52,6 +52,101 @@ export const extractFlashcards = (markdown: string): IFlashcard[] => {
 	return cards;
 };
 
+/*
+	Heading used when a page does not already carry a Key Terms section of its
+	own. Matched case-insensitively when looking for an existing one, so that
+	both "## Key Terms" and "## Key terms" are recognised.
+*/
+const KEY_TERMS_HEADING = '## Key Terms';
+const KEY_TERMS_RE = /^key\s+terms$/i;
+
+/*
+	Render the extracted terms back out as markdown bullets, sorted
+	alphabetically by term. localeCompare with sensitivity 'base' keeps the sort
+	case- and accent-insensitive, so "eda" and "EDA" land together rather than
+	every capitalised term sorting ahead of every lowercase one.
+*/
+const formatKeyTerms = (cards: IFlashcard[]): string[] =>
+	cards
+		.slice()
+		.sort((a, b) => a.term.localeCompare(b.term, undefined, { sensitivity: 'base' }))
+		.map((card) => `- **${card.term}**: ${card.definition}`);
+
+/*
+	Give a page a "Key Terms" section built from the same marked terms the
+	flashcard deck uses, so that the two can never drift apart.
+
+	`readingMarkdown` is the text that will actually be rendered; `sourceMarkdown`
+	is what the terms are read from, and defaults to the same string. PageView
+	passes the *full* page markdown as the source so the section matches the
+	flashcard count exactly, even though the reading view itself has the practice
+	questions stripped out.
+
+	If the page already has a Key Terms heading, the section is rebuilt in place:
+	its term bullets are replaced by the complete alphabetised list (the parser
+	de-duplicates, so an authored term appears exactly once), and anything else in
+	the section -- prose, or bullets the parser cannot read, such as
+	`- **Folder** (or **directory**): ...` -- is kept above the list untouched.
+	Otherwise a new section is appended to the end of the page.
+
+	Pages with no marked terms are returned unchanged: an empty Key Terms heading
+	helps nobody.
+*/
+export const appendKeyTermsSection = (readingMarkdown: string, sourceMarkdown?: string): string => {
+	if (!readingMarkdown) return readingMarkdown;
+
+	const terms = formatKeyTerms(extractFlashcards(sourceMarkdown ?? readingMarkdown));
+	if (terms.length === 0) return readingMarkdown;
+
+	const before: string[] = [];
+	const kept: string[] = []; // lines inside an existing section that are not term bullets
+	const after: string[] = [];
+
+	// 0 until an existing heading is found; then the level that closes the section.
+	let sectionLevel = 0;
+	let phase: 'before' | 'in' | 'after' = 'before';
+
+	for (const line of readingMarkdown.split(/\r?\n/)) {
+		const heading = line.match(/^(#{1,6})\s+(.+?)\s*$/);
+
+		if (phase === 'before' && heading && KEY_TERMS_RE.test(heading[2].trim())) {
+			sectionLevel = heading[1].length;
+			phase = 'in';
+			before.push(line); // keep the heading exactly as the author wrote it
+			continue;
+		}
+
+		if (phase === 'in') {
+			// A heading at the same level or higher ends the section.
+			if (heading && heading[1].length <= sectionLevel) {
+				phase = 'after';
+				after.push(line);
+				continue;
+			}
+			// Drop the bullets we are about to regenerate; keep everything else.
+			if (extractFlashcards(line).length === 0) kept.push(line);
+			continue;
+		}
+
+		(phase === 'before' ? before : after).push(line);
+	}
+
+	if (sectionLevel === 0) {
+		return `${readingMarkdown.replace(/\s+$/, '')}\n\n${KEY_TERMS_HEADING}\n\n${terms.join('\n')}\n`;
+	}
+
+	// A kept bullet is joined straight onto the generated list so the two render
+	// as one list; kept prose gets a blank line, as a paragraph needs.
+	const keptBody = kept.join('\n').trim();
+	const separator = /^\s*[-*+]\s/m.test(keptBody.split('\n').slice(-1)[0] ?? '') ? '\n' : '\n\n';
+	const section = keptBody ? `${keptBody}${separator}${terms.join('\n')}` : terms.join('\n');
+
+	return [...before, '', section, '', ...after]
+		.join('\n')
+		.replace(/\n{3,}/g, '\n\n')
+		.replace(/\s+$/, '\n');
+};
+
 interface IFlashcardDeckProps {
 	markdown: string;
 }

@@ -344,11 +344,24 @@ app.get('/main:p.js.map', (req: Request, res: Response) => {
 // When published for real, this should be set through .htaccess to avoid hitting express.
 // In development we serve both built assets and the in-repo static tree so markdown images
 // and other page assets resolve correctly under /static.
-const staticRoots = [
-	build_path('static'),
-	path.resolve(__dirname, '../public/static'),
-	path.resolve(__dirname, '../../static'),
-].filter((candidate) => fs.existsSync(candidate));
+//
+// Order matters: express.static returns the FIRST match, so whichever root is
+// listed first wins. In development the repo's static/ folder must come first --
+// build/public/static is a snapshot from the last build.sh run, so leaving it
+// first means edits to static/styles.css silently do nothing until you rebuild.
+// In production build/public/static is the only real copy, so it leads.
+const staticRoots = (DEBUG
+	? [
+		path.resolve(__dirname, '../../static'),
+		build_path('static'),
+		path.resolve(__dirname, '../public/static'),
+	]
+	: [
+		build_path('static'),
+		path.resolve(__dirname, '../public/static'),
+		path.resolve(__dirname, '../../static'),
+	]
+).filter((candidate) => fs.existsSync(candidate));
 
 for (const staticRoot of staticRoots) {
 	app.use('/static', express.static(staticRoot));
