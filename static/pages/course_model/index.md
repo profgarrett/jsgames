@@ -29,19 +29,18 @@ Each week covers Python and Machine Learning concepts.  Most modules have a deli
 
 - DataCamp: Data manipulation with pandas
 - [py03](py03-pandas-load-filter/index): Pandas 1: load data from a file, filtering
-- [ml02](ml02-data-and-distributions/index): Data and distributions
-- [ml03](ml03-category-prediction/index): Predicting categories
+- [py04](py04-pandas-mutate/index): Pandas 2: new columns with mutation 
 
 ### Week 4 - September 7, 2026
 
-- [py04](py04-pandas-mutate/index): Pandas 2: new columns with mutation 
-- [ml04](ml04-number-prediction/index): Predicting numbers
+- [py05](py05-charts/index): Visualization with Seaborn
+- [ml02](ml02-data-and-distributions/index): Data and distributions
+- [ml03](ml03-category-prediction/index): Predicting categories
 
 ### Week 5 - September 14, 2026 
 
 - *Datacamp: Introduction to DataVis with Seaborn*
-- [py05](py05-charts/index): Visualization with Seaborn
-- [Structuring a Report](https://profgarrett.github.io/course_eda/dv10-effective-reports.html)
+- [ml04](ml04-number-prediction/index): Predicting numbers
 
 *Exam 1*
 
