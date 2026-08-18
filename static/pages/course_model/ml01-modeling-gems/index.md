@@ -10,6 +10,7 @@ Our prior course focused on visualizations as a means to understand and make pre
 
 **Links**
 - [Template](template.ipynb)
+- [Suno y = f(x) + error](https://suno.com/s/nrophQQjMMi5eYfP)
 
 ## What is a model?
 
