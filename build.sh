@@ -19,12 +19,9 @@ npm run buildwebpackclientside
 npx babel src --out-dir build --presets @babel/preset-typescript --extensions ".ts"
 npx babel src --out-dir build --presets @babel/preset-typescript --extensions ".js"
 
-# Copy the wasm for sql to both the local static
-# This keeps the static version in sync with the build version
-cp -p node_modules/sql.js/dist/sql-wasm.* static/
-
-# Markdown page content lives in static/pages and is copied along with the
-# rest of the static assets by the next step.
+# Convert ipython notebooks to markdown pages. This is a separate script because it has 
+# its own dependencies and is a bit more complex than the rest of the build.
+./scripts/build-notebook-pages.sh --clean
 
 # Check file permissions BEFORE the copy. In the past, some files were included w/o read
 # permissions, which caused a 403 error. This has to run first: cp carries the source
@@ -32,14 +29,14 @@ cp -p node_modules/sql.js/dist/sql-wasm.* static/
 # build broken and only corrected the *next* one.
 ./scripts/fix-static-permissions.sh
 
+
+# Copy the wasm for sql to both the local static
+# This keeps the static version in sync with the build version
+cp -p node_modules/sql.js/dist/sql-wasm.* static/
+
 # Copy static files into build folder.
 #
-# -p preserves mtimes, and that matters more than it looks. Nginx derives ETag and
-# Last-Modified from the file's timestamp, and rsync decides what to send by comparing
-# size + mtime. A plain `cp -r` stamps all ~305MB of static with the current time on
-# every build, so every deploy looks like a full content change to both: browsers
-# re-download assets that never changed, and rsync ships the whole tree. With -p an
-# untouched image keeps its original timestamp and gets a cheap 304 instead.
+# -p preserves mtimes. 
 mkdir build/public/static
 cp -rp static/* build/public/static/
 cp -p static/favicon.ico build/public/favicon.ico
@@ -58,6 +55,8 @@ node build_metajson.js
 set +x
 if grep -Eq '^[[:space:]]*(const|export const|var|let)[[:space:]]+DEBUG[[:space:]]*=[[:space:]]*true' build/server/secret.js; then
 	rm -rf build
+	echo "\n\n\n\n"
+	echo "\n\n\n\n"
 	echo "\n\n\n\n"
 	echo "BUILD FAILED: secret.distribution.js has DEBUG = true."
 	echo "That file becomes the production secret.js. Set DEBUG = false and rebuild."
