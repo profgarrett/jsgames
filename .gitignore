@@ -16,3 +16,12 @@ solution.*
 # Excel files create temp files.
 ~$*
 */~$*
+
+# Do not include Jupyter notebook checkpoints
+.ipynb_checkpoints
+ 
+# OR venv
+.venv/
+
+# Do not include generated images from Jupyter notebooks
+index_files/
