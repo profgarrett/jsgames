@@ -24,12 +24,12 @@ Each week covers Python and Machine Learning concepts.  Most modules have a deli
 - DataCamp: Introduction to Python
 - [py01](py01-syntax/index): Python basic syntax
 - [py02](py02-data-structures/index): Python data structures
-- [ml02](ml02-data-and-distributions/): Data and distributions
 
 ### Week 3 - August 31, 2026
 
 - DataCamp: Data manipulation with pandas
 - [py03](py03-pandas-load-filter/index): Pandas 1: load data from a file, filtering
+- [ml02](ml02-data-and-distributions/index): Data and distributions
 - [ml03](ml03-category-prediction/index): Predicting categories
 
 ### Week 4 - September 7, 2026
