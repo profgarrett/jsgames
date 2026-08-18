@@ -172,3 +172,7 @@ These are longer and less structured than the report you are being asked to writ
 - [The limits of personal experience](https://ourworldindata.org/limits-personal-experience) — every chart is annotated, and every caption makes a claim.
 - [Is 200k a year good?](https://ofdollarsanddata.com/is-200k-a-year-good/) — watch how the author states what the data cannot answer before answering what it can.
 - [Generational Wealth](https://ofdollarsanddata.com/generational-wealth/) — a clean example of separating a statistically detectable effect from a practically meaningful one.
+
+## References
+
+Images generated through Claude.

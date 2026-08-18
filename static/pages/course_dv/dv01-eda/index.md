@@ -92,7 +92,7 @@ A *visualization* is any graphic representation of information. This includes ch
 Source: Inthefallofasparrow.
 
 
-## Terms
+## Key Terms
 
 - **Anscombe's Quartet**: Four small datasets with nearly identical means, variances, correlations, and regression lines that look completely different when graphed.
 - **Chart**: A graphic that maps data to visual attributes such as position, length, color, or size. Every chart is a visualization, but not every visualization is a chart.

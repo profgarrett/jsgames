@@ -16,31 +16,31 @@ Each week covers Python and Machine Learning concepts.  Most modules have a deli
 
 ### Week 1 - August 17, 2026
 
-- [py00](py00-setup/index.md): Set up your computer
-- [ml01](ml01-modeling-gems/index.md): Introduction to modeling (with gems dataset)
+- [py00](py00-setup/index): Set up your computer
+- [ml01](ml01-modeling-gems/index): Introduction to modeling
 
 ### Week 2 - August 24, 2026
 
 - DataCamp: Introduction to Python
-- [py01](py01-syntax/index.md): Python basic syntax
-- [py02](py02-data-structures/index.md): Python data structures
+- [py01](py01-syntax/index): Python basic syntax
+- [py02](py02-data-structures/index): Python data structures
 - [ml02](ml02-data-and-distributions/): Data and distributions
 
 ### Week 3 - August 31, 2026
 
 - DataCamp: Data manipulation with pandas
-- [py03](py03-pandas-load-filter/index.md): Pandas 1: load data from a file, filtering
-- [ml03](ml03-category-prediction/index.md): Predicting categories
+- [py03](py03-pandas-load-filter/index): Pandas 1: load data from a file, filtering
+- [ml03](ml03-category-prediction/index): Predicting categories
 
 ### Week 4 - September 7, 2026
 
-- [py04](py04-pandas-mutate/index.md): Pandas 2: new columns with mutation 
-- [ml04](ml04-number-prediction/index.md): Predicting numbers
+- [py04](py04-pandas-mutate/index): Pandas 2: new columns with mutation 
+- [ml04](ml04-number-prediction/index): Predicting numbers
 
 ### Week 5 - September 14, 2026 
 
 - *Datacamp: Introduction to DataVis with Seaborn*
-- [py05](py05-charts/index.md): Visualization with Seaborn
+- [py05](py05-charts/index): Visualization with Seaborn
 - [Structuring a Report](https://profgarrett.github.io/course_eda/dv10-effective-reports.html)
 
 *Exam 1*
@@ -49,57 +49,55 @@ Each week covers Python and Machine Learning concepts.  Most modules have a deli
 ### Week 6 - September 21, 2026 
 
 - *Datacamp: Regression in Python*
-- [ml05](ml05-ols/index.md): Classical Regression with OLS
+- [ml05](ml05-ols/index): Classical Regression with OLS
 
 
 ### Week 7 - September 28, 2026 
 
-- [ml06](ml06-logistic-transform/index.md): Regression 2, Logistic regression and data transformations
+- [ml06](ml06-logistic-transform/index): Regression 2, Logistic regression and data transformations
 
 
 ### Week 8 - October 5, 2026 
 
 - *DataCamp: Machine learning with Tree-based models in Python*
-- [ml07](ml07-dt/index.md): Decision Trees
+- [ml07](ml07-dt/index): Decision Trees
 
 
 ### Week 9 - October 12, 2026 
 
 - *DataCamp: Unsupervised learning in Python*
-- [ml08](ml08-kmeans/index.md): K-Means Clustering
-- [py06](py06-pandas-group-join/index.md): Pandas 3: aggregation and joins
+- [ml08](ml08-kmeans/index): K-Means Clustering
+- [py06](py06-pandas-group-join/index): Pandas 3: aggregation and joins
 
-*[Exam 2](/course_model/exams/exam2.html)*
-
+*Exam 2*
 
 ### Week 10 - October 19, 2026 
 
-- [ml09](ml09-pca/index.md): PCA and dimensionality reduction
+- [ml09](ml09-pca/index): PCA and dimensionality reduction
 - [Good presentations](https://profgarrett.github.io/course_dv/dv11-presentations/)
 
 ### Week 11 - October 26, 2026 
 
 
-
 - *Datacamp: Intermediate Python* 
-- [py09](py09-control-flow/index.md): Control flow
-- [py10](py10-functions/index.md): Functions
+- [py09](py09-control-flow/index): Control flow
+- [py10](py10-functions/index): Functions
 
 ### Week 12 - November 2, 2026 
 
 
 
 *Datacamp: NLP in Python*
-- [ml10-nlp](ml10-nlp/index.md): NLP with Python
+- [ml10-nlp](ml10-nlp/index): NLP with Python
 - Optional readings:
 	- Primer on NLP Embeddings [reading](https://huggingface.co/spaces/hesamation/primer-llm-embedding)
 
-*[Exam 3](/course_model/exams/exam3.html)*
+*Exam 3*
 
 ### Week 13 - November 9, 2026 
 
 
-- [ml11-nn](ml11-nn/index.md): Neural Networks with Python
+- [ml11-nn](ml11-nn/index): Neural Networks with Python
 
 
 ### Week 14 - November 16, 2026 
@@ -110,15 +108,15 @@ Each week covers Python and Machine Learning concepts.  Most modules have a deli
 
 ### Week 16 - November 30, 2026 
 
-<!-- - [py07-pandas-reshaping](py07-pandas-reshaping/index.md): Pandas 4: reshaping-->
-- [ml12 - Future topics in AI/ML](ml12-future/index.md): Future topics in data science and machine learning
-- [ml13 - Ethics](ml13-ethics/index.md): Ethics in data science and machine learning
+<!-- - [py07-pandas-reshaping](py07-pandas-reshaping/index): Pandas 4: reshaping-->
+- [ml12 - Future topics in AI/ML](ml12-future/index): Future topics in data science and machine learning
+- [ml13 - Ethics](ml13-ethics/index): Ethics in data science and machine learning
 
 Project week - No new material
 
 *Project*
 
-*[Exam 4](/course_model/exams/exam4.html)*
+*Exam 4*
 
 ### Week 17 - December 7, 2026 
 
