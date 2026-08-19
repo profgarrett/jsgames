@@ -187,28 +187,68 @@ export function getJson<T = any>(url: string, options: ApiOptions = {}): Promise
 }
 
 
+/*
+	Result of the /api/health probe.
+
+	'unknown' is the important one and is deliberately separate from 'db_down'. The
+	probe answers a question about the database, and it can only answer it if the
+	health endpoint itself replied properly. Anything else -- a 404 because the running
+	server predates /api/health, an HTML error page from nginx, a 502 mid-restart, a
+	body that will not parse -- tells us nothing about the database, and must not be
+	reported as "the database is down".
+
+	This is not hypothetical: a deploy that copied the new bundle but left the old node
+	process running answered /api/health with a 404, and every student on the login
+	page was told the database was down while it was serving queries normally.
+
+	Callers should treat 'unknown' as "say nothing". The real API calls (postJson etc.)
+	still produce an accurate message if the student goes ahead and submits, so a silent
+	probe costs nothing; a wrong probe costs a support email from every student at once.
+*/
+export type HealthState =
+	'ok'           // endpoint answered, database is up
+	| 'db_down'    // endpoint answered, database is down
+	| 'unreachable'// fetch itself failed: offline, DNS, server not listening
+	| 'unknown';   // endpoint did not answer usefully -- draw no conclusion
+
 export interface HealthStatus {
-	server_reachable: boolean;
-	db_up: boolean;
+	state: HealthState;
 }
 
 /*
 	Is the database up? Never throws -- callers use this to decide whether to warn, and
 	a failing warning check should not itself break the page.
 
-	server_reachable is reported separately so the client does not blame the database
-	when the real problem is the student's wifi.
+	'unreachable' is reported separately from 'db_down' so the client does not blame the
+	database when the real problem is the student's wifi.
 */
 export async function get_health(): Promise<HealthStatus> {
+	let res: Response;
+
 	try {
-		const res = await fetch('/api/health', { headers: { 'Accept': 'application/json' } });
-
-		if(!is_json_response(res)) return { server_reachable: true, db_up: false };
-
-		const json = await res.json();
-
-		return { server_reachable: true, db_up: !!json && json.db === 'up' };
+		res = await fetch('/api/health', { headers: { 'Accept': 'application/json' } });
 	} catch {
-		return { server_reachable: false, db_up: false };
+		return { state: 'unreachable' };
 	}
+
+	// Not JSON means something other than our route answered (nginx, a proxy, the SPA
+	// fallback). It is not a statement about the database.
+	if(!is_json_response(res)) return { state: 'unknown' };
+
+	// Declared without an initializer on purpose: every path out of the catch returns,
+	// so tsc can still prove json is assigned below, and eslint's no-useless-assignment
+	// stays happy.
+	let json: any;
+	try {
+		json = await res.json();
+	} catch {
+		return { state: 'unknown' };
+	}
+
+	if(!json || typeof json.db !== 'string') return { state: 'unknown' };
+
+	if(json.db === 'up') return { state: 'ok' };
+	if(json.db === 'down') return { state: 'db_down' };
+
+	return { state: 'unknown' };
 }

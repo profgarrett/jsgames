@@ -43,9 +43,19 @@ export default function ServiceHealthBanner({ action = 'sign in' }: { action?: s
 	const health = useServiceHealth();
 
 	if(health === null) return null;
-	if(health.db_up) return null;
+	if(health.state === 'ok') return null;
 
-	if(!health.server_reachable) {
+	/*
+		'unknown' means the probe could not answer the question -- the health route 404'd,
+		a proxy returned HTML, the body did not parse. Say nothing rather than guessing.
+
+		A false "the database is down" on the login page is worse than no banner at all:
+		the student stops trying and emails, while the site works fine. If something
+		really is broken, the login POST itself still produces an accurate message.
+	*/
+	if(health.state === 'unknown') return null;
+
+	if(health.state === 'unreachable') {
 		return (
 			<Alert variant='warning'>
 				<strong>We can&apos;t reach Excel.fun right now.</strong>{' '}
