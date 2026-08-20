@@ -30,7 +30,7 @@ const term_rank = (term: string): number => {
 	Newest first: year descending, then term descending, then code ascending.
 	Puts the semester the admin actually cares about at the top.
 */
-export function sort_sections_for_reports(sections: iAdminSection[]): iAdminSection[] {
+export function sort_sections_for_reports<T extends iAdminSection>(sections: T[]): T[] {
 	return [...sections].sort( (a, b) => {
 		if(a.year !== b.year) return b.year - a.year;
 

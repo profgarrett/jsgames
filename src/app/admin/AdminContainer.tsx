@@ -1,5 +1,6 @@
 import React, { ReactElement, useEffect, useState } from 'react';
-import { Alert, Breadcrumb, Col, Container, Row } from 'react-bootstrap';
+import { Alert, Breadcrumb, Button, Col, Container, Row } from 'react-bootstrap';
+import { Link } from 'react-router-dom';
 
 import { getUserFromBrowser } from '../components/Authentication';
 import ForceLogin from '../components/ForceLogin';
@@ -213,6 +214,11 @@ export default function AdminContainer(): ReactElement {
 				<ForceLogin />
 				{crumbs}
 				<h3>Admin</h3>
+				<div style={{ marginBottom: 20 }}>
+					<Link to='/ifgame/progress'>
+						<Button variant='outline-info'>Class progress</Button>
+					</Link>
+				</div>
 				<Message message={message} style={messageStyle} />
 				<Loading loading={isLoading} />
 

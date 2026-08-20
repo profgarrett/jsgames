@@ -34,7 +34,7 @@ Measuring error is a critical part of our process. Because the model is simpler 
 - **Features** (independent variables, predictors, X): what we use to predict
 - **Target** (dependent variable, outcome, y): what we are predicting
 - **Model**: the mathematical relationship between features and target
-- **Parameters** (coefficients): the numbers the model learns from the data — the `0.02` above
+- **Parameters** (coefficients): the numbers the model learns from the data
 - **Error** (residual): actual minus predicted, for a single observation
 - **Training data**: the rows used to build the model
 - **Test data**: rows held back, used only to check the finished model

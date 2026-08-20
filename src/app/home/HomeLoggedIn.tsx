@@ -132,7 +132,7 @@ export default function HomeLoggedIn(): ReactElement {
 			<Link to='/admin'>
 				<Button variant='outline-info' style={{ marginRight: 10 }}>Admin</Button>
 			</Link>
-			<Link to={'/ifgame/progress/'}>
+			<Link to={'/ifgame/progress'}>
 					<Button variant='outline-info'>Class progress</Button>
 			</Link>
 		</div>);

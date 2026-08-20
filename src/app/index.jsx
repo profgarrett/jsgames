@@ -77,6 +77,7 @@ function renderApp() {
 						<Route path="/ifgame/level/:_id/score" element={<LevelScoreContainer />} />
 						<Route path="/ifgame/level/:_id/raw" element={<LevelRawContainer />} />
 						
+						<Route path="/ifgame/progress" element={<ClassProgressContainer />} />
 						<Route path="/ifgame/progress/:_idsection" element={<ClassProgressContainer />} />
 						<Route path="/ifgame/kcs/:_idsection" element={<KCContainer />} />
 						<Route path="/ifgame/questions/:_idsection" element={<QuestionsContainer />} />
