@@ -23,6 +23,11 @@ global.window = {
 
 const { get_sticky_section_id } = require('../src/app/pages/PageSectionPicker.tsx');
 
+const {
+	format_section_label,
+	format_enrolled_sections,
+} = require('../src/app/home/EnrolledSectionsBanner.tsx');
+
 
 describe('Excel / SQL level list split', () => {
 	test('the two lists partition the default list', () => {
@@ -150,5 +155,38 @@ describe('sort_sections_for_reports', () => {
 			sort_sections_for_reports(sections).map(s => s.idsection),
 			[2, 1]
 		);
+	});
+});
+
+
+describe('home page enrolled-sections banner', () => {
+	test('labels a section with its term and year', () => {
+		const label = format_section_label(
+			{ idsection: 1, code: 'acct350', title: 'Business Analytics', year: 2026, term: 'fall' });
+		assert.strictEqual(label, 'Business Analytics (fall 2026)');
+	});
+
+	test('falls back to the join code when a section has no title', () => {
+		const label = format_section_label(
+			{ idsection: 1, code: 'acct350', title: '', year: 2026, term: 'fall' });
+		assert.strictEqual(label, 'acct350 (fall 2026)');
+	});
+
+	test('drops the parenthetical when there is no term or year', () => {
+		const label = format_section_label(
+			{ idsection: 1, code: 'acct350', title: 'Business Analytics', year: 0, term: '' });
+		assert.strictEqual(label, 'Business Analytics');
+	});
+
+	test('lists the newest section first', () => {
+		const labels = format_enrolled_sections([
+			{ idsection: 1, code: 'b', title: 'Older', year: 2025, term: 'fall' },
+			{ idsection: 2, code: 'a', title: 'Newer', year: 2026, term: 'spring' },
+		]);
+		assert.deepStrictEqual(labels, ['Newer (spring 2026)', 'Older (fall 2025)']);
+	});
+
+	test('returns nothing for a user with no sections', () => {
+		assert.deepStrictEqual(format_enrolled_sections([]), []);
 	});
 });

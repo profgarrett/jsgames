@@ -6,6 +6,7 @@ import { Message, Loading } from '../components/Misc';
 import ForceLogin from '../components/ForceLogin';
 import CacheBuster from '../components/CacheBuster';
 import { getUserFromBrowser } from '../components/Authentication';
+import EnrolledSectionsBanner from './EnrolledSectionsBanner';
 
 import {
 	IfLevelSchema,
@@ -142,6 +143,7 @@ export default function HomeLoggedIn(): ReactElement {
 				<Col>
 					<ForceLogin />
 					<CacheBuster/>
+					<EnrolledSectionsBanner />
 					<div style={{ paddingTop: 10}} />
 					<Message message={message} style={messageStyle} />
 					<Loading loading={is_loading} />
