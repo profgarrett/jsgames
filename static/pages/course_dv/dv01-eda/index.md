@@ -234,12 +234,6 @@ Source: Inthefallofasparrow.
    - Summary statistics are more reliable than charts
    - Correlation always indicates causation
 
-1. How closely do the summary statistics of the Datasaurus Dozen datasets match?
-   - They match to the second decimal place
-   - They are only roughly similar
-   - They match exactly, with no rounding
-   - Only the means match
-
 1. What is the main limitation of a table compared to a chart?
    - Tables do not let you see patterns at a glance
    - Tables cannot hold numeric data

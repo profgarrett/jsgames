@@ -139,3 +139,96 @@ In every format, report what the model does *not* know alongside what it predict
 
 - **Machine Learning**: A tradition emphasizing prediction
 - **Statistics**: A tradition emphasizing explanation
+
+## Practice Questions
+
+1. In the expression y = f(x) + ε, what does ε represent?
+   - Everything affecting y that we did not, or could not, measure
+   - The slope of the relationship between x and y
+   - A mistake made while writing the code
+   - The number of features in the model
+1. In a model predicting which invoices will go unpaid, the invoice amount and customer age are what?
+   - Features
+   - Targets
+   - Parameters
+   - Residuals
+1. What are the numbers a model learns from the data called?
+   - Parameters
+   - Features
+   - Residuals
+   - Targets
+1. What does George Box's line "all models are wrong, but some are useful" tell us to expect?
+   - A model is a simplification, so the goal is to be predictably wrong rather than exactly right
+   - Modeling rarely produces anything worth acting on
+   - A model becomes correct once enough features are added
+   - Statistical models are wrong, but machine learning models are not
+1. You need to defend to the audit committee which factors drive unpaid invoices, and by how much. Which goal is this?
+   - Explanation
+   - Prediction
+   - Clustering
+   - Simulation
+1. Which pairing describes the statistical modeling tradition?
+   - Smaller carefully collected data, a simpler interpretable model, success measured by valid conclusions
+   - Larger opportunistic data, a complex model, success measured by accuracy on new data
+   - Larger opportunistic data, a simpler model, success measured by valid conclusions
+   - Smaller carefully collected data, a complex model, success measured by accuracy on new data
+1. What is overfitting?
+   - The model memorizes the training data instead of learning the pattern
+   - The model uses too few features to capture the relationship
+   - The model produces predictions that are all too high
+   - The model is fit on data that was collected incorrectly
+1. How does the machine learning tradition guard against overfitting?
+   - Hold out test data, build on the training set, and judge on data the model has not seen
+   - Keep the model small and specify it before looking at the data
+   - Report a p-value for every coefficient
+   - Refit the model until the training error reaches zero
+1. Why do p-values not protect against overfitting?
+   - A p-value assumes the model was chosen before seeing the data, so picking variables by p-value invalidates them
+   - P-values only apply to categorical targets
+   - P-values measure the size of an effect rather than its consistency
+   - P-values are calculated on the test set rather than the training set
+1. What does a small p-value tell you?
+   - The relationship is probably not just noise
+   - The effect is large
+   - The effect is important to the business
+   - One variable causes the other
+1. A model predicts unpaid invoices well using customer zip code. What can you conclude?
+   - Zip code is useful for prediction, but that is not evidence that changing it would change anything
+   - Zip code causes customers to pay late
+   - The model is overfit and should be discarded
+   - Zip code should be removed because it is categorical
+1. What is a confidence interval?
+   - A plausible range for something we estimated
+   - The share of predictions the model gets right
+   - The gap between the training error and the test error
+   - The probability that the model is correct
+1. How does simulation express uncertainty?
+   - Refit the model on many resamples of the data; the spread of those answers is the uncertainty
+   - Derive a formula for the standard error algebraically
+   - Add random noise to the predictions until they look plausible
+   - Run the model on the test set several times
+1. Your target is a number, such as days until payment. Which metrics fit?
+   - RMSE and R²
+   - Precision and recall
+   - True positive and false positive counts
+   - Accuracy and AUC
+1. What is wrong with using "accuracy" as the general word for how good a model is?
+   - Accuracy is one specific measure, and the right metric depends on the target
+   - Accuracy applies only to numeric targets
+   - Accuracy cannot be calculated on test data
+   - Accuracy is another name for R²
+1. When should you split the data into training and test sets?
+   - Before looking at the test set, once the data is clean and features and a target are selected
+   - After fitting the model, to check the result
+   - Before cleaning the data, so cleaning does not bias the split
+   - Only when the target is categorical
+1. Why is repeating the fit-and-evaluate cycle many times a risk?
+   - Every repetition is another chance to overfit
+   - The training data shrinks with each pass
+   - Parameters can only be estimated once
+   - The p-values grow larger each time
+1. What belongs in every format used to communicate a model's results?
+   - What the model does not know, alongside what it predicts
+   - The full feature engineering process
+   - The code used to fit the model
+   - The raw training data
