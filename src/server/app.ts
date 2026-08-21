@@ -127,6 +127,11 @@ app.use('/api/users', app_users);
 import { app_admin } from './app_admin';
 app.use('/api/admin', app_admin);
 
+// Mounted under /api/admin, but a separate router: the traffic report reads
+// pageviews rather than managing users and sections.
+import { app_traffic } from './app_traffic';
+app.use('/api/admin/traffic', app_traffic);
+
 import { app_pages } from './app_pages';
 app.use('/api/pages', app_pages);
 

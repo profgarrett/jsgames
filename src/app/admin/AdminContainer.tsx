@@ -218,6 +218,10 @@ export default function AdminContainer(): ReactElement {
 					<Link to='/ifgame/progress'>
 						<Button variant='outline-info'>Class progress</Button>
 					</Link>
+					{' '}
+					<Link to='/admin/traffic'>
+						<Button variant='outline-info'>Traffic</Button>
+					</Link>
 				</div>
 				<Message message={message} style={messageStyle} />
 				<Loading loading={isLoading} />

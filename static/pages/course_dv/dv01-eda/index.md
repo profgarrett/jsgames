@@ -54,7 +54,7 @@ The EDA process generally follows these steps. A good data analyst will iterate 
 
 This class focuses on EDA, which primarily uses a visual approach. This is different from the statistical approach used in your statistics classes. The visual approach is often more effective for understanding data, especially when dealing with large datasets or complex relationships.
 
-Follow-up classes, such as Data Modeling in Python (BUDA 451/ACCT 426), use a statistical or machine learning approach. However, these classes build on the foundation of ED- If you don't understand your data, you cannot build good models.
+Follow-up classes, such as Data Modeling in Python (BUDA 451/ACCT 426), use a statistical or machine learning approach. However, these classes build on the foundation of EDA. If you don't understand your data, you cannot build good models.
 
 Charts can reveal patterns not seen through normal statistical measures.  One classic validation of this is [Anscombe's Quartet](https://en.wikipedia.org/wiki/Anscombe%27s_quartet). These data points have the same statistical properties (mean, variance, correlation, regression line), but look very different when graphed.
 
