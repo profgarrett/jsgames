@@ -23,9 +23,13 @@ After completing this module, you should be able to:
 
 ## Links
 
+- [Slides](slides.html)
+- [Sample datafile](dv20_data_samples.xlsx)
+
+## Further reading
+
 * [Socviz.co Chapter 1](https://socviz.co/lookatdata.html)
 * [Fundamentals of Data Visualization](https://clauswilke.com/dataviz/)
-* [The Generational Collapse of American Religion](https://www.graphsaboutreligion.com/p/the-generational-collapse-of-american)
 
 
 
