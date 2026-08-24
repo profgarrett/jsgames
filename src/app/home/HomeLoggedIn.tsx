@@ -121,7 +121,10 @@ export default function HomeLoggedIn(): ReactElement {
 				<Button variant='outline-primary' style={{ marginRight: 10 }}>Business Analytics Textbook</Button>
 			</Link>
 			<Link to='/pages/course_model/index'>
-				<Button variant='outline-primary'>Modeling with Python Textbook</Button>
+				<Button variant='outline-primary' style={{ marginRight: 10 }}>Modeling with Python Textbook</Button>
+			</Link>
+			<Link to='/pages/course_ais/index'>
+				<Button variant='outline-primary'>AIS Textbook</Button>
 			</Link>
 		</div>);
 
