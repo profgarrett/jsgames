@@ -23,7 +23,7 @@ After completing this module, you should be able to:
 
 ## Links
 
-- [Slides](slides.html)
+- [Slides](/static/pages/slides.html?course=course_dv&module=dv20-data)
 - [Sample datafile](dv20_data_samples.xlsx)
 
 ## Further reading

@@ -8,7 +8,7 @@ This module covers the fundamental concepts of Python programming, including sym
 - Create and pull data from lists and tuples
 
 **Links:**
-- [Slides](slides.html)
+- [Slides](/static/pages/slides.html?course=course_model&module=py01-syntax)
 - [Template](template.ipynb)
 - [Python Quick Reference Sheet](python3-quick-reference.pdf)
 

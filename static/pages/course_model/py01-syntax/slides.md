@@ -1,3 +1,4 @@
+
 # Python Basics
 
 ### py00 — Types, Operators, and Data Structures
@@ -16,27 +17,41 @@ Note: Arrow keys or space to advance. Down arrow reveals answers on question sli
 2. **Operators** — assignment, arithmetic, PEMDAS, `//` and `%`
 3. **Data structures** — lists, tuples, indexing, slicing, `range()`
 
-Python will not warn you when you use the wrong one. It will just
-quietly do something else.
+Understanding the different types and how operators behave with them is the foundation of programming. 
 
+Lists and tuples are the most common ways to group values.
 ---
 
 ## The Central Idea
 
-Every value has a **type**, and the type controls what an operator does.
+All values have a **type**. 
+This changes the effect of an operator (i.e., `+` or `/`)
 
 ```python
 print(7 + 3)                # 10   -> addition
 print('7' + '3')            # 73   -> gluing
 ```
 
-Same operator. Same-looking values. Completely different result.
-
 ---
 
 # Part 1
 
 ## Types
+
+
+---
+
+## Integer
+
+A whole number, no decimal point. Counts, row numbers, IDs.
+
+```python
+students = 42
+year = 2026
+print(students + 1)         # 43
+print(type(students))       # <class 'int'>
+```
+
 
 ---
 
@@ -74,26 +89,15 @@ print(0.1 + 0.2)            # 0.30000000000000004
 print(0.1 + 0.2 == 0.3)     # False
 ```
 
-Not a bug. It is what happens when base-10 fractions are stored in
-base-2.
+This is supposed to happen! Storing numbers in base-2 is different from base-10.
+
+Think about common computer numbers: 2, 4, 8, 16, 32, 64, 128. These are all exact in 
+binary. You can't store exactly 10 in binary, you can only do either 8 or 16.
 
 For money: **round before comparing**.
 
 ```python
 print(round(0.1 + 0.2, 2) == 0.3)   # True
-```
-
----
-
-## Integer
-
-A whole number, no decimal point. Counts, row numbers, IDs.
-
-```python
-students = 42
-year = 2026
-print(students + 1)         # 43
-print(type(students))       # <class 'int'>
 ```
 
 ---
@@ -117,7 +121,8 @@ Backticks are **not** valid Python. `` `Ada` `` is a syntax error.
 
 ## A Number in Quotes Is Text
 
-The single most common source of confusion.
+This is very common problem when loading data from a file or `input()`. 
+The value looks like a number, but it is actually a string. Python will not warn you when you use the wrong one. It will just quietly do something else.
 
 ```python
 print(7 + 3)                # 10
@@ -126,8 +131,7 @@ print(7 == '7')             # False  (different types)
 print('7' * 3)              # 777    (repeated)
 ```
 
-`'7' * 3` does not raise an error. It gives you the wrong answer
-silently.
+`'7' * 3` does not raise an error.
 
 ---
 
@@ -144,8 +148,6 @@ Conversion fails loudly when it cannot work:
 ```python
 print(int('seven'))         # ValueError: invalid literal for int()
 ```
-
-A loud error is a gift. The silent wrong answer is the dangerous one.
 
 ---
 
@@ -168,18 +170,13 @@ print(not passed)           # False
 
 ## Comparisons Produce Booleans
 
-This is where you will actually meet them.
+This is how we generlaly use Boolean variables.
 
 ```python
 score = 85
 print(score >= 70)          # True
 print(type(score >= 70))    # <class 'bool'>
-```
 
-A comparison is not a question you ask the screen. It is a **value**
-you can store.
-
-```python
 passed = score >= 70
 ```
 
@@ -206,25 +203,19 @@ Name the **type** of the result, or the **output**.
 
 ---
 
-## Q1
+## Questions 1-3
+
+**Q1.**
 
 ```python
 print(type(10 / 5))
 ```
 
-**What type prints?**
+*Answer: `<class 'float'>`. Division always returns a float, even for
+10 / 5 = 2. Use `10 // 5` if you need an `int`.*
+<!-- .element: class="fragment" -->
 
---
-
-### A1 — `<class 'float'>`
-
-Division always returns a float, even for 10 / 5 = 2.
-
-Use `10 // 5` if you need an `int`.
-
----
-
-## Q2
+**Q2.**
 
 ```python
 x = '25'
@@ -232,75 +223,49 @@ y = 4
 print(x * y)
 ```
 
-**What prints?**
+*Answer: `25252525`. `str * int` repeats the string. It is not
+multiplication and it is not an error. Fix: `int(x) * y` gives `100>`.*
+<!-- .element: class="fragment" -->
 
---
-
-### A2 — `25252525`
-
-`str * int` repeats the string. It is not multiplication and it is not
-an error.
-
-Fix: `int(x) * y` gives `100`.
-
----
-
-## Q3
+**Q3.**
 
 ```python
 print(0.1 + 0.2 == 0.3)
 ```
 
-**What prints?**
-
---
-
-### A3 — `False`
-
-Binary floating point. The left side is `0.30000000000000004`.
-
-Compare rounded values, or compare with a tolerance.
+*Answer: `False`. Binary floating point makes the left side
+`0.30000000000000004`. Compare rounded values, or compare with a
+tolerance.*
+<!-- .element: class="fragment" -->
 
 ---
 
-## Q4
+## Questions 4-6
+
+**Q4.**
 
 ```python
 enrolled = TRUE
 ```
 
-**What happens?**
+*Answer: `NameError`. Python booleans are `True` and `False`, capital
+first letter only. `TRUE` is read as a variable name that was never
+defined.*
+<!-- .element: class="fragment" -->
 
---
-
-### A4 — `NameError`
-
-Python booleans are `True` and `False`, capital first letter only.
-
-`TRUE` is read as a variable name that was never defined.
-
----
-
-## Q5
+**Q5.**
 
 ```python
 age = input('Age? ')    # user types 30
 print(age + 5)
 ```
 
-**What happens?**
+*Answer: `TypeError`. `input()` always returns a **string**, even when
+the user types digits. `'30' + 5` cannot concatenate a str and an int.
+Fix: `int(age) + 5`.*
+<!-- .element: class="fragment" -->
 
---
-
-### A5 — `TypeError`
-
-`input()` always returns a **string**, even when the user types digits.
-
-`'30' + 5` cannot concatenate a str and an int. Fix: `int(age) + 5`.
-
----
-
-## Q6
+**Q6.**
 
 ```python
 score = 91
@@ -308,14 +273,9 @@ result = score >= 90
 print(type(result))
 ```
 
-**What type prints?**
-
---
-
-### A6 — `<class 'bool'>`
-
-The comparison is evaluated first and produces `True`, which is a
-boolean value stored in `result`.
+*Answer: `<class 'bool'>`. The comparison is evaluated first and
+produces `True`, which is a boolean value stored in `result`.*
+<!-- .element: class="fragment" -->
 
 ---
 
@@ -334,13 +294,14 @@ A `#` makes Python ignore the rest of the line.
 percent = points / 100      # this part still runs
 ```
 
-Comments explain **why**, not what. `# add one to x` is noise.
+Comments explain **why**, not what. `# add one to x` is pointless, as it just 
+repeats the code.
 
 ---
 
 ## Assignment vs. Equality
 
-The single most common beginner error.
+A common beginner error.
 
 - `=` **stores** a value in a variable
 - `==` **asks** whether two values are the same
@@ -351,8 +312,7 @@ print(score == 10)          # True
 print(score == '10')        # False  (int vs. str)
 ```
 
-`if score = 10:` is a **syntax error** — deliberately. Python is
-blocking a typo that silently destroys data in other languages.
+`if score = 10:` will raise a **syntax error**  to block a common typo.
 
 ---
 
@@ -382,8 +342,6 @@ The caret `^` is **not** an exponent in Python — it is bitwise XOR.
 print(2 ^ 8)                # 10    (not 256)
 ```
 
-Another silent wrong answer.
-
 ---
 
 ## Integer Division and Modulo
@@ -407,8 +365,7 @@ print(n % 2 == 0)           # True  -> n is even
 print(125 // 60, 125 % 60)  # 2 5   -> 125 min = 2 hr, 5 min
 ```
 
-Any time you split a quantity into whole units plus a remainder, these
-two operators are the tool.
+Use to split a quantity into whole units plus a remainder.
 
 ---
 
@@ -444,7 +401,7 @@ It is **not** `(3 * 2) ** 2 + 1`, which would be 37.
 
 ## Parentheses Win
 
-There is no prize for leaving them out.
+Use when you have an unclear expression, or when you want to override the default order.
 
 ```python
 print((3 * 2) ** 2 + 1)     # 37
@@ -473,117 +430,77 @@ Give the **value** and, where it matters, the **type**.
 
 ---
 
-## Q7
+## Questions 7-9
+
+**Q7.**
 
 ```python
 print(8 % 3)
 ```
 
-**What prints?**
+*Answer: `2`. 8 divided by 3 is 2 with a remainder of 2. Modulo keeps
+the remainder. Compare: `8 // 3` is `2` (the whole times), `8 / 3` is
+`2.6666666666666665`.*
+<!-- .element: class="fragment" -->
 
---
-
-### A7 — `2`
-
-8 divided by 3 is 2 with a remainder of 2. Modulo keeps the remainder.
-
-Compare: `8 // 3` is `2` (the whole times), `8 / 3` is
-`2.6666666666666665`.
-
----
-
-## Q8
+**Q8.**
 
 ```python
 print(2 ^ 8)
 ```
 
-**What prints?**
+*Answer: `10`. `^` is bitwise XOR, not an exponent. Python does not
+complain. For 256 you need `2 ** 8`.*
+<!-- .element: class="fragment" -->
 
---
-
-### A8 — `10`
-
-`^` is bitwise XOR, not an exponent. Python does not complain.
-
-For 256 you need `2 ** 8`.
-
----
-
-## Q9
+**Q9.**
 
 ```python
 print(10 + 2 * 3 ** 2)
 ```
 
-**What prints?**
-
---
-
-### A9 — `28`
-
-Exponent first: `3 ** 2` is 9. Then `2 * 9` is 18. Then `10 + 18`
-is 28.
-
-Not `(10 + 2) * 3 ** 2`, which is 108.
+*Answer: `28`. Exponent first: `3 ** 2` is 9. Then `2 * 9` is 18.
+Then `10 + 18` is 28. Not `(10 + 2) * 3 ** 2`, which is 108.*
+<!-- .element: class="fragment" -->
 
 ---
 
-## Q10
+## Questions 10-12
+
+**Q10.**
 
 ```python
 score = 65
 print(score >= 70 or score == 65)
 ```
 
-**What prints?**
+*Answer: `True`. `score >= 70` is `False`. `score == 65` is `True`.
+`False or True` is `True`. Only one side of an `or` needs to hold.*
+<!-- .element: class="fragment" -->
 
---
-
-### A10 — `True`
-
-`score >= 70` is `False`. `score == 65` is `True`.
-
-`False or True` is `True`. Only one side of an `or` needs to hold.
-
----
-
-## Q11
+**Q11.**
 
 ```python
 if score = 70:
     print('passed')
 ```
 
-**What happens?**
+*Answer: `SyntaxError`. `=` assigns, `==` compares. A condition needs
+`==`. Python refuses to run the file at all. Nothing before this line
+executes either.*
+<!-- .element: class="fragment" -->
 
---
-
-### A11 — `SyntaxError`
-
-`=` assigns, `==` compares. A condition needs `==`.
-
-Python refuses to run the file at all. Nothing before this line
-executes either.
-
----
-
-## Q12
+**Q12.**
 
 ```python
 minutes = 200
 print(minutes // 60, minutes % 60)
 ```
 
-**What prints?**
-
---
-
-### A12 — `3 20`
-
-200 minutes is 3 whole hours (`//`) with 20 minutes left over (`%`).
-
-The comma in `print()` puts a space between the two values.
+*Answer: `3 20`. 200 minutes is 3 whole hours (`//`) with 20 minutes
+left over (`%`). The comma in `print()` puts a space between the two
+values.*
+<!-- .element: class="fragment" -->
 
 ---
 
@@ -686,8 +603,6 @@ print(my_list[5])
 
 A five-item list has valid indexes **0 through 4**.
 
-Off-by-one errors live here.
-
 ---
 
 ## Lists Can Be Changed
@@ -752,101 +667,68 @@ chosen together.
 
 ---
 
-## Predict the Output
+## Questions 13-15
 
 `my_list = [10, 20, 30, 40, 50]` for all of these.
 
----
-
-## Q13
+**Q13.**
 
 ```python
 print(my_list[1])
 ```
 
-**What prints?**
+*Answer: `20`. Index 1 is the **second** item. Index 0 is the first.*
+<!-- .element: class="fragment" -->
 
---
-
-### A13 — `20`
-
-Index 1 is the **second** item. Index 0 is the first.
-
----
-
-## Q14
+**Q14.**
 
 ```python
 print(my_list[5])
 ```
 
-**What happens?**
+*Answer: `IndexError`. Valid indexes are 0 through 4. There is no index
+5 in a five-item list. Note this is **not** the same as slicing:
+`my_list[5:]` returns `[]` without complaint.*
+<!-- .element: class="fragment" -->
 
---
-
-### A14 — `IndexError`
-
-Valid indexes are 0 through 4. There is no index 5 in a five-item list.
-
-Note this is *not* the same as slicing: `my_list[5:]` returns `[]`
-without complaint.
-
----
-
-## Q15
+**Q15.**
 
 ```python
 print(my_list[1:3])
 ```
 
-**What prints?**
-
---
-
-### A15 — `[20, 30]`
-
-Start 1 is included, end 3 is excluded. Two items, because 3 − 1 = 2.
+*Answer: `[20, 30]`. Start 1 is included, end 3 is excluded. Two
+items, because 3 - 1 = 2.*
+<!-- .element: class="fragment" -->
 
 ---
 
-## Q16
+## Questions 16-18
+
+`my_list = [10, 20, 30, 40, 50]` for all of these.
+
+**Q16.**
 
 ```python
 print(my_list[-2:])
 ```
 
-**What prints?**
+*Answer: `[40, 50]`. Start two from the end, run to the end. This is
+the idiom for "the last n items."*
+<!-- .element: class="fragment" -->
 
---
-
-### A16 — `[40, 50]`
-
-Start two from the end, run to the end.
-
-This is the idiom for "the last n items."
-
----
-
-## Q17
+**Q17.**
 
 ```python
 my_tuple = (100, 200, 300)
 my_tuple[1] = 25
 ```
 
-**What happens?**
+*Answer: `TypeError`. Tuples are immutable. Item assignment is not
+supported. If you need to change it, you needed a list.*
+<!-- .element: class="fragment" -->
 
---
-
-### A17 — `TypeError`
-
-Tuples are immutable. Item assignment is not supported.
-
-If you need to change it, you needed a list.
-
----
-
-## Q18
+**Q18.**
 
 ```python
 x, y = 5, 9
@@ -854,38 +736,27 @@ x, y = y, x
 print(x, y)
 ```
 
-**What prints?**
-
---
-
-### A18 — `9 5`
-
-The right side is built into a tuple `(9, 5)` **first**, then unpacked
-into x and y.
-
-That is why no temporary variable is needed.
+*Answer: `9 5`. The right side is built into a tuple `(9, 5)` **first**,
+then unpacked into x and y. That is why no temporary variable is
+needed.*
+<!-- .element: class="fragment" -->
 
 ---
 
-## Q19
+## Questions 19-20
+
+
+**Q19.**
 
 ```python
 print(list(range(1, 5)))
 ```
 
-**What prints?**
+*Answer: `[1, 2, 3, 4]`. Start is included, end is excluded. Four
+numbers, because 5 - 1 = 4. Same rule as slicing.*
+<!-- .element: class="fragment" -->
 
---
-
-### A19 — `[1, 2, 3, 4]`
-
-Start is included, end is excluded. Four numbers, because 5 − 1 = 4.
-
-Same rule as slicing.
-
----
-
-## Q20
+**Q20.**
 
 ```python
 my_list.append(60)
@@ -893,15 +764,9 @@ print(len(my_list))
 print(my_list[-1])
 ```
 
-**What prints?**
-
---
-
-### A20 — `6` then `60`
-
-`append()` adds to the end and changes the list in place.
-
-`len()` is now 6, so the valid indexes are 0 through 5.
+*Answer: `6` then `60`. `append()` adds to the end and changes the
+list in place. `len()` is now 6, so the valid indexes are 0 through 5.*
+<!-- .element: class="fragment" -->
 
 ---
 
@@ -926,6 +791,15 @@ print(type(total))
 --
 
 ### A — Order Total
+
+```python
+price = '19.99'
+qty = 3
+total = price * qty
+print(total)
+print(type(total))
+```
+
 
 Prints `19.9919.9919.99`, then `<class 'str'>`.
 
@@ -960,6 +834,15 @@ print(passed or honors)
 
 ### A — Pass Rate
 
+```python
+score = 85
+passed = score >= 70
+honors = score >= 90
+print(passed, honors)
+print(passed and honors)
+print(passed or honors)
+```
+
 ```text
 True False
 False
@@ -988,6 +871,13 @@ print(2 + 3 * 4 ** 2 // 5)
 --
 
 ### A — Time Conversion
+
+```python
+total_minutes = 425
+print(total_minutes // 60, total_minutes % 60)
+print(2 + 3 * 4 ** 2 // 5)
+```
+
 
 ```text
 7 5
@@ -1019,6 +909,16 @@ print(roster[5])
 --
 
 ### A — Class Roster
+
+```python
+roster = ['Ada', 'Bob', 'Chen', 'Dee']
+print(len(roster))
+print(roster[1:3])
+print(roster[-1])
+roster.append('Eve')
+print(roster[4])
+print(roster[5])
+```
 
 ```text
 4
@@ -1055,6 +955,15 @@ point[0] = 99
 
 ### A — Coordinates
 
+
+```python
+point = (3, 7)
+x, y = point
+x, y = y, x
+print(x, y)
+point[0] = 99
+```
+
 Prints `7 3`, then raises
 `TypeError: 'tuple' object does not support item assignment`.
 
@@ -1069,7 +978,7 @@ edit a tuple's contents.
 
 ---
 
-## The Habit
+## Summary
 
 Before you run it, ask:
 
@@ -1082,7 +991,7 @@ Before you run it, ask:
 
 ---
 
-## Errors Worth Recognizing
+## Common Errors
 
 | Error        | Usual cause                                  |
 | ------------ | -------------------------------------------- |
@@ -1093,14 +1002,3 @@ Before you run it, ask:
 | `IndexError`  | Index past the end of the list              |
 
 An error message is a diagnosis. Read the last line first.
-
----
-
-## Resources
-
-- [Notebook template](template.ipynb)
-- [Python Quick Reference Sheet](python3-quick-reference.pdf)
-
----
-
-# Questions?

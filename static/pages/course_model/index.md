@@ -16,6 +16,7 @@ Each week covers Python and Machine Learning concepts.  Most modules have a deli
 
 ### Week 1 - August 17, 2026
 
+- [Okta](/pages/course_ais/okta/index) Sign in with a laptop fingerprint reader
 - [py00](py00-setup/index): Set up your computer
 - [ml01](ml01-modeling-gems/index): Introduction to modeling
 

@@ -1,3 +1,4 @@
+
 # Understanding Your Data
 
 ### dv20 — Data Values and Structure
@@ -193,108 +194,43 @@ nominal · ordinal · interval · ratio · coding · data dictionary*
 
 ---
 
-## Q1
+## Questions 1-3
 
-An HR export stores Employee IDs as `00417`, `00418`, `00419`.
+**Q1.** An HR export stores Employee IDs as `00417`, `00418`, `00419`. When opened in Excel they become `417`, `418`, `419`.
 
-When opened in Excel they become `417`, `418`, `419`.
+*Storage Type: The IDs must be stored as **text**, not integer, to preserve leading zeros. Same trap as ZIP Codes: it looks numeric, but no arithmetic is ever performed on it.*
+<!-- .element: class="fragment" -->
 
-**Which concept?**
+**Q2.** A loan file rates each borrower as `Low`, `Moderate`, `High`, or `Severe`.
 
---
+*Ordinal: The categories have a clear order, but we cannot claim the distance from Low to Moderate equals the distance from High to Severe. Median is defensible. Mean is questionable.*
+<!-- .element: class="fragment" -->
 
-### A1 — Storage Type
-
-The IDs must be stored as **text**, not integer, to preserve leading zeros.
-
-Same trap as ZIP Codes: it looks numeric, but no arithmetic is ever
-performed on it.
-
----
-
-## Q2
-
-A loan file rates each borrower as `Low`, `Moderate`, `High`, or `Severe`.
-
-**Which concept?**
-
---
-
-### A2 — Ordinal
-
-The categories have a clear order, but we cannot claim the distance from
-Low to Moderate equals the distance from High to Severe.
-
-Median is defensible. Mean is questionable.
-
----
-
-## Q3
-
-An `Order` table has a `CustomerID` column. Every value in it also appears
+**Q3**. An `Order` table has a `CustomerID` column. Every value in it also appears
 in the `Customer` table's ID column.
 
-**Which concept?**
+*Foreign Key. `CustomerID` is the **primary key** in the Customer table and a foreign key in the Order table.*
+<!-- .element: class="fragment" -->
 
---
-
-### A3 — Foreign Key
-
-`CustomerID` is the **primary key** in the Customer table and a
-**foreign key** in the Order table.
-
-It is how the two tables join.
 
 ---
 
-## Q4
+## Questions 3-6
 
-A daily inventory table repeats each SKU and repeats each warehouse.
-Only `SKU + Warehouse + Date` together identify one row.
+**Q4**. A daily inventory table repeats each SKU and repeats each warehouse. Only `SKU + Warehouse + Date` together identify one row.
 
-**Which concept?**
+*Composite Key.  No single field is unique. Three fields combine to form the key. This also tells you the **unit of observation**: one SKU, in one warehouse, on one day.*
+<!-- .element: class="fragment" -->
 
---
+**Q5.** A survey field contains `Y`, `Yes`, `1`, `TRUE`, and `yes`.
 
-### A4 — Composite Key
+*Coding.  Five different ways to say the same thing. A bar chart of this field produces five bars where there should be one.*
+<!-- .element: class="fragment" -->
 
-No single field is unique. Three fields combine to form the key.
+**Q6.** A campus sensor records building temperature in °C. An analyst reports that the atrium at 24°C is "twice as warm" as the lobby at 12°C.
 
-This also tells you the **unit of observation**: one SKU, in one
-warehouse, on one day.
-
----
-
-## Q5
-
-A survey field contains `Y`, `Yes`, `1`, `TRUE`, and `yes`.
-
-**Which concept?**
-
---
-
-### A5 — Coding
-
-Five representations of one category.
-
-A bar chart of this field produces five bars where there should be one.
-
----
-
-## Q6
-
-A campus sensor records building temperature in °C. An analyst reports
-that the atrium at 24°C is "twice as warm" as the lobby at 12°C.
-
-**Which concept?**
-
---
-
-### A6 — Interval
-
-Celsius has equal intervals but no true zero, so ratios are meaningless.
-
-The difference (12 degrees) is fine. The ratio is not.
+*Interval. Celsius has equal intervals but no true zero, so ratios are meaningless. The difference (12 degrees) is fine. The ratio is not.*
+<!-- .element: class="fragment" -->
 
 ---
 
@@ -416,104 +352,37 @@ Name which **table-level concept** applies:
 
 ---
 
-## Q7
+## Questions 7-12
 
-An HR file lists every current employee with their salary as of
-December 31, 2026. Each employee appears exactly once.
+**Q7.** An HR file lists every current employee with their salary as of December 31, 2026. Each employee appears exactly once.
 
-**Which concept?**
+*Cross-Sectional: One row per entity, one point in time. A snapshot. Row count = employee count.*
+<!-- .element: class="fragment" -->
 
---
+**Q8.** A utility file records one meter reading per customer per month for three years.
 
-### A7 — Cross-Sectional
+*Longitudinal: Each customer appears 36 times. `COUNT(rows)` counts readings, not customers. Use a **distinct count** of customer ID.*
+<!-- .element: class="fragment" -->
 
-One row per entity, one point in time. A snapshot.
+**Q9.** A downloaded BLS file lists employment for each county, and after every group of counties there is a row for the state.
 
-Row count = employee count.
+*Roll-Up: The state rows are summaries of the county rows above them. Filter them out, or you double every number in the chart.*
+<!-- .element: class="fragment" -->
 
----
+**Q10.** A spreadsheet has columns: `Region`, `FY2023`, `FY2024`, `FY2025`, `FY2026`.
 
-## Q8
+*Wide: The variable "fiscal year" is spread across four columns. To chart revenue over time you must reshape it to `Region | Year | Revenue`.*
+<!-- .element: class="fragment" -->
 
-A utility file records one meter reading per customer per month for
-three years.
+**Q11.** A point-of-sale export has one row for every item scanned, with a receipt number, timestamp, SKU, and price.
 
-**Which concept?**
+*Transaction: One row per business event. The unit of observation is the *line item*, not the customer and not the receipt.*
+<!-- .element: class="fragment" -->
 
---
+**Q12.** A file has columns `Store`, `Quarter`, `Sales` — with four rows per store.
 
-### A8 — Longitudinal
-
-Each customer appears 36 times.
-
-`COUNT(rows)` counts readings, not customers. Use a **distinct count**
-of customer ID.
-
----
-
-## Q9
-
-A downloaded BLS file lists employment for each county, and after every
-group of counties there is a row for the state.
-
-**Which concept?**
-
---
-
-### A9 — Roll-Up
-
-The state rows are summaries of the county rows above them.
-
-Filter them out, or you double every number in the chart.
-
----
-
-## Q10
-
-A spreadsheet has columns: `Region`, `FY2023`, `FY2024`, `FY2025`, `FY2026`.
-
-**Which concept?**
-
---
-
-### A10 — Wide
-
-The variable "fiscal year" is spread across four columns.
-
-To chart revenue over time you must reshape it to
-`Region | Year | Revenue`.
-
----
-
-## Q11
-
-A point-of-sale export has one row for every item scanned, with a
-receipt number, timestamp, SKU, and price.
-
-**Which concept?**
-
---
-
-### A11 — Transaction
-
-One row per business event. The unit of observation is the *line item*,
-not the customer and not the receipt.
-
----
-
-## Q12
-
-A file has columns `Store`, `Quarter`, `Sales` — with four rows per store.
-
-**Which concept?**
-
---
-
-### A12 — Long
-
-Quarter is a value in a column, not a set of columns.
-
-Chart-ready.
+*Long: Quarter is a value in a column, not a set of columns. Chart-ready.*
+<!-- .element: class="fragment" -->
 
 ---
 
@@ -622,108 +491,37 @@ Name which **data-quality concept** applies:
 
 ---
 
-## Q13
+## Questions 13-18
 
-A shipping table shows an order placed `2026-03-15` and shipped
-`2026-03-01`.
+**Q13.** A shipping table shows an order placed `2026-03-15` and shipped `2026-03-01`.
 
-**Which concept?**
+*Invalid: The ship date precedes the order date. This breaks a logical rule, no matter how plausible each date looks alone. Often caused by a bad join or a default date.*
+<!-- .element: class="fragment" -->
 
---
+**Q14.** In a customer table, the `Age` field contains `-999` for 40 rows.
 
-### A13 — Invalid
+*Missing: `-999` is a placeholder, not a value. If you average this column, every one of those rows drags the mean down enormously. Invalid is a defensible second answer — the key point is that it is not a real age.*
+<!-- .element: class="fragment" -->
 
-The ship date precedes the order date. This breaks a logical rule, no
-matter how plausible each date looks alone.
+**Q15.** Invoice `1002` appears twice: same customer, same date, same amount, same everything.
 
-Often caused by a bad join or a default date.
+*Duplicate: The invoice number should be a primary key, so it must appear once. Check whether it is a true double entry or a legitimate second invoice that was mis-numbered.*
+<!-- .element: class="fragment" -->
 
----
+**Q16.** Customer `C204` appears 12 times in a transaction table.
 
-## Q14
+*None of These: Expected behavior. The unit of observation is the *transaction*, not the customer. C204 bought 12 times. Duplicates are only duplicates relative to the unit of observation.*
+<!-- .element: class="fragment" -->
 
-In a customer table, the `Age` field contains `-999` for 40 rows.
+**Q17.** A nonprofit's donation file has a median gift of $75 and one gift of $2.4 million.
 
-**Which concept?**
+*Outlier: Investigate — it could be a keying error, or it could be the single most important donor in the file. Do not drop it. Consider reporting median alongside mean.*
+<!-- .element: class="fragment" -->
 
---
+**Q18.** A project tracker's `PercentComplete` field contains `140`.
 
-### A14 — Missing
-
-`-999` is a placeholder, not a value. If you average this column, every
-one of those rows drags the mean down enormously.
-
-Invalid is a defensible second answer — the key point is that it is
-not a real age.
-
----
-
-## Q15
-
-Invoice `1002` appears twice: same customer, same date, same amount,
-same everything.
-
-**Which concept?**
-
---
-
-### A15 — Duplicate
-
-The invoice number should be a primary key, so it must appear once.
-
-Check whether it is a true double entry or a legitimate second invoice
-that was mis-numbered.
-
----
-
-## Q16
-
-Customer `C204` appears 12 times in a transaction table.
-
-**Which concept?**
-
---
-
-### A16 — None of These
-
-Expected behavior. The unit of observation is the *transaction*, not the
-customer. C204 bought 12 times.
-
-Duplicates are only duplicates relative to the unit of observation.
-
----
-
-## Q17
-
-A nonprofit's donation file has a median gift of $75 and one gift of
-$2.4 million.
-
-**Which concept?**
-
---
-
-### A17 — Outlier
-
-Investigate — it could be a keying error, or it could be the single most
-important donor in the file.
-
-Do not drop it. Consider reporting median alongside mean.
-
----
-
-## Q18
-
-A project tracker's `PercentComplete` field contains `140`.
-
-**Which concept?**
-
---
-
-### A18 — Invalid
-
-The field has a defined range of 0–100. A rule is broken.
-
-Possibly a manager's optimism, possibly a formula that double-counted.
+*Invalid: The field has a defined range of 0–100. A rule is broken. Possibly a manager's optimism, possibly a formula that double-counted.*
+<!-- .element: class="fragment" -->
 
 ---
 
@@ -804,110 +602,40 @@ Name which **aggregation or role concept** applies:
 
 ---
 
-## Q19
+## Questions 19-24
 
-A dashboard shows "Average ZIP Code: 41,208" for the customer base.
+**Q19.** A dashboard shows "Average ZIP Code: 41,208" for the customer base.
 
-**Which concept?**
+*Wrong Aggregation: ZIP Code is a **nominal label** that happens to be numeric. Correct answer: count, or distinct count of ZIP Codes served.*
+<!-- .element: class="fragment" -->
 
---
+**Q20.** An analyst reports the **median** star rating for each product, plus the count of reviews.
 
-### A19 — Wrong Aggregation
+*Appropriate Aggregation: Ratings are ordinal. Median and counts respect the order without assuming equal spacing between stars. Reporting the count alongside prevents a 5.0 built on one review.*
+<!-- .element: class="fragment" -->
 
-ZIP Code is a **nominal label** that happens to be numeric.
+**Q21.** A field records product weight to four decimal places: `87.2345` lbs.
 
-Correct answer: count, or distinct count of ZIP Codes served.
+*Continuous: Effectively unlimited values within a range. Precision is a property of the scale used, not of the categories. Tableau will give it an axis.*
+<!-- .element: class="fragment" -->
 
----
+**Q22.** A field records `Customer Segment` as `1`, `2`, or `3`.
 
-## Q20
+*Discrete: Only three possible values, and the numbers are labels. Summing segment codes is meaningless — Tableau's default of `SUM` here is a trap. Convert it to a dimension.*
+<!-- .element: class="fragment" -->
 
-An analyst reports the **median** star rating for each product, plus the
-count of reviews.
+**Q23.** A finance team sums the `Revenue` column of a transaction table to get annual revenue.
 
-**Which concept?**
+*Appropriate Aggregation: Revenue is a ratio-scaled measure and each row is a distinct event, so sum is correct. Only caveat: confirm there are no roll-up rows or duplicates hiding in the table.*
+<!-- .element: class="fragment" -->
 
---
+**Q24.** A team sums the `InventoryOnHand` column across 12 monthly snapshot rows for the same SKU.
 
-### A20 — Appropriate Aggregation
-
-Ratings are ordinal. Median and counts respect the order without
-assuming equal spacing between stars.
-
-Reporting the count alongside prevents a 5.0 built on one review.
-
----
-
-## Q21
-
-A field records product weight to four decimal places: `87.2345` lbs.
-
-**Which concept?**
-
---
-
-### A21 — Continuous
-
-Effectively unlimited values within a range. Precision is a property of
-the scale used, not of the categories.
-
-Tableau will give it an axis.
+*Wrong Aggregation: Each row is a snapshot of the *same* inventory, not a new quantity. Summing counts the same units twelve times. Use the latest value, or an average across periods.*
+<!-- .element: class="fragment" -->
 
 ---
 
-## Q22
-
-A field records `Customer Segment` as `1`, `2`, or `3`.
-
-**Which concept?**
-
---
-
-### A22 — Discrete
-
-Only three possible values, and the numbers are labels.
-
-Summing segment codes is meaningless — Tableau's default of `SUM` here
-is a trap. Convert it to a dimension.
-
----
-
-## Q23
-
-A finance team sums the `Revenue` column of a transaction table to get
-annual revenue.
-
-**Which concept?**
-
---
-
-### A23 — Appropriate Aggregation
-
-Revenue is a ratio-scaled measure and each row is a distinct event, so
-sum is correct.
-
-Only caveat: confirm there are no roll-up rows or duplicates hiding in
-the table.
-
----
-
-## Q24
-
-A team sums the `InventoryOnHand` column across 12 monthly snapshot rows
-for the same SKU.
-
-**Which concept?**
-
---
-
-### A24 — Wrong Aggregation
-
-Each row is a snapshot of the *same* inventory, not a new quantity.
-Summing counts the same units twelve times.
-
-Use the latest value, or an average across periods.
-
----
 
 # Putting It Together
 
@@ -1046,7 +774,7 @@ And: the **unit of observation** is unclear without documentation.
 
 ---
 
-## The Habit
+## Summary
 
 Before any chart, for every dataset:
 
@@ -1055,14 +783,4 @@ Before any chart, for every dataset:
 - **Values** → missing, invalid, outlier, duplicate
 - **Math** → which aggregation is meaningful
 
----
-
-## Further Reading
-
-- [Socviz.co, Chapter 1](https://socviz.co/lookatdata.html)
-- [Fundamentals of Data Visualization](https://clauswilke.com/dataviz/)
-- [The Generational Collapse of American Religion](https://www.graphsaboutreligion.com/p/the-generational-collapse-of-american)
-
----
-
-# Questions?
+Questions?

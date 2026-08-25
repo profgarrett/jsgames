@@ -30,6 +30,7 @@ This course introduces students to data analysis through visualization. Students
 
 ### Week 1 - August 17, 2026
 
+- [Okta](/pages/course_ais/okta/index) Sign in with a laptop fingerprint reader
 - [dv00. File management](dv00-files/index)
 - [dv01. EDA process](dv01-eda/index)
 

@@ -20,6 +20,7 @@ Course Introduction & RPS Exercise
 ### Week 2 - August 24, 2026
 
 - [file00](file00-setup/index): Set up your computer
+- [Okta](okta/index): Set up Okta for fingerprint reader
 - [excel01](excel01-input-formats/index): Introduction to Excel
 
 <!-- 
