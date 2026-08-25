@@ -37,6 +37,11 @@ const CODE_LENGTH = 6;
 const CODE_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 const CODE_GENERATION_ATTEMPTS = 10;
 
+// Most past sessions to list on the "Review past sessions" screen. A term of
+// live sessions on one page is a handful; this is only here so the query can
+// never turn into an unbounded scan.
+const HISTORY_LIMIT = 50;
+
 
 ////////////////////////////////////////////////////////////////////////
 //  Shapes
@@ -168,6 +173,35 @@ const parse_question_order = (raw: string | null, total_questions: number): numb
 	}
 };
 
+/*
+	How many questions a stored session's frozen deck holds, for the past-sessions
+	list. Reads questions_json rather than counting answer rows, so a session
+	nobody answered still reports its real length. Returns 0 for anything
+	unparseable instead of throwing -- one corrupt row should not take out the
+	whole list. Exported for unit testing.
+*/
+const count_stored_questions = (questions_json: unknown): number => {
+	if (typeof questions_json !== 'string') return 0;
+	try {
+		const parsed = JSON.parse(questions_json);
+		return Array.isArray(parsed) ? parsed.length : 0;
+	} catch {
+		return 0;
+	}
+};
+
+export interface IPastSession {
+	idsession: number;
+	code: string;
+	page: string;
+	// ISO-8601 UTC strings, formatted in SQL (see the query) so nothing has to
+	// guess a timezone while parsing a bare MySQL DATETIME.
+	created_datetime: string | null;
+	ended_datetime: string | null;
+	participant_count: number;
+	question_count: number;
+}
+
 interface IParticipantAnswerRow {
 	question_index: number;
 	correct: number;
@@ -254,7 +288,15 @@ export interface ILeaderboardEntry {
 	Build the per-question results for an ended session. Unlike the async-quiz
 	summary (which infers everything from logged rows), a live session has the
 	authoritative question deck, so every option shows up even if nobody picked
-	it. Questions stay in the order they were asked. Exported for unit testing.
+	it.
+
+	Questions come back worst-first: most wrong answers at the top, so the
+	review after a session starts with whatever the class actually missed.
+	Ranked by the raw count of wrong answers rather than percent correct, so a
+	question ten students missed outranks one that two of three missed. Ties
+	fall back to the lower percent correct and then to asked order, which keeps
+	the order stable for a given set of results; a question nobody answered
+	sorts last rather than reading as an all-wrong one. Exported for unit testing.
 */
 const summarize_session_results = (
 	questions: IStoredQuizQuestion[],
@@ -267,7 +309,7 @@ const summarize_session_results = (
 		rowsByQuestion.set(row.question_index, list);
 	}
 
-	return questions.map((question, index) => {
+	const summaries = questions.map((question, index) => {
 		const rows = rowsByQuestion.get(index) ?? [];
 		const total = rows.length;
 		const correct = rows.filter((row) => Number(row.correct) === 1).length;
@@ -290,6 +332,24 @@ const summarize_session_results = (
 			answers,
 		};
 	});
+
+	// Most wrong answers first. A question nobody answered has no wrong answers
+	// and a percent_correct of 0, which would otherwise float it to the top of
+	// the tie group, so it is pushed below every answered question instead.
+	// `index` is the asked position, held onto only as the last tie-breaker so
+	// equally-missed questions keep deck order.
+	const wrong = (s: IQuizQuestionSummary): number => s.total - s.correct;
+	const unanswered = (s: IQuizQuestionSummary): number => (s.total === 0 ? 1 : 0);
+
+	return summaries
+		.map((summary, index) => ({ summary, index }))
+		.sort((a, b) => (
+			(wrong(b.summary) - wrong(a.summary))
+			|| (unanswered(a.summary) - unanswered(b.summary))
+			|| (a.summary.percent_correct - b.summary.percent_correct)
+			|| (a.index - b.index)
+		))
+		.map((entry) => entry.summary);
 };
 
 /*
@@ -488,6 +548,61 @@ router.get('/mine/active',
 		if (!Array.isArray(rows) || rows.length === 0) return res.json({ session: null });
 
 		res.json({ session: await build_state_payload(rows[0] as ISessionRow) });
+	} catch (e) {
+		log_error(e);
+		next(e);
+	}
+});
+
+
+/*
+	The instructor's own past (ended) sessions for a page, newest first -- the
+	list behind the "Review past sessions" button. Deliberately thin: just enough
+	to tell one session apart from another. Picking one loads the full breakdown
+	from /:idsession/results, which is the same payload the class saw when the
+	session ended.
+
+	Scoped to the caller's own sessions on the requested page, matching
+	/mine/active. LIMIT is inlined rather than bound, since a bound LIMIT is
+	sent as a string by mysql2 and MySQL rejects it.
+*/
+router.get('/mine/history',
+	nocache, user_require_admin,
+	async (req: Request, res: Response, next: NextFunction): Promise<any> => {
+	try {
+		const page = sanitize_page(req.query.page);
+		if (page === null) return res.status(400).json({ error: 'invalid page' });
+
+		const username = (req as any).session.username;
+		const rows = await run_mysql_query(
+			`SELECT quizsessions.idsession,
+					quizsessions.code,
+					quizsessions.page,
+					quizsessions.questions_json,
+					DATE_FORMAT(quizsessions.created_datetime, '%Y-%m-%dT%TZ') AS created_datetime,
+					DATE_FORMAT(quizsessions.ended_datetime, '%Y-%m-%dT%TZ') AS ended_datetime,
+					(SELECT COUNT(*) FROM quizsession_participants
+						WHERE quizsession_participants.idsession = quizsessions.idsession) AS participant_count
+				FROM quizsessions
+				WHERE quizsessions.username = ? AND quizsessions.page = ? AND quizsessions.status = 'ended'
+				ORDER BY quizsessions.created_datetime DESC
+				LIMIT ${HISTORY_LIMIT}`,
+			[username, page],
+		);
+
+		const sessions: IPastSession[] = Array.isArray(rows) ? rows.map((row: any) => ({
+			idsession: row.idsession,
+			code: row.code,
+			page: row.page,
+			created_datetime: row.created_datetime ?? null,
+			ended_datetime: row.ended_datetime ?? null,
+			participant_count: Number(row.participant_count) || 0,
+			// Parsed here, not sent: the deck itself holds the answers, and this
+			// list is drawn on a projector.
+			question_count: count_stored_questions(row.questions_json),
+		})) : [];
+
+		res.json({ sessions });
 	} catch (e) {
 		log_error(e);
 		next(e);
@@ -826,7 +941,7 @@ export {
 	app_quizsessions,
 	sanitize_text, sanitize_page, sanitize_questions,
 	generate_code, correct_option_text, compute_participant_progress,
-	display_name_for,
+	display_name_for, count_stored_questions,
 	shuffle_indices, parse_question_order,
 	summarize_session_results, build_leaderboard,
 	MAX_TEXT_LENGTH, MAX_PAGE_LENGTH,

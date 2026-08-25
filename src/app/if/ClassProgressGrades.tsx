@@ -119,7 +119,17 @@ export default function ClassProgressGrades(props: PropsType): ReactElement {
 
 		// Grab biggest item for each user.
 		const grades: any[] = [];
-		
+
+		// Seeds one row per student on the roster, even those with no levels yet,
+		// so an enrolled student who hasn't started anything still shows up with
+		// blank scores instead of being invisible until they attempt something.
+		(props.nicknames ?? []).forEach( n => {
+			if( typeof n.username !== 'string' ) return;
+			const key = n.username.toLowerCase().trim();
+			if( key === '' || users.has(key) ) return;
+			users.set(key, []);
+		});
+
 		users.forEach( (levels: any, user: any) => {
 
 			// Build user object. Both tables below read straight off these keys
@@ -184,7 +194,9 @@ export default function ClassProgressGrades(props: PropsType): ReactElement {
 	};
 
 
-	if(props.data.length < 1) 
+	// Nothing to show unless there is either completed work or a roster of
+	// enrolled students to seed blank rows from.
+	if(props.data.length < 1 && (props.nicknames ?? []).length < 1)
 		return <div/>;
 
 	const grades = _convert_levels_into_highest_grades(props.data);

@@ -21,6 +21,7 @@ const {
 	summarize_session_results,
 	build_leaderboard,
 	display_name_for,
+	count_stored_questions,
 	MAX_TEXT_LENGTH,
 	MAX_PAGE_LENGTH,
 } = require('../src/server/app_quizsessions.ts');
@@ -231,10 +232,48 @@ describe('summarize_session_results', () => {
 		assert.strictEqual(summary[0].answers.find((a) => a.answer === 'Wrong').count, 0);
 	});
 
-	test('keeps questions in asked order, not percent-correct order', () => {
+	test('puts the question with the most wrong answers first', () => {
 		const rows = [
 			{ question_index: 0, answer: 'Right', correct: 1, username: 'alice' },
 			{ question_index: 1, answer: 'B', correct: 0, username: 'alice' },
+			{ question_index: 1, answer: 'C', correct: 0, username: 'bob' },
+		];
+		const summary = summarize_session_results(questions, rows);
+		assert.deepStrictEqual(summary.map((q) => q.question), ['Q2', 'Q1']);
+	});
+
+	test('ranks by count of wrong answers, not by percent correct', () => {
+		// Q1: 2 of 6 wrong (67% correct). Q2: 1 of 1 wrong (0% correct).
+		// The raw count wins, so the question more students missed leads.
+		const rows = [
+			...['a', 'b', 'c', 'd'].map((username) => (
+				{ question_index: 0, answer: 'Right', correct: 1, username }
+			)),
+			...['e', 'f'].map((username) => (
+				{ question_index: 0, answer: 'Wrong', correct: 0, username }
+			)),
+			{ question_index: 1, answer: 'B', correct: 0, username: 'a' },
+		];
+		const summary = summarize_session_results(questions, rows);
+		assert.deepStrictEqual(summary.map((q) => q.question), ['Q1', 'Q2']);
+		assert.strictEqual(summary[0].percent_correct, 67);
+	});
+
+	test('breaks a tie in wrong answers with the lower percent correct', () => {
+		// One wrong answer each: Q1 got it wrong once out of two, Q2 once out of one.
+		const rows = [
+			{ question_index: 0, answer: 'Right', correct: 1, username: 'alice' },
+			{ question_index: 0, answer: 'Wrong', correct: 0, username: 'bob' },
+			{ question_index: 1, answer: 'B', correct: 0, username: 'alice' },
+		];
+		const summary = summarize_session_results(questions, rows);
+		assert.deepStrictEqual(summary.map((q) => q.question), ['Q2', 'Q1']);
+	});
+
+	test('falls back to asked order when nothing separates two questions', () => {
+		const rows = [
+			{ question_index: 0, answer: 'Wrong', correct: 0, username: 'alice' },
+			{ question_index: 1, answer: 'B', correct: 0, username: 'bob' },
 		];
 		const summary = summarize_session_results(questions, rows);
 		assert.deepStrictEqual(summary.map((q) => q.question), ['Q1', 'Q2']);
@@ -250,6 +289,14 @@ describe('summarize_session_results', () => {
 		assert.strictEqual(summary[0].total, 3);
 		assert.strictEqual(summary[0].correct, 1);
 		assert.strictEqual(summary[0].percent_correct, 33);
+	});
+
+	test('sorts a question nobody answered below the answered ones', () => {
+		const rows = [
+			{ question_index: 1, answer: 'A', correct: 1, username: 'alice' },
+		];
+		const summary = summarize_session_results(questions, rows);
+		assert.deepStrictEqual(summary.map((q) => q.question), ['Q2', 'Q1']);
 	});
 
 	test('handles a question nobody answered', () => {
@@ -377,5 +424,30 @@ describe('display_name_for', () => {
 
 	test('trims a padded nickname', () => {
 		assert.strictEqual(display_name_for('bj000@mix.wvu.edu', '  Bob Jones  '), 'Bob Jones');
+	});
+});
+
+
+describe('count_stored_questions', () => {
+	test('counts the questions in a stored deck', () => {
+		const deck = JSON.stringify([
+			{ prompt: 'a', options: [] },
+			{ prompt: 'b', options: [] },
+		]);
+		assert.strictEqual(count_stored_questions(deck), 2);
+	});
+
+	test('returns 0 for an empty deck', () => {
+		assert.strictEqual(count_stored_questions('[]'), 0);
+	});
+
+	test('returns 0 rather than throwing on unusable input', () => {
+		// One corrupt questions_json should cost that row its count, not take
+		// down the whole past-sessions list.
+		assert.strictEqual(count_stored_questions('not json'), 0);
+		assert.strictEqual(count_stored_questions('{"prompt":"a"}'), 0);
+		assert.strictEqual(count_stored_questions(null), 0);
+		assert.strictEqual(count_stored_questions(undefined), 0);
+		assert.strictEqual(count_stored_questions(7), 0);
 	});
 });

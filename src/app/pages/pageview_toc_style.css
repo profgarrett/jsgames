@@ -837,6 +837,58 @@ table.flexible-width-table {
     padding-left: 1.5em;
 }
 
+
+/** Past live sessions (LiveQuizHistory.tsx) **********************/
+
+.live-quiz-history-list {
+    list-style: none;
+    margin: 20px 0 0 0;
+    padding: 0;
+    border: 1px solid #a2a9b1;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.live-quiz-history-list li + li {
+    border-top: 1px solid #d8dbdf;
+}
+
+/* A row is a <button> so it is keyboard-reachable; stripped back to look like a list row. */
+.live-quiz-history-item {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 8px;
+    width: 100%;
+    padding: 12px 16px;
+    border: none;
+    background-color: #fff;
+    text-align: left;
+    cursor: pointer;
+}
+
+.live-quiz-history-item:hover,
+.live-quiz-history-item:focus-visible {
+    background-color: #f0f3f7;
+}
+
+.live-quiz-history-when {
+    font-weight: bold;
+}
+
+.live-quiz-history-meta {
+    color: #666;
+    font-size: 0.9em;
+}
+
+.live-quiz-history-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
 .quiz-results-answer-count {
     flex: 0 0 90px;
     text-align: right;

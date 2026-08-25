@@ -11,6 +11,7 @@ import PageQuiz, { extractQuizQuestions, removeQuizSection } from './PageQuiz';
 import PageQuizResults from './PageQuizResults';
 import { CustomPre, CustomCode } from './PageCodeBlock';
 import LiveQuizInstructor from './LiveQuizInstructor';
+import LiveQuizHistory from './LiveQuizHistory';
 import { getUserFromBrowser } from './../components/Authentication';
 import './pageview_toc_style.css'; // Import the CSS file for TOC styling
 import { AnchorHTMLAttributes, ImgHTMLAttributes } from 'react';
@@ -376,8 +377,8 @@ function PageView({ page }: IPageViewProps): ReactElement {
 	const headingIdMap = useMemo(() => new Map(tocEntries.map((entry) => [normalizeHeadingText(entry.text), entry.id])), [tocEntries]);
 	const flashcards = useMemo(() => extractFlashcards(markdown_content), [markdown_content]);
 	const quizQuestions = useMemo(() => extractQuizQuestions(markdown_content), [markdown_content]);
-	// 'read' | 'flashcards' | 'quiz' | 'results' | 'live' -- the modes are mutually exclusive.
-	const [mode, setMode] = useState<'read' | 'flashcards' | 'quiz' | 'results' | 'live'>('read');
+	// 'read' | 'flashcards' | 'quiz' | 'results' | 'live' | 'history' -- the modes are mutually exclusive.
+	const [mode, setMode] = useState<'read' | 'flashcards' | 'quiz' | 'results' | 'live' | 'history'>('read');
 	// The results panel is for the admin (profgarrett) only. The API enforces
 	// this as well; hiding the button just keeps it out of everyone else's way.
 	const isAdmin = getUserFromBrowser().isAdmin;
@@ -388,7 +389,7 @@ function PageView({ page }: IPageViewProps): ReactElement {
 		setMode('read');
 	}, [markdown_content]);
 
-	const toggleMode = (next: 'flashcards' | 'quiz' | 'results' | 'live'): void =>
+	const toggleMode = (next: 'flashcards' | 'quiz' | 'results' | 'live' | 'history'): void =>
 		setMode((current) => (current === next ? 'read' : next));
 
 	if (page === null) return <></>;
@@ -490,11 +491,32 @@ function PageView({ page }: IPageViewProps): ReactElement {
 							{ mode === 'live' ? 'Back to reading' : 'Start live session' }
 						</Button>
 					) : null}
+
+					{/*
+						Not gated on quizQuestions.length the way the live-session button
+						is: a session that already ran has its own frozen deck, so its
+						results stay reviewable even if this page's questions have since
+						been edited away. (The toolbar as a whole still only appears when
+						the page has flashcards or questions.)
+					*/}
+					{isAdmin ? (
+						<Button
+							variant={mode === 'history' ? 'dark' : 'outline-dark'}
+							size='sm'
+							className='ms-2'
+							onClick={() => toggleMode('history')}
+							aria-pressed={mode === 'history'}
+						>
+							{ mode === 'history' ? 'Back to reading' : 'Review past sessions' }
+						</Button>
+					) : null}
 				</div>
 			) : null}
 
 			{mode === 'live' ? (
 				<LiveQuizInstructor quizQuestions={quizQuestions} flashcards={flashcards} page={page.slug} />
+			) : mode === 'history' ? (
+				<LiveQuizHistory page={page.slug} />
 			) : mode === 'results' ? (
 				<PageQuizResults page={page.slug} />
 			) : mode === 'quiz' ? (
