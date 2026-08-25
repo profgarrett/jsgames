@@ -30,11 +30,12 @@ export default function SiteHeader(): ReactElement {
 		<Navbar bg='dark' variant='dark'>
 			<Container fluid>
 				<Navbar.Brand href='/'>Excel.fun</Navbar.Brand>
+				<Nav>
+					<Nav.Link as={Link} to='/live'>Live</Nav.Link>
 				{isAdmin
-					? <Nav>
-						<Nav.Link as={Link} to='/admin'>Admin</Nav.Link>
-					</Nav>
+					? <Nav.Link as={Link} to='/admin'>Admin</Nav.Link>
 					: null}
+				</Nav>
 			</Container>
 		</Navbar>
 		</Col></Row>
