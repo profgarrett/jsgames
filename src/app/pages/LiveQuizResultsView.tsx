@@ -11,7 +11,14 @@ import QuizResultsTable, { IQuizQuestionSummary } from './QuizResultsTable';
 
 export interface ILiveQuizResults {
 	questions: IQuizQuestionSummary[];
-	leaderboard: { username: string; correct: number }[];
+	/*
+		`username` is the account, kept only as a stable react key -- it is an
+		email address, and this board goes on the projector. `display_name` is
+		what to show: the student's roster nickname, or their username when they
+		do not have one. Both are decided server-side by display_name_for() in
+		app_quizsessions.ts.
+	*/
+	leaderboard: { username: string; display_name: string; correct: number }[];
 	participant_count: number;
 }
 
@@ -37,7 +44,7 @@ function LiveQuizResultsView({ results }: ILiveQuizResultsViewProps): ReactEleme
 							<ol>
 								{ results.leaderboard.map((entry) => (
 									<li key={entry.username}>
-										{ entry.username } &mdash; { entry.correct } correct
+										{ entry.display_name } &mdash; { entry.correct } correct
 									</li>
 								)) }
 							</ol>

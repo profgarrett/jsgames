@@ -131,6 +131,11 @@ app.use('/api/admin', app_admin);
 import { app_traffic } from './app_traffic';
 app.use('/api/admin/traffic', app_traffic);
 
+// Also mounted under /api/admin as its own router. app_admin has no /nicknames
+// route, so express falls through to this one.
+import { app_nicknames } from './app_nicknames';
+app.use('/api/admin/nicknames', app_nicknames);
+
 import { app_pages } from './app_pages';
 app.use('/api/pages', app_pages);
 

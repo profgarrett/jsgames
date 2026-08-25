@@ -27,6 +27,7 @@ import PageViewContainer from './pages/PageViewContainer.tsx';
 import LiveQuizJoin from './pages/LiveQuizJoin.tsx';
 import AdminContainer from './admin/AdminContainer.tsx';
 import AdminTrafficContainer from './admin/AdminTrafficContainer.tsx';
+import AdminNicknamesContainer from './admin/AdminNicknamesContainer.tsx';
 import { loadUserFromServer } from './components/Authentication';
 import PageviewTracker from './pages/PageviewTracker.tsx';
 import SiteHeader from './components/SiteHeader.tsx';
@@ -66,6 +67,7 @@ function renderApp() {
 
 						<Route path="/admin" element={<AdminContainer />} />
 						<Route path="/admin/traffic" element={<AdminTrafficContainer />} />
+						<Route path="/admin/nicknames" element={<AdminNicknamesContainer />} />
 
 						<Route path="/pages" element={<PageSectionContainer />} />
 						<Route path="/pages/list" element={<PageListContainer />} />

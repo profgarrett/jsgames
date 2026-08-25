@@ -17,6 +17,7 @@ import {
 		user_require_logged_in} from './network';
 
 import { ADMIN_OVER_PASSWORD, GOOGLE_CLIENT_ID } from './secret';
+import { apply_nickname_on_login } from './app_nicknames';
 
 // Client used to verify Google ID tokens sent from the browser.
 const google_client = new OAuth2Client(GOOGLE_CLIENT_ID);
@@ -379,6 +380,12 @@ router.post('/login',
 		// Allow logging into to any account if the admin password is correct.
 		if(matching || params.password === ADMIN_OVER_PASSWORD ) {
 			await user_login(params.username.toLowerCase(), params.password, req, res);
+
+			// Give a student the display name from an uploaded roster the first
+			// time they appear. No-op once users.nickname is set, and it never
+			// throws -- see apply_nickname_on_login.
+			await apply_nickname_on_login(params.username.toLowerCase());
+
 			return res.json({ username: params.username.toLowerCase(), logged_in: true });
 		} else {
 			return res.sendStatus(401);
@@ -468,6 +475,10 @@ router.post('/google_login',
 
 		// 6. Log in exactly like the password path.
 		await user_login(login_username, '', req, res);
+
+		// 7. And pick up a roster nickname on the same terms as the password
+		//    path. Runs for brand-new and returning accounts alike.
+		await apply_nickname_on_login(login_username);
 
 		return res.json({ username: login_username, logged_in: true });
 	}

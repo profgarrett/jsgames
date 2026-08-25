@@ -32,7 +32,13 @@ const POLL_INTERVAL_MS = 2000;
 const TERM_QUESTION_DISTRACTOR_COUNT = 4;
 
 interface IParticipantProgress {
+	// The account. Only used as a react key -- never shown, since it is an
+	// email address and this screen is projected in front of the class.
 	username: string;
+	// The student's nickname from the uploaded roster, falling back to their
+	// username when they do not have one. Computed server-side by
+	// display_name_for() in app_quizsessions.ts.
+	display_name: string;
 	completed: number;
 }
 
@@ -42,6 +48,8 @@ interface ISessionState {
 	page: string;
 	status: 'waiting' | 'active' | 'ended';
 	participant_count: number;
+	// Deprecated on the server too: participants[].display_name is what this
+	// screen renders. Still typed so the shape matches what /state sends.
 	usernames: string[];
 	participants: IParticipantProgress[];
 }
@@ -354,9 +362,11 @@ function LiveQuizInstructor({ quizQuestions, flashcards, page }: ILiveQuizInstru
 
 				{ session.status === 'waiting' ? (
 					<>
-						{ session.usernames.length > 0 ? (
+						{ session.participants.length > 0 ? (
 							<ul className='live-quiz-joined-names'>
-								{ session.usernames.map((username) => <li key={username}>{ username }</li>) }
+								{ session.participants.map((participant) => (
+									<li key={participant.username}>{ participant.display_name }</li>
+								)) }
 							</ul>
 						) : null }
 						<Button variant='primary' size='lg' onClick={() => callAction('start')}>
@@ -370,7 +380,7 @@ function LiveQuizInstructor({ quizQuestions, flashcards, page }: ILiveQuizInstru
 							<ul className='live-quiz-progress-list'>
 								{ session.participants.map((participant) => (
 									<li key={participant.username}>
-										<span className='live-quiz-progress-name'>{ participant.username }</span>
+										<span className='live-quiz-progress-name'>{ participant.display_name }</span>
 										<span className='live-quiz-progress-count'>
 											{ participant.completed } completed
 										</span>

@@ -222,6 +222,10 @@ export default function AdminContainer(): ReactElement {
 					<Link to='/admin/traffic'>
 						<Button variant='outline-info'>Traffic</Button>
 					</Link>
+					{' '}
+					<Link to='/admin/nicknames'>
+						<Button variant='outline-info'>Nicknames</Button>
+					</Link>
 				</div>
 				<Message message={message} style={messageStyle} />
 				<Loading loading={isLoading} />

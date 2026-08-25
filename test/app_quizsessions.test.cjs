@@ -20,6 +20,7 @@ const {
 	parse_question_order,
 	summarize_session_results,
 	build_leaderboard,
+	display_name_for,
 	MAX_TEXT_LENGTH,
 	MAX_PAGE_LENGTH,
 } = require('../src/server/app_quizsessions.ts');
@@ -268,7 +269,10 @@ describe('build_leaderboard', () => {
 			{ question_index: 1, answer: 'B', correct: 0, username: 'bob' },
 		];
 		const board = build_leaderboard(rows);
-		assert.deepStrictEqual(board, [{ username: 'alice', correct: 2 }, { username: 'bob', correct: 1 }]);
+		assert.deepStrictEqual(board, [
+			{ username: 'alice', display_name: 'alice', correct: 2 },
+			{ username: 'bob', display_name: 'bob', correct: 1 },
+		]);
 	});
 
 	test('ignores incorrect answers entirely', () => {
@@ -292,5 +296,86 @@ describe('build_leaderboard', () => {
 			{ question_index: 0, answer: 'Right', correct: 1, username }
 		));
 		assert.strictEqual(build_leaderboard(rows).length, 5);
+	});
+
+	test('shows a roster nickname instead of the login email', () => {
+		const rows = [
+			{ question_index: 0, answer: 'Right', correct: 1,
+				username: 'bj000@mix.wvu.edu', nickname: 'Bob Jones' },
+		];
+		const board = build_leaderboard(rows);
+
+		assert.strictEqual(board[0].display_name, 'Bob Jones');
+		// The account stays on the entry as the stable key.
+		assert.strictEqual(board[0].username, 'bj000@mix.wvu.edu');
+	});
+
+	test('falls back to the username for a student with no nickname', () => {
+		const rows = [
+			{ question_index: 0, answer: 'Right', correct: 1, username: 'nw02@mix.wvu.edu', nickname: null },
+			{ question_index: 0, answer: 'Right', correct: 1, username: 'sm01@mix.wvu.edu' },
+		];
+		assert.deepStrictEqual(
+			build_leaderboard(rows).map((e) => e.display_name),
+			['nw02@mix.wvu.edu', 'sm01@mix.wvu.edu'],
+		);
+	});
+
+	test('two students sharing a nickname are still scored separately', () => {
+		// Merging them because their display names match would silently halve
+		// the board on a projector.
+		const rows = [
+			{ question_index: 0, answer: 'Right', correct: 1, username: 'bj000@x.edu', nickname: 'Bob Jones' },
+			{ question_index: 1, answer: 'Right', correct: 1, username: 'bj000@x.edu', nickname: 'Bob Jones' },
+			{ question_index: 0, answer: 'Right', correct: 1, username: 'bj001@x.edu', nickname: 'Bob Jones' },
+		];
+		const board = build_leaderboard(rows);
+
+		assert.strictEqual(board.length, 2);
+		assert.deepStrictEqual(board.map((e) => e.correct), [2, 1]);
+	});
+
+	test('ties sort by the name shown, not by the underlying email', () => {
+		// Sorting by username would put zeb's account first; the board reads by
+		// what the room can see.
+		const rows = [
+			{ question_index: 0, answer: 'Right', correct: 1, username: 'aa99@x.edu', nickname: 'Zeb Young' },
+			{ question_index: 0, answer: 'Right', correct: 1, username: 'zz11@x.edu', nickname: 'Anna Adams' },
+		];
+		assert.deepStrictEqual(
+			build_leaderboard(rows).map((e) => e.display_name),
+			['Anna Adams', 'Zeb Young'],
+		);
+	});
+
+	test('a name is picked up even from a row where the student answered wrong', () => {
+		const rows = [
+			{ question_index: 0, answer: 'Wrong', correct: 0, username: 'bj000@x.edu', nickname: 'Bob Jones' },
+			{ question_index: 1, answer: 'Right', correct: 1, username: 'bj000@x.edu', nickname: 'Bob Jones' },
+		];
+		assert.strictEqual(build_leaderboard(rows)[0].display_name, 'Bob Jones');
+	});
+});
+
+
+describe('display_name_for', () => {
+	test('prefers the nickname', () => {
+		assert.strictEqual(display_name_for('bj000@mix.wvu.edu', 'Bob Jones'), 'Bob Jones');
+	});
+
+	test('falls back to the username when there is no nickname', () => {
+		assert.strictEqual(display_name_for('bj000@mix.wvu.edu', null), 'bj000@mix.wvu.edu');
+		assert.strictEqual(display_name_for('bj000@mix.wvu.edu', undefined), 'bj000@mix.wvu.edu');
+	});
+
+	test('treats a blank or whitespace-only nickname as absent', () => {
+		// users.nickname is nullable and a hand-edited row can hold ''; showing
+		// an empty name on a projector is worse than showing the email.
+		assert.strictEqual(display_name_for('bj000@mix.wvu.edu', ''), 'bj000@mix.wvu.edu');
+		assert.strictEqual(display_name_for('bj000@mix.wvu.edu', '   '), 'bj000@mix.wvu.edu');
+	});
+
+	test('trims a padded nickname', () => {
+		assert.strictEqual(display_name_for('bj000@mix.wvu.edu', '  Bob Jones  '), 'Bob Jones');
 	});
 });

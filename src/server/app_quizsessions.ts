@@ -202,7 +202,31 @@ interface ISessionAnswerRow {
 	answer: string;
 	correct: number;
 	username: string;
+	// users.nickname for this participant, when they have one. Null for a
+	// student who is not on an uploaded roster (see app_nicknames.ts) and for
+	// rows written before nicknames existed.
+	nickname?: string | null;
 }
+
+/*
+	What to put on screen for a participant.
+
+	Live sessions are projected in front of a class, and a username here is an
+	email address -- 'bj000@mix.wvu.edu' tells nobody in the room who is
+	winning. A nickname off the uploaded roster ('Bob Jones') does.
+
+	Falls back to the username whenever there is no nickname, so a student who
+	is not on a roster still appears rather than showing up blank. Blank and
+	whitespace-only nicknames are treated as absent: users.nickname is
+	nullable, and a hand-edited row can end up holding ''.
+
+	Kept pure and exported so both the waiting-room list and the leaderboard
+	answer the question the same way. Exported for unit testing.
+*/
+const display_name_for = (username: string, nickname?: string | null): string => {
+	if (typeof nickname === 'string' && nickname.trim().length > 0) return nickname.trim();
+	return username;
+};
 
 export interface IQuizAnswerSummary {
 	answer: string;
@@ -219,7 +243,10 @@ export interface IQuizQuestionSummary {
 }
 
 export interface ILeaderboardEntry {
+	// The account, kept as the stable identity/react key.
 	username: string;
+	// What to show: the nickname when there is one, else the username.
+	display_name: string;
 	correct: number;
 }
 
@@ -267,19 +294,38 @@ const summarize_session_results = (
 
 /*
 	Top 5 participants by number of correct answers, ties broken alphabetically
-	by username for a stable, deterministic order. Exported for unit testing.
+	by the name shown for a stable, deterministic order. Exported for unit
+	testing.
+
+	Tallied by username, not by display name: two students could share a
+	nickname, and merging their scores because of it would be a silent,
+	wrong-looking bug on a projected leaderboard. The nickname is carried along
+	for display only. Ties sort by display_name so the list reads alphabetically
+	as it appears -- with no nicknames in play that is the username, which is
+	the behaviour this had before.
 */
 const build_leaderboard = (answerRows: ISessionAnswerRow[]): ILeaderboardEntry[] => {
 	const correctByUsername = new Map<string, number>();
+	const nameByUsername = new Map<string, string>();
 
 	for (const row of answerRows) {
+		// Record the name even for a wrong answer: a student can appear in the
+		// deck without ever scoring, and the first row we see should not decide
+		// whether we know their name.
+		if (!nameByUsername.has(row.username))
+			nameByUsername.set(row.username, display_name_for(row.username, row.nickname));
+
 		if (Number(row.correct) !== 1) continue;
 		correctByUsername.set(row.username, (correctByUsername.get(row.username) ?? 0) + 1);
 	}
 
 	return Array.from(correctByUsername.entries())
-		.map(([username, correct]) => ({ username, correct }))
-		.sort((a, b) => (b.correct - a.correct) || a.username.localeCompare(b.username))
+		.map(([username, correct]) => ({
+			username,
+			display_name: nameByUsername.get(username) ?? username,
+			correct,
+		}))
+		.sort((a, b) => (b.correct - a.correct) || a.display_name.localeCompare(b.display_name))
 		.slice(0, 5);
 };
 
@@ -329,20 +375,44 @@ const generate_unique_code = async (): Promise<string> => {
 // of them has completed so far -- never their correct/incorrect split, which
 // stays private to the student until results are shown.
 const build_state_payload = async (session: ISessionRow): Promise<any> => {
+	/*
+		The join to users is on username rather than on
+		quizsession_participants.iduser: iduser is nullable (lookup_iduser
+		returns null if the account could not be resolved at join time),
+		while username is always present here and is UNIQUE on users, so this
+		matches for every participant and still uses an index.
+
+		users.nickname is in the GROUP BY explicitly. It is functionally
+		dependent on idparticipant through a unique key, but relying on the
+		optimizer to work that out is how a query starts failing under
+		ONLY_FULL_GROUP_BY on someone else's MySQL.
+
+		Ordered by the name actually shown, so the projected list reads
+		alphabetically. With no nicknames stored that is the username, which is
+		the order this had before.
+	*/
 	const participantRows = await run_mysql_query(
 		`SELECT quizsession_participants.username AS username,
+				users.nickname AS nickname,
 				COUNT(quizsession_answers.idanswer) AS completed
 			FROM quizsession_participants
 			LEFT JOIN quizsession_answers
 				ON quizsession_answers.idparticipant = quizsession_participants.idparticipant
+			LEFT JOIN users
+				ON users.username = quizsession_participants.username
 			WHERE quizsession_participants.idsession = ?
-			GROUP BY quizsession_participants.idparticipant, quizsession_participants.username
-			ORDER BY quizsession_participants.username ASC`,
+			GROUP BY quizsession_participants.idparticipant, quizsession_participants.username,
+				users.nickname
+			ORDER BY COALESCE(NULLIF(users.nickname, ''), quizsession_participants.username) ASC`,
 		[session.idsession],
 	);
 
 	const participants = Array.isArray(participantRows)
-		? participantRows.map((row: any) => ({ username: row.username, completed: Number(row.completed) || 0 }))
+		? participantRows.map((row: any) => ({
+			username: row.username,
+			display_name: display_name_for(row.username, row.nickname),
+			completed: Number(row.completed) || 0,
+		}))
 		: [];
 
 	return {
@@ -351,6 +421,13 @@ const build_state_payload = async (session: ISessionRow): Promise<any> => {
 		page: session.page,
 		status: session.status,
 		participant_count: participants.length,
+		/*
+			Deprecated: superseded by participants[].display_name, which the
+			instructor screen renders instead. Kept populated so an instructor
+			holding an older bundle mid-session does not get an undefined here
+			the moment this deploys -- a live class is the worst possible place
+			to find that out. Safe to drop a term or two from now.
+		*/
 		usernames: participants.map((p) => p.username),
 		participants,
 	};
@@ -708,12 +785,18 @@ router.get('/:idsession/results',
 
 		const questions: IStoredQuizQuestion[] = JSON.parse(session.questions_json);
 
+		// LEFT JOIN to users purely to pick up nickname for the leaderboard --
+		// left, not inner, so a participant whose account has since been removed
+		// still counts toward the per-question breakdown.
 		const answerRows: ISessionAnswerRow[] = await run_mysql_query(
 			`SELECT quizsession_answers.question_index, quizsession_answers.answer, quizsession_answers.correct,
-					quizsession_participants.username
+					quizsession_participants.username,
+					users.nickname
 				FROM quizsession_answers
 				INNER JOIN quizsession_participants
 					ON quizsession_participants.idparticipant = quizsession_answers.idparticipant
+				LEFT JOIN users
+					ON users.username = quizsession_participants.username
 				WHERE quizsession_answers.idsession = ?`,
 			[idsession],
 		);
@@ -743,6 +826,7 @@ export {
 	app_quizsessions,
 	sanitize_text, sanitize_page, sanitize_questions,
 	generate_code, correct_option_text, compute_participant_progress,
+	display_name_for,
 	shuffle_indices, parse_question_order,
 	summarize_session_results, build_leaderboard,
 	MAX_TEXT_LENGTH, MAX_PAGE_LENGTH,

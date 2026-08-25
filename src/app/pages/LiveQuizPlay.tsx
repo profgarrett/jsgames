@@ -215,7 +215,7 @@ function LiveQuizPlay({ idsession }: ILiveQuizPlayProps): ReactElement {
 			</div>
 
 			{ answered ? (
-				<Button variant='outline-primary' onClick={loadQuestion}>
+				<Button variant='outline-primary' style={{ marginTop: '1rem' }} onClick={loadQuestion}>
 					Next question →
 				</Button>
 			) : null }
