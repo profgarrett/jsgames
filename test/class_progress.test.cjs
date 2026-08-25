@@ -17,6 +17,10 @@ const {
 	resolve_initial_section,
 } = require('../src/app/if/ClassProgressContainer.tsx');
 
+const {
+	build_nickname_lookup,
+} = require('../src/app/if/ClassProgressGrades.tsx');
+
 const section = (idsection, role, year, term) => ({
 	idsection,
 	code: 'c' + idsection,
@@ -102,5 +106,65 @@ describe('class progress initial section', () => {
 
 	test('defaults to the newest section', () => {
 		assert.strictEqual(resolve_initial_section(sections, null)?.idsection, 3);
+	});
+});
+
+
+describe('build_nickname_lookup', () => {
+	test('keys nicknames by username', () => {
+		const lookup = build_nickname_lookup([
+			{ username: 'bj000@mix.wvu.edu', nickname: 'Bob Jones' },
+			{ username: 'sm01@mix.wvu.edu', nickname: 'Sarah Smith' },
+		]);
+
+		assert.strictEqual(lookup.get('bj000@mix.wvu.edu'), 'Bob Jones');
+		assert.strictEqual(lookup.get('sm01@mix.wvu.edu'), 'Sarah Smith');
+	});
+
+	test('normalizes case and padding the way the grade rows are keyed', () => {
+		// _convert_levels_into_highest_grades keys on
+		// username.toLowerCase().trim(); a mismatch here silently drops the name.
+		const lookup = build_nickname_lookup([
+			{ username: '  BJ000@Mix.WVU.edu ', nickname: 'Bob Jones' },
+		]);
+
+		assert.strictEqual(lookup.get('bj000@mix.wvu.edu'), 'Bob Jones');
+	});
+
+	test('trims the nickname itself', () => {
+		const lookup = build_nickname_lookup([
+			{ username: 'bj000@mix.wvu.edu', nickname: '  Bob Jones  ' },
+		]);
+
+		assert.strictEqual(lookup.get('bj000@mix.wvu.edu'), 'Bob Jones');
+	});
+
+	test('omits a student with a blank nickname rather than storing an empty string', () => {
+		const lookup = build_nickname_lookup([
+			{ username: 'a@x.edu', nickname: '' },
+			{ username: 'b@x.edu', nickname: '   ' },
+			{ username: 'c@x.edu', nickname: 'Real Name' },
+		]);
+
+		assert.strictEqual(lookup.size, 1);
+		assert.strictEqual(lookup.has('a@x.edu'), false);
+		assert.strictEqual(lookup.get('c@x.edu'), 'Real Name');
+	});
+
+	test('survives a malformed row instead of throwing', () => {
+		// The column is a nicety; a bad payload must not take the grade table down.
+		const lookup = build_nickname_lookup([
+			{ username: null, nickname: 'X' },
+			{ username: 'a@x.edu', nickname: null },
+			{ username: '', nickname: 'Y' },
+			{ username: 'ok@x.edu', nickname: 'Fine' },
+		]);
+
+		assert.strictEqual(lookup.size, 1);
+		assert.strictEqual(lookup.get('ok@x.edu'), 'Fine');
+	});
+
+	test('an empty list is an empty lookup', () => {
+		assert.strictEqual(build_nickname_lookup([]).size, 0);
 	});
 });

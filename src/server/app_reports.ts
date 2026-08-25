@@ -316,6 +316,67 @@ ORDER BY iflevels.updated desc `;
 
 
 /**
+	Nicknames for the students in one section.
+
+	Split out from /progress rather than folded into it. That route returns
+	IfLevelPagelessSchema rows, and Schema.initialize() drops -- and console.logs
+	a complaint about -- any key not declared in the schema, so smuggling a
+	nickname alongside each level would both fail and be noisy about it. The
+	nickname also belongs to the student, not to a level: one row per person here
+	instead of the same value repeated on every level they have attempted.
+
+	Permissioned exactly like /progress: the caller must be faculty, and the
+	same join chain proves they are faculty of the section being asked about.
+
+	Returns [{ username, nickname }]. nickname is '' rather than null for a
+	student who is not on an uploaded roster (see app_nicknames.ts), so the
+	client can render it without a null check.
+*/
+router.get('/nicknames', nocache, user_require_logged_in,
+	async (req: Request, res: Response, next: NextFunction): Promise<any> => {
+	try {
+		const username = user_get_username_or_emptystring(req, res);
+		const is_faculty_result = await is_faculty(username);
+
+		// Simple perm check.
+		if(!is_faculty_result) throw new Error('User does not have permission to see class nicknames');
+
+		// The SQL below also checks that this faculty member teaches the section.
+		if(typeof req.query.idsection === 'undefined') throw new Error('You must pass idsection');
+
+		const param_idsection = parseInt( to_string_from_possible_array(req.query.idsection), 10);
+
+		const sql = `
+SELECT DISTINCT users.username, users.nickname
+FROM users
+INNER JOIN users_sections
+	ON users.iduser = users_sections.iduser
+	AND users_sections.role = 'student'
+INNER JOIN sections ON users_sections.idsection = sections.idsection
+INNER JOIN users_sections as faculty_sections
+	ON faculty_sections.idsection = sections.idsection
+	AND faculty_sections.role = 'faculty'
+INNER JOIN users as faculty
+	ON faculty.iduser = faculty_sections.iduser
+WHERE
+	faculty.username = ?
+	AND (faculty_sections.idsection = ?)
+ORDER BY users.username ASC `;
+
+		const select_results = await run_mysql_query(sql, [username, param_idsection]);
+
+		return res.json( select_results.map( (row: any) => ({
+			username: row.username,
+			nickname: row.nickname === null ? '' : row.nickname,
+		})));
+	} catch (e) {
+		log_error(e);
+		next(e);
+	}
+});
+
+
+/**
 	Get IfAnswers for the passed section and level.
 */
 router.get('/answers', nocache, user_require_logged_in,

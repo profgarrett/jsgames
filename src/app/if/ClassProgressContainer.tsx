@@ -4,7 +4,7 @@ import { Container, Row, Col, Tabs, Tab, Breadcrumb, Navbar, DropdownButton, Dro
 import { useParams } from 'react-router-dom';
 
 import { ClassProgressChart } from './ClassProgressChart';
-import  ClassProgressGrades from './ClassProgressGrades';
+import  ClassProgressGrades, { iStudentNickname } from './ClassProgressGrades';
 import { Message, Loading } from '../components/Misc';
 
 import ForceLogin from '../components/ForceLogin';
@@ -72,6 +72,7 @@ export default function ClassProgressContainer(): ReactElement {
 	const [sections, setSections] = useState<iSection[]>([]);
 	const [section, setSection] = useState<iSection | null>(null);
 	const [pageless_levels, setLevels] = useState<IfLevelPagelessSchema[]>([]);
+	const [nicknames, setNicknames] = useState<iStudentNickname[]>([]);
 
 	// Optional. Present only on the legacy /ifgame/progress/:_idsection route.
 	const { _idsection } = useParams();
@@ -139,6 +140,31 @@ export default function ClassProgressContainer(): ReactElement {
 				setMessage('Error: ' + error);
 				setMessageStyle('Error');
 				setIsLoadingLevels(false);
+			});
+
+		/*
+			Nicknames are fetched separately and deliberately never rejected into
+			the shared error path: this is a display nicety, and an instructor
+			looking at grades five minutes before class should not lose the whole
+			table because the nickname query failed. A failure just leaves the
+			Nickname column blank.
+		*/
+		fetch('/api/reports/nicknames?idsection='+encodeURIComponent(idsection), {
+				method: 'get',
+				credentials: 'include',
+				headers: {
+					'Accept': 'application/json',
+					'Content-Type': 'application/json'
+				}
+			})
+			.then( response => response.ok ? response.json() : [] )
+			.then( json => {
+				if(!is_current) return;
+				setNicknames( Array.isArray(json) ? json : [] );
+			})
+			.catch( () => {
+				if(!is_current) return;
+				setNicknames( [] );
 			});
 
 		return () => { is_current = false; };
@@ -213,7 +239,7 @@ export default function ClassProgressContainer(): ReactElement {
 						<ClassProgressChart data={data}  />
 					</Tab>
 					<Tab eventKey='grades' title='Grade table'>
-						<ClassProgressGrades data={data} />
+						<ClassProgressGrades data={data} nicknames={nicknames} />
 					</Tab>
 				</Tabs>
 			</Col>
