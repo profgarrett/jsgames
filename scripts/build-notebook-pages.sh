@@ -22,22 +22,31 @@
 #   ./scripts/build-notebook-pages.sh           # convert every notebook
 #   ./scripts/build-notebook-pages.sh --check   # list what would be converted
 #   ./scripts/build-notebook-pages.sh --clean   # also drop stale index_files/ images
+#   ./scripts/build-notebook-pages.sh --quiet   # suppress non-error output
 
 set -e
 
 CHECK_ONLY=false
 CLEAN=false
+QUIET=false
 for arg in "$@"; do
 	case "$arg" in
 		--check) CHECK_ONLY=true ;;
 		--clean) CLEAN=true ;;
+		--quiet) QUIET=true ;;
 		*)
 			echo "ERROR: unknown option '$arg'"
-			echo "Usage: $0 [--check] [--clean]"
+			echo "Usage: $0 [--check] [--clean] [--quiet]"
 			exit 1
 			;;
 	esac
 done
+
+# Prints unless --quiet was passed. Error output always uses plain echo so it
+# survives --quiet.
+log() {
+	[ "$QUIET" = true ] || echo "$@"
+}
 
 # Activate environment
 source .venv/bin/activate
@@ -79,12 +88,12 @@ while IFS= read -r nb; do
 done < <(find "$PAGES_DIR" -name .ipynb_checkpoints -prune -o -name 'index.ipynb' -print | LC_ALL=C sort)
 
 if [ ${#NOTEBOOKS[@]} -eq 0 ]; then
-	echo "No index.ipynb files found under $PAGES_DIR"
+	log "No index.ipynb files found under $PAGES_DIR"
 	exit 0
 fi
 
-echo "Found ${#NOTEBOOKS[@]} notebook(s) under static/pages."
-echo ""
+log "Found ${#NOTEBOOKS[@]} notebook(s) under static/pages."
+log ""
 
 CONVERTED=0
 FAILED=0
@@ -98,12 +107,12 @@ for nb in "${NOTEBOOKS[@]}"; do
 	if [ "$CHECK_ONLY" = true ]; then
 		if [ -f "$dir/index.md" ]; then
 			if [ "$nb" -nt "$dir/index.md" ]; then
-				echo "  $label  (index.md is OUT OF DATE, would overwrite)"
+				log "  $label  (index.md is OUT OF DATE, would overwrite)"
 			else
-				echo "  $label  (index.md is current, would still overwrite)"
+				log "  $label  (index.md is current, would still overwrite)"
 			fi
 		else
-			echo "  $label  (no index.md yet, would create)"
+			log "  $label  (no index.md yet, would create)"
 		fi
 		continue
 	fi
@@ -124,13 +133,13 @@ for nb in "${NOTEBOOKS[@]}"; do
 		continue
 	fi
 
-	echo "  ok      $label"
+	log "  ok      $label"
 	CONVERTED=$((CONVERTED + 1))
 done
 
 if [ "$CHECK_ONLY" = true ]; then
-	echo ""
-	echo "Check only. Run without --check to convert."
+	log ""
+	log "Check only. Run without --check to convert."
 	exit 0
 fi
 
@@ -142,8 +151,8 @@ find "$PAGES_DIR" -name 'index.md' -exec chmod 644 {} +
 find "$PAGES_DIR" -name 'index_files' -type d -exec chmod 755 {} +
 find "$PAGES_DIR" -path '*/index_files/*' -type f -exec chmod 644 {} +
 
-echo ""
-echo "Converted $CONVERTED notebook(s)."
+log ""
+log "Converted $CONVERTED notebook(s)."
 
 if [ "$CLEAN" = false ]; then
 	# Report images that no cell refers to any more. These are harmless but get
@@ -161,8 +170,8 @@ if [ "$CLEAN" = false ]; then
 	done
 
 	if [ "$ORPHANS" -gt 0 ]; then
-		echo "$ORPHANS image(s) in index_files/ are no longer referenced by any page."
-		echo "Re-run with --clean to remove them."
+		log "$ORPHANS image(s) in index_files/ are no longer referenced by any page."
+		log "Re-run with --clean to remove them."
 	fi
 fi
 

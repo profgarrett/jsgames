@@ -21,7 +21,7 @@ npx babel src --out-dir build --presets @babel/preset-typescript --extensions ".
 
 # Convert ipython notebooks to markdown pages. This is a separate script because it has 
 # its own dependencies and is a bit more complex than the rest of the build.
-./scripts/build-notebook-pages.sh --clean
+./scripts/build-notebook-pages.sh --clean --quiet
 
 # Check file permissions BEFORE the copy. In the past, some files were included w/o read
 # permissions, which caused a 403 error. This has to run first: cp carries the source
