@@ -9,6 +9,8 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/theme/white.css" id="theme">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/highlight/github.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.12.0/styles/default.min.css">
+
 
 <style>
   :root {
@@ -58,11 +60,47 @@
   /* Answer slides get a gold left rule so they read as a different beat */
   .reveal .slides section.present h3:first-child { color: var(--wvu-blue); }
 
-  /* Make slides scrollable if content is too long */
-  .reveal .slides section.scrollable {
-    overflow-y: auto;
-    max-height: 100%;
-}
+  /* Add scrollable to some slides. Regex only applies to ## Question... slides. */
+  .reveal .slides section.scrollable-slide {
+    overflow-y: auto !important;
+    height: 100% !important;
+    max-height: 700px !important;
+  }
+
+  /* All other slides default to stretching images to fill the available space. */
+  .reveal .slides section img {
+    display: block;
+    margin: 0 auto;
+    max-width: 100%;
+    max-height: 65vh;
+    width: auto;
+    height: auto;
+  }
+  .reveal .slides section.scrollable-slide img {
+    max-height: none;
+  }
+
+  /* Center the YouTube embed slide, both the iframe itself and its slide. */
+  .reveal .slides section iframe {
+    display: block;
+    margin: 0 auto;
+    max-width: 100%;
+  }
+
+  /* Use markdown title as caption for the image */
+  .image-caption-container {
+    display: inline-block;
+    margin: 10px auto;
+    text-align: center;
+  }
+
+  .image-markdown-caption {
+    font-size: 0.8em !important; /* Makes it look like a small caption */
+    color: #888888;              /* Soft gray color */
+    margin-top: 8px;
+    font-style: italic;
+  }
+
 
 </style>
 </head>
@@ -86,8 +124,7 @@
       data-separator="^---$"
       data-separator-vertical="^--$"
       data-separator-notes="^Note:"
-      data-charset="utf-8"
-      class="scrollable">
+      data-charset="utf-8">
       <textarea data-template>
 
 # Sample Slideshow 
@@ -98,7 +135,11 @@ Nathan Garrett, PhD CPA
 
 *Department of Accounting and Information Systems, WVU*
 
+---
 
+## Sample image page
+
+![Sample caption for an image.](/static/icon-512.png)
 ---
 
 ## Example content page
@@ -170,7 +211,15 @@ Same as questions 1-3, but with different content.
 
 ---
 
-## Sample long slide to test scrolling
+## YouTube example
+
+https://www.youtube.com/watch?v=vJG698U2Mvo
+
+---
+
+## Question 4
+
+Sample long slide to test scrolling. The scrollable only happens for slides that start with ## Question
 
 Here is a lot of text.Here is a lot of text.Here is a lot of text.Here is a lot of text.Here is a lot of text.Here is a lot of text.Here is a lot of text.Here is a lot of text.Here is a lot of text.Here is a lot of text.Here is a lot of text.Here is a lot of text.Here is a lot of text.Here is a lot of text.Here is a lot of text.Here is a lot of text.Here is a lot of text.Here is a lot of text.Here is a lot of text.
 
@@ -195,6 +244,51 @@ Here is a lot of text.Here is a lot of text.Here is a lot of text.Here is a lot 
   import Highlight from 'https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/highlight/highlight.esm.js';
   import Notes from 'https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/notes/notes.esm.js';
 
+  // Rewrite relative image/link targets in the fetched Markdown so that they
+  // resolve against /static/pages/{course}/{module}/... instead of against
+  // this page's own URL (which is where the browser would otherwise look).
+  function rewriteRelativePaths(markdown, course, mod) {
+    const base = `/static/pages/${course}/${mod}`;
+    return markdown.replace(/(!?\[[^\]]*\]\()([^)\s]+)(\s*(?:"[^"]*")?\))/g, (match, prefix, target, suffix) => {
+      if (/^([a-z][a-z0-9+.-]*:|\/|#)/i.test(target)) return match;
+      return `${prefix}${base}/${target}${suffix}`;
+    });
+  }
+
+  // Question and review slides tend to run long; mark them scrollable so reveal.js lets
+  // the user scroll instead of clipping the extra content. reveal.js applies a
+  // class to the <section> only via a `<!-- .slide: class="..." -->` directive
+  // on its own line -- the Pandoc-style `{class="..."}` suffix used by other
+  // Markdown tools has no meaning here and just renders as literal text.
+  function markQuestionSlidesScrollable(markdown) {
+    let m = markdown.replace(/^(## Question.*)$/gm, '$1\n<!-- .slide: class="scrollable-slide" -->');
+    m = m.replace(/^(## Review.*)$/gm, '$1\n<!-- .slide: class="scrollable-slide" -->');
+    return m;
+  }
+
+  // A YouTube link on its own line (used to give a video its own slide) is
+  // replaced with a clickable thumbnail, followed by a vertical slide (reached
+  // by pressing "down") holding the actual embed. `data-autoplay` is
+  // reveal.js's own convention for starting playback as soon as that vertical
+  // slide becomes active.
+  function addAutoplayToYoutubeEmbeds(markdown) {
+    const idFromUrl = (url) => {
+      const match = url.match(/(?:[?&]v=|youtu\.be\/|youtube\.com\/shorts\/)([\w-]{11})/);
+      return match ? match[1] : null;
+    };
+
+    return markdown.replace(
+      /^\s*(?:\[[^\]]*\]\()?(https?:\/\/(?:www\.)?(?:youtube\.com|youtu\.be)\/[^\s)]+)\)?\s*$/gm,
+      (match, url) => {
+        const id = idFromUrl(url);
+        if (!id) return match;
+        const thumbnail = `[![Click to play video](https://img.youtube.com/vi/${id}/hqdefault.jpg)](${url})`;
+        const embed = `<iframe data-autoplay src="https://www.youtube.com/embed/${id}" width="960" height="540" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
+        return `${thumbnail}\n\n--\n\n${embed}`;
+      }
+    );
+  }
+
   // Load slides from /static/pages/{course}/{module}/slides.md when
   // ?course=...&module=... is present; otherwise keep the sample markdown.
   async function loadSlidesFromQuery() {
@@ -212,7 +306,7 @@ Here is a lot of text.Here is a lot of text.Here is a lot of text.Here is a lot 
       }
       const markdown = await response.text();
       const textarea = document.querySelector('.reveal .slides textarea[data-template]');
-      textarea.textContent = markdown;
+      textarea.textContent = addAutoplayToYoutubeEmbeds(markQuestionSlidesScrollable(rewriteRelativePaths(markdown, course, mod)));
     } catch (err) {
       console.warn(`slides.html: error loading "${path}"; showing sample slides.`, err);
     }
@@ -227,10 +321,30 @@ Here is a lot of text.Here is a lot of text.Here is a lot of text.Here is a lot 
     controls: true,
     progress: true,
     transition: 'slide',
-    width: 1280,
-    height: 800,
+    width: 1920,
+    height: 1080,
     margin: 0.06,
     plugins: [Markdown, Highlight, Notes]
+  }).then(() => {
+    // Automatically turn Markdown image text into captions
+    document.querySelectorAll('.reveal img[alt]').forEach(img => {
+      // Skip if the image description is empty
+      if (!img.getAttribute('alt').trim()) return;
+
+      // Create a container wrapper
+      const figure = document.createElement('figure');
+      figure.className = 'image-caption-container';
+      
+      // Create the caption element using the markdown description
+      const caption = document.createElement('figcaption');
+      caption.textContent = img.getAttribute('alt');
+      caption.className = 'image-markdown-caption';
+
+      // Swap the elements in the DOM
+      img.parentNode.insertBefore(figure, img);
+      figure.appendChild(img);
+      figure.appendChild(caption);
+    });
   });
 </script>
 </body>

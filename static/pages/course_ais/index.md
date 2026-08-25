@@ -21,7 +21,8 @@ Course Introduction & RPS Exercise
 
 - [file00](file00-setup/index): Set up your computer
 - [Okta](okta/index): Set up Okta for fingerprint reader
-- [excel01](excel01-input-formats/index): Introduction to Excel
+- [excel01](excel01-input-formats/index): Inputting data and basic formatting
+- [excel03](excel03-functions/index): Functions
 
 <!-- 
 ### Week 3 - August 31, 2026

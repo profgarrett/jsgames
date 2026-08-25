@@ -4,7 +4,7 @@ You have to understand data before creating a chart. Many errors occur because a
 
 This module introduces a systematic process for examining a dataset before visualization or analysis.
 
-## Outcomes
+**Outcomes**
 
 After completing this module, you should be able to:
 
@@ -21,7 +21,7 @@ After completing this module, you should be able to:
 * Review a small business dataset and list its likely data problems
 
 
-## Links
+**Links**
 
 - [Slides](/static/pages/slides.html?course=course_dv&module=dv20-data)
 - [Sample datafile](dv20_data_samples.xlsx)

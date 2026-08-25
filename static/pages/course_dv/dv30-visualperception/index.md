@@ -15,6 +15,10 @@ Our eyes take visual input and convert it into meaning. However, they have a lot
 - Detect cases of visual clutter and propose strategies to reduce cognitive load
 - Explain the Lie Factor and Proportionality Principle
 
+**Links**
+
+- [Slides](/static/pages/slides.html?course=course_dv&module=dv30-visualperception)
+
 
 ## Physical components of a visual system
 
@@ -53,7 +57,7 @@ How does the phsyical design of the visual system impact data visualization? A f
 - The brain is used to filling in details. We need to work with the physical system's visual tricks, instead of against them.
 - You can also improve charts by reducing eye travel. Minimize the distance between data and legends. Or, if you are asking the user to compare multiple data points, move them closely together.
 
-![A chart redesigned to place labels next to the data instead of in a separate legend](images/reduce-eye-travel.png)
+![A chart redesigned to place labels next to the data instead of in a separate legend](images/reduce-eye-travel2.png)
 
 
 
@@ -176,7 +180,7 @@ Improve your dashboards by placing white space between unrelated charts and by p
 
 Improve individual charts by reducing alignment points. Centering items often feels like a good idea, but in practice it adds alignment points for the eye to *catch* on.
 
-![Comparison of centered vs. left-aligned text and the resulting alignment points](images/alignment-points.png)
+![Comparison of centered vs. left-aligned text and the resulting alignment points](images/alignment-points2.png)
 
 
 
@@ -271,7 +275,6 @@ Three of the most common sources of proportionality errors are:
 - **Miller's Law**: The claim that working memory holds about seven plus or minus two discrete items.
 - **Working memory**: Short-term memory that temporarily holds a limited number of items during a task.
 - **Chunk**: A meaningful unit of information; grouping items into chunks expands what fits in working memory.
-- **Cowan's limit**: The revised working-memory estimate of about four chunks once rehearsal and grouping strategies are removed; plan designs for four.
 - **Exploratory visualization**: A chart made to investigate a dataset, which may be deliberately overloaded with information.
 - **Confirmatory visualization**: A simplified chart made to communicate a finding to an audience.
 - **Proximity**: The Gestalt principle that items placed close together are perceived as related.
@@ -407,12 +410,6 @@ Three of the most common sources of proportionality errors are:
     - Brightness
     - Length
     - Area
-
-1. What did Cowan (2001) conclude about the practical working memory limit?
-    - About 4 chunks, once rehearsal and grouping are removed
-    - About 7 chunks, confirming Miller exactly
-    - About 12 chunks, if the items are colored
-    - There is no measurable limit in short-term memory
 
 1. Why is "1492" potentially one chunk rather than four?
     - A chunk is a meaningful unit, not necessarily a single item

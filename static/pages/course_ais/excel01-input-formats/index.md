@@ -1,14 +1,17 @@
 # Excel Keyboard and Mouse Input, and Formatting
 
-Refer to `File 01 Fundamentals.xlsx` 
-
-
 **Outcomes**:
 
 - Efficiently use a mouse for input
 - Efficiently use a keyboard for input
 - Explain and use relative/absolute referencing
 - Apply formatting conventions that communicate meaning to a reader.
+
+**Files**:
+
+- [Class practice file](file01-input-formats.xlsx)
+- [Sample quizzes from Spring 2026](file01-sample-quizzes-2026-spring.zip)
+
 
 ## Efficient mouse input
 

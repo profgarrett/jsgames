@@ -10,6 +10,7 @@ Data visualization represents *numbers* with *visual elements*.  This module cov
 
 **Links**:
 - [Socviz website's Look at Data](https://socviz.co/lookatdata.html)
+- [Slides](/static/pages/slides.html?course=course_dv&module=dv31-visualchannels)
 
 
 ## What is a chart?
@@ -25,15 +26,17 @@ The diagram below shows some examples of charts versus non-charts.
 
 ### What is a table?
 
-**A table is not a chart!** It has rows and columns of numbers. A table can *contain* charts when it uses graphical elements to represent data values, such as a heatmap table or other conditional formatting.
+**A table is not a chart!** It has rows and columns of numbers.  Tables and charts answer different questions, so neither is "better":
 
-Tables and charts answer different questions, so neither is "better":
+When should you use a table, and when should you use a chart?
 
 | Use a table when | Use a chart when |
 | --- | --- |
 | Readers need exact values | Readers need a pattern, trend, or comparison |
 | There are only a handful of numbers | There are many values |
 | Values are looked up individually | Values are read together |
+
+![The same six numbers as a table and as a sorted bar chart](images/slides-table-vs-chart2.png)
 
 Tables have been around for a very long time. The image below shows an inventory of shepherds and herds from around 1300 BC. You can see that it has rows and columns, each with a cell recording data.
 
@@ -44,6 +47,10 @@ Historical tables:
 - [Explanation of Cuneiform text](https://www.datafix.com.au/BASHing/2020-08-12.html)
 - [Website with tables](https://www.are.na/joshua-kopin/tabular-presentation)
 
+A table can *contain* charts when it uses graphical elements to represent data values, such as a heatmap table or other conditional formatting.
+
+![Table with conditional formatting](images/table-with-conditional-format.png)
+
 
 ## Graphs use visual channels
 
@@ -51,7 +58,7 @@ A graph uses **visual channels** to represent data. Your visual system processes
 
 Because these channels are interpreted by a biological visual system, they are limited by that system's capabilities. Some channels are far better than others for conveying information accurately.
 
-### Per-attentive versus accurate
+### Per-attentive versus accuracy
 
 Two related ideas get mixed up constantly, so keep them separate:
 
@@ -83,7 +90,7 @@ Encoding categories with a magnitude channel implies a ranking that does not exi
 - Curvature
 - Volume (3D as size)
 
-![Ten visual channels illustrated, from position on a common scale down to volume. Source: socviz](images/preattentive1.png)
+![Channels for numbers ranked from position on a common scale down to volume](images/slides-channel-ranking.png)
 
 *Channels for categories*. Note that only a handful of levels are usable at once — see [dv36. Colors](../dv36-colors/index).
 
