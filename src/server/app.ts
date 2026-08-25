@@ -25,29 +25,28 @@ import type { Request, Response, NextFunction } from 'express';
 
 const app = express();
 
-// Trust the proxy. Required both in development and on DreamHost, where Apache
-// mod_proxy sits in front of this daemon and forwards the real scheme and client IP
-// in X-Forwarded-* headers.
+// Trust the proxy. Required both in development and on DreamHost, where nginx sits in
+// front of this daemon and forwards the real scheme and client IP in X-Forwarded-*
+// headers. See the /api/ location block in dreamhost_config/nginx/excel.fun/settings.conf.
 app.set('trust proxy', 1)
 
 /*
-	Force HTTPS.
+	HTTPS is NOT enforced here. It is enforced in nginx.
 
-	This used to live in .htaccess. Under DreamHost's proxy server the document root is
-	no longer served by Apache, so none of the .htaccess rules run any more and the
-	redirect has to happen here.
+	There used to be an express middleware at this point that 301'd any request whose
+	X-Forwarded-Proto was 'http'. It was dead code and was removed.
 
-	Deliberately keyed on the header being present and equal to 'http' rather than on
-	`!req.secure`. If Apache ever stops sending X-Forwarded-Proto, `!req.secure` would be
-	true for every request and the app would redirect to itself forever; this version
-	simply stops redirecting instead.
+	Why it was dead: nginx serves index.html, /main.<hash>.js and /static/ straight off
+	disk and only proxies `location /api/` to this daemon. A student typing "excel.fun"
+	never reached node at all, so nothing redirected them -- they got the whole SPA over
+	plain http with a 200. The only requests that DID reach the middleware were /api/
+	calls, and 301'ing an XHR POST is actively harmful: fetch follows the redirect but
+	rewrites the method to GET, so the body is silently dropped.
+
+	Enforcement now lives in block 0 of dreamhost_config/nginx/excel.fun/settings.conf,
+	at server level, so it runs before location matching and covers every path. HSTS is
+	set there too, so after the first visit the browser never tries http again.
 */
-app.use((req: Request, res: Response, next: NextFunction) => {
-	if (!DEBUG && req.headers['x-forwarded-proto'] === 'http') {
-		return res.redirect(301, 'https://' + req.headers.host + req.originalUrl);
-	}
-	next();
-});
 
 app.use( session_initialize() ) ;
 app.use( session_refresh) ;

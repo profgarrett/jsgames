@@ -58,7 +58,7 @@ export default function HomeLoggedOut(): ReactElement {
 							<h3>A free Excel & SQL tutorial system</h3>
 							This website teaches you how to write SQL queries and Excel formulas.
 							<br/><br/>
-							It is a research project developed by <a href='http://profgarrett.com'>Nathan Garrett</a>.
+							It is a research project developed by <a href='https://profgarrett.com'>Nathan Garrett</a>.
 							Some  publications about it are <a href='https://scholar.google.com/citations?user=UJXCwEcAAAAJ&hl=en&oi=ao'>posted online</a>.
 							The site is free for both individuals and faculty.
 							<br/><br/>

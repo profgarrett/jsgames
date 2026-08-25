@@ -164,7 +164,7 @@ router.post('/passwordresetrequest',
 You have requested a password reset on Excel.fun.
 Please use the link below to reset your password.
 
-http://excel.fun/password/?passwordreset=${code}
+https://excel.fun/password/?passwordreset=${code}
 
 
 Thank you for using the Excel.fun website! If you have any questions, feel free to email me.
