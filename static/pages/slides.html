@@ -57,6 +57,13 @@
   .reveal ul, .reveal ol { display: block; }
   /* Answer slides get a gold left rule so they read as a different beat */
   .reveal .slides section.present h3:first-child { color: var(--wvu-blue); }
+
+  /* Make slides scrollable if content is too long */
+  .reveal .slides section.scrollable {
+    overflow-y: auto;
+    max-height: 100%;
+}
+
 </style>
 </head>
 <body>
@@ -79,7 +86,8 @@
       data-separator="^---$"
       data-separator-vertical="^--$"
       data-separator-notes="^Note:"
-      data-charset="utf-8">
+      data-charset="utf-8"
+      class="scrollable">
       <textarea data-template>
 
 # Sample Slideshow 
@@ -161,6 +169,18 @@ Show how this concept is illustrated in a real-world dataset or scenario.
 Same as questions 1-3, but with different content.
 
 ---
+
+## Sample long slide to test scrolling
+
+Here is a lot of text.Here is a lot of text.Here is a lot of text.Here is a lot of text.Here is a lot of text.Here is a lot of text.Here is a lot of text.Here is a lot of text.Here is a lot of text.Here is a lot of text.Here is a lot of text.Here is a lot of text.Here is a lot of text.Here is a lot of text.Here is a lot of text.Here is a lot of text.Here is a lot of text.Here is a lot of text.Here is a lot of text.
+
+Here is a lot of text.Here is a lot of text.Here is a lot of text.Here is a lot of text.Here is a lot of text.Here is a lot of text.Here is a lot of text.Here is a lot of text.Here is a lot of text.Here is a lot of text.Here is a lot of text.Here is a lot of text.Here is a lot of text.Here is a lot of text.Here is a lot of text.Here is a lot of text.Here is a lot of text.Here is a lot of text.Here is a lot of text.
+
+Here is a lot of text.Here is a lot of text.Here is a lot of text.Here is a lot of text.Here is a lot of text.Here is a lot of text.Here is a lot of text.Here is a lot of text.Here is a lot of text.Here is a lot of text.Here is a lot of text.Here is a lot of text.Here is a lot of text.Here is a lot of text.Here is a lot of text.Here is a lot of text.Here is a lot of text.Here is a lot of text.Here is a lot of text.
+
+Here is a lot of text.Here is a lot of text.Here is a lot of text.Here is a lot of text.Here is a lot of text.Here is a lot of text.Here is a lot of text.Here is a lot of text.Here is a lot of text.Here is a lot of text.Here is a lot of text.Here is a lot of text.Here is a lot of text.Here is a lot of text.Here is a lot of text.Here is a lot of text.Here is a lot of text.Here is a lot of text.Here is a lot of text.
+
+Here is a lot of text.Here is a lot of text.Here is a lot of text.Here is a lot of text.Here is a lot of text.Here is a lot of text.Here is a lot of text.Here is a lot of text.Here is a lot of text.Here is a lot of text.Here is a lot of text.Here is a lot of text.Here is a lot of text.Here is a lot of text.Here is a lot of text.Here is a lot of text.Here is a lot of text.Here is a lot of text.Here is a lot of text.
 
 ## Any questions?
 
