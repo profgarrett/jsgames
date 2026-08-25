@@ -236,7 +236,7 @@ export default function ClassProgressContainer(): ReactElement {
 				<br/>
 				<Tabs defaultActiveKey='chart'>
 					<Tab eventKey='chart' title='Chart of class progress'>
-						<ClassProgressChart data={data}  />
+						<ClassProgressChart data={data} nicknames={nicknames} />
 					</Tab>
 					<Tab eventKey='grades' title='Grade table'>
 						<ClassProgressGrades data={data} nicknames={nicknames} />

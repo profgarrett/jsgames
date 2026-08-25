@@ -19,6 +19,25 @@ const colors = {
 
 interface PropsType {
 	data: Array<IfLevelPagelessSchema>;
+    nicknames?: Array<{ username: string; nickname: string }>;
+};
+
+const normalize_username = (username: string): string => username.toLowerCase().trim();
+
+const build_nickname_lookup = (nicknames: Array<{ username: string; nickname: string }>): Map<string, string> => {
+    const lookup = new Map<string, string>();
+
+    nicknames.forEach( n => {
+        if(typeof n.username !== 'string' || typeof n.nickname !== 'string') return;
+
+        const key = normalize_username(n.username);
+        const value = n.nickname.trim();
+        if(key === '' || value === '') return;
+
+        lookup.set(key, value);
+    });
+
+    return lookup;
 };
 
 interface StateType {
@@ -170,6 +189,7 @@ export class ClassProgressChart extends React.Component<PropsType, StateType> {
         
 		// Turn uncompleted into Fail
 		const classification = this.state.classification == 'Fail' ? 'Needs repeating' : this.state.classification;
+        const nickname_lookup = build_nickname_lookup(this.props.nicknames ?? []);
 
         const row_data = levels.filter( l => l.code === this.state.code && l.props.classification === classification  );
 
@@ -179,6 +199,11 @@ export class ClassProgressChart extends React.Component<PropsType, StateType> {
 				Header: 'Username', 
 				accessor: l => DEMO_MODE ? '*****' : l.username,
 				width: 250
+            }, {
+                id: 'nickname',
+                Header: 'Nickname',
+                accessor: l => DEMO_MODE ? '*****' : (nickname_lookup.get(normalize_username(l.username)) ?? ''),
+                width: 250
 			}, {
 				id: 'updated',
 				Header: 'Last Update',
