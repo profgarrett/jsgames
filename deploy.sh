@@ -7,6 +7,72 @@ set -e  # Exit on any error
 # Turn execution tracing ON
 # set -x 
 
+# ---------------------------------------------------------------------------------
+# --pages-only
+#
+# Ships ONLY build/public/static/pages and stops. It does not run the `rm -rf jsgames`
+# below, does not re-copy sql/ or build/, does not touch package.json, the symlinks,
+# npm ci, the nginx config, or pm2.
+#
+# That is deliberate, not a shortcut. A pages-only deploy is a content edit, and the
+# running process never needs to see it: app_pages.ts resolves the pages directory once
+# at boot but readFileSync's each .md per request, and nginx serves /static/pages/*.md
+# straight off disk. So the new text is live the moment the copy lands -- no reload, no
+# restart, no 502 window, and no risk of a content typo taking the whole site down.
+#
+# The one thing this cannot do is add a page to a server that has never had a full
+# deploy, hence the guard below.
+#
+# Run a matching ./build.sh --pages-only first, or just use ./build_and_deploy_pages.sh.
+# ---------------------------------------------------------------------------------
+PAGES_ONLY=false
+for arg in "$@"; do
+	case "$arg" in
+		--pages-only) PAGES_ONLY=true ;;
+		*)
+			echo "ERROR: unknown option '$arg'"
+			echo "Usage: $0 [--pages-only]"
+			exit 1
+			;;
+	esac
+done
+
+if [ "$PAGES_ONLY" = true ]; then
+	LOCAL_PAGES="build/public/static/pages"
+	REMOTE_STATIC="excel.fun/jsgames/build/public/static"
+
+	if [ ! -d "$LOCAL_PAGES" ]; then
+		echo "ERROR: $LOCAL_PAGES does not exist."
+		echo "Run ./build.sh --pages-only first."
+		exit 1
+	fi
+
+	# Refuse to create the directory tree ourselves. If the server has no
+	# build/public/static, this box has never had a full deploy (or a deploy failed
+	# partway) and dropping a lone pages/ folder into a hand-made path would produce a
+	# site that serves course pages and nothing else.
+	#
+	# Written as an `if` because a false `[ -d ]` returns non-zero and would trip set -e.
+	if ! ssh profgarrett@excel.fun "[ -d $REMOTE_STATIC ]"; then
+		echo "ERROR: $REMOTE_STATIC does not exist on excel.fun."
+		echo "The server has no full build yet. Run ./build.sh && ./deploy.sh once first."
+		exit 1
+	fi
+
+	# Replace rather than merge, for the same reason as the local mirror in build.sh:
+	# scp only adds and overwrites, so a page deleted or renamed locally would keep
+	# being served from excel.fun under its old slug indefinitely.
+	ssh profgarrett@excel.fun "rm -rf $REMOTE_STATIC/pages"
+	scp -r -C -q "$LOCAL_PAGES" profgarrett@excel.fun:"$REMOTE_STATIC/"
+
+	echo ""
+	echo "Pages deployed to excel.fun. No server restart needed -- markdown is read"
+	echo "per request, so the new content is already live."
+	echo "  Local pages:  $(find "$LOCAL_PAGES" -name '*.md' | wc -l | tr -d ' ') markdown file(s)"
+	echo "  Server pages: $(ssh profgarrett@excel.fun "find $REMOTE_STATIC/pages -name '*.md' | wc -l" | tr -d ' ') markdown file(s)"
+	exit 0
+fi
+
 # Log into server and clean out old files
 ssh profgarrett@excel.fun "cd excel.fun; rm -rf jsgames; mkdir jsgames; mkdir jsgames/sql; mkdir jsgames/build"
 
