@@ -11,6 +11,7 @@ This section covers data structures that are built into Python.
 - Tuples: understand immutability; create and access tuples; use tuples for multiple return values.
 
 **Links:**
+- [Slides](/static/pages/slides.html?course=course_model&module=py02-data-structures)
 - [Template](template.ipynb)
 - [Whirlwind Tour: Built-in Data Structures](https://jakevdp.github.io/WhirlwindTourOfPython/06-built-in-data-structures.html)
 
@@ -69,7 +70,7 @@ mixed = [1, 'two', 3.0, True, [4, 5]]
 print(len(mixed))           # 5
 ```
 
-That flexibility is the reason lists are slow for math. Python has to check the type of every item every time it touches one.
+That flexibility is why lists are slow for math. Python has to check the type of every item every time.
 
 ### Common list methods
 

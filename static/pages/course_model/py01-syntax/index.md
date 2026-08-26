@@ -11,7 +11,7 @@ This module covers the fundamental concepts of Python programming, including sym
 - [Slides](/static/pages/slides.html?course=course_model&module=py01-syntax)
 - [Template](template.ipynb)
 - [Python Quick Reference Sheet](python3-quick-reference.pdf)
-
+- [Suno - Song for Python Starts at Zero](https://suno.com/s/ZzcN2X8dw0rwZJ62)
 
 ## Types
 
