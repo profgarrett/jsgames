@@ -20,9 +20,35 @@ export default function SiteHeader(): ReactElement {
 	// effect, so the Admin link is not missing after logging in.
 	const [isAdmin, setIsAdmin] = useState(getUserFromBrowser().isAdmin);
 
+	// Deploy date/time, pulled from the same /meta.json that CacheBuster polls
+	// for the build hash. Admin-only, purely informational.
+	const [deployDt, setDeployDt] = useState<string | null>(null);
+
+	// meta.json is only written by the production build (build_metajson.js) and,
+	// even then, only ends up reachable at the site root once deployed. The dev
+	// server (--static build) roots the build/ folder itself at '/', so a fetch
+	// would 404 as /meta.json locally -- same reason CacheBuster skips itself on
+	// localhost. Rather than hide the control there, show a fixed dev-mode label.
+	const [isLocalhost] = useState(
+		document.location.href.substr(0, 'http://localhost'.length) === 'http://localhost'
+	);
+
 	useEffect(() => {
 		setIsAdmin(getUserFromBrowser().isAdmin);
 	}, []);
+
+	useEffect(() => {
+		if (!isAdmin || isLocalhost) return;
+
+		fetch(`/meta.json?${new Date().getTime()}`, { cache: 'no-cache' })
+			.then(response => response.json())
+			.then(json => {
+				if (typeof json.dt === 'string') setDeployDt(json.dt);
+			})
+			.catch(() => {
+				// Not critical -- just don't show a deploy time.
+			});
+	}, [isAdmin, isLocalhost]);
 
 	return (
 		<Container fluid style={{  }}>
@@ -36,6 +62,14 @@ export default function SiteHeader(): ReactElement {
 					? <Nav.Link as={Link} to='/admin'>Admin</Nav.Link>
 					: null}
 				</Nav>
+				{isAdmin && (isLocalhost || deployDt)
+					? <Navbar.Text
+							className='ms-auto'
+							style={{ fontSize: '0.75rem', opacity: 0.6 }}
+						>
+							{isLocalhost ? 'localhost dev mode' : `Deployed ${new Date(deployDt as string).toLocaleString()}`}
+						</Navbar.Text>
+					: null}
 			</Container>
 		</Navbar>
 		</Col></Row>
