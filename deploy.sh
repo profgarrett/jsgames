@@ -8,20 +8,47 @@ set -e  # Exit on any error
 # set -x 
 
 # ---------------------------------------------------------------------------------
+# RELEASE LAYOUT (blue/green)
+#
+# A full deploy no longer touches a live `jsgames` directory in place. It builds a
+# brand new release under jsgames-releases/<timestamp>/, and only once that release is
+# fully copied and its node_modules is ready does it atomically repoint the `jsgames`
+# symlink at it. The pm2 process that's already running keeps serving out of the OLD
+# release's files for the entire copy + npm ci window -- unlike the old rm-rf-in-place
+# scheme, there is no longer a gap where `public`/`app.js` point through a deleted or
+# half-populated directory.
+#
+# node_modules is shared across releases by content: it lives in
+# jsgames-shared/node_modules-<lockfile hash>/, and a release just symlinks to the
+# matching one. If the lockfile hasn't changed since the last deploy that installed
+# something, the existing node_modules is reused untouched and `npm ci` -- normally the
+# slowest step in this script -- is skipped entirely. If the lockfile HAS changed,
+# npm ci runs once into a freshly hash-named directory, which is also why an older
+# release stays independently installable even after a newer one changes dependencies
+# (see rollback.sh).
+#
+# Old releases, and any node_modules-<hash> directory no kept release still points at,
+# are pruned at the end of a full deploy. KEEP_RELEASES controls how many stick around,
+# which is what rollback.sh has to choose from.
+# ---------------------------------------------------------------------------------
+KEEP_RELEASES=3
+
+# ---------------------------------------------------------------------------------
 # --pages-only
 #
-# Ships ONLY build/public/static/pages and stops. It does not run the `rm -rf jsgames`
-# below, does not re-copy sql/ or build/, does not touch package.json, the symlinks,
-# npm ci, the nginx config, or pm2.
+# Ships ONLY build/public/static/pages and stops. It does not run a full deploy, does
+# not re-copy sql/ or build/, does not touch package.json, the symlinks, npm ci, the
+# nginx config, or pm2.
 #
-# That is deliberate, not a shortcut. A pages-only deploy is a content edit, and the
+# A pages-only deploy is a content edit, and the
 # running process never needs to see it: app_pages.ts resolves the pages directory once
 # at boot but readFileSync's each .md per request, and nginx serves /static/pages/*.md
 # straight off disk. So the new text is live the moment the copy lands -- no reload, no
 # restart, no 502 window, and no risk of a content typo taking the whole site down.
 #
 # The one thing this cannot do is add a page to a server that has never had a full
-# deploy, hence the guard below.
+# deploy, hence the guard below. REMOTE_STATIC below resolves through the `jsgames`
+# symlink same as everything else, so this needs no changes for the release layout.
 #
 # Run a matching ./build.sh --pages-only first, or just use ./build_and_deploy_pages.sh.
 # ---------------------------------------------------------------------------------
@@ -73,22 +100,29 @@ if [ "$PAGES_ONLY" = true ]; then
 	exit 0
 fi
 
-# Log into server and clean out old files
-ssh profgarrett@excel.fun "cd excel.fun; rm -rf jsgames; mkdir jsgames; mkdir jsgames/sql; mkdir jsgames/build"
+# ---------------------------------------------------------------------------------
+# Full deploy starts here.
+# ---------------------------------------------------------------------------------
+RELEASE_ID=$(date +%Y%m%d-%H%M%S)
+RELEASES_DIR="excel.fun/jsgames-releases"
+SHARED_DIR="excel.fun/jsgames-shared"
+RELEASE_PATH="$RELEASES_DIR/$RELEASE_ID"
 
-# Copy build files
-scp -r -C -q sql profgarrett@excel.fun:excel.fun/jsgames/
-scp -r -C -q build profgarrett@excel.fun:excel.fun/jsgames/
+echo "Deploying release $RELEASE_ID"
 
-# Old Dreamhost setup for Apache
-#scp -C -q .htaccess profgarrett@excel.fun:excel.fun/public/.htaccess
+ssh profgarrett@excel.fun "mkdir -p $RELEASE_PATH/sql $RELEASE_PATH/build $SHARED_DIR"
 
-# New Dreamhost setup for Nginx
+# Copy build files into the new release. The OLD release -- and the pm2 process still
+# reading from it -- is untouched by any of this.
+scp -r -C -q sql profgarrett@excel.fun:"$RELEASE_PATH/"
+scp -r -C -q build profgarrett@excel.fun:"$RELEASE_PATH/"
+
+# Dreamhost setup for Nginx
 #
-# Hash the copy already on the server BEFORE the rm below deletes it, so the check at
-# the end of this script knows whether this deploy changes anything nginx cares about.
-# Without that the "reload nginx" reminder prints on every deploy and becomes noise you
-# learn to skip -- which is exactly how a config change silently fails to take effect.
+# Hash the copy already on the server BEFORE we might touch it, so the check at the end
+# of this script knows whether this deploy changes anything nginx cares about. Without
+# that the "reload nginx" reminder prints on every deploy and becomes noise you learn to
+# skip -- which is exactly how a config change silently fails to take effect.
 #
 # sha256sum on the Linux server, shasum -a 256 locally (macOS has no sha256sum).
 # `|| true` because a missing remote file is normal on a first deploy and a non-zero
@@ -104,46 +138,67 @@ scp -r -C -q "$NGINX_LOCAL" profgarrett@excel.fun:~/nginx/excel.fun/
 scp -C -q dreamhost_config/cron/pm2-check.sh profgarrett@excel.fun:~/pm2-check.sh
 ssh profgarrett@excel.fun "chmod +x ~/pm2-check.sh"
 
+# Copy package files into the release. Needed both to (maybe) run npm ci and to hash
+# the lockfile below. The lockfile MUST ship with package.json -- without it the server
+# would re-resolve every dependency on its own and drift from the tree tested locally,
+# which is what produced the ERESOLVE eslint conflict, back when both lived at
+# excel.fun/ instead of inside a release.
+scp -C -q package.json package-lock.json profgarrett@excel.fun:"$RELEASE_PATH/"
 
-# Copy package files for updating server node-modules.
-# The lockfile MUST ship with package.json. Without it the server re-resolves
-# every dependency on its own and drifts away from the tree tested locally,
-# which is what produced the ERESOLVE eslint conflict.
-scp -C -q package.json package-lock.json profgarrett@excel.fun:excel.fun/
+# ---------------------------------------------------------------------------------
+# node_modules: skip npm ci when the lockfile hasn't changed since a previous deploy.
+#
+# LOCK_HASH is a cache key, not a security boundary -- truncated to 16 hex chars so
+# `ls jsgames-shared/` stays readable.
+# ---------------------------------------------------------------------------------
+LOCK_HASH=$(shasum -a 256 package-lock.json | cut -c1-16)
+NM_DIR="$SHARED_DIR/node_modules-$LOCK_HASH"
 
-# Reset symbolic links
+echo "Lockfile hash: $LOCK_HASH"
+
+# Written as an `if`, not `[ -d ... ] || ssh ...`: a false `[ -d ]` over ssh returns
+# non-zero and would trip `set -e` as the last statement of a chain.
+if ssh profgarrett@excel.fun "[ -d $NM_DIR ]"; then
+	echo "  Dependencies unchanged since a previous deploy -- reusing $NM_DIR, skipping npm ci."
+	ssh profgarrett@excel.fun "cd $RELEASE_PATH && ln -sfn ../../jsgames-shared/node_modules-$LOCK_HASH node_modules"
+else
+	echo "  New or first-seen dependency set -- running npm ci (normally the slowest step here)."
+	# npm ci wipes node_modules and installs exactly what the lockfile pins, so a
+	# stale tree can never accumulate. --omit=dev skips eslint/webpack/React, which
+	# the running server never loads.
+	ssh profgarrett@excel.fun "cd $RELEASE_PATH && npm ci --omit=dev"
+	# Relocate the freshly-installed tree into the shared, hash-named location and
+	# symlink it back in. This is what lets the *next* deploy skip npm ci, if its
+	# lockfile hashes the same as this one's.
+	ssh profgarrett@excel.fun "mv $RELEASE_PATH/node_modules $NM_DIR && cd $RELEASE_PATH && ln -sfn ../../jsgames-shared/node_modules-$LOCK_HASH node_modules"
+fi
+
+# One-time migration: deploys before this release scheme left `jsgames` as a real
+# directory (rm -rf'd and recreated every time). `ln -sfn` can't swap a symlink onto a
+# path that is a real directory -- it would create the link *inside* it instead of
+# replacing it. If that's what's sitting there, it's disposable build output from the
+# old scheme -- clear it right here, immediately before the swap, so `public`/`app.js`
+# are dangling for a couple of shell commands on this one migration deploy rather than
+# for the whole copy + npm ci window above. Skipped once `jsgames` is already a symlink.
+ssh profgarrett@excel.fun '[ -L excel.fun/jsgames ] || [ ! -e excel.fun/jsgames ] || rm -rf excel.fun/jsgames'
+
+# ---------------------------------------------------------------------------------
+# Atomic swap. GNU coreutils' `ln -sfn` creates the new symlink under a temp name and
+# renames it over the old one, so there is no instant where `jsgames` points at
+# nothing. `public` and `app.js` are unchanged -- they still point through
+# jsgames/build/..., so repointing `jsgames` itself IS the swap.
+# ---------------------------------------------------------------------------------
+ssh profgarrett@excel.fun "cd excel.fun; ln -sfn jsgames-releases/$RELEASE_ID jsgames"
 ssh profgarrett@excel.fun "cd excel.fun; rm -f public; ln -s jsgames/build/public/ public"
 ssh profgarrett@excel.fun "cd excel.fun; rm -f app.js; ln -s jsgames/build/server/app.js app.js"
-
-# Install production modules on the server.
-# `npm ci` wipes node_modules and installs exactly what the lockfile pins, so a
-# stale tree can never accumulate. `--omit=dev` skips eslint/webpack/React,
-# which the running server never loads.
-ssh profgarrett@excel.fun "cd excel.fun; npm ci --omit=dev"
-
 
 # Clean logs
 ssh profgarrett@excel.fun "cd excel.fun; rm -f log.txt"
 
 # Reload pm2 so the new build is the code that is actually running.
 #
-# THIS USED TO BE `pm2 start`, AND THAT IS A TRAP. `pm2 start` against an app that is
-# already running does not restart it -- pm2 prints "Script already launched" and exits
-# 0. Every step above succeeds, the deploy looks clean, and the server keeps executing
-# whatever app.js it booted with days ago.
-#
-# Symptom when that happens: nginx serves the new bundle straight off disk while the API
-# is old, so the client calls routes the server has never heard of. In August 2026 the
-# new bundle polled /api/health against a process that predated the route, got a 404,
-# and showed every student on the login page a false "the database is down" banner while
-# mysql was serving queries normally.
-#
 # `reload` restarts in place (zero downtime, no 502 window); the `||` covers the first
 # deploy, when there is no jsgames process to reload yet.
-#
-# No --watch flag: pm2 does not watch by default, and `--watch false` was worse than
-# useless -- --watch is a boolean flag, so "false" was parsed as a stray argument rather
-# than as a value, which is the opposite of what the old comment claimed.
 ssh profgarrett@excel.fun "pm2 reload jsgames --update-env || pm2 start excel.fun/app.js --name jsgames"
 ssh profgarrett@excel.fun "pm2 save"
 
@@ -166,6 +221,8 @@ else
 	echo "  WARNING: /api/health did not return 200."
 	echo "  The old process may still be running, or mysql is down. Check with:"
 	echo "    ssh profgarrett@excel.fun 'pm2 list; pm2 logs jsgames --lines 50'"
+	echo "  jsgames still points at release $RELEASE_ID. To go back to the previous one:"
+	echo "    ./rollback.sh"
 fi
 
 # build_file here is read once at process start, so it also doubles as a "when did this
@@ -175,11 +232,46 @@ echo "  Server reports:"
 ssh profgarrett@excel.fun "curl -sS -m 10 http://127.0.0.1:9000/api/version; echo"
 echo "  Local build:  $(ls build/public/ | grep -E '^main\..*\.js$' | head -1)"
 
+# ---------------------------------------------------------------------------------
+# Prune old releases and any node_modules-<hash> directory no kept release still points
+# at. Runs LAST and only after the health check above, so a release that fails to come
+# up cleanly is still on disk (and still what `jsgames` points at) to inspect, rather
+# than getting swept away by its own deploy.
+# ---------------------------------------------------------------------------------
+echo ""
+echo "Pruning old releases (keeping last $KEEP_RELEASES)..."
+ssh profgarrett@excel.fun "cd $RELEASES_DIR && ls -1t | tail -n +$((KEEP_RELEASES + 1)) | xargs -r rm -rf"
+
+echo "Pruning unreferenced node_modules caches..."
+ssh profgarrett@excel.fun bash -s -- "$RELEASES_DIR" "$SHARED_DIR" <<'REMOTE_EOF'
+set -e
+releases_dir="$1"
+shared_dir="$2"
+
+# Build the set of node_modules-<hash> directory names still referenced by a release
+# that survived the prune above.
+keep=""
+for rel in "$releases_dir"/*/; do
+	[ -L "${rel}node_modules" ] || continue
+	target=$(readlink "${rel}node_modules")
+	keep="$keep $(basename "$target")"
+done
+
+cd "$shared_dir"
+for nm in node_modules-*; do
+	[ -d "$nm" ] || continue
+	case " $keep " in
+		*" $nm "*) ;;  # still referenced by a kept release
+		*) echo "  removing unreferenced $nm"; rm -rf "$nm" ;;
+	esac
+done
+REMOTE_EOF
+
 
 # ---------------------------------------------------------------------------------
 # Reload nginx
 #
-# THIS SCRIPT CANNOT RELOAD NGINX, and that is not an oversight.
+# THIS SCRIPT CANNOT RELOAD NGINX
 #
 # On a DreamHost Managed VPS there is no root, no sudo and no systemd -- the same
 # constraint dreamhost_config/cron/pm2-check.sh works around for pm2. DreamHost
@@ -254,4 +346,3 @@ else
 	echo "  See block 0 of $NGINX_LOCAL. If \$scheme is not truthful on this host,"
 	echo "  change the condition to: if (\$http_x_forwarded_proto = http)"
 fi
-
