@@ -657,6 +657,14 @@ Name which **aggregation or role concept** applies:
 
 ### Eight Problems
 
+| Invoice | Customer | State         | Quantity | Revenue | Status |
+| ------- | -------- | ------------- | -------: | ------: | ------ |
+| 1001    | C101     | WV            |        2 |  200.00 | Paid   |
+| 1002    | C102     | West Virginia |        1 |  125.00 | paid   |
+| 1002    | C102     | West Virginia |        1 |  125.00 | paid   |
+| 1003    | C103     | PA            |       -2 |  250.00 | NULL   |
+| Total   |          |               |        2 |  700.00 |        |
+
 1. Invoice `1002` may be **duplicated**
 2. `WV` vs. `West Virginia` — inconsistent **coding**
 3. `Paid` vs. `paid` — inconsistent **coding**
@@ -687,6 +695,15 @@ And: the **unit of observation** is unclear without documentation.
 
 ### A — County Grant File
 
+
+| FIPS  | County     | Program  | Awards | Amount     |
+| ----- | ---------- | -------- | -----: | ---------- |
+| 54061 | Monongalia | SNAP     |  1,204 | $482,100   |
+| 54061 | Monongalia | S.N.A.P. |     96 | $38,400    |
+| 54039 | Kanawha    | SNAP     |  2,310 | $915,300   |
+| 54049 | Marion     | SNAP     |   -999 | $0         |
+|       | Statewide  | All      |  3,610 | $1,435,800 |
+
 - **Roll-up**: the last row is a summary. Two tells — the label `Statewide` / `All`, and the **blank key value** in FIPS.
 - **Coding**: `SNAP` and `S.N.A.P.` split one program into two bars.
 - **Storage type**: `Amount` holds `$` and commas, so it is **text**. It will not sum until it is converted.
@@ -709,8 +726,16 @@ And: the **unit of observation** is unclear without documentation.
 
 --
 
-### A — Advising Report
+## Application 3 — Advising Report
 
+| Student       | AdvisorID | Fall2025 | Spring2026 | Fall2026 |
+| ------------- | --------- | -------: | ---------: | -------: |
+| Alice         | A17       |     3.40 |       3.60 |     3.70 |
+| Bob           | A17       |     2.90 |            |     4.50 |
+| Chen          | A22       |     3.80 |       3.90 |     3.90 |
+| Class Average |           |     3.37 |       3.75 |     4.03 |
+
+**What is wrong here?**
 - **Wide data**: the variable "term" is spread across three columns. Reshape to `Student | Term | GPA` before charting.
 - **Roll-up**: `Class Average` is a summary row, and it forces the text `Class Average` into the Student key field.
 - **Invalid**: Bob's `4.50` on a 0–4.0 scale breaks a business rule — and it drags the Fall 2026 class average above 4.0.
@@ -736,6 +761,15 @@ And: the **unit of observation** is unclear without documentation.
 
 ### A — Facility Sensors
 
+| SensorID | Timestamp        | TempF | StatusCode |
+| -------- | ---------------- | ----: | ---------- |
+| S-04     | 2026-07-14 08:00 |  71.2 | 1          |
+| S-04     | 2026-07-14 09:00 |  72.0 | 1          |
+| S-04     | 2026-07-14 09:00 |  72.0 | 1          |
+| S-11     | 2026-07-14 08:00 |  70.8 | 9          |
+| S-11     | 2026-07-14 09:00 | 214.0 | 1          |
+
+
 - **Longitudinal**: each sensor appears repeatedly. Row count ≠ sensor count.
 - **Composite key**: `SensorID + Timestamp` identifies a row.
 - **Duplicate**: S-04 at 09:00 appears twice — a real duplicate, because it violates that composite key.
@@ -759,6 +793,13 @@ And: the **unit of observation** is unclear without documentation.
 --
 
 ### A — Retail Line Items
+
+| ReceiptID | StoreZip | CustomerID | Tier | Qty | LineTotal |
+| --------- | -------- | ---------- | ---- | --: | --------: |
+| R-5001    | 07102    | C204       | 2    |   3 |     44.85 |
+| R-5002    | 7102     | C204       | 2    |   1 |     14.95 |
+| R-5003    | 02139    | C318       | 3    |  -1 |    -14.95 |
+| R-5004    | 02139    | C401       | 1    |   2 |     29.90 |
 
 **Fine:**
 

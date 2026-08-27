@@ -16,8 +16,9 @@
   :root {
     --wvu-blue: #002855;
     --wvu-gold: #EAAA00;
+    --zoom-scale: 1;
   }
-  .reveal { font-size: 30px; }
+  .reveal { font-size: calc(40px * var(--zoom-scale)); }
   .reveal .slides section { text-align: left; padding-top: 1.2em; }
   /* Section-divider slides (those that open with an h1) sit lower and centered */
   .reveal .slides section:has(> h1:first-child) { padding-top: 4.5em; text-align: center; }
@@ -39,7 +40,7 @@
     padding-bottom: 0.25em;
     margin-bottom: 0.6em;
   }
-  .reveal table { font-size: 0.72em; margin: 0.4em auto; }
+  .reveal table { font-size: 0.9em; margin: 0.4em auto; }
   .reveal table th {
     background: var(--wvu-blue);
     color: #fff;
@@ -55,6 +56,8 @@
     font-style: normal;
   }
   .reveal code { color: #a1260d; background: #f4f4f4; padding: 0 0.2em; }
+  /* reveal.js's default theme shrinks code blocks (~0.55em); match body text instead. */
+  .reveal pre, .reveal pre code { font-size: 1em; }
   .reveal a { color: #0b5394; }
   .reveal ul, .reveal ol { display: block; }
   /* Answer slides get a gold left rule so they read as a different beat */
@@ -65,6 +68,14 @@
     overflow-y: auto !important;
     height: 100% !important;
     max-height: 700px !important;
+  }
+  /* Presentation-wide override: when toggled on (see the "Scroll" control),
+     this beats the rule above on specificity and turns every
+     scrollable-slide back into a normal, non-scrolling slide. */
+  html.no-scroll-slides .reveal .slides section.scrollable-slide {
+    overflow-y: visible !important;
+    height: auto !important;
+    max-height: none !important;
   }
 
   /* All other slides default to stretching images to fill the available space. */
@@ -101,6 +112,103 @@
     font-style: italic;
   }
 
+  /* Runtime text-size + canvas-size controls: let the presenter bump slide
+     text up/down and change Reveal's nominal design resolution to fit the
+     room (projector vs. laptop). The canvas-size control changes the same
+     width/height Reveal uses for its own scale-to-fit transform (a smaller
+     canvas gets scaled up more on a given display); the text-size control
+     is an independent multiplier on top of that. State persists per
+     browser via localStorage. */
+  .deck-controls {
+    position: fixed;
+    left: 14px;
+    bottom: 14px;
+    z-index: 40;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    opacity: 0.35;
+    transition: opacity 0.15s ease;
+  }
+  .deck-controls:hover,
+  .deck-controls:focus-within {
+    opacity: 1;
+  }
+  .zoom-controls,
+  .size-controls,
+  .scroll-controls {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    background: rgba(255, 255, 255, 0.85);
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    padding: 2px;
+    font-family: inherit;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+  }
+  .zoom-controls button,
+  .size-controls button,
+  .scroll-controls button {
+    width: 28px;
+    height: 28px;
+    line-height: 1;
+    border: none;
+    background: transparent;
+    color: var(--wvu-blue);
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    border-radius: 4px;
+  }
+  .zoom-controls button:hover,
+  .size-controls button:hover,
+  .scroll-controls button:hover { background: #eef1f5; }
+  .scroll-controls button {
+    width: auto;
+    min-width: 28px;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 0 8px;
+  }
+  .scroll-controls button[aria-pressed="true"] {
+    background: var(--wvu-gold);
+    color: var(--wvu-blue);
+  }
+  .scroll-controls button[aria-pressed="true"]:hover { background: #d69f00; }
+  .zoom-controls .zoom-level {
+    min-width: 3em;
+    text-align: center;
+    font-size: 12px;
+    color: #555;
+    user-select: none;
+  }
+  .size-controls input[type="number"] {
+    width: 4.2em;
+    height: 24px;
+    font-size: 12px;
+    padding: 0 4px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    color: var(--wvu-blue);
+    background: #fff;
+    box-sizing: border-box;
+  }
+  .size-controls .size-x {
+    font-size: 12px;
+    color: #555;
+    user-select: none;
+    padding: 0 1px;
+  }
+  .size-controls button {
+    width: auto;
+    min-width: 28px;
+    font-size: 12px;
+    padding: 0 6px;
+  }
+  @media print {
+    .deck-controls { display: none; }
+  }
 
 </style>
 </head>
@@ -229,6 +337,27 @@ https://www.youtube.com/watch?v=vJG698U2Mvo
       </textarea>
     </section>
   </div>
+
+  <div class="deck-controls">
+    <div class="zoom-controls" aria-label="Slide text size">
+      <button type="button" id="zoom-out" aria-label="Decrease slide text size" title="Decrease text size (-)">&minus;</button>
+      <span class="zoom-level" id="zoom-level">100%</span>
+      <button type="button" id="zoom-in" aria-label="Increase slide text size" title="Increase text size (+)">&plus;</button>
+      <button type="button" id="zoom-reset" aria-label="Reset slide text size" title="Reset text size (0)">&#8635;</button>
+    </div>
+    <div class="size-controls" aria-label="Slide canvas size">
+      <input type="number" id="canvas-width" aria-label="Slide canvas width in pixels" title="Canvas width (px)" min="320" max="3840" step="10" value="1920">
+      <span class="size-x" aria-hidden="true">&times;</span>
+      <input type="number" id="canvas-height" aria-label="Slide canvas height in pixels" title="Canvas height (px)" min="240" max="2160" step="10" value="1080">
+      <button type="button" id="size-apply" aria-label="Apply slide canvas size" title="Apply size (Enter)">Set</button>
+      <button type="button" id="size-reset" aria-label="Reset slide canvas size to 1920 by 1080" title="Reset to 1920&times;1080">&#8635;</button>
+    </div>
+    <div class="scroll-controls" aria-label="Slide scrolling">
+      <button type="button" id="scroll-toggle" aria-pressed="false"
+        aria-label="Disable scrolling on question and review slides for the whole presentation"
+        title="Disable slide scrolling (all slides fixed-height)">Scroll: On</button>
+    </div>
+  </div>
 </div>
 
 <script type="module">
@@ -317,6 +446,7 @@ https://www.youtube.com/watch?v=vJG698U2Mvo
     width: 1920,
     height: 1080,
     margin: 0.06,
+    minScale: 0.5,
     plugins: [Markdown, Highlight, Notes]
   }).then(() => {
     // Automatically turn Markdown image text into captions
@@ -338,6 +468,160 @@ https://www.youtube.com/watch?v=vJG698U2Mvo
       figure.appendChild(img);
       figure.appendChild(caption);
     });
+
+    // --- Runtime text-size control -------------------------------------
+    // Reveal's own width/height scaling only reacts to pixel resolution,
+    // not the physical size of the room, so give presenters a manual
+    // override: buttons + keyboard shortcuts that scale a CSS variable on
+    // top of Reveal's transform. Persisted per browser via localStorage.
+    (function initZoomControls() {
+      const STORAGE_KEY = 'dv-slides-zoom-scale';
+      const MIN_ZOOM = 0.7;
+      const MAX_ZOOM = 1.6;
+      const STEP = 0.1;
+
+      const root = document.documentElement;
+      const levelEl = document.getElementById('zoom-level');
+
+      function readStored() {
+        const raw = parseFloat(localStorage.getItem(STORAGE_KEY));
+        return Number.isFinite(raw) ? raw : 1;
+      }
+
+      function apply(scale) {
+        const clamped = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, scale));
+        const rounded = Math.round(clamped * 100) / 100;
+        root.style.setProperty('--zoom-scale', rounded.toFixed(2));
+        if (levelEl) levelEl.textContent = `${Math.round(rounded * 100)}%`;
+        try {
+          localStorage.setItem(STORAGE_KEY, rounded);
+        } catch (err) {
+          // Ignore write failures (e.g. private browsing).
+        }
+        return rounded;
+      }
+
+      let current = apply(readStored());
+
+      function zoomIn() { current = apply(current + STEP); }
+      function zoomOut() { current = apply(current - STEP); }
+      function zoomReset() { current = apply(1); }
+
+      document.getElementById('zoom-in')?.addEventListener('click', zoomIn);
+      document.getElementById('zoom-out')?.addEventListener('click', zoomOut);
+      document.getElementById('zoom-reset')?.addEventListener('click', zoomReset);
+
+      Reveal.addKeyBinding({ keyCode: 187, key: '+', description: 'Increase slide text size' }, zoomIn);
+      Reveal.addKeyBinding({ keyCode: 189, key: '-', description: 'Decrease slide text size' }, zoomOut);
+      Reveal.addKeyBinding({ keyCode: 48, key: '0', description: 'Reset slide text size' }, zoomReset);
+    })();
+
+    // --- Runtime canvas-size control -------------------------------------
+    // Reveal scales its whole slide canvas to fit the display based on the
+    // width/height given to Reveal.initialize(). A canvas designed smaller
+    // than the actual display gets scaled UP more; changing these values at
+    // runtime lets a presenter pick a canvas that fits a given projector or
+    // screen rather than being stuck with the one nominal size in the code.
+    // Persisted per browser via localStorage.
+    (function initSizeControls() {
+      const W_KEY = 'dv-slides-canvas-width';
+      const H_KEY = 'dv-slides-canvas-height';
+      const DEFAULT_W = 1920;
+      const DEFAULT_H = 1080;
+      const MIN_W = 320, MAX_W = 3840;
+      const MIN_H = 240, MAX_H = 2160;
+
+      const widthInput = document.getElementById('canvas-width');
+      const heightInput = document.getElementById('canvas-height');
+
+      function clampDim(value, fallback, min, max) {
+        const n = parseInt(value, 10);
+        if (!Number.isFinite(n)) return fallback;
+        return Math.min(max, Math.max(min, n));
+      }
+
+      function applySize(rawWidth, rawHeight, persist) {
+        const w = clampDim(rawWidth, DEFAULT_W, MIN_W, MAX_W);
+        const h = clampDim(rawHeight, DEFAULT_H, MIN_H, MAX_H);
+        if (widthInput) widthInput.value = w;
+        if (heightInput) heightInput.value = h;
+        Reveal.configure({ width: w, height: h });
+        Reveal.layout();
+        if (persist) {
+          try {
+            localStorage.setItem(W_KEY, w);
+            localStorage.setItem(H_KEY, h);
+          } catch (err) {
+            // Ignore write failures (e.g. private browsing).
+          }
+        }
+        return { w, h };
+      }
+
+      function applyFromInputs() {
+        applySize(widthInput?.value, heightInput?.value, true);
+      }
+
+      function resetSize() {
+        applySize(DEFAULT_W, DEFAULT_H, true);
+      }
+
+      document.getElementById('size-apply')?.addEventListener('click', applyFromInputs);
+      document.getElementById('size-reset')?.addEventListener('click', resetSize);
+      [widthInput, heightInput].forEach((el) => {
+        el?.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') applyFromInputs();
+        });
+      });
+
+      // Re-apply a size saved from a previous visit, if different from the
+      // page's hard-coded default.
+      const storedW = localStorage.getItem(W_KEY);
+      const storedH = localStorage.getItem(H_KEY);
+      if (storedW || storedH) {
+        applySize(storedW || DEFAULT_W, storedH || DEFAULT_H, false);
+      }
+    })();
+
+    // --- Slide-scrolling toggle -------------------------------------------
+    // markQuestionSlidesScrollable() tags ## Question / ## Review slides
+    // with class="scrollable-slide" so long slides can be scrolled instead
+    // of clipped. This one button overrides that presentation-wide: it adds
+    // html.no-scroll-slides, which the CSS rule above uses (on selector
+    // specificity, not just source order) to force every scrollable-slide
+    // back to a normal fixed, non-scrolling slide. Persisted per browser.
+    (function initScrollToggle() {
+      const STORAGE_KEY = 'dv-slides-scroll-disabled';
+      const root = document.documentElement;
+      const btn = document.getElementById('scroll-toggle');
+
+      function readStored() {
+        return localStorage.getItem(STORAGE_KEY) === '1';
+      }
+
+      function apply(disabled) {
+        root.classList.toggle('no-scroll-slides', disabled);
+        if (btn) {
+          btn.textContent = disabled ? 'Scroll: Off' : 'Scroll: On';
+          btn.setAttribute('aria-pressed', String(disabled));
+          btn.title = disabled
+            ? 'Slide scrolling disabled for this presentation — click to re-enable on question/review slides'
+            : 'Disable slide scrolling (all slides fixed-height)';
+        }
+        try {
+          localStorage.setItem(STORAGE_KEY, disabled ? '1' : '0');
+        } catch (err) {
+          // Ignore write failures (e.g. private browsing).
+        }
+        return disabled;
+      }
+
+      let disabled = apply(readStored());
+
+      btn?.addEventListener('click', () => {
+        disabled = apply(!disabled);
+      });
+    })();
   });
 </script>
 </body>

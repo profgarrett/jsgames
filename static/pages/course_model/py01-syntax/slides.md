@@ -205,9 +205,8 @@ Name the **type** of the result, or the **output**.
 
 ## Questions 1-3
 
-**Q1.**
-
 ```python
+# Q1
 print(type(10 / 5))
 ```
 
@@ -215,9 +214,8 @@ print(type(10 / 5))
 10 / 5 = 2. Use `10 // 5` if you need an `int`.*
 <!-- .element: class="fragment" -->
 
-**Q2.**
-
 ```python
+# Q2
 x = '25'
 y = 4
 print(x * y)
@@ -227,9 +225,8 @@ print(x * y)
 multiplication and it is not an error. Fix: `int(x) * y` gives `100>`.*
 <!-- .element: class="fragment" -->
 
-**Q3.**
-
 ```python
+# Q3
 print(0.1 + 0.2 == 0.3)
 ```
 
@@ -242,9 +239,8 @@ tolerance.*
 
 ## Questions 4-6
 
-**Q4.**
-
 ```python
+# Q4
 enrolled = TRUE
 ```
 
@@ -253,9 +249,8 @@ first letter only. `TRUE` is read as a variable name that was never
 defined.*
 <!-- .element: class="fragment" -->
 
-**Q5.**
-
 ```python
+# Q5
 age = input('Age? ')    # user types 30
 print(age + 5)
 ```
@@ -265,9 +260,8 @@ the user types digits. `'30' + 5` cannot concatenate a str and an int.
 Fix: `int(age) + 5`.*
 <!-- .element: class="fragment" -->
 
-**Q6.**
-
 ```python
+# Q6
 score = 91
 result = score >= 90
 print(type(result))
@@ -432,9 +426,8 @@ Give the **value** and, where it matters, the **type**.
 
 ## Questions 7-9
 
-**Q7.**
-
 ```python
+# Q7
 print(8 % 3)
 ```
 
@@ -443,9 +436,8 @@ the remainder. Compare: `8 // 3` is `2` (the whole times), `8 / 3` is
 `2.6666666666666665`.*
 <!-- .element: class="fragment" -->
 
-**Q8.**
-
 ```python
+# Q8
 print(2 ^ 8)
 ```
 
@@ -453,9 +445,8 @@ print(2 ^ 8)
 complain. For 256 you need `2 ** 8`.*
 <!-- .element: class="fragment" -->
 
-**Q9.**
-
 ```python
+# Q9
 print(10 + 2 * 3 ** 2)
 ```
 
@@ -467,9 +458,8 @@ Then `10 + 18` is 28. Not `(10 + 2) * 3 ** 2`, which is 108.*
 
 ## Questions 10-12
 
-**Q10.**
-
 ```python
+# Q10
 score = 65
 print(score >= 70 or score == 65)
 ```
@@ -478,9 +468,8 @@ print(score >= 70 or score == 65)
 `False or True` is `True`. Only one side of an `or` needs to hold.*
 <!-- .element: class="fragment" -->
 
-**Q11.**
-
 ```python
+# Q11
 if score = 70:
     print('passed')
 ```
@@ -490,9 +479,8 @@ if score = 70:
 executes either.*
 <!-- .element: class="fragment" -->
 
-**Q12.**
-
 ```python
+# Q12
 minutes = 200
 print(minutes // 60, minutes % 60)
 ```
@@ -671,18 +659,16 @@ chosen together.
 
 `my_list = [10, 20, 30, 40, 50]` for all of these.
 
-**Q13.**
-
 ```python
+# Q13
 print(my_list[1])
 ```
 
 *Answer: `20`. Index 1 is the **second** item. Index 0 is the first.*
 <!-- .element: class="fragment" -->
 
-**Q14.**
-
 ```python
+# Q14
 print(my_list[5])
 ```
 
@@ -691,9 +677,8 @@ print(my_list[5])
 `my_list[5:]` returns `[]` without complaint.*
 <!-- .element: class="fragment" -->
 
-**Q15.**
-
 ```python
+# Q15
 print(my_list[1:3])
 ```
 
@@ -707,9 +692,8 @@ items, because 3 - 1 = 2.*
 
 `my_list = [10, 20, 30, 40, 50]` for all of these.
 
-**Q16.**
-
 ```python
+# Q16
 print(my_list[-2:])
 ```
 
@@ -717,9 +701,8 @@ print(my_list[-2:])
 the idiom for "the last n items."*
 <!-- .element: class="fragment" -->
 
-**Q17.**
-
 ```python
+#   Q17
 my_tuple = (100, 200, 300)
 my_tuple[1] = 25
 ```
@@ -728,9 +711,8 @@ my_tuple[1] = 25
 supported. If you need to change it, you needed a list.*
 <!-- .element: class="fragment" -->
 
-**Q18.**
-
 ```python
+# Q18
 x, y = 5, 9
 x, y = y, x
 print(x, y)
@@ -746,9 +728,8 @@ needed.*
 ## Questions 19-20
 
 
-**Q19.**
-
 ```python
+# Q19
 print(list(range(1, 5)))
 ```
 
@@ -756,9 +737,8 @@ print(list(range(1, 5)))
 numbers, because 5 - 1 = 4. Same rule as slicing.*
 <!-- .element: class="fragment" -->
 
-**Q20.**
-
 ```python
+# Q20
 my_list.append(60)
 print(len(my_list))
 print(my_list[-1])
