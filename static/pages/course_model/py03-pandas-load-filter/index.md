@@ -2,7 +2,7 @@
 
 Pandas is the most popular Python library for data manipulation and analysis. It provides data structures and functions needed to work with structured data seamlessly.
 
-This introduction shows you to how to create a table (DataFrame), load from a CSV file, access a column, and filter rows.
+This introduction shows you how to create a table (DataFrame), load from a CSV file, access a column, and filter rows.
 
 **Outcomes**:
 - Load data into a pandas DataFrame from a csv file
@@ -12,8 +12,12 @@ This introduction shows you to how to create a table (DataFrame), load from a CS
 - Access a Series
 - Filter rows based on conditions (single and multiple with and/or)
 - Reset an index after filtering
+- Use functions `isin`, `between`, and `~` to filter data
+- Learn how to use `.loc` to access rows and columns by label
+- Learn how copy works with filtered DataFrames
 
 **Links:**
+- [Slides](/static/pages/slides.html?course=course_model&module=py03-pandas-load-filter)
 - [Python Practice](template.ipynb)
     - Required datafile: [Students.csv file](students.csv)
 - [Predict outcomes](predict_outcomes_inclass.docx) (word file)
@@ -394,9 +398,6 @@ print(df.loc[df['grade'] > 88, 'name'])
 high_scores = df[df['grade'] > 88].copy()
 high_scores['grade'] = high_scores['grade'] + 5   # safe
 ```
-
-Without `.copy()`, older versions of pandas raise a `SettingWithCopyWarning` because it is ambiguous whether you meant to change the filtered table or the original. Adding `.copy()` states your intent and works in every version.
-
 
 
 ## Key Terms

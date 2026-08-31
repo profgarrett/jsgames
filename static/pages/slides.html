@@ -411,6 +411,26 @@ https://www.youtube.com/watch?v=vJG698U2Mvo
     );
   }
 
+  // Set the page's <title> from the fetched Markdown: the first `#` (h1)
+  // heading is the module title, and, when the first `###` (h3) heading
+  // follows the "code — subtitle" convention used across slides.md files
+  // (e.g. "### dv20 — Data Values and Structure"), its leading code is
+  // prefixed onto the title (e.g. "dv20 — Understanding Your Data").
+  function setTitleFromMarkdown(markdown) {
+    const h1Match = markdown.match(/^#\s+(.+)$/m);
+    if (!h1Match) return;
+    const h1 = h1Match[1].trim();
+
+    const h3Match = markdown.match(/^###\s+(.+)$/m);
+    let code = null;
+    if (h3Match) {
+      const parts = h3Match[1].split(/\s+—\s+/);
+      if (parts.length > 1) code = parts[0].trim();
+    }
+
+    document.title = code ? `${code} — ${h1}` : h1;
+  }
+
   // Load slides from /static/pages/{course}/{module}/slides.md when
   // ?course=...&module=... is present; otherwise keep the sample markdown.
   async function loadSlidesFromQuery() {
@@ -427,6 +447,7 @@ https://www.youtube.com/watch?v=vJG698U2Mvo
         return;
       }
       const markdown = await response.text();
+      setTitleFromMarkdown(markdown);
       const textarea = document.querySelector('.reveal .slides textarea[data-template]');
       textarea.textContent = addAutoplayToYoutubeEmbeds(markQuestionSlidesScrollable(rewriteRelativePaths(markdown, course, mod)));
     } catch (err) {

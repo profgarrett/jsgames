@@ -91,7 +91,7 @@ if(DEBUG)
 			const keys = Object.keys(req.params);
 
 			if(req.url !== '/favicon.ico') {
-				console.log(req.method, req.url, keys);
+				console.log(req.method, req.url, keys, 'ip=' + req.ip);
 			}
 			next();
 		});

@@ -319,12 +319,8 @@ large areas, and circles are read less accurately than rectangles.
 
 ## How This Works
 
-Each of the next six slides shows one chart and one question.
+Each of the next six slides shows one chart and one question.  One value is set to **100**. Estimate the other.
 
-One value is set to **100**. Estimate the other.
-
-Write your answer down *before* the reveal. The point is not the number
-— it is how far off you were, and on which chart type.
 
 ---
 
@@ -332,21 +328,11 @@ Write your answer down *before* the reveal. The point is not the number
 
 ![Bar chart: if Nathan is 100, what is Michael?](images/survey01.png)
 
-**If Nathan is 100, what is Michael?**
-
-*40. Two bars, same baseline, adjacent — position on a common scale. Most people land within a few points.*
-<!-- .element: class="fragment" -->
-
 ---
 
 ## Estimate 2
 
 ![Bar chart: if Brandon is 100, what is Adam?](images/survey02.png)
-
-**If Brandon is 100, what is Adam?**
-
-*124. Same channel, but the bars are farther apart. Still accurate — error rises only slightly with distance.*
-<!-- .element: class="fragment" -->
 
 ---
 
@@ -354,21 +340,11 @@ Write your answer down *before* the reveal. The point is not the number
 
 ![Stacked bar chart: if Randy's Y1 sales are 100, what are Henry's Y3 sales?](images/survey03.png)
 
-**If Randy's Y1 sales are 100, what are Henry's Y3 sales?**
-
-*55. Now you are comparing a floating segment to a grounded one. This is a length judgment, and error climbs.*
-<!-- .element: class="fragment" -->
-
 ---
 
 ## Estimate 4
 
 ![Stacked bar chart: if Russell's Y1 sales are 100, what are his Y2 sales?](images/survey04.png)
-
-**If Russell's Y1 sales are 100, what are his Y2 sales?**
-
-*63. Same bar, adjacent segments — easier than Estimate 3, and still harder than a plain bar chart.*
-<!-- .element: class="fragment" -->
 
 ---
 
@@ -376,21 +352,11 @@ Write your answer down *before* the reveal. The point is not the number
 
 ![Pie chart: if Raymond's sales are 100, what are Billy's?](images/survey05.png)
 
-**If Raymond's sales are 100, what are Billy's?**
-
-*54. Angle plus arc length plus area, and the two slices are not adjacent. Errors here are noticeably larger than on any bar design.*
-<!-- .element: class="fragment" -->
-
 ---
 
 ## Estimate 6
 
 ![Treemap: if Samuel's sales are 100, what are Donald's?](images/survey06.png)
-
-**If Samuel's sales are 100, what are Donald's?**
-
-*28. Pure area, and the two rectangles have very different shapes. Area carries the largest errors of any common chart design, and comparing a tall full-height column to a small block makes it harder still.*
-<!-- .element: class="fragment" -->
 
 ---
 
@@ -401,21 +367,16 @@ Which estimates were you confident about, and which were guesses?
 
 ---
 
-## Questions 13-16
+## Questions 13-14
 
 **Q13.** Why did the bar chart stay accurate even though the bars were far apart?
 
 *Both bars still share a common baseline. Distance costs a little accuracy — the T1 to T3 gap in the study — but far less than losing the shared baseline entirely.*
 <!-- .element: class="fragment" -->
 
-**Q15.** A manager insists the pie chart "worked fine" because everyone identified the largest slice.
+**Q14.** A manager insists the pie chart "worked fine" because everyone identified the largest slice.
 
 *Identifying the largest slice is a rank judgment on one extreme value — the easiest thing a pie does. It says nothing about whether readers can tell 23% from 19%, which is what the chart is usually asked for.*
-<!-- .element: class="fragment" -->
-
-**Q16.** Which single change would have improved five of those six charts?
-
-*Replace the encoding with position on a common scale — a sorted bar chart or dot plot. Estimates 1 and 2 already used it, which is why they were the easy ones.*
 <!-- .element: class="fragment" -->
 
 ---
@@ -425,6 +386,25 @@ Which estimates were you confident about, and which were guesses?
 ## Mapping Chart Types to Channels
 
 ---
+
+## The Mapping
+
+Write a sample of each of these charts. Identify their *main channel* and the *accuracy* of that channel.
+
+Chart types:
+
+- Bar chart or dot plot
+- Stacked bar
+- Pie or donut
+- Any 3D chart
+- Line chart
+- Scatterplot
+- Treemap
+- Small multiples / separate panels
+- Bubble chart
+- Heatmap
+
+--
 
 ## The Mapping
 
@@ -507,9 +487,7 @@ But, accuracy is not everything
 
 ---
 
-# Putting It Together
-
-## Overall Review
+# Overall Review
 
 ---
 
@@ -605,6 +583,220 @@ But, accuracy is not everything
 **R16.** In one sentence each, state the rule that follows from the channel ranking, from the data-type match, and from the table-versus-chart distinction.
 
 *Ranking: if values must be compared, use position on a common scale. Data type: magnitude channels for numbers, hue and shape and texture for categories. Table vs. chart: exact individual lookups get a table, patterns across many values get a chart.*
+<!-- .element: class="fragment" -->
+
+---
+
+# Part 6
+
+## Application Problems
+
+---
+
+## How This Works
+
+Each of the next ten slides describes a business or accounting scenario with sample data. Decide which **visual encoding channel** — and which chart type — is the appropriate match, then reveal the answer.
+
+Use the four questions: chart or table? which channel? how accurate? does it match the data type?
+
+---
+
+## App 1 — Revenue by Service Line
+
+**Problem.** The managing partner wants to compare total FY2026 revenue across the firm's seven audit service lines in one slide for a partner meeting.
+
+| Service Line | Revenue ($000s) |
+| --- | --- |
+| Financial Statement Audits | 4,820 |
+| Employee Benefit Plan Audits | 1,150 |
+| SOC Examinations | 2,340 |
+| Single Audits | 980 |
+| Agreed-Upon Procedures | 610 |
+| Internal Audit Co-Sourcing | 1,730 |
+| Advisory Attestation | 890 |
+
+**Q.** Which channel and chart type fit best?
+
+*Position on a common scale — a sorted bar chart. Seven categories, one value each, and the question is "which is biggest and by how much." Bars sharing a baseline are the most accurate channel available.*
+<!-- .element: class="fragment" -->
+
+---
+
+## App 2 — Cash Balance Trend
+
+**Problem.** The CFO wants to see how the company's monthly operating cash balance has moved over the past 18 months, to judge whether the trend is improving or worsening.
+
+| Month | Cash Balance ($000s) |
+| --- | --- |
+| Jan 2025 | 612 |
+| Apr 2025 | 588 |
+| Jul 2025 | 640 |
+| Oct 2025 | 705 |
+| Jan 2026 | 690 |
+| Jun 2026 | 760 |
+
+*(18 monthly points in the real report; six shown here.)*
+
+**Q.** Which channel and chart type fit best?
+
+*Position on a common scale, plus slope — a line chart. The question is about the rate and direction of change over time, and slope is the channel that answers "improving or worsening," not just "what was the value in any one month."*
+<!-- .element: class="fragment" -->
+
+---
+
+## App 3 — Audit Fee vs. Client Size
+
+**Problem.** An audit partner suspects that audit fees scale with client size, and wants to check that relationship across this year's 20 engagements before setting next year's fee schedule.
+
+| Client | Total Assets ($M) | Audit Fee ($K) |
+| --- | --- | --- |
+| Client A | 42 | 68 |
+| Client B | 210 | 195 |
+| Client C | 15 | 31 |
+| Client D | 340 | 260 |
+| Client E | 88 | 102 |
+| Client F | 175 | 240 |
+
+**Q.** Which channel and chart type fit best?
+
+*Position on two common scales — a scatterplot. Two continuous numeric variables and a question about the relationship between them (and about outliers, like Client F billing above the trend). Neither a bar chart nor a line chart can show two independent numeric axes at once.*
+<!-- .element: class="fragment" -->
+
+---
+
+## App 4 — Quarterly Expense Mix
+
+**Problem.** A budget report needs one slide showing both total quarterly operating expense and how the mix across three categories shifted over the fiscal year.
+
+| Quarter | Salaries ($000s) | Overhead ($000s) | Technology ($000s) |
+| --- | --- | --- | --- |
+| Q1 | 820 | 310 | 140 |
+| Q2 | 845 | 300 | 165 |
+| Q3 | 860 | 295 | 210 |
+| Q4 | 900 | 305 | 250 |
+
+**Q.** Which channel and chart type fit best?
+
+*Length, in a stacked bar chart. The bottom segment and the total sit on a common baseline and read accurately; the upper segments (Overhead, Technology) are length judgments with no shared baseline, so they read less precisely. If leadership needs to compare Technology spend precisely across quarters, pair this with a small-multiple or grouped bar chart for that one category.*
+<!-- .element: class="fragment" -->
+
+---
+
+## App 5 — Flagged Transactions by Payment Type
+
+**Problem.** A fraud-review dashboard counts 500 flagged transactions by payment type and shows the counts as a bar chart. An intern proposes coloring the four bars with a blue-to-red gradient, ordered alphabetically by type.
+
+| Payment Type | Flagged Count |
+| --- | --- |
+| ACH | 210 |
+| Check | 85 |
+| Credit Card | 140 |
+| Wire | 65 |
+
+**Q.** Which channel should color the bars, and is the intern's gradient a good match?
+
+*Hue, not a gradient. Payment type is a nominal category — there is no "more" or "less" ACH than Wire. A sequential blue-to-red ramp implies an ordering that doesn't exist in the data. Use four distinct hues instead; the magnitude is already carried correctly by bar length/position.*
+<!-- .element: class="fragment" -->
+
+---
+
+## App 6 — Training Budget Split
+
+**Problem.** HR wants one slide showing how this year's $2.0M training budget splits across five program types.
+
+| Program | Budget ($000s) | Share |
+| --- | --- | --- |
+| Technical Certifications | 640 | 32% |
+| Leadership Development | 460 | 23% |
+| Compliance Training | 380 | 19% |
+| Onboarding | 320 | 16% |
+| Conference Travel | 200 | 10% |
+
+**Q.** Pie chart or bar chart — which channel wins, and is the less-accurate option ever defensible here?
+
+*A sorted bar chart is more accurate: position on a common scale beats the angle-arc-area combination a pie forces on the reader, especially for telling 19% from 16% apart. A pie is defensible only if the point is a quick "most of the budget is technical and leadership" impression rather than precise comparison — with just five sorted, labeled slices, the cost is small either way.*
+<!-- .element: class="fragment" -->
+
+---
+
+## App 7 — Client Realization Outliers
+
+**Problem.** A partner wants to spot clients with low fee realization despite high billed fees, using three variables at once: hours worked, realization rate, and total fees billed, across 15 clients.
+
+| Client | Hours | Realization % | Fees Billed ($K) |
+| --- | --- | --- | --- |
+| Client A | 120 | 88% | 42 |
+| Client B | 340 | 61% | 95 |
+| Client C | 210 | 95% | 70 |
+| Client D | 480 | 55% | 150 |
+| Client E | 90 | 92% | 30 |
+
+**Q.** Which channel and chart type fit best?
+
+*A bubble chart: position on two common scales (Hours, Realization %) for the accurate part, and area (bubble size = Fees Billed) for a third variable read only roughly. This is the right trade only because the third variable — total fees — needs no more than "big vs. small" to spot the outlier (Client D: high fees, low realization); if exact fee comparisons mattered, area would be the wrong channel for it.*
+<!-- .element: class="fragment" -->
+
+---
+
+## App 8 — Inventory Value by SKU
+
+**Problem.** A warehouse manager wants one view of the relative dollar value of all 120 SKUs, grouped by product category, to see which categories dominate total inventory value.
+
+| Category | Sample SKU | Inventory Value ($) |
+| --- | --- | --- |
+| Electronics | SKU-1042 | 84,200 |
+| Electronics | SKU-1105 | 51,600 |
+| Hardware | SKU-2210 | 22,900 |
+| Hardware | SKU-2255 | 18,400 |
+| Apparel | SKU-3301 | 9,800 |
+| Apparel | SKU-3388 | 6,200 |
+
+*(120 SKUs total in the real dataset; a sample shown here.)*
+
+**Q.** Which channel and chart type fit best?
+
+*Area, in a treemap. A 120-bar chart is unreadable, so this trades ratio accuracy — you cannot reliably tell whether one rectangle is exactly twice another — for a single view that still shows which categories and SKUs dominate. Pair it with a sorted top-10 table if anyone needs exact values.*
+<!-- .element: class="fragment" -->
+
+---
+
+## App 9 — Fraud Alerts by Day and Hour
+
+**Problem.** The fraud team wants to know whether flagged transactions cluster by day of week and hour of day, across a full month — a 7-day by 24-hour matrix of counts.
+
+| Day | 9am | 12pm | 3pm | 6pm |
+| --- | --- | --- | --- | --- |
+| Monday | 4 | 12 | 9 | 3 |
+| Tuesday | 3 | 10 | 8 | 2 |
+| Wednesday | 5 | 14 | 11 | 4 |
+| Saturday | 1 | 3 | 2 | 1 |
+
+*(7 days × 24 hours in the real matrix; a sample shown here.)*
+
+**Q.** Which channel and chart type fit best?
+
+*Luminance, in a heatmap. A 168-cell matrix cannot become 168 bars on one slide, so luminance trades precision for showing the whole matrix at once — the eye can spot the weekday-afternoon cluster immediately. It is the wrong channel if someone then asks "was it 12 or 14 alerts at 3pm Wednesday" — that needs the underlying table.*
+<!-- .element: class="fragment" -->
+
+---
+
+## App 10 — Sales Tax Remitted by State
+
+**Problem.** A tax-compliance team wants a report showing total sales tax remitted by state across all 50 states, to help prioritize nexus reviews by region.
+
+| State | Tax Remitted ($000s) |
+| --- | --- |
+| California | 4,120 |
+| Texas | 3,650 |
+| New York | 2,980 |
+| Wyoming | 85 |
+| Vermont | 92 |
+
+*(50 states in the real report; a sample shown here.)*
+
+**Q.** Which channel and chart type fit best?
+
+*Luminance over geography — a choropleth map. Position and length would be more accurate for comparing magnitudes, but only a map shows *where* the pattern is, which is the actual question here (regional prioritization). Pair it with a sorted top-10 bar chart or table for the exact dollar figures the team will act on.*
 <!-- .element: class="fragment" -->
 
 ---
