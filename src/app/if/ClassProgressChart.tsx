@@ -1,6 +1,5 @@
 import React, { ReactElement } from 'react';
 import { Button } from 'react-bootstrap';
-import { turn_array_into_map, turn_object_keys_into_array } from '../../shared/misc';
 import {  Bar } from '@nivo/bar'
 import { LevelModal } from './LevelModal';
 import { IStringIndexJsonObject, prettyDateAsString } from '../components/Misc';
@@ -76,8 +75,19 @@ export class ClassProgressChart extends React.Component<PropsType, StateType> {
 
     _render_bar = (levels: Array<IfLevelPagelessSchema>): ReactElement => {
         const keys = [ ...DEFAULT_TUTORIAL_LEVEL_LIST].reverse();
-        const map_classifications = turn_array_into_map( levels, l => l.props.classification );
-        let a_classifications = turn_object_keys_into_array(map_classifications);
+
+        // Fixed set of classification values a level can have (see
+        // IfLevelSchema.get_completion_status()). This used to be derived from
+        // the data actually present (turn_array_into_map over l.props.classification),
+        // but that drops any classification with zero occurrences in this
+        // section -- e.g. a brand new class where nobody has failed a level
+        // yet has no 'Needs repeating' rows at all. o[classification] below
+        // was then never set for that classification, so it stayed `undefined`
+        // instead of 0 on every row. nivo's stacked bar sums undefined into
+        // NaN, which corrupts the scale for the *entire* chart, not just the
+        // row missing that classification. Using the fixed list guarantees
+        // every row gets a real number (possibly 0) for every classification.
+        let a_classifications = ['Uncompleted', 'Completed', 'Needs repeating'];
 
         const c_data : any[] = [];
         let code_levels : any[] = [];
