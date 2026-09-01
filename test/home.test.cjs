@@ -9,6 +9,7 @@ const {
 
 const { get_levels } = require('../src/app/if/levelProgress.tsx');
 const { sort_sections_for_reports } = require('../src/app/admin/AdminSectionReports.tsx');
+const { faculty_sections } = require('../src/app/if/ClassProgressContainer.tsx');
 
 // get_sticky_section_id reads window.localStorage. There is no DOM under
 // node --test, so stand up the smallest thing that satisfies it before the
@@ -158,6 +159,37 @@ describe('sort_sections_for_reports', () => {
 	});
 });
 
+
+describe('faculty_sections', () => {
+	const sections = [
+		{ idsection: 1, code: 'a', title: 'A', year: 2025, term: 'fall', role: 'student' },
+		{ idsection: 2, code: 'b', title: 'B', year: 2026, term: 'spring', role: 'faculty' },
+		{ idsection: 3, code: 'c', title: 'C', year: 2026, term: 'fall', role: 'Faculty' },
+	];
+
+	test('keeps only sections where the caller is faculty', () => {
+		assert.deepStrictEqual(
+			faculty_sections(sections).map(s => s.idsection),
+			[3, 2]
+		);
+	});
+
+	test('role check is case-insensitive', () => {
+		assert.ok(faculty_sections(sections).some(s => s.idsection === 3));
+	});
+
+	test('returns nothing for a student-only or empty section list', () => {
+		assert.deepStrictEqual(faculty_sections([sections[0]]), []);
+		assert.deepStrictEqual(faculty_sections([]), []);
+	});
+
+	test('sorts newest term first, matching sort_sections_for_reports', () => {
+		assert.deepStrictEqual(
+			faculty_sections(sections).map(s => s.idsection),
+			sort_sections_for_reports(sections.filter(s => String(s.role).toLowerCase() === 'faculty')).map(s => s.idsection)
+		);
+	});
+});
 
 describe('home page enrolled-sections banner', () => {
 	test('labels a section with its term and year', () => {

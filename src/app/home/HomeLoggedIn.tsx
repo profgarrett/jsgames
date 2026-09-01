@@ -7,6 +7,7 @@ import ForceLogin from '../components/ForceLogin';
 import CacheBuster from '../components/CacheBuster';
 import { getUserFromBrowser } from '../components/Authentication';
 import EnrolledSectionsBanner from './EnrolledSectionsBanner';
+import { faculty_sections } from '../if/ClassProgressContainer';
 
 import {
 	IfLevelSchema,
@@ -18,8 +19,9 @@ import { get_levels, iGrade, LevelProgressTable, NextLesson } from '../if/levelP
 /*
 	The logged-in view of '/'
 
-	Everyone sees the same Excel and SQL tutorial lists. The
-	only thing that varies is the admin block.
+	Everyone sees the same Excel and SQL tutorial lists. What varies is
+	the admin block (site admins) and the class-progress block (site
+	admins and anyone recorded as faculty on at least one section).
 */
 export default function HomeLoggedIn(): ReactElement {
 	const [message, setMessage] = useState('');
@@ -29,6 +31,7 @@ export default function HomeLoggedIn(): ReactElement {
 	const [grades, setGrades] = useState<iGrade[]>([]);
 	const [levels, setLevels] = useState<IfLevelSchema[]>([]);
 	const [user] = useState( getUserFromBrowser() );
+	const [isFaculty, setIsFaculty] = useState(false);
 	const navigate = useNavigate();
 
 	// Uncompleted levels, used to offer "continue where you left off".
@@ -66,6 +69,24 @@ export default function HomeLoggedIn(): ReactElement {
 				setMessage('Error: ' + error);
 				setMessageStyle('danger');
 				setIsLoadingGrades(false);
+			});
+		}, [] );
+
+	// Whether to show the Class progress link: true for site admins (checked
+	// separately below) or anyone recorded as faculty on at least one section.
+	// faculty_sections() is the same filter ClassProgressContainer.tsx uses to
+	// scope its section picker, reused here so the two stay in sync.
+	useEffect(() => {
+		fetch('/api/sections', { credentials: 'include' })
+			.then( response => response.json() )
+			.then( json => {
+				const sections = Array.isArray(json) ? json : [];
+				setIsFaculty( faculty_sections(sections).length > 0 );
+			})
+			.catch( () => {
+				// Fail closed and silently -- EnrolledSectionsBanner already surfaces
+				// a /api/sections failure if there is one worth showing.
+				setIsFaculty(false);
 			});
 		}, [] );
 
@@ -128,15 +149,21 @@ export default function HomeLoggedIn(): ReactElement {
 			</Link>
 		</div>);
 
-	// Admin-only. 
+	// Admin-only.
 	const admin_links = !user.isAdmin ? null : (
 		<div style={{ marginBottom: 30 }}>
 			<div className='h5'>Admin</div>
 			<Link to='/admin'>
-				<Button variant='outline-info' style={{ marginRight: 10 }}>Admin</Button>
+				<Button variant='outline-info'>Admin</Button>
 			</Link>
+		</div>);
+
+	// Site admins and anyone recorded as faculty on at least one section.
+	const class_progress_link = !(user.isAdmin || isFaculty) ? null : (
+		<div style={{ marginBottom: 30 }}>
+			<div className='h5'>Class progress</div>
 			<Link to={'/ifgame/progress'}>
-					<Button variant='outline-info'>Class progress</Button>
+				<Button variant='outline-info'>Class progress</Button>
 			</Link>
 		</div>);
 
@@ -151,6 +178,7 @@ export default function HomeLoggedIn(): ReactElement {
 					<Message message={message} style={messageStyle} />
 					<Loading loading={is_loading} />
 					{ admin_links }
+					{ class_progress_link }
 					{ course_links }
 					{ body }
 				</Col>
