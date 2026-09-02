@@ -91,6 +91,28 @@
     max-height: none;
   }
 
+  /* Video files embedded with Markdown image syntax (![caption](clip.mp4))
+     are converted to real <video> elements by convertVideoEmbeds() below --
+     an <img> tag cannot play a video. Sized the same as slide images. */
+  .reveal .slides section video {
+    display: block;
+    margin: 0 auto;
+    max-width: 100%;
+    max-height: 65vh;
+  }
+  .reveal .slides section.scrollable-slide video {
+    max-height: none;
+  }
+  /* convertVideoEmbeds() emits a raw HTML <figure> block, which marked does
+     not wrap in a <p> the way it does standalone image Markdown -- so it
+     never picks up the "centered-image" .element: treatment. Center it
+     directly instead; the video's own margin:0 auto (above) then centers
+     it within this full-width figure. */
+  .reveal .slides section figure.video-caption-container {
+    display: block;
+    text-align: center;
+  }
+
   /* Center the YouTube embed slide, both the iframe itself and its slide. */
   .reveal .slides section iframe {
     display: block;
@@ -508,6 +530,31 @@ https://www.youtube.com/watch?v=vJG698U2Mvo
     });
   }
 
+  // A Markdown "image" pointing at a video file is rewritten into a real
+  // <video> element: ![Dot illusions](colors-illusion-dots.mp4)
+  //
+  // reveal.js's markdown plugin (marked) turns Markdown image syntax into
+  // <img src="...">, and a browser cannot play a video through an <img>
+  // tag -- it just shows a broken-image icon. This runs before
+  // centerStandaloneImages (which only matches Markdown image syntax) and
+  // wraps the output in the same figure/figcaption structure the runtime
+  // caption code below builds for images, so captions and centering work
+  // the same way for both. <figure> is a block-level tag recognised by
+  // CommonMark's raw-HTML-block rule, so marked passes it through
+  // untouched rather than trying to parse its contents as Markdown.
+  function convertVideoEmbeds(markdown) {
+    const escapeHtml = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    return markdown.replace(
+      /^[ \t]*!\[([^\]]*)\]\(([^)]+\.(?:mp4|webm|ogv))\)[ \t]*$/gim,
+      (match, alt, src) => {
+        const caption = alt.trim()
+          ? `\n  <figcaption class="image-markdown-caption">${escapeHtml(alt)}</figcaption>`
+          : '';
+        return `<figure class="image-caption-container video-caption-container">\n  <video src="${escapeHtml(src)}" controls playsinline preload="metadata"></video>${caption}\n</figure>`;
+      }
+    );
+  }
+
   // A Markdown line containing nothing but a single image (no surrounding
   // text) is tagged with a `.element:` directive so reveal.js's markdown
   // plugin adds a "centered-image" class to just that image -- an image
@@ -593,7 +640,7 @@ https://www.youtube.com/watch?v=vJG698U2Mvo
       const markdown = await response.text();
       setTitleFromMarkdown(markdown);
       const textarea = document.querySelector('.reveal .slides textarea[data-template]');
-      textarea.textContent = addAutoplayToYoutubeEmbeds(markQuestionSlidesScrollable(centerStandaloneImages(rewriteRelativePaths(markdown, course, mod))));
+      textarea.textContent = addAutoplayToYoutubeEmbeds(markQuestionSlidesScrollable(centerStandaloneImages(convertVideoEmbeds(rewriteRelativePaths(markdown, course, mod)))));
     } catch (err) {
       console.warn(`slides.html: error loading "${path}"; showing sample slides.`, err);
     }

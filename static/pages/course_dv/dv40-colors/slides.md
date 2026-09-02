@@ -321,16 +321,10 @@ you *see* in a chart is not a direct readout of what is *there*.
 
 ---
 
-## Identify the Concept
-
-Name which concept applies:
+## Questions 10-12
 
 *color culture/convention · consistency · CVD simulation · grayscale
 test · optical mixing · simultaneous contrast*
-
----
-
-## Questions 10-12
 
 **Q10.** A US-based analyst sends a report to a supplier in Seoul using
 red bars for revenue gains and green bars for revenue declines,
@@ -525,6 +519,88 @@ color being a weak magnitude channel.
 <!-- .element: class="fragment" -->
 
 ---
+
+
+## Sample charts
+
+
+--
+
+## Visualizing Population Density Patterns in Six Countries
+
+![Visualizing Population Density Patterns in Six Countries](../dv31-visualchannels/sample-images/population-of-france.png)
+
+Souce: https://www.visualcapitalist.com/cp/population-density-patterns-countries/
+
+--
+
+## Visualizing the Odds of Dying from Various Accidents
+
+![Visualizing the Odds of Dying from Various Accidents](../dv31-visualchannels/sample-images/odds-death.jpg)
+
+Source: https://www.visualcapitalist.com/visualizing-the-odds-of-dying-in-accidents/
+
+
+--
+
+## The numbers 0–99 sorted alphabetically in different languages
+
+![The numbers 0–99 sorted alphabetically in different languages](../dv31-visualchannels/sample-images/numbers-0-99-alpha.png)
+
+Source: https://www.reddit.com/media?url=https%3A%2F%2Fi.redd.it%2F5z606kdtodfc1.png
+
+
+--
+
+## Largest Company in U.S. Every Year Since 1995
+
+![Largest Company in U.S. Every Year Since 1995](../dv31-visualchannels/sample-images/most-valuable-companies.jpg)
+
+Source: https://www.visualcapitalist.com/the-best-visualizations-of-january-on-the-voronoi-app/
+
+--
+
+## The Most Valuable Brands in 12 Countries
+
+
+![The Most Valuable Brands in 12 Countries](../dv31-visualchannels/sample-images/most-valuable-brands.jpg)
+Source: https://www.visualcapitalist.com/the-best-visualizations-of-january-on-the-voronoi-app/
+
+
+--
+
+## Visualizing Costco’s Global Presence
+
+
+![Visualizing Costco’s Global Presence](../dv31-visualchannels/sample-images/costco-global-presence-shopping-cart.png)
+
+Source: https://posts.voronoiapp.com/business/Visualizing-Costcos-Global-Presence-150
+
+
+--
+
+### Florence Nightingale's Polar Area Diagram
+
+
+![Example of polar area diagram by Florence Nightingale (1820–1910)](../dv31-visualchannels/sample-images/causes-of-mortality-nightingale.jpg)
+
+Source: https://commons.wikimedia.org/wiki/File:Nightingale-mortality.jpg
+
+"This "Diagram of the causes of mortality in the army in the East" was published in Notes on Matters Affecting the Health, Efficiency, and Hospital Administration of the British Army and sent to Queen Victoria in 1858.
+
+"This graphic indicates the annual rate of mortality per 1,000 in each month that occurred from preventable diseases (in blue), those that were the results of wounds (in red), and those due to other causes (in black).
+
+"The legend reads:
+
+>> The Areas of the blue, red, & black wedges are each measured from the centre as the common vertex.
+>> The blue wedges measured from the centre of the circle represent area for area the deaths from Preventable or Mitigable Zymotic diseases, the red wedges measured from the centre the deaths from wounds, & the black wedges measured from the centre the deaths from all other causes.
+>> The black line across the red triangle in Nov. 1854 marks the boundary of the deaths from all other causes during the month.
+>> In October 1854, & April 1855, the black area coincides with the red, in January & February 1856, the blue coincides with the black.
+>> The entire areas may be compared by following the blue, the red, & the black lines enclosing them.
+
+---
+
+
 
 ## Summary
 
