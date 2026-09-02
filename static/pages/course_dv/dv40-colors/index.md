@@ -1,8 +1,7 @@
-<script src="/course_dv/toc.js"></script>
-
 # Using Colors
 
 **Outcomes**:
+
 - Describe how common color vision deficiency is, and how the rate varies by sex and ancestry
 - Identify the most common form of color vision deficiency and what it actually does to perception
 - Differentiate between sequential, diverging, and categorical color scales, and select the correct one for a given dataset
@@ -11,17 +10,15 @@
 - Evaluate the palette in an existing visualization and fix what is wrong with it
 
 **Links**
-
-- [Color Blindness](https://www.theverge.com/23650428/colorblindness-design-ui-accessibility-wordle)
+- [Slides](/static/pages/slides.html?course=course_dv&module=dv40-colors)
+- [Activity: Is my blue your blue?](https://ismy.blue/)
+- [Activity: What is your color JND?](https://www.keithcirkel.co.uk/too-much-color/)
 - [Color: From Hexcodes to Eyeballs](https://jamie-wong.com/post/color/)
 - [Saccades and other weird things your eyes do](https://imgur.com/gallery/XNlmPi8)
-- [Accessible data visualizations](https://ucdavisdatalab.github.io/workshop_data_viz_principles/accessible-data-visualizations.html)
 - [Color scales](https://socviz.co/01-look-at-data.html#edges-contrasts-and-colors)
 - [ColorBrewer: pick a safe palette](https://colorbrewer2.org/)
 - [Viz Palette: test a palette you already have](https://projects.susielu.com/viz-palette)
-- [WCAG 1.4.1: Use of Color](https://www.w3.org/WAI/WCAG22/Understanding/use-of-color.html)
-- [Activity: What is your color JND?](https://www.keithcirkel.co.uk/too-much-color/)
-- [Activity: Is my blue your blue?](https://ismy.blue/)
+
 
 **Common exam mistakes**:
 - Using a red/green color scale without a second visual cue

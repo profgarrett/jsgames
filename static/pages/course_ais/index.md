@@ -24,6 +24,10 @@ Course Introduction & RPS Exercise
 - [excel01](excel01-input-formats/index): Inputting data and basic formatting
 - [excel03](excel03-functions/index): Functions
 
+### Week 3 - August 31, 2026
+
+- [excel04](excel04-tables/index): Tables, XLookup, and PivotTables
+
 <!-- 
 ### Week 3 - August 31, 2026
 
