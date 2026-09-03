@@ -1,4 +1,4 @@
-# Business Analytics Textbook
+# Modeling with Python
 
 **Nathan Garrett, PhD CPA**
 

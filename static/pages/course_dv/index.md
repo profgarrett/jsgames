@@ -50,9 +50,9 @@ Optional Reading:
 
 - *DataCamp: Introduction to Tableau, Part 1*
 - [dv40. Colors](dv40-colors/index)
-- [dv45. Presentations](dv45-presentations/index)
-- [dv46. Writing an effective report](dv46-report/index)
-- [dv47. Creating a poster](dv47-poster/index)
+- [dv45. Presentation](dv45-presentations/index)
+- [dv46. Report](dv46-report/index)
+- [dv47. Poster](dv47-poster/index)
 
 ## Module 2: Tableau
 
@@ -154,3 +154,18 @@ Continue Python
 - [Andrew Heiss - Data Visualization with R](https://datavizf25.classes.andrewheiss.com/content/01-content.html)
 - [Kieran Healy - Socviz - Data Visualization](https://socviz.co/)
 
+
+
+## Key Terms
+
+- **Data Visualization**: The graphical representation of data to help people understand it. It is a tool for analysis, communication, and decision-making.
+- **BUDA**: Major at WVU, Applied AI and Data Analytic
+
+
+## Practice Questions
+
+1. What is your professor's name?
+   - Nathan Garrett
+   - Benjamin Sisko
+   - Liet-Kynes
+   - Dudley Dursley

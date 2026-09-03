@@ -1,10 +1,10 @@
 # Designing a Poster
 
-A poster is not a report printed large, and it is not one enormous slide. It is a conversation starter hanging on a board in a noisy room, competing with forty other boards and a table of free coffee.
+A poster is conversation starter and memory aid.
 
-Most people walking a poster session give any single poster about thirty seconds — enough to read the title, look at one chart, and decide whether to stop. If they stop, they are not going to read your poster. They are going to talk to you, and the poster becomes the visual aid for that conversation.
+Most people walking a poster session give any single poster about thirty seconds — enough to read the title, look at one chart, and decide whether to stop. If they stop, they are going to talk to you, and the poster becomes the visual aid for that conversation.
 
-That gives you two audiences with opposite needs. **Skimmers** need the title and one finding, large enough to read while walking. **Stoppers** need you, plus a chart you can point at. Design for the skimmer, because the stopper has your full attention anyway.
+That gives you two audiences with opposite needs. **Skimmers** need the title and one finding, large enough to read while walking. **Stoppers** need you, plus a chart you can point at.
 
 **Outcomes**:
 
@@ -15,8 +15,13 @@ That gives you two audiences with opposite needs. **Skimmers** need the title an
 - Adapt a written report into roughly 400 words of poster text
 - Recognize where class posters and academic research posters differ
 
-![A poster board viewed at three distances: title readable at fifteen feet, headline finding and main chart at six feet, and supporting text at three feet](images/fig1-viewing-distance.svg)
+**Links**:
 
+- [Garrett 2026 AAA presentation](GarrettAAA2026.pptx)
+- [Sample Template](example-poster-48x36.pptx)
+
+
+![A poster board viewed at three distances: title readable at fifteen feet, headline finding and main chart at six feet, and supporting text at three feet](images/fig1-viewing-distance.svg)
 
 
 ## Setting Up the File in PowerPoint
@@ -44,8 +49,6 @@ A few more settings worth changing now:
 
 ## Type Sizes
 
-This is where most posters fail, and it is the easiest thing to get right. When your PowerPoint canvas is set to the true 48×36 inches, the point sizes in the panel are literal — 32 pt on your screen is 32 pt on the wall.
-
 | Element | Size | Must be readable from |
 |---|---|---|
 | Title | 72–100 pt | 15–20 feet |
@@ -59,22 +62,9 @@ This is where most posters fail, and it is the easiest thing to get right. When 
 
 ![A ladder of type sizes from a 100 point title down to 18 point references, each labeled with the distance at which it stops being readable](images/fig3-type-sizes.svg)
 
-
-A useful check: zoom PowerPoint to 25% and look at your poster from a normal seated distance. That approximates standing about six feet from the printed version. Whatever you cannot read at 25% zoom, a visitor cannot read either.
-
-
 ## Word Count
 
-**Target 300 to 500 words for the entire poster.** Not per section — total, including the title and captions.
-
-This is the single most useful constraint in this chapter, and it is far less text than students expect. Your five-page report has perhaps 1,500 words in it. Roughly two-thirds of them do not go on the poster.
-
-Cut in this order:
-
-1. Every sentence describing what you did rather than what you found
-2. Every methodological caveat that is not a real limitation
-3. Every transition sentence — columns and headings do that work now
-4. Every adjective
+**Target 300 to 500 words for the entire poster.** Your five-page report has perhaps 1,500 words in it. Roughly two-thirds of them do not go on the poster.
 
 Bullets beat paragraphs on a poster. A paragraph longer than four lines will not be read standing up.
 
@@ -91,14 +81,11 @@ A layout that works:
 - **Columns 2 and 3**: results. Charts live here, and this is the largest area on the poster.
 - **Column 4 (or bottom of column 3)**: limitations, conclusion, references, QR code.
 
-**Charts and images should occupy 40 to 60 percent of the poster area.** If your poster is mostly text, it is a report on a wall.
+**Charts and images should occupy 40 to 60 percent of the poster area.** 
 
 Leave real whitespace — 30 to 40 percent of the poster. Cramped posters read as anxious, and visitors skip them.
 
 ![Two poster layouts side by side. The weak one is dense text in irregular boxes with no clear entry point. The strong one has a title bar, a shaded takeaway box, three columns, and one dominant chart](images/fig4-layout.svg)
-
-
-**A worked example**: [example-poster-48x36.pptx](/static/pages/course_dv/dv47-poster/example-poster-48x36.pptx) is a complete poster built to everything in this chapter — 48×36 inches, three columns, 325 words, one dominant chart. Open it, look at the type sizes, then replace the content with yours.
 
 
 ## Charts on a Poster
@@ -134,7 +121,7 @@ Check the event's requirements before you design. Many research days publish a r
 - **Print three days early.** Print shops have queues, and you will find a typo.
 - **Confirm the file format and size** the shop wants, and ask about turnaround and cost before you finalize. Large-format printing is not cheap and not fast.
 - **Avoid dark backgrounds.** They cost more in ink, show every scuff, and reduce text contrast. White or very light backgrounds print better and read better.
-- **Bring a tube**, plus pins, binder clips, or tape. Assume the board hardware will be wrong.
+- **Bring a tube**, plus pins, binder clips, or tape. 
 - **Add a QR code** linking to your full report, and **test it after printing.** 
 
 
