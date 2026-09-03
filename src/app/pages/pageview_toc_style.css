@@ -895,3 +895,31 @@ table.flexible-width-table {
     white-space: nowrap;
     font-size: 0.9em;
 }
+
+/** Practice: Export to Word (PagePractice.tsx) **********************/
+
+.practice-export-content {
+    margin: 20px 0;
+    padding: 20px 25px;
+    border: 1px solid #dee2e6;
+    border-radius: 10px;
+    background-color: #fff;
+    text-align: left;
+}
+
+.practice-export-table {
+    margin-bottom: 24px;
+}
+
+.practice-export-questions {
+    padding-left: 1.5em;
+}
+
+.practice-export-questions li {
+    margin-bottom: 12px;
+}
+
+.practice-export-questions ul {
+    list-style: disc;
+    margin-top: 4px;
+}

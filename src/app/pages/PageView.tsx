@@ -6,9 +6,12 @@ import rehypeSanitize from 'rehype-sanitize';
 import { Button } from 'react-bootstrap';
 
 import iPage from './iPage';
-import PageFlashcards, { extractFlashcards, appendKeyTermsSection } from './PageFlashcards';
-import PageQuiz, { extractQuizQuestions, removeQuizSection } from './PageQuiz';
+import { prepareMarkdownForSlug } from './PagePrepareMarkdown';
+import { extractFlashcards, appendKeyTermsSection } from './PageFlashcards';
+import { extractQuizQuestions, removeQuizSection } from './PageQuiz';
+import { getModuleScope } from './PageModuleLinks';
 import PageQuizResults from './PageQuizResults';
+import PagePractice from './PagePractice';
 import { CustomPre, CustomCode } from './PageCodeBlock';
 import LiveQuizInstructor from './LiveQuizInstructor';
 import LiveQuizHistory from './LiveQuizHistory';
@@ -68,87 +71,10 @@ export const extractTableOfContents = (markdown: string): ITOCEntry[] => {
 	return headings;
 };
 
-export const getPageAssetPath = (slug: string, imagePath: string): string => {
-	if (!imagePath) return imagePath;
-	if (imagePath.startsWith('http://') || imagePath.startsWith('https://') || imagePath.startsWith('data:')) {
-		return imagePath;
-	}
-	if (imagePath.startsWith('/')) {
-		return imagePath;
-	}
-
-	const normalizedSlug = slug.replace(/\.md$/, '');
-	const slugParts = normalizedSlug.split('/').filter(Boolean);
-	const pageDirectoryParts = normalizedSlug.endsWith('/index')
-		? slugParts.slice(0, -1)
-		: slugParts.slice(0, -1);
-	const assetBase = pageDirectoryParts.length > 0 ? `/static/pages/${pageDirectoryParts.join('/')}` : '/static/pages';
-
-	try {
-		return new URL(imagePath, `http://example.com${assetBase}/`).pathname;
-	} catch {
-		return `${assetBase}/${imagePath}`;
-	}
-};
-
-/*
-	Search markdown for any inline images.
-	Example: ![Table example with highlight](table_25_years_oftv.webp)
-
-	Convert into an absolute path for local images, so that they can be loaded correctly in the browser.
-	Output: ![Table example with highlight](/static/pages/table_25_years_oftv.webp)
-*/
-const convert_images_by_adding_folder_path = (markdown: string, slug: string): string => {
-	return markdown.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, (match, altText, imagePath) => {
-		if (imagePath.startsWith('http://') || imagePath.startsWith('https://') || imagePath.startsWith('data:')) {
-			return match;
-		}
-		const resolvedPath = getPageAssetPath(slug, imagePath);
-		return `![${altText}](${resolvedPath})`;
-	});
-};
-
-
-/*
-	File types that live next to the markdown in static/pages rather than being
-	pages in their own right: notebook templates, datafiles, Word exercises, and
-	so on. Add to this list when a reading starts linking a new kind of file.
-
-	Images and video are listed too, so that a plain link to one (rather than an
-	embed) resolves as well.
-*/
-const ASSET_EXTENSIONS = /\.(ipynb|csv|tsv|xlsx?|xlsm|docx?|pptx?|potx|pdf|zip|txt|json|sql|py|r|html?|png|jpe?g|gif|svg|webp|mp4|webm|ogv)$/i;
-
-/*
-	Search markdown for links to local files and rewrite them the same way
-	images are rewritten.
-
-	Without this, `[template](template.ipynb)` renders as <a href='template.ipynb'>,
-	which the browser resolves against the *page route* (/pages/course_model/...)
-	rather than against /static/pages. That URL then reaches app_pages.ts, whose
-	SLUG_RE rejects any slug containing a '.', so every notebook, datafile and
-	Word exercise on the site 404s.
-
-	Example: [template](template.ipynb)
-	Output:  [template](/static/pages/course_model/ml01-modeling-gems/template.ipynb)
-
-	Markdown links are deliberately left alone: '.md' is stripped by
-	normalize_slug on the server, so page-to-page links already resolve, and
-	keeping them relative lets the SPA router handle them.
-*/
-export const convert_asset_links_by_adding_folder_path = (markdown: string, slug: string): string => {
-	// The leading (!?) captures the image marker so that images -- already
-	// handled above -- can be passed through untouched. Matching them here
-	// rather than excluding them with a lookbehind also keeps back-to-back
-	// links, `[a](x.csv)[b](y.csv)`, from swallowing each other.
-	return markdown.replace(/(!?)\[([^\]]*)\]\(([^)\s]+)\)/g, (match, imageMarker, text, href) => {
-		if (imageMarker) return match;
-		if (/^([a-z][a-z0-9+.-]*:|\/|#)/i.test(href)) return match;
-		if (!ASSET_EXTENSIONS.test(href)) return match;
-
-		return `[${text}](${getPageAssetPath(slug, href)})`;
-	});
-};
+export {
+	getPageAssetPath,
+	convert_asset_links_by_adding_folder_path,
+} from './PagePrepareMarkdown';
 
 
 /*
@@ -354,8 +280,7 @@ function PageView({ page }: IPageViewProps): ReactElement {
 	// defaults when page is null and defer the empty-render until after the hooks.
 	const markdown_content = useMemo(() => {
 		if (!page) return '';
-		const with_images = convert_images_by_adding_folder_path(page.markdown, page.slug);
-		return convert_asset_links_by_adding_folder_path(with_images, page.slug);
+		return prepareMarkdownForSlug(page.markdown, page.slug);
 	}, [page?.markdown, page?.slug]);
 	// The Practice Questions section is hidden from the reading view (it lists
 	// the correct answer first), but is still parsed from the full markdown to
@@ -377,8 +302,30 @@ function PageView({ page }: IPageViewProps): ReactElement {
 	const headingIdMap = useMemo(() => new Map(tocEntries.map((entry) => [normalizeHeadingText(entry.text), entry.id])), [tocEntries]);
 	const flashcards = useMemo(() => extractFlashcards(markdown_content), [markdown_content]);
 	const quizQuestions = useMemo(() => extractQuizQuestions(markdown_content), [markdown_content]);
-	// 'read' | 'flashcards' | 'quiz' | 'results' | 'live' | 'history' -- the modes are mutually exclusive.
-	const [mode, setMode] = useState<'read' | 'flashcards' | 'quiz' | 'results' | 'live' | 'history'>('read');
+	const hasOwnPracticeContent = flashcards.length > 0 || quizQuestions.length > 0;
+	// A course hub page (course_dv/index, viewed directly) is where
+	// PagePractice.tsx offers module selection -- see IModuleScope.isHub --
+	// even though the hub itself is normally just a syllabus with no
+	// flashcards or quiz questions of its own. The button needs to appear
+	// there too, or that flow would be unreachable.
+	const moduleScope = useMemo(() => getModuleScope(page?.slug ?? ''), [page?.slug]);
+	const showPracticeButton = hasOwnPracticeContent || moduleScope.isHub;
+	// Label for the toolbar's practice button, based on what this page alone
+	// offers -- PagePractice.tsx may end up pulling in more once the student
+	// picks additional modules, but this first impression is scoped to just
+	// the page they are reading.
+	const practiceButtonLabel = !hasOwnPracticeContent
+		? 'Practice'
+		: quizQuestions.length > 0 && flashcards.length > 0
+			? `Practice (${quizQuestions.length} questions, ${flashcards.length} terms)`
+			: quizQuestions.length > 0
+				? `Start quiz (${quizQuestions.length})`
+				: `Flashcards (${flashcards.length})`;
+	// 'read' | 'practice' | 'results' | 'live' | 'history' -- the modes are mutually exclusive.
+	// 'practice' covers both flashcards and quizzing -- see PagePractice.tsx,
+	// which owns choosing which modules to pull from and then flashcards vs.
+	// quiz within them.
+	const [mode, setMode] = useState<'read' | 'practice' | 'results' | 'live' | 'history'>('read');
 	// The results panel is for the admin (profgarrett) only. The API enforces
 	// this as well; hiding the button just keeps it out of everyone else's way.
 	const isAdmin = getUserFromBrowser().isAdmin;
@@ -389,7 +336,7 @@ function PageView({ page }: IPageViewProps): ReactElement {
 		setMode('read');
 	}, [markdown_content]);
 
-	const toggleMode = (next: 'flashcards' | 'quiz' | 'results' | 'live' | 'history'): void =>
+	const toggleMode = (next: 'practice' | 'results' | 'live' | 'history'): void =>
 		setMode((current) => (current === next ? 'read' : next));
 
 	if (page === null) return <></>;
@@ -434,38 +381,21 @@ function PageView({ page }: IPageViewProps): ReactElement {
 
 	return (
 		<div className='markdown-page'>
-			{flashcards.length > 0 || quizQuestions.length > 0 ? (
+			{showPracticeButton ? (
 
 				<div className='pageview-toolbar'>
 
-					{flashcards.length > 0 ? (
-						<Button
-							variant={mode === 'flashcards' ? 'primary' : 'outline-primary'}
-							size='sm'
-							className='me-2'
-							onClick={() => toggleMode('flashcards')}
-							aria-pressed={mode === 'flashcards'}
-						>
-							{ mode === 'flashcards'
-								? 'Back to reading'
-								: `Flashcards (${flashcards.length})` }
-						</Button>
-					) : null}
-					
-					
-					{quizQuestions.length > 0 ? (
-						<Button
-							variant={mode === 'quiz' ? 'primary' : 'outline-primary'}
-							size='sm'
-							onClick={() => toggleMode('quiz')}
-							aria-pressed={mode === 'quiz'}
-						>
-							{ mode === 'quiz'
-								? 'Back to reading'
-								: `Start quiz (${quizQuestions.length})` }
-						</Button>
-					) : null}
-
+					<Button
+						variant={mode === 'practice' ? 'primary' : 'outline-primary'}
+						size='sm'
+						className='me-2'
+						onClick={() => toggleMode('practice')}
+						aria-pressed={mode === 'practice'}
+					>
+						{ mode === 'practice'
+							? 'Back to reading'
+							: practiceButtonLabel }
+					</Button>
 
 
 					{isAdmin && quizQuestions.length > 0 ? (
@@ -519,10 +449,8 @@ function PageView({ page }: IPageViewProps): ReactElement {
 				<LiveQuizHistory page={page.slug} />
 			) : mode === 'results' ? (
 				<PageQuizResults page={page.slug} />
-			) : mode === 'quiz' ? (
-				<PageQuiz markdown={markdown_content} page={page.slug} />
-			) : mode === 'flashcards' ? (
-				<PageFlashcards markdown={markdown_content} />
+			) : mode === 'practice' ? (
+				<PagePractice page={page} onExit={() => setMode('read')} />
 			) : (
 			<>
 			{tocEntries.length > 0 ? (

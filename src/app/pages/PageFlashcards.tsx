@@ -1,4 +1,4 @@
-import React, { ReactElement, useEffect, useMemo, useRef, useState } from 'react';
+import React, { ReactElement, useEffect, useRef, useState } from 'react';
 import { Button, ButtonGroup } from 'react-bootstrap';
 
 export interface IFlashcard {
@@ -148,12 +148,17 @@ export const appendKeyTermsSection = (readingMarkdown: string, sourceMarkdown?: 
 };
 
 interface IFlashcardDeckProps {
-	markdown: string;
+	// Already-selected cards to study, in the order they should appear. The
+	// selection itself -- which terms from which pages -- is made by whatever
+	// renders this component (see PagePractice.tsx's key-terms checklist,
+	// modeled on LiveQuizInstructor.tsx's question/term selection screen);
+	// this component just plays through whatever list it is given.
+	cards: IFlashcard[];
 }
 
 /*
-	Renders an interactive flashcard deck built from the marked terms in a page's
-	markdown. One card is shown at a time.
+	Renders an interactive flashcard deck from an already-selected list of
+	terms. One card is shown at a time.
 
 	The card starts with only the prompt visible. Clicking the card, pressing
 	Space/Enter, or clicking Next reveals the answer directly below the prompt.
@@ -169,8 +174,7 @@ interface IFlashcardDeckProps {
 	The Next button takes keyboard focus as soon as the deck mounts, so the whole
 	deck can be worked through with the space bar alone.
 */
-function PageFlashcards({ markdown }: IFlashcardDeckProps): ReactElement {
-	const cards = useMemo(() => extractFlashcards(markdown), [markdown]);
+function PageFlashcards({ cards }: IFlashcardDeckProps): ReactElement {
 	const [index, setIndex] = useState(0);
 	const [revealed, setRevealed] = useState(false);
 	// false: term is the prompt (term -> definition). true: the reverse.

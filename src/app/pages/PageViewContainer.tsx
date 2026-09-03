@@ -7,7 +7,7 @@ import ForceLogin from '../components/ForceLogin';
 import iPage from './iPage';
 import PageView from './PageView';
 
-const requestPage = async (slug: string): Promise<iPage> => {
+export const requestPage = async (slug: string): Promise<iPage> => {
 	const encodedSlug = slug.split('/').map(encodeURIComponent).join('/');
 	const response = await fetch('/api/pages/' + encodedSlug, {
 		method: 'get',

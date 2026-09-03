@@ -98,14 +98,16 @@ export const buildTermQuestions = (selectedTerms: IFlashcard[], allTerms: IFlash
 		.filter((question) => question.answers.length >= 2);
 
 // Toggles `index` in a Set-of-indices selection state. Shared by the
-// questions and terms lists on the selection screen.
-const toggleIndex = (index: number, current: Set<number>): Set<number> => {
+// questions and terms lists on the selection screen. Exported so
+// PagePractice.tsx's module-content selection screen can use the same
+// checkbox/select-all/select-random pattern as this live-session screen.
+export const toggleIndex = (index: number, current: Set<number>): Set<number> => {
 	const next = new Set(current);
 	if (next.has(index)) next.delete(index); else next.add(index);
 	return next;
 };
 
-interface IRandomPickControlProps {
+export interface IRandomPickControlProps {
 	// Size of the list this control picks from.
 	total: number;
 	onPick: (count: number) => void;
@@ -115,8 +117,10 @@ interface IRandomPickControlProps {
 	A number input plus a "Select random" button, for picking N items at
 	random out of a list (used by both the practice-questions and key-terms
 	sections). Owns its own count so the two sections don't share one value.
+	Exported for reuse by PagePractice.tsx's own questions/terms selection
+	screen -- see the module comment at the top of this file.
 */
-function RandomPickControl({ total, onPick }: IRandomPickControlProps): ReactElement {
+export function RandomPickControl({ total, onPick }: IRandomPickControlProps): ReactElement {
 	const [count, setCount] = useState(() => Math.max(1, Math.min(5, total)));
 
 	const clamp = (value: number): number => {

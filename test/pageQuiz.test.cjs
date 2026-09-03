@@ -115,6 +115,17 @@ describe('extractQuizQuestions', () => {
 		assert.deepStrictEqual(extractQuizQuestions(''), []);
 		assert.deepStrictEqual(extractQuizQuestions('# Title\n\nSome text.'), []);
 	});
+
+	test('stamps every question with the given page slug, for multi-page quizzes', () => {
+		const questions = extractQuizQuestions(SAMPLE, 'course_dv/dv01-eda/index');
+		assert.strictEqual(questions.length, 2);
+		assert.ok(questions.every((q) => q.page === 'course_dv/dv01-eda/index'));
+	});
+
+	test('leaves page undefined when none is given', () => {
+		const questions = extractQuizQuestions(SAMPLE);
+		assert.ok(questions.every((q) => q.page === undefined));
+	});
 });
 
 describe('removeQuizSection', () => {
@@ -191,6 +202,22 @@ describe('shuffle / buildQuiz', () => {
 		}
 		// With 2 questions, 50 runs should produce both orderings.
 		assert.ok(orders.size > 1, 'expected question order to vary');
+	});
+
+	test('carries each question\'s source page through into the shuffled deck', () => {
+		const questions = extractQuizQuestions(SAMPLE, 'course_dv/dv01-eda/index');
+		const built = buildQuiz(questions);
+		assert.ok(built.every((q) => q.page === 'course_dv/dv01-eda/index'));
+	});
+
+	test('pools questions tagged with different pages, keeping each one\'s own page', () => {
+		const pageA = extractQuizQuestions(SAMPLE, 'course_dv/a/index');
+		const pageB = extractQuizQuestions(SAMPLE, 'course_dv/b/index');
+		const built = buildQuiz([...pageA, ...pageB]);
+
+		assert.strictEqual(built.length, pageA.length + pageB.length);
+		assert.strictEqual(built.filter((q) => q.page === 'course_dv/a/index').length, pageA.length);
+		assert.strictEqual(built.filter((q) => q.page === 'course_dv/b/index').length, pageB.length);
 	});
 });
 

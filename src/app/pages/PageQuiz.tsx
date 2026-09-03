@@ -1,4 +1,4 @@
-import React, { ReactElement, useEffect, useMemo, useState } from 'react';
+import React, { ReactElement, useEffect, useState } from 'react';
 import { Button, ButtonGroup } from 'react-bootstrap';
 
 import { getUserFromBrowser } from './../components/Authentication';
@@ -7,6 +7,10 @@ export interface IQuizQuestion {
 	prompt: string;
 	// Answers in the order they were authored. The first entry is the correct one.
 	answers: string[];
+	// Slug of the page this question came from. Set by extractQuizQuestions
+	// when given a page argument; used to log each answer against the page it
+	// actually belongs to when a quiz merges questions from several pages.
+	page?: string;
 }
 
 export interface IQuizOption {
@@ -17,6 +21,7 @@ export interface IQuizOption {
 export interface IShuffledQuestion {
 	prompt: string;
 	options: IQuizOption[];
+	page?: string;
 }
 
 /*
@@ -49,8 +54,12 @@ const stripInlineMarkdown = (text: string): string =>
 	Ordered list markers may be `1.` or `1)` (markdown renumbers automatically,
 	so the source usually repeats `1.`). Answer bullets may use `-`, `*`, or `+`.
 	Questions with fewer than two answers are skipped.
+
+	`page`, when given, is stamped onto every returned question (see
+	IQuizQuestion.page) so a quiz built from several pages' markdown can still
+	log each answer against the page it actually came from.
 */
-export const extractQuizQuestions = (markdown: string): IQuizQuestion[] => {
+export const extractQuizQuestions = (markdown: string, page?: string): IQuizQuestion[] => {
 	if (!markdown) return [];
 
 	const lines = markdown.split(/\r?\n/);
@@ -92,7 +101,7 @@ export const extractQuizQuestions = (markdown: string): IQuizQuestion[] => {
 		if (questionMatch) {
 			finish();
 			const prompt = stripInlineMarkdown(questionMatch[1]);
-			current = prompt ? { prompt, answers: [] } : null;
+			current = prompt ? { prompt, answers: [], page } : null;
 			continue;
 		}
 
@@ -158,6 +167,7 @@ export const shuffle = <T,>(items: T[]): T[] => {
 export const buildQuiz = (questions: IQuizQuestion[]): IShuffledQuestion[] =>
 	shuffle(questions).map((question) => ({
 		prompt: question.prompt,
+		page: question.page,
 		options: shuffle(
 			question.answers.map((text, index) => ({ text, isCorrect: index === 0 })),
 		),
@@ -194,21 +204,23 @@ export const logQuizAnswer = (entry: {
 };
 
 interface IPageQuizProps {
-	markdown: string;
-	// Page slug, recorded with each logged answer.
-	page?: string;
+	// The already-selected questions to quiz on, pooled from however many
+	// pages the student picked (see PagePractice.tsx's practice-questions
+	// checklist, modeled on LiveQuizInstructor.tsx's own question-selection
+	// screen). Each question still carries the slug of the page it came from
+	// (see IQuizQuestion.page), so per-page results (see PageQuizResults.tsx)
+	// stay accurate even when a student practices several modules together.
+	questions: IQuizQuestion[];
 }
 
 /*
-	Renders an interactive multiple-choice quiz built from the "## Practice
-	Questions" section of a page's markdown. Questions are presented one at a
-	time in random order with randomly ordered answers. The student picks an
-	answer, is told immediately whether it was right or wrong, then advances to
-	the next question. A score summary is shown at the end.
+	Renders an interactive multiple-choice quiz from an already-selected list
+	of questions, presented one at a time in random order with randomly
+	ordered answers. The student picks an answer, is told immediately whether
+	it was right or wrong, then advances to the next question. A score summary
+	is shown at the end.
 */
-function PageQuiz({ markdown, page = '' }: IPageQuizProps): ReactElement {
-	const questions = useMemo(() => extractQuizQuestions(markdown), [markdown]);
-
+function PageQuiz({ questions }: IPageQuizProps): ReactElement {
 	const [deck, setDeck] = useState<IShuffledQuestion[]>(() => buildQuiz(questions));
 	const [index, setIndex] = useState(0);
 	const [selected, setSelected] = useState<number | null>(null);
@@ -272,8 +284,10 @@ function PageQuiz({ markdown, page = '' }: IPageQuizProps): ReactElement {
 		if (option.isCorrect) setCorrectCount((count) => count + 1);
 
 		// Non-blocking: the UI updates above regardless of what happens here.
+		// question.page is the slug of the page this particular question came
+		// from -- not necessarily the page the student started the quiz on.
 		logQuizAnswer({
-			page,
+			page: question.page ?? '',
 			question: question.prompt,
 			answer: option.text,
 			correct: option.isCorrect,
