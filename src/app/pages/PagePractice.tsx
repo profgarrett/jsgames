@@ -300,24 +300,19 @@ function PagePractice({ page, onExit }: IPagePracticeProps): ReactElement {
 	}
 
 	if (step === 'select-format') {
+
+		// Removed count code
+		//			<!-- <p className='live-quiz-select-count' >{ selectedQuestions.size } of { allQuestions.length } selected</p> -->
+		//					<!-- <p className='live-quiz-select-count'>{ selectedTerms.size } of { allTerms.length } selected</p> -->
+
 		return (
 			<div className='live-quiz'>
 				<div className='live-quiz-select'>
-					<h3>Practice</h3>
-					<p className='live-quiz-instructions'>
-						{ preparedPages.length > 1
-							? `Choose which terms and questions to include, pulled from ${preparedPages.length} modules.`
-							: 'Choose which terms and questions to include.' }
-					</p>
 
 					{ allQuestions.length > 0 ? (
 						<div className='live-quiz-select-section'>
-							<h4 className='live-quiz-select-section-title'>Practice questions</h4>
-							<p className='live-quiz-instructions'>
-								Answers aren&rsquo;t shown here.
-							</p>
-							<p className='live-quiz-select-count'>{ selectedQuestions.size } of { allQuestions.length } selected</p>
-
+							<h3 className='live-quiz-select-section-title'>Select questions for multiple-choice quiz</h3>
+		
 							<div className='live-quiz-select-actions'>
 								<Button variant='link' size='sm' onClick={() => setSelectedQuestions(new Set(allQuestions.map((_, i) => i)))}>
 									Select all
@@ -341,13 +336,17 @@ function PagePractice({ page, onExit }: IPagePracticeProps): ReactElement {
 									</li>
 								)) }
 							</ul>
+
+							<Button variant='primary' className='me-2' onClick={() => setStep('quiz')} disabled={chosenQuestions.length === 0}>
+								{ `Start quiz (${chosenQuestions.length})` }
+							</Button>
+
 						</div>
 					) : null }
 
 					{ allTerms.length > 0 ? (
 						<div className='live-quiz-select-section'>
-							<h4 className='live-quiz-select-section-title'>Key terms</h4>
-							<p className='live-quiz-select-count'>{ selectedTerms.size } of { allTerms.length } selected</p>
+							<h3 className='live-quiz-select-section-title'>Select terms for flashcards</h3>
 
 							<div className='live-quiz-select-actions'>
 								<Button variant='link' size='sm' onClick={() => setSelectedTerms(new Set(allTerms.map((_, i) => i)))}>
@@ -377,10 +376,7 @@ function PagePractice({ page, onExit }: IPagePracticeProps): ReactElement {
 
 					<div className='live-quiz-select-actions'>
 						<Button variant='primary' className='me-2' onClick={() => setStep('flashcards')} disabled={chosenTerms.length === 0}>
-							{ `Flashcards (${chosenTerms.length})` }
-						</Button>
-						<Button variant='primary' className='me-2' onClick={() => setStep('quiz')} disabled={chosenQuestions.length === 0}>
-							{ `Start quiz (${chosenQuestions.length})` }
+							{ `Start flashcards (${chosenTerms.length})` }
 						</Button>
 						{ isAdmin ? (
 							<Button
@@ -480,9 +476,6 @@ function PagePractice({ page, onExit }: IPagePracticeProps): ReactElement {
 					<Button variant='outline-secondary' size='sm' onClick={() => setStep('select-format')}>
 						&larr; Back
 					</Button>
-					<Button variant='outline-secondary' size='sm' className='ms-2' onClick={onExit}>
-						Back to reading
-					</Button>
 				</div>
 			</div>
 		);
@@ -494,9 +487,6 @@ function PagePractice({ page, onExit }: IPagePracticeProps): ReactElement {
 				<div className='pageview-toolbar'>
 					<Button variant='outline-secondary' size='sm' onClick={() => setStep('select-format')}>
 						&larr; Back
-					</Button>
-					<Button variant='outline-secondary' size='sm' className='ms-2' onClick={onExit}>
-						Back to reading
 					</Button>
 				</div>
 				<PageFlashcards cards={chosenTerms} />
@@ -510,9 +500,6 @@ function PagePractice({ page, onExit }: IPagePracticeProps): ReactElement {
 			<div className='pageview-toolbar'>
 				<Button variant='outline-secondary' size='sm' onClick={() => setStep('select-format')}>
 					&larr; Back
-				</Button>
-				<Button variant='outline-secondary' size='sm' className='ms-2' onClick={onExit}>
-					Back to reading
 				</Button>
 			</div>
 			<PageQuiz questions={chosenQuestions} />

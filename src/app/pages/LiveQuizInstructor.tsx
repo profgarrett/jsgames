@@ -274,7 +274,7 @@ function LiveQuizInstructor({ quizQuestions, flashcards, page }: ILiveQuizInstru
 				<div className='live-quiz-select'>
 					<h3>Select questions</h3>
 					<p className='live-quiz-instructions'>
-						Choose which questions students will see. Answers aren&rsquo;t shown here.
+						Choose which questions students will see.
 					</p>
 
 					{ quizQuestions.length > 0 ? (
