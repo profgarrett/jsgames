@@ -10,6 +10,15 @@ import { prepareMarkdownForSlug } from './PagePrepareMarkdown';
 import { extractFlashcards, appendKeyTermsSection } from './PageFlashcards';
 import { extractQuizQuestions, removeQuizSection } from './PageQuiz';
 import { getModuleScope } from './PageModuleLinks';
+import {
+	isExamReviewPage,
+	extractExamOutcomeRefs,
+	resolveExamOutcomeSlug,
+	extractOutcomesBullets,
+	substituteExamOutcomeRefs,
+	IExamOutcomeResult,
+} from './PageExamOutcomes';
+import { requestPage } from './PageViewContainer';
 import PageQuizResults from './PageQuizResults';
 import PagePractice from './PagePractice';
 import { CustomPre, CustomCode } from './PageCodeBlock';
@@ -282,12 +291,61 @@ function PageView({ page }: IPageViewProps): ReactElement {
 		if (!page) return '';
 		return prepareMarkdownForSlug(page.markdown, page.slug);
 	}, [page?.markdown, page?.slug]);
+	// Exam review pages (title starts with "Exam") support {{lesson-name}}
+	// references, which pull in the Outcomes bullets and a link from that
+	// lesson's own page -- see PageExamOutcomes.ts. isExam and examRefs are
+	// synchronous; examResults fills in as each referenced page is fetched
+	// below.
+	const isExam = useMemo(() => isExamReviewPage(page?.title ?? ''), [page?.title]);
+	const examRefs = useMemo(() => (isExam ? extractExamOutcomeRefs(markdown_content) : []), [isExam, markdown_content]);
+	const [examResults, setExamResults] = useState<Map<string, IExamOutcomeResult>>(new Map());
+
+	useEffect(() => {
+		if (!isExam || !page || examRefs.length === 0) return;
+
+		const refsToFetch = examRefs.filter((ref) => !examResults.has(ref));
+		if (refsToFetch.length === 0) return;
+
+		let ignore = false;
+
+		void (async (): Promise<void> => {
+			const fetched = await Promise.all(refsToFetch.map(async (ref): Promise<[string, IExamOutcomeResult]> => {
+				const slug = resolveExamOutcomeSlug(page.slug, ref);
+				try {
+					const referencedPage = await requestPage(slug);
+					return [ref, { slug, title: referencedPage.title, outcomes: extractOutcomesBullets(referencedPage.markdown), notFound: false }];
+				} catch {
+					return [ref, { slug, title: null, outcomes: [], notFound: true }];
+				}
+			}));
+
+			if (ignore) return;
+			setExamResults((prev) => {
+				const next = new Map(prev);
+				for (const [ref, result] of fetched) next.set(ref, result);
+				return next;
+			});
+		})();
+
+		return () => {
+			ignore = true;
+		};
+		// examResults is checked above (refsToFetch) but intentionally left out
+		// of the dependency list -- it is only ever added to here, and
+		// including it would re-run this effect on every fetch it triggers.
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [isExam, examRefs, page?.slug]);
+
+	const markdown_with_exam_outcomes = useMemo(
+		() => (isExam ? substituteExamOutcomeRefs(markdown_content, examResults) : markdown_content),
+		[isExam, markdown_content, examResults],
+	);
 	// The Practice Questions section is hidden from the reading view (it lists
 	// the correct answer first), but is still parsed from the full markdown to
 	// build the quiz.
 	const reading_content = useMemo(
-		() => (extractQuizQuestions(markdown_content).length > 0 ? removeQuizSection(markdown_content) : markdown_content),
-		[markdown_content],
+		() => (extractQuizQuestions(markdown_with_exam_outcomes).length > 0 ? removeQuizSection(markdown_with_exam_outcomes) : markdown_with_exam_outcomes),
+		[markdown_with_exam_outcomes],
 	);
 	// Every reading ends with a Key Terms section: the same terms the flashcard
 	// deck is built from, alphabetised. Generated here rather than authored into
@@ -334,6 +392,7 @@ function PageView({ page }: IPageViewProps): ReactElement {
 	useEffect(() => {
 		renderedFirstH1.current = false;
 		setMode('read');
+		setExamResults(new Map());
 	}, [markdown_content]);
 
 	const toggleMode = (next: 'practice' | 'results' | 'live' | 'history'): void =>
