@@ -8,6 +8,10 @@ A report is a concise argument for a specific conclusion from specific evidence.
 - Clearly present a thesis
 - Support thesis with graphs and/or statistics
 
+**Links**:
+
+- [XCKD Typology of Scientific Reports](https://xkcd.com/2456/)
+
 
 ## Overview
 

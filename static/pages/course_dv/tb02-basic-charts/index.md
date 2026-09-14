@@ -9,6 +9,13 @@ This module introduces basic chart types in Tableau. We will cover how to create
 - Match a chart to the data structure and analysis goal
 - Match a chart type to the appropriate pre-attentive attributes
 
+
+**Files**:
+
+- [Slides](tableau-chart-types.pptx)
+- [Dataset for slides](graduate_payoff.xlsx)
+
+
 **Links**:
 
 - [Improving a line chart](https://nrennie.rbind.io/blog/accessible-line-chart/) — accessibility tips, referenced again in the Line section

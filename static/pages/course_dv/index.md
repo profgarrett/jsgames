@@ -61,23 +61,25 @@ Optional Reading:
 - *DataCamp: Introduction to Tableau, Parts 2-4*
 - [tb01. Tableau interface and data](tb01-interface/index)
 - [tb02. Tableau basic charts](tb02-basic-charts/index)
-- [tb03. Shaping data in Tableau](tb03-basic-features/index)
 
 ### Week 5 - September 14, 2026 
 
+**[Exam 1](exam1/index)**
+
 - *DataCamp: Analyzing Data with Tableau, Parts 1-2*
+- [tb03. Shaping data in Tableau](tb03-basic-features/index)
 - [tb11. Chart refinements](tb11-chart-refinements/index)
-- [tb12. Data refinements](tb12-data-refinements/index)
 
 ### Week 6 - September 21, 2026 
 
 - *DataCamp: Analyzing Data with Tableau, Parts 3-4*
-- [tb21. Tableau maps](tb21-maps/index)
+- [tb12. Data refinements](tb12-data-refinements/index)
 - [tb22. Dashboards](tb22-dashboards/index)
 
 ### Week 7 - September 28, 2026 
 
 - *DataCamp: Creating Dashboards with Tableau*
+- [tb21. Tableau maps](tb21-maps/index)
 - [tb31. Tableau Table Calculations](tb31-tablecalculations/index)
 
 

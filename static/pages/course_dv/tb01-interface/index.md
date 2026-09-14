@@ -23,6 +23,9 @@ Most beginner frustration in Tableau is a field classification problem.
 
 **Links**:
 
+- Car Colors
+  - [Sample Color Popularity Over time](https://public.tableau.com/views/CarColorEvolutionNorthAmerica/ColorRankOverTime?:embed=y&:display_count=yes&:showTabs=y&:showVizHome=n)
+  - [Datafile](carcolors.xlsx)
 - See DataCamp *Introduction to Tableau*
 - [Tableau's official interface reference](https://help.tableau.com/current/pro/desktop/en-us/environment_workspace.htm)
 

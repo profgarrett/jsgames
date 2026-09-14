@@ -20,7 +20,7 @@ This tutorial shows how to create and remove columns in Pandas.
 **Links:**
 - [template](template.ipynb)
 - [Predict Mutation Template](predict_mutation.docx)
-
+- [Affairs data file](affairs_problem.csv)
 
 ## Fix fields with dropping and renaming
 

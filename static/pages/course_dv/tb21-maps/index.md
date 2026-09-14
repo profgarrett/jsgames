@@ -14,7 +14,10 @@ This module introduces maps in Tableau. We will cover how to create different ty
 - Describe problems with projection distortion
 
 **Links**:
+
 - [Class slideshow](tb45-maps.pptx) and [data](tb45-maps-dcidata.xlsx)
+- [The true size of Africa](https://flowingdata.com/2025/09/17/explaining-the-true-size-of-africa-a-lesson-in-map-projections/)
+
 
 **Common exam mistakes**:
 - Know the difference between a filled chart, point chart, and a combo map.
@@ -102,3 +105,6 @@ Example of distortion: Greenland appears much larger than it actually is compare
 
 Source: [Visual Capitalist - The true size of Greenland](https://www.visualcapitalist.com/true-size-of-greenland-map-mercator-projection/)
 
+### Examples
+
+![Average bedtimes by time zone](avg_bedtimes.png)

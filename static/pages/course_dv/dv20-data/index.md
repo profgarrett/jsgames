@@ -25,6 +25,8 @@ After completing this module, you should be able to:
 
 - [Slides](/static/pages/slides.html?course=course_dv&module=dv20-data)
 - [Sample datafile](dv20_data_samples.xlsx)
+- [Example of car colors](https://www.visualcapitalist.com/americas-most-popular-car-colors-1996-vs-2025/)
+
 
 ## Further reading
 
