@@ -43,7 +43,7 @@ Each week covers Python and Machine Learning concepts.  Most modules have a deli
 
 ### Week 5 - September 14, 2026 
 
-*Exam 1*
+[Exam 1](exams/exam1)
 
 - [ml03](ml03-category-prediction/index): Predicting categories
 - [ml04](ml04-number-prediction/index): Predicting numbers

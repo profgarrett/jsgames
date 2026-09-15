@@ -64,7 +64,7 @@ Optional Reading:
 
 ### Week 5 - September 14, 2026 
 
-**[Exam 1](exam1/index)**
+**[Exam 1](exams/exam1)**
 
 - *DataCamp: Analyzing Data with Tableau, Parts 1-2*
 - [tb03. Shaping data in Tableau](tb03-basic-features/index)

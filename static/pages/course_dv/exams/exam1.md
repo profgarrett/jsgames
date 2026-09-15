@@ -1,7 +1,3 @@
-<script src="/course_dv/toc.js"></script>
-<script src="/course_dv/review.js"></script>
-
-
 # Exam 1 Review
 
 Exam 1 will be 80% conceptual, and 20% practical. Review the core concepts from our lass, and work on how to apply these concepts to practical situations. The applied portion will be done with Tableau. See quiz 1 for an example.
