@@ -182,7 +182,7 @@ Improve individual charts by reducing alignment points. Centering items often fe
 
 ![Comparison of centered vs. left-aligned text and the resulting alignment points](images/alignment-points2.png)
 
-
+![Badly designed billboard](images/teeth70000.png)
 
 ### Tufte's Data-ink Ratio 
 

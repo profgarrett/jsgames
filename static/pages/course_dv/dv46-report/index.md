@@ -17,6 +17,7 @@ A report is a concise argument for a specific conclusion from specific evidence.
 
 - **Length**: No more than 3 pages, including figures.
 - **File format**: Word Document *(NOT A PDF)*
+- **Text**: 12-point font, single-spaced, 1-inch margins, no initial tab, blank line between paragraphs.
 - **Figures**: At least one, with a good title that states the takeaway.
 - **AI Use**: You are responsible for everything in the report, including the parts a model wrote. "The AI produced that number" is not a defense. Not being able to explain what the AI wrote will result in no credit for the report..
 

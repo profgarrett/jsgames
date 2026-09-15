@@ -31,7 +31,7 @@ export default function FeedbackRouter() {
 	useEffect( () => {
 		// Redirect to logged in
 		if(user.username == '') {
-			navigate('/login?url=ifgame-feedback-create-' + code)
+			navigate('/login?url=' + encodeURIComponent('/ifgame/feedback/create/' + code));
 		}
 		fetch('/api/levels/new_level_by_code/'+code, {
 			method: 'post',

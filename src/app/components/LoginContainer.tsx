@@ -39,8 +39,9 @@ Process:
 For Amazon Mechanical Turk, use
 	.../login/amt=1
 
-For feedback,
-	.../?url=path-to-item (hypens will be replaced with / characters.)
+For feedback, or any other protected page, pass the absolute path to return
+to as a single encodeURIComponent'd value:
+	.../login?url=%2Fifgame%2Ffeedback%2Fcreate%2FABC123
 
 This will automatically setup the account and join to the AMT group.
 */
@@ -49,9 +50,23 @@ export default function LoginContainer() {
 	const search = new URLSearchParams(window.location.search);
 	const isAMT = search.has('amt'); 
 
-	// Replace all - with / characters in url
-	const url_with_hypthens = search.has('url') ? (search.get('url') || '/') : '/';
-	const url = url_with_hypthens.replaceAll('-', '/');
+	// Decode the page to return to after login. It's stored as a single
+	// encodeURIComponent'd value (see ForceLogin.getLoginRedirectHref and
+	// FeedbackRouter), so any character -- including '-' -- round-trips
+	// safely. Only ever accept a same-origin relative path, to guard
+	// against an open redirect if this param is ever hand-crafted.
+	const decodeRedirectUrl = (raw: string | null): string => {
+		if (!raw) return '/';
+		let decoded: string;
+		try {
+			decoded = decodeURIComponent(raw);
+		} catch {
+			return '/';
+		}
+		if (!decoded.startsWith('/') || decoded.startsWith('//')) return '/';
+		return decoded;
+	};
+	const url = decodeRedirectUrl(search.get('url'));
 	
 	const [message, setMessage] = useState( isAMT ? 'Please wait while we log you in' : '')
 	const [messageStyle, setMessageStyle] = useState('');
@@ -90,7 +105,7 @@ export default function LoginContainer() {
 
 		setTimeout( () => {
 			// Refresh the cached identity (httpOnly cookie) before navigating.
-			loadUserFromServer().finally( () => navigate('/'+url) );
+			loadUserFromServer().finally( () => navigate(url) );
 		}, location.host === 'localhost:8080' ? 1000 : 0);  // add a short delay if on dev.
 	};
 

@@ -8,6 +8,18 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" >
 	<link rel="icon" href="/static/favicon.ico" sizes="32x32">
 	<link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
+	<script>
+		// Local dev tabs get a red favicon (instead of the green production one) so they're
+		// easy to tell apart from a deployed site at a glance.
+		(function () {
+			var devHosts = ['localhost', '127.0.0.1', '::1'];
+			if (devHosts.indexOf(window.location.hostname) === -1) return;
+			document.querySelectorAll('link[rel="icon"]').forEach(function (link) {
+				if (link.href.indexOf('favicon.ico') !== -1) link.href = '/static/favicon-dev.ico';
+				else if (link.href.indexOf('favicon.svg') !== -1) link.href = '/static/favicon-dev.svg';
+			});
+		})();
+	</script>
 	<link rel="apple-touch-icon" href="/static/apple-touch-icon.png">
 	<link rel="manifest" href="/static/site.webmanifest">
 	<meta name="theme-color" content="#217346">
