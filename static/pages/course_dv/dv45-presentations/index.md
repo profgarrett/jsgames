@@ -14,6 +14,11 @@ The major problem with most presentations is that they lack a central point. Do 
 - Handle questions without losing credibility
 
 
+**Links**:
+
+- (Martin Fowler - Nail Your Narrative)[https://martinfowler.com/articles/never-send-slides/nail-your-narrative.html]
+
+
 ## Start With the Message
 
 Every presentation needs a core **thesis**. This is a single  sentence you want the audience to remember. Poor presentations only have topics, a general subject area. 

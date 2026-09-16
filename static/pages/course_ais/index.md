@@ -36,3 +36,6 @@ Course Introduction & RPS Exercise
 ### Week 5 - September 14, 2026
 
 - [excel07](excel07-charts1/index): Charts Part 1
+<!-- - [excel08](excel08-charts2/index): Charts Part 2 -->
+- [excel09](excel09-titanic/index): Titanic Problem
+
