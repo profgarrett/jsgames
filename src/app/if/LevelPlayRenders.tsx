@@ -14,6 +14,7 @@ import ShortTextAnswer from './IfPlayComponents/ShortTextAnswer';
 import LongTextAnswer from './IfPlayComponents/LongTextAnswer';
 import Timer from './../components/Timer';
 import SqlQuery from './IfPlayComponents/SqlQuery';
+import Chat from './IfPlayComponents/Chat';
 
 import { buildChart } from './charts/Charts';
 
@@ -55,7 +56,7 @@ export function render_page_lead(page: IfPageBaseSchema, pageId: number): ReactE
 
 		return (
 			<Card style={ {marginBottom: '10px'} }>
-				<Card.Header>Quiz Question</Card.Header>
+				<Card.Header>Question</Card.Header>
 				<Card.Body>
 					<div style={ style }>
 						<HtmlDiv ariaLive='alert' html={ ''+desc } />
@@ -107,7 +108,9 @@ export function render_exercise_panel(
 			handleChange: ( json: IStringIndexJsonObject ) => void,
 			handleEnter: ( ) => void,
 			handleSubmit: () => void,
-			handleValidate: () => void ): ReactElement {
+			handleValidate: () => void,
+			level_id: string = '',
+			onChatUpdate: ( level_json: any ) => void = () => {} ): ReactElement {
 
 	let problem: ReactElement;
 	const instruc = fill_template(page.instruction, page.template_values);
@@ -172,7 +175,15 @@ export function render_exercise_panel(
 					onChange={handleChange} 
 					onValidate={handleValidate}
 					onSubmit={handleSubmit } />;
-					
+
+	} else if(page.type === 'IfPageChatSchema') {
+		problem = <Chat page={page.toIfPageChatSchema()}
+					level_id={level_id}
+					readonly={ isLoading }
+					editable={ true }
+					onChange={handleChange}
+					onChatUpdate={onChatUpdate} />;
+
 	} else {
 		throw new Error('Invalid type in IfLevelPlay '+page.type);
 	}

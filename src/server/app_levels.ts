@@ -4,7 +4,7 @@
 import express from 'express';
 const router = express.Router();
 
-import { ADMIN_USERNAME } from './secret.js'; 
+import { ADMIN_USERNAME, OPENAI_API_KEY } from './secret.js'; 
 import { IfLevels, IfLevelSchema } from './../shared/IfLevelSchema';
 import { IfLevelSchemaFactory } from './IfLevelSchemaFactory';
 
@@ -39,6 +39,17 @@ router.post('/new_level_by_code/:code',
 		const code = getRouteParamString(req.params.code);
 		const username = user_get_username_or_emptystring(req, res);
 		const level = await IfLevelSchemaFactory.create(code, username);
+
+		// Optionally stamp Prolific study/session identifiers onto the level's history, for
+		// provenance -- e.g. from the Prolific landing page (src/app/if/ProlificRouter.tsx).
+		// No schema change: history is the same free-form JSON array every level already uses
+		// for this kind of bookkeeping.
+		const prolific_study_id = req.body && typeof req.body.prolific_study_id === 'string' ? req.body.prolific_study_id : '';
+		const prolific_session_id = req.body && typeof req.body.prolific_session_id === 'string' ? req.body.prolific_session_id : '';
+		if( prolific_study_id !== '' || prolific_session_id !== '' ) {
+			level.history = [...level.history, { dt: new Date(), code: 'server_prolific_context', prolific_study_id, prolific_session_id }];
+		}
+
 		const now = from_utc_to_myql(to_utc(new Date()));
 
 		// need to refresh, even though this is a new object, before saving. Otherwise, this will be null
@@ -352,6 +363,114 @@ router.post('/level/:id/delete',
 		const delete_results = await run_mysql_query(sql, [_id] );
 
 		res.json({success: (delete_results.affectedRows >= 1)});
+
+	} catch (e) {
+		log_error(e);
+		next(e);
+	}
+});
+
+
+/**
+	Exchange one chat turn on the current (last) page of a level, which must be an
+	IfPageChatSchema. Appends the student's message, calls the OpenAI Chat Completions API
+	using the page's (hidden) condition-specific system prompt plus the transcript so far, and
+	appends the AI's reply. This is a dedicated route -- separate from the generic
+	POST /level/:id below -- specifically so that an arbitrary number of chat turns can happen
+	on one page without each one trying to advance the level to the next page. See
+	IfPageChatSchema.updateUserFields (src/shared/IfPageSchemas.ts) for why client_messages is
+	only ever written here, never through the generic level-update route.
+*/
+router.post('/level/:id/chat',
+	nocache, user_require_logged_in,
+	async (req: Request, res: Response, next: NextFunction): Promise<any> => {
+	try {
+		const username = user_get_username_or_emptystring(req, res);
+		const _id = getRouteParamString(req.params.id);
+		const text = typeof req.body.text === 'string' ? req.body.text.trim() : '';
+
+		if(text.length === 0) return res.status(400).json({ _error: 'Message text is required' });
+		if(text.length > 4000) return res.status(400).json({ _error: 'Message is too long (4000 character max)' });
+
+		const sql_select = 'SELECT * FROM iflevels WHERE _id = ? AND username = ?';
+		const select_results = await run_mysql_query(sql_select, [_id, username]);
+
+		if(select_results.length === 0) return res.sendStatus(404);
+
+		const iflevel = new IfLevelSchema(select_results[0]);
+
+		if(iflevel.completed) return res.status(400).json({ _error: 'This level is already completed' });
+
+		const page: any = iflevel.pages[iflevel.pages.length - 1];
+
+		if(page.type !== 'IfPageChatSchema') return res.status(400).json({ _error: 'The current page is not a chat page' });
+		if(page.completed) return res.status(400).json({ _error: 'This chat page is already completed' });
+
+		const turns_used = page.client_messages.filter( (m: any) => m.role === 'user').length;
+		if(turns_used >= page.max_turns) {
+			return res.status(400).json({ _error: 'You have reached the maximum number of messages for this chat' });
+		}
+
+		if(!OPENAI_API_KEY) {
+			return res.status(500).json({ _error: 'AI chat is not configured on this server (missing OPENAI_API_KEY in secret.js)' });
+		}
+
+		// Append the student's message before calling the AI, so it's included in what's sent.
+		page.client_messages = [
+			...page.client_messages,
+			{ role: 'user', text: text, dt: new Date() },
+		];
+
+		const openai_messages = [
+			{ role: 'system', content: page.solution_system_prompt || 'You are a helpful assistant.' },
+			...page.client_messages.map( (m: any) => ({ role: m.role, content: m.text }) ),
+		];
+
+		let assistant_text = '';
+		try {
+			const openai_response = await fetch('https://api.openai.com/v1/chat/completions', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+					'Authorization': `Bearer ${OPENAI_API_KEY}`,
+				},
+				body: JSON.stringify({
+					model: 'gpt-4o-mini',
+					messages: openai_messages,
+					max_tokens: 300,
+					temperature: 0.8,
+				}),
+			});
+
+			const openai_json: any = await openai_response.json();
+
+			if(!openai_response.ok) {
+				throw new Error('OpenAI API error: ' + (openai_json && openai_json.error && openai_json.error.message ? openai_json.error.message : openai_response.status));
+			}
+
+			assistant_text = (openai_json && openai_json.choices && openai_json.choices[0] && openai_json.choices[0].message && openai_json.choices[0].message.content || '').trim();
+			if(assistant_text === '') throw new Error('OpenAI returned an empty response');
+
+		} catch(openai_error) {
+			log_error(openai_error);
+			// Note: the student's message above is not persisted (we haven't saved yet), so it's
+			// safe for them to retry without creating a duplicate.
+			return res.status(502).json({ _error: 'The AI chat service is temporarily unavailable. Please try again.' });
+		}
+
+		// Append the AI's reply, right after the student's message that prompted it.
+		page.client_messages = [
+			...page.client_messages,
+			{ role: 'assistant', text: assistant_text, dt: new Date() },
+		];
+
+		page.history.push({ dt: new Date(), code: 'server_chat_exchange', turn: turns_used + 1 });
+		iflevel.history = [...iflevel.history, { dt: new Date(), code: 'server_chat_exchange', page_i: iflevel.pages.length - 1 }];
+
+		const update_results = await update_level_in_db(iflevel);
+		if(update_results.changedRows !== 1) return res.sendStatus(500);
+
+		res.json(return_level_prepared_for_transmit(iflevel, true));
 
 	} catch (e) {
 		log_error(e);

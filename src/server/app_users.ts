@@ -491,6 +491,71 @@ router.post('/google_login',
 
 
 
+/*
+	Auto-provision (or reuse) an account for a Prolific participant, then log them in --
+	no login form, no manual account creation. Mirrors google_login's shape: validate,
+	find-or-create by a stable identifier, optionally join a section, then user_login().
+
+	The stable identifier here is the Prolific participant ID (PROLIFIC_PID), which
+	Prolific appends to the study URL for us -- there is no external token to verify
+	(unlike Google's signed credential), since the study link itself, given out only
+	through Prolific, is what stands in for that. See src/app/if/ProlificRouter.tsx for
+	the client side that calls this immediately after landing on /prolific.
+*/
+router.post('/prolific_login',
+	nocache,
+	async (req: Request, res: Response, next: NextFunction): Promise<any> => {
+	try {
+		const params: any = type_params(req.body, ['prolific_pid', 'section_code']);
+
+		// Restrict to a safe charset -- this becomes part of a username -- and a
+		// sane length. Prolific IDs are normally 24 hex characters, but this is kept
+		// loose rather than hard-coded to that exact shape.
+		const prolific_pid = String(params.prolific_pid).trim();
+		if( !/^[A-Za-z0-9_-]{4,64}$/.test(prolific_pid) ) {
+			return res.json({ success: false, error: 'InvalidProlificId' });
+		}
+
+		const username = 'prolific_' + prolific_pid.toLowerCase();
+
+		// Validate the join code up front, same as google_login. An empty code is a
+		// valid "no section".
+		const section = await resolve_section_code(params.section_code || '');
+		if( section.error === 'InvalidCode' ) return res.json({ success: false, error: 'InvalidCode' });
+
+		// Find or create the account. One Prolific participant ID always maps to the
+		// same site account, so re-visiting the link (e.g. after a dropped connection)
+		// reuses it rather than creating a duplicate.
+		const rows = await run_mysql_query('SELECT iduser FROM users WHERE username = ? LIMIT 1', [username]);
+
+		let iduser: number;
+		if( rows.length === 0 ) {
+			const password = 'r' + crypto.randomBytes(24).toString('hex'); // unusable, never given to the participant
+			const hashed_password = hash_password(password);
+			const insert_results = await run_mysql_query(
+				'INSERT INTO users (username, hashed_password, ip, auth_provider) VALUES (?, ?, ?, ?)',
+				[username, hashed_password, get_request_ip(req), 'prolific']);
+			if( insert_results.affectedRows !== 1 ) return res.sendStatus(500);
+			iduser = insert_results.insertId;
+		} else {
+			iduser = rows[0].iduser;
+		}
+
+		if( section.idsection != null ) {
+			await ensure_section_membership(iduser, section.idsection);
+		}
+
+		await user_login(username, '', req, res);
+
+		return res.json({ username, logged_in: true });
+	}
+	catch (e) {
+		log_error(e);
+		next(e);
+	}
+});
+
+
 // Grab first item from query.
 // any = ParsedQs from req.query.code
 function to_string_from_possible_array( s: string | string[] | any ): string {

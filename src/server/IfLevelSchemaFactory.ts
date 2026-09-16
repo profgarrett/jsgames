@@ -29,6 +29,8 @@ import { surveycharts_amt, surveycharts_wu } from './tutorials/surveycharts';
 
 import { sql_selectfrom, sql_orderby, sql_where, sql_where_and_or, sql_join_inner, sql_join_leftouter, sql_join_keys, sql_join_self, sql_groupby } from './tutorials/sql';
 
+import { testprolificstudy } from './tutorials/testprolificstudy';
+
 
 import type { GenType } from './Gens';
 
@@ -75,6 +77,7 @@ const LEVEL_GENS: IStringIndexJsonObject = {
 	sql_join_inner, sql_join_leftouter, sql_join_keys, sql_join_self,
 	sql_groupby,
 	feedback_n, feedback_nm, feedback_t, feedback_m,
+	testprolificstudy,
 };
 
 
@@ -265,6 +268,21 @@ async function _initialize_json(level: IfLevelSchema, original_json: any): Promi
 
 		// Default to *not* show feedback on this item unless set.
 		json.show_feedback_on = typeof json.show_feedback_on === 'undefined' ? false : json.show_feedback_on;
+
+		// Add a default code.
+		json.code = typeof json.code === 'undefined' ? 'tutorial' : json.code;
+
+	} else if( json.type === 'IfPageChatSchema' ) {
+		// Require the student to explicitly signal they're done chatting (client_ready_to_advance)
+		// before the level is allowed to move to the next page.
+		json.correct_required = typeof json.correct_required === 'undefined' ? true : json.correct_required;
+
+		// Default to *not* show feedback on this item, there's no right/wrong chat transcript.
+		json.show_feedback_on = typeof json.show_feedback_on === 'undefined' ? false : json.show_feedback_on;
+
+		// Default instruction text.
+		if(typeof json.instruction === 'undefined')
+			json.instruction = 'Type a message and press Send.';
 
 		// Add a default code.
 		json.code = typeof json.code === 'undefined' ? 'tutorial' : json.code;

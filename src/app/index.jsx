@@ -21,6 +21,7 @@ import LevelRawContainer from './if/LevelRawContainer';
 import HomeContainer from './home/HomeContainer.tsx';
 import FeedbackContainer from './if/FeedbackContainer';
 import FeedbackRouter from './if/FeedbackRouter';
+import ProlificRouter from './if/ProlificRouter';
 import PageListContainer from './pages/PageListContainer.tsx';
 import PageSectionContainer from './pages/PageSectionContainer.tsx';
 import PageViewContainer from './pages/PageViewContainer.tsx';
@@ -73,6 +74,8 @@ function renderApp() {
 						<Route path="/pages/list" element={<PageListContainer />} />
 						<Route path="/pages/*" element={<PageViewContainer />} />
 						<Route path="/live" element={<LiveQuizJoin />} />
+
+						<Route path="/prolific" element={<ProlificRouter />} />
 
 						<Route path="/ifgame" element={<Navigate to="/" replace />} />
 						<Route path="/ifgame/levels/:_code" element={<LevelListContainer />} />

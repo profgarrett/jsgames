@@ -74,6 +74,17 @@ export default function LevelPlayContainer() {
 		return level;
 	}
 
+	/**
+		Called by the Chat component after a successful message exchange with the AI.
+		The server (POST /level/:id/chat) is the source of truth for the transcript, so this
+		just replaces local state with the fresh level it returns -- unlike handleChange below,
+		it does not go through page.updateUserFields (client_messages is intentionally not in
+		that whitelist; see IfPageChatSchema in shared/IfPageSchemas.ts).
+	*/
+	const handleChatUpdate = (level_json: any): void => {
+		setLevel(new IfLevelSchema(level_json));
+	};
+
 	// Update level based on user input.
 	// Changes is passed a json object with the updated values.
 	const handleChange = (json: IStringIndexJsonObject): void => {
@@ -314,6 +325,7 @@ export default function LevelPlayContainer() {
 								onNext={ ()=>handleNext(false) }
 								onValidate={ ()=>handleNext(true) }
 								onChange={ (json)=>handleChange(json) }
+								onChatUpdate={ (level_json)=>handleChatUpdate(level_json) }
 								show_feedback={ showFeedbackOn != -1 }
 								show_feedback_on={showFeedbackOn}
 								onHideFeedback={handleHideFeedback}

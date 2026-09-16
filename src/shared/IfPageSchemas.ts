@@ -590,6 +590,12 @@ class IfPageBaseSchema extends Schema {
 		// @ts-ignore 
 		return this;
 	}
+	// Type coercion for ts not liking subtypes.
+	toIfPageChatSchema(): IfPageChatSchema {
+		if( this.type !== 'IfPageChatSchema') throw new Error('Invalid type convertion to IfPageChatSchema');
+		// @ts-ignore 
+		return this;
+	}
 
 
 }
@@ -1852,6 +1858,110 @@ class IfPageSqlSchema extends IfPageBaseSchema {
 
 
 
+/*
+	A page that embeds a conversation with an AI chatbot (used for Prolific-style experiments).
+
+	The student exchanges messages with an AI. Message turns are only ever appended by the
+	dedicated POST /api/levels/level/:id/chat server route (which calls the LLM and appends
+	both the student's message and the AI's reply), never through the generic level-update
+	route -- see updateUserFields() below. This keeps the transcript authoritative on the
+	server and prevents a student from fabricating AI turns.
+
+	solution_system_prompt holds the (condition-specific) system prompt that controls the AI's
+	persona/stance. It is stripped before being sent to the client by the same
+	solution..._visible convention used elsewhere (e.g. IfPageSqlSchema.solution_sql_visible),
+	via solution_system_prompt_visible = false.
+
+	Advancing past this page requires the student to explicitly mark themselves ready via
+	client_ready_to_advance, so that an arbitrary number of chat turns can happen first.
+*/
+class IfPageChatSchema extends IfPageBaseSchema {
+	client_messages!: Array<{ role: string, text: string, dt: Date }>;
+	client_ready_to_advance!: boolean;
+	max_turns!: number;
+	solution_system_prompt!: string;
+	solution_system_prompt_visible!: boolean;
+
+	// Apply json to this obj, signally no parent classes to do the setting for us.
+	constructor( json?: any) {
+		super(true);
+		if(json === true) return;
+		this.initialize(json, this.schema);
+		this.updateCorrect();
+	}
+
+	get type(): string {
+		return 'IfPageChatSchema';
+	}
+
+	get schema(): any {
+		const inherit = common_schema();
+
+		return {
+			...inherit,
+			client_messages: { type: 'Array', initialize: (a: any) => isDef(a) && isArray(a) ? revive_dates_recursively(a) : [] },
+			client_ready_to_advance: { type: 'Boolean', initialize: (b: any) => isDef(b) ? bool(b) : false },
+			max_turns: { type: 'Number', initialize: (s: any) => isDef(s) ? s : 6 },
+			solution_system_prompt: { type: 'String', initialize: (s: any) => isDef(s) ? s : '' },
+			solution_system_prompt_visible: { type: 'Boolean', initialize: (b: any) => isDef(b) ? bool(b) : false },
+		};
+	}
+
+	// Has the user provided input? Requires the student to explicitly click "ready to continue",
+	// not just having sent a message, so that a variable number of turns is allowed.
+	client_has_answered(): boolean {
+		return this.client_ready_to_advance === true;
+	}
+
+	// Remove all client input.
+	clear_answer_and_all_results(): void {
+		this.client_messages = [];
+		this.client_ready_to_advance = false;
+		this.correct = false;
+		this.completed = false;
+		this.client_feedback = [];
+	}
+
+	// Automatically fill in the answer. Used for testing on the server (debuglevel/previewlevel).
+	debug_answer() {
+		this.client_messages = [
+			{ role: 'user', text: '(debug) Hello', dt: new Date() },
+			{ role: 'assistant', text: '(debug) Hi there!', dt: new Date() },
+		];
+		this.client_ready_to_advance = true;
+		this.updateCorrect();
+	}
+
+	// There is no single solution for a chat transcript.
+	get_solution(): string {
+		return '';
+	}
+
+	/*
+		Only client_ready_to_advance may be updated through the generic level-update route.
+		client_messages is intentionally excluded -- it is only ever written by the dedicated
+		chat route (app_levels.ts POST /level/:id/chat), which calls the AI and appends both
+		sides of the conversation directly to the database.
+	*/
+	updateUserFields(json: any) {
+		this._updateUserFields(json, ['client_ready_to_advance']);
+	}
+
+	updateCorrect() {
+		if(this.completed) return; // do not update completed items.
+		if(!this.client_ready_to_advance) return; // student hasn't finished chatting yet.
+
+		this.client_feedback = [];
+		this.correct = true;
+	}
+
+	// Nicely formatted view of the transcript, e.g. for admin review.
+	toString(): string {
+		return this.client_messages.map( (m: { role: string, text: string }) => (m.role + ': ' + m.text) ).join('\n');
+	}
+}
+
+
 // Used to correctly instantiate a class based on the json .type property.
 function get_page_schema_as_class(json: any): IfPageBaseSchema {
 	const type = json.type;
@@ -1865,6 +1975,7 @@ function get_page_schema_as_class(json: any): IfPageBaseSchema {
 		'IfPageShortTextAnswerSchema': IfPageShortTextAnswerSchema,
 		'IfPageLongTextAnswerSchema': IfPageLongTextAnswerSchema,
 		'IfPageSqlSchema': IfPageSqlSchema,
+		'IfPageChatSchema': IfPageChatSchema,
 	}[type];
 
 	if(typeof p === 'undefined') {
@@ -1971,6 +2082,7 @@ export {
 	IfPageLongTextAnswerSchema,
 	IfPageAnswer,
 	IfPageSqlSchema,
+	IfPageChatSchema,
 	build_answers_from_level,
 };
 

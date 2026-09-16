@@ -77,6 +77,9 @@ const IfLevels = [
 	{ code: 'feedback_m', title: 'Feedback - Memo', description: 'Feedback' },
 	{ code: 'feedback_nm', title: 'Feedback - Number Memo', description: 'Feedback' },
 
+	// Prolific AI-chat study test
+	{ code: 'testprolificstudy', title: 'Test: Prolific AI Chat Study', description: 'Sample study flow: consent, survey, video, AI chat, reflection, survey, completion code.' },
+
 ];
 
 

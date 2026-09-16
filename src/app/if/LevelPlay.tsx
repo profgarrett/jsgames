@@ -36,6 +36,7 @@ type PropsType = {
 	level: IfLevelSchema,
 	selected_page_index: number,
 	onChange: ( json: IStringIndexJsonObject ) => void,
+	onChatUpdate: ( level_json: any ) => void,
 	onNext: () => void,
 	onValidate: Function,
 	onHideFeedback: Function,
@@ -220,7 +221,7 @@ export default class IfLevelPlay extends React.Component<PropsType, StateType> {
 		const exercise_panel = render_exercise_panel( 
 					page, validate_button, this.props.isLoading, 
 					this.handleChange, this.handleEnter, this.handleNext,
-					this.handleValidate );
+					this.handleValidate, level._id, this.props.onChatUpdate );
 		
 		const feedback_modal = this.props.show_feedback ? <LevelPlayFeedbackModal page={page} onHideModal={ this.handleViewFeedback } /> : <></>;
 

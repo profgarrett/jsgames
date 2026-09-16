@@ -1,0 +1,165 @@
+import React from 'react';
+import { Button, FormControl, Card } from 'react-bootstrap';
+
+import { IfPageChatSchema } from '../../../shared/IfPageSchemas';
+import type { IStringIndexJsonObject } from '../../components/Misc';
+
+interface PropsType {
+	page: IfPageChatSchema;
+	level_id: string;
+	editable: boolean;
+	readonly: boolean;
+	// Updates local, client-only fields (currently just client_ready_to_advance) the same way
+	// every other page type does, so the "Next page" button's gating logic sees the change.
+	onChange: (json: IStringIndexJsonObject) => void;
+	// Called with the full, fresh level JSON returned by the server after a chat exchange, so
+	// that the authoritative (server-saved) transcript replaces local state. Chat messages are
+	// intentionally *not* routed through onChange -- see IfPageChatSchema.updateUserFields.
+	onChatUpdate: (level_json: any) => void;
+}
+
+interface StateType {
+	draft: string;
+	isSending: boolean;
+	error: string;
+}
+
+const INPUT_ID = 'ChatMessageInput';
+
+/**
+	Renders an embedded AI chat conversation: the transcript so far, a text box + Send button
+	for the student's next message, and (once at least one exchange has happened) a button to
+	mark the student ready to move on.
+*/
+export default class Chat extends React.Component<PropsType, StateType> {
+
+	constructor(props: PropsType) {
+		super(props);
+		this.state = { draft: '', isSending: false, error: '' };
+	}
+
+	handleSend = (): void => {
+		const text = this.state.draft.trim();
+		if(text === '' || this.state.isSending || this.props.readonly) return;
+
+		this.setState({ isSending: true, error: '' });
+
+		fetch('/api/levels/level/' + this.props.level_id + '/chat', {
+			method: 'post',
+			credentials: 'include',
+			headers: {
+				'Accept': 'application/json',
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({ text })
+		})
+			.then( (response: any) => response.json() )
+			.then( (json: any) => {
+				if(json._error) throw new Error(json._error);
+
+				this.setState({ draft: '', isSending: false });
+				this.props.onChatUpdate(json);
+			})
+			.catch( (err: any) => {
+				this.setState({ isSending: false, error: err.message || 'Something went wrong sending that message.' });
+			});
+	}
+
+	handleKeyDown = (e: React.KeyboardEvent): void => {
+		if(e.key === 'Enter' && !e.shiftKey) {
+			// Prevent this Enter from bubbling up to the level's <form onSubmit=...>, which
+			// would otherwise try to advance to the next page.
+			e.preventDefault();
+			e.stopPropagation();
+			this.handleSend();
+		}
+	}
+
+	handleReady = (): void => {
+		this.props.onChange({ client_ready_to_advance: true });
+	}
+
+	render(): React.ReactElement {
+		const page = this.props.page;
+		const messages = page.client_messages || [];
+		const turns_used = messages.filter( m => m.role === 'user').length;
+		const turns_left = Math.max(0, page.max_turns - turns_used);
+		const can_advance = turns_used > 0;
+		const at_limit = turns_left <= 0;
+
+		return (
+			<Card style={{ marginTop: '1rem' }}>
+				<Card.Body>
+					<div
+						style={{
+							maxHeight: '320px',
+							overflowY: 'auto',
+							border: '1px solid #dee2e6',
+							borderRadius: '4px',
+							padding: '10px',
+							marginBottom: '10px',
+							background: '#f8f9fa'
+						}}
+					>
+						{ messages.length === 0
+							? <div style={{ color: '#6c757d' }}>No messages yet. Say hello to get started.</div>
+							: messages.map( (m, i) => (
+								<div key={i} style={{ textAlign: m.role === 'user' ? 'right' : 'left', marginBottom: '8px' }}>
+									<span
+										style={{
+											display: 'inline-block',
+											padding: '6px 12px',
+											borderRadius: '14px',
+											maxWidth: '80%',
+											background: m.role === 'user' ? '#0d6efd' : '#e9ecef',
+											color: m.role === 'user' ? 'white' : 'black'
+										}}
+									>
+										{ m.text }
+									</span>
+								</div>
+							))
+						}
+					</div>
+
+					{ this.state.error !== '' && <div style={{ color: '#dc3545', marginBottom: '8px' }}>{ this.state.error }</div> }
+
+					<div style={{ display: 'flex', gap: '8px' }}>
+						<FormControl
+							id={INPUT_ID}
+							as='textarea'
+							rows={2}
+							autoComplete='off'
+							value={ this.state.draft }
+							disabled={ this.props.readonly || this.state.isSending || at_limit }
+							placeholder={ at_limit ? 'You have reached the message limit for this chat.' : 'Type a message...' }
+							onChange={ (e: any) => this.setState({ draft: e.target.value }) }
+							onKeyDown={ this.handleKeyDown }
+						/>
+						<Button
+							variant='primary'
+							disabled={ this.props.readonly || this.state.isSending || at_limit || this.state.draft.trim() === '' }
+							onClick={ (e) => { e.preventDefault(); this.handleSend(); } }
+						>
+							{ this.state.isSending ? 'Sending...' : 'Send' }
+						</Button>
+					</div>
+
+					<div style={{ marginTop: '8px', color: '#6c757d', fontSize: '0.9em' }}>
+						{ turns_left } of { page.max_turns } messages remaining.
+					</div>
+
+					<div style={{ marginTop: '10px' }}>
+						<Button
+							variant={ page.client_ready_to_advance ? 'success' : 'secondary' }
+							disabled={ this.props.readonly || !can_advance || page.client_ready_to_advance }
+							onClick={ (e) => { e.preventDefault(); this.handleReady(); } }
+						>
+							{ page.client_ready_to_advance ? "Ready -- click Next page below" : "I'm ready to continue" }
+						</Button>
+					</div>
+				</Card.Body>
+			</Card>
+		);
+	}
+}
