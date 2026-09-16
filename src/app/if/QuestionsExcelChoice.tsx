@@ -39,6 +39,9 @@ const padL = ( s_or_n: any, length: number ): string => {
 
 
 
+// Flattens choice, short/long free-text, and chat pages into one row-per-answer
+// table (paste into Excel). Originally Choice-only; widened to cover the other
+// "single final answer" page types survey/study levels use.
 export default class QuestionsPagesExcelChoice extends React.Component<DetailPropsType> {
 
 
@@ -46,6 +49,7 @@ export default class QuestionsPagesExcelChoice extends React.Component<DetailPro
 	flatten_levels = (levels: any): any => {
 		const columns = [
 			'level',
+			'a_type',
 			'q_n', 
 			'a_username', 
 			'a_seconds', 
@@ -110,7 +114,15 @@ export default class QuestionsPagesExcelChoice extends React.Component<DetailPro
 		question.answers.map( answer => {
 			// Only track completed pages.
 			if(!answer.page.completed) return;
-			if(answer.page.type !== 'IfPageChoiceSchema') return;
+			const SUPPORTED_TYPES = [
+				'IfPageChoiceSchema',
+				'IfPageShortTextAnswerSchema',
+				'IfPageLongTextAnswerSchema',
+				'IfPageChatSchema',
+				'IfPageNumberAnswerSchema',
+				'IfPageTextSchema',
+			];
+			if(SUPPORTED_TYPES.indexOf(answer.page.type) === -1) return;
 
 			const history = answer.page.history.filter( h => typeof h.client_f !== 'undefined' && h.code === 'client_update' );
 

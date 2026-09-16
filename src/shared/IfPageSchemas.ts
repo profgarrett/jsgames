@@ -2006,7 +2006,8 @@ class IfPageAnswer {
     classification!: string;
 
 	page_code!: string; // page code, such as test, tutorial, ...
-	
+	page_type!: string; // page type, e.g. 'IfPageFormulaSchema', 'IfPageChatSchema', ...
+
 	constructor(json?: any) {
 		if(typeof json === 'undefined') return;
 		
@@ -2022,48 +2023,93 @@ class IfPageAnswer {
 
 
 // Initialize from a page.
+// Page types whose answer is a single final value (or, for chat, a transcript)
+// rather than a formula's history-of-attempts. Added so non-tutorial studies
+// (e.g. a Prolific survey/chat level) can also be pulled through /api/reports/answers.
+const SIMPLE_ANSWER_PAGE_TYPES = [
+	'IfPageChoiceSchema',
+	'IfPageShortTextAnswerSchema',
+	'IfPageLongTextAnswerSchema',
+	'IfPageChatSchema',
+	'IfPageNumberAnswerSchema',
+	'IfPageTextSchema', // static content (consent, video, completion code, ...); see the special case below.
+];
+
 function build_answers_from_level( level: IfLevelSchema ): Array<IfPageAnswer> {
     const username = level.username;
     const answers: IfPageAnswer[] = [];
     let a: IfPageAnswer;
 
     level.pages.forEach( (p,i)=> {
-        if(p.type !== 'IfPageFormulaSchema') return;
+
+        if(p.type === 'IfPageFormulaSchema') {
+            a = new IfPageAnswer();
+            a.level_code = level.code;
+            a.level_id = level._id;
+            a.username = username;
+            a.sequence_in_level = i;
+            a.kcs_as_string = p.kcs.join(',');
+            a.solution = p.get_solution();
+            a.solution_pretty = ''+fill_template( a.solution, p.template_values );
+            a.correct = p.correct;
+            a.seconds = p.get_time_in_seconds();
+            a.page_code = p.code;
+            a.page_type = p.type;
+
+            // Grab all of the answers in the given page and return as an array of an array of strings.
+            // [  ['=1', '=23'], ['=32'], ...]
+            const non_intermediate_histories = typeof p.history  === 'undefined' || p.history.length == 0 
+                ? []
+                : p.history.filter( (history: { tags: { filter: (arg0: (t: any) => boolean) => { (): any; new(): any; length: number; }; }; client_f: any; }) => {
+                    if( typeof history.tags === 'undefined') return false;
+
+                    // If this history has an INTERMEDIATE, no!
+                    if( history.tags.filter( (t: { tag: string; }) => t.tag === 'INTERMEDIATE' ).length !== 0)  return false;
+
+                    // Only give histories for thing we understand, like client_f
+                    if( typeof history.client_f === 'undefined') return false;
+
+                    return true;
+                });
+            
+            a.answers = non_intermediate_histories.map( (h: { client_f: any; }) => h.client_f );
+            a.classification = !p.correct 
+                ? 'Incorrect' 
+                : a.seconds > 60 ? 'Correct, but slow' : 'Correct';
+            
+            answers.push(a);
+            return;
+        }
+
+        // Survey / free-text / choice / chat pages: one row per page holding its final
+        // answer (or, for chat, the full transcript as an array of 'role: text' turns).
+        if( SIMPLE_ANSWER_PAGE_TYPES.indexOf(p.type) === -1 ) return;
 
         a = new IfPageAnswer();
         a.level_code = level.code;
-		a.level_id = level._id;
+        a.level_id = level._id;
         a.username = username;
         a.sequence_in_level = i;
         a.kcs_as_string = p.kcs.join(',');
         a.solution = p.get_solution();
-        a.solution_pretty = ''+fill_template( a.solution, p.template_values );
+        a.solution_pretty = a.solution;
         a.correct = p.correct;
         a.seconds = p.get_time_in_seconds();
-		a.page_code = p.code;
-		a.sequence_in_level = i;
+        a.page_code = p.code;
+        a.page_type = p.type;
 
-        // Grab all of the answers in the given page and return as an array of an array of strings.
-        // [  ['=1', '=23'], ['=32'], ...]
-        const non_intermediate_histories = typeof p.history  === 'undefined' || p.history.length == 0 
-            ? []
-            : p.history.filter( (history: { tags: { filter: (arg0: (t: any) => boolean) => { (): any; new(): any; length: number; }; }; client_f: any; }) => {
-                if( typeof history.tags === 'undefined') return false;
+        a.answers = p.type === 'IfPageChatSchema'
+            ? (p as any).client_messages.map( (m: { role: string, text: string }) => m.role + ': ' + m.text )
+            // IfPageTextSchema.toString() unconditionally returns 'read', regardless of
+            // whether the participant actually dismissed the page -- use client_has_answered()
+            // instead so a static page (consent, video, completion code) reports whether it
+            // was actually reached/read.
+            : p.type === 'IfPageTextSchema'
+            ? [ p.client_has_answered() ? 'read' : 'not read' ]
+            : [ p.toString() ];
 
-                // If this history has an INTERMEDIATE, no!
-                if( history.tags.filter( (t: { tag: string; }) => t.tag === 'INTERMEDIATE' ).length !== 0)  return false;
+        a.classification = p.completed ? 'Completed' : 'In progress';
 
-                // Only give histories for thing we understand, like client_f
-                if( typeof history.client_f === 'undefined') return false;
-
-                return true;
-            });
-        
-        a.answers = non_intermediate_histories.map( (h: { client_f: any; }) => h.client_f );
-        a.classification = !p.correct 
-            ? 'Incorrect' 
-            : a.seconds > 60 ? 'Correct, but slow' : 'Correct';
-        
         answers.push(a);
     });
 

@@ -312,6 +312,53 @@ function create_summary_answer( page: IfPageBaseSchema, ): any {
 		summary_answer.code = page.code;
 	}
 
+	// Short / long free-text answers (survey questions, reflections, etc).
+	if( page.type === 'IfPageShortTextAnswerSchema' || page.type === 'IfPageLongTextAnswerSchema') {
+		summary_answer.type = page.type === 'IfPageShortTextAnswerSchema' ? 'shorttext' : 'longtext';
+		summary_answer.html = page.client;
+		summary_answer.answer = page.client;
+		summary_answer.expand = '';
+		summary_answer.client = page.client;
+		summary_answer.intermediate = '';
+		summary_answer.all = '';
+		summary_answer.code = page.code;
+	}
+
+	// Static text pages (consent, video embed, completion code, ...). There is no
+	// real "answer" -- just whether the participant reached/dismissed the page --
+	// so client/html/all report that instead of a submitted value.
+	if( page.type === 'IfPageTextSchema') {
+		const read_label = page.client_read ? 'read' : 'not read';
+
+		summary_answer.type = 'text';
+		summary_answer.html = read_label;
+		summary_answer.answer = read_label;
+		summary_answer.expand = '';
+		summary_answer.client = read_label;
+		summary_answer.intermediate = '';
+		summary_answer.all = read_label;
+		summary_answer.code = page.code;
+	}
+
+	// Chat (AI chatbox) transcript. There is no single "answer" -- the whole
+	// conversation is the data -- so client/html/all all carry the transcript,
+	// one line per turn, so it shows up sensibly in the table and Excel views.
+	if( page.type === 'IfPageChatSchema') {
+		const transcript = (page.client_messages || [])
+			.map( m => m.role + ': ' + m.text )
+			.join('\n');
+
+		summary_answer.type = 'chat';
+		summary_answer.html = transcript.replace(/\n/g, '<br/>');
+		summary_answer.answer = transcript;
+		summary_answer.expand = '';
+		summary_answer.client = transcript;
+		summary_answer.intermediate = '';
+		summary_answer.all = transcript;
+		summary_answer.code = page.code;
+		summary_answer.turns = (page.client_messages || []).length;
+	}
+
 	return summary_answer;
 }
 

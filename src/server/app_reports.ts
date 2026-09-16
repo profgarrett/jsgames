@@ -123,10 +123,17 @@ router.get('/questions/', nocache, user_require_logged_in,
 
 		// Remove all pages in schemas that do not match the given code.
 		
+		// An empty/'All'/'*' pagetype means "don't filter, return every page type" --
+		// needed to pull a level with several different page types (e.g. a Prolific
+		// study level mixing text/choice/short-text/chat pages) back in one call.
+		const pagetype_filters_pages = param_pagetype !== '' && param_pagetype !== 'All' && param_pagetype !== '*';
+
 		select_results = select_results.map( (level_json: any) => {
 			//console.log('level_json', level_json);
 			const pages = JSON.parse(level_json.pages);
-			const matching_pages = pages.filter( (p: any) => p.type === param_pagetype );
+			const matching_pages = pagetype_filters_pages
+				? pages.filter( (p: any) => p.type === param_pagetype )
+				: pages;
 			const pages_as_text = JSON.stringify(matching_pages);
 			level_json.pages = pages_as_text;
 			console.log('filtered out ', pages.length - matching_pages.length, 'pages');
@@ -416,8 +423,11 @@ WHERE
 	faculty.username = ? 
 	AND (faculty_sections.idsection = ? OR ? = '*') 
 	AND (iflevels.code = ? OR ? = '*')
-	AND users.username LIKE '%@%'
 ORDER BY iflevels.updated desc `;
+// Note: previously also required "users.username LIKE '%@%'", which silently
+// excluded any account whose username isn't an email address -- including
+// Prolific-provisioned accounts (username = 'prolific_<pid>', no '@'). Removed
+// so /answers reports on all students in the section, not just email-username ones.
 
 		const select_results = await run_mysql_query(sql, sql_where_values);
 		

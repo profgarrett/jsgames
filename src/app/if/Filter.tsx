@@ -64,6 +64,10 @@ export default class Filter extends React.Component<PropsType, ContainerStateTyp
 				{ value: 'IfPageChoiceSchema',  label:'Choice' },
 				{ value: 'IfPageSqlSchema', label:'SQL' },
 				{ value: 'IfPageFormulaSchema', label:'Formula' },
+				{ value: 'IfPageShortTextAnswerSchema', label:'Short text' },
+				{ value: 'IfPageLongTextAnswerSchema', label:'Long text' },
+				{ value: 'IfPageChatSchema', label:'Chat' },
+				{ value: 'IfPageTextSchema', label:'Text/Consent' },
 				];
 		}
 

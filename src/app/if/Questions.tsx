@@ -36,15 +36,20 @@ export default class IfQuestions extends React.Component<PropsType> {
 			return <QuestionsChart levels={this.props.levels} />;
 
 		if(this.props.output === 'excel') {
-			
+
 			//return <div><QuestionsExcelSql levels={levels} /></div>;
 
-			// GOOD, just don't currently need both options.
-			//if( SHOW_FORMULA_INSTEAD_OF_CHOICE ) 
-			//	return <div>hey</div>;
-			//else 
-			//	return <div><QuestionsExcelChoice levels={levels} /></div>;
-			return <QuestionsExcelFormulas levels={levels} />
+			// Pick the exporter automatically from the page types actually loaded,
+			// rather than a hardcoded choice: formula-based tutorials (the original,
+			// still-default use of this page) get the Formulas export, while a level
+			// made of choice/free-text/chat pages (e.g. a survey or Prolific study)
+			// gets the Choice/survey exporter, which now also flattens those types.
+			const has_formula_pages = this.props.levels.some( 
+				(level: IfLevelSchema) => level.pages.some( (p: any) => p.type === 'IfPageFormulaSchema') );
+
+			if( has_formula_pages ) return <QuestionsExcelFormulas levels={levels} />;
+
+			return <QuestionsExcelChoice levels={levels} />;
 		}
 		console.log(this.props.output);
 		
