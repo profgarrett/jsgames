@@ -175,7 +175,9 @@ function create_summary_question( pages: Array<IfPageBaseSchema>): any {
 		summary_question.solution_f = p.solution;
 	} else if (pages[0].type === 'IfPageNumberAnswerSchema') {
 		const p: IfPageNumberAnswerSchema = pages[0].toIfPageNumberAnswerSchema();
-		summary_question.solution_f = p.solution.toString();
+		// A number page used as a plain survey question (e.g. "how many hours per week...")
+		// has no fixed solution -- p.solution is null -- so guard rather than crash.
+		summary_question.solution_f = (p.solution === null || typeof p.solution === 'undefined') ? '' : p.solution.toString();
 	} else if (pages[0].type === 'IfPageSqlSchema') {
 		summary_question.solution_sql = pages[0].solution_sql;
 	}
@@ -289,7 +291,10 @@ function create_summary_answer( page: IfPageBaseSchema, ): any {
 	if( page.type === 'IfPageChoiceSchema') {
 		summary_answer.breaks = page.get_break_times_in_minutes().join(', ');
 		summary_answer.type = 'choice';
-		summary_answer.html = page.client;
+		// .html is rendered with dangerouslySetInnerHTML (QuestionsTable's Expandable ->
+		// HtmlDiv) -- page.client is participant-entered text, so it must be encoded here,
+		// same as the Formula/SQL branches above already do via he.encode().
+		summary_answer.html = he.encode( typeof page.client === 'string' ? page.client : '' );
 		summary_answer.expand = '';
 		summary_answer.client = page.client;
 		summary_answer.intermediate = '';
@@ -315,7 +320,9 @@ function create_summary_answer( page: IfPageBaseSchema, ): any {
 	// Short / long free-text answers (survey questions, reflections, etc).
 	if( page.type === 'IfPageShortTextAnswerSchema' || page.type === 'IfPageLongTextAnswerSchema') {
 		summary_answer.type = page.type === 'IfPageShortTextAnswerSchema' ? 'shorttext' : 'longtext';
-		summary_answer.html = page.client;
+		// See the Choice branch above: .html is unescaped HTML, page.client is
+		// participant-entered text, so it must be encoded.
+		summary_answer.html = he.encode( typeof page.client === 'string' ? page.client : '' );
 		summary_answer.answer = page.client;
 		summary_answer.expand = '';
 		summary_answer.client = page.client;
@@ -348,8 +355,17 @@ function create_summary_answer( page: IfPageBaseSchema, ): any {
 			.map( m => m.role + ': ' + m.text )
 			.join('\n');
 
+		// .html is unescaped HTML and every line here is either the participant's own
+		// message or the AI's reply (which the participant can influence, e.g. via a
+		// jailbreak attempt) -- both are untrusted, so encode each turn individually
+		// before joining with <br/> (the <br/> tags themselves must stay literal HTML,
+		// so they're added after encoding, not before).
+		const transcript_html = (page.client_messages || [])
+			.map( m => he.encode(m.role || '') + ': ' + he.encode(m.text || '') )
+			.join('<br/>');
+
 		summary_answer.type = 'chat';
-		summary_answer.html = transcript.replace(/\n/g, '<br/>');
+		summary_answer.html = transcript_html;
 		summary_answer.answer = transcript;
 		summary_answer.expand = '';
 		summary_answer.client = transcript;

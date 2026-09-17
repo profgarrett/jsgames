@@ -12,6 +12,7 @@ import { from_utc_to_myql, run_mysql_query, is_faculty, to_utc, update_level_in_
 import { user_require_logged_in, nocache, log_error, user_get_username_or_emptystring, return_level_prepared_for_transmit } from './network';
 
 import { return_tagged_level } from './tag';
+import { rate_limit_check } from './rate_limit';
 
 import { queryFactory_updateClientResults } from './../shared/queryFactory';
 
@@ -26,6 +27,17 @@ const getRouteParamString = (value: string | string[] | undefined, fallback = ''
 	return value;
 };
 
+// Pull the client IP from the request (behind a proxy, via x-forwarded-for).
+// Mirrors app_users.ts's private helper of the same name -- not currently shared
+// between route files, so duplicated here rather than adding a cross-file import
+// for one small function (consistent with how e.g. to_string_from_possible_array
+// is already duplicated across app_users.ts / app_reports.ts).
+const get_request_ip = (req: Request): string => {
+	const header = req.headers['x-forwarded-for'];
+	const ip = Array.isArray(header) ? (header[0] || '') : (header || '');
+	return ip.substr(0, 255);
+};
+
 ////////////////////////////////////////////////////////////////////////
 //  If Game
 ////////////////////////////////////////////////////////////////////////
@@ -38,6 +50,31 @@ router.post('/new_level_by_code/:code',
 	try {
 		const code = getRouteParamString(req.params.code);
 		const username = user_get_username_or_emptystring(req, res);
+
+		// Blunt scripted abuse: cap how many new attempts one IP can start in a
+		// window, regardless of account. Generous enough that no real student or
+		// researcher should ever hit it.
+		const ip = get_request_ip(req);
+		if( !rate_limit_check('new_level_by_code:' + ip, 60, 15 * 60 * 1000) ) {
+			return res.status(429).json({ _error: 'RateLimited' });
+		}
+
+		// Prolific-provisioned accounts (see POST /api/users/prolific_login) are
+		// auto-created with no identity verification, so nothing stops a script from
+		// looping this route to spin up unlimited attempts -- each one carrying its
+		// own chat page's OpenAI-call budget. Cap attempts-of-this-code per username,
+		// scoped to just those accounts so normal students/faculty retrying a
+		// tutorial for practice are unaffected.
+		if( username.indexOf('prolific_') === 0 ) {
+			const MAX_ATTEMPTS_PER_CODE = 3;
+			const existing_attempts = await run_mysql_query(
+				'SELECT COUNT(*) as n FROM iflevels WHERE username = ? AND code = ?',
+				[username, code]);
+			if( existing_attempts[0].n >= MAX_ATTEMPTS_PER_CODE ) {
+				return res.status(429).json({ _error: 'TooManyAttempts' });
+			}
+		}
+
 		const level = await IfLevelSchemaFactory.create(code, username);
 
 		// Optionally stamp Prolific study/session identifiers onto the level's history, for

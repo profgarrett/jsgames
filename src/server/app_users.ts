@@ -9,6 +9,7 @@ import { OAuth2Client } from 'google-auth-library';
 
 import { from_utc_to_myql, run_mysql_query, to_utc } from './mysql';
 import { send_email } from './email';
+import { rate_limit_check } from './rate_limit';
 import {
 		hash_password, is_matching_mysql_user, nocache,
 		user_logout, user_login,
@@ -506,6 +507,17 @@ router.post('/prolific_login',
 	nocache,
 	async (req: Request, res: Response, next: NextFunction): Promise<any> => {
 	try {
+		// This route is intentionally unauthenticated (it's how a participant gets an
+		// account in the first place) and accepts any PID matching the charset check
+		// below -- there's no way to verify it against a real Prolific session. That
+		// makes it a prime target for scripted account-creation abuse (each account can
+		// then drive a chat page's OpenAI calls), so rate-limit by IP before doing
+		// anything else.
+		const ip = get_request_ip(req);
+		if( !rate_limit_check('prolific_login:' + ip, 20, 10 * 60 * 1000) ) {
+			return res.status(429).json({ success: false, error: 'RateLimited' });
+		}
+
 		const params: any = type_params(req.body, ['prolific_pid', 'section_code']);
 
 		// Restrict to a safe charset -- this becomes part of a username -- and a
