@@ -1,0 +1,275 @@
+/* ------------------------------------------------------------------
+   The Hunter's Confidence widget (see HunterConfidenceWidget.tsx)
+
+   Kept visually in the same family as the fenced-code-block chrome in
+   PageCodeBlock.css: light background, thin gray border, GitHub-ish
+   neutrals, with Bootstrap's semantic green/red for hit/miss-fire.
+   ------------------------------------------------------------------ */
+
+.hunter-widget {
+	margin: 1.25rem 0;
+	padding: 1rem 1.25rem;
+	border: 1px solid #dfe2e5;
+	border-radius: 6px;
+	background: #fafafa;
+}
+
+/* Equipment picker -- the "option box" for no-scope / basic / high-powered. */
+.hunter-widget-scope {
+	margin: 0;
+	padding: 0.75rem 1rem 1rem;
+	border: 1px solid #d0d7de;
+	border-radius: 6px;
+	background: #fff;
+}
+
+.hunter-widget-scope legend {
+	padding: 0 0.35rem;
+	font-size: 0.8rem;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+	color: #6a737d;
+}
+
+.hunter-widget-scope-options {
+	display: flex;
+	gap: 0.75rem;
+	flex-wrap: wrap;
+}
+
+.hunter-widget-scope-option {
+	flex: 1 1 180px;
+	display: flex;
+	flex-direction: column;
+	gap: 0.15rem;
+	padding: 0.5rem 0.65rem;
+	border: 1px solid #dfe2e5;
+	border-radius: 6px;
+	cursor: pointer;
+	background: #fafafa;
+}
+
+.hunter-widget-scope-option.active {
+	border-color: #0d6efd;
+	background: #eaf2ff;
+}
+
+.hunter-widget-scope-option input {
+	margin-right: 0.4rem;
+}
+
+.hunter-widget-scope-option-label {
+	font-weight: 600;
+	font-size: 0.9rem;
+}
+
+.hunter-widget-scope-option-blurb {
+	font-size: 0.75rem;
+	color: #6a737d;
+	margin-left: 1.35rem;
+}
+
+.hunter-widget-scope-explainer {
+	margin-top: 0.5rem;
+}
+
+.hunter-widget-strip-wrap {
+	margin-top: 1rem;
+}
+
+.hunter-widget-strip {
+	width: 100%;
+	height: auto;
+	display: block;
+}
+
+.hunter-axis {
+	stroke: #adb5bd;
+	stroke-width: 1;
+}
+
+.hunter-threshold-line {
+	stroke: #0d6efd;
+	stroke-width: 2;
+	stroke-dasharray: 4 3;
+}
+
+.hunter-tick-label {
+	font-size: 8px;
+	fill: #6a737d;
+}
+
+.hunter-widget-axis-caption {
+	text-align: center;
+	font-size: 0.8rem;
+	color: #6a737d;
+	margin-top: -0.25rem;
+}
+
+.hunter-animal-ring {
+	fill: none;
+	stroke: transparent;
+	stroke-width: 2;
+}
+
+.hunter-animal-tp .hunter-animal-ring {
+	stroke: #198754;
+}
+
+.hunter-animal-fp .hunter-animal-ring {
+	stroke: #dc3545;
+}
+
+.hunter-animal-fn {
+	opacity: 0.35;
+	filter: grayscale(1);
+}
+
+.hunter-animal-tn {
+	opacity: 0.85;
+}
+
+.hunter-widget-slider-row {
+	display: flex;
+	align-items: center;
+	gap: 0.75rem;
+	margin-top: 1rem;
+	flex-wrap: wrap;
+}
+
+.hunter-widget-slider-label {
+	font-size: 0.9rem;
+	font-weight: 600;
+	margin: 0;
+}
+
+.hunter-widget-slider {
+	flex: 1 1 200px;
+}
+
+.hunter-widget-slider-value {
+	font-variant-numeric: tabular-nums;
+	min-width: 3.5ch;
+	text-align: right;
+	font-weight: 600;
+}
+
+.hunter-widget-anchors {
+	display: flex;
+	justify-content: space-between;
+	font-size: 0.75rem;
+	color: #6a737d;
+	margin-top: 0.25rem;
+}
+
+.hunter-widget-caption {
+	margin-top: 0.75rem;
+	margin-bottom: 0;
+}
+
+.hunter-widget-metrics {
+	margin-top: 0.75rem;
+	font-size: 0.875rem;
+	background: #fff;
+}
+
+.hunter-widget-plain {
+	color: #57606a;
+	font-style: italic;
+}
+
+.hunter-widget-roc-wrap {
+	display: flex;
+	align-items: center;
+	gap: 1rem;
+	margin-top: 1rem;
+	flex-wrap: wrap;
+}
+
+.hunter-widget-roc {
+	width: 180px;
+	height: 180px;
+	flex: 0 0 auto;
+}
+
+.hunter-roc-diagonal {
+	stroke: #ced4da;
+	stroke-width: 1;
+	stroke-dasharray: 3 3;
+}
+
+.hunter-roc-curve {
+	stroke-width: 1.5;
+}
+
+.hunter-roc-curve.active {
+	stroke: #0d6efd;
+	stroke-width: 2.5;
+}
+
+.hunter-roc-curve.inactive {
+	stroke: #adb5bd;
+	stroke-width: 1.25;
+	stroke-dasharray: 2 2;
+	opacity: 0.7;
+}
+
+.hunter-roc-point {
+	fill: #dc3545;
+	stroke: #fff;
+	stroke-width: 1.5;
+}
+
+.hunter-axis-label {
+	font-size: 8px;
+	fill: #6a737d;
+}
+
+.hunter-widget-auc-legend {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	font-size: 0.8rem;
+	max-width: 26ch;
+}
+
+.hunter-widget-auc-legend li {
+	padding: 0.1rem 0;
+	color: #6a737d;
+}
+
+.hunter-widget-auc-legend li.active {
+	color: #212529;
+	font-weight: 600;
+}
+
+.hunter-widget-note {
+	margin-top: 0.75rem;
+	margin-bottom: 0;
+	font-size: 0.8rem;
+	font-style: italic;
+	color: #6a737d;
+}
+
+@media (max-width: 600px) {
+	.hunter-widget-roc-wrap {
+		flex-direction: column;
+		align-items: flex-start;
+	}
+
+	.hunter-widget-auc-legend {
+		max-width: none;
+	}
+
+	.hunter-widget-scope-options {
+		flex-direction: column;
+	}
+}
+
+@media print {
+	.hunter-widget-slider,
+	.hunter-widget-scope input {
+		display: none;
+	}
+}

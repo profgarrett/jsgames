@@ -10,6 +10,8 @@ import oneLight from 'react-syntax-highlighter/dist/esm/styles/prism/one-light';
 
 import './PageCodeBlock.css';
 
+import { HunterConfidenceWidget } from './HunterConfidenceWidget';
+
 /*
 	Syntax highlighting for fenced code blocks in page markdown.
 
@@ -108,6 +110,23 @@ const CopyButton = ({ code }: { code: string }): ReactElement => {
 };
 
 /*
+	Fenced code blocks whose language tag isn't really a language: an author
+	writes ```widget-name to embed one of these interactive components in a
+	reading instead of a syntax-highlighted block. This is the one place a
+	page's raw markdown can reach a live React widget, since rehype-sanitize
+	strips raw <script>/<input> tags before they ever reach the DOM (see
+	PageView.tsx) -- a hand-typed <script> in markdown never runs, but a
+	fenced block with a `language-*` className survives sanitizing (see
+	getLanguage below), so that's the hook this uses instead.
+
+	Add an entry here, plus the matching fenced-block language in the
+	reading's markdown, to add another one.
+*/
+const WIDGETS: Record<string, React.FC> = {
+	'widget-hunter-confidence': HunterConfidenceWidget,
+};
+
+/*
 	Markdown component for a fenced code block.
 
 	Registered as the `pre` renderer rather than `code`: react-markdown v9
@@ -120,6 +139,10 @@ export const CustomPre: React.FC<{ children?: ReactNode; node?: unknown }> = ({ 
 	const props: ICodeElementProps = isValidElement(child) ? (child.props as ICodeElementProps) : {};
 
 	const language = getLanguage(props.className);
+
+	const Widget = WIDGETS[language];
+	if (Widget) return <Widget />;
+
 	// Fences trail a newline that Prism would render as a blank final row.
 	const code = getCodeText(props.children).replace(/\n$/, '');
 

@@ -16,129 +16,61 @@ Some models predict a yes/no (categorical) variable. This is called *classificat
 
 ## Confusion Matrix
 
-Measuring error is done with a confusion matrix. This compares predicted values against actual values.
+Imagine we are a hunter. We see a gray shape, and decide that it's a deer. Or, we see a shape and decide it's Kermit the frog. Do we shoot or do we hold our fire? 
 
-As an example, imagine we are a hunter trying to find deer in the forest. Are we looking at a deer (positive) or a person (negative)?
+![Deer versus Kermit](deer_vs_kermit.png)
 
-Our model can be very simple, if we see something gray, it's a deer. If we see something else, it's a person. How well does this model work?
+A confusion matrix compares our prediction against reality.  The first word is whether you were **right**, and the the second word is what you **predicted**.
+
+- **True Positive** a deer, and you thought deer. You take the shot and eat well.
+- **True Negative** Kermit, and you thought Kermit. You hold your fire.
+- **False Positive** Kermit, but you thought deer. You shoot a hiker. Also called a **Type I error**, or a false alarm.
+- **False Negative** a deer, but you thought Kermit. You go hungry. Also called a **Type II error**, or a miss.
+
 
 |                   | Predicted Positive, think yes deer | Predicted Negative, think no deer |
 | ----------------- | ---------------------------------- | --------------------------------- |
-| Positive = Deer   | True Positive (TP)                 | False Negative (FN)               |
-| Negative = Person | False Positive (FP)                | True Negative (TN)                |
-
-### Reading the four cells
-
-Every prediction lands in exactly one cell. The first word is whether you were **right**, and the the second word is what you **predicted**.
-
-- **True Positive** a deer, and you thought deer. You take the shot and eat well.
-- **True Negative** a person, and you thought person. You hold your fire.
-- **False Positive** a person, but you thought deer. You shoot a hiker. Also called a Type I error, or a false alarm.
-- **False Negative** a deer, but you thought person. You go hungry. Also called a Type II error, or a miss.
-
-The two errors are not equally bad here.  A model with a handful of false negatives is a bad hunting trip. A model with one false positive is a manslaughter charge.
-
-### Choosing the positive class
-
-Before you can build a confusion matrix, you have to decide which outcome is "positive." Positive does not mean good — it means the thing you are trying to detect. Fraud is positive. Disease is positive. Dropping out is positive.
-
-### Building one in Python
-
-```python
-from sklearn.metrics import confusion_matrix
-
-# 1 = fraud (positive), 0 = ok (negative)
-actual    = [1, 1, 1, 0, 0, 0]
-predicted = [1, 1, 0, 1, 1, 0]
-
-print(confusion_matrix(actual, predicted))
-# [[1 2]
-#  [1 2]]
-```
-
-**Watch the layout.** Scikit-learn sorts the labels ascending, so 0 (negative) comes first. Its default output is arranged as:
-
-|                | Predicted 0 | Predicted 1 |
-| -------------- | ----------- | ----------- |
-| **Actual 0**   | TN          | FP          |
-| **Actual 1**   | FN          | TP          |
-
-That is the opposite corner from the table above, where positive comes first. Both are correct; they are just different conventions. Unpack the values by name so you never have to guess:
-
-```python
-tn, fp, fn, tp = confusion_matrix(actual, predicted).ravel()
-print(tn, fp, fn, tp)      # 1 2 1 2
-```
-
-To match the course table, ask for positive first:
-
-```python
-print(confusion_matrix(actual, predicted, labels=[1, 0]))
-# [[2 1]     TP FN
-#  [2 1]]    FP TN
-```
+| Reality = Deer   | True Positive (TP)                 | False Negative (FN)               |
+| Reality = Kermit | False Positive (FP)                | True Negative (TN)                |
 
 
-## Measuring Accuracy, Precision, and Recall
+Importantly, the two errors are not the same.  A false positive means we shot a beloved Muppet. But, in another scenario, we may want to prioritize False Negatives. For example, if we are screening for cancer, a false negative means we missed a patient who needs treatment. A false positive means we sent a healthy patient for more tests. The cost of each error is different, and that is why we need to measure both.
 
+### When accuracy misleads
 
-From this, we can calculate several metrics to evaluate our model:
+Accuracy is the percentage of correct predictions out of all predictions (TP + TN) / (TP + TN + FP + FN). It intuitive but problematic. 
+
+Suppose 10 of 1,000 transactions are fraud, and your model simply predicts "not fraud" every time. It would have 99% accuracy!  This is the **accuracy paradox**. We need other measures to evaluate model success.
+
+## Metrics
+
+We use several metrics to evaluate a model:
+
 - *Accuracy*: (TP + TN) / (TP + TN + FP + FN)
-  - The proportion of correct predictions (both true positives and true negatives) out of all predictions
+   - The proportion of correct predictions (both true positives and true negatives) out of all of our data.
+   - It asks: how often were we entirely right?
 - *Precision*: TP / (TP + FP)
-  - The proportion of true positive predictions out of all positive predictions
+   - The proportion of true positive predictions out of all positive predictions
+   - It uses the predicted-positive *column*. 
+   - Precision is a question about your predictions
+   - It asks: when we shot, how often was it a deer?
 - *Recall* (Sensitivity): TP / (TP + FN)
   - The proportion of true positive predictions out of all actual positive cases
-
-Two more that round out the set:
-
+  - It uses the actual-positive *row*. 
+  - Recall is a question about reality
+  - It asks: of all deer, how many did we shoot?
 - *Specificity*: TN / (TN + FP)
-  - The proportion of actual negatives correctly identified. Recall is specificity's mirror image, one measured on each row of the matrix.
+  - The proportion of actual negatives correctly identified. 
+  - Recall is specificity's mirror image, one measured on each row of the matrix.
 - *F1 score*: 2 × (Precision × Recall) / (Precision + Recall)
   - A single number balancing precision and recall. It uses the harmonic mean rather than a simple average, so a model that scores 1.0 on one and 0.0 on the other gets an F1 of 0, not 0.5.
 
-### Reading the formulas
 
-Notice which part of the matrix each metric looks at, because that is what makes them memorable:
+### Tradeoffs
 
-- **Accuracy** uses all four cells. It asks: how often were we right about anything?
-- **Precision** uses the predicted-positive *column*. It asks: when we raised the alarm, how often was it real?
-- **Recall** uses the actual-positive *row*. It asks: of everything we should have caught, how much did we catch?
+There are tradeoffs between our metrics.
 
-Precision is a question about your predictions. Recall is a question about reality. They have the same numerator (TP) and different denominators, which is why improving one usually costs you the other.
-
-### In code
-
-```python
-from sklearn.metrics import (accuracy_score, precision_score,
-                             recall_score, f1_score, classification_report)
-
-actual    = [1, 1, 1, 0, 0, 0]
-predicted = [1, 1, 0, 1, 1, 0]
-
-print(accuracy_score(actual, predicted))    # 0.5
-print(precision_score(actual, predicted))   # 0.5
-print(recall_score(actual, predicted))      # 0.6666666666666666
-print(f1_score(actual, predicted))          # 0.5714285714285715
-```
-
-`classification_report()` gives all of it at once, broken out per class:
-
-```python
-print(classification_report(actual, predicted, target_names=['Ok', 'Fraud']))
-#               precision    recall  f1-score   support
-#
-#           Ok       0.50      0.33      0.40         3
-#        Fraud       0.50      0.67      0.57         3
-#
-#     accuracy                           0.50         6
-```
-
-The "support" column is the number of actual cases in each class — worth checking first, because a metric computed on 3 cases means very little.
-
-### The tradeoff
-
-There are tradeoffs between precision and recall. For example, if we want to be very sure we are only shooting deer (high precision), we may miss some deer (low recall). Conversely, if we want to make sure we shoot all the deer (high recall), we may accidentally shoot some people (low precision).
+For example, consider precision and recall. For example, if we want to be very sure we are only shooting deer (high precision), we may miss some deer (low recall). Conversely, if we want to make sure we shoot all the deer (high recall), we may accidentally shoot Kermit (low precision).
 
 You can always push either metric to 1.0 by being extreme.
 
@@ -147,77 +79,8 @@ You can always push either metric to 1.0 by being extreme.
 
 Any single metric can be gamed.
 
-### When accuracy misleads
 
-Accuracy is the most intuitive metric and the most dangerous one, because a rare positive class lets a useless model score well. Suppose 10 of 1,000 transactions are fraud, and your model simply predicts "not fraud" every time:
-
-```python
-import numpy as np
-from sklearn.metrics import accuracy_score, recall_score, confusion_matrix
-
-actual = np.array([1]*10 + [0]*990)
-lazy   = np.zeros(1000, dtype=int)      # predict "not fraud" for everyone
-
-print(accuracy_score(actual, lazy))                    # 0.99
-print(recall_score(actual, lazy, zero_division=0))     # 0.0
-
-print(confusion_matrix(actual, lazy))
-# [[990   0]
-#  [ 10   0]]
-```
-
-99% accuracy, and the model caught zero fraudsters. This is the **accuracy paradox**, and it is why accuracy is nearly worthless on imbalanced data. The confusion matrix shows that an entire column is zero.
-
-
-## Example : Fraud Prediction
-
-Imagine we are predicting which people are fraudsters
-
-We have 6 people:
-
-- A Fraudster, Predicted Fraudster (success!)
-- B Fraudster, Predicted Fraudster (success!)
-- C Fraudster, Not predicted
-- D Ok, Predicted Fraudster
-- E Ok, Predicted Fraudster
-- F Ok, Not predicted (success!)
-
-This translates to the confusion matrix:
-
-| Matrix             | Predicted Fraud   | Predicted Ok |
-| ------------------ | ----------------- | ---------------- |
-| Positive = Fraud   | A, B (TP)         | C (FN)           |
-| Negative = Ok      | D, E (FP)         | F (TN)           |
-
-
-From this, we can calculate:
-
-- Accuracy
-  - Correctly classified / all cases
-  - (3 including A, B, & F) / 6 = 50% accuracy
-- Precision:
-  - Predicted Correctly / Predicted
-  - (A, B) / (A, B, D, E) = 2 / 4 = 50% precision
-- Recall
-  - Predicted Correctly / All fraudsters
-  - (A, B) / (A, B, C) = 2/3 = 67% recall
-
-Two more from the same table:
-
-- Specificity
-  - Correctly cleared / all innocent people
-  - (F) / (D, E, F) = 1/3 = 33% specificity
-- F1
-  - 2 × (0.50 × 0.67) / (0.50 + 0.67) = 57%
-
-### What the numbers tell us
-
-Read together, they describe a specific failure. Recall of 67% says we caught most fraudsters. Precision of 50% says half the people we accused were innocent. Specificity of 33% says we cleared only one of three innocent people.
-
-This model is aggressive: it accuses too readily. Whether that is acceptable depends entirely on what happens next. If the "prediction" flags an account for a two-minute review, false positives are cheap and you would take this trade. If it freezes a customer's account, you have a serious problem, and you would want to raise the threshold and buy precision at the cost of recall.
-
-
-## Choosing the Right Metric
+### Choosing the Right Metric
 
 The question is never "which metric is best?" It is "which error costs more?"
 
@@ -229,66 +92,245 @@ The question is never "which metric is best?" It is "which error costs more?"
 | Automatically freezing accounts | Freezing an innocent customer (FP) | Precision |
 | Balanced classes, symmetric costs | Neither dominates | Accuracy or F1 |
 
-Two rules that cover most cases:
 
-- **Prioritize recall when a miss is expensive.** A cancer screen that misses a tumor costs a life; a false alarm costs a follow-up test.
-- **Prioritize precision when a false alarm is expensive.** A spam filter that eats a job offer has failed, even if it catches every advertisement.
 
-Notice the fraud example appears twice in the table with opposite answers. The same model and the same data can call for different metrics depending on what the prediction triggers. Ask what happens to the person on the other end of a false positive.
+```python
+## Building metrics in Python
+import pandas as pd
+import matplotlib.pyplot as plt
+
+from sklearn.metrics import confusion_matrix, confusion_matrix_at_thresholds
+from sklearn.metrics import classification_report, ConfusionMatrixDisplay
+
+# Create a new table showing reality and predictions
+df = pd.DataFrame({
+    'actual': ['deer', 'deer', 'deer', 'deer', 'deer', 'deer', 'deer', 'a kermit', 'a kermit', 'a kermit'], 
+    'green': [0, 0.2, 0.2, 0.4, .6, 0.8, 0.9, 0.2, 0.6, 1],
+    'noise': [0, 0.1, 0.1, 0.1, 0.2, 0.2, 1, 0.2, 0.8, 0.9 ]})
+
+# Create a new column with the predicted values based on a threshold of 0.5
+GREEN_THRESHOLD = 0.5
+df = df.assign( predicted = df['green'].apply(lambda x: 'a kermit' if x > GREEN_THRESHOLD else 'deer'))
+
+# Show a table with the results of the predictions (TP, FP, TN, FN)
+df = df.assign( result = df.apply(lambda x: 'TP' if x['actual'] == 'deer' and x['predicted'] == 'deer' else (
+    'FP' if x['actual'] == 'a kermit' and x['predicted'] == 'deer' else (
+    'TN' if x['actual'] == 'a kermit' and x['predicted'] == 'a kermit' else (
+    'FN'))), axis=1))
+
+# Print a count of each result
+print(df['result'].value_counts())
+
+df
+```
+
+    result
+    TP    4
+    FN    3
+    TN    2
+    FP    1
+    Name: count, dtype: int64
+
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>actual</th>
+      <th>green</th>
+      <th>noise</th>
+      <th>predicted</th>
+      <th>result</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>deer</td>
+      <td>0.0</td>
+      <td>0.0</td>
+      <td>deer</td>
+      <td>TP</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>deer</td>
+      <td>0.2</td>
+      <td>0.1</td>
+      <td>deer</td>
+      <td>TP</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>deer</td>
+      <td>0.2</td>
+      <td>0.1</td>
+      <td>deer</td>
+      <td>TP</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>deer</td>
+      <td>0.4</td>
+      <td>0.1</td>
+      <td>deer</td>
+      <td>TP</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>deer</td>
+      <td>0.6</td>
+      <td>0.2</td>
+      <td>a kermit</td>
+      <td>FN</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>deer</td>
+      <td>0.8</td>
+      <td>0.2</td>
+      <td>a kermit</td>
+      <td>FN</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>deer</td>
+      <td>0.9</td>
+      <td>1.0</td>
+      <td>a kermit</td>
+      <td>FN</td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>a kermit</td>
+      <td>0.2</td>
+      <td>0.2</td>
+      <td>deer</td>
+      <td>FP</td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>a kermit</td>
+      <td>0.6</td>
+      <td>0.8</td>
+      <td>a kermit</td>
+      <td>TN</td>
+    </tr>
+    <tr>
+      <th>9</th>
+      <td>a kermit</td>
+      <td>1.0</td>
+      <td>0.9</td>
+      <td>a kermit</td>
+      <td>TN</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+
+
+```python
+# Create a confusion matrix
+#   actual values
+#   predicted values
+#   labels: gives a sort order of classes. 
+#       In this case, we want to see the confusion matrix for the "deer" class (1) first,
+#       followed by the "a kermit" class (0).
+#   normalize: None or 'all' 
+#       None is raw counts, 'all' is percentages.
+cm = confusion_matrix(df['actual'], df['predicted'], 
+    labels=['deer', 'a kermit'],
+    normalize = None)
+
+# Printing cm doesn't include any labels.
+print(cm)
+
+# Confusion matrix display is a prettier version
+# However, note that it doesn't include the labels in the confusion matrix itself, so you have to pass them in separately.
+# You must make sure that the labels match the order of the classes in the confusion matrix.
+ConfusionMatrixDisplay(
+    confusion_matrix=cm, 
+    display_labels=['a normal deer', 'Kermit the frog']
+).plot()
+```
+
+    [[4 3]
+     [1 2]]
+
+
+
+
+
+    <sklearn.metrics._plot.confusion_matrix.ConfusionMatrixDisplay at 0x119211cd0>
+
+
+
+
+    
+![png](index_files/index_3_2.png)
+    
+
+
+
+```python
+# Print a classification report, which includes precision, recall, and F1 score for each class.
+# Note that this is treating each class as a separate prediction task.
+# This is useful when we're doing predictions for multiple classes,
+#  and we want to see how well the model is doing for each class.
+print(classification_report(df['actual'], df['predicted']))
+
+```
+
+                  precision    recall  f1-score   support
+    
+        a kermit       0.40      0.67      0.50         3
+            deer       0.80      0.57      0.67         7
+    
+        accuracy                           0.60        10
+       macro avg       0.60      0.62      0.58        10
+    weighted avg       0.68      0.60      0.62        10
+    
 
 
 ## Thresholds, ROC, and AUC
 
 Most classifiers do not actually output a category. They output a **probability**, and a threshold converts it into a yes or no. The default threshold is 0.5, but nothing requires that. Moving the threshold is how you trade precision against recall in practice.
 
-```python
-import numpy as np
-from sklearn.metrics import precision_score, recall_score
-
-probs = np.array([0.95, 0.80, 0.65, 0.55, 0.40, 0.30, 0.20, 0.10])
-truth = np.array([1,    1,    0,    1,    0,    1,    0,    0])
-
-for t in [0.7, 0.5, 0.3]:
-    pred = (probs >= t).astype(int)
-    print(t, pred.tolist(),
-          round(precision_score(truth, pred, zero_division=0), 3),
-          round(recall_score(truth, pred), 3))
-
-# 0.7 [1, 1, 0, 0, 0, 0, 0, 0]   precision 1.0     recall 0.5
-# 0.5 [1, 1, 1, 1, 0, 0, 0, 0]   precision 0.75    recall 0.75
-# 0.3 [1, 1, 1, 1, 1, 1, 0, 0]   precision 0.667   recall 1.0
-```
-
-The same model uses one set of predictions, but can give three different answers. Raising the threshold to 0.7 made every accusation correct but caught only half the positives. Lowering it to 0.3 caught them all but accused two innocents.
-
 ### The ROC curve
 
 Because a single confusion matrix only describes one threshold, we need a way to evaluate a model across all of them. The **ROC curve** (Receiver Operating Characteristic) plots recall on the y-axis against the false positive rate on the x-axis, sweeping the threshold from high to low:
 
-- **True positive rate (recall)** = TP / (TP + FN) — the positives you caught
-- **False positive rate** = FP / (FP + TN) = 1 − specificity — the innocents you accused
+- **True positive rate (recall)** = TP / (TP + FN) — the deer you shot
+- **False positive rate** = FP / (FP + TN) = 1 − specificity — times you shot Kermit the frog
 
 Each point on the curve is one threshold's confusion matrix. A model that separates the classes well rises steeply toward the top-left corner, gaining recall before it starts accumulating false positives.
 
-```python
-from sklearn.metrics import roc_curve
+The ROC curve is about the threshold, not the model. It is a way to visualize the tradeoff between precision and recall as you move the threshold.
 
-fpr, tpr, thresholds = roc_curve(truth, probs)
-print(np.round(fpr, 3).tolist())   # [0.0, 0.0, 0.0, 0.25, 0.25, 0.5, 0.5, 1.0]
-print(np.round(tpr, 3).tolist())   # [0.0, 0.25, 0.5, 0.5, 0.75, 0.75, 1.0, 1.0]
-```
+### AUC 
 
-### AUC
+What if we have multiple models? An easy way to compare them is to plot their ROC curves, and measure the total **Area Under the Curve** (AUC). AUC can be defined as the probability that a randomly chosen positive case scores higher than a randomly chosen negative case. 
 
-**AUC** is the area under that curve, condensing the whole picture into one number between 0 and 1:
-
-```python
-from sklearn.metrics import roc_auc_score
-
-print(round(roc_auc_score(truth, probs), 4))     # 0.8125
-```
-
-Interpreting it:
+AUC is a number between 0 and 1, with higher numbers showing better performance:
 
 - **1.0** perfect separation; every positive scored higher than every negative
 - **0.9** excellent
@@ -297,10 +339,162 @@ Interpreting it:
 - **0.5** no better than a coin flip, the diagonal line on the plot
 - **below 0.5** worse than guessing, which usually means your labels are reversed
 
-AUC has a clean interpretation worth remembering: it is the probability that a randomly chosen positive case scores higher than a randomly chosen negative case. Our 0.8125 means that if you drew one real fraudster and one honest customer at random, the model would rank the fraudster as riskier about 81% of the time.
+The advantage of AUC is that it is threshold-independent, so it measures how well the model *ranks* cases rather than how well one particular cutoff performs.
 
-The advantage of AUC is that it is threshold-independent, so it measures how well the model *ranks* cases rather than how well one particular cutoff performs. The disadvantage is that it can look flattering on heavily imbalanced data, where a precision-recall curve tells a more honest story.
 
+```python
+df
+```
+
+
+
+
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>actual</th>
+      <th>green</th>
+      <th>predicted</th>
+      <th>result</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>deer</td>
+      <td>0.0</td>
+      <td>deer</td>
+      <td>TP</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>deer</td>
+      <td>0.2</td>
+      <td>deer</td>
+      <td>TP</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>deer</td>
+      <td>0.2</td>
+      <td>deer</td>
+      <td>TP</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>deer</td>
+      <td>0.4</td>
+      <td>deer</td>
+      <td>TP</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>deer</td>
+      <td>0.6</td>
+      <td>a kermit</td>
+      <td>FN</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>deer</td>
+      <td>0.8</td>
+      <td>a kermit</td>
+      <td>FN</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>deer</td>
+      <td>0.9</td>
+      <td>a kermit</td>
+      <td>FN</td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>a kermit</td>
+      <td>0.2</td>
+      <td>deer</td>
+      <td>FP</td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>a kermit</td>
+      <td>0.6</td>
+      <td>a kermit</td>
+      <td>TN</td>
+    </tr>
+    <tr>
+      <th>9</th>
+      <td>a kermit</td>
+      <td>1.0</td>
+      <td>a kermit</td>
+      <td>TN</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+
+
+
+```python
+import numpy as np
+from sklearn.metrics import precision_score, recall_score, roc_curve, roc_auc_score, RocCurveDisplay
+
+# plot a roc curve from our deer and Kermit predictions
+#   y_true: the actual values
+#   y_score: the predicted probabilities for the positive class (deer). Number!!! Not your class prediction
+#   pos_label: the label of the positive class (deer)
+#   name: the name of the curve, which will be displayed in the legend
+RocCurveDisplay.from_predictions(
+        y_true = df['actual'], 
+        y_score = df['green'], 
+        pos_label='a kermit',
+        name='ROC curve for kermit',
+    )
+```
+
+
+
+
+    <sklearn.metrics._plot.roc_curve.RocCurveDisplay at 0x116210f30>
+
+
+
+
+    
+![png](index_files/index_7_1.png)
+    
+
+
+### Try it: the hunter's confidence
+
+The forest below has 25 fixed animals -- the same ones for everyone, so a class can compare notes. Each one has a hidden confidence score, exactly what a model like the ones above would output. Drag the slider to set how confident the hunter needs to be before pulling the trigger, and watch accuracy, precision, recall, specificity, and F1 update, along with where that threshold lands on the ROC curve.
+
+The equipment picker is a separate question from the threshold. It swaps in a different model entirely -- same 25 animals, same true species, but a different confidence score for each one -- so you can see how model quality itself changes the ROC curve and the AUC, independent of where you set the trigger.
+
+```widget-hunter-confidence
+```
+
+
+## Sources
+
+- Kermit: https://en.wikipedia.org/wiki/Kermit_the_Frog#/media/File:Kermit_puppet.jpg
+- Deer: https://en.wikipedia.org/wiki/Deer#/media/File:White-tailed_deer.jpg
 
 ## Key Terms
 
@@ -335,12 +529,12 @@ The advantage of AUC is that it is threshold-independent, so it measures how wel
    - The model predicted negative, but the actual value was positive
    - The model predicted negative, and the actual value was negative
    - The model predicted positive, and the actual value was positive
-1. A hunter's model says "deer" when the shape is actually a person. Which cell is this?
+1. A hunter's model says "deer" when the shape is actually Kermit. Which cell is this?
    - False Positive
    - False Negative
    - True Positive
    - True Negative
-1. A hunter's model says "person" when the shape is actually a deer. Which cell is this?
+1. A hunter's model says "Kermit" when the shape is actually a deer. Which cell is this?
    - False Negative
    - False Positive
    - True Negative
