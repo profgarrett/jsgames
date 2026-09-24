@@ -3,16 +3,21 @@
 Some models predict a yes/no (categorical) variable. This is called *classification*.  We typically use it for comparing a prediction against actual results. For example, how well does our model predict which students will pass a class?
 
 **Outcomes**:
+
 - Create a confusion matrix
 - Measure accuracy, precision, and recall
 - Pick the most appropriate metric for your situation
 
 **Links**
+
 - [Is Susan pregnant?](susanpregnancy.docx)
 - [Nice graphic](https://encord.com/glossary/confusion-matrix/)
 - [ROC curve and AUC](https://mlu-explain.github.io/roc-auc/)
 - [Precision and Recall](https://mlu-explain.github.io/precision-recall/)
 
+**Data Files**
+
+- [BodyM Metadata](hwg_metadata.csv)
 
 ## Confusion Matrix
 
@@ -62,9 +67,14 @@ We use several metrics to evaluate a model:
 - *Specificity*: TN / (TN + FP)
   - The proportion of actual negatives correctly identified. 
   - Recall is specificity's mirror image, one measured on each row of the matrix.
+  - We use 1 - Specificity to measure the false positive rate (FPR): FPR = 1 - Specificity = FP / (FP + TN)
 - *F1 score*: 2 × (Precision × Recall) / (Precision + Recall)
   - A single number balancing precision and recall. It uses the harmonic mean rather than a simple average, so a model that scores 1.0 on one and 0.0 on the other gets an F1 of 0, not 0.5.
 
+
+Each metric draws its numerator and denominator from different cells of the confusion matrix. Bold borders mark the numerator; shaded cells make up the denominator.
+
+![Numerator and denominator cells for accuracy, precision, recall, and false positive rate](metrics_confusion_matrices.png)
 
 ### Tradeoffs
 
@@ -121,7 +131,7 @@ df = df.assign( result = df.apply(lambda x: 'TP' if x['actual'] == 'deer' and x[
 # Print a count of each result
 print(df['result'].value_counts())
 
-df
+print(df)
 ```
 
     result
@@ -280,7 +290,7 @@ ConfusionMatrixDisplay(
 
 
 
-    <sklearn.metrics._plot.confusion_matrix.ConfusionMatrixDisplay at 0x119211cd0>
+    <sklearn.metrics._plot.confusion_matrix.ConfusionMatrixDisplay at 0x116def750>
 
 
 
@@ -343,115 +353,6 @@ The advantage of AUC is that it is threshold-independent, so it measures how wel
 
 
 ```python
-df
-```
-
-
-
-
-<div>
-<style scoped>
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }
-</style>
-<table border="1" class="dataframe">
-  <thead>
-    <tr style="text-align: right;">
-      <th></th>
-      <th>actual</th>
-      <th>green</th>
-      <th>predicted</th>
-      <th>result</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th>0</th>
-      <td>deer</td>
-      <td>0.0</td>
-      <td>deer</td>
-      <td>TP</td>
-    </tr>
-    <tr>
-      <th>1</th>
-      <td>deer</td>
-      <td>0.2</td>
-      <td>deer</td>
-      <td>TP</td>
-    </tr>
-    <tr>
-      <th>2</th>
-      <td>deer</td>
-      <td>0.2</td>
-      <td>deer</td>
-      <td>TP</td>
-    </tr>
-    <tr>
-      <th>3</th>
-      <td>deer</td>
-      <td>0.4</td>
-      <td>deer</td>
-      <td>TP</td>
-    </tr>
-    <tr>
-      <th>4</th>
-      <td>deer</td>
-      <td>0.6</td>
-      <td>a kermit</td>
-      <td>FN</td>
-    </tr>
-    <tr>
-      <th>5</th>
-      <td>deer</td>
-      <td>0.8</td>
-      <td>a kermit</td>
-      <td>FN</td>
-    </tr>
-    <tr>
-      <th>6</th>
-      <td>deer</td>
-      <td>0.9</td>
-      <td>a kermit</td>
-      <td>FN</td>
-    </tr>
-    <tr>
-      <th>7</th>
-      <td>a kermit</td>
-      <td>0.2</td>
-      <td>deer</td>
-      <td>FP</td>
-    </tr>
-    <tr>
-      <th>8</th>
-      <td>a kermit</td>
-      <td>0.6</td>
-      <td>a kermit</td>
-      <td>TN</td>
-    </tr>
-    <tr>
-      <th>9</th>
-      <td>a kermit</td>
-      <td>1.0</td>
-      <td>a kermit</td>
-      <td>TN</td>
-    </tr>
-  </tbody>
-</table>
-</div>
-
-
-
-
-```python
 import numpy as np
 from sklearn.metrics import precision_score, recall_score, roc_curve, roc_auc_score, RocCurveDisplay
 
@@ -471,13 +372,13 @@ RocCurveDisplay.from_predictions(
 
 
 
-    <sklearn.metrics._plot.roc_curve.RocCurveDisplay at 0x116210f30>
+    <sklearn.metrics._plot.roc_curve.RocCurveDisplay at 0x116f665d0>
 
 
 
 
     
-![png](index_files/index_7_1.png)
+![png](index_files/index_6_1.png)
     
 
 
