@@ -1,5 +1,3 @@
-<script src="/course_dv/toc.js"></script>
-
 # Beauty
 
 What makes a chart beatiful? This section covers some of the principles of design and aesthetics that can help you create more visually appealing and effective charts.

@@ -280,6 +280,9 @@ Pie charts get a lot of criticism because angle and area are decoded less accura
 
 ![Pie Chart - Pyramid](images/pie_pyramid.jpg)
 
+![Pie Chart - What the mars rover can see](images/tom-gauld-mars-pie.png)
+
+
 - Best for
   - 1 dimension (a category)
   - 1 measure (Tableau converts the values into angles for you)

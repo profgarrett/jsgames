@@ -1,5 +1,3 @@
-<script src="/course_dv/toc.js"></script>
-
 # Tableau Maps
 
 This module introduces maps in Tableau. We will cover how to create different types of maps in Tableau.
@@ -15,9 +13,9 @@ This module introduces maps in Tableau. We will cover how to create different ty
 
 **Links**:
 
-- [Class slideshow](tb45-maps.pptx) and [data](tb45-maps-dcidata.xlsx)
+- [Class slideshow](tb21-maps.pptx) and [data](tb21-maps-dcidata.xlsx)
 - [The true size of Africa](https://flowingdata.com/2025/09/17/explaining-the-true-size-of-africa-a-lesson-in-map-projections/)
-
+- [Relief map](https://relief.bertspaan.nl/world)
 
 **Common exam mistakes**:
 - Know the difference between a filled chart, point chart, and a combo map.

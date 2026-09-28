@@ -1,5 +1,3 @@
-<script src="/course_dv/toc.js"></script>
-
 # Data Refinements in Tableau
 
 This section covers data refinements in Tableau.
@@ -15,6 +13,7 @@ This section covers data refinements in Tableau.
 
 **Links**:
 - See Datacamp *Analyzing data in Tableau*
+- [tb12 Burbank Salaries](tb12_BurbankSalaries.xlsx)
 
 ## Grouping Data Values
 

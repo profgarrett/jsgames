@@ -104,7 +104,7 @@ df_raw = df_raw.rename(columns={'arm-length': 'arm_length'})
 # Keep only a few columns for easier analysis
 df = df_raw[['height_cm', 'is_male', 'weight_kg', 'bmi', 'arm_length']].copy()
 
-print(df)
+df.head()
 ```
 
 
@@ -140,7 +140,7 @@ print(df)
       <th>0</th>
       <td>160.00</td>
       <td>0</td>
-      <td>92.40</td>
+      <td>92.4</td>
       <td>36.093750</td>
       <td>46.422310</td>
     </tr>
@@ -148,7 +148,7 @@ print(df)
       <th>1</th>
       <td>175.75</td>
       <td>0</td>
-      <td>102.80</td>
+      <td>102.8</td>
       <td>33.281466</td>
       <td>53.050766</td>
     </tr>
@@ -156,7 +156,7 @@ print(df)
       <th>2</th>
       <td>174.80</td>
       <td>1</td>
-      <td>106.90</td>
+      <td>106.9</td>
       <td>34.986045</td>
       <td>52.061996</td>
     </tr>
@@ -164,7 +164,7 @@ print(df)
       <th>3</th>
       <td>181.50</td>
       <td>1</td>
-      <td>111.80</td>
+      <td>111.8</td>
       <td>33.938180</td>
       <td>52.575706</td>
     </tr>
@@ -172,61 +172,12 @@ print(df)
       <th>4</th>
       <td>161.60</td>
       <td>0</td>
-      <td>93.00</td>
+      <td>93.0</td>
       <td>35.612317</td>
       <td>46.116558</td>
     </tr>
-    <tr>
-      <th>...</th>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-    </tr>
-    <tr>
-      <th>1993</th>
-      <td>175.00</td>
-      <td>0</td>
-      <td>103.25</td>
-      <td>33.714286</td>
-      <td>52.452713</td>
-    </tr>
-    <tr>
-      <th>1994</th>
-      <td>169.50</td>
-      <td>1</td>
-      <td>103.90</td>
-      <td>36.163974</td>
-      <td>48.238476</td>
-    </tr>
-    <tr>
-      <th>1995</th>
-      <td>180.20</td>
-      <td>1</td>
-      <td>111.90</td>
-      <td>34.460416</td>
-      <td>52.979710</td>
-    </tr>
-    <tr>
-      <th>1996</th>
-      <td>168.00</td>
-      <td>1</td>
-      <td>102.60</td>
-      <td>36.352041</td>
-      <td>46.166344</td>
-    </tr>
-    <tr>
-      <th>1997</th>
-      <td>163.50</td>
-      <td>0</td>
-      <td>94.80</td>
-      <td>35.462784</td>
-      <td>46.793224</td>
-    </tr>
   </tbody>
 </table>
-<p>1998 rows × 5 columns</p>
 </div>
 
 
@@ -354,7 +305,7 @@ for a in cols:
 # round values to 3 decimal places for easier reading
 p_values = p_values.round(3)
 
-print(p_values)
+p_values.head()
 ```
 
 

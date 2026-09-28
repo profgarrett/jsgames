@@ -131,7 +131,7 @@ df = df.assign( result = df.apply(lambda x: 'TP' if x['actual'] == 'deer' and x[
 # Print a count of each result
 print(df['result'].value_counts())
 
-print(df)
+df.head()
 ```
 
     result
@@ -211,46 +211,6 @@ print(df)
       <td>a kermit</td>
       <td>FN</td>
     </tr>
-    <tr>
-      <th>5</th>
-      <td>deer</td>
-      <td>0.8</td>
-      <td>0.2</td>
-      <td>a kermit</td>
-      <td>FN</td>
-    </tr>
-    <tr>
-      <th>6</th>
-      <td>deer</td>
-      <td>0.9</td>
-      <td>1.0</td>
-      <td>a kermit</td>
-      <td>FN</td>
-    </tr>
-    <tr>
-      <th>7</th>
-      <td>a kermit</td>
-      <td>0.2</td>
-      <td>0.2</td>
-      <td>deer</td>
-      <td>FP</td>
-    </tr>
-    <tr>
-      <th>8</th>
-      <td>a kermit</td>
-      <td>0.6</td>
-      <td>0.8</td>
-      <td>a kermit</td>
-      <td>TN</td>
-    </tr>
-    <tr>
-      <th>9</th>
-      <td>a kermit</td>
-      <td>1.0</td>
-      <td>0.9</td>
-      <td>a kermit</td>
-      <td>TN</td>
-    </tr>
   </tbody>
 </table>
 </div>
@@ -290,7 +250,7 @@ ConfusionMatrixDisplay(
 
 
 
-    <sklearn.metrics._plot.confusion_matrix.ConfusionMatrixDisplay at 0x116def750>
+    <sklearn.metrics._plot.confusion_matrix.ConfusionMatrixDisplay at 0x116ff5090>
 
 
 
@@ -372,7 +332,7 @@ RocCurveDisplay.from_predictions(
 
 
 
-    <sklearn.metrics._plot.roc_curve.RocCurveDisplay at 0x116f665d0>
+    <sklearn.metrics._plot.roc_curve.RocCurveDisplay at 0x117150410>
 
 
 

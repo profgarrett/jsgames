@@ -26,3 +26,23 @@ Structure:
 {{py04-pandas-mutate}}
 
 {{py05-charts}}
+
+<!-- 
+## Take-Home Problem: Car Color Trends
+
+Load a dataset of US new-vehicle color market share from 1996 to 2025, create new columns, compute
+counts/sums/standard deviations, build a couple of charts, and answer a few comprehension questions
+about what you found.
+
+Process:
+
+- Download the template notebook and the data file below.
+- Put them in the same folder.
+- Open the template file and fill in the missing code.
+- Answer the comprehension questions at the end in the markdown cells provided.
+- Submit your completed notebook to eCampus.
+
+**Links:**
+- [Notebook template](exam1-takehome-template.ipynb)
+- [Data file](exam1-takehome-carcolors.xlsx)
+-->
