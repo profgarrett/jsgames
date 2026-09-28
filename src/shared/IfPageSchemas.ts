@@ -1859,6 +1859,60 @@ class IfPageSqlSchema extends IfPageBaseSchema {
 
 
 /*
+	Info tabs shown beside the chat (IfPageChatSchema.tabs), and the record of when the
+	participant expanded each one (IfPageChatSchema.client_tab_views).
+*/
+export type ChatTab = { title: string, body: string };
+export type ChatTabView = { tab_i: number, title: string, dt_opened: Date, dt_closed: Date|null, seconds: number|null };
+
+const MAX_CHAT_TAB_VIEWS = 500;
+const MAX_CHAT_TAB_VIEW_SECONDS = 60*60;
+
+/*
+	client_tab_views comes from the (untrusted) browser. Rebuild it from scratch:
+	drop malformed entries or out-of-range tab indexes, cap the array length, take each
+	title from the page's own tabs, and recompute seconds from the open/close times
+	(ignoring whatever seconds value the client sent).
+
+	If close_open_at is given, any view still open (dt_closed === null) is closed at that time.
+	The server does this when the page is submitted, so a tab left open when the participant
+	clicks "Next page" still gets a duration.
+*/
+function sanitize_chat_tab_views(raw: any, tabs: Array<ChatTab>, close_open_at: Date|null = null): Array<ChatTabView> {
+	if(!isArray(raw)) return [];
+
+	const valid_date = (d: any): Date|null => {
+		if(d === null || typeof d === 'undefined' || d === '') return null;
+		const dt = new Date(d);
+		return isNaN(dt.getTime()) ? null : dt;
+	};
+
+	const views: Array<ChatTabView> = [];
+
+	raw.slice(0, MAX_CHAT_TAB_VIEWS).forEach( (v: any) => {
+		if(v === null || typeof v !== 'object') return;
+
+		const tab_i = Number(v.tab_i);
+		if(!Number.isInteger(tab_i) || tab_i < 0 || tab_i >= tabs.length) return;
+
+		const dt_opened = valid_date(v.dt_opened);
+		if(dt_opened === null) return;
+
+		let dt_closed = valid_date(v.dt_closed);
+		if(dt_closed === null && close_open_at !== null) dt_closed = close_open_at;
+
+		const seconds = dt_closed === null
+			? null
+			: Math.min(MAX_CHAT_TAB_VIEW_SECONDS, Math.max(0, Math.round((dt_closed.getTime() - dt_opened.getTime()) / 100) / 10));
+
+		views.push({ tab_i, title: tabs[tab_i].title, dt_opened, dt_closed, seconds });
+	});
+
+	return views;
+}
+
+
+/*
 	A page that embeds a conversation with an AI chatbot (used for Prolific-style experiments).
 
 	The student exchanges messages with an AI. Message turns are only ever appended by the
@@ -1874,6 +1928,10 @@ class IfPageSqlSchema extends IfPageBaseSchema {
 
 	Advancing past this page requires the student to explicitly mark themselves ready via
 	client_ready_to_advance, so that an arbitrary number of chat turns can happen first.
+
+	tabs (optional, set by the level author) are shown as an accordion to the left of the chat;
+	only one can be open at a time. client_tab_views records each time one was expanded and
+	for how many seconds -- see sanitize_chat_tab_views above.
 */
 class IfPageChatSchema extends IfPageBaseSchema {
 	client_messages!: Array<{ role: string, text: string, dt: Date }>;
@@ -1881,6 +1939,8 @@ class IfPageChatSchema extends IfPageBaseSchema {
 	max_turns!: number;
 	solution_system_prompt!: string;
 	solution_system_prompt_visible!: boolean;
+	tabs!: Array<ChatTab>;
+	client_tab_views!: Array<ChatTabView>;
 
 	// Apply json to this obj, signally no parent classes to do the setting for us.
 	constructor( json?: any) {
@@ -1904,6 +1964,10 @@ class IfPageChatSchema extends IfPageBaseSchema {
 			max_turns: { type: 'Number', initialize: (s: any) => isDef(s) ? s : 6 },
 			solution_system_prompt: { type: 'String', initialize: (s: any) => isDef(s) ? s : '' },
 			solution_system_prompt_visible: { type: 'Boolean', initialize: (b: any) => isDef(b) ? bool(b) : false },
+			tabs: { type: 'Array', initialize: (a: any) => isDef(a) && isArray(a)
+				? a.filter( (t: any) => t !== null && typeof t === 'object' ).map( (t: any) => ({ title: ''+(t.title ?? ''), body: ''+(t.body ?? '') }) )
+				: [] },
+			client_tab_views: { type: 'Array', initialize: (a: any) => isDef(a) && isArray(a) ? revive_dates_recursively(a) : [] },
 		};
 	}
 
@@ -1917,6 +1981,7 @@ class IfPageChatSchema extends IfPageBaseSchema {
 	clear_answer_and_all_results(): void {
 		this.client_messages = [];
 		this.client_ready_to_advance = false;
+		this.client_tab_views = [];
 		this.correct = false;
 		this.completed = false;
 		this.client_feedback = [];
@@ -1928,6 +1993,11 @@ class IfPageChatSchema extends IfPageBaseSchema {
 			{ role: 'user', text: '(debug) Hello', dt: new Date() },
 			{ role: 'assistant', text: '(debug) Hi there!', dt: new Date() },
 		];
+		if(this.tabs.length > 0) {
+			const opened = new Date();
+			const closed = new Date(opened.getTime() + 5000);
+			this.client_tab_views = [{ tab_i: 0, title: this.tabs[0].title, dt_opened: opened, dt_closed: closed, seconds: 5 }];
+		}
 		this.client_ready_to_advance = true;
 		this.updateCorrect();
 	}
@@ -1942,8 +2012,17 @@ class IfPageChatSchema extends IfPageBaseSchema {
 		client_messages is intentionally excluded -- it is only ever written by the dedicated
 		chat route (app_levels.ts POST /level/:id/chat), which calls the AI and appends both
 		sides of the conversation directly to the database.
+
+		client_tab_views is also accepted, but handled here rather than through
+		_updateUserFields: that function logs the full before/after value of every changed
+		field into history, which would copy the whole (growing) tab-view array into history
+		on every tab click. It is always sanitized, and on the server (i.e. when the page is
+		submitted) any view still open is closed at the server's current time.
 	*/
 	updateUserFields(json: any) {
+		if(!this.completed && typeof json !== 'undefined' && typeof json.client_tab_views !== 'undefined') {
+			this.client_tab_views = sanitize_chat_tab_views(json.client_tab_views, this.tabs, is_server() ? new Date() : null);
+		}
 		this._updateUserFields(json, ['client_ready_to_advance']);
 	}
 
@@ -2099,7 +2178,14 @@ function build_answers_from_level( level: IfLevelSchema ): Array<IfPageAnswer> {
         a.page_type = p.type;
 
         a.answers = p.type === 'IfPageChatSchema'
-            ? (p as any).client_messages.map( (m: { role: string, text: string }) => m.role + ': ' + m.text )
+            ? [
+                ...(p as any).client_messages.map( (m: { role: string, text: string }) => m.role + ': ' + m.text ),
+                // One line per info-tab expansion (if the page has tabs).
+                ...((p as any).client_tab_views || []).map( (v: ChatTabView) =>
+                    'tab: ' + v.title
+                    + ' | opened ' + new Date(v.dt_opened).toISOString()
+                    + ' | ' + (v.seconds === null ? 'still open' : v.seconds + 's') ),
+              ]
             // IfPageTextSchema.toString() unconditionally returns 'read', regardless of
             // whether the participant actually dismissed the page -- use client_has_answered()
             // instead so a static page (consent, video, completion code) reports whether it
@@ -2118,6 +2204,7 @@ function build_answers_from_level( level: IfLevelSchema ): Array<IfPageAnswer> {
 
 export {
 	get_page_schema_as_class,
+	sanitize_chat_tab_views,
 	IfPageBaseSchema,
 	IfPageTextSchema,
 	IfPageChoiceSchema,

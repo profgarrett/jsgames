@@ -18,7 +18,7 @@ import { queryFactory_updateClientResults } from './../shared/queryFactory';
 
 
 import type { Request, Response, NextFunction } from 'express';
-import { IfPageBaseSchema, IfPageSqlSchema } from '../shared/IfPageSchemas.js';
+import { IfPageBaseSchema, IfPageSqlSchema, sanitize_chat_tab_views } from '../shared/IfPageSchemas.js';
 
 // Convert a route parameter into a string. If it is an array, then grab the first item. If it is undefined, then return the fallback value.
 const getRouteParamString = (value: string | string[] | undefined, fallback = ''): string => {
@@ -442,6 +442,13 @@ router.post('/level/:id/chat',
 
 		if(page.type !== 'IfPageChatSchema') return res.status(400).json({ _error: 'The current page is not a chat page' });
 		if(page.completed) return res.status(400).json({ _error: 'This chat page is already completed' });
+
+		// Save the info-tab views the client has recorded so far (if any), so they survive
+		// even if the participant reloads or abandons the page before clicking "Next page".
+		// Sanitized the same way as in IfPageChatSchema.updateUserFields; open views stay open.
+		if(typeof req.body.client_tab_views !== 'undefined') {
+			page.client_tab_views = sanitize_chat_tab_views(req.body.client_tab_views, page.tabs || [], null);
+		}
 
 		const turns_used = page.client_messages.filter( (m: any) => m.role === 'user').length;
 		if(turns_used >= page.max_turns) {

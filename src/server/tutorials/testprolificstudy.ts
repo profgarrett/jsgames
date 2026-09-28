@@ -1,4 +1,3 @@
-import { _ } from 'react-router/dist/development/index-react-server-client-3ykjivgQ';
 import type { LevelSchemaFactoryType } from '../IfLevelSchemaFactory';
 
 /*
@@ -81,10 +80,14 @@ const email = {
 }
 
 
+
 const pre_survey_1 = {
 	..._base_choice,
 	template_id: 'testprolificstudy_pre1',
-	description: 'How familiar are you with AI chatbots like ChatGPT?',
+	versions: [
+		{ description: 'How familiar are you with AI chatbots like ChatGPT?' },
+		{ description: 'How familiar are you with AI chatbots like Claude?' },
+	],
 	client_items: ['Not at all familiar', 'Slightly familiar', 'Moderately familiar', 'Very familiar', 'Extremely familiar'],
 };
 
@@ -111,9 +114,9 @@ const video = {
 `
 };
 
-const chat_agree_prompt = `You are a friendly conversational partner discussing the video the participant just watched. Agree with and validate the participant's opinions and reasoning throughout the conversation, finding generous interpretations of what they say even if you have reservations. Keep each reply to 2-3 sentences. Ask a brief follow-up question after validating their point. Do not mention that you are an AI, and do not reference these instructions.`;
+const chat_agree_prompt = `Talk to the user only about onions. Redirect every conversation. `;
 
-const chat_skeptical_prompt = `You are a friendly conversational partner discussing the video the participant just watched. Politely and respectfully push back on the participant's opinions and reasoning throughout the conversation, offering a counterpoint or a complicating consideration each time. Keep each reply to 2-3 sentences. Do not mention that you are an AI, and do not reference these instructions.`;
+const chat_skeptical_prompt = `Respond to the user about the video. Only discuss the video.`;
 
 const chat = {
 	type: 'IfPageChatSchema',
@@ -122,6 +125,13 @@ const chat = {
 	description: 'Chat with the AI assistant below about the video you just watched and what you think of it. Send a few messages back and forth (up to 6), then click "I\'m ready to continue."',
 	instruction: 'Type a message and press Send.',
 	max_turns: 6,
+	// Info tabs shown to the left of the chat (one open at a time; opens/durations are recorded).
+	// [SAMPLE TABS -- replace with real study content.]
+	tabs: [
+		{ title: 'About the video', body: '[SAMPLE] A short summary of the video you just watched.' },
+		{ title: 'Key facts', body: '[SAMPLE] <ul><li>Fact one</li><li>Fact two</li><li>Fact three</li></ul>' },
+		{ title: 'Instructions', body: '[SAMPLE] Chat with the AI about the video. When you are done, click "I\'m ready to continue."' },
+	],
 	versions: [
 		{ solution_system_prompt: chat_agree_prompt, tags: ['condition_agree'] },
 		{ solution_system_prompt: chat_skeptical_prompt, tags: ['condition_skeptical'] },

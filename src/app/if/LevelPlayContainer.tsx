@@ -82,7 +82,20 @@ export default function LevelPlayContainer() {
 		that whitelist; see IfPageChatSchema in shared/IfPageSchemas.ts).
 	*/
 	const handleChatUpdate = (level_json: any): void => {
-		setLevel(new IfLevelSchema(level_json));
+		setLevel( (prev: IfLevelSchema|null) => {
+			const newLevel = new IfLevelSchema(level_json);
+
+			// Info-tab views are recorded only in the browser and sent along with each chat
+			// message. The participant may have opened/closed a tab while this reply was in
+			// flight, so keep the local (newest) list rather than the server's copy.
+			const i = newLevel.pages.length - 1;
+			const prev_page: any = prev && prev.pages[i];
+			const new_page: any = newLevel.pages[i];
+			if(prev_page && new_page && prev_page.type === 'IfPageChatSchema' && new_page.type === 'IfPageChatSchema') {
+				new_page.client_tab_views = prev_page.client_tab_views;
+			}
+			return newLevel;
+		});
 	};
 
 	// Update level based on user input.

@@ -1,7 +1,9 @@
 import React from 'react';
-import { Button, FormControl, Card } from 'react-bootstrap';
+import { Button, FormControl, Card, Accordion, Row, Col } from 'react-bootstrap';
 
 import { IfPageChatSchema } from '../../../shared/IfPageSchemas';
+import type { ChatTabView } from '../../../shared/IfPageSchemas';
+import { HtmlDiv } from '../../components/Misc';
 import type { IStringIndexJsonObject } from '../../components/Misc';
 
 interface PropsType {
@@ -30,6 +32,10 @@ const INPUT_ID = 'ChatMessageInput';
 	Renders an embedded AI chat conversation: the transcript so far, a text box + Send button
 	for the student's next message, and (once at least one exchange has happened) a button to
 	mark the student ready to move on.
+
+	If the page has info tabs (page.tabs), they're shown as an accordion to the left of the
+	chat, with only one open at a time. Each expand/collapse is recorded in
+	page.client_tab_views (sent through onChange, and also along with each chat message).
 */
 export default class Chat extends React.Component<PropsType, StateType> {
 
@@ -51,7 +57,7 @@ export default class Chat extends React.Component<PropsType, StateType> {
 				'Accept': 'application/json',
 				'Content-Type': 'application/json'
 			},
-			body: JSON.stringify({ text })
+			body: JSON.stringify({ text, client_tab_views: this.props.page.client_tab_views || [] })
 		})
 			.then( (response: any) => response.json() )
 			.then( (json: any) => {
@@ -76,7 +82,40 @@ export default class Chat extends React.Component<PropsType, StateType> {
 	}
 
 	handleReady = (): void => {
-		this.props.onChange({ client_ready_to_advance: true });
+		// Also close any open info tab, so its duration ends when the participant finishes.
+		this.props.onChange({ client_ready_to_advance: true, client_tab_views: this.close_open_views(new Date()) });
+	}
+
+	// Copy of the current tab views, with any still-open view closed at `now`.
+	close_open_views = (now: Date): Array<ChatTabView> => {
+		return (this.props.page.client_tab_views || []).map( (v: ChatTabView) => {
+			if(v.dt_closed !== null && typeof v.dt_closed !== 'undefined') return v;
+			const seconds = Math.max(0, Math.round((now.getTime() - new Date(v.dt_opened).getTime()) / 100) / 10);
+			return { ...v, dt_closed: now, seconds };
+		});
+	}
+
+	// Index of the currently open tab, or null. The open tab is the last view without a close time.
+	open_tab_i = (): number|null => {
+		const views = this.props.page.client_tab_views || [];
+		const last = views[views.length - 1];
+		return last && (last.dt_closed === null || typeof last.dt_closed === 'undefined') ? last.tab_i : null;
+	}
+
+	// Accordion click: close whatever was open, then (unless this click collapsed it) open the new tab.
+	handleTabSelect = (eventKey: any): void => {
+		if(this.props.readonly) return;
+
+		const now = new Date();
+		const was_open = this.open_tab_i();
+		const views = this.close_open_views(now);
+		const tab_i = (eventKey === null || typeof eventKey === 'undefined') ? null : Number(eventKey);
+
+		if(tab_i !== null && tab_i !== was_open && tab_i >= 0 && tab_i < this.props.page.tabs.length) {
+			views.push({ tab_i, title: this.props.page.tabs[tab_i].title, dt_opened: now, dt_closed: null, seconds: null });
+		}
+
+		this.props.onChange({ client_tab_views: views });
 	}
 
 	render(): React.ReactElement {
@@ -87,7 +126,7 @@ export default class Chat extends React.Component<PropsType, StateType> {
 		const can_advance = turns_used > 0;
 		const at_limit = turns_left <= 0;
 
-		return (
+		const chat_card = (
 			<Card style={{ marginTop: '1rem' }}>
 				<Card.Body>
 					<div
@@ -160,6 +199,32 @@ export default class Chat extends React.Component<PropsType, StateType> {
 					</div>
 				</Card.Body>
 			</Card>
+		);
+
+		const tabs = page.tabs || [];
+		if(tabs.length === 0) return chat_card;
+
+		const open_i = this.open_tab_i();
+
+		return (
+			<Row>
+				<Col md={5} style={{ marginTop: '1rem' }}>
+					<Accordion
+						activeKey={ open_i === null ? null : String(open_i) }
+						onSelect={ this.handleTabSelect }
+					>
+						{ tabs.map( (t, i) => (
+							<Accordion.Item eventKey={ String(i) } key={ i }>
+								<Accordion.Header>{ t.title }</Accordion.Header>
+								<Accordion.Body><HtmlDiv html={ t.body } /></Accordion.Body>
+							</Accordion.Item>
+						))}
+					</Accordion>
+				</Col>
+				<Col md={7}>
+					{ chat_card }
+				</Col>
+			</Row>
 		);
 	}
 }

@@ -364,13 +364,29 @@ function create_summary_answer( page: IfPageBaseSchema, ): any {
 			.map( m => he.encode(m.role || '') + ': ' + he.encode(m.text || '') )
 			.join('<br/>');
 
+		// Info-tab usage: per tab, how many times it was opened and total seconds open.
+		// Tab titles come from the level author, but encode them anyway since .html is raw HTML.
+		const tab_totals: { [title: string]: { opens: number, seconds: number } } = {};
+		((page as any).client_tab_views || []).forEach( (v: any) => {
+			const t = tab_totals[v.title] || { opens: 0, seconds: 0 };
+			t.opens += 1;
+			t.seconds += (v.seconds || 0);
+			tab_totals[v.title] = t;
+		});
+		const tab_lines = Object.keys(tab_totals).map( title =>
+			"Tab '" + title + "': " + tab_totals[title].opens + ' opens, '
+			+ Math.round(tab_totals[title].seconds) + 's' );
+
+		const transcript_with_tabs = [transcript, ...tab_lines].filter( l => l !== '' ).join('\n');
+		const html_with_tabs = [transcript_html, ...tab_lines.map( l => he.encode(l) )].filter( l => l !== '' ).join('<br/>');
+
 		summary_answer.type = 'chat';
-		summary_answer.html = transcript_html;
-		summary_answer.answer = transcript;
+		summary_answer.html = html_with_tabs;
+		summary_answer.answer = transcript_with_tabs;
 		summary_answer.expand = '';
-		summary_answer.client = transcript;
+		summary_answer.client = transcript_with_tabs;
 		summary_answer.intermediate = '';
-		summary_answer.all = transcript;
+		summary_answer.all = transcript_with_tabs;
 		summary_answer.code = page.code;
 		summary_answer.turns = (page.client_messages || []).length;
 	}
