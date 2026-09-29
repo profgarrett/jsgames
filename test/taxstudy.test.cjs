@@ -212,8 +212,10 @@ describe('taxstudy level', async () => {
 		levels.forEach( level => {
 			const condition = get_level_condition(level);
 			level.pages.filter( p => p.type === 'IfPageChatSchema' ).forEach( p => {
-				assert.strictEqual(p.tabs.length, 6);
-				assert.strictEqual(p.tabs[5].title, 'Video transcript');
+				// The number of fact tabs varies by scenario; the first is always the transcript.
+				assert.ok(p.tabs.length >= 2);
+				assert.strictEqual(p.tabs[0].title, 'Video transcript');
+				p.tabs.forEach( tb => assert.ok(tb.title.trim() !== '' && tb.body.trim() !== '', 'empty tab: ' + tb.title) );
 				assert.strictEqual(p.code, 'test');
 				assert.ok(p.has_question());
 				assert.strictEqual(p.question_id, p.template_id.replace('_advisor', '_post_estimate'));

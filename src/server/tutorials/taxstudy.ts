@@ -62,7 +62,7 @@ Do not include citations or references to IRS publications, forms, or the tax co
 const PROMPT_LONG_AI = `${PROMPT_BASE}
 
 Style: formal, thorough, and precise.
-Give a complete explanation of about 200 to 350 words, in several paragraphs: the applicable rule, how it applies, and the conclusion.
+Give a complete explanation of about 150 to 200 words, in several paragraphs: the applicable rule, how it applies, and the conclusion.
 Write at a college reading level.
 Support each rule with citations to authoritative sources, such as IRS publications, IRS Tax Topics, form instructions, or the Internal Revenue Code, written inline in parentheses, for example (IRS Publication 970, Tax Benefits for Education) or (IRC section 117).`;
 
@@ -399,9 +399,8 @@ How much is taxable income?
 	tabs: [
 		{ title: 'Video transcript', body: '' }, // filled in below
 		{ title: 'Degree-seeking status', body: 'She is a degree-seeking student hoping to graduate in 4 years.' },
-		{ title: 'Other job', body: 'She is not planning on working any other jobs while enrolled.' },
-		{ title: 'Teaching assistant', body: 'Half of tuition comes from a grant ($6,000), and the other half ($6,000) is salary (wages) for her work as a teaching assistant.' },
-		{ title: 'Room and board', body: 'She gets $8,000 for living expenses. This does not come from her teaching assistant role.' },
+		{ title: 'Teaching assistant', body: 'Half of the tuition scholarship comes from a grant ($6,000), and the other half ($6,000) is salary (wages) for her work as a teaching assistant.' },
+		{ title: 'Room and board', body: 'She gets $8,000 for living expenses. This grant is separate from her teaching assistant role.' },
 	],
 };
 
@@ -427,10 +426,9 @@ How much is taxable business income?
 `,
 	tabs: [
 		{ title: 'Video transcript', body: '' },
-		{ title: 'Loan', body: 'His loan had no interest payments.' },
+		{ title: 'Loan', body: 'He has taken out no debt.' },
 		{ title: 'Other job', body: 'He had no other jobs this year.' },
 		{ title: 'Personal use', body: 'Half of the miles he put on the truck are for driving to school and seeing friends.' },
-		{ title: 'Personal bills', body: 'He spent roughly $500 a month on clothing, food, and a cell phone.' },
 	],
 };
 
@@ -458,8 +456,7 @@ My friend said the IRS is cracking down on Venmo now, and I\'m worried I must re
 		{ title: 'Video transcript', body: '' },
 		{ title: 'School', body: 'She is a full-time college student with no other job this year.' },
 		{ title: 'Venmo', body: 'The $2,500 Venmo payment came from her roommate paying their share of the rent.' },
-		{ title: 'Gift card', body: 'My roommate gave me the $600 bookstore gift card in exchange for me tutoring them in algebra.' },
-		{ title: 'Other payments', body: 'The roommate made no other payments to her this year.' },
+		{ title: 'Gift card', body: 'Her roommate gave the $600 bookstore gift card in exchange for algebra tutoring.' },
 	],
 };
 
@@ -507,7 +504,7 @@ Of the $20,000 award, $6,000 is a scholarship used for tuition and is generally 
 The $10,000 received from customers is business revenue. Half of the $4,000 truck rental relates to business driving, making $2,000 deductible as a business expense. The other half relates to personal driving and is not deductible.  Assuming he had no other business expenses, net business income is $10,000 &minus; $2,000 = $8,000.</p>
 <p><b>Scenario 3: Roommate payments</b><br/>
 <b>Correct answer: $600.</b><br/>
-The $2,500 sent through Venmo repaid the roommate's share of rent and utilities.  Those reimbursements are not income, regardless of how the roommate paid them. The $600 bookstore gift card was payment for tutoring, so its value is income.  $600 is taxable income.</p>
+The $2,500 sent through Venmo repaid the roommate's share of rent.  Those reimbursements are not income, regardless of how the roommate paid them. The $600 bookstore gift card was payment for tutoring, so its value is income.  $600 is taxable income.</p>
 `,
 };
 
@@ -518,7 +515,7 @@ const finish = {
 	..._text,
 	template_id: 'finish',
 	instruction: 'Click "Next page" to finish.',
-	description: 'Thank you for participating! You have completed the study. You can now close this window.',
+	description: 'Thank you for participating! You have completed the study. Click next and then close the window.',
 };
 
 

@@ -158,7 +158,6 @@ with torch.no_grad():
     Test accuracy: 100.0%
 
 
-
 ## Practical Advice
 
 **Data preprocessing matters more than architecture.** Normalize inputs (zero mean, unit variance) before training — neural networks are sensitive to scale.
@@ -187,7 +186,6 @@ Neural networks are not always the right tool. On **small tabular datasets** (< 
 - Data is large (images, text, audio, time series)
 - Features have complex spatial or sequential structure
 - Transfer learning from a pretrained model is possible
-
 
 
 ## Further Reading

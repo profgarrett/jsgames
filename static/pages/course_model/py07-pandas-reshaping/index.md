@@ -24,7 +24,6 @@ Arguments:
 - `value_name = 'score'`: name for the new *value* column
 
 
-
 ```python
 # Shaping data with melt 
 import pandas as pd

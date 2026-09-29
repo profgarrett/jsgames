@@ -94,7 +94,6 @@ Optional:
 - `errorbar = ('ci', 95)`: confidence interval for the estimate (default is 95%)
 
 
-
 ```python
 # Barplot Example
 import seaborn as sns
@@ -113,7 +112,6 @@ plt.show()
     
 ![png](index_files/index_5_0.png)
     
-
 
 
 ### What the bar actually shows
@@ -241,7 +239,6 @@ A histogram slices the range into bins and counts how many rows fall in each. It
 As an example, penguin body mass looks bimodal at some bin counts. This can indicate that the dataset mixes species of very different sizes. Splitting by `hue="species"` shows why.
 
 
-
 ```python
 import seaborn as sns
 import matplotlib.pyplot as plt
@@ -285,8 +282,6 @@ This chart is doing more than it appears. Position handles two variables, `hue` 
 ### alpha and overplotting
 
 `alpha=0.25` makes each point a quarter opaque, so ten overlapping points look darker than one. Without it, a dense region looks identical to a single dot, and you cannot see where the data actually piles up. This is the same **overplotting** problem the earlier module solved with jitter.
-
-
 
 
 ```python
@@ -337,7 +332,6 @@ Every mark comes from the quartiles in the descriptive statistics module:
 So a box plot is that rule drawn to scale. If a value is plotted as an isolated dot, it is exactly what `income[(income < lower) | (income > upper)]` would have returned.
 
 Box plots are ideal for comparisons. Five species side by side let you see instantly which group is higher, which is more variable, and which has strange values.
-
 
 
 ```python
@@ -427,7 +421,6 @@ Pair plots are for reconnaissance, not presentation. Scan for:
 - **Separated colour clusters** — a categorical variable that predicts the numeric ones, which is exactly what you want before a classification model.
 
 A pair plot on twenty variables produces four hundred subplots and tells you nothing. Filter to a handful of columns first.
-
 
 
 ```python
@@ -529,7 +522,6 @@ Match the palette to the data type or you will mislead people: a sequential pale
 `colorblind` is worth making your default. Roughly 8% of men have some form of colour vision deficiency, and the standard red-green pairing is the one they cannot distinguish. Where it matters, do not rely on colour alone — `hue` plus a different marker shape survives both colour blindness and a black-and-white printout.
 
 
-
 ## Sample Code
 
 The below code is useful for a quick overview of all variables in a dataset. It creates a plot for each variable. Numbers are shown with a histogram and boxplot, and text with a count plot. Update it by updating `df` to your dataframe of choice.
@@ -580,11 +572,9 @@ for col in text_columns:
     
 
 
-
     
 ![png](index_files/index_24_1.png)
     
-
 
 
     
@@ -592,11 +582,9 @@ for col in text_columns:
     
 
 
-
     
 ![png](index_files/index_24_3.png)
     
-
 
 
     
@@ -604,11 +592,9 @@ for col in text_columns:
     
 
 
-
     
 ![png](index_files/index_24_5.png)
     
-
 
 
     

@@ -34,7 +34,6 @@ Each principal component is:
   * etc.
 
 
-
 ```python
 import numpy as np
 import pandas as pd
@@ -78,7 +77,6 @@ print(pca.components_)
       -0.35279264 -0.34405162]
      [ 0.13807797  0.35411536  0.01102768  0.24256939 -0.01602305  0.49075458
       -0.38000873  0.64114884]]
-
 
 
 ```python
@@ -170,7 +168,6 @@ print(loadings_df['PC2'].abs().sort_values(ascending=False))
 #### Add PCA results back to a DataFrame
 
 We can now use the PCA results to do further analysis or visualization.
-
 
 
 ```python
