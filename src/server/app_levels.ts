@@ -19,7 +19,7 @@ import { queryFactory_updateClientResults } from './../shared/queryFactory';
 
 
 import type { Request, Response, NextFunction } from 'express';
-import { IfPageBaseSchema, IfPageSqlSchema, sanitize_chat_tab_views } from '../shared/IfPageSchemas';
+import { IfPageBaseSchema, IfPageSqlSchema, sanitize_chat_tab_views, parse_chat_answer } from '../shared/IfPageSchemas';
 
 // Convert a route parameter into a string. If it is an array, then grab the first item. If it is undefined, then return the fallback value.
 const getRouteParamString = (value: string | string[] | undefined, fallback = ''): string => {
@@ -455,6 +455,17 @@ router.post('/level/:id/chat',
 			page.client_tab_views = sanitize_chat_tab_views(req.body.client_tab_views, page.tabs || [], null);
 		}
 
+		// Same for the answer to the page's embedded question (if any), which the participant
+		// may have typed before sending this message. Log changes, since this is the only
+		// record of the answer's value at the time of each message.
+		if(typeof req.body.client_answer !== 'undefined' && typeof page.has_question === 'function' && page.has_question()) {
+			const answer = parse_chat_answer(req.body.client_answer);
+			if(answer !== page.client_answer) {
+				page.client_answer = answer;
+				page.history.push({ dt: new Date(), code: 'server_update', client_answer: answer });
+			}
+		}
+
 		const turns_used = page.client_messages.filter( (m: any) => m.role === 'user').length;
 		if(turns_used >= page.max_turns) {
 			return res.status(400).json({ _error: 'You have reached the maximum number of messages for this chat' });
@@ -512,6 +523,7 @@ router.post('/level/:id/chat',
 		];
 
 		page.history.push({ dt: new Date(), code: 'server_chat_exchange', turn: turns_used + 1 });
+		if(typeof page.updateCorrect === 'function') page.updateCorrect();
 		iflevel.history = [...iflevel.history, { dt: new Date(), code: 'server_chat_exchange', page_i: iflevel.pages.length - 1 }];
 
 		const update_results = await update_level_in_db(iflevel);

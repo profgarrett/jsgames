@@ -13,6 +13,7 @@ import Slider from './IfPlayComponents/Slider';
 import ShortTextAnswer from './IfPlayComponents/ShortTextAnswer';
 import LongTextAnswer  from './IfPlayComponents/LongTextAnswer';
 import SqlQuery from './IfPlayComponents/SqlQuery';
+import ChatLog from './IfPlayComponents/ChatLog';
 import HistorySlider from './HistorySlider';
 
 import { buildChart } from './charts/Charts';
@@ -133,6 +134,10 @@ export class LevelScorePage extends React.Component<ScorePropsType, ScoreStateTy
 			problem = (<div><SqlQuery page={page_at.toIfPageSqlSchema()} readonly={true} onValidate={() => {}} editable={false} show_solution={page_final.correct === false} onChange={noop} onSubmit={noop }/></div>);
 
 			
+		} else if(page_at.type === 'IfPageChatSchema') {
+			// Log of the attempt: messages and fact-tab opens, in time order.
+			problem = <ChatLog page={page_at.toIfPageChatSchema()} />;
+
 		} else {
 			throw new Error('Invalid type in IfLevelScore '+page_at.type);
 		}

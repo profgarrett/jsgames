@@ -93,6 +93,9 @@ export default function LevelPlayContainer() {
 			const new_page: any = newLevel.pages[i];
 			if(prev_page && new_page && prev_page.type === 'IfPageChatSchema' && new_page.type === 'IfPageChatSchema') {
 				new_page.client_tab_views = prev_page.client_tab_views;
+				// Same for the embedded question's answer, which may have been edited meanwhile.
+				new_page.client_answer = prev_page.client_answer;
+				new_page.updateCorrect();
 			}
 			return newLevel;
 		});

@@ -7,9 +7,10 @@ import type { LevelSchemaFactoryType } from '../IfLevelSchemaFactory';
 		consent -> background (12 pages) -> tax knowledge (intro + 6)
 		-> scenario instructions (worded by condition)
 		-> 3 scenario blocks, order shuffled per participant:
-			video -> pre estimate/reason/confidence/difficulty -> advisor
-			-> post estimate/reason/confidence/difficulty -> cogfit 1-3
-		-> end questions (5, incl. attention check) -> debrief -> finish
+			video with the pre estimate question below it (one page) -> pre reason/confidence/difficulty
+			-> advisor, with the post estimate question below it on the same page
+			-> post reason/confidence/difficulty -> cogfit
+		-> scenarios-completed page -> end questions (5, incl. attention check) -> debrief -> finish
 
 	Access:
 		- WVU students: Google login, join the study's section, open /ifgame/levels/taxstudy.
@@ -24,7 +25,8 @@ import type { LevelSchemaFactoryType } from '../IfLevelSchemaFactory';
 		condition_long_ai); exports carry it as the participant's condition.
 
 	Variable names from the survey doc are stored as each page's template_id
-	(e.g. s1_pre_estimate), and exported as a_template_id.
+	(e.g. s1_pre_estimate), and exported as a_template_id. The post estimate lives on the
+	advisor page (question_id sN_post_estimate); /api/reports/answers gives it its own row.
 
 	Before launch: replace the video placeholders (VIDEO_URLS), and review the system prompts.
 */
@@ -46,7 +48,9 @@ const MAX_TURNS = 30;
 const PROMPT_BASE = `You are a general-purpose chatbot.
 If a question is not about taxes, briefly say that you can only help with tax questions.
 NEVER ask for Social Security numbers, account numbers, or other personal identifying information.
-Write in plain text only. Do not use Markdown (no headings, bold, italics, or tables).`;
+Write in plain text only. Do not use Markdown (no headings, bold, italics, or tables).
+Assume that they live in the US in West Virginia.
+`;
 
 const PROMPT_SHORT_AI = `${PROMPT_BASE}
 
@@ -313,18 +317,17 @@ const make_scenario_block = (s: ScenarioType): any => {
 	const before = `<b>${s.title} scenario: your preliminary answer</b><br/>`;
 	const after = `<b>${s.title} scenario: your revised answer</b><br/>`;
 
-	const advisor_description = `<b>${s.title} scenario</b><br/>Please check your understanding through the tax advisor system. You can look up additional information using the tabs on the left. You can also re-watch the video.<br/><br/>${video_html(s, 400, 225)}`;
+	const advisor_description = `<b>${s.title} scenario</b><br/>Please check your understanding through the tax advisor system. You can look up additional information using the tabs on the left. A transcript of the video is in the first tab.`;
 
 	return {
 		gen_type: 'LinearGen',
 		pages: [
-			{ ..._text, template_id: k + '_video',
-				instruction: 'Watch the video, then click "Next page."',
-				description: `<b>${s.title} scenario</b><br/><br/>${video_html(s, 560, 315)}` },
-
-			// Before the advisor.
-			{ ..._number, template_id: k + '_pre_estimate', instruction: 'Type a dollar amount',
-				description: before + s.question },
+			// Before the advisor. The video and the preliminary-answer question share one page,
+			// so the participant can re-watch while answering. (The number box auto-focuses, so
+			// the video is kept small enough that the box is usually visible without scrolling.)
+			{ ..._number, template_id: k + '_pre_estimate',
+				instruction: 'Watch the video, then type a dollar amount and click "Next page."',
+				description: `<b>${s.title} scenario</b><br/><br/>${video_html(s, 480, 270)}<br/><br/>` + before + s.question },
 			{ ..._long_text, template_id: k + '_pre_reason',
 				description: before + 'Write 1-2 sentences explaining why you gave this answer.' },
 			{ ..._choice, template_id: k + '_pre_confidence', client_items: CONFIDENCE_7,
@@ -332,28 +335,31 @@ const make_scenario_block = (s: ScenarioType): any => {
 			{ ..._choice, template_id: k + '_pre_difficulty', client_items: DIFFICULTY_7,
 				description: before + 'How difficult is this tax question?' },
 
-			// Advisor. Versions in condition order: [FAQ, SHORT_AI, LONG_AI].
+			// Advisor, with the revised-answer question below it (question_id = sN_post_estimate),
+			// so the participant can keep using the video, tabs and advisor while answering.
+			// code 'test': "Next page" stays disabled until the page is answered.
+			// Versions in condition order: [FAQ, SHORT_AI, LONG_AI].
 			{
 				type: 'IfPageChatSchema',
-				code: 'tutorial',
+				code: 'test',
 				template_id: k + '_advisor',
 				description: advisor_description,
+				question: after + s.question,
+				question_id: k + '_post_estimate',
 				max_turns: MAX_TURNS,
 				tabs: s.tabs,
 				versions_by_condition: true,
 				versions: [
 					{ static_html: s.faq_html, tags: ['condition_faq'],
-						instruction: 'Read the advisor, then click "I\'m ready to continue."' },
+						instruction: 'Use the advisor. Then type your revised answer below and click "Next page."' },
 					{ solution_system_prompt: PROMPT_SHORT_AI, ...SHORT_AI_SETTINGS, tags: ['condition_short_ai'],
-						instruction: 'Type a message and press Send. When you are done, click "I\'m ready to continue."' },
+						instruction: 'Ask the advisor to check your answer. Then type your revised answer below and click "Next page."' },
 					{ solution_system_prompt: PROMPT_LONG_AI, ...LONG_AI_SETTINGS, tags: ['condition_long_ai'],
-						instruction: 'Type a message and press Send. When you are done, click "I\'m ready to continue."' },
+						instruction: 'Ask the advisor to help you with your answer. Then type your revised answer below and click "Next page."' },
 				],
 			},
 
 			// After the advisor.
-			{ ..._number, template_id: k + '_post_estimate', instruction: 'Type a dollar amount',
-				description: after + s.question },
 			{ ..._long_text, template_id: k + '_post_reason',
 				description: after + 'Write 1-2 sentences explaining why you gave this answer.' },
 			{ ..._choice, template_id: k + '_post_confidence', client_items: CONFIDENCE_7,
@@ -362,10 +368,10 @@ const make_scenario_block = (s: ScenarioType): any => {
 				description: after + 'How difficult is this tax question?' },
 			{ ..._choice, template_id: k + '_post_cogfit1', client_items: AGREE_7,
 				description: `<b>${s.title} scenario</b><br/>This advisor system felt like a good match for this kind of tax question.` },
-			{ ..._choice, template_id: k + '_post_cogfit2', client_items: AGREE_7,
+/*			{ ..._choice, template_id: k + '_post_cogfit2', client_items: AGREE_7,
 				description: `<b>${s.title} scenario</b><br/>This advisor system approached the problem the way I naturally think.` },
 			{ ..._choice, template_id: k + '_post_cogfit3', client_items: AGREE_7,
-				description: `<b>${s.title} scenario</b><br/>This advisor system fit how I wanted to work through this question.` },
+				description: `<b>${s.title} scenario</b><br/>This advisor system fit how I wanted to work through this question.` }, */
 		],
 	};
 };
@@ -376,7 +382,13 @@ const s1: ScenarioType = {
 	key: 's1',
 	title: 'Scholarship',
 	video_url: VIDEO_URLS.s1,
-	script: 'I just got accepted to become a business student at WVU! I\'m so excited, as they gave me a $20,000 scholarship. But, I don\'t understand how this scholarship will impact my taxes. The letter said that I had to use $12,000 for tuition and $8,000 for room and board. Together, this covers most of my total bill. The award does say that part of the tuition portion is tied to working as a teaching assistant, but that\'s only for 4 hours per week. I\'m pretty sure that I can handle the overall load. How much of this $20,000 scholarship is taxable income?',
+	script: `
+I just got accepted to become a business student at WVU! I\'m so excited, as they gave me a scholarship. 
+But, I don\'t understand how this scholarship will impact my taxes. The letter said that I had to use $12,000 
+for tuition and $8,000 for room and board. The award does say that part of the tuition portion is tied to working 
+as a teaching assistant.
+How much is taxable income?
+`,
 	question: 'How much of this $20,000 scholarship is taxable income?',
 	faq_html: `
 <h5>Scholarships and Payments for Services</h5>
@@ -385,12 +397,11 @@ const s1: ScenarioType = {
 <p><b>How should an award with several designated uses be evaluated?</b> Determine the amount attributable to qualified tuition expenses, the amount attributable to room and board, and the amount attributable to required services. Apply the relevant rule to each portion separately. The amount included in income is not the same as the student's final tax liability.</p>
 `,
 	tabs: [
-		{ title: 'Degree-seeking status', body: 'She is a degree-seeking student hoping to graduate in 4 years.' },
-		{ title: 'Family', body: 'She has two parents and an older sibling.' },
-		{ title: 'Other job', body: 'She is not planning on working any other jobs while enrolled.' },
-		{ title: 'Teaching assistant', body: 'Half of tuition comes from a grant ($6,000), and the other half ($6,000) is for her work as a teaching assistant.' },
-		{ title: 'Room and board', body: 'She gets $8,000 for living expenses. This does not come from her teaching assistant role.' },
 		{ title: 'Video transcript', body: '' }, // filled in below
+		{ title: 'Degree-seeking status', body: 'She is a degree-seeking student hoping to graduate in 4 years.' },
+		{ title: 'Other job', body: 'She is not planning on working any other jobs while enrolled.' },
+		{ title: 'Teaching assistant', body: 'Half of tuition comes from a grant ($6,000), and the other half ($6,000) is salary (wages) for her work as a teaching assistant.' },
+		{ title: 'Room and board', body: 'She gets $8,000 for living expenses. This does not come from her teaching assistant role.' },
 	],
 };
 
@@ -399,7 +410,13 @@ const s2: ScenarioType = {
 	key: 's2',
 	title: 'Small business',
 	video_url: VIDEO_URLS.s2,
-	script: 'I started a small business this year picking up trash for my neighbors. So far, I\'ve collected $10,000. However, my dad just told me that I need to file taxes on the business. I got a $500 interest-free loan from my parents to start the business. I also rented a truck for $4,000 (it was so nice having a car to see my friends). But I only have $1,000 cash left after paying off my bills and my parents. How much of this $10,000 is taxable business income?',
+	script: `
+I started a small business this year picking up trash for my neighbors. So far, I\'ve collected $10,000. 
+However, my dad just told me that I need to file taxes on the business. 
+I also rented a truck for $4,000 (it was so nice having a car to see my friends). 
+But I only have $1,000 cash left after paying off my bills and my parents. 
+How much is taxable business income?
+`,
 	question: 'How much of this $10,000 is taxable business income?',
 	faq_html: `
 <h5>Business Receipts and Expenses</h5>
@@ -409,12 +426,11 @@ const s2: ScenarioType = {
 <p><b>Are the owner's personal expenditures business expenses?</b> No. Personal expenditures, such as ordinary clothing, food, and personal telephone charges, do not become business expenses merely because they are paid with money earned from the business. See ${link('https://www.irs.gov/faqs/small-business-self-employed-other-business/income-expenses', 'IRS Income and Expenses FAQs')}.</p>
 `,
 	tabs: [
+		{ title: 'Video transcript', body: '' },
 		{ title: 'Loan', body: 'His loan had no interest payments.' },
-		{ title: 'Family', body: 'He has two parents and an older sibling.' },
 		{ title: 'Other job', body: 'He had no other jobs this year.' },
 		{ title: 'Personal use', body: 'Half of the miles he put on the truck are for driving to school and seeing friends.' },
 		{ title: 'Personal bills', body: 'He spent roughly $500 a month on clothing, food, and a cell phone.' },
-		{ title: 'Video transcript', body: '' },
 	],
 };
 
@@ -423,8 +439,14 @@ const s3: ScenarioType = {
 	key: 's3',
 	title: 'Roommate payments',
 	video_url: VIDEO_URLS.s3,
-	script: 'My roommate and I split a lot of stuff this year, and I just realized how much money they\'ve sent me. They sent $2,500 on Venmo, $500 in cash, and a $600 gift card to the campus bookstore, which I used for my textbooks. So that\'s $3,600 total. My friend said the IRS is cracking down on Venmo now, and I\'m worried I must report all of it. It\'s not like I have a real job. We just help each other out. How much of this $3,600 is taxable income?',
-	question: 'How much of this $3,600 is taxable income?',
+	script: `
+My roommate and I split a lot of stuff this year.
+They sent $2,500 on Venmo for rent, and a $600 gift card to the campus bookstore.
+My friend said the IRS is cracking down on Venmo now, and I\'m worried I must report all of it.
+ It\'s not like I have a real job. We just help each other out. 
+ How much is taxable income?
+`,
+	question: 'How much of this $3,100 is taxable income?',
 	faq_html: `
 <h5>Reimbursements and Payments for Services</h5>
 <p><b>Is a payment taxable because it was made through a payment app?</b> The method of payment does not, by itself, determine whether the amount is income. The purpose of the payment must be considered. See ${link('https://www.irs.gov/businesses/understanding-your-form-1099-k', 'IRS, Understanding Your Form 1099-K')}.</p>
@@ -433,18 +455,16 @@ const s3: ScenarioType = {
 <p><b>How should multiple payments be evaluated?</b> Determine the purpose of each payment separately. Amounts repaying shared expenses and amounts paid for services have different tax treatment.</p>
 `,
 	tabs: [
+		{ title: 'Video transcript', body: '' },
 		{ title: 'School', body: 'She is a full-time college student with no other job this year.' },
 		{ title: 'Venmo', body: 'The $2,500 Venmo payment came from her roommate paying their share of the rent.' },
-		{ title: 'Cash', body: 'The $500 in cash was the roommate\'s half of the groceries she bought for the apartment.' },
-		// Worded in the first person in Survey 1.8, unlike the other tabs.
 		{ title: 'Gift card', body: 'My roommate gave me the $600 bookstore gift card in exchange for me tutoring them in algebra.' },
 		{ title: 'Other payments', body: 'The roommate made no other payments to her this year.' },
-		{ title: 'Video transcript', body: '' },
 	],
 };
 
 // Tab 6 is the video transcript.
-[s1, s2, s3].forEach( s => { s.tabs[5].body = s.script; });
+[s1, s2, s3].forEach( s => { s.tabs[0].body = s.script; });
 
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -465,22 +485,32 @@ const end_questions = [
 		description: 'This advisor system changed how I thought about each scenario.' },
 ];
 
+const completed_scenarios_page = {
+	..._text,
+	template_id: 'scenario_exit',
+	description: 'You\'ve completed all the scenarios. The next section of the survey asks you some closing questions.',
+};
+
+
+
 const debrief = {
 	..._text,
 	template_id: 'debrief',
 	description: `
-<h4>Correct answers</h4>
+<h4>Debriefing</h4>
+<p>Thank you for participating in this research study. We hope you found the experience informative and helpful. The correct answers to the scenarios are provided below.</p>
 <p><b>Scenario 1: Scholarship</b><br/>
 <b>Correct answer: $14,000.</b><br/>
 Of the $20,000 award, $6,000 is a scholarship used for tuition and is generally excluded from taxable income. The $6,000 paid for teaching assistant work is taxable because it is payment for services. The remaining $8,000 is designated for room and board, which is not a qualified tuition expense and is also taxable. Thus, $6,000 + $8,000 = $14,000 of taxable income. This amount is taxable income, not the amount of tax the student owes.</p>
 <p><b>Scenario 2: Small business</b><br/>
 <b>Correct answer: $8,000 of net business income.</b><br/>
-The $10,000 received from customers is business revenue. The $500 borrowed from his parents is a loan, so it is not business revenue. Half of the $4,000 truck rental relates to business driving, making $2,000 deductible as a business expense. The other half relates to personal driving and is not deductible. His personal bills and the amount of cash he has left do not determine business income. Assuming he had no other business expenses, net business income is $10,000 &minus; $2,000 = $8,000.</p>
+The $10,000 received from customers is business revenue. Half of the $4,000 truck rental relates to business driving, making $2,000 deductible as a business expense. The other half relates to personal driving and is not deductible.  Assuming he had no other business expenses, net business income is $10,000 &minus; $2,000 = $8,000.</p>
 <p><b>Scenario 3: Roommate payments</b><br/>
 <b>Correct answer: $600.</b><br/>
-The $2,500 sent through Venmo repaid the roommate's share of rent and utilities. The $500 in cash repaid the roommate's share of groceries. Those reimbursements are not income, regardless of how the roommate paid them. The $600 bookstore gift card was payment for tutoring, so its value is income. Of the $3,600 received, $600 is taxable income.</p>
+The $2,500 sent through Venmo repaid the roommate's share of rent and utilities.  Those reimbursements are not income, regardless of how the roommate paid them. The $600 bookstore gift card was payment for tutoring, so its value is income.  $600 is taxable income.</p>
 `,
 };
+
 
 // No completion code: WVU students get credit through their faculty. For a Prolific run,
 // add the Prolific completion code here (and use a Prolific-specific consent).
@@ -488,7 +518,7 @@ const finish = {
 	..._text,
 	template_id: 'finish',
 	instruction: 'Click "Next page" to finish.',
-	description: 'Thank you for participating! You have completed the study.',
+	description: 'Thank you for participating! You have completed the study. You can now close this window.',
 };
 
 
@@ -514,6 +544,7 @@ const taxstudy: LevelSchemaFactoryType = {
 				gen_type: 'ShuffleGen',
 				pages: [ make_scenario_block(s1), make_scenario_block(s2), make_scenario_block(s3) ],
 			},
+			completed_scenarios_page,
 			...end_questions,
 			debrief,
 			finish,

@@ -10,6 +10,7 @@ import Slider from './IfPlayComponents/Slider';
 import ShortTextAnswer from './IfPlayComponents/ShortTextAnswer';
 import LongTextAnswer from  './IfPlayComponents/LongTextAnswer';
 import SqlQuery from './IfPlayComponents/SqlQuery';
+import ChatLog from './IfPlayComponents/ChatLog';
 
 import { IfLevelSchema } from '../../shared/IfLevelSchema';
 import { IfPageBaseSchema } from '../../shared/IfPageSchemas';
@@ -123,6 +124,9 @@ class LevelDebugPage extends React.Component<ScorePropsType> {
 			problem = (<div>
 					<Choice page={page.toIfPageChoiceSchema()} show_solution={true} readonly={true} editable={false}  onChange={ () => {} }  />
 				</div>);
+
+		} else if(page.type === 'IfPageChatSchema') {
+			problem = (<div><ChatLog page={page.toIfPageChatSchema()} /></div>);
 
 		} else {
 			console.log( page );

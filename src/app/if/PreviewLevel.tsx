@@ -11,6 +11,7 @@ import Slider from './IfPlayComponents/Slider';
 import ShortTextAnswer from './IfPlayComponents/ShortTextAnswer';
 import LongTextAnswer  from './IfPlayComponents/LongTextAnswer';
 import SqlQuery from './IfPlayComponents/SqlQuery';
+import ChatLog from './IfPlayComponents/ChatLog';
 
 
 import { IfLevelSchema } from '../../shared/IfLevelSchema';
@@ -70,6 +71,9 @@ const PreviewPage = (props: any ): ReactElement => {
 
 	} else if(page.type === 'IfPageChoiceSchema') {
 		problem = <Choice page={page.toIfPageChoiceSchema()} show_solution={false} readonly={true} editable={false}  onChange={ noop }  />;
+
+	} else if(page.type === 'IfPageChatSchema') {
+		problem = <ChatLog page={page.toIfPageChatSchema()} />;
 
 	} else {
 		console.log( page );

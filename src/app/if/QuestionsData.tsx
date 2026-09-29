@@ -378,8 +378,14 @@ function create_summary_answer( page: IfPageBaseSchema, ): any {
 			"Tab '" + title + "': " + tab_totals[title].opens + ' opens, '
 			+ Math.round(tab_totals[title].seconds) + 's' );
 
-		const transcript_with_tabs = [transcript, ...tab_lines].filter( l => l !== '' ).join('\n');
-		const html_with_tabs = [transcript_html, ...tab_lines.map( l => he.encode(l) )].filter( l => l !== '' ).join('<br/>');
+		// Embedded question's answer (if the page has one) goes first, and into client_n.
+		const has_question = typeof (page as any).question === 'string' && (page as any).question.trim() !== '';
+		const client_answer = (page as any).client_answer;
+		const answer_lines = has_question ? [ 'answer: ' + (client_answer === null || typeof client_answer === 'undefined' ? '' : client_answer) ] : [];
+		if(has_question) summary_answer.client_n = client_answer;
+
+		const transcript_with_tabs = [...answer_lines, transcript, ...tab_lines].filter( l => l !== '' ).join('\n');
+		const html_with_tabs = [...answer_lines.map( l => he.encode(l) ), transcript_html, ...tab_lines.map( l => he.encode(l) )].filter( l => l !== '' ).join('<br/>');
 
 		summary_answer.type = 'chat';
 		summary_answer.html = html_with_tabs;

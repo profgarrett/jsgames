@@ -27,6 +27,7 @@ interface StateType {
 }
 
 const INPUT_ID = 'ChatMessageInput';
+const ANSWER_ID = 'ChatQuestionAnswerInput';
 
 /**
 	Renders an embedded AI chat conversation: the transcript so far, a text box + Send button
@@ -36,6 +37,10 @@ const INPUT_ID = 'ChatMessageInput';
 	If the page has info tabs (page.tabs), they're shown as an accordion to the left of the
 	chat, with only one open at a time. Each expand/collapse is recorded in
 	page.client_tab_views (sent through onChange, and also along with each chat message).
+
+	If the page has a question (page.question), it's shown below the tabs and chat with a
+	number box (page.client_answer), and replaces the "ready" button. The answer is also sent
+	with each chat message so the server keeps it.
 */
 export default class Chat extends React.Component<PropsType, StateType> {
 
@@ -57,7 +62,11 @@ export default class Chat extends React.Component<PropsType, StateType> {
 				'Accept': 'application/json',
 				'Content-Type': 'application/json'
 			},
-			body: JSON.stringify({ text, client_tab_views: this.props.page.client_tab_views || [] })
+			body: JSON.stringify({
+				text,
+				client_tab_views: this.props.page.client_tab_views || [],
+				client_answer: this.props.page.client_answer,
+			})
 		})
 			.then( (response: any) => response.json() )
 			.then( (json: any) => {
@@ -84,6 +93,21 @@ export default class Chat extends React.Component<PropsType, StateType> {
 	handleReady = (): void => {
 		// Also close any open info tab, so its duration ends when the participant finishes.
 		this.props.onChange({ client_ready_to_advance: true, client_tab_views: this.close_open_views(new Date()) });
+	}
+
+	// Answer box for the embedded question: keep digits only (so "$14,000" becomes 14000).
+	handleAnswerChange = (s: string): void => {
+		if(this.props.readonly) return;
+		const n = parseInt(s.replace(/\D/g, ''), 10);
+		this.props.onChange({ client_answer: Number.isNaN(n) ? null : n });
+	}
+
+	handleAnswerKeyDown = (e: React.KeyboardEvent): void => {
+		// Don't let Enter submit the level's form; the participant clicks "Next page".
+		if(e.key === 'Enter') {
+			e.preventDefault();
+			e.stopPropagation();
+		}
 	}
 
 	// Copy of the current tab views, with any still-open view closed at `now`.
@@ -126,8 +150,10 @@ export default class Chat extends React.Component<PropsType, StateType> {
 		const is_static = page.is_static();
 		const can_advance = is_static || turns_used > 0;
 		const at_limit = turns_left <= 0;
+		const has_question = page.has_question();
 
-		const ready_button = (
+		// With an embedded question, the answer (not this button) signals the participant is done.
+		const ready_button = has_question ? null : (
 			<div style={{ marginTop: '10px' }}>
 				<Button
 					variant={ page.client_ready_to_advance ? 'success' : 'secondary' }
@@ -175,7 +201,7 @@ export default class Chat extends React.Component<PropsType, StateType> {
 						}}
 					>
 						{ messages.length === 0
-							? <div style={{ color: '#6c757d' }}>No messages yet. Say hello to get started.</div>
+							? <div style={{ color: '#6c757d' }}>No messages yet.</div>
 							: messages.map( (m, i) => (
 								<div key={i} style={{ textAlign: m.role === 'user' ? 'right' : 'left', marginBottom: '8px' }}>
 									<span
@@ -229,12 +255,41 @@ export default class Chat extends React.Component<PropsType, StateType> {
 			</Card>
 		);
 
+		// Embedded question, below the tabs and chat, so the participant can keep using the
+		// advisor (and the video above) while answering.
+		const answer_text = page.client_answer === null || typeof page.client_answer === 'undefined' ? '' : ''+page.client_answer;
+		const question_card = !has_question ? null : (
+			<Card style={{ marginTop: '1rem', borderColor: '#0d6efd' }}>
+				<Card.Body>
+					<HtmlDiv html={ page.question } />
+					<FormControl
+						id={ ANSWER_ID }
+						type='text'
+						inputMode='numeric'
+						autoComplete='off'
+						style={{ maxWidth: '240px', marginTop: '8px' }}
+						placeholder='Type a dollar amount'
+						value={ answer_text }
+						disabled={ this.props.readonly }
+						onChange={ (e: any) => this.handleAnswerChange(e.target.value) }
+						onKeyDown={ this.handleAnswerKeyDown }
+					/>
+					{ !is_static && turns_used === 0 &&
+						<div style={{ marginTop: '8px', color: '#6c757d', fontSize: '0.9em' }}>
+							Send at least one message to the advisor before continuing.
+						</div>
+					}
+				</Card.Body>
+			</Card>
+		);
+
 		const tabs = page.tabs || [];
-		if(tabs.length === 0) return chat_card;
+		if(tabs.length === 0) return <div>{ chat_card }{ question_card }</div>;
 
 		const open_i = this.open_tab_i();
 
 		return (
+			<div>
 			<Row>
 				<Col md={5} style={{ marginTop: '1rem' }}>
 					<Accordion
@@ -253,6 +308,8 @@ export default class Chat extends React.Component<PropsType, StateType> {
 					{ chat_card }
 				</Col>
 			</Row>
+			{ question_card }
+			</div>
 		);
 	}
 }

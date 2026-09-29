@@ -79,7 +79,8 @@ export default function IfRecentContainer(): ReactElement {
 
 	const search = new URLSearchParams(window.location.search);
 
-	const filter_defaults = { sections: _idsection, days: 7, levels: 'feedback_t' };
+		///feedback_t
+	const filter_defaults = { sections: _idsection, days: 7, levels: '' };
 
 	const filter_filters = {
 		levels: [],
@@ -117,7 +118,7 @@ export default function IfRecentContainer(): ReactElement {
 				<Message message={message} style={messageStyle} />
 				<Loading loading={isLoading } />
 				{ filter }
-				<Tabs defaultActiveKey='answers' className='mb-3'>
+				<Tabs defaultActiveKey='levels' className='mb-3'>
 					<Tab eventKey='levels' title='Levels' >
 						<RecentLevelTable levels={levels} />
 					</Tab>

@@ -1911,6 +1911,18 @@ function sanitize_chat_tab_views(raw: any, tabs: Array<ChatTab>, close_open_at: 
 	return views;
 }
 
+/*
+	The number typed into a chat page's embedded question (IfPageChatSchema.client_answer).
+	Comes from the (untrusted) browser: accept a number or a string such as "$14,000", and
+	return null for anything that isn't a finite number.
+*/
+function parse_chat_answer(raw: any): number|null {
+	if(raw === null || typeof raw === 'undefined') return null;
+	const n = typeof raw === 'number' ? raw : parseFloat(String(raw).replace(/[^0-9.-]/g, ''));
+	if(!Number.isFinite(n) || Math.abs(n) > 1e12) return null;
+	return n;
+}
+
 
 /*
 	A page that embeds a conversation with an AI chatbot (used for Prolific-style experiments).
@@ -1932,6 +1944,12 @@ function sanitize_chat_tab_views(raw: any, tabs: Array<ChatTab>, close_open_at: 
 	tabs (optional, set by the level author) are shown as an accordion to the left of the chat;
 	only one can be open at a time. client_tab_views records each time one was expanded and
 	for how many seconds -- see sanitize_chat_tab_views above.
+
+	question (optional HTML, set by the level author) is shown below the tabs and chat with a
+	number box, so the participant can answer while still using the advisor. The number is
+	client_answer; question_id names it in exports (e.g. 's1_post_estimate'). With a question,
+	the page is answered once client_answer is set and, for an AI chat (not static), at least
+	one message was sent. The "I'm ready to continue" button isn't used.
 */
 class IfPageChatSchema extends IfPageBaseSchema {
 	client_messages!: Array<{ role: string, text: string, dt: Date }>;
@@ -1943,6 +1961,9 @@ class IfPageChatSchema extends IfPageBaseSchema {
 	client_tab_views!: Array<ChatTabView>;
 	static_html!: string;
 	max_tokens!: number;
+	question!: string;
+	question_id!: string|null;
+	client_answer!: number|null;
 
 	// Apply json to this obj, signally no parent classes to do the setting for us.
 	constructor( json?: any) {
@@ -1960,6 +1981,16 @@ class IfPageChatSchema extends IfPageBaseSchema {
 	// Tabs still work; no messages can be sent. Used for a non-AI study condition.
 	is_static(): boolean {
 		return typeof this.static_html === 'string' && this.static_html.trim() !== '';
+	}
+
+	// Does this page embed a question for the participant to answer (see class comment)?
+	has_question(): boolean {
+		return typeof this.question === 'string' && this.question.trim() !== '';
+	}
+
+	// Number of messages the participant has sent.
+	user_turns(): number {
+		return (this.client_messages || []).filter( m => m.role === 'user' ).length;
 	}
 
 	get schema(): any {
@@ -1980,12 +2011,19 @@ class IfPageChatSchema extends IfPageBaseSchema {
 			// Per-page cap on the AI's output tokens, which include its reasoning tokens
 			// (see src/server/openai_chat.ts). A cap that's too low returns an empty reply.
 			max_tokens: { type: 'Number', initialize: (n: any) => isDef(n) && n !== null && n !== '' && Number.isFinite(Number(n)) ? Math.max(1, Math.min(32000, Math.round(Number(n)))) : 2000 },
+			question: { type: 'String', initialize: (s: any) => isDef(s) && s !== null ? ''+s : '' },
+			question_id: { type: 'String', initialize: (s: any) => isDef(s) && s !== null ? ''+s : null },
+			client_answer: { type: 'Number', initialize: (n: any) => parse_chat_answer(n) },
 		};
 	}
 
-	// Has the user provided input? Requires the student to explicitly click "ready to continue",
-	// not just having sent a message, so that a variable number of turns is allowed.
+	// Has the user provided input? Without a question, requires the student to explicitly click
+	// "ready to continue", not just having sent a message, so that a variable number of turns is
+	// allowed. With a question, requires an answer (and, for an AI chat, at least one message).
 	client_has_answered(): boolean {
+		if(this.has_question()) {
+			return this.client_answer !== null && (this.is_static() || this.user_turns() > 0);
+		}
 		return this.client_ready_to_advance === true;
 	}
 
@@ -1994,6 +2032,7 @@ class IfPageChatSchema extends IfPageBaseSchema {
 		this.client_messages = [];
 		this.client_ready_to_advance = false;
 		this.client_tab_views = [];
+		this.client_answer = null;
 		this.correct = false;
 		this.completed = false;
 		this.client_feedback = [];
@@ -2011,6 +2050,7 @@ class IfPageChatSchema extends IfPageBaseSchema {
 			this.client_tab_views = [{ tab_i: 0, title: this.tabs[0].title, dt_opened: opened, dt_closed: closed, seconds: 5 }];
 		}
 		this.client_ready_to_advance = true;
+		if(this.has_question()) this.client_answer = Math.round(Math.random()*10);
 		this.updateCorrect();
 	}
 
@@ -2035,11 +2075,22 @@ class IfPageChatSchema extends IfPageBaseSchema {
 		if(!this.completed && typeof json !== 'undefined' && typeof json.client_tab_views !== 'undefined') {
 			this.client_tab_views = sanitize_chat_tab_views(json.client_tab_views, this.tabs, is_server() ? new Date() : null);
 		}
-		this._updateUserFields(json, ['client_ready_to_advance']);
+		// client_answer is untrusted; keep only a clean number (or null).
+		const clean = typeof json !== 'undefined' && typeof json.client_answer !== 'undefined'
+			? { ...json, client_answer: parse_chat_answer(json.client_answer) }
+			: json;
+		this._updateUserFields(clean, ['client_ready_to_advance', 'client_answer']);
 	}
 
 	updateCorrect() {
 		if(this.completed) return; // do not update completed items.
+
+		if(this.has_question()) {
+			this.client_feedback = [];
+			this.correct = this.client_has_answered();
+			return;
+		}
+
 		if(!this.client_ready_to_advance) return; // student hasn't finished chatting yet.
 
 		this.client_feedback = [];
@@ -2231,6 +2282,15 @@ function build_answers_from_level( level: IfLevelSchema ): Array<IfPageAnswer> {
         a.classification = p.completed ? 'Completed' : 'In progress';
 
         answers.push(a);
+
+        // A chat page's embedded question gets its own row, named by question_id.
+        if(p.type === 'IfPageChatSchema' && (p as any).has_question()) {
+            const q = new IfPageAnswer({ ...a });
+            const client_answer = (p as any).client_answer;
+            q.template_id = (p as any).question_id || ((p.template_id || '') + '_answer');
+            q.answers = [ client_answer === null ? '' : ''+client_answer ];
+            answers.push(q);
+        }
     });
 
     return answers;
@@ -2239,6 +2299,7 @@ function build_answers_from_level( level: IfLevelSchema ): Array<IfPageAnswer> {
 export {
 	get_page_schema_as_class,
 	sanitize_chat_tab_views,
+	parse_chat_answer,
 	IfPageBaseSchema,
 	IfPageTextSchema,
 	IfPageChoiceSchema,
