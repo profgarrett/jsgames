@@ -51,11 +51,12 @@ Each week covers Python and Machine Learning concepts.  Most modules have a deli
 ### Week 6 - September 21, 2026 
 
 - *Datacamp: Regression in Python*
-- [ml05](ml05-ols/index): Classical Regression with OLS
+- [ml05](ml05-ols/index): Regression 1, Classical Regression with OLS
 
 ### Week 7 - September 28, 2026 
 
-- [ml06](ml06-logistic-transform/index): Regression 2, Logistic regression and data transformations
+- [ml06](ml06-ols-transform/index): Regression 2, Data transformations
+- [ml07](ml07-logistic-regression/index): Regression 3, Advanced logistic regression
 
 
 ## Module 3: Machine Learning
