@@ -133,56 +133,10 @@ df_students_with_classes
 ```
 
 
-
-
-<div>
-<style scoped>
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }
-</style>
-<table border="1" class="dataframe">
-  <thead>
-    <tr style="text-align: right;">
-      <th></th>
-      <th>id</th>
-      <th>name_student</th>
-      <th>student_id</th>
-      <th>name_class</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th>0</th>
-      <td>1</td>
-      <td>Alice</td>
-      <td>1</td>
-      <td>CS101</td>
-    </tr>
-    <tr>
-      <th>1</th>
-      <td>1</td>
-      <td>Alice</td>
-      <td>1</td>
-      <td>Math101</td>
-    </tr>
-    <tr>
-      <th>2</th>
-      <td>2</td>
-      <td>Bob</td>
-      <td>2</td>
-      <td>CS101</td>
-    </tr>
-  </tbody>
-</table>
-</div>
+|   | id | name_student | student_id | name_class |
+|---|---|---|---|---|
+| 0 | 1 | Alice | 1 | CS101 |
+| 1 | 1 | Alice | 1 | Math101 |
+| 2 | 2 | Bob | 2 | CS101 |
 
 

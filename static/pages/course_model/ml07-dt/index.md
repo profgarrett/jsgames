@@ -100,187 +100,21 @@ df
 ```
 
 
+|   | mpg | cylinders | displacement | horsepower | weight | acceleration | model_year | origin | name | make |
+|---|---|---|---|---|---|---|---|---|---|---|
+| 0 | 18.0 | 8 | 307.0 | 130.0 | 3504 | 12.0 | 70 | usa | chevrolet chevelle malibu | chevrolet |
+| 1 | 15.0 | 8 | 350.0 | 165.0 | 3693 | 11.5 | 70 | usa | buick skylark 320 | buick |
+| 2 | 18.0 | 8 | 318.0 | 150.0 | 3436 | 11.0 | 70 | usa | plymouth satellite | plymouth |
+| 3 | 16.0 | 8 | 304.0 | 150.0 | 3433 | 12.0 | 70 | usa | amc rebel sst | amc |
+| 4 | 17.0 | 8 | 302.0 | 140.0 | 3449 | 10.5 | 70 | usa | ford torino | ford |
+| ... | ... | ... | ... | ... | ... | ... | ... | ... | ... | ... |
+| 393 | 27.0 | 4 | 140.0 | 86.0 | 2790 | 15.6 | 82 | usa | ford mustang gl | ford |
+| 394 | 44.0 | 4 | 97.0 | 52.0 | 2130 | 24.6 | 82 | europe | vw pickup | vw |
+| 395 | 32.0 | 4 | 135.0 | 84.0 | 2295 | 11.6 | 82 | usa | dodge rampage | dodge |
+| 396 | 28.0 | 4 | 120.0 | 79.0 | 2625 | 18.6 | 82 | usa | ford ranger | ford |
+| 397 | 31.0 | 4 | 119.0 | 82.0 | 2720 | 19.4 | 82 | usa | chevy s-10 | chevy |
 
-
-<div>
-<style scoped>
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }
-</style>
-<table border="1" class="dataframe">
-  <thead>
-    <tr style="text-align: right;">
-      <th></th>
-      <th>mpg</th>
-      <th>cylinders</th>
-      <th>displacement</th>
-      <th>horsepower</th>
-      <th>weight</th>
-      <th>acceleration</th>
-      <th>model_year</th>
-      <th>origin</th>
-      <th>name</th>
-      <th>make</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th>0</th>
-      <td>18.0</td>
-      <td>8</td>
-      <td>307.0</td>
-      <td>130.0</td>
-      <td>3504</td>
-      <td>12.0</td>
-      <td>70</td>
-      <td>usa</td>
-      <td>chevrolet chevelle malibu</td>
-      <td>chevrolet</td>
-    </tr>
-    <tr>
-      <th>1</th>
-      <td>15.0</td>
-      <td>8</td>
-      <td>350.0</td>
-      <td>165.0</td>
-      <td>3693</td>
-      <td>11.5</td>
-      <td>70</td>
-      <td>usa</td>
-      <td>buick skylark 320</td>
-      <td>buick</td>
-    </tr>
-    <tr>
-      <th>2</th>
-      <td>18.0</td>
-      <td>8</td>
-      <td>318.0</td>
-      <td>150.0</td>
-      <td>3436</td>
-      <td>11.0</td>
-      <td>70</td>
-      <td>usa</td>
-      <td>plymouth satellite</td>
-      <td>plymouth</td>
-    </tr>
-    <tr>
-      <th>3</th>
-      <td>16.0</td>
-      <td>8</td>
-      <td>304.0</td>
-      <td>150.0</td>
-      <td>3433</td>
-      <td>12.0</td>
-      <td>70</td>
-      <td>usa</td>
-      <td>amc rebel sst</td>
-      <td>amc</td>
-    </tr>
-    <tr>
-      <th>4</th>
-      <td>17.0</td>
-      <td>8</td>
-      <td>302.0</td>
-      <td>140.0</td>
-      <td>3449</td>
-      <td>10.5</td>
-      <td>70</td>
-      <td>usa</td>
-      <td>ford torino</td>
-      <td>ford</td>
-    </tr>
-    <tr>
-      <th>...</th>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-    </tr>
-    <tr>
-      <th>393</th>
-      <td>27.0</td>
-      <td>4</td>
-      <td>140.0</td>
-      <td>86.0</td>
-      <td>2790</td>
-      <td>15.6</td>
-      <td>82</td>
-      <td>usa</td>
-      <td>ford mustang gl</td>
-      <td>ford</td>
-    </tr>
-    <tr>
-      <th>394</th>
-      <td>44.0</td>
-      <td>4</td>
-      <td>97.0</td>
-      <td>52.0</td>
-      <td>2130</td>
-      <td>24.6</td>
-      <td>82</td>
-      <td>europe</td>
-      <td>vw pickup</td>
-      <td>vw</td>
-    </tr>
-    <tr>
-      <th>395</th>
-      <td>32.0</td>
-      <td>4</td>
-      <td>135.0</td>
-      <td>84.0</td>
-      <td>2295</td>
-      <td>11.6</td>
-      <td>82</td>
-      <td>usa</td>
-      <td>dodge rampage</td>
-      <td>dodge</td>
-    </tr>
-    <tr>
-      <th>396</th>
-      <td>28.0</td>
-      <td>4</td>
-      <td>120.0</td>
-      <td>79.0</td>
-      <td>2625</td>
-      <td>18.6</td>
-      <td>82</td>
-      <td>usa</td>
-      <td>ford ranger</td>
-      <td>ford</td>
-    </tr>
-    <tr>
-      <th>397</th>
-      <td>31.0</td>
-      <td>4</td>
-      <td>119.0</td>
-      <td>82.0</td>
-      <td>2720</td>
-      <td>19.4</td>
-      <td>82</td>
-      <td>usa</td>
-      <td>chevy s-10</td>
-      <td>chevy</td>
-    </tr>
-  </tbody>
-</table>
-<p>392 rows × 10 columns</p>
-</div>
-
+*392 rows × 10 columns*
 
 
 ### Step 2: Define predictors and target
@@ -329,7 +163,6 @@ print("Linear Regression R^2:", r2_lr)
     Linear Regression R^2: 0.6348272785373763
 
 
-
 ```python
 # Use a decision tree
 from sklearn.tree import DecisionTreeRegressor
@@ -369,266 +202,56 @@ feature_importances
     R^2: 0.6087798210484368
 
 
-
-
-
-<div>
-<style scoped>
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }
-</style>
-<table border="1" class="dataframe">
-  <thead>
-    <tr style="text-align: right;">
-      <th></th>
-      <th>feature</th>
-      <th>importance</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th>2</th>
-      <td>displacement</td>
-      <td>0.762519</td>
-    </tr>
-    <tr>
-      <th>1</th>
-      <td>horsepower</td>
-      <td>0.190945</td>
-    </tr>
-    <tr>
-      <th>0</th>
-      <td>weight</td>
-      <td>0.039471</td>
-    </tr>
-    <tr>
-      <th>18</th>
-      <td>make_datsun</td>
-      <td>0.007065</td>
-    </tr>
-    <tr>
-      <th>33</th>
-      <td>make_plymouth</td>
-      <td>0.000000</td>
-    </tr>
-    <tr>
-      <th>26</th>
-      <td>make_mercedes</td>
-      <td>0.000000</td>
-    </tr>
-    <tr>
-      <th>27</th>
-      <td>make_mercedes-benz</td>
-      <td>0.000000</td>
-    </tr>
-    <tr>
-      <th>28</th>
-      <td>make_mercury</td>
-      <td>0.000000</td>
-    </tr>
-    <tr>
-      <th>29</th>
-      <td>make_nissan</td>
-      <td>0.000000</td>
-    </tr>
-    <tr>
-      <th>30</th>
-      <td>make_oldsmobile</td>
-      <td>0.000000</td>
-    </tr>
-    <tr>
-      <th>31</th>
-      <td>make_opel</td>
-      <td>0.000000</td>
-    </tr>
-    <tr>
-      <th>32</th>
-      <td>make_peugeot</td>
-      <td>0.000000</td>
-    </tr>
-    <tr>
-      <th>34</th>
-      <td>make_pontiac</td>
-      <td>0.000000</td>
-    </tr>
-    <tr>
-      <th>24</th>
-      <td>make_maxda</td>
-      <td>0.000000</td>
-    </tr>
-    <tr>
-      <th>35</th>
-      <td>make_renault</td>
-      <td>0.000000</td>
-    </tr>
-    <tr>
-      <th>36</th>
-      <td>make_saab</td>
-      <td>0.000000</td>
-    </tr>
-    <tr>
-      <th>37</th>
-      <td>make_subaru</td>
-      <td>0.000000</td>
-    </tr>
-    <tr>
-      <th>38</th>
-      <td>make_toyota</td>
-      <td>0.000000</td>
-    </tr>
-    <tr>
-      <th>39</th>
-      <td>make_toyouta</td>
-      <td>0.000000</td>
-    </tr>
-    <tr>
-      <th>40</th>
-      <td>make_triumph</td>
-      <td>0.000000</td>
-    </tr>
-    <tr>
-      <th>41</th>
-      <td>make_vokswagen</td>
-      <td>0.000000</td>
-    </tr>
-    <tr>
-      <th>42</th>
-      <td>make_volkswagen</td>
-      <td>0.000000</td>
-    </tr>
-    <tr>
-      <th>43</th>
-      <td>make_volvo</td>
-      <td>0.000000</td>
-    </tr>
-    <tr>
-      <th>25</th>
-      <td>make_mazda</td>
-      <td>0.000000</td>
-    </tr>
-    <tr>
-      <th>22</th>
-      <td>make_hi</td>
-      <td>0.000000</td>
-    </tr>
-    <tr>
-      <th>23</th>
-      <td>make_honda</td>
-      <td>0.000000</td>
-    </tr>
-    <tr>
-      <th>21</th>
-      <td>make_ford</td>
-      <td>0.000000</td>
-    </tr>
-    <tr>
-      <th>3</th>
-      <td>acceleration</td>
-      <td>0.000000</td>
-    </tr>
-    <tr>
-      <th>4</th>
-      <td>cylinders</td>
-      <td>0.000000</td>
-    </tr>
-    <tr>
-      <th>5</th>
-      <td>origin_europe</td>
-      <td>0.000000</td>
-    </tr>
-    <tr>
-      <th>6</th>
-      <td>origin_japan</td>
-      <td>0.000000</td>
-    </tr>
-    <tr>
-      <th>7</th>
-      <td>origin_usa</td>
-      <td>0.000000</td>
-    </tr>
-    <tr>
-      <th>8</th>
-      <td>make_amc</td>
-      <td>0.000000</td>
-    </tr>
-    <tr>
-      <th>9</th>
-      <td>make_audi</td>
-      <td>0.000000</td>
-    </tr>
-    <tr>
-      <th>10</th>
-      <td>make_bmw</td>
-      <td>0.000000</td>
-    </tr>
-    <tr>
-      <th>11</th>
-      <td>make_buick</td>
-      <td>0.000000</td>
-    </tr>
-    <tr>
-      <th>12</th>
-      <td>make_cadillac</td>
-      <td>0.000000</td>
-    </tr>
-    <tr>
-      <th>13</th>
-      <td>make_capri</td>
-      <td>0.000000</td>
-    </tr>
-    <tr>
-      <th>14</th>
-      <td>make_chevroelt</td>
-      <td>0.000000</td>
-    </tr>
-    <tr>
-      <th>15</th>
-      <td>make_chevrolet</td>
-      <td>0.000000</td>
-    </tr>
-    <tr>
-      <th>16</th>
-      <td>make_chevy</td>
-      <td>0.000000</td>
-    </tr>
-    <tr>
-      <th>17</th>
-      <td>make_chrysler</td>
-      <td>0.000000</td>
-    </tr>
-    <tr>
-      <th>19</th>
-      <td>make_dodge</td>
-      <td>0.000000</td>
-    </tr>
-    <tr>
-      <th>20</th>
-      <td>make_fiat</td>
-      <td>0.000000</td>
-    </tr>
-    <tr>
-      <th>44</th>
-      <td>make_vw</td>
-      <td>0.000000</td>
-    </tr>
-  </tbody>
-</table>
-</div>
-
+|   | feature | importance |
+|---|---|---|
+| 2 | displacement | 0.762519 |
+| 1 | horsepower | 0.190945 |
+| 0 | weight | 0.039471 |
+| 18 | make_datsun | 0.007065 |
+| 33 | make_plymouth | 0.000000 |
+| 26 | make_mercedes | 0.000000 |
+| 27 | make_mercedes-benz | 0.000000 |
+| 28 | make_mercury | 0.000000 |
+| 29 | make_nissan | 0.000000 |
+| 30 | make_oldsmobile | 0.000000 |
+| 31 | make_opel | 0.000000 |
+| 32 | make_peugeot | 0.000000 |
+| 34 | make_pontiac | 0.000000 |
+| 24 | make_maxda | 0.000000 |
+| 35 | make_renault | 0.000000 |
+| 36 | make_saab | 0.000000 |
+| 37 | make_subaru | 0.000000 |
+| 38 | make_toyota | 0.000000 |
+| 39 | make_toyouta | 0.000000 |
+| 40 | make_triumph | 0.000000 |
+| 41 | make_vokswagen | 0.000000 |
+| 42 | make_volkswagen | 0.000000 |
+| 43 | make_volvo | 0.000000 |
+| 25 | make_mazda | 0.000000 |
+| 22 | make_hi | 0.000000 |
+| 23 | make_honda | 0.000000 |
+| 21 | make_ford | 0.000000 |
+| 3 | acceleration | 0.000000 |
+| 4 | cylinders | 0.000000 |
+| 5 | origin_europe | 0.000000 |
+| 6 | origin_japan | 0.000000 |
+| 7 | origin_usa | 0.000000 |
+| 8 | make_amc | 0.000000 |
+| 9 | make_audi | 0.000000 |
+| 10 | make_bmw | 0.000000 |
+| 11 | make_buick | 0.000000 |
+| 12 | make_cadillac | 0.000000 |
+| 13 | make_capri | 0.000000 |
+| 14 | make_chevroelt | 0.000000 |
+| 15 | make_chevrolet | 0.000000 |
+| 16 | make_chevy | 0.000000 |
+| 17 | make_chrysler | 0.000000 |
+| 19 | make_dodge | 0.000000 |
+| 20 | make_fiat | 0.000000 |
+| 44 | make_vw | 0.000000 |
 
 
 ### Measure accuracy on test set.
-
-
 
 
 ```python
@@ -646,7 +269,6 @@ print("R^2:", r2)
     MAE: 3.389427325074965
     RMSE: 19.73045119753326
     R^2: 0.6087798210484368
-
 
 
 ```python
@@ -721,7 +343,6 @@ print("Confusion Matrix:\n", cm)
      [[21  0  3]
      [ 6  9  2]
      [ 7  0 50]]
-
 
 
 ```python

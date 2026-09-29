@@ -133,6 +133,11 @@ for nb in "${NOTEBOOKS[@]}"; do
 		continue
 	fi
 
+	# DataFrame output arrives as raw HTML, which the page renderer drops (and
+	# its <style> block leaks onto the page as a code block). Rewrite those
+	# tables as markdown tables.
+	python3 "$SCRIPT_DIR/notebook_tables_to_markdown.py" "$dir/index.md"
+
 	log "  ok      $label"
 	CONVERTED=$((CONVERTED + 1))
 done

@@ -108,78 +108,13 @@ df.head()
 ```
 
 
-
-
-<div>
-<style scoped>
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }
-</style>
-<table border="1" class="dataframe">
-  <thead>
-    <tr style="text-align: right;">
-      <th></th>
-      <th>height_cm</th>
-      <th>is_male</th>
-      <th>weight_kg</th>
-      <th>bmi</th>
-      <th>arm_length</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th>0</th>
-      <td>160.00</td>
-      <td>0</td>
-      <td>92.4</td>
-      <td>36.093750</td>
-      <td>46.422310</td>
-    </tr>
-    <tr>
-      <th>1</th>
-      <td>175.75</td>
-      <td>0</td>
-      <td>102.8</td>
-      <td>33.281466</td>
-      <td>53.050766</td>
-    </tr>
-    <tr>
-      <th>2</th>
-      <td>174.80</td>
-      <td>1</td>
-      <td>106.9</td>
-      <td>34.986045</td>
-      <td>52.061996</td>
-    </tr>
-    <tr>
-      <th>3</th>
-      <td>181.50</td>
-      <td>1</td>
-      <td>111.8</td>
-      <td>33.938180</td>
-      <td>52.575706</td>
-    </tr>
-    <tr>
-      <th>4</th>
-      <td>161.60</td>
-      <td>0</td>
-      <td>93.0</td>
-      <td>35.612317</td>
-      <td>46.116558</td>
-    </tr>
-  </tbody>
-</table>
-</div>
-
+|   | height_cm | is_male | weight_kg | bmi | arm_length |
+|---|---|---|---|---|---|
+| 0 | 160.00 | 0 | 92.4 | 36.093750 | 46.422310 |
+| 1 | 175.75 | 0 | 102.8 | 33.281466 | 53.050766 |
+| 2 | 174.80 | 1 | 106.9 | 34.986045 | 52.061996 |
+| 3 | 181.50 | 1 | 111.8 | 33.938180 | 52.575706 |
+| 4 | 161.60 | 0 | 93.0 | 35.612317 | 46.116558 |
 
 
 ### One Pair of Variables
@@ -201,7 +136,6 @@ else:
 
     Correlation between height and weight: r = 0.55
     P-value: < 0.001
-
 
 
 ```python
@@ -292,7 +226,6 @@ plt.show()
     
 
 
-
 ```python
 # P-value for each pair of columns (diagonal left blank)
 cols = df.columns
@@ -309,78 +242,13 @@ p_values.head()
 ```
 
 
-
-
-<div>
-<style scoped>
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }
-</style>
-<table border="1" class="dataframe">
-  <thead>
-    <tr style="text-align: right;">
-      <th></th>
-      <th>height_cm</th>
-      <th>is_male</th>
-      <th>weight_kg</th>
-      <th>bmi</th>
-      <th>arm_length</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th>height_cm</th>
-      <td>NaN</td>
-      <td>0.0</td>
-      <td>0.0</td>
-      <td>0.014</td>
-      <td>0.000</td>
-    </tr>
-    <tr>
-      <th>is_male</th>
-      <td>0.000</td>
-      <td>NaN</td>
-      <td>0.0</td>
-      <td>0.000</td>
-      <td>0.000</td>
-    </tr>
-    <tr>
-      <th>weight_kg</th>
-      <td>0.000</td>
-      <td>0.0</td>
-      <td>NaN</td>
-      <td>0.000</td>
-      <td>0.000</td>
-    </tr>
-    <tr>
-      <th>bmi</th>
-      <td>0.014</td>
-      <td>0.0</td>
-      <td>0.0</td>
-      <td>NaN</td>
-      <td>0.497</td>
-    </tr>
-    <tr>
-      <th>arm_length</th>
-      <td>0.000</td>
-      <td>0.0</td>
-      <td>0.0</td>
-      <td>0.497</td>
-      <td>NaN</td>
-    </tr>
-  </tbody>
-</table>
-</div>
-
+|   | height_cm | is_male | weight_kg | bmi | arm_length |
+|---|---|---|---|---|---|
+| height_cm | NaN | 0.0 | 0.0 | 0.014 | 0.000 |
+| is_male | 0.000 | NaN | 0.0 | 0.000 | 0.000 |
+| weight_kg | 0.000 | 0.0 | NaN | 0.000 | 0.000 |
+| bmi | 0.014 | 0.0 | 0.0 | NaN | 0.497 |
+| arm_length | 0.000 | 0.0 | 0.0 | 0.497 | NaN |
 
 
 ## Significant but Meaningless

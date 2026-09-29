@@ -74,86 +74,18 @@ df_logistic
 ```
 
 
-
-
-<div>
-<style scoped>
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }
-</style>
-<table border="1" class="dataframe">
-  <thead>
-    <tr style="text-align: right;">
-      <th></th>
-      <th>office_size</th>
-      <th>closed</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th>0</th>
-      <td>1</td>
-      <td>1</td>
-    </tr>
-    <tr>
-      <th>1</th>
-      <td>3</td>
-      <td>0</td>
-    </tr>
-    <tr>
-      <th>2</th>
-      <td>1</td>
-      <td>1</td>
-    </tr>
-    <tr>
-      <th>3</th>
-      <td>6</td>
-      <td>0</td>
-    </tr>
-    <tr>
-      <th>4</th>
-      <td>8</td>
-      <td>0</td>
-    </tr>
-    <tr>
-      <th>5</th>
-      <td>9</td>
-      <td>0</td>
-    </tr>
-    <tr>
-      <th>6</th>
-      <td>2</td>
-      <td>1</td>
-    </tr>
-    <tr>
-      <th>7</th>
-      <td>4</td>
-      <td>1</td>
-    </tr>
-    <tr>
-      <th>8</th>
-      <td>3</td>
-      <td>0</td>
-    </tr>
-    <tr>
-      <th>9</th>
-      <td>2</td>
-      <td>1</td>
-    </tr>
-  </tbody>
-</table>
-</div>
-
-
+|   | office_size | closed |
+|---|---|---|
+| 0 | 1 | 1 |
+| 1 | 3 | 0 |
+| 2 | 1 | 1 |
+| 3 | 6 | 0 |
+| 4 | 8 | 0 |
+| 5 | 9 | 0 |
+| 6 | 2 | 1 |
+| 7 | 4 | 1 |
+| 8 | 3 | 0 |
+| 9 | 2 | 1 |
 
 
 ```python
@@ -209,11 +141,9 @@ plt.show()
     [1] Standard Errors assume that the covariance matrix of the errors is correctly specified.
 
 
-
     
 ![png](index_files/index_3_1.png)
     
-
 
 
 ```python
@@ -263,7 +193,6 @@ plt.show()
     const           3.9810      2.645      1.505      0.132      -1.203       9.165
     office_size    -1.2246      0.875     -1.400      0.161      -2.939       0.490
     ===============================================================================
-
 
 
     
@@ -331,7 +260,6 @@ We can remove old columns by using the `drop` function.
 `df = df.drop(columns=['old_column1', 'old_column2'])`
 
 
-
 ```python
 # Sample code
 import pandas as pd
@@ -386,120 +314,17 @@ df
 ```
 
 
-
-
-<div>
-<style scoped>
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }
-</style>
-<table border="1" class="dataframe">
-  <thead>
-    <tr style="text-align: right;">
-      <th></th>
-      <th>profit</th>
-      <th>office_size</th>
-      <th>state</th>
-      <th>sales_as_number</th>
-      <th>is_ny</th>
-      <th>office_size_clipped</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th>0</th>
-      <td>0.0</td>
-      <td>16</td>
-      <td>ca</td>
-      <td>1000.0</td>
-      <td>0</td>
-      <td>10</td>
-    </tr>
-    <tr>
-      <th>1</th>
-      <td>400.0</td>
-      <td>1</td>
-      <td>ca</td>
-      <td>2000.0</td>
-      <td>0</td>
-      <td>1</td>
-    </tr>
-    <tr>
-      <th>2</th>
-      <td>1600.0</td>
-      <td>2</td>
-      <td>ny</td>
-      <td>2500.0</td>
-      <td>0</td>
-      <td>2</td>
-    </tr>
-    <tr>
-      <th>3</th>
-      <td>6250.0</td>
-      <td>3</td>
-      <td>ny</td>
-      <td>10000.0</td>
-      <td>1</td>
-      <td>3</td>
-    </tr>
-    <tr>
-      <th>4</th>
-      <td>240.0</td>
-      <td>1</td>
-      <td>ca</td>
-      <td>1900.0</td>
-      <td>0</td>
-      <td>1</td>
-    </tr>
-    <tr>
-      <th>6</th>
-      <td>900.0</td>
-      <td>2</td>
-      <td>ny</td>
-      <td>3000.0</td>
-      <td>1</td>
-      <td>2</td>
-    </tr>
-    <tr>
-      <th>7</th>
-      <td>1600.0</td>
-      <td>4</td>
-      <td>ny</td>
-      <td>4000.0</td>
-      <td>1</td>
-      <td>4</td>
-    </tr>
-    <tr>
-      <th>8</th>
-      <td>500.0</td>
-      <td>5</td>
-      <td>ca</td>
-      <td>5000.0</td>
-      <td>0</td>
-      <td>5</td>
-    </tr>
-    <tr>
-      <th>9</th>
-      <td>600.0</td>
-      <td>2</td>
-      <td>ca</td>
-      <td>6000.0</td>
-      <td>0</td>
-      <td>2</td>
-    </tr>
-  </tbody>
-</table>
-</div>
-
+|   | profit | office_size | state | sales_as_number | is_ny | office_size_clipped |
+|---|---|---|---|---|---|---|
+| 0 | 0.0 | 16 | ca | 1000.0 | 0 | 10 |
+| 1 | 400.0 | 1 | ca | 2000.0 | 0 | 1 |
+| 2 | 1600.0 | 2 | ny | 2500.0 | 0 | 2 |
+| 3 | 6250.0 | 3 | ny | 10000.0 | 1 | 3 |
+| 4 | 240.0 | 1 | ca | 1900.0 | 0 | 1 |
+| 6 | 900.0 | 2 | ny | 3000.0 | 1 | 2 |
+| 7 | 1600.0 | 4 | ny | 4000.0 | 1 | 4 |
+| 8 | 500.0 | 5 | ca | 5000.0 | 0 | 5 |
+| 9 | 600.0 | 2 | ca | 6000.0 | 0 | 2 |
 
 
 ## Topic 3

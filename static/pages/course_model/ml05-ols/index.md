@@ -73,14 +73,12 @@ Weaknesses / Assumptions:
     - Categorical variables need to be converted to dummy/indicator variables. I.E., if we have a categorical variable with three levels (A, B, C), we would create two dummy variables (is_B, is_C) where is_B = 1 if the observation is B and 0 otherwise, and is_C = 1 if the observation is C and 0 otherwise. Level A would be the reference level.
 
 
-
 ## Step 1: Understand your data
 
 ### Check field types and values
 
 First we want to make sure that we understand our data. Begin by visually scanning the table.
 Then, use some functions to show what values are present in the data.
-
 
 
 ```python
@@ -113,85 +111,16 @@ df_raw.describe()
     dtype: object
 
 
-
-
-
-<div>
-<style scoped>
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }
-</style>
-<table border="1" class="dataframe">
-  <thead>
-    <tr style="text-align: right;">
-      <th></th>
-      <th>sales_id</th>
-      <th>profit</th>
-      <th>office_size</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th>count</th>
-      <td>10.00000</td>
-      <td>9.000000</td>
-      <td>10.000000</td>
-    </tr>
-    <tr>
-      <th>mean</th>
-      <td>5.50000</td>
-      <td>1343.333333</td>
-      <td>3.900000</td>
-    </tr>
-    <tr>
-      <th>std</th>
-      <td>3.02765</td>
-      <td>1922.862450</td>
-      <td>4.433459</td>
-    </tr>
-    <tr>
-      <th>min</th>
-      <td>1.00000</td>
-      <td>0.000000</td>
-      <td>1.000000</td>
-    </tr>
-    <tr>
-      <th>25%</th>
-      <td>3.25000</td>
-      <td>400.000000</td>
-      <td>2.000000</td>
-    </tr>
-    <tr>
-      <th>50%</th>
-      <td>5.50000</td>
-      <td>600.000000</td>
-      <td>2.500000</td>
-    </tr>
-    <tr>
-      <th>75%</th>
-      <td>7.75000</td>
-      <td>1600.000000</td>
-      <td>3.750000</td>
-    </tr>
-    <tr>
-      <th>max</th>
-      <td>10.00000</td>
-      <td>6250.000000</td>
-      <td>16.000000</td>
-    </tr>
-  </tbody>
-</table>
-</div>
-
+|   | sales_id | profit | office_size |
+|---|---|---|---|
+| count | 10.00000 | 9.000000 | 10.000000 |
+| mean | 5.50000 | 1343.333333 | 3.900000 |
+| std | 3.02765 | 1922.862450 | 4.433459 |
+| min | 1.00000 | 0.000000 | 1.000000 |
+| 25% | 3.25000 | 400.000000 | 2.000000 |
+| 50% | 5.50000 | 600.000000 | 2.500000 |
+| 75% | 7.75000 | 1600.000000 | 3.750000 |
+| max | 10.00000 | 6250.000000 | 16.000000 |
 
 
 ### Graph your data
@@ -204,6 +133,21 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 df = df_raw.copy()
+
+# Create is_ny column
+df['is_ny'] = df['state'].apply(lambda x: True if x == 'NY' else False)
+
+# Convert text to numbers
+df['sales'] = df['sales_as_text'].str.replace(',', '').astype(float)
+
+# Cap office size to 5
+df['office_size_capped'] = df['office_size'].apply(lambda x: x if x <= 5 else 5)
+
+# Remove old columns
+df = df.drop(columns=['sales_as_text', 'office_size', 'state', 'sales_id'])
+
+# Remove NaN values
+df = df.dropna()
 
 number_columns = df.select_dtypes(include=['number']).columns.tolist()
 text_columns = df.select_dtypes(include=['string', 'category']).columns.tolist()
@@ -236,29 +180,14 @@ for col in text_columns:
     
 
 
-
     
 ![png](index_files/index_5_1.png)
     
 
 
-
     
 ![png](index_files/index_5_2.png)
     
-
-
-
-    
-![png](index_files/index_5_3.png)
-    
-
-
-
-    
-![png](index_files/index_5_4.png)
-    
-
 
 
 ```python
@@ -296,7 +225,7 @@ import numpy as np
 import statsmodels.api as sm
 import statsmodels.formula.api as smf
 
-X = df[['office_size', 'sales_as_number', 'is_ny']]
+X = df[['office_size_capped', 'sales', 'is_ny']]
 y = df['profit']
 
 # Fit the model
@@ -304,9 +233,38 @@ X = sm.add_constant(X)  # Adds a constant term to the predictor
 model = sm.OLS(y, X).fit()
 predictions = model.predict(X)
 print(model.summary())
-
-
 ```
+
+                                OLS Regression Results                            
+    ==============================================================================
+    Dep. Variable:                 profit   R-squared:                       0.760
+    Model:                            OLS   Adj. R-squared:                  0.616
+    Method:                 Least Squares   F-statistic:                     5.274
+    Date:                Mon, 28 Sep 2026   Prob (F-statistic):             0.0524
+    Time:                        11:12:34   Log-Likelihood:                -73.875
+    No. Observations:                   9   AIC:                             155.7
+    Df Residuals:                       5   BIC:                             156.5
+    Df Model:                           3                                         
+    Covariance Type:            nonrobust                                         
+    ======================================================================================
+                             coef    std err          t      P>|t|      [0.025      0.975]
+    --------------------------------------------------------------------------------------
+    const               -654.8170    986.176     -0.664      0.536   -3189.863    1880.229
+    office_size_capped  -105.8695    272.240     -0.389      0.713    -805.685     593.946
+    sales                  0.4871      0.173      2.822      0.037       0.043       0.931
+    is_ny               1128.8053    955.146      1.182      0.290   -1326.476    3584.087
+    ==============================================================================
+    Omnibus:                        0.645   Durbin-Watson:                   0.608
+    Prob(Omnibus):                  0.724   Jarque-Bera (JB):                0.522
+    Skew:                          -0.002   Prob(JB):                        0.770
+    Kurtosis:                       1.820   Cond. No.                     1.20e+04
+    ==============================================================================
+    
+    Notes:
+    [1] Standard Errors assume that the covariance matrix of the errors is correctly specified.
+    [2] The condition number is large, 1.2e+04. This might indicate that there are
+    strong multicollinearity or other numerical problems.
+
 
 ## Step 3: Interpret results
 
@@ -350,7 +308,6 @@ We will *always* use the adjusted R^2 when using multiple coeffients. This appli
 
 
 ```python
-
 # Calculate error metrics
 
 # Find the residuals, which are the differences between the observed and predicted values
@@ -375,3 +332,12 @@ plt.title('Residuals vs Fitted')
 plt.axhline(0, color='red', linestyle='--')
 plt.show()
 ```
+
+    RMSE: 888.3554873466958
+    R²: 0.7598792649195762
+
+
+    
+![png](index_files/index_10_1.png)
+    
+

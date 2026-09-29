@@ -167,91 +167,21 @@ df
 ```
 
 
+|   | comment | sentiment |
+|---|---|---|
+| 0 | The assignments were really helpful and the ex... | 1 |
+| 1 | Too much homework and unclear instructions on ... | 0 |
+| 2 | I loved the real-world data sets we used in cl... | 1 |
+| 3 | Lectures were disorganized and it was hard to ... | 0 |
+| 4 | Great balance of theory and practice, very eng... | 1 |
+| ... | ... | ... |
+| 93 | There was little explanation about how grades ... | 0 |
+| 94 | Clear lectures with helpful real-world examples. | 1 |
+| 95 | Homework feedback did not explain what to impr... | 0 |
+| 96 | The instructor made time for every student who... | 1 |
+| 97 | The LMS was disorganized with missing files. | 0 |
 
-
-<div>
-<style scoped>
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }
-</style>
-<table border="1" class="dataframe">
-  <thead>
-    <tr style="text-align: right;">
-      <th></th>
-      <th>comment</th>
-      <th>sentiment</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th>0</th>
-      <td>The assignments were really helpful and the ex...</td>
-      <td>1</td>
-    </tr>
-    <tr>
-      <th>1</th>
-      <td>Too much homework and unclear instructions on ...</td>
-      <td>0</td>
-    </tr>
-    <tr>
-      <th>2</th>
-      <td>I loved the real-world data sets we used in cl...</td>
-      <td>1</td>
-    </tr>
-    <tr>
-      <th>3</th>
-      <td>Lectures were disorganized and it was hard to ...</td>
-      <td>0</td>
-    </tr>
-    <tr>
-      <th>4</th>
-      <td>Great balance of theory and practice, very eng...</td>
-      <td>1</td>
-    </tr>
-    <tr>
-      <th>...</th>
-      <td>...</td>
-      <td>...</td>
-    </tr>
-    <tr>
-      <th>93</th>
-      <td>There was little explanation about how grades ...</td>
-      <td>0</td>
-    </tr>
-    <tr>
-      <th>94</th>
-      <td>Clear lectures with helpful real-world examples.</td>
-      <td>1</td>
-    </tr>
-    <tr>
-      <th>95</th>
-      <td>Homework feedback did not explain what to impr...</td>
-      <td>0</td>
-    </tr>
-    <tr>
-      <th>96</th>
-      <td>The instructor made time for every student who...</td>
-      <td>1</td>
-    </tr>
-    <tr>
-      <th>97</th>
-      <td>The LMS was disorganized with missing files.</td>
-      <td>0</td>
-    </tr>
-  </tbody>
-</table>
-<p>98 rows × 2 columns</p>
-</div>
-
+*98 rows × 2 columns*
 
 
 ### Step 2: Data Cleanup
@@ -288,103 +218,21 @@ df
 ```
 
 
+|   | comment | sentiment | clean_comment |
+|---|---|---|---|
+| 0 | The assignments were really helpful and the ex... | 1 | the assignments were really helpful and the ex... |
+| 1 | Too much homework and unclear instructions on ... | 0 | too much homework and unclear instructions on ... |
+| 2 | I loved the real-world data sets we used in cl... | 1 | i loved the realworld data sets we used in class |
+| 3 | Lectures were disorganized and it was hard to ... | 0 | lectures were disorganized and it was hard to ... |
+| 4 | Great balance of theory and practice, very eng... | 1 | great balance of theory and practice very enga... |
+| ... | ... | ... | ... |
+| 93 | There was little explanation about how grades ... | 0 | there was little explanation about how grades ... |
+| 94 | Clear lectures with helpful real-world examples. | 1 | clear lectures with helpful realworld examples |
+| 95 | Homework feedback did not explain what to impr... | 0 | homework feedback did not explain what to improve |
+| 96 | The instructor made time for every student who... | 1 | the instructor made time for every student who... |
+| 97 | The LMS was disorganized with missing files. | 0 | the lms was disorganized with missing files |
 
-
-<div>
-<style scoped>
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }
-</style>
-<table border="1" class="dataframe">
-  <thead>
-    <tr style="text-align: right;">
-      <th></th>
-      <th>comment</th>
-      <th>sentiment</th>
-      <th>clean_comment</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th>0</th>
-      <td>The assignments were really helpful and the ex...</td>
-      <td>1</td>
-      <td>the assignments were really helpful and the ex...</td>
-    </tr>
-    <tr>
-      <th>1</th>
-      <td>Too much homework and unclear instructions on ...</td>
-      <td>0</td>
-      <td>too much homework and unclear instructions on ...</td>
-    </tr>
-    <tr>
-      <th>2</th>
-      <td>I loved the real-world data sets we used in cl...</td>
-      <td>1</td>
-      <td>i loved the realworld data sets we used in class</td>
-    </tr>
-    <tr>
-      <th>3</th>
-      <td>Lectures were disorganized and it was hard to ...</td>
-      <td>0</td>
-      <td>lectures were disorganized and it was hard to ...</td>
-    </tr>
-    <tr>
-      <th>4</th>
-      <td>Great balance of theory and practice, very eng...</td>
-      <td>1</td>
-      <td>great balance of theory and practice very enga...</td>
-    </tr>
-    <tr>
-      <th>...</th>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-    </tr>
-    <tr>
-      <th>93</th>
-      <td>There was little explanation about how grades ...</td>
-      <td>0</td>
-      <td>there was little explanation about how grades ...</td>
-    </tr>
-    <tr>
-      <th>94</th>
-      <td>Clear lectures with helpful real-world examples.</td>
-      <td>1</td>
-      <td>clear lectures with helpful realworld examples</td>
-    </tr>
-    <tr>
-      <th>95</th>
-      <td>Homework feedback did not explain what to impr...</td>
-      <td>0</td>
-      <td>homework feedback did not explain what to improve</td>
-    </tr>
-    <tr>
-      <th>96</th>
-      <td>The instructor made time for every student who...</td>
-      <td>1</td>
-      <td>the instructor made time for every student who...</td>
-    </tr>
-    <tr>
-      <th>97</th>
-      <td>The LMS was disorganized with missing files.</td>
-      <td>0</td>
-      <td>the lms was disorganized with missing files</td>
-    </tr>
-  </tbody>
-</table>
-<p>98 rows × 3 columns</p>
-</div>
-
+*98 rows × 3 columns*
 
 
 ### Step 3: TF-IDF – focus on informative words
@@ -429,14 +277,9 @@ Vocabulary used: course, great, hard, wow
 Note that the values are rounded for readability. The pattern is what's important: common words like "course" get discounted.
 
 
-
-
-
 ```python
 
 ```
-
-
 
 
     array([[0., 0., 0., ..., 0., 0., 0.],
@@ -446,8 +289,6 @@ Note that the values are rounded for readability. The pattern is what's importan
            [0., 0., 0., ..., 0., 0., 0.],
            [0., 0., 0., ..., 0., 0., 0.],
            [0., 0., 0., ..., 0., 0., 0.]], shape=(98, 283))
-
-
 
 
 ```python
@@ -491,7 +332,6 @@ plt.show()
     Test accuracy: 0.8666666666666667
 
 
-
     
 ![png](index_files/index_8_1.png)
     
@@ -518,92 +358,21 @@ df[["comment", "cluster"]]
 ```
 
 
+|   | comment | cluster |
+|---|---|---|
+| 0 | The assignments were really helpful and the ex... | 0 |
+| 1 | Too much homework and unclear instructions on ... | 1 |
+| 2 | I loved the real-world data sets we used in cl... | 0 |
+| 3 | Lectures were disorganized and it was hard to ... | 0 |
+| 4 | Great balance of theory and practice, very eng... | 0 |
+| ... | ... | ... |
+| 93 | There was little explanation about how grades ... | 0 |
+| 94 | Clear lectures with helpful real-world examples. | 0 |
+| 95 | Homework feedback did not explain what to impr... | 0 |
+| 96 | The instructor made time for every student who... | 0 |
+| 97 | The LMS was disorganized with missing files. | 0 |
 
-
-<div>
-<style scoped>
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }
-</style>
-<table border="1" class="dataframe">
-  <thead>
-    <tr style="text-align: right;">
-      <th></th>
-      <th>comment</th>
-      <th>cluster</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th>0</th>
-      <td>The assignments were really helpful and the ex...</td>
-      <td>0</td>
-    </tr>
-    <tr>
-      <th>1</th>
-      <td>Too much homework and unclear instructions on ...</td>
-      <td>1</td>
-    </tr>
-    <tr>
-      <th>2</th>
-      <td>I loved the real-world data sets we used in cl...</td>
-      <td>0</td>
-    </tr>
-    <tr>
-      <th>3</th>
-      <td>Lectures were disorganized and it was hard to ...</td>
-      <td>0</td>
-    </tr>
-    <tr>
-      <th>4</th>
-      <td>Great balance of theory and practice, very eng...</td>
-      <td>0</td>
-    </tr>
-    <tr>
-      <th>...</th>
-      <td>...</td>
-      <td>...</td>
-    </tr>
-    <tr>
-      <th>93</th>
-      <td>There was little explanation about how grades ...</td>
-      <td>0</td>
-    </tr>
-    <tr>
-      <th>94</th>
-      <td>Clear lectures with helpful real-world examples.</td>
-      <td>0</td>
-    </tr>
-    <tr>
-      <th>95</th>
-      <td>Homework feedback did not explain what to impr...</td>
-      <td>0</td>
-    </tr>
-    <tr>
-      <th>96</th>
-      <td>The instructor made time for every student who...</td>
-      <td>0</td>
-    </tr>
-    <tr>
-      <th>97</th>
-      <td>The LMS was disorganized with missing files.</td>
-      <td>0</td>
-    </tr>
-  </tbody>
-</table>
-<p>98 rows × 2 columns</p>
-</div>
-
-
+*98 rows × 2 columns*
 
 
 ```python
@@ -624,7 +393,6 @@ for cluster_id in range(k):
     
     Cluster 1
     ['unclear', 'instructions', 'projects', 'homework', 'follow', 'hard', 'makeups', 'attendance', 'logistics', 'daily']
-
 
 
 ```python

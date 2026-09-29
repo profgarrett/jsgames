@@ -103,7 +103,6 @@ The question is never "which metric is best?" It is "which error costs more?"
 | Balanced classes, symmetric costs | Neither dominates | Accuracy or F1 |
 
 
-
 ```python
 ## Building metrics in Python
 import pandas as pd
@@ -142,80 +141,13 @@ df.head()
     Name: count, dtype: int64
 
 
-
-
-
-<div>
-<style scoped>
-    .dataframe tbody tr th:only-of-type {
-        vertical-align: middle;
-    }
-
-    .dataframe tbody tr th {
-        vertical-align: top;
-    }
-
-    .dataframe thead th {
-        text-align: right;
-    }
-</style>
-<table border="1" class="dataframe">
-  <thead>
-    <tr style="text-align: right;">
-      <th></th>
-      <th>actual</th>
-      <th>green</th>
-      <th>noise</th>
-      <th>predicted</th>
-      <th>result</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th>0</th>
-      <td>deer</td>
-      <td>0.0</td>
-      <td>0.0</td>
-      <td>deer</td>
-      <td>TP</td>
-    </tr>
-    <tr>
-      <th>1</th>
-      <td>deer</td>
-      <td>0.2</td>
-      <td>0.1</td>
-      <td>deer</td>
-      <td>TP</td>
-    </tr>
-    <tr>
-      <th>2</th>
-      <td>deer</td>
-      <td>0.2</td>
-      <td>0.1</td>
-      <td>deer</td>
-      <td>TP</td>
-    </tr>
-    <tr>
-      <th>3</th>
-      <td>deer</td>
-      <td>0.4</td>
-      <td>0.1</td>
-      <td>deer</td>
-      <td>TP</td>
-    </tr>
-    <tr>
-      <th>4</th>
-      <td>deer</td>
-      <td>0.6</td>
-      <td>0.2</td>
-      <td>a kermit</td>
-      <td>FN</td>
-    </tr>
-  </tbody>
-</table>
-</div>
-
-
+|   | actual | green | noise | predicted | result |
+|---|---|---|---|---|---|
+| 0 | deer | 0.0 | 0.0 | deer | TP |
+| 1 | deer | 0.2 | 0.1 | deer | TP |
+| 2 | deer | 0.2 | 0.1 | deer | TP |
+| 3 | deer | 0.4 | 0.1 | deer | TP |
+| 4 | deer | 0.6 | 0.2 | a kermit | FN |
 
 
 ```python
@@ -247,18 +179,12 @@ ConfusionMatrixDisplay(
      [1 2]]
 
 
-
-
-
     <sklearn.metrics._plot.confusion_matrix.ConfusionMatrixDisplay at 0x116ff5090>
-
-
 
 
     
 ![png](index_files/index_3_2.png)
     
-
 
 
 ```python
@@ -330,11 +256,7 @@ RocCurveDisplay.from_predictions(
 ```
 
 
-
-
     <sklearn.metrics._plot.roc_curve.RocCurveDisplay at 0x117150410>
-
-
 
 
     
