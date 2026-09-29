@@ -39,3 +39,20 @@ Course Introduction & RPS Exercise
 <!-- - [excel08](excel08-charts2/index): Charts Part 2 -->
 - [excel09](excel09-titanic/index): Titanic Problem
 
+### Week 6 - September 21, 2026
+
+- [AIS Chapter 1](ais01-overview/index): Introduction to AIS
+
+### Week 7 - September 28, 2026
+
+- [AIS Chapter 2](ais02-erp/index): ERP Systems and Business Processes
+- [AIS Chapter 3](ais03-flowcharts/index): Flowcharts 
+
+### Week 8 - October 5, 2026
+
+- [AIS Chapter 22](ais22-systems-development/index): Systems Development Life Cycle
+- [AIS Chapter 23](ais23-development-strategies/index): Development Strategies
+
+### Week 9 - October 12, 2026
+
+- [AIS Chapter 24](ais24-design-implementation/index): Design and Implementation
