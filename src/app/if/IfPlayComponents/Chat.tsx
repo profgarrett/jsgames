@@ -123,10 +123,44 @@ export default class Chat extends React.Component<PropsType, StateType> {
 		const messages = page.client_messages || [];
 		const turns_used = messages.filter( m => m.role === 'user').length;
 		const turns_left = Math.max(0, page.max_turns - turns_used);
-		const can_advance = turns_used > 0;
+		const is_static = page.is_static();
+		const can_advance = is_static || turns_used > 0;
 		const at_limit = turns_left <= 0;
 
-		const chat_card = (
+		const ready_button = (
+			<div style={{ marginTop: '10px' }}>
+				<Button
+					variant={ page.client_ready_to_advance ? 'success' : 'secondary' }
+					disabled={ this.props.readonly || !can_advance || page.client_ready_to_advance }
+					onClick={ (e) => { e.preventDefault(); this.handleReady(); } }
+				>
+					{ page.client_ready_to_advance ? "Ready -- click Next page below" : "I'm ready to continue" }
+				</Button>
+			</div>
+		);
+
+		// Static mode (e.g. an FAQ condition): fixed content in place of the chat box.
+		const static_card = (
+			<Card style={{ marginTop: '1rem' }}>
+				<Card.Body>
+					<div
+						style={{
+							maxHeight: '480px',
+							overflowY: 'auto',
+							border: '1px solid #dee2e6',
+							borderRadius: '4px',
+							padding: '10px',
+							marginBottom: '10px',
+						}}
+					>
+						<HtmlDiv html={ page.static_html } />
+					</div>
+					{ ready_button }
+				</Card.Body>
+			</Card>
+		);
+
+		const chat_card = is_static ? static_card : (
 			<Card style={{ marginTop: '1rem' }}>
 				<Card.Body>
 					<div
@@ -150,6 +184,8 @@ export default class Chat extends React.Component<PropsType, StateType> {
 											padding: '6px 12px',
 											borderRadius: '14px',
 											maxWidth: '80%',
+											whiteSpace: 'pre-wrap',
+											textAlign: 'left',
 											background: m.role === 'user' ? '#0d6efd' : '#e9ecef',
 											color: m.role === 'user' ? 'white' : 'black'
 										}}
@@ -188,15 +224,7 @@ export default class Chat extends React.Component<PropsType, StateType> {
 						{ turns_left } of { page.max_turns } messages remaining.
 					</div>
 
-					<div style={{ marginTop: '10px' }}>
-						<Button
-							variant={ page.client_ready_to_advance ? 'success' : 'secondary' }
-							disabled={ this.props.readonly || !can_advance || page.client_ready_to_advance }
-							onClick={ (e) => { e.preventDefault(); this.handleReady(); } }
-						>
-							{ page.client_ready_to_advance ? "Ready -- click Next page below" : "I'm ready to continue" }
-						</Button>
-					</div>
+					{ ready_button }
 				</Card.Body>
 			</Card>
 		);

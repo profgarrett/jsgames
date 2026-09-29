@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { IfPageBaseSchema, IfPageFormulaSchema, IfPageChoiceSchema, IfPageNumberAnswerSchema } from './../../shared/IfPageSchemas';
+import { IfPageBaseSchema, IfPageFormulaSchema, IfPageChoiceSchema, IfPageNumberAnswerSchema, get_level_condition } from './../../shared/IfPageSchemas';
 import { IfLevelSchema } from './../../shared/IfLevelSchema';
 import { formatDate } from './../../shared/misc';
 import { turn_array_into_map } from './../../shared/misc';
@@ -204,6 +204,7 @@ function increment_tag( tags: Array<any>, tagname: string ) {
 function create_summary_answer( page: IfPageBaseSchema, ): any {
 	const summary_answer = {
 		template_id: page.template_id,
+		condition: page.level_condition || '',
 		type: page.type,
 		username: page.username,
 		seconds: page.get_time_in_seconds(),
@@ -457,6 +458,7 @@ export function create_summary( levels: Array<IfLevelSchema>): any {
 	levels.map( l => l.pages.map( p => p.id = l._id ));
 	levels.map( l => l.pages.map( p => p.level_completed = l.completed ));
 	levels.map( l => l.pages.map( p => p.standardize_formula_case = l.standardize_formula_case ));
+	levels.map( l => { const c = get_level_condition(l); l.pages.map( p => p.level_condition = c ); });
 
 	// Add the index (position) of each page in the level.  Since levels can use
 	// questions in any order, this allows detecting the order of each question later on.

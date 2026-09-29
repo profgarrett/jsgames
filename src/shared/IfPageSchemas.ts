@@ -1941,6 +1941,8 @@ class IfPageChatSchema extends IfPageBaseSchema {
 	solution_system_prompt_visible!: boolean;
 	tabs!: Array<ChatTab>;
 	client_tab_views!: Array<ChatTabView>;
+	static_html!: string;
+	max_tokens!: number;
 
 	// Apply json to this obj, signally no parent classes to do the setting for us.
 	constructor( json?: any) {
@@ -1952,6 +1954,12 @@ class IfPageChatSchema extends IfPageBaseSchema {
 
 	get type(): string {
 		return 'IfPageChatSchema';
+	}
+
+	// Static mode: the page shows static_html (e.g. an FAQ) where the chat box would be.
+	// Tabs still work; no messages can be sent. Used for a non-AI study condition.
+	is_static(): boolean {
+		return typeof this.static_html === 'string' && this.static_html.trim() !== '';
 	}
 
 	get schema(): any {
@@ -1968,6 +1976,10 @@ class IfPageChatSchema extends IfPageBaseSchema {
 				? a.filter( (t: any) => t !== null && typeof t === 'object' ).map( (t: any) => ({ title: ''+(t.title ?? ''), body: ''+(t.body ?? '') }) )
 				: [] },
 			client_tab_views: { type: 'Array', initialize: (a: any) => isDef(a) && isArray(a) ? revive_dates_recursively(a) : [] },
+			static_html: { type: 'String', initialize: (s: any) => isDef(s) && s !== null ? ''+s : '' },
+			// Per-page cap on the AI's output tokens, which include its reasoning tokens
+			// (see src/server/openai_chat.ts). A cap that's too low returns an empty reply.
+			max_tokens: { type: 'Number', initialize: (n: any) => isDef(n) && n !== null && n !== '' && Number.isFinite(Number(n)) ? Math.max(1, Math.min(32000, Math.round(Number(n)))) : 2000 },
 		};
 	}
 
@@ -1989,7 +2001,7 @@ class IfPageChatSchema extends IfPageBaseSchema {
 
 	// Automatically fill in the answer. Used for testing on the server (debuglevel/previewlevel).
 	debug_answer() {
-		this.client_messages = [
+		this.client_messages = this.is_static() ? [] : [
 			{ role: 'user', text: '(debug) Hello', dt: new Date() },
 			{ role: 'assistant', text: '(debug) Hi there!', dt: new Date() },
 		];
@@ -2086,6 +2098,8 @@ class IfPageAnswer {
 
 	page_code!: string; // page code, such as test, tutorial, ...
 	page_type!: string; // page type, e.g. 'IfPageFormulaSchema', 'IfPageChatSchema', ...
+	template_id!: string|null; // page's template_id, e.g. a study variable name like 's1_pre_estimate'
+	condition!: string; // participant's study condition (see get_level_condition), or ''
 
 	constructor(json?: any) {
 		if(typeof json === 'undefined') return;
@@ -2114,9 +2128,25 @@ const SIMPLE_ANSWER_PAGE_TYPES = [
 	'IfPageTextSchema', // static content (consent, video, completion code, ...); see the special case below.
 ];
 
+/**
+	A participant's study condition: the first page tag starting with 'condition_'
+	(set per page by a `versions` entry, e.g. tags: ['condition_faq']). '' if none.
+	Lets every exported row carry the condition, not just the page that set it.
+*/
+function get_level_condition( level: IfLevelSchema ): string {
+    for(const p of level.pages || []) {
+        for(const t of (p && p.tags) || []) {
+            const tag = typeof t === 'string' ? t : (t && typeof t.tag === 'string' ? t.tag : '');
+            if(tag.indexOf('condition_') === 0) return tag;
+        }
+    }
+    return '';
+}
+
 function build_answers_from_level( level: IfLevelSchema ): Array<IfPageAnswer> {
     const username = level.username;
     const answers: IfPageAnswer[] = [];
+    const condition = get_level_condition(level);
     let a: IfPageAnswer;
 
     level.pages.forEach( (p,i)=> {
@@ -2134,6 +2164,8 @@ function build_answers_from_level( level: IfLevelSchema ): Array<IfPageAnswer> {
             a.seconds = p.get_time_in_seconds();
             a.page_code = p.code;
             a.page_type = p.type;
+            a.template_id = p.template_id;
+            a.condition = condition;
 
             // Grab all of the answers in the given page and return as an array of an array of strings.
             // [  ['=1', '=23'], ['=32'], ...]
@@ -2176,6 +2208,8 @@ function build_answers_from_level( level: IfLevelSchema ): Array<IfPageAnswer> {
         a.seconds = p.get_time_in_seconds();
         a.page_code = p.code;
         a.page_type = p.type;
+        a.template_id = p.template_id;
+        a.condition = condition;
 
         a.answers = p.type === 'IfPageChatSchema'
             ? [
@@ -2217,5 +2251,6 @@ export {
 	IfPageSqlSchema,
 	IfPageChatSchema,
 	build_answers_from_level,
+	get_level_condition,
 };
 

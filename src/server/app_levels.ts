@@ -13,12 +13,13 @@ import { user_require_logged_in, nocache, log_error, user_get_username_or_emptys
 
 import { return_tagged_level } from './tag';
 import { rate_limit_check } from './rate_limit';
+import { build_chat_request, get_response_text } from './openai_chat';
 
 import { queryFactory_updateClientResults } from './../shared/queryFactory';
 
 
 import type { Request, Response, NextFunction } from 'express';
-import { IfPageBaseSchema, IfPageSqlSchema, sanitize_chat_tab_views } from '../shared/IfPageSchemas.js';
+import { IfPageBaseSchema, IfPageSqlSchema, sanitize_chat_tab_views } from '../shared/IfPageSchemas';
 
 // Convert a route parameter into a string. If it is an array, then grab the first item. If it is undefined, then return the fallback value.
 const getRouteParamString = (value: string | string[] | undefined, fallback = ''): string => {
@@ -410,7 +411,7 @@ router.post('/level/:id/delete',
 
 /**
 	Exchange one chat turn on the current (last) page of a level, which must be an
-	IfPageChatSchema. Appends the student's message, calls the OpenAI Chat Completions API
+	IfPageChatSchema. Appends the student's message, calls the OpenAI Responses API
 	using the page's (hidden) condition-specific system prompt plus the transcript so far, and
 	appends the AI's reply. This is a dedicated route -- separate from the generic
 	POST /level/:id below -- specifically so that an arbitrary number of chat turns can happen
@@ -442,6 +443,10 @@ router.post('/level/:id/chat',
 
 		if(page.type !== 'IfPageChatSchema') return res.status(400).json({ _error: 'The current page is not a chat page' });
 		if(page.completed) return res.status(400).json({ _error: 'This chat page is already completed' });
+		// Static (non-AI) advisor pages show fixed content and never call the AI.
+		if(typeof page.static_html === 'string' && page.static_html.trim() !== '') {
+			return res.status(400).json({ _error: 'This page does not accept chat messages' });
+		}
 
 		// Save the info-tab views the client has recorded so far (if any), so they survive
 		// even if the participant reloads or abandons the page before clicking "Next page".
@@ -465,25 +470,18 @@ router.post('/level/:id/chat',
 			{ role: 'user', text: text, dt: new Date() },
 		];
 
-		const openai_messages = [
-			{ role: 'system', content: page.solution_system_prompt || 'You are a helpful assistant.' },
-			...page.client_messages.map( (m: any) => ({ role: m.role, content: m.text }) ),
-		];
+		// Model and reasoning effort are set in openai_chat.ts; the token cap is per page.
+		const openai_request = build_chat_request(page.solution_system_prompt, page.client_messages, page.max_tokens);
 
 		let assistant_text = '';
 		try {
-			const openai_response = await fetch('https://api.openai.com/v1/chat/completions', {
+			const openai_response = await fetch('https://api.openai.com/v1/responses', {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
 					'Authorization': `Bearer ${OPENAI_API_KEY}`,
 				},
-				body: JSON.stringify({
-					model: 'gpt-4o-mini',
-					messages: openai_messages,
-					max_tokens: 300,
-					temperature: 0.8,
-				}),
+				body: JSON.stringify(openai_request),
 			});
 
 			const openai_json: any = await openai_response.json();
@@ -492,8 +490,13 @@ router.post('/level/:id/chat',
 				throw new Error('OpenAI API error: ' + (openai_json && openai_json.error && openai_json.error.message ? openai_json.error.message : openai_response.status));
 			}
 
-			assistant_text = (openai_json && openai_json.choices && openai_json.choices[0] && openai_json.choices[0].message && openai_json.choices[0].message.content || '').trim();
-			if(assistant_text === '') throw new Error('OpenAI returned an empty response');
+			assistant_text = get_response_text(openai_json);
+			const incomplete = openai_json && openai_json.status === 'incomplete'
+				? ' (incomplete: ' + JSON.stringify(openai_json.incomplete_details) + ')'
+				: '';
+			if(assistant_text === '') throw new Error('OpenAI returned an empty response' + incomplete);
+			// A reply cut off by the token cap is still shown, but logged so the cap can be raised.
+			if(incomplete !== '') log_error(new Error('OpenAI reply truncated' + incomplete));
 
 		} catch(openai_error) {
 			log_error(openai_error);

@@ -30,6 +30,9 @@ import { surveycharts_amt, surveycharts_wu } from './tutorials/surveycharts';
 import { sql_selectfrom, sql_orderby, sql_where, sql_where_and_or, sql_join_inner, sql_join_leftouter, sql_join_keys, sql_join_self, sql_groupby } from './tutorials/sql';
 
 import { testprolificstudy } from './tutorials/testprolificstudy';
+import { taxstudy } from './tutorials/taxstudy';
+
+import seedrandom from 'seedrandom';
 
 
 import type { GenType } from './Gens';
@@ -78,8 +81,26 @@ const LEVEL_GENS: IStringIndexJsonObject = {
 	sql_groupby,
 	feedback_n, feedback_nm, feedback_t, feedback_m,
 	testprolificstudy,
+	taxstudy,
 };
 
+
+
+/**
+	Pick one condition (0..n-1) per participant, for pages with `versions_by_condition: true`.
+
+	Same seed + same n => same index, so all of a participant's flagged pages agree, as long
+	as every flagged page lists its versions in the same condition order.
+
+	Uses its own random stream (a string seed) on purpose. ShuffleGen and the regular
+	`versions` pick both call seedrandom(level.seed); shuffling any list of the same length
+	gives the same permutation. With 3 scenarios and 3 conditions, reusing that stream would
+	tie condition to scenario order.
+*/
+function condition_index(seed: number, n: number): number {
+	const r = seedrandom(String(seed) + '|condition')();
+	return Math.min(n - 1, Math.floor(r * n));
+}
 
 
 /**
@@ -110,10 +131,18 @@ async function _initialize_json(level: IfLevelSchema, original_json: any): Promi
 		//  the user doesn't get the same item multiple times w/o first
 		//  going through all of the other items.
 		// 
-		randomly_sorted_versions = DataFactory.randomizeList(json.versions.slice(), seed);
-		// Find ith item for this run.
-		version_i = page_count % json.versions.length;
-		version = randomly_sorted_versions[version_i];
+		if(json.versions_by_condition === true) {
+			// Between-subjects condition: every page flagged this way gets the same version
+			// index for a given participant, no matter where the page sits in the level.
+			// See condition_index() for why this doesn't reuse randomizeList(seed).
+			version_i = condition_index(seed, json.versions.length);
+			version = json.versions[version_i];
+		} else {
+			randomly_sorted_versions = DataFactory.randomizeList(json.versions.slice(), seed);
+			// Find ith item for this run.
+			version_i = page_count % json.versions.length;
+			version = randomly_sorted_versions[version_i];
+		}
 
 		// Initialize contained objects.
 		for(const key in version) {
@@ -131,6 +160,7 @@ async function _initialize_json(level: IfLevelSchema, original_json: any): Promi
 		// Remove key, as it's not a valid item in the class.
 		delete json.versions;
 	}
+	delete json.versions_by_condition;
 
 	// Make sure feedback is always initialized
 	if(typeof json.feedback === 'undefined' || json.feedback === null) {
@@ -420,6 +450,7 @@ const IfLevelSchemaFactory = {
 
 
 export {
-	IfLevelSchemaFactory
+	IfLevelSchemaFactory,
+	condition_index,
 }
 

@@ -80,6 +80,9 @@ const IfLevels = [
 	// Prolific AI-chat study test
 	{ code: 'testprolificstudy', title: 'Test: Prolific AI Chat Study', description: 'Sample study flow: consent, survey, video, AI chat, reflection, survey, completion code.' },
 
+	// Tax Decision Support study (src/server/tutorials/taxstudy.ts)
+	{ code: 'taxstudy', title: 'Tax Decision Support', description: 'Research study: answer three fictional tax questions with the help of a tax advisor.' },
+
 ];
 
 

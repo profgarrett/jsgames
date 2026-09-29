@@ -52,6 +52,8 @@ export default class QuestionsPagesExcelChoice extends React.Component<DetailPro
 			'a_type',
 			'q_n', 
 			'a_username', 
+			'a_condition',
+			'a_template_id',
 			'a_seconds', 
 			'a_sequence_in_level',
 			'a_correct', 
@@ -128,6 +130,8 @@ export default class QuestionsPagesExcelChoice extends React.Component<DetailPro
 
 			const local = {
 				'a_username': DEMO_MODE ? '****' : answer.username, 
+				'a_condition': answer.condition || '',
+				'a_template_id': answer.template_id || '',
 				'a_seconds' : answer.seconds, 
 				'a_correct': answer.correct ? 1 : 0,
 				'a_completed': answer.completed ? 1 : 0, 
