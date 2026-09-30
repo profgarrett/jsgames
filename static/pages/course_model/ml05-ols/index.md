@@ -270,16 +270,16 @@ print(model.summary())
 
 Important parts of the summary output:
 
-- *Dep. Variable: profit*: What is our output variable?
-- *Adj. R-squared*: What is the R-squared value, with an appropriate penalty for number of variables?
-- *No. Observations*: How many observations were used in the model?
+- **Dep. Variable: profit** What is our output variable?
+- **Adj. R-squared** What is the R-squared value, with an appropriate penalty for number of variables?
+- **No. Observations** How many observations were used in the model?
 
 What explains each variable in our model?
 
-- *coef*: The estimated coefficient for each independent variable. This represents the change in the dependent variable for a one-unit change in the independent variable, holding all other variables constant.
-- *t*: The t-statistic for the hypothesis test that the coefficient is equal to zero.
-- *P>/|t/|*: The probability of this result, given a random underlying variable. A low p-value (typically < 0.05) suggests that a good relationship exists.
-- *[0.025 0.975]*: The 95% confidence interval for the coefficient. This means that we are 95% confident that the true coefficient lies within this interval.
+- **coef** The estimated coefficient for each independent variable. This represents the change in the dependent variable for a one-unit change in the independent variable, holding all other variables constant.
+- **t** The t-statistic for the hypothesis test that the coefficient is equal to zero.
+- **p>|t|** The probability of this result, given a random underlying variable. A low p-value (typically < 0.05) suggests that a good relationship exists.
+- **[0.025 0.975]** The 95% confidence interval for the coefficient. This means that we are 95% confident that the true coefficient lies within this interval.
 
 ### RMSE
 
@@ -341,3 +341,116 @@ plt.show()
 ![png](index_files/index_10_1.png)
     
 
+
+## Key Terms
+
+- **Linear regression**: A model that predicts a continuous output from one or more numeric inputs using a straight-line equation
+- **OLS (ordinary least squares)**: The algorithm that picks the line minimizing the sum of squared residuals
+- **Dependent variable**: The output variable being predicted, such as profit
+- **Independent variable**: An input variable used to make the prediction, such as sales
+- **Coefficient**: The change in the output for a one-unit change in an input, holding all other inputs constant
+- **Intercept (const)**: The predicted output when every input is zero
+- **Residual**: The difference between an actual value and the predicted value for one row
+- **RMSE (root mean squared error)**: The square root of the average squared residual; roughly the typical size of a prediction error
+- **R²**: The proportion of variance in the output explained by the inputs
+- **Adjusted R²**: R² with a penalty for each added input; used when there are multiple inputs
+- **p-value (coefficient)**: The probability of seeing a coefficient this far from zero if the input had no real relationship with the output
+- **Confidence interval**: The range [0.025, 0.975] in which we are 95% confident the true coefficient lies
+- **Overfitting**: When a model captures noise in the data rather than the underlying pattern
+- **Multicollinearity**: When input variables are highly correlated with each other, making their individual effects hard to separate
+- **Normality of residuals**: The assumption that residuals are roughly normally distributed around zero
+- **Dummy variable**: A 0/1 column that represents one level of a categorical variable
+
+
+## Practice Questions
+
+1. What kind of output variable does linear regression predict?
+   - A continuous number, such as profit
+   - A category, such as yes/no
+   - A cluster label
+   - A ranking
+1. What does OLS (ordinary least squares) minimize?
+   - The sum of squared residuals
+   - The number of input variables
+   - The p-value of each coefficient
+   - The R² value
+1. What is a residual?
+   - The difference between an actual value and the predicted value
+   - The coefficient for an input variable
+   - The proportion of variance explained
+   - The number of observations in the model
+1. A model predicts 10 for three rows whose actual values are 10, 12, and 8. What are the residuals?
+   - 0, 2, -2
+   - 0, 4, 4
+   - 10, 12, 8
+   - 0, -2, 2 squared
+1. For three residuals (0, 2, -2), what is the RMSE?
+   - About 1.63, the square root of (0 + 4 + 4) / 3
+   - 0, because the residuals cancel out
+   - 8, the sum of squared residuals
+   - 2.67, the average squared residual
+1. Is a lower or higher RMSE better?
+   - Lower, because predictions are closer to the actual values
+   - Higher, because the model explains more variance
+   - Neither; RMSE only measures sample size
+   - It depends only on the p-values
+1. What does an R² of 0.76 mean?
+   - The inputs explain about 76% of the variance in the output
+   - 76% of predictions are exactly correct
+   - The average error is 0.76
+   - There is a 76% chance the model is significant
+1. Why do we use adjusted R² when a model has several inputs?
+   - Regular R² never goes down when inputs are added, so adjusted R² penalizes extra inputs
+   - Adjusted R² is always higher than R²
+   - Regular R² cannot be calculated with more than one input
+   - Adjusted R² removes the need to check p-values
+1. In our model, the coefficient for `sales` is 0.4871. How do you interpret it?
+   - Each extra dollar of sales adds about $0.49 of profit, holding other inputs constant
+   - Sales explains 48.71% of the variance in profit
+   - There is a 48.71% chance sales is unrelated to profit
+   - Profit is 0.4871 when sales is zero
+1. What does a negative coefficient mean?
+   - As that input increases, the predicted output decreases
+   - The input is not statistically significant
+   - The input has no effect on the output
+   - The model is overfit
+1. What does the intercept (const) represent?
+   - The predicted output when all inputs are zero
+   - The average residual
+   - The slope of the line
+   - The p-value for the whole model
+1. In our model, `sales` has p = 0.037 and `is_ny` has p = 0.290. Using a 0.05 cutoff, which is statistically significant?
+   - Only sales
+   - Only is_ny
+   - Both
+   - Neither
+1. The 95% confidence interval for a coefficient runs from -805 to 594. What does this suggest?
+   - The true coefficient could plausibly be zero, so the input may have no real effect
+   - The input is highly significant
+   - The coefficient is exactly -105
+   - The model has an R² of 0.95
+1. In classical regression, what is our main tool for avoiding overfitting?
+   - Checking the p-values of individual coefficients and dropping weak inputs
+   - Splitting the data into training and test sets
+   - Adding as many inputs as possible
+   - Maximizing regular R²
+1. What is multicollinearity?
+   - When input variables are highly correlated with each other
+   - When the output is correlated with an input
+   - When residuals are not normally distributed
+   - When the model has too few observations
+1. Why is multicollinearity a problem?
+   - It makes it hard to separate the individual effect of each input
+   - It makes R² impossible to calculate
+   - It forces all coefficients to be negative
+   - It causes residuals to always equal zero
+1. How can you check whether residuals meet the normality assumption?
+   - Plot a histogram of residuals and look for a bell shape centered on zero
+   - Check that every p-value is below 0.05
+   - Confirm that R² is above 0.5
+   - Count the number of observations
+1. A `region` column has three levels: North, South, and West. How should it enter a regression?
+   - As two dummy variables (such as is_south and is_west), with North as the reference level
+   - As a single column coded 1, 2, 3
+   - As three dummy variables, one for every level
+   - It cannot be used in a regression

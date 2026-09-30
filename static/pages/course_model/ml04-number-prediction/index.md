@@ -57,18 +57,20 @@ Correlation is not causation! Two variables may be correlated, but that does not
 
 A correlation calculated from a sample might just be a fluke. In a classical approach to statistics, we check this with a p-value.
 
-- **Null hypothesis**: there is no correlation in the population (r = 0).
-- **p-value**: the probability of seeing a correlation *at least this strong* if the null hypothesis were true.
+- **Null hypothesis** is the assumption that there is no correlation in the population (r = 0).
+- **p-value** is the probability of seeing a correlation *at least this strong* if the null hypothesis were true.
   - A low p-value (<= 0.05) means a result this strong would be rare if there were no real relationship, so we call it *statistically significant*.
   - A high p-value (> 0.05) means we can't rule out chance.
 
+We use a default threshold of 0.05 for p-values, but in the real-world, this value may change. For example, in medical research, a p-value of 0.01 may be used to reduce the chance of false positives. As sample size grows, the p-value can become very small even for a weak correlation. So, we need to consider the number of variables being evaluated, and the number of rows in the sample. In general, the larger the sample size, the more likely a correlation will be statistically significant.
+
 A correlation has both:
-- **Strength** (r): how closely the points fit a line
-- **Statistical significance** (p-value): how confident we are the correlation isn't zero
+- **Strength** (r) is how closely the points fit a line
+- **Statistical significance** (p-value) is how confident we are the correlation isn't zero
 
 These are **different** things. With a large sample, even a tiny, useless correlation can be statistically significant. We'll see an example below.
 
-*Looking ahead:* In newer ML approaches, we will measure error by splitting our data into training and test sets. After training our model, we evaluate it on the test set. This will be covered in later modules.
+*Looking ahead* In newer ML approaches, we will measure error by splitting our data into training and test sets. After training our model, we evaluate it on the test set. This will be covered in later modules.
 
 ## Example: Height, Weight, and Body Measurements
 
@@ -154,7 +156,7 @@ plt.show()
     
 
 
-**Interpretation:** r is about 0.55, a *strong* positive correlation. Taller people tend to weigh more. The p-value is tiny, so this is very unlikely to be chance.
+**Interpretation** r is about 0.55, a *strong* positive correlation. Taller people tend to weigh more. The p-value is tiny, so this is very unlikely to be chance.
 
 Notice how much the points still scatter around the line. Height tells us *something* about weight, but not everything.
 
@@ -253,13 +255,13 @@ p_values.head()
 
 ## Significant but Meaningless
 
-Look at **height_cm vs. bmi**:
+Look at **height_cm vs. bmi**
 - r ≈ 0.06 (negligible)
 - p ≈ 0.01 (statistically significant!)
 
 How can both be true? With about 2,000 people, even a tiny correlation is unlikely to be *exactly* zero, so it passes the p-value test. But r = 0.06 means height explains well under 1% of the variation in BMI. It's useless for prediction.
 
-**Lesson:** A p-value tells you whether a correlation is probably real, not whether it matters. Always check the strength (r) too.
+**Lesson** A p-value tells you whether a correlation is probably real, not whether it matters. Always check the strength (r) too.
 
 Why is BMI almost unrelated to height? BMI divides weight by height squared. It was *designed* to remove the effect of height.
 
@@ -277,3 +279,120 @@ Similarly, **weight_kg vs. bmi** (r ≈ 0.86) is high because BMI is *calculated
 2. Find the pair with the highest p-value. Is it statistically significant? Is it strong?
 3. `is_male` is correlated with height (r ≈ 0.67). Does being male *cause* height? What else could explain this?
 4. Pick a pair with a moderate correlation and suggest a possible confounder.
+
+## Key Terms
+
+- **Continuous variable**: A numeric variable that can take any value in a range, such as height or weight
+- **Correlation (Pearson's r)**: A number from -1 to +1 measuring the strength and direction of a linear relationship
+- **Positive correlation**: As one variable goes up, the other tends to go up
+- **Negative correlation**: As one variable goes up, the other tends to go down
+- **Strength (|r|)**: The absolute value of r; -0.6 and +0.6 are equally strong
+- **Outlier**: An unusual point that can push r up or down a lot
+- **Null hypothesis**: The assumption that there is no correlation in the population (r = 0)
+- **p-value**: The probability of seeing a correlation at least this strong if the null hypothesis were true
+- **Statistically significant**: A p-value at or below 0.05, meaning the result would be rare by chance alone
+- **Linear regression**: A best-fit straight line used to predict one number from another
+- **r²**: The share of the variation in one variable explained by the other
+- **Pairplot**: A grid of scatterplots for every pair of columns, with histograms on the diagonal
+- **Correlation heatmap**: A colored grid showing r for every pair of columns
+- **Confounder**: A third variable that drives both variables, creating a correlation without causation
+- **Spurious correlation**: A correlation that arises from coincidence or a confounder rather than a real link
+
+
+## Practice Questions
+
+1. What does Pearson's r measure?
+   - The strength and direction of a linear relationship between two continuous variables
+   - Whether one variable causes another
+   - The probability that a correlation is due to chance
+   - The average difference between two variables
+1. What is the range of possible values for r?
+   - -1 to +1
+   - 0 to 1
+   - 0 to 100
+   - Any real number
+1. Which correlation is the strongest?
+   - r = -0.8
+   - r = 0.5
+   - r = 0.1
+   - r = 0.0
+1. What does r = -0.6 tell you?
+   - As one variable goes up, the other tends to go down, with a strong relationship
+   - There is almost no relationship
+   - As one variable goes up, the other tends to go up
+   - The relationship is weaker than r = +0.6
+1. Using the rules of thumb in this module, how would you describe r = 0.4?
+   - Moderate
+   - Negligible
+   - Weak
+   - Strong
+1. A scatterplot shows a clear U-shaped pattern, but r is close to 0. Why?
+   - r only measures straight-line relationships
+   - The sample is too small
+   - The p-value is too high
+   - U-shaped data always has a negative correlation
+1. What effect can a few outliers have on r?
+   - They can push r up or down a lot
+   - None, since r ignores extreme values
+   - They always make r closer to 0
+   - They always make r closer to 1
+1. What is the null hypothesis when testing a correlation?
+   - There is no correlation in the population (r = 0)
+   - There is a perfect correlation (r = 1)
+   - One variable causes the other
+   - The sample is representative of the population
+1. What does the p-value represent?
+   - The probability of seeing a correlation at least this strong if there were no real relationship
+   - The probability that the correlation is strong
+   - The share of variation explained by the model
+   - The probability that one variable causes the other
+1. Which p-value is conventionally called statistically significant?
+   - 0.05
+   - 0.20
+   - 0.50
+   - 0.90
+1. Strength (r) and statistical significance (p-value) are:
+   - Different things; a correlation can be significant but weak
+   - The same thing measured two ways
+   - Always in agreement: strong means significant and weak means not significant
+   - Only meaningful when r is negative
+1. Why can a tiny correlation like r = 0.06 still be statistically significant?
+   - With a large sample, even a small correlation is unlikely to be exactly zero
+   - Because small correlations are always significant
+   - Because the p-value measures strength
+   - Because BMI is calculated from height
+1. Height and weight have r ≈ 0.55 and a tiny p-value. What is the best interpretation?
+   - A strong positive relationship that is very unlikely to be due to chance
+   - Height causes weight
+   - Height perfectly predicts weight
+   - A weak relationship that is probably due to chance
+1. What does the best-fit line from linear regression let you do?
+   - Predict one number from another, such as weight from height
+   - Prove that one variable causes the other
+   - Calculate the p-value
+   - Remove outliers from the data
+1. What does a pairplot show?
+   - A scatterplot for every pair of columns, with histograms on the diagonal
+   - Only the correlation values as numbers
+   - A single best-fit line
+   - The p-value for every pair
+1. Why is the diagonal of a correlation heatmap always 1?
+   - Every column is perfectly correlated with itself
+   - The diagonal shows the strongest pair in the data
+   - The heatmap rounds all values up
+   - The diagonal shows the p-values
+1. Arm length and weight are correlated (r ≈ 0.47). What is the best explanation?
+   - Height is a confounder that drives both
+   - Longer arms cause people to weigh more
+   - Heavier people grow longer arms
+   - The correlation is a coincidence with no explanation
+1. Why is weight strongly correlated with BMI (r ≈ 0.86)?
+   - BMI is calculated from weight, so the correlation is built in
+   - Heavier people are always taller
+   - Weight causes BMI to change over time
+   - It is a spurious correlation caused by chance
+1. A study finds that ice cream sales and drowning deaths are correlated. What is the most likely explanation?
+   - A confounder, such as hot weather, drives both
+   - Eating ice cream causes drowning
+   - Drowning causes people to buy ice cream
+   - The correlation must not be statistically significant

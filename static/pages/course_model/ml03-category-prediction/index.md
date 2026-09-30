@@ -282,7 +282,6 @@ The equipment picker is a separate question from the threshold. It swaps in a di
 ## Key Terms
 
 - **Classification**: Predicting which category a case belongs to, rather than a numeric value
-- **Positive class**: The outcome you are trying to detect, such as fraud or disease
 - **Confusion matrix**: A table comparing predicted categories against actual categories
 - **True Positive (TP)**: Predicted positive, and actually positive
 - **True Negative (TN)**: Predicted negative, and actually negative
@@ -291,10 +290,8 @@ The equipment picker is a separate question from the threshold. It swaps in a di
 - **Accuracy**: The share of all predictions that were correct
 - **Precision**: Of the cases predicted positive, the share that really were positive
 - **Recall (sensitivity)**: Of the cases that really were positive, the share the model caught
-- **Specificity**: Of the cases that really were negative, the share the model correctly cleared
 - **F1 score**: The harmonic mean of precision and recall, used when you need one number
 - **Class imbalance**: When one outcome is far more common than the other
-- **Accuracy paradox**: High accuracy achieved by always predicting the majority class
 - **Threshold**: The cutoff probability at which a prediction is called positive
 - **ROC curve**: A plot of recall against the false positive rate across every threshold
 - **AUC**: The area under the ROC curve, summarizing performance across all thresholds
@@ -352,16 +349,6 @@ The equipment picker is a separate question from the threshold. It swaps in a di
    - When the model predicted positive, how often was it right?
    - How often was the model right about anything?
    - How many predictions did the model make in total?
-1. What is another name for recall?
-   - Sensitivity
-   - Specificity
-   - Precision
-   - Support
-1. What does specificity measure?
-   - The share of actual negatives correctly identified
-   - The share of actual positives correctly identified
-   - The share of positive predictions that were correct
-   - The share of all predictions that were correct
 1. In the fraud example (TP=2, FN=1, FP=2, TN=1), what is the accuracy?
    - 50%
    - 67%
@@ -392,7 +379,7 @@ The equipment picker is a separate question from the threshold. It swaps in a di
    - 0%
    - 50%
    - 1%
-1. In that same model, what is the recall?
+1. A model predicts "not fraud" for all 1,000 transactions, 10 of which are fraud. What is its recall?
    - 0%
    - 99%
    - 50%
