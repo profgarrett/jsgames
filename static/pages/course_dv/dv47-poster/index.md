@@ -9,6 +9,7 @@ That gives you two audiences with opposite needs. **Skimmers** need the title an
 **Outcomes**:
 
 - Set up a 48×36 inch poster file in PowerPoint
+- Print using a 6-page version via Adobe & PDF
 - Lay out a poster in columns with a clear reading order
 - Choose type sizes that are legible at poster viewing distance
 - Prepare charts that survive printing at large scale
@@ -124,6 +125,37 @@ Check the event's requirements before you design. Many research days publish a r
 - **Bring a tube**, plus pins, binder clips, or tape. 
 - **Add a QR code** linking to your full report, and **test it after printing.** 
 
+
+## Economical Printing: Six Color Pages Using Adobe Acrobat
+
+For this assignment, **submit your original PowerPoint (.pptx) file and bring a poster printed on six color sheets of standard letter-size paper**. Assemble the sheets into one display. Large-format printing is not required.
+
+Keep your poster as a single **48 × 36-inch landscape slide** in PowerPoint. Adobe Acrobat will reduce the poster and divide it across six printed sheets. This process is called *tiling*.
+
+**Prepare your file**
+
+1. Save your finished PowerPoint file. This is the file you will submit.
+2. Export a PDF using PowerPoint’s **Save As** or **Export** command. Select PDF and standard or print-quality output.
+3. Open the PDF and check for missing text, shifted objects, and blurry charts.
+4. Open the PDF in the **Adobe Acrobat desktop application**. Use Acrobat’s print dialog rather than your web browser’s print dialog.
+
+**Set up six-page printing**
+
+1. Select **File → Print** and choose a color printer.
+2. In **Page Setup** or the printer’s settings, select **Letter (8.5 × 11 inches)** and **Portrait** paper orientation. The poster itself remains landscape.
+3. Under **Page Sizing & Handling**, select **Poster**.
+4. Start with **Tile Scale: 45%** and **Overlap: 0.25 inches**. Enable **Cut marks** to help with trimming.
+5. Inspect the preview. It should show **six sheets arranged in three columns
+6. If the preview shows a different sheet count, adjust Tile Scale slightly until it shows six. Printer margins affect the result.
+7. Select color, one copy, and single-sided printing. Turn off grayscale and double-sided printing.
+
+Acrobat’s Poster option divides a PDF page into tiles. Its preview updates as you change the scale and overlap settings. Confirm the six-sheet layout before printing.
+
+**Assemble your poster**
+
+Lay out the six sheets in three columns and two rows. Trim the overlapping edges as needed, align the duplicated content, and tape the sheets together from the back. Assemble all 6 pages into a single poster before class.
+
+I will provide tape in class to stick your poster on the whiteboard. However, you should have the poster already assembled into a single large poster. You will probably want to fold it for transport.
 
 ## At the Poster Session
 

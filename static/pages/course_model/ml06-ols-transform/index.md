@@ -1,11 +1,14 @@
-<script src="/course_model/toc.js"></script>
-
-# Advanced Topics in Regression
+# Regression data transformations
 
 There are several other important concepts to understand when working with regression models.
 
 **Outcomes**:
-- Use logistic regression to predict a binary outcome
+- Describe the overall process of building a model
+    - Check data for potential issues and to understand how data is being stored (esp at what level of granularity)
+    - Clean the data and create new features. However, don't get too carried away with feature engineering. You can always come back and add more features later if you need to.
+    - Examine correlations to get a sense of which features are likely to be important and to check for multicolinearity.
+    - Build the model and check the results.
+    - Repeat!
 - Transform data to make it work with regression
     - Convert numbers stored as text to regular numbers
     - Convert category (usually text) to hot-encoded variables (1 or 0) for each category. Know when to drop the first category.
@@ -13,12 +16,6 @@ There are several other important concepts to understand when working with regre
     - Bin/Group category data by using replace to combine categories into fewer categories (e.g. combine all zip codes into 5 regions) or with a lookup table.
     - Remove outliers by filtering out rows with values that are outside of a reasonable range (e.g. 3 standard deviations from the mean) or using the clip function to set a maximum value for the column.
     - Remove old columns after checking to make sure that the new column works as expected.
-- Describe the overall process of building a model
-    - Check data for potential issues and to understand how data is being stored (esp at what level of granularity)
-    - Clean the data and create new features. However, don't get too carried away with feature engineering. You can always come back and add more features later if you need to.
-    - Examine correlations to get a sense of which features are likely to be important and to check for multicolinearity.
-    - Build the model and check the results.
-    - Repeat!
 - Detect common pitfalls of regression
     - Describe the impaact of an outlier on a regression model, and how to detect and address outliers.
     - Describe the impact of a non-linear relationship between the independent and dependent variable, and how to detect and address non-linearity.
@@ -29,178 +26,10 @@ There are several other important concepts to understand when working with regre
     - Describe the meaning of p-values for each independent variable, and how to use them to determine which independent variables are significantly associated with the dependent variable.
 
 **Links**:
-- [logistic template](logistic_template.ipynb)
+
 - [Ames Regression](ames_template.ipynb) and [data](ames_lite.csv)
-- [Helpful tutorial on Logistic Regression](https://mlu-explain.github.io/logistic-regression/)
 
-
-## Topic 1: Logistic regression
-
-Logistic regression is used when the dependent variable is a categorical represented by 0 or 1. It estimates the probability that a given input point belongs to a certain class.
-
-Key Concepts:
-- The line drawn by logistic regression is an S-shaped curve (sigmoid function) that maps any real-valued number into the (0, 1) interval. This is different from linear regression, which draws a straight line.
-- The major advantage of logistic regression is that it draw a steeper curve between classes, which can better capture the relationship when the outcome is either a zero or a one.
-- The major downside of logistic regression is that it is less interpretable than linear regression. The coefficients represent the change in the log-odds of the outcome for a one-unit change in the predictor variable, which can be less intuitive than the coefficients in linear regression.
-
-Interpretation:
-- Logistic regression is is similar to linear regression, but with some key differences
-- Overall model
-    - Instead of adjusted R^2, we use Pseudo R^2 (e.g., McFadden's R^2) to assess model fit.
-- Individual predictors
-    - A coefficient in logistic regression indicates the change in the log-odds of the outcome for a one-unit increase in the predictor variable, holding all other variables constant.
-    - To convert log-odds to odds, use the exponential function: odds = exp(coefficient).
-    - To convert odds to probability, use the formula: probability = odds / (1 + odds).
-
-When used in a classical statistics context, logistic regression typically does not involve train/test splits or cross-validation. Instead, the focus is on interpreting coefficients and assessing model fit using statistical tests and metrics specific to logistic regression.
-
-
-```python
-# Check field types and values
-import pandas as pd
-import numpy as np
-
-# Sales table
-df_logistic = pd.DataFrame({
-    'office_size': [1, 3, 1, 6, 8, 9, 2, 4, 3, 2],
-    'closed': [True, False, True, False, False, False, True, True, False, True],
-})
-
-# Fix columns
-df_logistic = df_logistic.assign(closed = df_logistic['closed'].astype(int))  # Convert boolean to int (1/0)
-
-
-df_logistic
-```
-
-
-|   | office_size | closed |
-|---|---|---|
-| 0 | 1 | 1 |
-| 1 | 3 | 0 |
-| 2 | 1 | 1 |
-| 3 | 6 | 0 |
-| 4 | 8 | 0 |
-| 5 | 9 | 0 |
-| 6 | 2 | 1 |
-| 7 | 4 | 1 |
-| 8 | 3 | 0 |
-| 9 | 2 | 1 |
-
-
-```python
-# OLS regression example with statsmodels
-import statsmodels.api as sm
-
-# Prepare the data
-X = df_logistic[['office_size']]
-y = df_logistic['closed']
-
-# Fit the model using OLS for comparison
-X = sm.add_constant(X)  # Adds a constant term to the predictor
-model_ols = sm.OLS(y, X).fit()
-predictions = model_ols.predict(X)
-print(model_ols.summary())
-
-# Print a chart comparing actual vs predicted
-import matplotlib.pyplot as plt
-plt.scatter(df_logistic['office_size'], y, label='Actual', color='blue')
-plt.scatter(df_logistic['office_size'], predictions, label='Predicted', color='red')
-plt.xlabel('Office Size')
-plt.ylabel('Closed')
-plt.legend()
-plt.show()
-
-
-```
-
-                                OLS Regression Results                            
-    ==============================================================================
-    Dep. Variable:                 closed   R-squared:                       0.495
-    Model:                            OLS   Adj. R-squared:                  0.432
-    Method:                 Least Squares   F-statistic:                     7.848
-    Date:                Tue, 06 Jan 2026   Prob (F-statistic):             0.0231
-    Time:                        11:53:33   Log-Likelihood:                -3.8400
-    No. Observations:                  10   AIC:                             11.68
-    Df Residuals:                       8   BIC:                             12.29
-    Df Model:                           1                                         
-    Covariance Type:            nonrobust                                         
-    ===============================================================================
-                      coef    std err          t      P>|t|      [0.025      0.975]
-    -------------------------------------------------------------------------------
-    const           1.0082      0.221      4.569      0.002       0.499       1.517
-    office_size    -0.1303      0.047     -2.801      0.023      -0.238      -0.023
-    ==============================================================================
-    Omnibus:                        1.449   Durbin-Watson:                   2.701
-    Prob(Omnibus):                  0.485   Jarque-Bera (JB):                0.965
-    Skew:                          -0.684   Prob(JB):                        0.617
-    Kurtosis:                       2.333   Cond. No.                         8.59
-    ==============================================================================
-    
-    Notes:
-    [1] Standard Errors assume that the covariance matrix of the errors is correctly specified.
-
-
-    
-![png](index_files/index_3_1.png)
-    
-
-
-```python
-# Logistic regression example with statsmodels
-import statsmodels.api as sm
-
-# Prepare the data
-X = df_logistic[['office_size']]
-y = df_logistic['closed']
-X = sm.add_constant(X)  # Adds a constant term to the predictor
-
-# Fit the logistic regression model
-model_logistic = sm.Logit(y, X)
-result = model_logistic.fit()
-# Display the summary of the model
-print(result.summary())
-
-predictions = result.predict(X)
-
-# Print a chart comparing actual vs predicted
-import matplotlib.pyplot as plt
-plt.scatter(df_logistic['office_size'], y, label='Actual', color='blue')
-plt.scatter(df_logistic['office_size'], predictions, label='Predicted', color='red')
-plt.xlabel('Office Size')
-plt.ylabel('Closed')
-plt.legend()
-plt.show()
-
-
-```
-
-    Optimization terminated successfully.
-             Current function value: 0.352287
-             Iterations 8
-                               Logit Regression Results                           
-    ==============================================================================
-    Dep. Variable:                 closed   No. Observations:                   10
-    Model:                          Logit   Df Residuals:                        8
-    Method:                           MLE   Df Model:                            1
-    Date:                Tue, 06 Jan 2026   Pseudo R-squ.:                  0.4918
-    Time:                        11:53:33   Log-Likelihood:                -3.5229
-    converged:                       True   LL-Null:                       -6.9315
-    Covariance Type:            nonrobust   LLR p-value:                  0.009028
-    ===============================================================================
-                      coef    std err          z      P>|z|      [0.025      0.975]
-    -------------------------------------------------------------------------------
-    const           3.9810      2.645      1.505      0.132      -1.203       9.165
-    office_size    -1.2246      0.875     -1.400      0.161      -2.939       0.490
-    ===============================================================================
-
-
-    
-![png](index_files/index_4_1.png)
-    
-
-
-## Topic 2: Data transformations
+## Data transformations
 
 ### Handle missing values
 
@@ -265,6 +94,7 @@ We can remove old columns by using the `drop` function.
 import pandas as pd
 import numpy as np
 
+
 # Sales table
 df_raw = pd.DataFrame({
     'sales_id': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
@@ -327,9 +157,7 @@ df
 | 9 | 600.0 | 2 | ca | 6000.0 | 0 | 2 |
 
 
-## Topic 3
-
-Interpretation tips:
+## Interpretation tips:
 
 - Follow the overall process:
     1. Check field types and values
