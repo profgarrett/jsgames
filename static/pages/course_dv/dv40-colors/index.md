@@ -18,6 +18,7 @@
 - [Color scales](https://socviz.co/01-look-at-data.html#edges-contrasts-and-colors)
 - [ColorBrewer: pick a safe palette](https://colorbrewer2.org/)
 - [Viz Palette: test a palette you already have](https://projects.susielu.com/viz-palette)
+- [OKpallette - create a palette from an image](https://okpalette.color.pizza/)
 
 
 **Common exam mistakes**:

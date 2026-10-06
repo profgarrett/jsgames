@@ -41,12 +41,61 @@ const ANSWER_ID = 'ChatQuestionAnswerInput';
 	If the page has a question (page.question), it's shown below the tabs and chat with a
 	number box (page.client_answer), and replaces the "ready" button. The answer is also sent
 	with each chat message so the server keeps it.
+
+	The transcript is a fixed-height box with its own scrollbar. While a message is sending, an
+	"Advisor is typing..." bubble is shown and the box scrolls to it. When the reply arrives,
+	the box scrolls so the participant's message is at the top, with the start of the reply
+	below it (a long reply can be taller than the box, so scrolling to the very bottom would
+	show only its end). Only the box's own scrollTop is set -- not scrollIntoView(), which
+	would also scroll the page.
 */
 export default class Chat extends React.Component<PropsType, StateType> {
+
+	// The scrollable transcript box.
+	private transcriptRef = React.createRef<HTMLDivElement>();
 
 	constructor(props: PropsType) {
 		super(props);
 		this.state = { draft: '', isSending: false, error: '' };
+	}
+
+	componentDidMount(): void {
+		// Returning to (or reloading) the page: show the participant's latest message and the
+		// reply below it (or the last message, if the participant hasn't sent one).
+		const messages = this.props.page.client_messages || [];
+		if(messages.length === 0) return;
+		let target = messages.length - 1;
+		for(let i = messages.length - 1; i >= 0; i--) {
+			if(messages[i].role === 'user') { target = i; break; }
+		}
+		this.scroll_to_message(target);
+	}
+
+	componentDidUpdate(prevProps: PropsType, prevState: StateType): void {
+		// Compare counts, not arrays: the page object is rebuilt on every server update.
+		const prev_count = (prevProps.page.client_messages || []).length;
+		const messages = this.props.page.client_messages || [];
+
+		if(messages.length > prev_count) {
+			// New messages arrived (the participant's message, then the reply). Put the first
+			// new one -- the participant's message -- at the top, with the reply below it.
+			this.scroll_to_message(prev_count);
+		} else if(this.state.isSending && !prevState.isSending) {
+			// Just started sending: bring the typing bubble (the last thing in the box) into view.
+			const box = this.transcriptRef.current;
+			if(box) box.scrollTop = box.scrollHeight;
+		}
+	}
+
+	// Scroll the transcript box (only) so message i is at its top.
+	scroll_to_message = (i: number): void => {
+		const box = this.transcriptRef.current;
+		if(!box) return;
+		const el = box.querySelector<HTMLElement>('[data-msg-i="' + i + '"]');
+		if(!el) return;
+		// offsetTop is measured from the box, since the box is position: relative. Leave the
+		// box's top padding (10px) above the message.
+		box.scrollTop = Math.max(0, el.offsetTop - 10);
 	}
 
 	handleSend = (): void => {
@@ -190,7 +239,9 @@ export default class Chat extends React.Component<PropsType, StateType> {
 			<Card style={{ marginTop: '1rem' }}>
 				<Card.Body>
 					<div
+						ref={ this.transcriptRef }
 						style={{
+							position: 'relative',
 							maxHeight: '320px',
 							overflowY: 'auto',
 							border: '1px solid #dee2e6',
@@ -200,10 +251,10 @@ export default class Chat extends React.Component<PropsType, StateType> {
 							background: '#f8f9fa'
 						}}
 					>
-						{ messages.length === 0
+						{ messages.length === 0 && !this.state.isSending
 							? <div style={{ color: '#6c757d' }}>No messages yet.</div>
 							: messages.map( (m, i) => (
-								<div key={i} style={{ textAlign: m.role === 'user' ? 'right' : 'left', marginBottom: '8px' }}>
+								<div key={i} data-msg-i={i} style={{ textAlign: m.role === 'user' ? 'right' : 'left', marginBottom: '8px' }}>
 									<span
 										style={{
 											display: 'inline-block',
@@ -220,6 +271,22 @@ export default class Chat extends React.Component<PropsType, StateType> {
 									</span>
 								</div>
 							))
+						}
+						{ this.state.isSending &&
+							<div role='status' style={{ textAlign: 'left', marginBottom: '8px' }}>
+								<span
+									style={{
+										display: 'inline-block',
+										padding: '6px 12px',
+										borderRadius: '14px',
+										background: '#e9ecef',
+										color: '#6c757d',
+										fontStyle: 'italic'
+									}}
+								>
+									Advisor is typing...
+								</span>
+							</div>
 						}
 					</div>
 

@@ -30,10 +30,12 @@
 	     imported from there) -- so the two screens look and behave the same
 	     way. Flashcards and the quiz are still separate practice modes here
 	     (unlike the live session, which turns everything into one quiz deck),
-	     so this screen ends in two buttons instead of one -- plus a third,
-	     admin-only "Export to Word" button (see PageExportWord.ts) that shows
-	     the same selection formatted as a term-matching table and a bolded-
-	     answer multiple-choice list, ready to select and paste into Word.
+	     so this screen ends in two buttons instead of one -- plus two
+	     admin-only export buttons: "Export to Word" (see PageExportWord.ts)
+	     shows the same selection formatted as a term-matching table and a
+	     bolded-answer multiple-choice list, ready to select and paste into
+	     Word; "Export to Blackboard" (see PageExportBlackboard.ts) downloads
+	     it as a tab-delimited file for Blackboard's question upload.
 
 	Quiz answers are still logged per source page (see IQuizQuestion.page in
 	PageQuiz.tsx), so the admin's per-page results view stays accurate even
@@ -51,6 +53,7 @@ import { toggleIndex, RandomPickControl } from './LiveQuizInstructor';
 import PageFlashcards, { extractFlashcards, IFlashcard } from './PageFlashcards';
 import PageQuiz, { extractQuizQuestions, shuffle, IQuizQuestion } from './PageQuiz';
 import { buildTermSection, buildExportQuestions } from './PageExportWord';
+import { buildBlackboardFile, blackboardFileName, RECOMMENDED_MAX_QUESTIONS } from './PageExportBlackboard';
 
 type Step = 'loading' | 'select-modules' | 'loading-content' | 'select-format' | 'flashcards' | 'quiz' | 'export';
 
@@ -67,6 +70,19 @@ interface IPagePracticeProps {
 }
 
 const idForSlug = (prefix: string, slug: string): string => `${prefix}-${slug.replace(/\//g, '-')}`;
+
+// Hand the browser a generated text file as a download. The object URL is
+// revoked on a delay so the download has started before it goes away.
+const downloadTextFile = (fileName: string, text: string): void => {
+	const url = URL.createObjectURL(new Blob([text], { type: 'text/plain;charset=utf-8' }));
+	const link = document.createElement('a');
+	link.href = url;
+	link.download = fileName;
+	document.body.appendChild(link);
+	link.click();
+	link.remove();
+	setTimeout(() => URL.revokeObjectURL(url), 1000);
+};
 
 function PagePractice({ page, onExit }: IPagePracticeProps): ReactElement {
 	const [step, setStep] = useState<Step>('loading');
@@ -231,6 +247,24 @@ function PagePractice({ page, onExit }: IPagePracticeProps): ReactElement {
 		}
 	};
 
+	// "Export to Blackboard": same selection as the Word export, but written
+	// straight to a downloaded upload file (see PageExportBlackboard.ts) --
+	// no intermediate screen, since there's nothing to copy.
+	const [blackboardStatus, setBlackboardStatus] = useState('');
+
+	const exportToBlackboard = (): void => {
+		const text = buildBlackboardFile(chosenTerms, chosenQuestions);
+		const fileName = blackboardFileName(page.slug);
+		const questionCount = text === '' ? 0 : text.split('\n').length;
+
+		downloadTextFile(fileName, text);
+
+		const tooMany = questionCount > RECOMMENDED_MAX_QUESTIONS
+			? ` Blackboard recommends no more than ${RECOMMENDED_MAX_QUESTIONS} questions per upload -- consider exporting a smaller selection.`
+			: '';
+		setBlackboardStatus(`Downloaded ${fileName} (${questionCount} question${questionCount === 1 ? '' : 's'}). In Blackboard, open the test and choose Upload questions. Points import as 0.${tooMany}`);
+	};
+
 	if (step === 'loading') {
 		return (
 			<div className='live-quiz'>
@@ -387,7 +421,19 @@ function PagePractice({ page, onExit }: IPagePracticeProps): ReactElement {
 								Export to Word
 							</Button>
 						) : null }
+						{ isAdmin ? (
+							<Button
+								variant='outline-dark'
+								className='ms-2'
+								onClick={exportToBlackboard}
+								disabled={chosenTerms.length === 0 && chosenQuestions.length === 0}
+							>
+								Export to Blackboard
+							</Button>
+						) : null }
 					</div>
+
+					{ isAdmin && blackboardStatus !== '' ? <p className='live-quiz-instructions'>{ blackboardStatus }</p> : null }
 
 					{ linkItems.length > 1 ? (
 						<div>

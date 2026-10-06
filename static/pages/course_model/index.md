@@ -56,7 +56,7 @@ Each week covers Python and Machine Learning concepts.  Most modules have a deli
 ### Week 7 - September 28, 2026 
 
 - [ml06](ml06-ols-transform/index): Regression 2, Data transformations
-- [ml07](ml07-logistic-regression/index): Regression 3, Advanced logistic regression
+- [ml07](ml07-logistic/index): Regression 3, Advanced logistic regression
 
 
 ## Module 3: Machine Learning
@@ -64,19 +64,19 @@ Each week covers Python and Machine Learning concepts.  Most modules have a deli
 ### Week 8 - October 5, 2026 
 
 - *DataCamp: Machine learning with Tree-based models in Python*
-- [ml07](ml07-dt/index): Decision Trees
+- [ml10](ml10-dt/index): Decision Trees
 
 ### Week 9 - October 12, 2026 
 
 *Exam 2*
 
 - *DataCamp: Unsupervised learning in Python*
-- [ml08](ml08-kmeans/index): K-Means Clustering
+- [ml11](ml11-kmeans/index): K-Means Clustering
 - [py06](py06-pandas-group-join/index): Pandas 3: aggregation and joins
 
 ### Week 10 - October 19, 2026 
 
-- [ml09](ml09-pca/index): PCA and dimensionality reduction
+- [ml12](ml12-pca/index): PCA and dimensionality reduction
 - [Good presentations](https://profgarrett.github.io/course_dv/dv11-presentations/)
 
 ### Week 11 - October 26, 2026 
@@ -88,7 +88,7 @@ Each week covers Python and Machine Learning concepts.  Most modules have a deli
 ### Week 12 - November 2, 2026 
 
 *Datacamp: NLP in Python*
-- [ml10-nlp](ml10-nlp/index): NLP with Python
+- [ml15-nlp](ml15-nlp/index): NLP with Python
 - Optional readings:
 	- Primer on NLP Embeddings [reading](https://huggingface.co/spaces/hesamation/primer-llm-embedding)
 

@@ -14,9 +14,9 @@ const { build_chat_request, get_response_text, CHAT_MODEL } = require('../src/se
 const CONDITIONS = ['condition_faq', 'condition_short_ai', 'condition_long_ai'];
 
 // consent 1 + background 12 + tax intro 1 + knowledge 6 + instructions 1
-// + 3 scenarios x (video+pre estimate 1 + pre 3 + advisor 1 + post 3 + cogfit 1) + scenarios done 1
-// + end 5 + debrief 1 + finish 1
-const N_PAGES = 56;
+// + 3 scenarios x (video+pre estimate 1 + pre 3 + advisor 1 + post 3 + attention check 1) + scenarios done 1
+// + end 8 + debrief 1 + finish 1
+const N_PAGES = 59;
 const N_PARTICIPANTS = 150;
 
 // Build and fully complete one taxstudy level, auto-answering each page.
@@ -230,10 +230,10 @@ describe('taxstudy level', async () => {
 					assert.strictEqual(p.max_turns, 30);
 					if(condition === 'condition_short_ai') {
 						assert.ok(p.solution_system_prompt.includes('short, conversational'));
-						assert.strictEqual(p.max_tokens, 2000);
+						assert.strictEqual(p.max_tokens, 3000);
 					} else {
 						assert.ok(p.solution_system_prompt.includes('formal, thorough'));
-						assert.strictEqual(p.max_tokens, 4000);
+						assert.strictEqual(p.max_tokens, 3000);
 					}
 				}
 			});
@@ -255,7 +255,8 @@ describe('taxstudy level', async () => {
 
 	test('knowledge items and the attention check are scored silently', () => {
 		const level = levels[0];
-		['TaxBody', 'TaxReduce', 'TaxMarginal', 'TaxLiability', 'TaxFiling', 'TaxRetire', 'end_attcheck'].forEach( id => {
+		['TaxBody', 'TaxReduce', 'TaxMarginal', 'TaxLiability', 'TaxFiling', 'TaxRetire', 'end_attcheck',
+			's1_attcheck', 's2_attcheck', 's3_attcheck'].forEach( id => {
 			const p = level.pages.find( q => q.template_id === id );
 			assert.strictEqual(p.correct_required, false);
 			assert.strictEqual(p.show_feedback_on, false);

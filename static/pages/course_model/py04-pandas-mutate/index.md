@@ -482,7 +482,7 @@ The outer parentheses let you break the chain across lines. Chains are worth lea
 - **drop()**: Removes columns (or rows) from a DataFrame
 - **rename()**: Changes column names using a dictionary of old-to-new
 - **List comprehension**: A one-line loop that builds a list, used here to rewrite every column name
-- **snake_case**: The lowercase-with-underscores naming convention used for pandas columns
+- **snake_case**: The lowercase_with_underscores naming convention used for pandas columns
 - **assign()**: Adds or replaces columns and returns a new DataFrame
 - **Method chain**: Several operations strung together in one expression
 - **.str accessor**: The gateway to string functions on a column, as in `df['name'].str.strip()`
