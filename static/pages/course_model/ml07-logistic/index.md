@@ -173,3 +173,81 @@ plt.show()
 ![png](index_files/index_4_1.png)
     
 
+
+## Key Terms
+
+- **Logistic regression**: A model that predicts the probability of a binary (0/1) outcome from one or more inputs
+- **Binary outcome**: A dependent variable with only two possible values, coded as 1 and 0, such as closed or not closed
+- **Probability**: The chance that the outcome is 1, always between 0 and 1
+- **Pseudo R²**: A measure of model fit for logistic regression, such as McFadden's R², used in place of adjusted R²
+- **Linear probability model**: An OLS regression fit to a 0/1 outcome, which can predict values below 0 or above 1
+- **Logit function (statsmodels)**: `sm.Logit(y, X).fit()`, the statsmodels call that fits a logistic regression
+
+
+## Practice Questions
+
+1. What kind of output variable is logistic regression used to predict?
+   - A binary outcome coded as 0 or 1
+   - A continuous number, such as profit
+   - A cluster label with no known answer
+   - A count of missing values
+1. What does a logistic regression model estimate for each row?
+   - The probability that the row belongs to the 1 class
+   - The exact dollar value of the output
+   - The residual from a straight line
+   - The number of inputs to keep
+1. What shape does logistic regression fit to the data?
+   - An S-shaped (sigmoid) curve that stays between 0 and 1
+   - A straight line with no upper or lower limit
+   - A U-shaped curve
+   - A series of flat steps
+1. Why is OLS a poor fit for a 0/1 outcome?
+   - Its straight line can predict values below 0 or above 1, which are impossible probabilities
+   - OLS cannot be calculated when the output is 0 or 1
+   - OLS always produces an R² of zero for binary outcomes
+   - OLS ignores the intercept for binary outcomes
+1. Our OLS model has a const of 1.0082 and an `office_size` coefficient of -0.1303. What does it predict for an office size of 9?
+   - About -0.16, an impossible negative probability
+   - About 0.16
+   - About 1.17
+   - Exactly 0
+1. What is the major advantage of logistic regression over linear regression for a 0/1 outcome?
+   - It draws a steeper curve between the two classes that better fits an outcome that is either 0 or 1
+   - Its coefficients are easier to interpret
+   - It never needs an intercept
+   - It always has a higher R²
+1. What is the major downside of logistic regression compared with linear regression?
+   - It is less interpretable, because coefficients are in log-odds
+   - It cannot use more than one input
+   - It cannot produce p-values
+   - It only works with very large datasets
+1. Which statsmodels call fits a logistic regression?
+   - `sm.Logit(y, X).fit()`
+   - `sm.OLS(y, X).fit()`
+   - `sm.add_constant(X)`
+   - `df.corr()`
+1. What does a coefficient in logistic regression represent?
+   - The change in the log-odds of the outcome for a one-unit increase in the input, holding other inputs constant
+   - The change in the probability of the outcome for a one-unit increase in the input
+   - The proportion of variance explained by the input
+   - The predicted probability when the input is zero
+1. What does a negative coefficient mean in logistic regression?
+   - As that input increases, the probability of the outcome being 1 goes down
+   - The input is not statistically significant
+   - The predicted probability is negative
+   - The model failed to converge
+1. Which measure of overall fit replaces adjusted R² in logistic regression?
+   - Pseudo R², such as McFadden's R²
+   - RMSE
+   - The correlation coefficient
+   - The F-statistic
+1. In our model with only 10 rows, `office_size` has a p-value of 0.161. What should you conclude?
+   - It is not significant at 0.05; with so little data we cannot be confident in the effect
+   - Office size has been proven to have no effect on closing
+   - There is a 16.1% chance that an office closes
+   - The coefficient must be positive
+1. Which task is the best fit for logistic regression?
+   - Predicting whether a customer will cancel their subscription
+   - Predicting the sale price of a house
+   - Predicting next month's total sales
+   - Grouping customers into segments without a known outcome

@@ -1,5 +1,3 @@
-<script src="/course_model/toc.js"></script>
-
 # Decision Trees
 
 A decision tree is a supervised machine learning algorithm used for classification and regression tasks. It works by splitting the data into subsets based on the value of input features, creating a tree-like model of decisions.
@@ -18,7 +16,7 @@ A decision tree is a supervised machine learning algorithm used for classificati
 - Explain why a decision tree can use a virtually unlimited number of features without overfitting (unlike regression).
 
 **Links**:
-- [Quizlet](https://quizlet.com/1148647471/course-model-decision-trees-flash-cards/?i=2up6jq&x=1qqt)
+- Word [template](decision-tree-problem.docx) and [solution](decision-tree-key.docx) for the decision tree split problem
 - [template](template.ipynb) and [affairs1](affairs.csv) and [affairs2](affairs_occupations.csv) datasets
 
 **Resources**:
@@ -44,6 +42,7 @@ Problems:
 - Overfitting is a major problem with decision trees.
     - Decision trees can build very elaborate trees. In the worse case, these will perfectly memorize the training data, meaning that they may not work well on new data.
     - Techniques to prevent overfitting include pruning the tree, setting a maximum depth, or requiring a minimum number of samples per leaf node.
+    - Pruning means cutting back branches that add complexity without improving predictions. Setting `max_depth` or `min_samples_leaf` stops the tree from growing those branches in the first place.
 
 Interpretation:
 
@@ -52,10 +51,16 @@ Interpretation:
     - Feature importance can be assessed to see which features contribute most to the predictions.
 - Individual predictions:
     - We can evaluate the model's performance using metrics like accuracy, precision, recall, F1-score for classification, or mean squared error for regression.
+        - Accuracy is the share of all predictions that are correct.
+        - Precision asks: of the rows the model predicted to be in a class, what share really are? If the model predicts 20 cars are from europe and 15 really are, precision is 15 / 20 = 0.75.
+        - Recall asks: of the rows that really are in a class, what share did the model find? If there are 30 europe cars and the model finds 15 of them, recall is 15 / 30 = 0.50.
+        - A confusion matrix shows the counts behind these numbers, with one row for each actual class and one column for each predicted class.
 
 ## Topic: Test and train data split
 
 In contrast to a classical approach, modern machine learning practices often involve splitting the dataset into training and testing sets to evaluate model performance. In this approach, we do not evaluate individual coefficients for significance, but rather focus on overall model performance metrics. Because we are not focusing on an understandable model, we can use more complex models that may not be easily interpretable. However, this means that we need to be careful to avoid overfitting.
+
+This is the difference between whitebox and blackbox modeling. A whitebox model, such as a linear regression or a small decision tree, can be read and explained: you can see the coefficients or follow the splits. A blackbox model, such as a very deep tree or a random forest, may predict well, but its internal reasoning is hard to interpret. Older statistical methods favor whitebox models, while newer machine learning methods often accept a blackbox in exchange for better predictions.
 
 Key Concepts:
 - The dataset is divided into two parts: the training set and the testing set. The training set is used to train the model, while the testing set is used to evaluate its performance on unseen data.
@@ -150,7 +155,7 @@ lr = LinearRegression()
 lr.fit(X_train, y_train)
 y_pred_lr = lr.predict(X_test)
 mae_lr = mean_absolute_error(y_test, y_pred_lr)
-rmse_lr = mean_squared_error(y_test, y_pred_lr)
+rmse_lr = np.sqrt(mean_squared_error(y_test, y_pred_lr))
 r2_lr = r2_score(y_test, y_pred_lr)
 print("Linear Regression MAE:", mae_lr)
 print("Linear Regression RMSE:", rmse_lr)
@@ -158,9 +163,9 @@ print("Linear Regression R^2:", r2_lr)
 
 ```
 
-    Linear Regression MAE: 3.4386653125824713
-    Linear Regression RMSE: 18.416796850299363
-    Linear Regression R^2: 0.6348272785373763
+    Linear Regression MAE: 3.4386653125824727
+    Linear Regression RMSE: 4.291479564241145
+    Linear Regression R^2: 0.6348272785373761
 
 
 ```python
@@ -181,7 +186,7 @@ y_pred = tree.predict(X_test)
 
 # Calculate metrics, using mae (mean absolute error), rmse (root mean squared error), r2 (R-squared)
 mae = mean_absolute_error(y_test, y_pred)
-rmse = mean_squared_error(y_test, y_pred)
+rmse = np.sqrt(mean_squared_error(y_test, y_pred))
 r2 = r2_score(y_test, y_pred)
 
 print("MAE:", mae)
@@ -197,8 +202,8 @@ feature_importances = pd.DataFrame({
 feature_importances
 ```
 
-    MAE: 3.389427325074965
-    RMSE: 19.73045119753326
+    MAE: 3.3894273250749642
+    RMSE: 4.441897252023425
     R^2: 0.6087798210484368
 
 
@@ -258,7 +263,7 @@ feature_importances
 # Measure accuracy on test set.
 y_pred = tree.predict(X_test)
 mae = mean_absolute_error(y_test, y_pred)
-rmse = mean_squared_error(y_test, y_pred)
+rmse = np.sqrt(mean_squared_error(y_test, y_pred))
 r2 = r2_score(y_test, y_pred)
 
 print("MAE:", mae)
@@ -266,8 +271,8 @@ print("RMSE:", rmse)
 print("R^2:", r2)
 ```
 
-    MAE: 3.389427325074965
-    RMSE: 19.73045119753326
+    MAE: 3.3894273250749642
+    RMSE: 4.441897252023425
     R^2: 0.6087798210484368
 
 
@@ -352,7 +357,8 @@ from sklearn.tree import plot_tree
 # Show decision tree. The top line shows the decision rule.
 # The second line shows gini, which is defined as 1 - sum(p_i^2) for each class i, 
 #   where p_i is the proportion of samples of class i at that node.
-# Gini ranges from 0 (pure node) to 0.5 (impure node with equal class distribution).
+# Gini ranges from 0 (pure node) up to 1 - 1/k when k classes are evenly mixed:
+#   0.5 for two classes, and about 0.67 for the three origins here.
 # The line with value = ... shows the number of samples at that node.
 # The last line shows the most common class distribution at that node.
 
@@ -373,3 +379,145 @@ plt.show()
 ![png](index_files/index_15_0.png)
     
 
+
+## Key Terms
+
+- **Decision tree**: A supervised model that predicts an outcome by splitting the data into smaller groups with a series of yes/no rules
+- **Classification tree**: A decision tree that predicts a category, such as a car's origin (`DecisionTreeClassifier`)
+- **Regression tree**: A decision tree that predicts a continuous number, such as mpg (`DecisionTreeRegressor`)
+- **Root node**: The first split at the top of the tree, which contains all of the training rows
+- **Split (decision rule)**: A yes/no test on one feature, such as weight <= 2500, that divides a node into two branches
+- **Leaf node**: An end point of the tree with no further splits, where the prediction is made
+- **Gini impurity**: A measure of how mixed the classes are in a node, calculated as 1 minus the sum of each class proportion squared
+- **Pure node**: A node where every row belongs to the same class, giving a gini of 0
+- **Overfitting**: When a model memorizes the training data, including its noise, and performs poorly on new data
+- **Max depth**: A limit on how many levels of splits a tree may have (`max_depth`)
+- **Minimum samples per leaf**: The smallest number of training rows allowed in a leaf (`min_samples_leaf`)
+- **Pruning**: Cutting back branches of a tree that add complexity without improving predictions
+- **Train/test split**: Dividing the data into one part used to fit the model and another part held back to evaluate it
+- **Training set**: The portion of the data, often 70% to 80%, used to fit the model
+- **Test set**: The portion of the data held back and used only to measure performance on unseen data
+- **Generalization**: How well a model performs on new data it was not trained on
+- **Cross-validation**: Repeatedly splitting the data into training and validation parts so that every row is used for both
+- **Feature importance**: A score showing how much each feature reduced error across all of the splits in the tree
+- **Accuracy**: The share of all predictions that are correct
+- **Confusion matrix**: A table that counts predictions by actual class and predicted class
+- **Precision**: Of the rows predicted to be in a class, the share that really are in that class
+- **Recall**: Of the rows that really are in a class, the share that the model found
+- **MAE (mean absolute error)**: The mean size of the prediction errors, ignoring their sign
+- **Whitebox model**: A model whose reasoning can be read and explained, such as a regression or a small decision tree
+- **Blackbox model**: A model that predicts well but whose internal reasoning is hard to interpret
+
+
+## Practice Questions
+
+1. How does a decision tree make a prediction?
+   - It follows a series of yes/no splits on the features until it reaches a leaf
+   - It multiplies each feature by a coefficient and adds them up
+   - It measures the distance to the nearest rows in the data
+   - It groups rows without using a known outcome
+1. Which kinds of outcomes can a decision tree predict?
+   - Both categories (classification) and continuous numbers (regression)
+   - Only categories
+   - Only continuous numbers
+   - Only 0/1 outcomes
+1. Which scikit-learn class would you use to predict `mpg`, a continuous number?
+   - `DecisionTreeRegressor`
+   - `DecisionTreeClassifier`
+   - `OneHotEncoder`
+   - `train_test_split`
+1. In a regression tree, what value does a leaf predict?
+   - The average outcome of the training rows that landed in that leaf
+   - The most common class in that leaf
+   - The largest outcome in that leaf
+   - The outcome of the first row in that leaf
+1. What is the root node of a decision tree?
+   - The first split at the top, which contains all of the training rows
+   - The final node where a prediction is made
+   - The node with the fewest rows
+   - The feature with the lowest importance
+1. Why do decision trees not require scaling the numeric features?
+   - They are not distance-based; each split only compares one feature to a cutoff
+   - Scaling is done automatically by `get_dummies`
+   - Trees only accept values between 0 and 1
+   - Scaling would remove the outliers that trees depend on
+1. How do we prepare a text column such as `make` for a decision tree?
+   - One-hot encode it into 1/0 columns with `pd.get_dummies`
+   - Leave it as text; scikit-learn trees read text directly
+   - Drop every row that contains text
+   - Convert each make to its alphabetical rank
+1. What does overfitting mean for a decision tree?
+   - The tree grows so elaborate that it memorizes the training data and does poorly on new data
+   - The tree has too few splits to capture the pattern
+   - The tree uses too many rows for testing
+   - The tree cannot handle categorical features
+1. Which settings help reduce overfitting in a decision tree?
+   - Limiting `max_depth` and raising `min_samples_leaf`
+   - Removing the test set
+   - Scaling all of the numeric features
+   - Letting the tree grow until every leaf is pure
+1. What does `min_samples_leaf=5` do?
+   - Prevents any split that would leave a leaf with fewer than 5 training rows
+   - Limits the tree to 5 leaves
+   - Limits the tree to 5 levels of splits
+   - Uses only 5 features
+1. Why do we split the data into training and test sets?
+   - To measure how well the model performs on data it has not seen
+   - To make the model train faster
+   - To remove rows with missing values
+   - To calculate p-values for each feature
+1. The mpg dataset has 392 rows and we use `test_size=0.25`. About how many rows are in the test set?
+   - 98
+   - 25
+   - 294
+   - 196
+1. A tree has an R² of 0.99 on the training set but 0.55 on the test set. What does this suggest?
+   - The tree is overfit and has memorized the training data
+   - The tree is too simple
+   - The test set is too large
+   - The model generalizes very well
+1. In the test/train approach, what do we focus on instead of coefficient p-values?
+   - Overall predictive performance on the test set
+   - The significance of each individual feature
+   - The intercept of the model
+   - The number of rows in the training set
+1. What is the basic idea of cross-validation?
+   - Split the data into subsets and repeat training and validation so every row is used for both
+   - Train the model once on all of the data and test it on the same data
+   - Remove the features with the lowest importance
+   - Run the model on two different datasets and compare the results
+1. A node contains 8 usa cars and 2 japan cars. What is its gini impurity?
+   - 0.32, because 1 - (0.8² + 0.2²)
+   - 0.20
+   - 0.80
+   - 0
+1. What is the gini impurity of a node where every row belongs to the same class?
+   - 0, the node is pure
+   - 0.5
+   - 1
+   - It cannot be calculated
+1. What does feature importance tell you?
+   - Which features contributed most to reducing error across the tree's splits
+   - Whether a feature raises or lowers the prediction
+   - The p-value of each feature
+   - How many missing values each feature has
+1. A model predicts 10 cars are from japan, and 8 of them really are. What is the precision for japan?
+   - 0.80, because 8 of the 10 predicted are correct
+   - 0.20
+   - 8
+   - It cannot be found without the recall
+1. There are 20 japan cars in the test set and the model correctly identifies 8 of them. What is the recall for japan?
+   - 0.40, because it found 8 of the 20 actual japan cars
+   - 0.80
+   - 0.60
+   - 12
+1. What does a confusion matrix show?
+   - Counts of predictions broken down by actual class and predicted class
+   - The correlation between each pair of features
+   - The importance of each feature
+   - The splits used at each level of the tree
+1. What is the difference between a whitebox and a blackbox model?
+   - A whitebox model's reasoning can be read and explained; a blackbox model predicts without an easily interpretable explanation
+   - A whitebox model uses a test set; a blackbox model does not
+   - A whitebox model predicts categories; a blackbox model predicts numbers
+   - A whitebox model is always more accurate than a blackbox model
