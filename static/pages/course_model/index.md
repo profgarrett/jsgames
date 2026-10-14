@@ -68,26 +68,30 @@ Each week covers Python and Machine Learning concepts.  Most modules have a deli
 
 ### Week 9 - October 12, 2026 
 
-*Exam 2*
+[Exam 2](exams/exam2)
 
-- *DataCamp: Unsupervised learning in Python*
-- [ml11](ml11-kmeans/index): K-Means Clustering
+
 - [py06](py06-pandas-group-join/index): Pandas 3: aggregation and joins
+- [py07](py07-pandas-reshaping/index): Pandas 4: reshaping
 
 ### Week 10 - October 19, 2026 
 
-- [ml12](ml12-pca/index): PCA and dimensionality reduction
-- [Good presentations](https://profgarrett.github.io/course_dv/dv11-presentations/)
+- *DataCamp: Unsupervised learning in Python*
+
+- [ml11](ml11-kmeans/index): K-Means Clustering
 
 ### Week 11 - October 26, 2026 
 
 - *Datacamp: Intermediate Python* 
+
+- [ml12](ml12-pca/index): PCA and dimensionality reduction
 - [py09](py09-control-flow/index): Control flow
 - [py10](py10-functions/index): Functions
 
 ### Week 12 - November 2, 2026 
 
 *Datacamp: NLP in Python*
+
 - [ml15-nlp](ml15-nlp/index): NLP with Python
 - Optional readings:
 	- Primer on NLP Embeddings [reading](https://huggingface.co/spaces/hesamation/primer-llm-embedding)

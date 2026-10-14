@@ -56,3 +56,29 @@ Course Introduction & RPS Exercise
 ### Week 9 - October 12, 2026
 
 - [AIS Chapter 24](ais24-design-implementation/index): Design and Implementation
+- [AIS Chapter 14](ais14-revenue-cycle/index): The Revenue Cycle
+- [AIS Chapter 15](ais15-expenditure-cycle/index): The Expenditure Cycle
+
+### Week 10 - October 19, 2026
+
+- [AIS Chapter 8](ais08-fraud/index): Fraud and Errors
+
+### Week 11 - October 26, 2026
+
+- [AIS Chapter 9](ais09-fraud-techniques/index): Computer Fraud and Abuse Techniques
+
+### Week 12 - November 2, 2026
+
+- [AIS Chapter 10](ais10-controls/index): Control and Accounting Information Systems
+- [AIS Chapter 11](ais11-security/index): Controls for Information Security
+- [AIS Chapter 13](ais13-processing-controls/index): Processing Integrity and Availability Controls
+
+### Week 13 - November 9, 2026
+
+- [AIS Chapter 12](ais12-privacy/index): Confidentiality and Privacy Controls
+
+### Week 14 - November 16, 2026
+
+- [AIS Chapter 14](ais14-revenue-cycle/index): Revenue Cycle
+
+- [AIS Chapter 15](ais15-expenditure-cycle/index): Expenditure Cycle

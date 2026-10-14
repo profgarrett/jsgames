@@ -92,7 +92,7 @@ Optional Reading:
 
 ### Week 9 - October 12, 2026 
 
-[Exam 2](exams/exam2.html)
+[Exam 2](exams/exam2)
 
 - [bi02. PowerBI Modeling](bi02-model/index)
 
