@@ -11,8 +11,8 @@ Exam 2 will primarily focus on modeling techniques in Python, with a special foc
 
 ## Prior Term Examples
 
-- [Spring 2026 Exam](exam2-2026-spring.zip): Note that this exam used creation of a solution, rather than criquing an existing solution. The exam will be more focused on critiquing an existing solution, rather than creating a new one.
-- [Fall 2025 Exam](exam2-2025-fall.zip): I had more exams during this semester, so you'll find several different files in this zip. Howevever, it should be fairly obvious which are relevant for this exam.
+- [Spring 2026 Exam](exam2-spring-2026.zip): Note that this exam used creation of a solution, rather than reviewing an existing solution. The exam will be more focused on critiquing an existing solution, rather than creating a new one.
+- [Fall 2025 Exam](exam2-fall-2025.zip): I had more exams during this semester, so you'll find several different files in this zip. Howevever, it should be fairly obvious which are relevant for this exam.
 
 ## Learning Outcomes
 

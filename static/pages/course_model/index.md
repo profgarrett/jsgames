@@ -70,7 +70,6 @@ Each week covers Python and Machine Learning concepts.  Most modules have a deli
 
 [Exam 2](exams/exam2)
 
-
 - [py06](py06-pandas-group-join/index): Pandas 3: aggregation and joins
 - [py07](py07-pandas-reshaping/index): Pandas 4: reshaping
 

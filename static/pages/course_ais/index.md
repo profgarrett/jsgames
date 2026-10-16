@@ -39,6 +39,9 @@ Course Introduction & RPS Exercise
 <!-- - [excel08](excel08-charts2/index): Charts Part 2 -->
 - [excel09](excel09-titanic/index): Titanic Problem
 
+
+## Module 2: AIS Overview & SDLC
+
 ### Week 6 - September 21, 2026
 
 - [AIS Chapter 1](ais01-overview/index): Introduction to AIS
@@ -59,6 +62,8 @@ Course Introduction & RPS Exercise
 - [AIS Chapter 14](ais14-revenue-cycle/index): The Revenue Cycle
 - [AIS Chapter 15](ais15-expenditure-cycle/index): The Expenditure Cycle
 
+## Module 3: Controls and Fraud
+
 ### Week 10 - October 19, 2026
 
 - [AIS Chapter 8](ais08-fraud/index): Fraud and Errors
@@ -71,14 +76,13 @@ Course Introduction & RPS Exercise
 
 - [AIS Chapter 10](ais10-controls/index): Control and Accounting Information Systems
 - [AIS Chapter 11](ais11-security/index): Controls for Information Security
-- [AIS Chapter 13](ais13-processing-controls/index): Processing Integrity and Availability Controls
+- [AIS Chapter 12](ais12-privacy/index): Confidentiality and Privacy Controls
 
 ### Week 13 - November 9, 2026
 
-- [AIS Chapter 12](ais12-privacy/index): Confidentiality and Privacy Controls
+- [AIS Chapter 13](ais13-processing-controls/index): Processing Integrity and Availability Controls
+
 
 ### Week 14 - November 16, 2026
 
-- [AIS Chapter 14](ais14-revenue-cycle/index): Revenue Cycle
-
-- [AIS Chapter 15](ais15-expenditure-cycle/index): Expenditure Cycle
+TBD
