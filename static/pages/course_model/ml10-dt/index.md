@@ -26,7 +26,13 @@ A decision tree is a supervised machine learning algorithm used for classificati
 - [Cross Validation](https://mlu-explain.github.io/cross-validation/)
 - [Random Forest](https://mlu-explain.github.io/random-forest/)
 
-# Decision Trees
+## Roadmap
+
+Use this map to follow the code blocks below. A code block often covers several stages (A–G), so match the variable names on the arrows. This page runs the pattern twice: first with a regression tree (predicting `mpg`, a number), then with a classification tree (predicting `origin`, a category). The linear regression block is the optional whitebox baseline.
+
+![Decision tree roadmap](decision-tree-roadmap.svg)
+
+## Overview
 
 A decision tree is a supervised machine learning algorithm used for classification and regression tasks. It works by splitting the data into subsets based on the value of input features, creating a tree-like model of decisions.
 
@@ -78,7 +84,7 @@ Cross-validation is a technique used to assess how the results of a statistical 
 
 The basic idea of cross-validation is to partition the data into subsets, train the model on some subsets (training set), and validate it on the remaining subsets (validation set). This process is repeated multiple times to ensure that every data point has been used for both training and validation.
 
-### Step 1: Load and Explore the Data
+## Step 1: Load and Explore the Data
 
 
 ```python
@@ -122,7 +128,7 @@ df
 *392 rows × 10 columns*
 
 
-### Step 2: Define predictors and target
+## Step 2: Define predictors and target
 
 
 ```python
@@ -143,7 +149,7 @@ X_train, X_test, y_train, y_test = train_test_split(
 
 ```
 
-### Step 3: Prediction of mpg (continuous value)
+## Step 3: Prediction of mpg (continuous value)
 
 The decision tree regressor predicts the miles per gallon (mpg) based on the input features. It splits the data into regions with similar mpg values, allowing us to estimate the fuel efficiency of a car given its attributes.
 
@@ -256,7 +262,7 @@ feature_importances
 | 44 | make_vw | 0.000000 |
 
 
-### Measure accuracy on test set.
+## Measure accuracy on test set.
 
 
 ```python
@@ -288,11 +294,11 @@ plt.show()
 
 
     
-![png](index_files/index_12_0.png)
+![png](index_files/index_13_0.png)
     
 
 
-### Alternative: Predict a class variable
+## Alternative: Predict a class variable
 
 This is used when we want to classify data points into categories based on their features. For example, we could classify cars into different fuel efficiency categories (e.g., low, medium, high) based on their attributes.
 
@@ -339,7 +345,7 @@ print("Confusion Matrix:\n", cm)
 
 
     
-![png](index_files/index_14_0.png)
+![png](index_files/index_15_0.png)
     
 
 
@@ -376,7 +382,7 @@ plt.show()
 
 
     
-![png](index_files/index_15_0.png)
+![png](index_files/index_16_0.png)
     
 
 

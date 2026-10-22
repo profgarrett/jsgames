@@ -15,6 +15,12 @@ PCA is a method for reducing the number of columns while retaining as much infor
 **Links**:
 - [template census data](census.csv) and [PCA example](census_pca_example.ipynb)
 
+## Roadmap
+
+Use this map to follow the code blocks below. Steps 1a–1c all happen in the Step 1 code block, and Steps 3a and 3b both happen in the Step 3 code block.
+
+![PCA roadmap](pca-roadmap.svg)
+
 ## PCA Algorithm
 
 Principal Component Analysis (PCA) is a technique for:
@@ -244,7 +250,7 @@ plt.show()
 
 
     
-![png](index_files/index_7_0.png)
+![png](index_files/index_8_0.png)
     
 
 

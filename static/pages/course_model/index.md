@@ -133,8 +133,6 @@ Project week - No new material
 
 <!---
 
-## Temporary notes for NDG
-
 GIT
 https://www.youtube.com/watch?v=eWxxfttcMts
 
@@ -175,5 +173,5 @@ https://www.consumerreports.org/money/questionable-business-practices/kroger-sec
 https://unctadstat.unctad.org/datacentre/
 
 
-
+https://pudding.cool/2026/10/kevin-bacon/
 --->
