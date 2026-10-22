@@ -66,15 +66,18 @@ Course Introduction & RPS Exercise
 
 ### Week 10 - October 19, 2026
 
+[Exam 2 Review](exams/exam2)
+
 - [AIS Chapter 8](ais08-fraud/index): Fraud and Errors
+- [AIS Chapter 9](ais09-fraud-techniques/index): Computer Fraud and Abuse Techniques
+
 
 ### Week 11 - October 26, 2026
 
-- [AIS Chapter 9](ais09-fraud-techniques/index): Computer Fraud and Abuse Techniques
+- [AIS Chapter 10](ais10-controls/index): Control and Accounting Information Systems
 
 ### Week 12 - November 2, 2026
 
-- [AIS Chapter 10](ais10-controls/index): Control and Accounting Information Systems
 - [AIS Chapter 11](ais11-security/index): Controls for Information Security
 - [AIS Chapter 12](ais12-privacy/index): Confidentiality and Privacy Controls
 
