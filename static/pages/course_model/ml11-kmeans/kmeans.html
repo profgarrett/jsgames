@@ -1,0 +1,2128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>K-Means Lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Mono:wght@400;600&family=Atkinson+Hyperlegible+Next:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+	--navy: #002855;
+	--navy-soft: #e3eaf3;
+	--gold: #eaaa00;
+	--ink: #1b2230;
+	--ink-2: #46506a;
+	--muted: #6b7487;
+	--page: #f2f4f7;
+	--surface: #ffffff;
+	--line: #d3d9e2;
+	--grid: #e8ecf1;
+	--font: 'Atkinson Hyperlegible Next', 'Atkinson Hyperlegible', system-ui, -apple-system, 'Segoe UI', sans-serif;
+	--mono: 'Atkinson Hyperlegible Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+}
+* { box-sizing: border-box; }
+html { font-size: 18px; scroll-behavior: smooth; scroll-padding-top: 64px; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+body {
+	margin: 0;
+	background: var(--page);
+	color: var(--ink);
+	font-family: var(--font);
+	line-height: 1.5;
+}
+a { color: var(--navy); }
+:focus-visible { outline: 3px solid var(--navy); outline-offset: 2px; }
+
+/* ---------- top bar ---------- */
+.topbar {
+	position: sticky; top: 0; z-index: 20;
+	background: var(--navy); color: #fff;
+	display: flex; align-items: center; gap: 24px;
+	padding: 0 24px; height: 52px;
+}
+.topbar .brand { font-weight: 800; font-size: 1.05rem; white-space: nowrap; letter-spacing: -0.01em; }
+.topbar nav { display: flex; gap: 4px; overflow-x: auto; scrollbar-width: none; }
+.topbar nav a {
+	color: #dbe4f0; text-decoration: none; font-size: 0.85rem; white-space: nowrap;
+	padding: 6px 10px; border-radius: 6px;
+}
+.topbar nav a:hover { background: rgba(255,255,255,0.12); color: #fff; }
+.topbar nav a b { color: var(--gold); margin-right: 4px; }
+.teacher-badge { display: none; margin-left: auto; font-size: 0.8rem; background: var(--gold); color: var(--navy); font-weight: 700; padding: 3px 10px; border-radius: 999px; white-space: nowrap; }
+body.teacher .teacher-badge { display: inline-block; }
+
+/* ---------- intro ---------- */
+.intro { max-width: 1280px; margin: 0 auto; padding: 40px 24px 8px; }
+.intro h1 { font-size: 2.6rem; line-height: 1.1; margin: 0 0 10px; color: var(--navy); font-weight: 800; letter-spacing: -0.02em; }
+.intro p { margin: 0; max-width: 64ch; color: var(--ink-2); font-size: 1.05rem; }
+.flow { display: flex; flex-wrap: wrap; gap: 8px 28px; margin: 18px 0 0; padding: 0; list-style: none; color: var(--ink-2); font-size: 0.95rem; }
+.flow li { display: flex; align-items: baseline; gap: 8px; }
+.flow li strong { color: var(--ink); }
+
+/* ---------- activity ---------- */
+.act { max-width: 1280px; margin: 0 auto; padding: 40px 24px 24px; }
+.act + .act { border-top: 1px solid var(--line); }
+.act-head { display: grid; grid-template-columns: auto 1fr; gap: 18px; align-items: start; margin-bottom: 18px; }
+.act-num { font-size: 3.6rem; line-height: 0.9; font-weight: 800; color: var(--navy); letter-spacing: -0.04em; min-width: 1.1ch; }
+.act-head h2 { margin: 2px 0 4px; font-size: 1.7rem; line-height: 1.2; color: var(--navy); letter-spacing: -0.01em; }
+.act-head .concept { margin: 0; max-width: 70ch; color: var(--ink-2); }
+.act-body { display: grid; grid-template-columns: minmax(0, 1.75fr) minmax(300px, 1fr); gap: 28px; align-items: start; }
+@media (max-width: 1000px) { .act-body { grid-template-columns: 1fr; } }
+
+/* ---------- controls ---------- */
+.controls { display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: center; margin-bottom: 10px; }
+.ctl { display: flex; align-items: center; gap: 8px; font-size: 0.88rem; color: var(--ink-2); }
+.ctl > .lbl { font-weight: 600; color: var(--ink); }
+select, input[type=text] {
+	font: inherit; font-size: 0.9rem; color: var(--ink);
+	padding: 6px 10px; border: 1px solid var(--line); border-radius: 6px; background: var(--surface);
+}
+select { padding-right: 6px; cursor: pointer; }
+.btn {
+	font: inherit; font-size: 0.88rem; font-weight: 600;
+	padding: 7px 14px; border-radius: 6px; cursor: pointer;
+	border: 1.5px solid var(--navy); background: var(--surface); color: var(--navy);
+}
+.btn:hover { background: var(--navy-soft); }
+.btn.primary { background: var(--navy); color: #fff; }
+.btn.primary:hover { background: #0b3a73; }
+.btn.next { box-shadow: 0 0 0 3px var(--gold); }
+.btn:disabled { opacity: 0.4; cursor: not-allowed; box-shadow: none; }
+.btn-group { display: flex; gap: 6px; flex-wrap: wrap; }
+.seg { display: inline-flex; border: 1.5px solid var(--navy); border-radius: 6px; overflow: hidden; }
+.seg button {
+	font: inherit; font-size: 0.85rem; font-weight: 600; padding: 6px 12px; cursor: pointer;
+	border: 0; background: var(--surface); color: var(--navy);
+}
+.seg button + button { border-left: 1.5px solid var(--navy); }
+.seg button[aria-pressed=true] { background: var(--navy); color: #fff; }
+.chk { display: inline-flex; align-items: center; gap: 6px; font-size: 0.88rem; color: var(--ink); cursor: pointer; }
+.chk input { width: 17px; height: 17px; accent-color: var(--navy); }
+
+/* ---------- plots ---------- */
+.plot-wrap { position: relative; background: var(--surface); border: 1px solid var(--line); border-radius: 4px; }
+.plot-wrap canvas { display: block; width: 100%; touch-action: none; }
+.plot-wrap.scroll-ok canvas { touch-action: auto; }
+.plot-title { font-size: 0.85rem; font-weight: 700; color: var(--ink); margin: 0 0 4px; }
+.plot-sub { font-size: 0.8rem; color: var(--muted); margin: -2px 0 6px; }
+.tip {
+	position: absolute; pointer-events: none; display: none; z-index: 5;
+	background: var(--ink); color: #fff; font-size: 0.78rem; line-height: 1.35;
+	padding: 6px 9px; border-radius: 5px; white-space: nowrap; max-width: 280px;
+}
+.tip b { font-weight: 700; }
+.cover {
+	position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
+	gap: 12px; text-align: center; padding: 24px; background: repeating-linear-gradient(135deg, #f6f8fb 0 12px, #eef2f7 12px 24px);
+	color: var(--ink-2); border-radius: 4px;
+}
+.cover p { margin: 0; max-width: 42ch; }
+.cover[hidden] { display: none; }
+.two-plots { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+@media (max-width: 700px) { .two-plots { grid-template-columns: 1fr; } }
+.chart-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 14px; }
+@media (max-width: 700px) { .chart-pair { grid-template-columns: 1fr; } }
+
+/* ---------- readouts ---------- */
+.status { margin: 10px 0 0; padding: 8px 12px; background: var(--navy-soft); border-radius: 4px; font-size: 0.9rem; color: var(--ink); min-height: 2.6em; }
+.stats { display: flex; flex-wrap: wrap; gap: 6px 28px; margin: 10px 0 0; padding: 0; list-style: none; }
+.stats li { display: flex; flex-direction: column; }
+.stats .k { font-size: 0.75rem; color: var(--muted); }
+.stats .v { font-size: 1.25rem; font-weight: 700; color: var(--ink); font-variant-numeric: tabular-nums; }
+.legend-inline { display: inline-flex; gap: 14px; font-size: 0.78rem; color: var(--ink-2); align-items: center; }
+.legend-inline svg { vertical-align: -2px; }
+.sub-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin: 16px 0 4px; flex-wrap: wrap; }
+.sub-head .plot-title { margin: 0; }
+
+.thumbs { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; margin-top: 12px; }
+@media (max-width: 600px) { .thumbs { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.thumb {
+	font: inherit; text-align: left; padding: 4px; border: 1.5px solid var(--line); border-radius: 4px; background: var(--surface); cursor: pointer;
+	display: flex; flex-direction: column; gap: 2px; color: var(--ink);
+}
+.thumb canvas { width: 100%; display: block; }
+.thumb .t1 { font-size: 0.72rem; color: var(--muted); }
+.thumb .t2 { font-size: 0.8rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+.thumb.kept { border-color: var(--navy); border-width: 2.5px; }
+.thumb.kept .t1::after { content: ' (kept)'; color: var(--navy); font-weight: 700; }
+.thumb[aria-pressed=true] { outline: 3px solid var(--gold); outline-offset: 1px; }
+
+.share { margin-top: 14px; }
+.share-bar { display: flex; height: 26px; border-radius: 4px; overflow: hidden; gap: 2px; background: var(--surface); }
+.share-bar div { min-width: 3px; }
+.share-key { display: flex; justify-content: space-between; gap: 12px; font-size: 0.82rem; color: var(--ink-2); margin-top: 4px; flex-wrap: wrap; }
+.share-key span b { color: var(--ink); }
+.swatch { display: inline-block; width: 11px; height: 11px; border-radius: 2px; margin-right: 5px; vertical-align: -1px; }
+
+table.data { border-collapse: collapse; font-size: 0.85rem; font-variant-numeric: tabular-nums; margin-top: 6px; width: 100%; }
+table.data th, table.data td { padding: 6px 8px; text-align: right; border-bottom: 1px solid var(--grid); }
+table.data th:first-child, table.data td:first-child { text-align: left; }
+table.data thead th { font-weight: 700; color: var(--ink); border-bottom: 1.5px solid var(--line); white-space: nowrap; }
+table.data tfoot td { font-weight: 700; border-top: 1.5px solid var(--line); border-bottom: 0; }
+table.data input { width: 100%; min-width: 120px; padding: 4px 6px; font-size: 0.85rem; }
+.tables { display: grid; grid-template-columns: 1fr; gap: 18px; margin-top: 12px; }
+.tables > div { overflow-x: auto; }
+#a6-cross { width: auto; min-width: 60%; }
+.two-plots .plot-sub { min-height: 2.9em; }
+
+/* ---------- python echo ---------- */
+details.code { margin-top: 14px; }
+details.code summary { cursor: pointer; font-size: 0.85rem; font-weight: 600; color: var(--ink-2); }
+details.code pre {
+	margin: 6px 0 0; padding: 12px 14px; background: #f7f9fc; border: 1px solid var(--line); border-radius: 4px;
+	font-family: var(--mono); font-size: 0.8rem; line-height: 1.5; color: var(--navy); overflow-x: auto;
+}
+
+/* ---------- guide column ---------- */
+.guide { position: relative; padding-left: 22px; }
+.guide::before { content: ''; position: absolute; left: 5px; top: 10px; bottom: 10px; width: 2px; background: var(--line); }
+.step { position: relative; margin: 0 0 20px; }
+.step::before { content: ''; position: absolute; left: -22px; top: 6px; width: 12px; height: 12px; border-radius: 50%; background: var(--page); border: 2px solid var(--navy); }
+.step h3, .step summary { margin: 0 0 6px; font-size: 1rem; color: var(--navy); font-weight: 800; }
+.step ol, .step ul { margin: 0; padding-left: 1.2em; }
+.step li { margin: 0 0 6px; font-size: 0.92rem; }
+.step li::marker { color: var(--muted); font-weight: 700; }
+.step.turn { background: var(--surface); border-left: 4px solid var(--gold); padding: 12px 14px 8px; border-radius: 0 4px 4px 0; }
+.step.turn::before { background: var(--gold); border-color: var(--gold); left: -22px; }
+.step.turn li { font-size: 0.95rem; }
+details.step summary { cursor: pointer; list-style: none; }
+details.step summary::-webkit-details-marker { display: none; }
+details.step summary::after { content: ' (open when ready)'; font-weight: 400; color: var(--muted); font-size: 0.85rem; }
+details.step[open] summary::after { content: ''; }
+.teacher-notes { display: none; }
+body.teacher .teacher-notes { display: block; }
+.teacher-notes { background: #fff8e1; border: 1px dashed #c99400; padding: 12px 14px 6px; border-radius: 4px; }
+.teacher-notes::before { background: #fff8e1; border-color: #c99400; }
+.teacher-notes li { font-size: 0.86rem; }
+
+footer { max-width: 1280px; margin: 0 auto; padding: 24px 24px 48px; color: var(--muted); font-size: 0.85rem; border-top: 1px solid var(--line); }
+footer p { margin: 0 0 6px; max-width: 80ch; }
+
+@media (max-width: 600px) {
+	html { font-size: 16px; }
+	.topbar { padding: 0 16px; gap: 12px; }
+	.intro, .act, footer { padding-left: 16px; padding-right: 16px; }
+	.intro h1 { font-size: 2rem; }
+	.act-num { font-size: 2.6rem; }
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+	<span class="brand">K-Means Lab</span>
+	<nav aria-label="Activities">
+		<a href="#a1"><b>1</b>Watch it work</a>
+		<a href="#a2"><b>2</b>Random starts</a>
+		<a href="#a3"><b>3</b>Choose K</a>
+		<a href="#a4"><b>4</b>Scaling</a>
+		<a href="#a5"><b>5</b>Break it</a>
+		<a href="#a6"><b>6</b>Check against the truth</a>
+	</nav>
+	<span class="teacher-badge">Teacher notes on</span>
+</div>
+
+<header class="intro">
+	<h1>K-Means Lab</h1>
+	<p>Six short activities on K-Means clustering. Each one runs the same way in class:</p>
+	<ol class="flow">
+		<li><strong>Demo.</strong> Watch the instructor use the tool.</li>
+		<li><strong>Your turn.</strong> Use it yourself to answer the questions.</li>
+		<li><strong>Discuss.</strong> Compare what you found.</li>
+	</ol>
+</header>
+
+<!-- ======================= 1 ======================= -->
+<section class="act" id="a1" aria-labelledby="a1-h">
+	<div class="act-head">
+		<div class="act-num" aria-hidden="true">1</div>
+		<div>
+			<h2 id="a1-h">Watch it work</h2>
+			<p class="concept">K-Means repeats two steps. <strong>Assign</strong> gives each point to its nearest centroid. <strong>Update</strong> moves each centroid to the average of its points. It stops when no point changes cluster.</p>
+		</div>
+	</div>
+	<div class="act-body">
+		<div class="lab">
+			<div class="controls">
+				<label class="ctl"><span class="lbl">Data</span>
+					<select id="a1-data">
+						<option value="three">Three groups</option>
+						<option value="four">Four uneven groups</option>
+						<option value="draw">Draw your own</option>
+					</select>
+				</label>
+				<label class="ctl"><span class="lbl">K</span><select id="a1-k"></select></label>
+				<div class="btn-group">
+					<button class="btn" id="a1-random">Random start</button>
+					<button class="btn" id="a1-place">Place by hand</button>
+					<button class="btn" id="a1-clear" hidden>Clear points</button>
+				</div>
+			</div>
+			<div class="controls">
+				<div class="btn-group">
+					<button class="btn primary" id="a1-assign">Assign</button>
+					<button class="btn primary" id="a1-update">Update</button>
+					<button class="btn" id="a1-run">Run to the end</button>
+				</div>
+				<label class="chk"><input type="checkbox" id="a1-regions" checked> Regions</label>
+				<label class="chk"><input type="checkbox" id="a1-lines" checked> Lines to centroid</label>
+				<label class="chk"><input type="checkbox" id="a1-squares"> Squares</label>
+			</div>
+			<div class="plot-wrap" id="a1-plot"><canvas aria-label="Scatter plot of points and centroids. Drag a centroid to move it."></canvas><div class="tip"></div></div>
+			<p class="status" id="a1-status" aria-live="polite"></p>
+			<ul class="stats">
+				<li><span class="k">Updates so far</span><span class="v" id="a1-iter">0</span></li>
+				<li><span class="k">Next step</span><span class="v" id="a1-next">Assign</span></li>
+				<li><span class="k">Points that switched (last Assign)</span><span class="v" id="a1-changed">–</span></li>
+				<li><span class="k">Inertia</span><span class="v" id="a1-inertia">–</span></li>
+			</ul>
+			<div class="sub-head">
+				<p class="plot-title">Inertia after each step</p>
+				<span class="legend-inline">
+					<span><svg width="12" height="12" aria-hidden="true"><circle cx="6" cy="6" r="4.5" fill="#002855"/></svg> after Assign</span>
+					<span><svg width="12" height="12" aria-hidden="true"><rect x="1.5" y="1.5" width="9" height="9" fill="#fff" stroke="#002855" stroke-width="2"/></svg> after Update</span>
+				</span>
+			</div>
+			<div class="plot-wrap scroll-ok" id="a1-hist"><canvas aria-label="Line chart of inertia after each step"></canvas><div class="tip"></div></div>
+		</div>
+		<aside class="guide">
+			<div class="step demo">
+				<h3>Demo</h3>
+				<ol>
+					<li>Press <b>Assign</b>. Each point takes the color of its nearest centroid. The shaded regions show which centroid is nearest.</li>
+					<li>Press <b>Update</b>. Each centroid moves to the average of its points. Points whose color no longer matches the shading will switch on the next Assign.</li>
+					<li>Keep going until the page says nothing changed. Watch the inertia chart.</li>
+				</ol>
+			</div>
+			<div class="step turn">
+				<h3>Your turn</h3>
+				<ol>
+					<li>Press <b>Random start</b> and step through with Assign and Update. How many updates did it take before nothing changed?</li>
+					<li>Look at the inertia chart. Does inertia ever go up after an Assign or an Update?</li>
+					<li>Turn on <b>Squares</b>. Each square's area is one point's squared distance, so inertia is the total area. Drag the centroids to make it as small as you can and write down the inertia. Then press <b>Run to the end</b>. Did K-Means beat you?</li>
+				</ol>
+			</div>
+			<details class="step discuss">
+				<summary>Discuss</summary>
+				<ul>
+					<li>Why can't inertia go up on either step?</li>
+					<li>Why is the algorithm guaranteed to stop?</li>
+					<li>With squares on, which points add the most to inertia?</li>
+				</ul>
+			</details>
+			<div class="step teacher-notes">
+				<h3>Teacher notes</h3>
+				<ul>
+					<li>Assign: each point moves to a centroid that is at least as close, so its squared distance can't grow. Update: the average is the spot with the smallest total squared distance to a group, so moving there can't increase it either.</li>
+					<li>Inertia keeps falling and there are only so many ways to split the points, so it must stop. Once an Assign changes nothing, an Update would not move anything.</li>
+					<li>Squares tie to the practice question: distances 1, 2, 2 give 1 + 4 + 4 = 9. Far points have huge squares, which previews the outlier in activity 5.</li>
+					<li>Run to the end almost always lowers a hand-placed answer a little. If it doesn't, the student already found a stopping point.</li>
+					<li>The page opens with the same start each time, so the demo is repeatable. Each press of Random start gives a new one.</li>
+				</ul>
+			</div>
+		</aside>
+	</div>
+</section>
+
+<!-- ======================= 2 ======================= -->
+<section class="act" id="a2" aria-labelledby="a2-h">
+	<div class="act-head">
+		<div class="act-num" aria-hidden="true">2</div>
+		<div>
+			<h2 id="a2-h">Random starts</h2>
+			<p class="concept">The final clusters depend on where the centroids start. Python's <code>KMeans</code> tries several starts (<code>n_init</code>) and keeps the one with the lowest inertia.</p>
+		</div>
+	</div>
+	<div class="act-body">
+		<div class="lab">
+			<div class="controls">
+				<label class="ctl"><span class="lbl">K</span><select id="a2-k"></select></label>
+				<label class="ctl"><span class="lbl">Starts (n_init)</span>
+					<select id="a2-n"><option>1</option><option>3</option><option selected>10</option><option>20</option></select>
+				</label>
+				<div class="ctl"><span class="lbl">Start method</span>
+					<div class="seg" id="a2-init">
+						<button data-v="random" aria-pressed="true">Random points</button>
+						<button data-v="pp" aria-pressed="false">Spread out (k-means++)</button>
+					</div>
+				</div>
+			</div>
+			<div class="controls">
+				<div class="ctl"><span class="lbl">random_state</span> <span id="a2-seed" style="font-family:var(--mono);font-weight:600;color:var(--ink)">7</span></div>
+				<div class="btn-group">
+					<button class="btn primary" id="a2-run">Run</button>
+					<button class="btn" id="a2-newseed">New random_state</button>
+				</div>
+			</div>
+			<div class="plot-wrap" id="a2-plot"><canvas aria-label="Scatter plot of the selected start, with paths showing how each centroid moved"></canvas><div class="tip"></div></div>
+			<p class="status" id="a2-status" aria-live="polite"></p>
+			<div class="sub-head">
+				<p class="plot-title">Each start's final answer. Click one to see it above.</p>
+				<span class="legend-inline">
+					<span><svg width="14" height="14" aria-hidden="true"><circle cx="7" cy="7" r="5" fill="none" stroke="#1b2230" stroke-width="2"/></svg> where a centroid started</span>
+				</span>
+			</div>
+			<div class="thumbs" id="a2-thumbs"></div>
+			<details class="code"><summary>Same thing in Python</summary><pre id="a2-code"></pre></details>
+		</div>
+		<aside class="guide">
+			<div class="step demo">
+				<h3>Demo</h3>
+				<ol>
+					<li>Set Starts to 1 and press Run. The hollow shapes show where each centroid started, and the lines show the path it took.</li>
+					<li>Set Starts to 10. Each small plot is one start. The outlined one has the lowest inertia, so Python keeps it.</li>
+					<li>Press Run again. With the same random_state, you get exactly the same results.</li>
+				</ol>
+			</div>
+			<div class="step turn">
+				<h3>Your turn</h3>
+				<ol>
+					<li>With 10 random starts, how many different answers did you get? Which one would Python keep, and how does it decide without looking at the picture?</li>
+					<li>Click a start that found a worse answer. Where did its centroids begin? Why couldn't they fix the problem?</li>
+					<li>Switch to <b>Spread out (k-means++)</b> and press New random_state a few times. Are bad answers more or less common?</li>
+				</ol>
+			</div>
+			<details class="step discuss">
+				<summary>Discuss</summary>
+				<ul>
+					<li>Why not just run one start?</li>
+					<li>What does <code>random_state</code> do, and why does it matter for homework and reports?</li>
+					<li>Python picks the lowest inertia. Is that always the answer a person would pick?</li>
+				</ul>
+			</details>
+			<div class="step teacher-notes">
+				<h3>Teacher notes</h3>
+				<ul>
+					<li>A bad answer usually has two centroids starting in one group and splitting it, while another centroid covers two groups. Each step only makes small local moves, so it gets stuck.</li>
+					<li>Python compares starts using inertia alone: no labels and no picture are needed.</li>
+					<li>k-means++ is Python's default. It picks starting points far apart, so bad starts are rarer but still possible. That's why <code>n_init</code> still matters.</li>
+					<li><code>random_state</code> fixes the random numbers, so the same code gives the same clusters every run. This page has its own random numbers, so its random_state values won't match Python's.</li>
+				</ul>
+			</div>
+		</aside>
+	</div>
+</section>
+
+<!-- ======================= 3 ======================= -->
+<section class="act" id="a3" aria-labelledby="a3-h">
+	<div class="act-head">
+		<div class="act-num" aria-hidden="true">3</div>
+		<div>
+			<h2 id="a3-h">Choose K</h2>
+			<p class="concept">Inertia always falls as K grows, so look for the <strong>elbow</strong>, where adding another cluster stops helping much. The silhouette score (higher is better) can also be compared across values of K.</p>
+		</div>
+	</div>
+	<div class="act-body">
+		<div class="lab">
+			<div class="controls">
+				<label class="ctl"><span class="lbl">Data</span>
+					<select id="a3-data">
+						<option value="A">Mystery A</option>
+						<option value="B">Mystery B</option>
+						<option value="C">Mystery C</option>
+						<option value="iris">Iris (4 features, scaled)</option>
+					</select>
+				</label>
+				<label class="ctl"><span class="lbl">Color the data with K =</span><select id="a3-k"></select></label>
+				<button class="btn" id="a3-hide" hidden>Hide the data again</button>
+			</div>
+			<div class="chart-pair">
+				<div>
+					<p class="plot-title">Inertia by K (elbow plot)</p>
+					<div class="plot-wrap scroll-ok" id="a3-inertia"><canvas aria-label="Line chart of inertia for K from 1 to 8"></canvas><div class="tip"></div></div>
+				</div>
+				<div>
+					<p class="plot-title">Silhouette score by K</p>
+					<div class="plot-wrap scroll-ok" id="a3-sil"><canvas aria-label="Line chart of silhouette score for K from 2 to 8"></canvas><div class="tip"></div></div>
+				</div>
+			</div>
+			<p class="plot-sub" style="margin-top:8px">Click a point on either chart to pick that K. Each K uses the best of 10 starts.</p>
+			<div class="sub-head"><p class="plot-title" id="a3-scatter-title">The data</p></div>
+			<div class="plot-wrap scroll-ok" id="a3-plot">
+				<canvas aria-label="Scatter plot of the data colored by cluster"></canvas><div class="tip"></div>
+				<div class="cover" id="a3-cover">
+					<p><strong>The data is hidden.</strong> Real data often has too many features to plot, so you have to choose K from the charts alone.</p>
+					<button class="btn primary" id="a3-reveal">Reveal the data</button>
+				</div>
+			</div>
+			<details class="code"><summary>Same thing in Python</summary><pre id="a3-code"></pre></details>
+		</div>
+		<aside class="guide">
+			<div class="step demo">
+				<h3>Demo</h3>
+				<ol>
+					<li>Pick Mystery A. The data is hidden, as it would be for a dataset with many features.</li>
+					<li>Read the elbow plot: where does the drop flatten out? Then check the silhouette chart.</li>
+					<li>Pick a K, then press Reveal the data.</li>
+				</ol>
+			</div>
+			<div class="step turn">
+				<h3>Your turn</h3>
+				<ol>
+					<li>For Mysteries A, B and C, choose K from the charts alone. Write down your pick and your reason, then reveal the data.</li>
+					<li>Which mystery was hardest to call? What did its charts look like?</li>
+					<li>Pick Iris. Compare these charts to the elbow plot in the lesson notes.</li>
+				</ol>
+			</div>
+			<details class="step discuss">
+				<summary>Discuss</summary>
+				<ul>
+					<li>Why not just choose the K with the lowest inertia?</li>
+					<li>Did the elbow plot and the silhouette score agree?</li>
+					<li>What did K-Means do with Mystery C?</li>
+				</ul>
+			</details>
+			<div class="step teacher-notes">
+				<h3>Teacher notes</h3>
+				<ul>
+					<li>A: four groups. Sharp elbow at 4, and silhouette peaks at 4.</li>
+					<li>B: two groups, each made of two smaller groups. The elbow is soft, and 2 and 4 are both defensible. Domain knowledge decides.</li>
+					<li>C: one blob with no real groups. No clear elbow and a low silhouette at every K, yet K-Means still returns K clusters. It always splits the data, even when there is nothing to find.</li>
+					<li>Iris: inertia is 600, 222 and 140 for K = 1–3, the same as the lesson notes. Silhouette is highest at K = 2 (setosa vs. the rest), even though there are three species.</li>
+					<li>Inertia hits 0 when K equals the number of points, which is why the lowest inertia is never the goal.</li>
+				</ul>
+			</div>
+		</aside>
+	</div>
+</section>
+
+<!-- ======================= 4 ======================= -->
+<section class="act" id="a4" aria-labelledby="a4-h">
+	<div class="act-head">
+		<div class="act-num" aria-hidden="true">4</div>
+		<div>
+			<h2 id="a4-h">Scaling</h2>
+			<p class="concept">K-Means measures straight-line distance, so a feature measured in big numbers (dollars) outweighs one measured in small numbers (years). Scaling puts the features on equal footing.</p>
+		</div>
+	</div>
+	<div class="act-body">
+		<div class="lab">
+			<div class="controls">
+				<label class="ctl"><span class="lbl">Data</span>
+					<select id="a4-data">
+						<option value="cust">Customers: age and income</option>
+						<option value="homes">Morgantown homes: size and price</option>
+					</select>
+				</label>
+				<div class="ctl"><span class="lbl">Scaling</span>
+					<div class="seg" id="a4-scale">
+						<button data-v="none" aria-pressed="true">None</button>
+						<button data-v="z" aria-pressed="false">Z-score</button>
+						<button data-v="mm" aria-pressed="false">Min-Max</button>
+					</div>
+				</div>
+				<label class="ctl"><span class="lbl">K</span><select id="a4-k"></select></label>
+			</div>
+			<div class="two-plots">
+				<div>
+					<p class="plot-title">The chart you would normally make</p>
+					<p class="plot-sub">Each axis is stretched to fit, in original units.</p>
+					<div class="plot-wrap" id="a4-left"><canvas aria-label="Scatter plot in original units with axes stretched to fit"></canvas><div class="tip"></div></div>
+				</div>
+				<div>
+					<p class="plot-title">What K-Means measures</p>
+					<p class="plot-sub" id="a4-right-sub">Both axes use the same units, the way distance does.</p>
+					<div class="plot-wrap" id="a4-right"><canvas aria-label="Scatter plot with both axes on the same scale, as K-Means sees distance"></canvas><div class="tip"></div></div>
+				</div>
+			</div>
+			<div class="share">
+				<p class="plot-title">Share of the distance between points that comes from each feature</p>
+				<div class="share-bar" id="a4-bar" role="img"></div>
+				<div class="share-key" id="a4-key"></div>
+			</div>
+			<p class="status" id="a4-status" aria-live="polite"></p>
+			<details class="code"><summary>Same thing in Python</summary><pre id="a4-code"></pre></details>
+		</div>
+		<aside class="guide">
+			<div class="step demo">
+				<h3>Demo</h3>
+				<ol>
+					<li>With Scaling set to None, compare the two plots. The right one draws both features in the same units, which is how K-Means sees them.</li>
+					<li>Read the bar: nearly all of the distance comes from income.</li>
+					<li>Switch to Z-score and watch the clusters change in both plots.</li>
+				</ol>
+			</div>
+			<div class="step turn">
+				<h3>Your turn</h3>
+				<ol>
+					<li>With no scaling, what decides a customer's cluster? Hover to find a customer in their 20s and one in their 60s who share a cluster.</li>
+					<li>Switch to Z-score. What changed? Which version matches the groups you can see in the left plot?</li>
+					<li>Switch to Morgantown homes. Without scaling, which feature drives the clusters? Do Z-score and Min-Max give the same clusters?</li>
+				</ol>
+			</div>
+			<details class="step discuss">
+				<summary>Discuss</summary>
+				<ul>
+					<li>Why does a dollar of income count as much as a year of age?</li>
+					<li>If income were recorded in thousands of dollars, would the unscaled clusters change?</li>
+					<li>Can you think of features you might not want to scale?</li>
+				</ul>
+			</details>
+			<div class="step teacher-notes">
+				<h3>Teacher notes</h3>
+				<ul>
+					<li>Unscaled, income varies by about $20,000 and age by about 16 years, so income makes up over 99.9% of the squared distance. The clusters become income bands, and young and retired customers with similar incomes end up together.</li>
+					<li>Z-score gives each feature a standard deviation of 1, so each one contributes about half and the three groups come back.</li>
+					<li>Changing units (dollars to thousands of dollars) would change the unscaled clusters. Results that depend on the choice of units are a warning sign.</li>
+					<li>Min-Max depends on the single smallest and largest values, so one extreme home squeezes everyone else. Z-score is less sensitive to that.</li>
+					<li>Homes are the course datafile, limited to sales from $20k to $1M and under 6,000 sq ft.</li>
+				</ul>
+			</div>
+		</aside>
+	</div>
+</section>
+
+<!-- ======================= 5 ======================= -->
+<section class="act" id="a5" aria-labelledby="a5-h">
+	<div class="act-head">
+		<div class="act-num" aria-hidden="true">5</div>
+		<div>
+			<h2 id="a5-h">Break it</h2>
+			<p class="concept">Every point joins its nearest centroid, so the border between two clusters is always a straight line halfway between their centroids. K-Means works best on round groups of similar size.</p>
+		</div>
+	</div>
+	<div class="act-body">
+		<div class="lab">
+			<div class="controls">
+				<label class="ctl"><span class="lbl">Data</span>
+					<select id="a5-data">
+						<option value="moons">Crescents</option>
+						<option value="rings">Rings</option>
+						<option value="ovals">Long ovals</option>
+						<option value="bigsmall">Big and small</option>
+						<option value="outlier">Outlier</option>
+					</select>
+				</label>
+				<label class="ctl"><span class="lbl">K</span><select id="a5-k"></select></label>
+				<div class="ctl"><span class="lbl">Color by</span>
+					<div class="seg" id="a5-color">
+						<button data-v="km" aria-pressed="true">K-Means clusters</button>
+						<button data-v="truth" aria-pressed="false">Groups you'd draw</button>
+					</div>
+				</div>
+				<label class="chk"><input type="checkbox" id="a5-regions" checked> Regions</label>
+			</div>
+			<div class="plot-wrap" id="a5-plot"><canvas aria-label="Scatter plot of a dataset that K-Means handles poorly"></canvas><div class="tip"></div></div>
+			<p class="status" id="a5-status" aria-live="polite"></p>
+			<ul class="stats">
+				<li><span class="k">Agreement with the groups you'd draw</span><span class="v" id="a5-agree">–</span></li>
+				<li><span class="k">Inertia</span><span class="v" id="a5-inertia">–</span></li>
+			</ul>
+		</div>
+		<aside class="guide">
+			<div class="step demo">
+				<h3>Demo</h3>
+				<ol>
+					<li>Show Crescents colored by <b>Groups you'd draw</b>, then switch to <b>K-Means clusters</b>.</li>
+					<li>Point out the shaded regions: the border between two clusters is always a straight line.</li>
+				</ol>
+			</div>
+			<div class="step turn">
+				<h3>Your turn</h3>
+				<ol>
+					<li>For each dataset, predict before you look: will K-Means find the groups you'd draw by eye? Then check the agreement score.</li>
+					<li>What do the datasets where K-Means fails have in common?</li>
+					<li>Pick Outlier and drag the lone point far away. What happens to the centroids? Where does the answer flip?</li>
+				</ol>
+			</div>
+			<details class="step discuss">
+				<summary>Discuss</summary>
+				<ul>
+					<li>Why are the borders always straight lines?</li>
+					<li>Why does one point have so much pull?</li>
+					<li>Is K-Means wrong here, or is it answering a different question than ours?</li>
+				</ul>
+			</details>
+			<div class="step teacher-notes">
+				<h3>Teacher notes</h3>
+				<ul>
+					<li>The border is the set of spots equally far from two centroids, which is a straight line. Curved or nested shapes can't be cut correctly with straight lines.</li>
+					<li>Long ovals: cutting across the long direction lowers inertia more than separating the ovals, so K-Means prefers the "wrong" cut. It is doing exactly what it's told, which is to minimize inertia.</li>
+					<li>Big and small: the border sits halfway between centroids, so the big group's edge is handed to the small cluster.</li>
+					<li>Outlier: averages are pulled by far points, and squaring makes a far point very costly. Past some distance it is cheaper to give the outlier its own cluster and merge the two real groups.</li>
+					<li>Other methods (such as DBSCAN) handle curved shapes, but they are beyond this lesson.</li>
+				</ul>
+			</div>
+		</aside>
+	</div>
+</section>
+
+<!-- ======================= 6 ======================= -->
+<section class="act" id="a6" aria-labelledby="a6-h">
+	<div class="act-head">
+		<div class="act-num" aria-hidden="true">6</div>
+		<div>
+			<h2 id="a6-h">Check against the truth</h2>
+			<p class="concept">K-Means never sees the species column. Iris has known species, so we can check how well the clusters line up. With real data there is no answer key, so we describe each cluster by its averages instead.</p>
+		</div>
+	</div>
+	<div class="act-body">
+		<div class="lab">
+			<div class="controls">
+				<label class="ctl"><span class="lbl">K</span><select id="a6-k"></select></label>
+				<div class="ctl"><span class="lbl">Color by</span>
+					<div class="seg" id="a6-color">
+						<button data-v="none" aria-pressed="true">Nothing</button>
+						<button data-v="cluster" aria-pressed="false">Cluster</button>
+						<button data-v="species" aria-pressed="false">Species</button>
+					</div>
+				</div>
+				<button class="btn" id="a6-renumber">Renumber clusters</button>
+			</div>
+			<div class="controls">
+				<label class="ctl"><span class="lbl">x</span><select id="a6-x"></select></label>
+				<label class="ctl"><span class="lbl">y</span><select id="a6-y"></select></label>
+				<label class="chk"><input type="checkbox" id="a6-mis"> Circle flowers that don't match their cluster's main species</label>
+			</div>
+			<div class="plot-wrap" id="a6-plot"><canvas aria-label="Scatter plot of iris flowers"></canvas><div class="tip"></div></div>
+			<p class="status" id="a6-status" aria-live="polite"></p>
+			<div class="tables">
+				<div>
+					<p class="plot-title">Species in each cluster</p>
+					<table class="data" id="a6-cross"></table>
+				</div>
+				<div>
+					<p class="plot-title">Cluster profiles (averages in cm)</p>
+					<table class="data" id="a6-prof"></table>
+				</div>
+			</div>
+			<details class="code"><summary>Same thing in Python</summary><pre id="a6-code"></pre></details>
+		</div>
+		<aside class="guide">
+			<div class="step demo">
+				<h3>Demo</h3>
+				<ol>
+					<li>Color by <b>Nothing</b>: this is all K-Means gets to see.</li>
+					<li>Color by <b>Cluster</b>, then by <b>Species</b>. Only the mismatched flowers change color. Turn on the circles to find them.</li>
+					<li>Press <b>Renumber clusters</b>. The numbers and colors change, but the groups stay the same.</li>
+				</ol>
+			</div>
+			<div class="step turn">
+				<h3>Your turn</h3>
+				<ol>
+					<li>Which species does K-Means separate perfectly? Which two get mixed up, and where on the plot do they overlap?</li>
+					<li>Read the cluster profiles. Describe each cluster in plain words and type a name for it.</li>
+					<li>Try K = 2. Which species end up together?</li>
+				</ol>
+			</div>
+			<details class="step discuss">
+				<summary>Discuss</summary>
+				<ul>
+					<li>Why don't cluster numbers line up with the species order?</li>
+					<li>In a real project with no species column, how would you decide whether the clusters are useful?</li>
+					<li>Is 75% purity good or bad? What would you need to know?</li>
+				</ul>
+			</details>
+			<div class="step teacher-notes">
+				<h3>Teacher notes</h3>
+				<ul>
+					<li>With K = 3, setosa is 100% in one cluster. Versicolor (39 / 11) and virginica (14 / 36) overlap, for 25 mismatches. This matches the lesson's crosstab, though the cluster numbers may differ.</li>
+					<li>The clusters use all four scaled features, so some mismatches look out of place on any single two-feature plot. Try other axes.</li>
+					<li>The profiles are averages in cm. Small petals point to setosa, the largest flowers to virginica.</li>
+					<li>K = 2 puts versicolor and virginica together, which matches the high silhouette at K = 2 in activity 3.</li>
+					<li>Without labels, judge usefulness by whether the profiles make sense, whether the clusters stay stable across random_state values, and whether they help with a real decision.</li>
+				</ul>
+			</div>
+		</aside>
+	</div>
+</section>
+
+<footer>
+	<p>Python's <code>KMeans</code> uses its own random numbers, so specific starts on this page won't match it exactly. The best answers agree.</p>
+	<p>Iris data from scikit-learn's <code>load_iris</code>. Morgantown homes from the course datafile (Zillow sales, 2023). All other datasets are made up.</p>
+</footer>
+
+<script>
+'use strict';
+const DATA = {"iris":[[5.1,3.5,1.4,0.2,0],[4.9,3.0,1.4,0.2,0],[4.7,3.2,1.3,0.2,0],[4.6,3.1,1.5,0.2,0],[5.0,3.6,1.4,0.2,0],[5.4,3.9,1.7,0.4,0],[4.6,3.4,1.4,0.3,0],[5.0,3.4,1.5,0.2,0],[4.4,2.9,1.4,0.2,0],[4.9,3.1,1.5,0.1,0],[5.4,3.7,1.5,0.2,0],[4.8,3.4,1.6,0.2,0],[4.8,3.0,1.4,0.1,0],[4.3,3.0,1.1,0.1,0],[5.8,4.0,1.2,0.2,0],[5.7,4.4,1.5,0.4,0],[5.4,3.9,1.3,0.4,0],[5.1,3.5,1.4,0.3,0],[5.7,3.8,1.7,0.3,0],[5.1,3.8,1.5,0.3,0],[5.4,3.4,1.7,0.2,0],[5.1,3.7,1.5,0.4,0],[4.6,3.6,1.0,0.2,0],[5.1,3.3,1.7,0.5,0],[4.8,3.4,1.9,0.2,0],[5.0,3.0,1.6,0.2,0],[5.0,3.4,1.6,0.4,0],[5.2,3.5,1.5,0.2,0],[5.2,3.4,1.4,0.2,0],[4.7,3.2,1.6,0.2,0],[4.8,3.1,1.6,0.2,0],[5.4,3.4,1.5,0.4,0],[5.2,4.1,1.5,0.1,0],[5.5,4.2,1.4,0.2,0],[4.9,3.1,1.5,0.2,0],[5.0,3.2,1.2,0.2,0],[5.5,3.5,1.3,0.2,0],[4.9,3.6,1.4,0.1,0],[4.4,3.0,1.3,0.2,0],[5.1,3.4,1.5,0.2,0],[5.0,3.5,1.3,0.3,0],[4.5,2.3,1.3,0.3,0],[4.4,3.2,1.3,0.2,0],[5.0,3.5,1.6,0.6,0],[5.1,3.8,1.9,0.4,0],[4.8,3.0,1.4,0.3,0],[5.1,3.8,1.6,0.2,0],[4.6,3.2,1.4,0.2,0],[5.3,3.7,1.5,0.2,0],[5.0,3.3,1.4,0.2,0],[7.0,3.2,4.7,1.4,1],[6.4,3.2,4.5,1.5,1],[6.9,3.1,4.9,1.5,1],[5.5,2.3,4.0,1.3,1],[6.5,2.8,4.6,1.5,1],[5.7,2.8,4.5,1.3,1],[6.3,3.3,4.7,1.6,1],[4.9,2.4,3.3,1.0,1],[6.6,2.9,4.6,1.3,1],[5.2,2.7,3.9,1.4,1],[5.0,2.0,3.5,1.0,1],[5.9,3.0,4.2,1.5,1],[6.0,2.2,4.0,1.0,1],[6.1,2.9,4.7,1.4,1],[5.6,2.9,3.6,1.3,1],[6.7,3.1,4.4,1.4,1],[5.6,3.0,4.5,1.5,1],[5.8,2.7,4.1,1.0,1],[6.2,2.2,4.5,1.5,1],[5.6,2.5,3.9,1.1,1],[5.9,3.2,4.8,1.8,1],[6.1,2.8,4.0,1.3,1],[6.3,2.5,4.9,1.5,1],[6.1,2.8,4.7,1.2,1],[6.4,2.9,4.3,1.3,1],[6.6,3.0,4.4,1.4,1],[6.8,2.8,4.8,1.4,1],[6.7,3.0,5.0,1.7,1],[6.0,2.9,4.5,1.5,1],[5.7,2.6,3.5,1.0,1],[5.5,2.4,3.8,1.1,1],[5.5,2.4,3.7,1.0,1],[5.8,2.7,3.9,1.2,1],[6.0,2.7,5.1,1.6,1],[5.4,3.0,4.5,1.5,1],[6.0,3.4,4.5,1.6,1],[6.7,3.1,4.7,1.5,1],[6.3,2.3,4.4,1.3,1],[5.6,3.0,4.1,1.3,1],[5.5,2.5,4.0,1.3,1],[5.5,2.6,4.4,1.2,1],[6.1,3.0,4.6,1.4,1],[5.8,2.6,4.0,1.2,1],[5.0,2.3,3.3,1.0,1],[5.6,2.7,4.2,1.3,1],[5.7,3.0,4.2,1.2,1],[5.7,2.9,4.2,1.3,1],[6.2,2.9,4.3,1.3,1],[5.1,2.5,3.0,1.1,1],[5.7,2.8,4.1,1.3,1],[6.3,3.3,6.0,2.5,2],[5.8,2.7,5.1,1.9,2],[7.1,3.0,5.9,2.1,2],[6.3,2.9,5.6,1.8,2],[6.5,3.0,5.8,2.2,2],[7.6,3.0,6.6,2.1,2],[4.9,2.5,4.5,1.7,2],[7.3,2.9,6.3,1.8,2],[6.7,2.5,5.8,1.8,2],[7.2,3.6,6.1,2.5,2],[6.5,3.2,5.1,2.0,2],[6.4,2.7,5.3,1.9,2],[6.8,3.0,5.5,2.1,2],[5.7,2.5,5.0,2.0,2],[5.8,2.8,5.1,2.4,2],[6.4,3.2,5.3,2.3,2],[6.5,3.0,5.5,1.8,2],[7.7,3.8,6.7,2.2,2],[7.7,2.6,6.9,2.3,2],[6.0,2.2,5.0,1.5,2],[6.9,3.2,5.7,2.3,2],[5.6,2.8,4.9,2.0,2],[7.7,2.8,6.7,2.0,2],[6.3,2.7,4.9,1.8,2],[6.7,3.3,5.7,2.1,2],[7.2,3.2,6.0,1.8,2],[6.2,2.8,4.8,1.8,2],[6.1,3.0,4.9,1.8,2],[6.4,2.8,5.6,2.1,2],[7.2,3.0,5.8,1.6,2],[7.4,2.8,6.1,1.9,2],[7.9,3.8,6.4,2.0,2],[6.4,2.8,5.6,2.2,2],[6.3,2.8,5.1,1.5,2],[6.1,2.6,5.6,1.4,2],[7.7,3.0,6.1,2.3,2],[6.3,3.4,5.6,2.4,2],[6.4,3.1,5.5,1.8,2],[6.0,3.0,4.8,1.8,2],[6.9,3.1,5.4,2.1,2],[6.7,3.1,5.6,2.4,2],[6.9,3.1,5.1,2.3,2],[5.8,2.7,5.1,1.9,2],[6.8,3.2,5.9,2.3,2],[6.7,3.3,5.7,2.5,2],[6.7,3.0,5.2,2.3,2],[6.3,2.5,5.0,1.9,2],[6.5,3.0,5.2,2.0,2],[6.2,3.4,5.4,2.3,2],[5.9,3.0,5.1,1.8,2]],"homes":[[35000,565],[49500,600],[80000,750],[125000,472],[145000,768],[220000,1000],[48750,780],[55000,683],[80000,656],[40000,880],[95000,1650],[78000,476],[30000,733],[35000,400],[155000,816],[180000,1520],[60000,494],[40000,816],[102600,1000],[300000,1024],[221500,500],[185000,800],[85000,1075],[205000,1103],[85000,750],[285000,949],[221000,1530],[140000,1145],[181000,1602],[160000,1372],[187500,1290],[261000,1476],[79719,1120],[199000,1348],[214900,1340],[75000,1902],[85000,1189],[180500,1275],[210000,1482],[210000,1255],[199500,1232],[80000,792],[77700,1100],[206873,1174],[185000,1060],[50000,1300],[40000,1620],[195000,996],[165000,1108],[185000,1200],[132000,756],[148000,816],[195000,1232],[125000,1280],[125000,977],[140000,780],[96000,768],[20000,1428],[65000,850],[157000,1073],[240500,2098],[69000,1360],[150000,943],[200000,1428],[45000,920],[225000,1288],[203000,1280],[277000,1614],[171500,1320],[215000,1816],[289000,811],[25000,1004],[206000,1500],[110000,1152],[160000,1188],[120000,1368],[165000,1040],[177500,1188],[106000,1908],[175000,1356],[125000,1152],[200000,1184],[250000,1058],[175000,1152],[140000,906],[295000,2030],[139000,1320],[285000,1512],[205000,1324],[65000,690],[223000,1295],[189000,700],[319900,1341],[165000,1668],[319900,1308],[210000,1711],[200000,1200],[600000,980],[120000,1050],[190000,858],[150000,1080],[144900,760],[148000,1000],[195000,1386],[65000,1144],[135000,1520],[325000,1749],[200000,1688],[170000,1668],[335000,1732],[235000,2548],[220530,1167],[185000,1488],[230000,1056],[330000,1296],[294000,1830],[319000,1919],[385000,2130],[230000,930],[235000,1325],[258000,2508],[325000,1974],[235000,960],[285000,1848],[390000,2376],[288000,1800],[236900,2006],[340000,2265],[209000,1800],[230000,1249],[195000,2319],[393000,1846],[478850,2655],[583000,2360],[339000,1699],[310000,1647],[325000,2604],[325000,1932],[315000,2080],[325000,2136],[309000,1625],[222000,1281],[168000,1120],[165000,1180],[80000,1776],[216500,1575],[205000,1694],[312000,2415],[285400,1688],[375000,2375],[329900,1691],[69000,1613],[100000,1070],[86000,1676],[176000,1378],[190000,1530],[110000,784],[75250,1064],[310000,1560],[287000,1680],[190000,1152],[132000,1144],[215000,1258],[431000,2769],[150000,938],[31000,984],[325000,1595],[189000,1628],[80000,1030],[148000,1143],[185000,1496],[145000,1872],[355000,1890],[161500,1148],[315500,1595],[207597,2419],[35000,2100],[215000,1655],[310000,2198],[245000,1932],[245000,1372],[235000,1815],[275000,2010],[100000,1497],[210000,1429],[299900,2397],[225000,1566],[510000,2679],[429000,2884],[252500,2102],[285000,1473],[135000,1291],[350000,2350],[145000,2294],[255000,1903],[225000,3320],[500000,3138],[177000,2218],[159000,1600],[280000,3713],[116500,1500],[349000,2275],[295000,2291],[175000,1890],[180000,1187],[225000,1924],[302000,2130],[328000,1956],[110000,1968],[340000,1885],[525000,2652],[175000,2204],[325000,2445],[364000,1822],[215000,1806],[300000,3100],[100000,1258],[26000,1520],[326570,2634],[273500,2031],[439000,3825],[801200,3257],[444000,3348],[805000,3500],[380000,2783],[571000,3992],[354000,2175],[296000,2344],[297000,2337],[435000,2385],[415000,2636],[300000,2000],[385000,2198],[784000,4240],[585000,3250],[386000,2282],[440000,2606],[306000,1632],[400000,2380],[585000,3640],[500000,3200],[300000,1600],[350000,1931],[335000,1674],[364000,1880],[360000,2467],[230000,1288],[240000,1778],[681000,3638],[525000,3491],[420000,2400],[541000,3809],[387000,2535],[405000,3423],[552500,3970],[234900,1544],[275000,1557],[335000,2480],[280000,1477],[421500,3148],[489000,2128],[144100,1680],[1000000,5906],[842850,3896],[50000,1860],[240000,2146],[349000,2660],[238000,2226],[180000,1982],[239000,2036],[415000,3609],[510000,3362],[135000,1714],[370000,2369],[315375,3254],[475900,2832],[720000,4142],[303000,2664],[500000,3487],[350000,5188],[220000,2244],[130000,1984],[155000,1910],[210000,3136],[380000,2920],[360000,2844],[209000,2880],[350000,2700],[268500,2800],[185000,2245],[595000,4690],[345000,2470],[285000,2706],[412000,2854],[415000,3838],[342500,3105],[430000,2600],[160000,2668],[275000,2932],[510000,2896],[825000,5500],[195000,2470],[320000,1840],[633000,4261],[281500,1505],[725000,4184],[550000,3683],[396000,2105],[546000,3400],[643000,4676],[775000,5736],[539000,4535],[285000,2319],[605000,3471],[592000,3300],[182000,3046],[569900,3584],[737000,4585],[610000,3640],[850000,5509],[435000,3149],[640000,3597],[875000,4804],[595000,4304],[799000,5065],[618500,3670],[707500,4736],[402800,2500],[339000,2619],[765000,3502]]};
+
+/* =====================================================================
+   Basics
+   ===================================================================== */
+const PAL = ['#2a78d6', '#eb6834', '#1baf7a', '#eda100', '#e87ba4', '#008300', '#6250d6', '#e34948'];
+const GRAY = '#a2a9b4';
+const INK = '#1b2230';
+const MUTED = '#6b7487';
+const GRID = '#e8ecf1';
+const NAVY = '#002855';
+const MAXK = 8;
+const TEACHER = new URLSearchParams(location.search).has('teacher');
+if (TEACHER) document.body.classList.add('teacher');
+const REDUCED = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+const $ = (s, el = document) => el.querySelector(s);
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const FONT = () => getComputedStyle(document.body).fontFamily;
+
+function rgba(hex, a) {
+	const n = parseInt(hex.slice(1), 16);
+	return `rgba(${n >> 16},${(n >> 8) & 255},${n & 255},${a})`;
+}
+
+function mulberry32(seed) {
+	let a = seed >>> 0;
+	return function () {
+		a = (a + 0x6D2B79F5) >>> 0;
+		let t = a;
+		t = Math.imul(t ^ (t >>> 15), t | 1);
+		t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+		return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+	};
+}
+function randn(r) {
+	let u = 0;
+	while (u === 0) u = r();
+	const v = r();
+	return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+}
+
+function fmtNum(v) {
+	const a = Math.abs(v);
+	if (a >= 1e6) return (v / 1e6).toFixed(a >= 1e7 ? 0 : 1).replace(/\.0$/, '') + 'M';
+	if (a >= 1e4) return Math.round(v / 1e3) + 'k';
+	if (a >= 1000) return Math.round(v).toLocaleString('en-US');
+	if (a >= 100 || v === 0) return String(Math.round(v));
+	if (a >= 10) return String(+v.toFixed(1));
+	return String(+v.toFixed(2));
+}
+const fmtMoney = v => (v < 0 ? '−$' : '$') + fmtNum(Math.abs(v));
+function fmtInertia(v) {
+	if (v == null || !isFinite(v)) return '–';
+	const a = Math.abs(v);
+	if (a >= 1e9) return v.toExponential(2).replace('e+', ' × 10^');
+	if (a >= 1000) return Math.round(v).toLocaleString('en-US');
+	if (a >= 100) return v.toFixed(1);
+	return v.toFixed(2);
+}
+
+function niceTicks(a, b, n = 5) {
+	const span = b - a;
+	if (!(span > 0)) return [a];
+	const step0 = span / n;
+	const mag = Math.pow(10, Math.floor(Math.log10(step0)));
+	const r = step0 / mag;
+	const step = (r < 1.5 ? 1 : r < 3 ? 2 : r < 7 ? 5 : 10) * mag;
+	const t = [];
+	for (let v = Math.ceil(a / step) * step; v <= b + step * 1e-9; v += step) t.push(+v.toPrecision(12));
+	return t;
+}
+
+function seg(el, onChange) {
+	el.addEventListener('click', e => {
+		const b = e.target.closest('button[data-v]');
+		if (!b) return;
+		el.querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+		onChange(b.dataset.v);
+	});
+}
+function setSeg(el, v) {
+	el.querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x.dataset.v === v)));
+}
+function fillK(sel, from, to, val) {
+	sel.innerHTML = '';
+	for (let k = from; k <= to; k++) {
+		const o = document.createElement('option');
+		o.value = k; o.textContent = k;
+		if (k === val) o.selected = true;
+		sel.appendChild(o);
+	}
+}
+
+/* =====================================================================
+   K-Means engine (any number of features)
+   ===================================================================== */
+function d2(a, b) {
+	let s = 0;
+	for (let i = 0; i < a.length; i++) { const d = a[i] - b[i]; s += d * d; }
+	return s;
+}
+function nearest(p, C) {
+	let best = 0, bd = Infinity;
+	for (let j = 0; j < C.length; j++) {
+		const d = d2(p, C[j]);
+		if (d < bd) { bd = d; best = j; }
+	}
+	return best;
+}
+function assignStep(X, C, labels) {
+	const out = new Array(X.length);
+	let changed = 0;
+	for (let i = 0; i < X.length; i++) {
+		const j = nearest(X[i], C);
+		if (!labels || labels[i] !== j) changed++;
+		out[i] = j;
+	}
+	return { labels: out, changed };
+}
+function updateStep(X, labels, C) {
+	const k = C.length, d = C[0].length;
+	const sums = Array.from({ length: k }, () => new Array(d).fill(0));
+	const counts = new Array(k).fill(0);
+	for (let i = 0; i < X.length; i++) {
+		const j = labels[i];
+		counts[j]++;
+		for (let f = 0; f < d; f++) sums[j][f] += X[i][f];
+	}
+	const empty = [];
+	const out = C.map((c, j) => {
+		if (counts[j] === 0) { empty.push(j); return c.slice(); }
+		return sums[j].map(s => s / counts[j]);
+	});
+	return { C: out, empty, counts };
+}
+function inertiaOf(X, labels, C) {
+	if (!labels) return null;
+	let s = 0;
+	for (let i = 0; i < X.length; i++) s += d2(X[i], C[labels[i]]);
+	return s;
+}
+function initRandom(X, k, r) {
+	const idx = X.map((_, i) => i);
+	for (let i = 0; i < k; i++) {
+		const j = i + Math.floor(r() * (idx.length - i));
+		[idx[i], idx[j]] = [idx[j], idx[i]];
+	}
+	return idx.slice(0, k).map(i => X[i].slice());
+}
+/* Greedy k-means++, as in scikit-learn: each new centroid is the best of a few
+   candidates drawn with probability proportional to squared distance. */
+function initPP(X, k, r) {
+	const n = X.length;
+	const trials = 2 + Math.floor(Math.log(k));
+	const C = [X[Math.floor(r() * n)].slice()];
+	const D = new Float64Array(n);
+	for (let i = 0; i < n; i++) D[i] = d2(X[i], C[0]);
+	while (C.length < k) {
+		let sum = 0;
+		for (let i = 0; i < n; i++) sum += D[i];
+		if (sum === 0) { C.push(X[Math.floor(r() * n)].slice()); continue; }
+		let bestPot = Infinity, bestIdx = 0, bestD = null;
+		for (let t = 0; t < trials; t++) {
+			let u = r() * sum, i = 0;
+			for (; i < n - 1; i++) { u -= D[i]; if (u <= 0) break; }
+			const ND = new Float64Array(n);
+			let pot = 0;
+			for (let q = 0; q < n; q++) { ND[q] = Math.min(D[q], d2(X[q], X[i])); pot += ND[q]; }
+			if (pot < bestPot) { bestPot = pot; bestIdx = i; bestD = ND; }
+		}
+		C.push(X[bestIdx].slice());
+		D.set(bestD);
+	}
+	return C;
+}
+function runKMeans(X, C0, maxIter = 300) {
+	let C = C0.map(c => c.slice());
+	let labels = null, iters = 0;
+	const path = [C.map(c => c.slice())];
+	for (let it = 0; it < maxIter; it++) {
+		const a = assignStep(X, C, labels);
+		labels = a.labels;
+		if (a.changed === 0) break;
+		C = updateStep(X, labels, C).C;
+		path.push(C.map(c => c.slice()));
+		iters++;
+	}
+	return { C, labels, inertia: inertiaOf(X, labels, C), path, iters };
+}
+function bestOf(X, k, nInit, seed, init = 'pp') {
+	const r = mulberry32(seed);
+	const runs = [];
+	for (let i = 0; i < nInit; i++) {
+		const C0 = init === 'pp' ? initPP(X, k, r) : initRandom(X, k, r);
+		runs.push(runKMeans(X, C0));
+	}
+	let bi = 0;
+	runs.forEach((res, i) => { if (res.inertia < runs[bi].inertia - 1e-9) bi = i; });
+	return { best: runs[bi], bestIndex: bi, runs };
+}
+function silhouette(X, labels, k) {
+	if (k < 2) return null;
+	const n = X.length;
+	const sizes = new Array(k).fill(0);
+	labels.forEach(l => sizes[l]++);
+	let total = 0;
+	const sums = new Float64Array(k);
+	for (let i = 0; i < n; i++) {
+		sums.fill(0);
+		for (let j = 0; j < n; j++) if (j !== i) sums[labels[j]] += Math.sqrt(d2(X[i], X[j]));
+		const li = labels[i];
+		if (sizes[li] <= 1) continue;
+		const a = sums[li] / (sizes[li] - 1);
+		let b = Infinity;
+		for (let c = 0; c < k; c++) if (c !== li && sizes[c] > 0) b = Math.min(b, sums[c] / sizes[c]);
+		if (!isFinite(b)) continue;
+		total += (b - a) / Math.max(a, b);
+	}
+	return total / n;
+}
+function permutations(n) {
+	const out = [];
+	const a = [...Array(n).keys()];
+	const rec = i => {
+		if (i === n) { out.push(a.slice()); return; }
+		for (let j = i; j < n; j++) { [a[i], a[j]] = [a[j], a[i]]; rec(i + 1); [a[i], a[j]] = [a[j], a[i]]; }
+	};
+	rec(0);
+	return out;
+}
+/* Best one-to-one match between clusters and known groups; share of points matched. */
+function agreement(truth, labels, k) {
+	const m = Math.max(...truth) + 1;
+	const sz = Math.max(k, m);
+	const M = Array.from({ length: sz }, () => new Array(sz).fill(0));
+	truth.forEach((t, i) => M[labels[i]][t]++);
+	let best = 0;
+	for (const p of permutations(sz)) {
+		let s = 0;
+		for (let c = 0; c < sz; c++) s += M[c][p[c]];
+		if (s > best) best = s;
+	}
+	return best / truth.length;
+}
+/* Relabel clusters so cluster numbers follow a sort key of their centroids. */
+function relabelBy(res, keyFn) {
+	const k = res.C.length;
+	const order = [...Array(k).keys()].sort((a, b) => keyFn(res.C[a]) - keyFn(res.C[b]));
+	const map = new Array(k);
+	order.forEach((old, nw) => { map[old] = nw; });
+	return {
+		...res,
+		C: order.map(o => res.C[o]),
+		labels: res.labels.map(l => map[l]),
+		path: res.path ? res.path.map(Cs => order.map(o => Cs[o])) : undefined,
+	};
+}
+function zscore(X) {
+	const d = X[0].length, n = X.length;
+	const mu = new Array(d).fill(0), sd = new Array(d).fill(0);
+	X.forEach(r => r.forEach((v, f) => { mu[f] += v / n; }));
+	X.forEach(r => r.forEach((v, f) => { sd[f] += (v - mu[f]) ** 2 / n; }));
+	for (let f = 0; f < d; f++) sd[f] = Math.sqrt(sd[f]) || 1;
+	return X.map(r => r.map((v, f) => (v - mu[f]) / sd[f]));
+}
+function minmax(X) {
+	const d = X[0].length;
+	const lo = new Array(d).fill(Infinity), hi = new Array(d).fill(-Infinity);
+	X.forEach(r => r.forEach((v, f) => { lo[f] = Math.min(lo[f], v); hi[f] = Math.max(hi[f], v); }));
+	return X.map(r => r.map((v, f) => (v - lo[f]) / ((hi[f] - lo[f]) || 1)));
+}
+function variance(X, f) {
+	const n = X.length;
+	let mu = 0;
+	X.forEach(r => { mu += r[f] / n; });
+	let v = 0;
+	X.forEach(r => { v += (r[f] - mu) ** 2 / n; });
+	return v;
+}
+
+/* =====================================================================
+   Datasets
+   ===================================================================== */
+function blobs(seed, specs) {
+	const r = mulberry32(seed);
+	const X = [], T = [];
+	specs.forEach(([cx, cy, sx, sy, n], g) => {
+		for (let i = 0; i < n; i++) { X.push([cx + randn(r) * sx, cy + randn(r) * sy]); T.push(g); }
+	});
+	return { X, T };
+}
+function moons(seed, n) {
+	const r = mulberry32(seed);
+	const X = [], T = [];
+	for (let i = 0; i < n; i++) {
+		const t = Math.PI * i / (n - 1);
+		const pts = [[Math.cos(t), Math.sin(t)], [1 - Math.cos(t), 1 - Math.sin(t) - 0.5]];
+		pts.forEach(([x, y], g) => {
+			X.push([6 + (x - 0.5) * 3.3 + randn(r) * 0.28, 3.5 + (y - 0.25) * 3.3 + randn(r) * 0.28]);
+			T.push(g);
+		});
+	}
+	return { X, T };
+}
+function rings(seed) {
+	const r = mulberry32(seed);
+	const X = [], T = [];
+	[[1.0, 60], [2.9, 150]].forEach(([rad, n], g) => {
+		for (let i = 0; i < n; i++) {
+			const a = r() * 2 * Math.PI, rr = rad + randn(r) * 0.14;
+			X.push([6 + rr * Math.cos(a), 3.5 + rr * Math.sin(a)]);
+			T.push(g);
+		}
+	});
+	return { X, T };
+}
+function ovals(seed) {
+	const r = mulberry32(seed);
+	const X = [], T = [];
+	[2.5, 4.5].forEach((cy, g) => {
+		for (let i = 0; i < 90; i++) {
+			X.push([clamp(6 + randn(r) * 2.3, 0.6, 11.4), cy + randn(r) * 0.26]);
+			T.push(g);
+		}
+	});
+	return { X, T };
+}
+function customers(seed) {
+	const r = mulberry32(seed);
+	const X = [], T = [];
+	[[27, 3.5, 58000, 9000], [46, 4, 104000, 10000], [68, 3.5, 56000, 9000]].forEach(([am, as, im, is], g) => {
+		for (let i = 0; i < 50; i++) {
+			X.push([Math.round(clamp(am + randn(r) * as, 19, 85)), Math.round(clamp(im + randn(r) * is, 18000, 200000) / 100) * 100]);
+			T.push(g);
+		}
+	});
+	return { X, T };
+}
+
+/* =====================================================================
+   Plot helper (canvas)
+   ===================================================================== */
+class Plot {
+	constructor(wrap, o = {}) {
+		this.wrap = wrap;
+		this.canvas = wrap.querySelector('canvas');
+		this.ctx = this.canvas.getContext('2d');
+		this.tipEl = wrap.querySelector('.tip');
+		this.o = Object.assign({
+			aspect: 0.62, minH: 220, maxH: 560,
+			pad: { l: 58, r: 18, t: 16, b: 46 },
+			equal: false, xLabel: '', yLabel: '', xFmt: fmtNum, yFmt: fmtNum, ticks: true,
+		}, o);
+		this.xd = [0, 1]; this.yd = [0, 1];
+		this.draw = () => {};
+		this.lastW = -1;
+		new ResizeObserver(() => { if (this.wrap.clientWidth !== this.lastW) this.render(); }).observe(wrap);
+	}
+	setDomain(xd, yd) { this.xd = xd.slice(); this.yd = yd.slice(); }
+	layout() {
+		const W = Math.max(160, this.wrap.clientWidth);
+		const H = Math.round(clamp(W * this.o.aspect, this.o.minH, this.o.maxH));
+		const r = Math.max(1, window.devicePixelRatio || 1);
+		if (this.canvas.width !== Math.round(W * r) || this.canvas.height !== Math.round(H * r)) {
+			this.canvas.width = Math.round(W * r);
+			this.canvas.height = Math.round(H * r);
+			this.canvas.style.height = H + 'px';
+		}
+		this.dpr = r;
+		this.W = W; this.H = H; this.lastW = this.wrap.clientWidth;
+		const p = this.o.pad;
+		this.px0 = p.l; this.px1 = W - p.r; this.py0 = p.t; this.py1 = H - p.b;
+		let [x0, x1] = this.xd, [y0, y1] = this.yd;
+		if (x1 === x0) { x0 -= 1; x1 += 1; }
+		if (y1 === y0) { y0 -= 1; y1 += 1; }
+		if (this.o.equal) {
+			const pw = this.px1 - this.px0, ph = this.py1 - this.py0;
+			const s = Math.min(pw / (x1 - x0), ph / (y1 - y0));
+			const cx = (x0 + x1) / 2, cy = (y0 + y1) / 2;
+			x0 = cx - pw / s / 2; x1 = cx + pw / s / 2;
+			y0 = cy - ph / s / 2; y1 = cy + ph / s / 2;
+		}
+		this.vx = [x0, x1]; this.vy = [y0, y1];
+	}
+	sx(x) { return this.px0 + (x - this.vx[0]) / (this.vx[1] - this.vx[0]) * (this.px1 - this.px0); }
+	sy(y) { return this.py1 - (y - this.vy[0]) / (this.vy[1] - this.vy[0]) * (this.py1 - this.py0); }
+	ix(px) { return this.vx[0] + (px - this.px0) / (this.px1 - this.px0) * (this.vx[1] - this.vx[0]); }
+	iy(py) { return this.vy[0] + (this.py1 - py) / (this.py1 - this.py0) * (this.vy[1] - this.vy[0]); }
+	render() {
+		this.layout();
+		const c = this.ctx;
+		c.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
+		c.clearRect(0, 0, this.W, this.H);
+		c.fillStyle = '#fff';
+		c.fillRect(0, 0, this.W, this.H);
+		this.frame(c);
+		c.save();
+		c.beginPath();
+		c.rect(this.px0, this.py0, this.px1 - this.px0, this.py1 - this.py0);
+		c.clip();
+		this.draw(c, this);
+		c.restore();
+		if (this.after) this.after(c, this);
+	}
+	frame(c) {
+		const font = FONT();
+		c.lineWidth = 1;
+		c.strokeStyle = GRID;
+		c.fillStyle = MUTED;
+		c.font = `13px ${font}`;
+		let maxYW = 0;
+		if (this.o.ticks) {
+			const xt = this.o.xTicks || niceTicks(this.vx[0], this.vx[1], Math.max(3, Math.round((this.px1 - this.px0) / 90)));
+			const yt = this.o.yTicks || niceTicks(this.vy[0], this.vy[1], Math.max(3, Math.round((this.py1 - this.py0) / 60)));
+			yt.forEach(v => { maxYW = Math.max(maxYW, c.measureText(this.o.yFmt(v)).width); });
+			c.textAlign = 'center'; c.textBaseline = 'top';
+			xt.forEach(v => {
+				const x = Math.round(this.sx(v)) + 0.5;
+				if (x < this.px0 - 1 || x > this.px1 + 1) return;
+				c.beginPath(); c.moveTo(x, this.py0); c.lineTo(x, this.py1); c.stroke();
+				c.fillText(this.o.xFmt(v), x, this.py1 + 6);
+			});
+			c.textAlign = 'right'; c.textBaseline = 'middle';
+			yt.forEach(v => {
+				const y = Math.round(this.sy(v)) + 0.5;
+				if (y < this.py0 - 1 || y > this.py1 + 1) return;
+				c.beginPath(); c.moveTo(this.px0, y); c.lineTo(this.px1, y); c.stroke();
+				c.fillText(this.o.yFmt(v), this.px0 - 7, y);
+			});
+		}
+		c.fillStyle = '#46506a';
+		c.font = `600 13px ${font}`;
+		if (this.o.xLabel) { c.textAlign = 'center'; c.textBaseline = 'bottom'; c.fillText(this.o.xLabel, (this.px0 + this.px1) / 2, this.H - 4); }
+		if (this.o.yLabel) {
+			c.save(); c.translate(Math.max(9, Math.min(14, this.px0 - 7 - maxYW - 10)), (this.py0 + this.py1) / 2); c.rotate(-Math.PI / 2);
+			c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText(this.o.yLabel, 0, 0); c.restore();
+		}
+	}
+	tip(px, py, html) {
+		const t = this.tipEl;
+		if (!html) { t.style.display = 'none'; return; }
+		t.innerHTML = html;
+		t.style.display = 'block';
+		const tw = t.offsetWidth, th = t.offsetHeight;
+		let left = px + 14, top = py - th - 10;
+		if (left + tw > this.W - 4) left = px - tw - 14;
+		if (top < 4) top = py + 16;
+		t.style.left = Math.max(4, left) + 'px';
+		t.style.top = top + 'px';
+	}
+	pos(e) {
+		const b = this.canvas.getBoundingClientRect();
+		return [e.clientX - b.left, e.clientY - b.top];
+	}
+}
+
+/* ---------- marks ---------- */
+function poly(c, x, y, R, n, rot) {
+	for (let i = 0; i < n; i++) {
+		const a = rot + i * 2 * Math.PI / n;
+		const px = x + R * Math.cos(a), py = y + R * Math.sin(a);
+		if (i) c.lineTo(px, py); else c.moveTo(px, py);
+	}
+}
+function shapePath(c, s, x, y, r) {
+	c.beginPath();
+	switch (((s % 8) + 8) % 8) {
+		case 0: c.arc(x, y, r, 0, 2 * Math.PI); break;
+		case 1: { const h = r * 0.88; c.rect(x - h, y - h, 2 * h, 2 * h); break; }
+		case 2: poly(c, x, y + r * 0.2, r * 1.25, 3, -Math.PI / 2); break;
+		case 3: poly(c, x, y, r * 1.25, 4, 0); break;
+		case 4: poly(c, x, y - r * 0.2, r * 1.25, 3, Math.PI / 2); break;
+		case 5: {
+			for (let i = 0; i < 10; i++) {
+				const a = -Math.PI / 2 + i * Math.PI / 5, rr = i % 2 ? r * 0.6 : r * 1.4;
+				const px = x + rr * Math.cos(a), py = y + rr * Math.sin(a);
+				if (i) c.lineTo(px, py); else c.moveTo(px, py);
+			}
+			break;
+		}
+		case 6: poly(c, x, y, r * 1.12, 5, -Math.PI / 2); break;
+		case 7: poly(c, x, y, r * 1.1, 6, 0); break;
+	}
+	c.closePath();
+}
+function drawPoint(c, x, y, cls, r = 5.5) {
+	shapePath(c, cls < 0 ? 0 : cls, x, y, r);
+	c.fillStyle = cls < 0 ? GRAY : PAL[cls % 8];
+	c.fill();
+	c.lineWidth = 1.25;
+	c.strokeStyle = '#fff';
+	c.stroke();
+}
+function drawCentroid(c, x, y, cls, r = 10) {
+	shapePath(c, cls, x, y, r + 3);
+	c.fillStyle = '#fff';
+	c.fill();
+	shapePath(c, cls, x, y, r);
+	c.fillStyle = PAL[cls % 8];
+	c.fill();
+	c.lineWidth = 2.5;
+	c.strokeStyle = INK;
+	c.stroke();
+}
+function drawHollow(c, x, y, cls, r = 8) {
+	shapePath(c, cls, x, y, r);
+	c.lineWidth = 2;
+	c.strokeStyle = INK;
+	c.stroke();
+}
+function drawRegions(c, P, C2, alpha = 0.11) {
+	if (!C2 || !C2.length) return;
+	const cols = PAL.map(h => rgba(h, alpha));
+	const step = 5;
+	for (let py = P.py0; py < P.py1; py += step) {
+		const y = P.iy(py + step / 2);
+		for (let px = P.px0; px < P.px1; px += step) {
+			const j = nearest([P.ix(px + step / 2), y], C2);
+			c.fillStyle = cols[j % 8];
+			c.fillRect(px, py, step, step);
+		}
+	}
+}
+function nearestPx(list, mx, my, maxD = 12) {
+	let bi = -1, bd = maxD * maxD;
+	for (let i = 0; i < list.length; i++) {
+		const dx = list[i][0] - mx, dy = list[i][1] - my;
+		const d = dx * dx + dy * dy;
+		if (d < bd) { bd = d; bi = i; }
+	}
+	return bi;
+}
+function swatchSVG(cls, size = 14) {
+	const cv = document.createElement('canvas');
+	const r = 2;
+	cv.width = size * r; cv.height = size * r;
+	const c = cv.getContext('2d');
+	c.scale(r, r);
+	if (cls < 0) { drawPoint(c, size / 2, size / 2, -1, size * 0.36); }
+	else drawPoint(c, size / 2, size / 2, cls, size * 0.33);
+	return `<img src="${cv.toDataURL()}" width="${size}" height="${size}" alt="" style="vertical-align:-2px;margin-right:4px">`;
+}
+
+/* Simple line chart with dots on a Plot */
+function drawLineDots(c, P, pts, opts = {}) {
+	const valid = pts.filter(p => p[1] != null);
+	if (!valid.length) return;
+	c.beginPath();
+	valid.forEach((p, i) => { const x = P.sx(p[0]), y = P.sy(p[1]); if (i) c.lineTo(x, y); else c.moveTo(x, y); });
+	c.lineWidth = 2; c.strokeStyle = NAVY; c.lineJoin = 'round'; c.stroke();
+	valid.forEach(p => {
+		const x = P.sx(p[0]), y = P.sy(p[1]);
+		const sel = opts.selected != null && p[0] === opts.selected;
+		const square = opts.squareIf && opts.squareIf(p);
+		const r = sel ? 7 : 4.5;
+		c.beginPath();
+		if (square) c.rect(x - r, y - r, 2 * r, 2 * r); else c.arc(x, y, r, 0, 2 * Math.PI);
+		c.fillStyle = square ? '#fff' : NAVY;
+		c.fill();
+		c.lineWidth = 2; c.strokeStyle = NAVY; c.stroke();
+		if (sel) { c.beginPath(); c.arc(x, y, r + 4, 0, 2 * Math.PI); c.strokeStyle = '#eaaa00'; c.lineWidth = 3; c.stroke(); }
+	});
+}
+
+/* =====================================================================
+   Activity 1: Watch it work
+   ===================================================================== */
+(function A1() {
+	const P = new Plot($('#a1-plot'), { aspect: 0.62, equal: true, xLabel: 'Feature 1', yLabel: 'Feature 2' });
+	const Hc = new Plot($('#a1-hist'), { aspect: 0.2, minH: 130, maxH: 170, pad: { l: 58, r: 18, t: 12, b: 36 }, xLabel: 'Step', yLabel: '' });
+	P.setDomain([0, 10], [0, 7]);
+	const sets = {
+		three: () => blobs(101, [[2.6, 2.1, 0.75, 0.75, 30], [7.3, 2.2, 0.75, 0.75, 30], [5.0, 5.2, 0.75, 0.7, 30]]).X,
+		four: () => blobs(202, [[2.0, 2.0, 0.6, 0.6, 35], [2.6, 5.3, 0.45, 0.45, 18], [7.2, 4.8, 1.0, 0.9, 42], [7.9, 1.5, 0.45, 0.4, 18]]).X,
+		draw: () => [],
+	};
+	const ui = {
+		data: $('#a1-data'), k: $('#a1-k'), random: $('#a1-random'), place: $('#a1-place'), clear: $('#a1-clear'),
+		assign: $('#a1-assign'), update: $('#a1-update'), run: $('#a1-run'),
+		regions: $('#a1-regions'), lines: $('#a1-lines'), squares: $('#a1-squares'),
+		status: $('#a1-status'), iter: $('#a1-iter'), next: $('#a1-next'), changed: $('#a1-changed'), inertia: $('#a1-inertia'),
+	};
+	fillK(ui.k, 1, MAXK, 3);
+	let X = sets.three(), k = 3, C = null, labels = null, phase = 'start', iter = 0, hist = [], lastChanged = null;
+	let placing = 0, trails = [], running = false, startCount = 0, dragging = -1, painting = false, lastPaint = null, hover = null;
+	let msg = '';
+
+	function say(m) { msg = m; ui.status.textContent = m; }
+	function inertia() { return labels && C ? inertiaOf(X, labels, C) : null; }
+	function refresh() {
+		const nextTxt = { start: '–', place: 'Place', assign: 'Assign', update: 'Update', done: 'Done' }[phase];
+		ui.iter.textContent = iter;
+		ui.next.textContent = nextTxt;
+		ui.changed.textContent = lastChanged == null ? '–' : (lastChanged.first ? `all ${lastChanged.n}` : lastChanged.n);
+		ui.inertia.textContent = fmtInertia(inertia());
+		ui.assign.disabled = running || !(phase === 'assign' || phase === 'update' || phase === 'done') || !C;
+		ui.update.disabled = running || !(phase === 'update') || !labels;
+		ui.assign.classList.toggle('next', phase === 'assign' && !running);
+		ui.update.classList.toggle('next', phase === 'update' && !running);
+		ui.run.textContent = running ? 'Stop' : 'Run to the end';
+		ui.run.disabled = !running && (!C || phase === 'done' || phase === 'place');
+		ui.random.disabled = running; ui.place.disabled = running; ui.k.disabled = running; ui.data.disabled = running;
+		ui.clear.hidden = ui.data.value !== 'draw';
+		P.render(); Hc.render();
+	}
+	function startFrom(C0, why) {
+		C = C0; labels = null; iter = 0; hist = []; lastChanged = null;
+		trails = C.map(c => [c.slice()]);
+		phase = 'assign';
+		say(why || 'Centroids are placed. Press Assign to give each point to its nearest centroid.');
+		refresh();
+	}
+	function randomStart(why) {
+		if (X.length < k) { C = null; labels = null; phase = 'start'; say(`Add at least ${k} points first: click or drag on the plot.`); refresh(); return; }
+		const r = mulberry32(9000 + 37 * startCount++);
+		startFrom(initRandom(X, k, r), why);
+	}
+	function doAssign() {
+		if (!C) return;
+		const first = !labels;
+		const a = assignStep(X, C, labels);
+		labels = a.labels;
+		lastChanged = { n: a.changed, first };
+		hist.push({ t: 'A', v: inertia(), it: iter });
+		if (!first && a.changed === 0) {
+			phase = 'done';
+			say(`Finished after ${iter} update${iter === 1 ? '' : 's'}. The last Assign moved no points, so another Update would not move any centroid.`);
+		} else {
+			phase = 'update';
+			say(first
+				? 'Every point now has the color of its nearest centroid. Press Update to move each centroid to the average of its points.'
+				: `${a.changed} point${a.changed === 1 ? '' : 's'} switched to a closer centroid. Press Update.`);
+		}
+		refresh();
+	}
+	async function doUpdate() {
+		if (!labels) return;
+		const u = updateStep(X, labels, C);
+		const from = C.map(c => c.slice()), to = u.C;
+		iter++;
+		phase = 'assign';
+		const dur = REDUCED || running ? (REDUCED ? 0 : 280) : 450;
+		if (dur > 0) {
+			const t0 = performance.now();
+			await new Promise(res => {
+				const tick = now => {
+					const t = Math.min(1, (now - t0) / dur), e = 1 - Math.pow(1 - t, 3);
+					C = from.map((f, j) => [f[0] + (to[j][0] - f[0]) * e, f[1] + (to[j][1] - f[1]) * e]);
+					P.render();
+					if (t < 1) requestAnimationFrame(tick); else res();
+				};
+				requestAnimationFrame(tick);
+			});
+		}
+		C = to;
+		C.forEach((c, j) => trails[j].push(c.slice()));
+		hist.push({ t: 'U', v: inertia(), it: iter });
+		let m = 'Each centroid moved to the average of its points. Points whose color no longer matches the shading are now closer to another centroid. Press Assign.';
+		if (u.empty.length) m = `Cluster ${u.empty.join(', ')} has no points, so its centroid stays put. ` + m;
+		say(m);
+		refresh();
+	}
+	async function runAll() {
+		if (running) { running = false; refresh(); return; }
+		running = true; refresh();
+		let guard = 0;
+		while (running && phase !== 'done' && guard++ < 200) {
+			if (phase === 'assign') doAssign();
+			else if (phase === 'update') await doUpdate();
+			await sleep(REDUCED ? 60 : 380);
+		}
+		running = false;
+		refresh();
+	}
+
+	ui.assign.onclick = doAssign;
+	ui.update.onclick = () => doUpdate();
+	ui.run.onclick = runAll;
+	ui.random.onclick = () => randomStart('New random start: K points picked at random serve as the starting centroids. Press Assign.');
+	ui.place.onclick = () => {
+		if (X.length === 0) { say('Add some points first: click or drag on the plot.'); return; }
+		C = []; labels = null; placing = k; phase = 'place'; iter = 0; hist = []; lastChanged = null; trails = [];
+		say(`Click the plot to place centroid 1 of ${k}.`);
+		refresh();
+	};
+	ui.clear.onclick = () => { X = []; C = null; labels = null; phase = 'start'; hist = []; iter = 0; lastChanged = null; trails = []; say('Click or drag on the plot to add points, then press Random start or Place by hand.'); refresh(); };
+	ui.k.onchange = () => { k = +ui.k.value; randomStart(`New random start with K = ${k}. Press Assign.`); };
+	ui.data.onchange = () => {
+		X = sets[ui.data.value]();
+		if (ui.data.value === 'draw') { C = null; labels = null; phase = 'start'; hist = []; iter = 0; lastChanged = null; trails = []; say('Click or drag on the plot to add points, then press Random start or Place by hand.'); refresh(); }
+		else randomStart();
+	};
+	[ui.regions, ui.lines, ui.squares].forEach(el => { el.onchange = () => P.render(); });
+
+	/* pointer: drag centroids, place centroids, paint points */
+	const cv = P.canvas;
+	function centroidAt(mx, my) {
+		if (!C) return -1;
+		return nearestPx(C.map(c => [P.sx(c[0]), P.sy(c[1])]), mx, my, 18);
+	}
+	function inPlot(mx, my) { return mx >= P.px0 && mx <= P.px1 && my >= P.py0 && my <= P.py1; }
+	cv.addEventListener('pointerdown', e => {
+		if (running) return;
+		const [mx, my] = P.pos(e);
+		if (phase === 'place') {
+			if (!inPlot(mx, my)) return;
+			C.push([P.ix(mx), P.iy(my)]);
+			placing--;
+			if (placing > 0) { say(`Click the plot to place centroid ${k - placing + 1} of ${k}.`); refresh(); }
+			else startFrom(C, 'Your centroids are placed. Press Assign.');
+			return;
+		}
+		const j = centroidAt(mx, my);
+		if (j >= 0) { dragging = j; cv.setPointerCapture(e.pointerId); return; }
+		if (ui.data.value === 'draw' && inPlot(mx, my)) {
+			painting = true; lastPaint = [mx, my];
+			cv.setPointerCapture(e.pointerId);
+			addPoint(mx, my);
+		}
+	});
+	function addPoint(mx, my) {
+		X.push([P.ix(mx), P.iy(my)]);
+		labels = null; hist = []; iter = 0; lastChanged = null;
+		if (C && C.length === k) { phase = 'assign'; trails = C.map(c => [c.slice()]); }
+		say(`${X.length} point${X.length === 1 ? '' : 's'}. Keep adding, then press ${C ? 'Assign' : 'Random start or Place by hand'}.`);
+		refresh();
+	}
+	cv.addEventListener('pointermove', e => {
+		const [mx, my] = P.pos(e);
+		if (dragging >= 0) {
+			C[dragging] = [clamp(P.ix(mx), P.vx[0], P.vx[1]), clamp(P.iy(my), P.vy[0], P.vy[1])];
+			trails = C.map(c => [c.slice()]);
+			if (labels) {
+				labels = assignStep(X, C, null).labels;
+				phase = 'update';
+			}
+			iter = 0; hist = []; lastChanged = null;
+			ui.inertia.textContent = fmtInertia(inertia());
+			P.render();
+			return;
+		}
+		if (painting) {
+			const dx = mx - lastPaint[0], dy = my - lastPaint[1];
+			if (dx * dx + dy * dy > 15 * 15 && inPlot(mx, my)) { lastPaint = [mx, my]; addPoint(mx, my); }
+			return;
+		}
+		hover = [mx, my];
+		updateTip();
+	});
+	cv.addEventListener('pointerup', () => {
+		if (dragging >= 0) {
+			dragging = -1;
+			if (labels) {
+				hist = [{ t: 'A', v: inertia(), it: 0 }];
+				say('You moved a centroid, so every point was reassigned to its nearest centroid and the inertia chart restarted. Press Update, or keep dragging.');
+			} else say('Centroid moved. Press Assign when ready.');
+			refresh();
+		}
+		painting = false;
+	});
+	cv.addEventListener('pointerleave', () => { hover = null; P.tip(0, 0, null); P.render(); });
+	function updateTip() {
+		if (!hover) return;
+		const [mx, my] = hover;
+		const j = centroidAt(mx, my);
+		if (j >= 0) {
+			const n = labels ? labels.filter(l => l === j).length : null;
+			P.tip(mx, my, `<b>Centroid ${j}</b><br>(${C[j][0].toFixed(2)}, ${C[j][1].toFixed(2)})${n != null ? `<br>${n} points` : ''}`);
+			P.hoverPoint = -1; P.render(); return;
+		}
+		const i = nearestPx(X.map(p => [P.sx(p[0]), P.sy(p[1])]), mx, my, 10);
+		P.hoverPoint = i;
+		if (i < 0) { P.tip(0, 0, null); P.render(); return; }
+		let html = `<b>Point</b> (${X[i][0].toFixed(2)}, ${X[i][1].toFixed(2)})`;
+		if (labels) {
+			const dd = d2(X[i], C[labels[i]]);
+			html += `<br>Cluster ${labels[i]}<br>Distance to its centroid: ${Math.sqrt(dd).toFixed(2)}<br>Squared distance (its share of inertia): ${dd.toFixed(2)}`;
+		}
+		P.tip(mx, my, html);
+		P.render();
+	}
+
+	P.draw = (c, P) => {
+		const showRegions = ui.regions.checked && C && C.length && phase !== 'place';
+		if (showRegions) drawRegions(c, P, C);
+		if (C && labels) {
+			if (ui.squares.checked) {
+				X.forEach((p, i) => {
+					const x = P.sx(p[0]), y = P.sy(p[1]), cc = C[labels[i]];
+					const vx = P.sx(cc[0]) - x, vy = P.sy(cc[1]) - y;
+					c.beginPath();
+					c.moveTo(x, y); c.lineTo(x + vx, y + vy); c.lineTo(x + vx - vy, y + vy + vx); c.lineTo(x - vy, y + vx); c.closePath();
+					const hot = P.hoverPoint === i;
+					c.fillStyle = rgba(PAL[labels[i] % 8], hot ? 0.3 : 0.05);
+					c.fill();
+					c.lineWidth = hot ? 2 : 1;
+					c.strokeStyle = rgba(PAL[labels[i] % 8], hot ? 0.9 : 0.35);
+					c.stroke();
+				});
+			}
+			if (ui.lines.checked) {
+				c.lineWidth = 1;
+				X.forEach((p, i) => {
+					const cc = C[labels[i]];
+					c.beginPath(); c.moveTo(P.sx(p[0]), P.sy(p[1])); c.lineTo(P.sx(cc[0]), P.sy(cc[1]));
+					c.strokeStyle = rgba(PAL[labels[i] % 8], 0.45); c.stroke();
+				});
+			}
+		}
+		// trails
+		trails.forEach((tr, j) => {
+			if (tr.length < 2) return;
+			c.beginPath();
+			tr.forEach((q, t) => { const x = P.sx(q[0]), y = P.sy(q[1]); if (t) c.lineTo(x, y); else c.moveTo(x, y); });
+			if (C && C[j]) c.lineTo(P.sx(C[j][0]), P.sy(C[j][1]));
+			c.setLineDash([4, 4]); c.lineWidth = 2; c.strokeStyle = INK; c.stroke(); c.setLineDash([]);
+			drawHollow(c, P.sx(tr[0][0]), P.sy(tr[0][1]), j, 6);
+		});
+		X.forEach((p, i) => drawPoint(c, P.sx(p[0]), P.sy(p[1]), labels ? labels[i] : -1, P.hoverPoint === i ? 7 : 5.5));
+		if (C) C.forEach((cc, j) => drawCentroid(c, P.sx(cc[0]), P.sy(cc[1]), j));
+		if (!X.length) {
+			c.fillStyle = MUTED; c.font = `16px ${FONT()}`; c.textAlign = 'center'; c.textBaseline = 'middle';
+			c.fillText('Click or drag here to add points', (P.px0 + P.px1) / 2, (P.py0 + P.py1) / 2);
+		}
+	};
+	Hc.draw = (c, H) => {
+		if (!hist.length) {
+			c.fillStyle = MUTED; c.font = `14px ${FONT()}`; c.textAlign = 'center'; c.textBaseline = 'middle';
+			c.fillText('Inertia appears here after the first Assign.', (H.px0 + H.px1) / 2, (H.py0 + H.py1) / 2);
+			return;
+		}
+		drawLineDots(c, H, hist.map((h, i) => [i, h.v, h.t]), { squareIf: p => p[2] === 'U' });
+	};
+	let offscale = false;
+	Hc.after = (c, H) => {
+		if (!hist.length) return;
+		const last = hist[hist.length - 1];
+		c.fillStyle = INK; c.font = `700 13px ${FONT()}`; c.textAlign = 'right'; c.textBaseline = 'top';
+		c.fillText(`Now: ${fmtInertia(last.v)}`, H.px1, 2);
+		if (offscale) {
+			// first value is far above the rest: mark it at the top edge with its value
+			const x = H.sx(0), y = H.py0 + 2;
+			c.beginPath(); c.moveTo(x, y - 1); c.lineTo(x - 6, y + 8); c.lineTo(x + 6, y + 8); c.closePath();
+			c.fillStyle = NAVY; c.fill();
+			c.font = `600 12px ${FONT()}`; c.textAlign = 'left'; c.textBaseline = 'top'; c.fillStyle = INK;
+			c.fillText(`${fmtInertia(hist[0].v)} (off the chart)`, x + 10, y);
+		}
+	};
+	const _hr = Hc.render.bind(Hc);
+	Hc.render = () => {
+		const n = Math.max(6, hist.length);
+		offscale = hist.length >= 3 && hist[0].v > 2.5 * Math.max(...hist.slice(1).map(h => h.v));
+		const vals = (offscale ? hist.slice(1) : hist).map(h => h.v);
+		const mx = vals.length ? Math.max(...vals) : 1;
+		Hc.setDomain([-0.5, n - 0.5], [0, mx * (offscale ? 1.3 : 1.12) || 1]);
+		Hc.o.xTicks = niceTicks(0, n - 1, 6).filter(v => Number.isInteger(v));
+		_hr();
+	};
+	Hc.o.xFmt = v => String(v);
+	Hc.canvas.addEventListener('pointermove', e => {
+		const [mx, my] = Hc.pos(e);
+		const i = nearestPx(hist.map((h, i) => [Hc.sx(i), Hc.sy(h.v)]), mx, my, 14);
+		if (i < 0) { Hc.tip(0, 0, null); return; }
+		const h = hist[i];
+		Hc.tip(mx, my, `Step ${i}: after ${h.t === 'A' ? 'Assign' : 'Update ' + h.it}<br>Inertia <b>${fmtInertia(h.v)}</b>`);
+	});
+	Hc.canvas.addEventListener('pointerleave', () => Hc.tip(0, 0, null));
+
+	// opening state: a fixed start so the demo is repeatable
+	startCount = 0;
+	startFrom([[0.6, 0.6], [0.6, 3.5], [0.6, 6.4]], 'Three starting centroids are lined up on the left edge. Press Assign to give each point to its nearest centroid.');
+})();
+
+/* =====================================================================
+   Activity 2: Random starts
+   ===================================================================== */
+(function A2() {
+	const P = new Plot($('#a2-plot'), { aspect: 0.55, equal: true, xLabel: 'Feature 1', yLabel: 'Feature 2' });
+	P.setDomain([0, 12], [0, 7]);
+	const X = blobs(303, [[2.2, 2.0, 0.55, 0.55, 25], [6, 2.0, 0.55, 0.55, 25], [9.8, 2.0, 0.55, 0.55, 25], [2.2, 5.0, 0.55, 0.55, 25], [6, 5.0, 0.55, 0.55, 25], [9.8, 5.0, 0.55, 0.55, 25]]).X;
+	const ui = { k: $('#a2-k'), n: $('#a2-n'), init: $('#a2-init'), seed: $('#a2-seed'), run: $('#a2-run'), newseed: $('#a2-newseed'), thumbs: $('#a2-thumbs'), status: $('#a2-status'), code: $('#a2-code') };
+	fillK(ui.k, 2, MAXK, 6);
+	let k = 6, nInit = 10, init = 'random', seed = 7, out = null, sel = 0;
+	const key = c => Math.round(c[0] * 2) * 100 + c[1];
+
+	function run() {
+		const raw = bestOf(X, k, nInit, seed, init);
+		out = { bestIndex: raw.bestIndex, runs: raw.runs.map(r => relabelBy(r, key)) };
+		sel = out.bestIndex;
+		ui.seed.textContent = seed;
+		ui.code.textContent =
+`kmeans = KMeans(n_clusters=${k}, init='${init === 'pp' ? 'k-means++' : 'random'}',
+                n_init=${nInit}, random_state=${seed})
+kmeans.fit(X)
+kmeans.inertia_   # inertia of the start it kept: ${fmtInertia(out.runs[out.bestIndex].inertia)}`;
+		renderThumbs();
+		show();
+	}
+	function summary() {
+		const best = out.runs[out.bestIndex].inertia;
+		const groups = new Map();
+		out.runs.forEach(r => { const key = r.inertia.toFixed(1); groups.set(key, (groups.get(key) || 0) + 1); });
+		const nBest = out.runs.filter(r => Math.abs(r.inertia - best) < 0.05).length;
+		const s = out.runs[sel];
+		const head = nInit === 1
+			? `One start: it took ${s.iters} update${s.iters === 1 ? '' : 's'} and ended at inertia ${fmtInertia(s.inertia)}.`
+			: `${nInit} starts found ${groups.size} different answer${groups.size === 1 ? '' : 's'}. The lowest inertia (${fmtInertia(best)}) came from ${nBest} of ${nInit} starts, and that is the one Python keeps.`;
+		const selTxt = nInit === 1 ? '' : ` Showing start ${sel + 1}: ${s.iters} updates, inertia ${fmtInertia(s.inertia)}${sel === out.bestIndex ? ' (kept).' : Math.abs(s.inertia - best) < 0.05 ? ' (same answer as the kept one).' : ' (not kept: another start did better).'}`;
+		ui.status.textContent = head + selTxt;
+	}
+	function show() { summary(); P.render(); ui.thumbs.querySelectorAll('.thumb').forEach((t, i) => t.setAttribute('aria-pressed', String(i === sel))); }
+	function renderThumbs() {
+		ui.thumbs.innerHTML = '';
+		out.runs.forEach((r, i) => {
+			const b = document.createElement('button');
+			b.className = 'thumb' + (i === out.bestIndex ? ' kept' : '');
+			b.setAttribute('aria-pressed', String(i === sel));
+			b.setAttribute('aria-label', `Start ${i + 1}, inertia ${fmtInertia(r.inertia)}${i === out.bestIndex ? ', kept' : ''}`);
+			const cv = document.createElement('canvas');
+			b.appendChild(cv);
+			b.insertAdjacentHTML('beforeend', `<span class="t1">Start ${i + 1}</span><span class="t2">inertia ${fmtInertia(r.inertia)}</span>`);
+			b.onclick = () => { sel = i; show(); };
+			ui.thumbs.appendChild(b);
+			requestAnimationFrame(() => drawThumb(cv, r));
+		});
+	}
+	function drawThumb(cv, r) {
+		const W = cv.clientWidth || 140, H = Math.round(W * 0.58), d = Math.max(1, window.devicePixelRatio || 1);
+		cv.width = W * d; cv.height = H * d; cv.style.height = H + 'px';
+		const c = cv.getContext('2d');
+		c.scale(d, d);
+		c.fillStyle = '#fff'; c.fillRect(0, 0, W, H);
+		const s = Math.min(W / 12, H / 7);
+		const ox = (W - 12 * s) / 2, oy = (H - 7 * s) / 2;
+		const tx = x => ox + x * s, ty = y => H - oy - y * s;
+		X.forEach((p, i) => { shapePath(c, r.labels[i], tx(p[0]), ty(p[1]), 2.2); c.fillStyle = PAL[r.labels[i] % 8]; c.fill(); });
+		r.C.forEach((cc, j) => { shapePath(c, j, tx(cc[0]), ty(cc[1]), 4.5); c.fillStyle = PAL[j % 8]; c.fill(); c.lineWidth = 1.5; c.strokeStyle = INK; c.stroke(); });
+	}
+	P.draw = (c, P) => {
+		if (!out) return;
+		const r = out.runs[sel];
+		drawRegions(c, P, r.C, 0.08);
+		X.forEach((p, i) => drawPoint(c, P.sx(p[0]), P.sy(p[1]), r.labels[i]));
+		for (let j = 0; j < k; j++) {
+			c.beginPath();
+			r.path.forEach((Cs, t) => { const x = P.sx(Cs[j][0]), y = P.sy(Cs[j][1]); if (t) c.lineTo(x, y); else c.moveTo(x, y); });
+			c.setLineDash([4, 4]); c.lineWidth = 2; c.strokeStyle = INK; c.stroke(); c.setLineDash([]);
+			drawHollow(c, P.sx(r.path[0][j][0]), P.sy(r.path[0][j][1]), j, 7);
+		}
+		r.C.forEach((cc, j) => drawCentroid(c, P.sx(cc[0]), P.sy(cc[1]), j));
+	};
+	P.canvas.addEventListener('pointermove', e => {
+		if (!out) return;
+		const [mx, my] = P.pos(e);
+		const r = out.runs[sel];
+		const j = nearestPx(r.C.map(cc => [P.sx(cc[0]), P.sy(cc[1])]), mx, my, 16);
+		if (j < 0) { P.tip(0, 0, null); return; }
+		const n = r.labels.filter(l => l === j).length;
+		P.tip(mx, my, `<b>Centroid ${j}</b><br>${n} points<br>moved ${r.path.length - 1} times`);
+	});
+	P.canvas.addEventListener('pointerleave', () => P.tip(0, 0, null));
+	ui.k.onchange = () => { k = +ui.k.value; run(); };
+	ui.n.onchange = () => { nInit = +ui.n.value; run(); };
+	seg(ui.init, v => { init = v; run(); });
+	ui.run.onclick = run;
+	ui.newseed.onclick = () => { seed = Math.floor(Math.random() * 999) + 1; run(); };
+	window.addEventListener('resize', () => { if (out) ui.thumbs.querySelectorAll('canvas').forEach((cv, i) => drawThumb(cv, out.runs[i])); });
+	run();
+})();
+
+/* =====================================================================
+   Activity 3: Choose K
+   ===================================================================== */
+(function A3() {
+	const KS = [1, 2, 3, 4, 5, 6, 7, 8];
+	const iris = DATA.iris.map(r => r.slice(0, 4));
+	const sets = {
+		A: { X: blobs(404, [[2.2, 3.4, 0.55, 0.55, 50], [6.0, 5.6, 0.55, 0.55, 50], [9.8, 3.4, 0.55, 0.55, 50], [6.0, 1.3, 0.55, 0.55, 50]]).X },
+		B: { X: blobs(505, [[2.3, 2.6, 0.45, 0.45, 50], [3.8, 4.4, 0.45, 0.45, 50], [8.1, 2.5, 0.45, 0.45, 50], [9.6, 4.3, 0.45, 0.45, 50]]).X },
+		C: { X: blobs(606, [[6, 3.5, 1.7, 1.1, 200]]).X },
+		iris: { X: zscore(iris), show: iris.map(r => [r[2], r[3]]) },
+	};
+	const ui = { data: $('#a3-data'), k: $('#a3-k'), hide: $('#a3-hide'), reveal: $('#a3-reveal'), cover: $('#a3-cover'), title: $('#a3-scatter-title'), code: $('#a3-code') };
+	fillK(ui.k, 1, MAXK, 3);
+	const Pi = new Plot($('#a3-inertia'), { aspect: 0.62, minH: 200, maxH: 300, xLabel: 'Number of clusters (K)', yLabel: 'Inertia', pad: { l: 66, r: 16, t: 14, b: 46 } });
+	const Ps = new Plot($('#a3-sil'), { aspect: 0.62, minH: 200, maxH: 300, xLabel: 'Number of clusters (K)', yLabel: 'Silhouette', pad: { l: 58, r: 16, t: 14, b: 46 } });
+	const P = new Plot($('#a3-plot'), { aspect: 0.5, equal: true, xLabel: 'Feature 1', yLabel: 'Feature 2' });
+	[Pi, Ps].forEach(p => { p.o.xTicks = KS; p.o.xFmt = v => String(v); });
+	let cur = 'A', k = 3, hidden = true;
+	const cache = {};
+	function sweep(name) {
+		if (cache[name]) return cache[name];
+		const X = sets[name].X;
+		const res = KS.map(kk => {
+			const b = relabelBy(bestOf(X, kk, 10, 42, 'pp').best, c => c[0] * 10 + c[1]);
+			return { k: kk, inertia: b.inertia, labels: b.labels, C: b.C, sil: kk >= 2 ? silhouette(X, b.labels, kk) : null };
+		});
+		return (cache[name] = res);
+	}
+	function update() {
+		const res = sweep(cur);
+		const isIris = cur === 'iris';
+		ui.cover.hidden = !hidden;
+		ui.hide.hidden = hidden;
+		P.o.equal = !isIris;
+		P.o.xLabel = isIris ? 'Petal length (cm)' : 'Feature 1';
+		P.o.yLabel = isIris ? 'Petal width (cm)' : 'Feature 2';
+		if (isIris) P.setDomain([0.6, 7.2], [0, 2.7]); else P.setDomain([0, 12], [0, 7]);
+		ui.title.textContent = isIris ? 'The data (clustered on all four scaled features, plotted by petal size)' : 'The data';
+		const maxI = Math.max(...res.map(r => r.inertia));
+		Pi.setDomain([0.5, 8.5], [0, maxI * 1.08]);
+		Ps.setDomain([1.5, 8.5], [0, 1]);
+		Ps.o.yTicks = [0, 0.25, 0.5, 0.75, 1];
+		Ps.o.yFmt = v => v.toFixed(2);
+		ui.code.textContent = (isIris
+? `X_scaled = StandardScaler().fit_transform(iris.data)
+` : '') +
+`inertias, silhouettes = [], []
+for k in range(1, 9):
+    kmeans = KMeans(n_clusters=k, random_state=42, n_init=10)
+    labels = kmeans.fit_predict(${isIris ? 'X_scaled' : 'X'})
+    inertias.append(kmeans.inertia_)
+    if k > 1:
+        silhouettes.append(silhouette_score(${isIris ? 'X_scaled' : 'X'}, labels))
+
+# You picked K = ${k}:  inertia ${fmtInertia(res[k - 1].inertia)}${res[k - 1].sil != null ? ', silhouette ' + res[k - 1].sil.toFixed(3) : ''}`;
+		Pi.render(); Ps.render(); P.render();
+	}
+	Pi.draw = (c, p) => drawLineDots(c, p, sweep(cur).map(r => [r.k, r.inertia]), { selected: k });
+	Ps.draw = (c, p) => drawLineDots(c, p, sweep(cur).filter(r => r.k >= 2).map(r => [r.k, r.sil]), { selected: k });
+	P.draw = (c, p) => {
+		const r = sweep(cur)[k - 1];
+		const S = sets[cur].show || sets[cur].X;
+		S.forEach((q, i) => drawPoint(c, p.sx(q[0]), p.sy(q[1]), r.labels[i]));
+		if (cur !== 'iris') r.C.forEach((cc, j) => drawCentroid(c, p.sx(cc[0]), p.sy(cc[1]), j, 8));
+	};
+	function chartHover(Pc, getPts) {
+		Pc.canvas.addEventListener('pointermove', e => {
+			const [mx, my] = Pc.pos(e);
+			const pts = getPts();
+			const i = nearestPx(pts.map(q => [Pc.sx(q.k), Pc.sy(q.v)]), mx, my, 16);
+			Pc.canvas.style.cursor = i >= 0 ? 'pointer' : 'default';
+			if (i < 0) { Pc.tip(0, 0, null); return; }
+			const r = sweep(cur)[pts[i].k - 1];
+			Pc.tip(mx, my, `<b>K = ${r.k}</b><br>Inertia ${fmtInertia(r.inertia)}${r.sil != null ? `<br>Silhouette ${r.sil.toFixed(3)}` : ''}<br>Click to pick`);
+		});
+		Pc.canvas.addEventListener('pointerleave', () => Pc.tip(0, 0, null));
+		Pc.canvas.addEventListener('click', e => {
+			const [mx, my] = Pc.pos(e);
+			const pts = getPts();
+			const i = nearestPx(pts.map(q => [Pc.sx(q.k), Pc.sy(q.v)]), mx, my, 16);
+			if (i >= 0) { k = pts[i].k; ui.k.value = k; update(); }
+		});
+	}
+	chartHover(Pi, () => sweep(cur).map(r => ({ k: r.k, v: r.inertia })));
+	chartHover(Ps, () => sweep(cur).filter(r => r.k >= 2).map(r => ({ k: r.k, v: r.sil })));
+	P.canvas.addEventListener('pointermove', e => {
+		if (hidden) return;
+		const [mx, my] = P.pos(e);
+		const S = sets[cur].show || sets[cur].X;
+		const i = nearestPx(S.map(q => [P.sx(q[0]), P.sy(q[1])]), mx, my, 10);
+		if (i < 0) { P.tip(0, 0, null); return; }
+		const r = sweep(cur)[k - 1];
+		P.tip(mx, my, cur === 'iris'
+			? `Petal ${S[i][0]} × ${S[i][1]} cm<br>Cluster ${r.labels[i]}`
+			: `(${S[i][0].toFixed(2)}, ${S[i][1].toFixed(2)})<br>Cluster ${r.labels[i]}`);
+	});
+	P.canvas.addEventListener('pointerleave', () => P.tip(0, 0, null));
+	ui.data.onchange = () => { cur = ui.data.value; hidden = true; update(); };
+	ui.k.onchange = () => { k = +ui.k.value; update(); };
+	ui.reveal.onclick = () => { hidden = false; update(); };
+	ui.hide.onclick = () => { hidden = true; update(); };
+	update();
+})();
+
+/* =====================================================================
+   Activity 4: Scaling
+   ===================================================================== */
+(function A4() {
+	const cust = customers(707);
+	const sets = {
+		cust: { X: cust.X, names: ['Age', 'Income'], units: ['years', 'dollars'], xLabel: 'Age (years)', yLabel: 'Income ($)', fx: v => fmtNum(v), fy: fmtMoney,
+			tip: p => `Age ${p[0]}<br>Income ${fmtMoney(p[1])}`, py: ['age', 'income'] },
+		homes: { X: DATA.homes.map(([price, area]) => [area, price]), names: ['Living area', 'Price'], units: ['sq ft', 'dollars'], xLabel: 'Living area (sq ft)', yLabel: 'Price ($)', fx: v => fmtNum(v), fy: fmtMoney,
+			tip: p => `${p[0].toLocaleString('en-US')} sq ft<br>Price ${fmtMoney(p[1])}`, py: ['living_area', 'price'] },
+	};
+	const ui = { data: $('#a4-data'), scale: $('#a4-scale'), k: $('#a4-k'), bar: $('#a4-bar'), key: $('#a4-key'), status: $('#a4-status'), code: $('#a4-code'), rsub: $('#a4-right-sub') };
+	fillK(ui.k, 2, 6, 3);
+	const L = new Plot($('#a4-left'), { aspect: 0.82, minH: 240, maxH: 440, pad: { l: 64, r: 14, t: 14, b: 46 } });
+	const R = new Plot($('#a4-right'), { aspect: 0.82, minH: 240, maxH: 440, equal: true, pad: { l: 64, r: 14, t: 14, b: 46 } });
+	let cur = 'cust', scale = 'none', k = 3, res = null, Xs = null, means = null;
+	const BAR = ['#002855', '#8b97ab'];
+
+	function extent(X, f, padFrac = 0.06) {
+		let lo = Infinity, hi = -Infinity;
+		X.forEach(r => { lo = Math.min(lo, r[f]); hi = Math.max(hi, r[f]); });
+		const p = (hi - lo) * padFrac;
+		return [lo - p, hi + p];
+	}
+	function pct(v) {
+		if (v >= 99.995 && v < 100) return 'more than 99.99%';
+		if (v > 0 && v < 0.005) return 'less than 0.01%';
+		if (v >= 99.9 || v <= 0.1) return v.toFixed(2) + '%';
+		return v.toFixed(1) + '%';
+	}
+	function update() {
+		const S = sets[cur];
+		const X = S.X;
+		Xs = scale === 'z' ? zscore(X) : scale === 'mm' ? minmax(X) : X.map(r => r.slice());
+		res = relabelBy(bestOf(Xs, k, 10, 42, 'pp').best, c => c[1] * 1000 + c[0]);
+		means = Array.from({ length: k }, () => [0, 0, 0]);
+		X.forEach((p, i) => { const m = means[res.labels[i]]; m[0] += p[0]; m[1] += p[1]; m[2]++; });
+		means = means.map(m => m[2] ? [m[0] / m[2], m[1] / m[2]] : [NaN, NaN]);
+
+		L.o.xLabel = S.xLabel; L.o.yLabel = S.yLabel; L.o.xFmt = S.fx; L.o.yFmt = S.fy;
+		L.setDomain(extent(X, 0), extent(X, 1));
+		const raw = scale === 'none';
+		R.o.xLabel = raw ? S.xLabel : `${S.names[0]} (${scale === 'z' ? 'z-score' : 'scaled 0 to 1'})`;
+		R.o.yLabel = raw ? S.yLabel : `${S.names[1]} (${scale === 'z' ? 'z-score' : 'scaled 0 to 1'})`;
+		R.o.xFmt = raw ? S.fx : (v => +v.toFixed(2) + '');
+		R.o.yFmt = raw ? S.fy : (v => +v.toFixed(2) + '');
+		R.setDomain(extent(Xs, 0), extent(Xs, 1));
+		ui.rsub.textContent = raw
+			? `Both axes use the same units: 1 ${S.units[0] === 'years' ? 'year' : 'sq ft'} counts the same as $1.`
+			: scale === 'z' ? 'Both features in standard deviations, so 1 unit means the same on each axis.' : 'Both features squeezed to run from 0 to 1.';
+
+		const v0 = variance(Xs, 0), v1 = variance(Xs, 1);
+		const s0 = 100 * v0 / (v0 + v1), s1 = 100 - s0;
+		ui.bar.innerHTML = `<div style="width:${s0}%;background:${BAR[0]}"></div><div style="width:${s1}%;background:${BAR[1]}"></div>`;
+		ui.bar.setAttribute('aria-label', `${S.names[0]} ${pct(s0)}, ${S.names[1]} ${pct(s1)}`);
+		ui.key.innerHTML = `<span><span class="swatch" style="background:${BAR[0]}"></span>${S.names[0]}: <b>${pct(s0)}</b></span><span><span class="swatch" style="background:${BAR[1]}"></span>${S.names[1]}: <b>${pct(s1)}</b></span>`;
+
+		const desc = means.map((m, j) => `cluster ${j}: ${S.names[0].toLowerCase()} ${cur === 'cust' ? Math.round(m[0]) : Math.round(m[0]).toLocaleString('en-US')}, ${S.names[1].toLowerCase()} ${fmtMoney(m[1])}`).join('; ');
+		let note = '';
+		if (cur === 'cust') {
+			const ag = agreement(cust.T, res.labels, k);
+			note = k === 3 ? ` These clusters match the three customer groups (young, mid-career, retired) for ${Math.round(ag * 100)}% of customers.` : '';
+		}
+		let spans = '';
+		if (raw) {
+			const ex0 = extent(X, 0, 0), ex1 = extent(X, 1, 0);
+			spans = `${S.names[0]} spans ${Math.round(ex0[1] - ex0[0]).toLocaleString('en-US')} ${S.units[0]}, but ${S.names[1].toLowerCase()} spans ${fmtMoney(ex1[1] - ex1[0])}, so in the right plot the ${S.names[0].toLowerCase()} differences shrink to a thin line. `;
+		}
+		ui.status.textContent = `${spans}Cluster averages in original units: ${desc}.${note}`;
+		const [a, b] = S.py;
+		ui.code.textContent = raw
+? `X = df[['${a}', '${b}']]
+kmeans = KMeans(n_clusters=${k}, random_state=42, n_init=10)
+df['cluster'] = kmeans.fit_predict(X)     # no scaling`
+: `X = df[['${a}', '${b}']]
+X_scaled = ${scale === 'z' ? 'StandardScaler' : 'MinMaxScaler'}().fit_transform(X)
+kmeans = KMeans(n_clusters=${k}, random_state=42, n_init=10)
+df['cluster'] = kmeans.fit_predict(X_scaled)`;
+		L.render(); R.render();
+	}
+	L.draw = (c, p) => {
+		sets[cur].X.forEach((q, i) => drawPoint(c, p.sx(q[0]), p.sy(q[1]), res.labels[i], 5));
+		means.forEach((m, j) => { if (isFinite(m[0])) drawCentroid(c, p.sx(m[0]), p.sy(m[1]), j, 9); });
+	};
+	R.draw = (c, p) => {
+		Xs.forEach((q, i) => drawPoint(c, p.sx(q[0]), p.sy(q[1]), res.labels[i], 5));
+		res.C.forEach((cc, j) => drawCentroid(c, p.sx(cc[0]), p.sy(cc[1]), j, 9));
+	};
+	function hover(Pl, getXY) {
+		Pl.canvas.addEventListener('pointermove', e => {
+			const [mx, my] = Pl.pos(e);
+			const XY = getXY();
+			const i = nearestPx(XY.map(q => [Pl.sx(q[0]), Pl.sy(q[1])]), mx, my, 10);
+			if (i < 0) { Pl.tip(0, 0, null); return; }
+			Pl.tip(mx, my, sets[cur].tip(sets[cur].X[i]) + `<br>Cluster ${res.labels[i]}`);
+		});
+		Pl.canvas.addEventListener('pointerleave', () => Pl.tip(0, 0, null));
+	}
+	hover(L, () => sets[cur].X);
+	hover(R, () => Xs);
+	ui.data.onchange = () => { cur = ui.data.value; update(); };
+	ui.k.onchange = () => { k = +ui.k.value; update(); };
+	seg(ui.scale, v => { scale = v; update(); });
+	update();
+})();
+
+/* =====================================================================
+   Activity 5: Break it
+   ===================================================================== */
+(function A5() {
+	const P = new Plot($('#a5-plot'), { aspect: 0.55, equal: true, xLabel: 'Feature 1', yLabel: 'Feature 2' });
+	P.setDomain([0, 12], [0, 7]);
+	const bs = blobs(808, [[4.0, 3.5, 1.5, 1.5, 150], [7.8, 3.5, 0.32, 0.32, 30]]);
+	const ol = blobs(909, [[3.4, 3.4, 0.4, 0.4, 15], [5.0, 3.4, 0.4, 0.4, 15]]);
+	ol.X.push([7.4, 3.9]); ol.T.push(1);
+	const sets = {
+		moons: { ...moons(111, 110), k: 2, note: 'Two crescents.' },
+		rings: { ...rings(222), k: 2, note: 'A small ring inside a big ring.' },
+		ovals: { ...ovals(333), k: 2, note: 'Two long, thin ovals, one above the other.' },
+		bigsmall: { ...bs, k: 2, note: 'One big, spread-out group and one small, tight group.' },
+		outlier: { ...ol, k: 2, note: 'Two groups and one far-off point. Drag the lone point (outlined in black) around.', drag: ol.X.length - 1 },
+	};
+	const ui = { data: $('#a5-data'), k: $('#a5-k'), color: $('#a5-color'), regions: $('#a5-regions'), status: $('#a5-status'), agree: $('#a5-agree'), inertia: $('#a5-inertia') };
+	fillK(ui.k, 2, 6, 2);
+	let cur = 'moons', k = 2, color = 'km', res = null, dragging = false, pending = false;
+	function compute() {
+		const S = sets[cur];
+		res = relabelBy(bestOf(S.X, k, 10, 42, 'pp').best, c => c[0] * 10 + c[1]);
+		const ag = agreement(S.T, res.labels, k);
+		ui.agree.textContent = Math.round(ag * 100) + '%';
+		ui.inertia.textContent = fmtInertia(res.inertia);
+		let m = S.note + ' ';
+		if (cur === 'outlier') {
+			const o = S.X[S.drag];
+			const alone = res.labels.filter(l => l === res.labels[S.drag]).length === 1;
+			m += alone ? 'Now the lone point has a cluster to itself, and the two real groups were merged.' : `The lone point (${o[0].toFixed(1)}, ${o[1].toFixed(1)}) belongs to cluster ${res.labels[S.drag]} and pulls its centroid toward it.`;
+		} else {
+			m += color === 'truth' ? 'Colors show the groups a person would draw.' : `K-Means agrees with the groups you'd draw for ${Math.round(ag * 100)}% of points.`;
+		}
+		ui.status.textContent = m;
+		P.render();
+	}
+	P.draw = (c, p) => {
+		const S = sets[cur];
+		if (ui.regions.checked) drawRegions(c, p, res.C, 0.1);
+		S.X.forEach((q, i) => drawPoint(c, p.sx(q[0]), p.sy(q[1]), color === 'truth' ? S.T[i] : res.labels[i]));
+		if (cur === 'outlier') {
+			const o = S.X[S.drag];
+			c.beginPath(); c.arc(p.sx(o[0]), p.sy(o[1]), 12, 0, 2 * Math.PI); c.lineWidth = 2.5; c.strokeStyle = INK; c.stroke();
+		}
+		if (color === 'km') res.C.forEach((cc, j) => drawCentroid(c, p.sx(cc[0]), p.sy(cc[1]), j));
+	};
+	const cv = P.canvas;
+	cv.addEventListener('pointerdown', e => {
+		if (cur !== 'outlier') return;
+		const [mx, my] = P.pos(e);
+		const o = sets.outlier.X[sets.outlier.drag];
+		const dx = P.sx(o[0]) - mx, dy = P.sy(o[1]) - my;
+		if (dx * dx + dy * dy < 20 * 20) { dragging = true; cv.setPointerCapture(e.pointerId); }
+	});
+	cv.addEventListener('pointermove', e => {
+		const [mx, my] = P.pos(e);
+		const S = sets[cur];
+		if (dragging) {
+			S.X[S.drag] = [clamp(P.ix(mx), 0.2, 11.8), clamp(P.iy(my), 0.2, 6.8)];
+			if (!pending) { pending = true; requestAnimationFrame(() => { pending = false; compute(); }); }
+			P.tip(0, 0, null);
+			return;
+		}
+		if (cur === 'outlier') {
+			const o = S.X[S.drag];
+			const dx = P.sx(o[0]) - mx, dy = P.sy(o[1]) - my;
+			cv.style.cursor = dx * dx + dy * dy < 20 * 20 ? 'grab' : 'default';
+		} else cv.style.cursor = 'default';
+		const i = nearestPx(S.X.map(q => [P.sx(q[0]), P.sy(q[1])]), mx, my, 10);
+		if (i < 0) { P.tip(0, 0, null); return; }
+		P.tip(mx, my, `Cluster ${res.labels[i]}<br>Group you'd draw: ${S.T[i]}`);
+	});
+	cv.addEventListener('pointerup', () => { dragging = false; });
+	cv.addEventListener('pointerleave', () => P.tip(0, 0, null));
+	ui.data.onchange = () => { cur = ui.data.value; k = sets[cur].k; ui.k.value = k; compute(); };
+	ui.k.onchange = () => { k = +ui.k.value; compute(); };
+	seg(ui.color, v => { color = v; compute(); });
+	ui.regions.onchange = () => P.render();
+	compute();
+})();
+
+/* =====================================================================
+   Activity 6: Check against the truth (iris)
+   ===================================================================== */
+(function A6() {
+	const FEATS = ['Sepal length', 'Sepal width', 'Petal length', 'Petal width'];
+	const SPECIES = ['setosa', 'versicolor', 'virginica'];
+	const X = DATA.iris.map(r => r.slice(0, 4));
+	const Y = DATA.iris.map(r => r[4]);
+	const Xz = zscore(X);
+	const ui = { k: $('#a6-k'), color: $('#a6-color'), renum: $('#a6-renumber'), x: $('#a6-x'), y: $('#a6-y'), mis: $('#a6-mis'), status: $('#a6-status'), cross: $('#a6-cross'), prof: $('#a6-prof'), code: $('#a6-code') };
+	fillK(ui.k, 2, 6, 3);
+	FEATS.forEach((f, i) => {
+		ui.x.insertAdjacentHTML('beforeend', `<option value="${i}" ${i === 2 ? 'selected' : ''}>${f}</option>`);
+		ui.y.insertAdjacentHTML('beforeend', `<option value="${i}" ${i === 3 ? 'selected' : ''}>${f}</option>`);
+	});
+	const P = new Plot($('#a6-plot'), { aspect: 0.55 });
+	let k = 3, color = 'none', fx = 2, fy = 3, base = null, perm = null, names = {}, cross = null, spColor = null, major = null;
+	const lab = i => perm[base.labels[i]];
+	function fit() {
+		base = relabelBy(bestOf(Xz, k, 10, 42, 'pp').best, c => c[2] * 10 + c[3]);
+		perm = [...Array(k).keys()];
+		names = {};
+	}
+	function compute() {
+		cross = Array.from({ length: 3 }, () => new Array(k).fill(0));
+		X.forEach((_, i) => cross[Y[i]][lab(i)]++);
+		major = [...Array(k).keys()].map(c => { let b = 0; for (let s = 1; s < 3; s++) if (cross[s][c] > cross[b][c]) b = s; return b; });
+		// species color = color of the cluster where most of that species landed (if still free)
+		const order = [0, 1, 2].sort((a, b) => Math.max(...cross[b]) - Math.max(...cross[a]));
+		const used = new Set();
+		spColor = new Array(3);
+		order.forEach(s => {
+			const pref = cross[s].indexOf(Math.max(...cross[s]));
+			if (!used.has(pref)) { spColor[s] = pref; used.add(pref); }
+		});
+		order.forEach(s => {
+			if (spColor[s] != null) return;
+			let c = 0; while (used.has(c)) c++;
+			spColor[s] = c; used.add(c);
+		});
+	}
+	function render() {
+		compute();
+		P.o.xLabel = FEATS[fx] + ' (cm)'; P.o.yLabel = FEATS[fy] + ' (cm)';
+		const ex = f => { let lo = Infinity, hi = -Infinity; X.forEach(r => { lo = Math.min(lo, r[f]); hi = Math.max(hi, r[f]); }); const p = (hi - lo) * 0.06; return [lo - p, hi + p]; };
+		P.setDomain(ex(fx), ex(fy));
+		P.render();
+		// crosstab
+		const maxC = Math.max(...cross.flat());
+		const ramp = ['#ffffff', '#cde2fb', '#9ec5f4', '#6da7ec', '#3987e5', '#256abf', '#184f95'];
+		const cell = v => { const t = v / maxC, i = v === 0 ? 0 : Math.max(1, Math.round(t * (ramp.length - 1))); return `<td style="background:${ramp[i]};color:${i >= 4 ? '#fff' : INK}">${v}</td>`; };
+		const cols = [...Array(k).keys()];
+		let h = `<thead><tr><th>Species</th>${cols.map(c => `<th>${swatchSVG(c)}Cluster ${c}</th>`).join('')}</tr></thead><tbody>`;
+		SPECIES.forEach((s, si) => { h += `<tr><td>${s}</td>${cols.map(c => cell(cross[si][c])).join('')}</tr>`; });
+		const purity = cols.map(c => { const tot = cross.reduce((a, r) => a + r[c], 0); return tot ? Math.max(...cross.map(r => r[c])) / tot : 0; });
+		h += `</tbody><tfoot><tr><td>Purity</td>${purity.map(p => `<td>${Math.round(p * 100)}%</td>`).join('')}</tr></tfoot>`;
+		ui.cross.innerHTML = h;
+		// profiles
+		const sums = cols.map(() => [0, 0, 0, 0, 0]);
+		X.forEach((r, i) => { const s = sums[lab(i)]; r.forEach((v, f) => { s[f] += v; }); s[4]++; });
+		let ph = `<thead><tr><th>Cluster</th><th>Flowers</th>${FEATS.map(f => `<th>${f.replace(' ', '<br>')}</th>`).join('')}<th>Your name for it</th></tr></thead><tbody>`;
+		const inv = new Array(k); perm.forEach((d, b) => { inv[d] = b; });
+		cols.forEach(c => {
+			const s = sums[c];
+			ph += `<tr><td>${swatchSVG(c)}${c}</td><td>${s[4]}</td>${[0, 1, 2, 3].map(f => `<td>${s[4] ? (s[f] / s[4]).toFixed(2) : '–'}</td>`).join('')}<td><input type="text" data-base="${inv[c]}" value="${(names[inv[c]] || '').replace(/"/g, '&quot;')}" aria-label="Name for cluster ${c}" placeholder="Type a name"></td></tr>`;
+		});
+		ui.prof.innerHTML = ph + '</tbody>';
+		ui.prof.querySelectorAll('input').forEach(inp => { inp.oninput = () => { names[inp.dataset.base] = inp.value; }; });
+		const mism = X.filter((_, i) => major[lab(i)] !== Y[i]).length;
+		const what = color === 'none' ? 'No colors: this is all K-Means gets to see. ' : color === 'species' ? 'Colored by the real species. ' : 'Colored by cluster. ';
+		ui.status.textContent = what + `${mism} of 150 flowers are in a cluster whose main species is not their own.`;
+		ui.code.textContent =
+`X_scaled = StandardScaler().fit_transform(iris.data)
+kmeans = KMeans(n_clusters=${k}, random_state=42, n_init=10)
+df['cluster'] = kmeans.fit_predict(X_scaled)
+
+pd.crosstab(df['species'], df['cluster'])     # species in each cluster
+df.groupby('cluster').mean(numeric_only=True)  # cluster profiles`;
+	}
+	P.draw = (c, p) => {
+		const order = X.map((_, i) => i);
+		order.forEach(i => {
+			const x = p.sx(X[i][fx]), y = p.sy(X[i][fy]);
+			const cls = color === 'none' ? -1 : color === 'species' ? spColor[Y[i]] : lab(i);
+			drawPoint(c, x, y, cls, 6);
+		});
+		if (ui.mis.checked) {
+			c.lineWidth = 2; c.strokeStyle = INK;
+			X.forEach((r, i) => { if (major[lab(i)] !== Y[i]) { c.beginPath(); c.arc(p.sx(r[fx]), p.sy(r[fy]), 11, 0, 2 * Math.PI); c.stroke(); } });
+		}
+	};
+	P.after = (c, p) => {
+		if (color !== 'species') return;
+		// legend for species
+		c.font = `13px ${FONT()}`; c.textBaseline = 'middle'; c.textAlign = 'left';
+		let x = p.px0 + 10, y = p.py0 + 14;
+		const w = SPECIES.reduce((a, s) => a + c.measureText(s).width + 32, 0);
+		c.fillStyle = 'rgba(255,255,255,0.92)'; c.fillRect(x - 6, y - 11, w + 4, 22);
+		SPECIES.forEach((s, si) => { drawPoint(c, x + 6, y, spColor[si], 5.5); c.fillStyle = INK; c.fillText(s, x + 16, y); x += c.measureText(s).width + 32; });
+	};
+	P.canvas.addEventListener('pointermove', e => {
+		const [mx, my] = P.pos(e);
+		const i = nearestPx(X.map(r => [P.sx(r[fx]), P.sy(r[fy])]), mx, my, 10);
+		if (i < 0) { P.tip(0, 0, null); return; }
+		P.tip(mx, my, `<b>${SPECIES[Y[i]]}</b> in cluster ${lab(i)}<br>${FEATS.map((f, j) => `${f}: ${X[i][j]}`).join('<br>')}`);
+	});
+	P.canvas.addEventListener('pointerleave', () => P.tip(0, 0, null));
+	ui.k.onchange = () => { k = +ui.k.value; fit(); render(); };
+	seg(ui.color, v => { color = v; render(); });
+	ui.x.onchange = () => { fx = +ui.x.value; render(); };
+	ui.y.onchange = () => { fy = +ui.y.value; render(); };
+	ui.mis.onchange = () => P.render();
+	ui.renum.onclick = () => {
+		let p;
+		do {
+			p = [...Array(k).keys()];
+			for (let i = k - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [p[i], p[j]] = [p[j], p[i]]; }
+		} while (p.every((v, i) => v === perm[i]));
+		perm = p;
+		render();
+		ui.status.textContent = 'Clusters renumbered. Same groups and same purity, just different numbers and colors. ' + ui.status.textContent.replace(/^.*?\. /, '');
+	};
+	fit(); render();
+})();
+</script>
+</body>
+</html>

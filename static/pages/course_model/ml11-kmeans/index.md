@@ -16,6 +16,13 @@ K-Means is a popular unsupervised machine learning algorithm used for *clusterin
 - State characteristics [template](template.ipynb) and [datafile](statelife.csv)
 - Alternative datafile of [states](StateDemographics2.xlsx)
 - Morgantown real estate [datafile](zillowmorgantown_latlong.csv)
+- [K-Means Lab](kmeans.html): in-class simulation
+
+## Roadmap
+
+Use this map to follow the code blocks below. Steps 4a and 4b both happen in the Step 4 code block.
+
+![K-Means roadmap](kmeans-roadmap.svg)
 
 ## Algorithm Overview
 
@@ -168,7 +175,7 @@ plt.show()
 
 
     
-![png](index_files/index_7_0.png)
+![png](index_files/index_8_0.png)
     
 
 
@@ -272,7 +279,7 @@ plt.show()
 
 
     
-![png](index_files/index_11_0.png)
+![png](index_files/index_12_0.png)
     
 
 
@@ -310,7 +317,7 @@ for cluster in range(3):
 
 
     
-![png](index_files/index_13_0.png)
+![png](index_files/index_14_0.png)
     
 
 
