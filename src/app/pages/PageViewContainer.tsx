@@ -1,5 +1,4 @@
 import React, { ReactElement, useEffect, useState } from 'react';
-import { Container, Breadcrumb, Row, Col } from 'react-bootstrap';
 import { useParams } from 'react-router-dom';
 
 import { Message, Loading } from '../components/Misc';
@@ -41,12 +40,18 @@ export const getParentPageSlugs = (slug: string): string[] => {
 
 // Renders a single markdown page. Fetches /api/pages/:slug and converts the
 // markdown to sanitized HTML in the browser.
+//
+// The page is laid out as a book (see PageView.tsx and book_theme.css): the
+// course's chapters on the left and this chapter's sections on the right,
+// which replaces the breadcrumb trail this container used to render.
+// getParentPageSlugs above is still used to find the course hub page (see
+// getModuleScope in PageModuleLinks.ts).
 export default function PageViewContainer(): ReactElement {
-	const [message, setMessage] = useState('Loading page');
+	// Errors only: while a page loads, the spinner alone shows it (no banner).
+	const [message, setMessage] = useState('');
 	const [messageStyle, setMessageStyle] = useState('');
 	const [isLoading, setIsLoading] = useState(true);
 	const [page, setPage] = useState<iPage | null>(null);
-	const [parentPages, setParentPages] = useState<Array<{ slug: string; title: string }>>([]);
 
 	const params = useParams();
 	const slug = params['*'] ? params['*'] : '';
@@ -56,8 +61,7 @@ export default function PageViewContainer(): ReactElement {
 
 		const loadPage = async (): Promise<void> => {
 			setIsLoading(true);
-			setMessage('Loading page');
-			setParentPages([]);
+			setMessage('');
 
 			if (!slug) {
 				if (!ignore) {
@@ -71,24 +75,16 @@ export default function PageViewContainer(): ReactElement {
 
 			try {
 				const currentPage = await requestPage(slug);
-				if (ignore) return;
-
-				const parentPageSlugs = getParentPageSlugs(currentPage.slug);
-				const parentPageRequests = parentPageSlugs.map(async (parentSlug) => {
-					try {
-						return await requestPage(parentSlug);
-					} catch {
-						return { slug: parentSlug, title: parentSlug.replace(/\/index$/, '') } as iPage;
-					}
-				});
-
-				const parents = await Promise.all(parentPageRequests);
 				if (!ignore) {
 					setPage(currentPage);
-					setParentPages(parents);
 					setMessage('');
 					setMessageStyle('');
 					setIsLoading(false);
+
+					// Chapter links in the contents panel navigate without a full
+					// reload, so start each new chapter at the top -- unless the
+					// address points at a section (#heading) within it.
+					if (!window.location.hash) window.scrollTo(0, 0);
 				}
 			} catch (error) {
 				if (!ignore) {
@@ -106,29 +102,12 @@ export default function PageViewContainer(): ReactElement {
 		};
 	}, [slug]);
 
-	const crumbs = (
-			<Breadcrumb>
-				<Breadcrumb.Item title='home' href='/'>Home</Breadcrumb.Item>
-				{ parentPages.map((parentPage) => (
-					<Breadcrumb.Item key={parentPage.slug} title={parentPage.title} href={'/pages/' + parentPage.slug}>
-						{ parentPage.title }
-					</Breadcrumb.Item>
-				)) }
-				<Breadcrumb.Item title='Page' active>{ page ? page.title : '' }</Breadcrumb.Item>
-			</Breadcrumb>
-			);
-
 	return (
-		<Container fluid>
-		<Row>
-			<Col>
-				<ForceLogin/>
-				{ crumbs }
-				<Message message={message} style={messageStyle} />
-				<Loading loading={isLoading} />
-				<PageView page={page} />
-			</Col>
-		</Row>
-		</Container>
+		<div className='book-page'>
+			<ForceLogin/>
+			<Message message={message} style={messageStyle} />
+			<Loading loading={isLoading} />
+			<PageView page={page} />
+		</div>
 	);
 }

@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeSanitize from 'rehype-sanitize';
-import { Button } from 'react-bootstrap';
+import { Link } from 'react-router-dom';
 
 import iPage from './iPage';
 import { prepareMarkdownForSlug } from './PagePrepareMarkdown';
@@ -15,9 +15,13 @@ import {
 	extractExamOutcomeRefs,
 	resolveExamOutcomeSlug,
 	extractOutcomesBullets,
+	removeOutcomesBlock,
 	substituteExamOutcomeRefs,
 	IExamOutcomeResult,
 } from './PageExamOutcomes';
+import { getChapterCode, findChapterContext, extractTitle } from './PageBookHub';
+import useBookHub from './useBookHub';
+import PageBookContents from './PageBookContents';
 import { requestPage } from './PageViewContainer';
 import PageQuizResults from './PageQuizResults';
 import PagePractice from './PagePractice';
@@ -26,6 +30,7 @@ import LiveQuizInstructor from './LiveQuizInstructor';
 import LiveQuizHistory from './LiveQuizHistory';
 import { getUserFromBrowser } from './../components/Authentication';
 import './pageview_toc_style.css'; // Import the CSS file for TOC styling
+import './book_theme.css'; // Book layout and typography; loaded after, so it wins ties
 import { AnchorHTMLAttributes, ImgHTMLAttributes } from 'react';
 
 interface IPageViewProps {
@@ -265,7 +270,9 @@ const CustomLink: React.FC<AnchorHTMLAttributes<HTMLAnchorElement> & { node?: un
 /*
 	Markdown component for a table.
 
-	Adds a className='table'
+	Adds a className='table'. No zebra striping: the book theme rules tables
+	with lines above and below the header and at the foot instead (see
+	book_theme.css).
 */
 const CustomTable: React.FC<TableHTMLAttributes<HTMLTableElement> & { node?: unknown }> = ({
 	children,
@@ -273,7 +280,7 @@ const CustomTable: React.FC<TableHTMLAttributes<HTMLTableElement> & { node?: unk
 	node: _node,
 	...props
 }) => {
-	const tableClassName = ['table table-striped table-hover flexible-width-table', className]
+	const tableClassName = ['table table-hover flexible-width-table', className]
 		.filter(Boolean)
 		.join(' ');
 
@@ -283,6 +290,37 @@ const CustomTable: React.FC<TableHTMLAttributes<HTMLTableElement> & { node?: unk
 			</table>
 	);
 };
+
+/*
+	A single line of markdown -- a chapter title or one Learning Outcomes
+	bullet -- rendered without the wrapping <p>, so `code`, **bold** and links
+	still work inside an <h1> or <li>.
+*/
+const InlineMarkdown: React.FC<{ children: string }> = ({ children }) => (
+	<ReactMarkdown
+		remarkPlugins={[remarkGfm]}
+		rehypePlugins={[rehypeSanitize]}
+		components={{
+			p: ({ children: inner }) => <>{inner}</>,
+			a: CustomLink,
+			code: CustomCode,
+		}}
+	>
+		{children}
+	</ReactMarkdown>
+);
+
+// The #heading-id in the address bar, or '' (also for a malformed one).
+const readHashId = (): string => {
+	try {
+		return decodeURIComponent(window.location.hash.slice(1));
+	} catch {
+		return '';
+	}
+};
+
+// The generated Key Terms section closes every reading; it is not numbered.
+const KEY_TERMS_ID_RE = /^key-terms(-\d+)?$/;
 
 function PageView({ page }: IPageViewProps): ReactElement {
 	// Hooks must run unconditionally on every render, so compute against safe
@@ -336,9 +374,20 @@ function PageView({ page }: IPageViewProps): ReactElement {
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [isExam, examRefs, page?.slug]);
 
+	// Book layout: the page's own "**Outcomes**:" list moves into a Learning
+	// Outcomes box under the chapter title, and its first H1 becomes that
+	// title, so both are taken out of the body here. Exam-review
+	// substitution and everything after it then work on what is left.
+	const outcomes = useMemo(() => extractOutcomesBullets(markdown_content), [markdown_content]);
+	const titleSplit = useMemo(
+		() => extractTitle(outcomes.length > 0 ? removeOutcomesBlock(markdown_content) : markdown_content),
+		[markdown_content, outcomes.length],
+	);
+	const chapterTitle = titleSplit.title ?? page?.title ?? '';
+
 	const markdown_with_exam_outcomes = useMemo(
-		() => (isExam ? substituteExamOutcomeRefs(markdown_content, examResults) : markdown_content),
-		[isExam, markdown_content, examResults],
+		() => (isExam ? substituteExamOutcomeRefs(titleSplit.body, examResults) : titleSplit.body),
+		[isExam, titleSplit.body, examResults],
 	);
 	// The Practice Questions section is hidden from the reading view (it lists
 	// the correct answer first), but is still parsed from the full markdown to
@@ -398,14 +447,158 @@ function PageView({ page }: IPageViewProps): ReactElement {
 	const toggleMode = (next: 'practice' | 'results' | 'live' | 'history'): void =>
 		setMode((current) => (current === next ? 'read' : next));
 
+	/*
+		Book layout (see book_theme.css). The course hub page supplies the
+		left-hand contents, the module name above the title and the
+		previous/next links; the lesson folder name ("dv40-colors") supplies
+		the chapter number used for "Chapter dv40", sections 40.1, 40.2, ...
+		and figures 40.1, 40.2, ... Pages without a hub or a numbered folder
+		simply go without.
+	*/
+	const hub = useBookHub(page?.slug ?? '');
+	const hasContents = hub !== null && hub.sections.length > 0;
+	const chapter = useMemo(() => getChapterCode(page?.slug ?? ''), [page?.slug]);
+	const chapterContext = useMemo(() => findChapterContext(hub, page?.slug ?? ''), [hub, page?.slug]);
+	const sectionNumbers = useMemo(() => {
+		const numbers = new Map<string, string>();
+		if (!chapter) return numbers;
+
+		let count = 0;
+		for (const entry of tocEntries) {
+			if (entry.level !== 2 || KEY_TERMS_ID_RE.test(entry.id)) continue;
+			count += 1;
+			numbers.set(entry.id, `${chapter.number}.${count}`);
+		}
+		return numbers;
+	}, [chapter, tocEntries]);
+
+	// On narrow screens the "In this chapter" list folds behind a button.
+	const [tocOpen, setTocOpen] = useState(false);
+
+	/*
+		Track the section being read as the page scrolls: the last heading
+		that has scrolled up past the top of the window.
+
+		- It is highlighted in the right-hand "In this chapter" list.
+		- It is written into the address bar as #heading-id, so a bookmark,
+		  a shared link or a reload returns to the same place. replaceState
+		  (not pushState) keeps scrolling out of the Back button's history,
+		  and bypasses the router, so PageviewTracker does not log it. Above
+		  the first heading the #... is removed again.
+		- On arrival, a #heading-id already in the address is jumped to: the
+		  browser cannot do that itself, because the page's markdown arrives
+		  after it has finished loading. The heading is held in place while
+		  images and fonts above it load, but only until the reader scrolls
+		  (or 10 seconds pass), so nothing later pulls the reader back.
+	*/
+	const [activeId, setActiveId] = useState<string | null>(null);
+	// The #heading-id the reader arrived with, per page. Kept in a ref rather
+	// than effect-local state because React's StrictMode (development builds)
+	// tears effects down and runs them again on mount.
+	const arrival = useRef<{ slug: string; id: string; until: number; done: boolean } | null>(null);
+	useEffect(() => {
+		if (mode !== 'read' || tocEntries.length === 0) {
+			setActiveId(null);
+			return;
+		}
+
+		const cleanups: Array<() => void> = [];
+
+		if (page && arrival.current?.slug !== page.slug) {
+			arrival.current = { slug: page.slug, id: readHashId(), until: Date.now() + 10000, done: false };
+		}
+		const pending = arrival.current;
+		const target = pending && !pending.done && pending.id && Date.now() < pending.until
+			? document.getElementById(pending.id)
+			: null;
+
+		if (pending && target) {
+			// Images, web fonts and late content above the heading -- in the
+			// reading column or the header -- keep changing size after the
+			// first jump and push the heading down. Re-align whenever they do,
+			// until the reader starts scrolling for themselves (or 10s pass).
+			// Looked up afresh each time: a re-render (e.g. the course hub
+			// arriving) replaces the heading elements, and scrolling to the
+			// old, detached one does nothing.
+			const align = (): void => document.getElementById(pending.id)?.scrollIntoView();
+			const observer = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(align) : null;
+			const finish = (): void => {
+				pending.done = true;
+				observer?.disconnect();
+			};
+			const timer = window.setTimeout(finish, Math.max(0, pending.until - Date.now()));
+			const readerEvents = ['wheel', 'touchstart', 'keydown', 'mousedown'];
+
+			align();
+			document.querySelectorAll('.book-header, .book-main').forEach((element) => observer?.observe(element));
+			for (const type of readerEvents) window.addEventListener(type, finish, { once: true, passive: true });
+
+			cleanups.push(() => {
+				observer?.disconnect();
+				window.clearTimeout(timer);
+				for (const type of readerEvents) window.removeEventListener(type, finish);
+			});
+		}
+
+		let frame = 0;
+		const update = (): void => {
+			frame = 0;
+			let passed: string | null = null;
+			for (const entry of tocEntries) {
+				const element = document.getElementById(entry.id);
+				if (!element) continue;
+				if (element.getBoundingClientRect().top > 120) break;
+				passed = entry.id;
+			}
+			setActiveId(passed ?? tocEntries[0].id);
+
+			const hash = passed ? `#${passed}` : '';
+			if (window.location.hash !== hash) {
+				try {
+					// Keep the router's own history.state, or Back/Forward breaks.
+					window.history.replaceState(window.history.state, '', `${window.location.pathname}${window.location.search}${hash}`);
+				} catch {
+					// Some browsers rate-limit replaceState; the highlight still works.
+				}
+			}
+		};
+		const onScroll = (): void => {
+			if (!frame) frame = window.requestAnimationFrame(update);
+		};
+
+		update();
+		window.addEventListener('scroll', onScroll, { passive: true });
+		window.addEventListener('resize', onScroll);
+		return () => {
+			window.removeEventListener('scroll', onScroll);
+			window.removeEventListener('resize', onScroll);
+			if (frame) window.cancelAnimationFrame(frame);
+			for (const cleanup of cleanups) cleanup();
+		};
+		// `page` is read only for its slug, to recognise a newly opened page;
+		// tocEntries already changes whenever the page does.
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [mode, tocEntries, page?.slug]);
+
+	// The paper background and the light header apply to reading pages only;
+	// the games, admin and login pages keep the stock Bootstrap look.
+	useEffect(() => {
+		document.body.classList.add('book-theme-body');
+		return () => document.body.classList.remove('book-theme-body');
+	}, []);
+
 	if (page === null) return <></>;
 
 	const renderHeading = (level: 1 | 2 | 3 | 4 | 5 | 6) => ({ children }: { children?: React.ReactNode }) => {
 		const text = getTextContent(children);
 		const id = headingIdMap.get(normalizeHeadingText(text));
-		//const headingProps = id ? { id } : {};
+		const number = level === 2 && id ? sectionNumbers.get(id) : undefined;
 
-		return React.createElement(`h${level}`, { id }, children);
+		return React.createElement(
+			`h${level}`,
+			{ id },
+			number ? <><span className='section-number'>{number}</span>{children}</> : children,
+		);
 	};
 
 	const components = {
@@ -438,103 +631,177 @@ function PageView({ page }: IPageViewProps): ReactElement {
 		code: CustomCode,
 	};
 
-	return (
-		<div className='markdown-page'>
-			{showPracticeButton ? (
-
-				<div className='pageview-toolbar'>
-
-					<Button
-						variant={mode === 'practice' ? 'primary' : 'outline-primary'}
-						size='sm'
-						className='me-2'
-						onClick={() => toggleMode('practice')}
-						aria-pressed={mode === 'practice'}
-					>
-						{ mode === 'practice'
-							? 'Back to reading'
-							: practiceButtonLabel }
-					</Button>
-
-
-					{isAdmin && quizQuestions.length > 0 ? (
-						<Button
-							variant={mode === 'results' ? 'dark' : 'outline-dark'}
-							size='sm'
-							className='ms-2'
-							onClick={() => toggleMode('results')}
-							aria-pressed={mode === 'results'}
-						>
-							{ mode === 'results' ? 'Back to reading' : 'Quiz results' }
-						</Button>
-					) : null}
-
-					{isAdmin && quizQuestions.length + flashcards.length  > 0 ? (
-						<Button
-							variant={mode === 'live' ? 'dark' : 'outline-dark'}
-							size='sm'
-							className='ms-2'
-							onClick={() => toggleMode('live')}
-							aria-pressed={mode === 'live'}
-						>
-							{ mode === 'live' ? 'Back to reading' : 'Start live session' }
-						</Button>
-					) : null}
-
-					{/*
-						Not gated on quizQuestions.length the way the live-session button
-						is: a session that already ran has its own frozen deck, so its
-						results stay reviewable even if this page's questions have since
-						been edited away. (The toolbar as a whole still only appears when
-						the page has flashcards or questions.)
-					*/}
-					{isAdmin ? (
-						<Button
-							variant={mode === 'history' ? 'dark' : 'outline-dark'}
-							size='sm'
-							className='ms-2'
-							onClick={() => toggleMode('history')}
-							aria-pressed={mode === 'history'}
-						>
-							{ mode === 'history' ? 'Back to reading' : 'Review past sessions' }
-						</Button>
-					) : null}
-				</div>
-			) : null}
-
-			{mode === 'live' ? (
-				<LiveQuizInstructor quizQuestions={quizQuestions} flashcards={flashcards} page={page.slug} />
-			) : mode === 'history' ? (
-				<LiveQuizHistory page={page.slug} />
-			) : mode === 'results' ? (
-				<PageQuizResults page={page.slug} />
-			) : mode === 'practice' ? (
-				<PagePractice page={page} onExit={() => setMode('read')} />
-			) : (
-			<>
-			{tocEntries.length > 0 ? (
-				<div id='toc' className='toc'>
-					<div className='toc-block'>
-						<div className='toc-title'>Contents</div>
-						<ul className='toc-list'>
-							{tocEntries.map((entry) => (
-								<li key={entry.id} className={`toc-item toc-level-${entry.level}`}>
-									<a href={`#${entry.id}`}>{entry.text}</a>
-								</li>
-							))}
-						</ul>
-					</div>
-				</div>
-			) : null}
-			<ReactMarkdown
-				remarkPlugins={[remarkGfm]}
-				rehypePlugins={[rehypeSanitize]}
-				components={components}
+	// Practice and admin tools sit under the chapter title. In the practice,
+	// results, live and history modes there is no title, so they move to the
+	// top of the column, where "Back to reading" is easy to find.
+	const practiceButtons = showPracticeButton ? (
+		<div className='book-actions'>
+			<button
+				type='button'
+				className={`book-button${mode === 'practice' ? ' is-active' : ''}`}
+				onClick={() => toggleMode('practice')}
+				aria-pressed={mode === 'practice'}
 			>
-				{ reading_with_key_terms }
-			</ReactMarkdown>
-			</>
-			)}
+				{ mode === 'practice'
+					? 'Back to reading'
+					: practiceButtonLabel }
+			</button>
+
+			{isAdmin && quizQuestions.length > 0 ? (
+				<button
+					type='button'
+					className={`book-button book-button-admin${mode === 'results' ? ' is-active' : ''}`}
+					onClick={() => toggleMode('results')}
+					aria-pressed={mode === 'results'}
+				>
+					{ mode === 'results' ? 'Back to reading' : 'Quiz results' }
+				</button>
+			) : null}
+
+			{isAdmin && quizQuestions.length + flashcards.length  > 0 ? (
+				<button
+					type='button'
+					className={`book-button book-button-admin${mode === 'live' ? ' is-active' : ''}`}
+					onClick={() => toggleMode('live')}
+					aria-pressed={mode === 'live'}
+				>
+					{ mode === 'live' ? 'Back to reading' : 'Start live session' }
+				</button>
+			) : null}
+
+			{/*
+				Not gated on quizQuestions.length the way the live-session button
+				is: a session that already ran has its own frozen deck, so its
+				results stay reviewable even if this page's questions have since
+				been edited away. (The toolbar as a whole still only appears when
+				the page has flashcards or questions.)
+			*/}
+			{isAdmin ? (
+				<button
+					type='button'
+					className={`book-button book-button-admin${mode === 'history' ? ' is-active' : ''}`}
+					onClick={() => toggleMode('history')}
+					aria-pressed={mode === 'history'}
+				>
+					{ mode === 'history' ? 'Back to reading' : 'Review past sessions' }
+				</button>
+			) : null}
+		</div>
+	) : null;
+
+	const moduleLabel = chapterContext
+		? [chapterContext.section.kicker, chapterContext.section.name].filter(Boolean).join(' · ')
+		: '';
+	const tocLabel = chapter ? 'In this chapter' : 'On this page';
+	// Read by the figure-caption counter in book_theme.css ("Figure 40.1").
+	const chapterStyle = chapter
+		? ({ '--chapter-number': `"${chapter.number}"` } as React.CSSProperties)
+		: undefined;
+
+	return (
+		<div className={`book-layout${hasContents ? '' : ' no-contents'}`}>
+			{hasContents && hub ? (
+				<PageBookContents
+					key={page.slug}
+					hub={hub}
+					currentSlug={page.slug}
+					currentSectionIndex={chapterContext?.sectionIndex ?? -1}
+				/>
+			) : null}
+
+			<main className={`book-main markdown-page${chapter ? ' is-chapter' : ''}`} style={chapterStyle}>
+				{mode !== 'read' ? practiceButtons : null}
+				{mode === 'live' ? (
+					<LiveQuizInstructor quizQuestions={quizQuestions} flashcards={flashcards} page={page.slug} />
+				) : mode === 'history' ? (
+					<LiveQuizHistory page={page.slug} />
+				) : mode === 'results' ? (
+					<PageQuizResults page={page.slug} />
+				) : mode === 'practice' ? (
+					<PagePractice page={page} onExit={() => setMode('read')} />
+				) : (
+				<>
+					<header className='chapter-opener'>
+						{ /* moduleLabel ? <div className='chapter-module'>{moduleLabel}</div> : null */ }
+						{chapter ? <div className='chapter-label'>Chapter {chapter.code}</div> : null}
+						{chapterTitle ? <h1 className='chapter-title'><InlineMarkdown>{chapterTitle}</InlineMarkdown></h1> : null}
+						{practiceButtons}
+
+						{outcomes.length > 0 ? (
+							<section className='chapter-outcomes' aria-labelledby='chapter-outcomes-label'>
+								<div id='chapter-outcomes-label' className='chapter-outcomes-label'>Learning outcomes</div>
+								<ol>
+									{outcomes.map((outcome, index) => (
+										<li key={index}><InlineMarkdown>{outcome}</InlineMarkdown></li>
+									))}
+								</ol>
+							</section>
+						) : null}
+					</header>
+
+					<div className='book-body'>
+						<ReactMarkdown
+							remarkPlugins={[remarkGfm]}
+							rehypePlugins={[rehypeSanitize]}
+							components={components}
+						>
+							{ reading_with_key_terms }
+						</ReactMarkdown>
+					</div>
+
+					{chapterContext && (chapterContext.previous || chapterContext.next) ? (
+						<nav className='chapter-nav' aria-label='Chapter navigation'>
+							{chapterContext.previous ? (
+								<Link to={`/pages/${chapterContext.previous.slug}`} className='chapter-nav-link chapter-nav-previous'>
+									<span className='chapter-nav-label'>&larr; Previous{chapterContext.previous.code ? ` · ${chapterContext.previous.code}` : ''}</span>
+									<span className='chapter-nav-title'>{chapterContext.previous.title}</span>
+								</Link>
+							) : null}
+							{chapterContext.next ? (
+								<Link to={`/pages/${chapterContext.next.slug}`} className='chapter-nav-link chapter-nav-next'>
+									<span className='chapter-nav-label'>Next{chapterContext.next.code ? ` · ${chapterContext.next.code}` : ''} &rarr;</span>
+									<span className='chapter-nav-title'>{chapterContext.next.title}</span>
+								</Link>
+							) : null}
+						</nav>
+					) : null}
+				</>
+				)}
+			</main>
+
+			<aside className={`book-rail${tocOpen ? ' is-open' : ''}`}>
+				{mode === 'read' && tocEntries.length > 0 ? (
+					<nav className='book-toc' aria-label={tocLabel}>
+						<button
+							type='button'
+							className='book-panel-toggle'
+							aria-expanded={tocOpen}
+							onClick={() => setTocOpen((current) => !current)}
+						>
+							{tocLabel}
+						</button>
+						<div className='book-toc-title'>{tocLabel}</div>
+						<ul className={`book-toc-list${chapter ? ' is-numbered' : ''}`}>
+							{tocEntries.map((entry) => {
+								const number = sectionNumbers.get(entry.id);
+								const isActive = activeId === entry.id;
+								return (
+									<li key={entry.id} className={`book-toc-item book-toc-level-${entry.level}`}>
+										<a
+											href={`#${entry.id}`}
+											className={isActive ? 'is-active' : undefined}
+											aria-current={isActive ? 'location' : undefined}
+										>
+											{chapter && entry.level === 2 ? <span className='book-toc-number'>{number ?? ''}</span> : null}
+											<span className='book-toc-text'>{entry.text}</span>
+										</a>
+									</li>
+								);
+							})}
+						</ul>
+					</nav>
+				) : null}
+			</aside>
 		</div>
 	);
 }

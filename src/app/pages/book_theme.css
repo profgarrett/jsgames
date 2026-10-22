@@ -1,0 +1,887 @@
+/* ==================================================================
+   Book theme for the reading pages (/pages/...)
+
+   Warm paper, Source Serif text, WVU navy accent with a gold rule. Three
+   columns: every chapter in the course on the left (PageBookContents.tsx),
+   the reading in the middle (with the practice tools under the chapter
+   title), and this chapter's sections on the right (PageView.tsx).
+
+   Everything is scoped to body.book-theme-body -- a class PageView adds to
+   <body> while it is mounted -- or to the .book-* elements it renders, so
+   the games, admin and login pages keep the stock Bootstrap look. The light
+   header is SiteHeader.tsx's /pages variant (.book-header).
+
+   Fonts are loaded in src/app/index.html.
+   ================================================================== */
+
+body.book-theme-body,
+.book-header {
+	--book-paper: #FAF7F0;
+	--book-sheet: #FFFDF8;
+	--book-ink: #2A2622;
+	--book-ink-strong: #1E1B18;
+	--book-muted: #5E564C;
+	--book-caption: #4F483F;
+	--book-rule: #D9D1C3;
+	--book-accent: #002855;
+	--book-gold: #C9A227;
+	--book-tint: rgba(120, 96, 60, 0.06);
+	--book-current: rgba(0, 40, 85, 0.07);
+	--book-serif: 'Source Serif 4', Georgia, 'Times New Roman', serif;
+	--book-sans: 'Source Sans 3', 'Helvetica Neue', Arial, sans-serif;
+}
+
+body.book-theme-body {
+	background-color: var(--book-paper);
+	color: var(--book-ink);
+}
+
+
+/** Header (SiteHeader.tsx on /pages) *******************************/
+
+.book-header {
+	background-color: var(--book-paper);
+	border-bottom: 1px solid var(--book-rule);
+	font-family: var(--book-sans);
+}
+
+.book-header-inner {
+	box-sizing: border-box;
+	max-width: 1640px;
+	min-height: 60px;
+	margin: 0 auto;
+	padding: 8px 28px;
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: space-between;
+	gap: 4px 32px;
+}
+
+.book-header-brand {
+	font-family: var(--book-serif);
+	font-size: 1.3rem;
+	font-weight: 600;
+	font-variant-caps: all-small-caps;
+	letter-spacing: 0.12em;
+	color: var(--book-ink);
+	text-decoration: none;
+}
+
+.book-header-brand:hover,
+.book-header-brand:focus-visible {
+	color: var(--book-accent);
+}
+
+.book-header-nav {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 0 24px;
+	font-size: 0.8125rem;
+	letter-spacing: 0.1em;
+	text-transform: uppercase;
+}
+
+.book-header-nav a {
+	display: inline-block;
+	padding: 12px 0;
+	color: var(--book-muted);
+	text-decoration: none;
+}
+
+.book-header-nav a:hover,
+.book-header-nav a:focus-visible {
+	color: var(--book-accent);
+}
+
+.book-header-deploy {
+	font-size: 0.75rem;
+	letter-spacing: 0.02em;
+	text-transform: none;
+	color: var(--book-muted);
+}
+
+/* The /pages section picker still shows a breadcrumb; quiet it down. */
+body.book-theme-body .breadcrumb {
+	margin: 16px 0;
+	padding: 0;
+	background: transparent;
+	font-family: var(--book-sans);
+	font-size: 0.8125rem;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+}
+
+body.book-theme-body .breadcrumb a {
+	color: var(--book-muted);
+}
+
+
+/** Three-column layout *********************************************/
+
+/* No  padding: the contents panel runs to the edge of the window. */
+.book-page {
+	padding: 0 0px 0 0;
+}
+
+.book-layout {
+	display: grid;
+	grid-template-columns: minmax(220px, 280px) minmax(0, 1fr) minmax(220px, 280px);
+	grid-template-areas: "contents main rail";
+	column-gap: 0px;
+	align-items: start;
+	max-width: 1640px;
+	margin: 0 auto;
+	font-family: var(--book-serif);
+	color: var(--book-ink);
+}
+
+/* No course hub (a stand-alone page): reading and section list only. */
+.book-layout.no-contents {
+	grid-template-columns: minmax(0, 1fr) minmax(220px, 280px);
+	grid-template-areas: "main rail";
+	max-width: 1100px;
+}
+
+.book-contents { grid-area: contents; }
+.book-main { grid-area: main; }
+.book-rail { grid-area: rail; }
+
+/* Both side panels stay in view while the reading scrolls. */
+.book-contents,
+.book-rail {
+	position: sticky;
+	top: 0;
+	box-sizing: border-box;
+	max-height: 100vh;
+	overflow-y: auto;
+}
+
+/* Only shown on narrow screens (see the media queries below). */
+.book-panel-toggle {
+	display: none;
+	align-items: center;
+	justify-content: space-between;
+	width: 100%;
+	min-height: 44px;
+	padding: 0 14px;
+	border: 1px solid var(--book-rule);
+	border-radius: 2px;
+	background-color: var(--book-tint);
+	color: var(--book-ink);
+	font-family: var(--book-sans);
+	font-size: 0.8125rem;
+	font-weight: 600;
+	letter-spacing: 0.1em;
+	text-transform: uppercase;
+	cursor: pointer;
+}
+
+.book-panel-toggle::after {
+	content: '+';
+	font-size: 1.1rem;
+	font-weight: 400;
+}
+
+.book-panel-toggle[aria-expanded='true']::after {
+	content: '\2212';
+}
+
+
+/** Left panel: book contents (PageBookContents.tsx) ****************/
+
+.book-contents {
+	min-height: 100vh;
+	padding: 32px 20px 48px 20px;
+	border-right: 1px solid var(--book-rule);
+	background-color: var(--book-tint);
+	font-size: 0.95rem;
+	line-height: 1.4;
+}
+
+.book-contents-label {
+	display: block;
+	margin-bottom: 10px;
+	padding-bottom: 8px;
+	border-bottom: 1px solid var(--book-rule);
+	font-family: var(--book-sans);
+	font-size: 0.75rem;
+	font-weight: 600;
+	letter-spacing: 0.14em;
+	text-transform: uppercase;
+	color: var(--book-muted);
+	text-decoration: none;
+}
+
+.book-contents-label:hover {
+	color: var(--book-accent);
+}
+
+.book-contents-module {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	width: 100%;
+	padding: 8px 0;
+	border: 0;
+	background: none;
+	text-align: left;
+	color: var(--book-ink-strong);
+	font-family: var(--book-serif);
+	cursor: pointer;
+}
+
+.book-contents-kicker {
+	font-family: var(--book-sans);
+	font-size: 0.72rem;
+	font-weight: 600;
+	letter-spacing: 0.12em;
+	text-transform: uppercase;
+	color: var(--book-accent);
+}
+
+.book-contents-name {
+	font-size: 1.05rem;
+	font-weight: 600;
+	line-height: 1.3;
+}
+
+.book-contents-name::after {
+	content: '+';
+	margin-left: 8px;
+	font-family: var(--book-sans);
+	font-weight: 400;
+	color: var(--book-muted);
+}
+
+.book-contents-module[aria-expanded='true'] .book-contents-name::after {
+	content: '\2212';
+}
+
+.book-contents-module:focus-visible,
+.book-contents-link:focus-visible {
+	outline: 2px solid var(--book-accent);
+	outline-offset: 2px;
+}
+
+.book-contents-list {
+	margin: 0 0 10px;
+	padding: 0;
+	list-style: none;
+}
+
+.book-contents-link {
+	display: flex;
+	gap: 8px;
+	padding: 5px 0;
+	border-radius: 2px;
+	color: var(--book-ink);
+	text-decoration: none;
+}
+
+.book-contents-link:hover {
+	background-color: var(--book-current);
+	color: var(--book-accent);
+}
+
+.book-contents-link.is-current {
+	background-color: var(--book-current);
+	color: var(--book-accent);
+	font-weight: 600;
+}
+
+.book-contents-code {
+	flex: 0 0 2.0em;
+	padding-top: 0.15em;
+	font-family: var(--book-sans);
+	font-size: 0.8rem;
+	color: var(--book-muted);
+}
+
+.book-contents-link.is-current .book-contents-code {
+	color: var(--book-accent);
+}
+
+
+/** Centre column: the reading **************************************/
+
+body.book-theme-body .book-main {
+	box-sizing: border-box;
+	justify-self: center;
+	width: 100%;
+	max-width: 700px;
+	margin: 0;
+	padding: 40px 0 72px;
+	font-family: var(--book-serif);
+	font-size: 18px;
+	line-height: 1.65;
+}
+
+body.book-theme-body .book-main a {
+	color: var(--book-accent);
+	text-decoration-thickness: 1px;
+	text-underline-offset: 3px;
+}
+
+body.book-theme-body .book-main a:hover {
+	color: var(--book-ink-strong);
+}
+
+/* Chapter opener */
+
+body.book-theme-body .book-main .chapter-module {
+	font-family: var(--book-sans);
+	font-size: 0.8125rem;
+	letter-spacing: 0.14em;
+	text-transform: uppercase;
+	color: var(--book-muted);
+}
+
+body.book-theme-body .book-main .chapter-label {
+	margin-top: 20px;
+	font-size: 1.15rem;
+	font-variant-caps: all-small-caps;
+	letter-spacing: 0.16em;
+	color: var(--book-accent);
+}
+
+body.book-theme-body .book-main h1.chapter-title {
+	margin: 4px 0 0;
+	padding: 0;
+	border: 0;
+	font-size: 3.1rem;
+	font-weight: 600;
+	line-height: 1.1;
+	letter-spacing: -0.01em;
+	color: var(--book-ink-strong);
+}
+
+/* Short gold rule under the title. */
+body.book-theme-body .book-main h1.chapter-title::after {
+	content: '';
+	display: block;
+	width: 64px;
+	height: 3px;
+	margin: 24px 0 36px;
+	background-color: var(--book-gold);
+}
+
+body.book-theme-body .book-main .chapter-outcomes {
+	margin-bottom: 40px;
+	padding: 18px 24px 20px;
+	border-top: 2px solid var(--book-accent);
+	border-bottom: 1px solid var(--book-rule);
+	background-color: var(--book-tint);
+}
+
+body.book-theme-body .book-main .chapter-outcomes-label {
+	margin-bottom: 8px;
+	font-family: var(--book-sans);
+	font-size: 0.75rem;
+	font-weight: 600;
+	letter-spacing: 0.14em;
+	text-transform: uppercase;
+	color: var(--book-accent);
+}
+
+body.book-theme-body .book-main .chapter-outcomes ol {
+	margin: 0;
+	padding-left: 22px;
+	font-size: 1rem;
+	line-height: 1.55;
+}
+
+body.book-theme-body .book-main .chapter-outcomes li + li {
+	margin-top: 6px;
+}
+
+/* Headings */
+
+body.book-theme-body .book-main h1,
+body.book-theme-body .book-main h2,
+body.book-theme-body .book-main h3,
+body.book-theme-body .book-main h4,
+body.book-theme-body .book-main h5,
+body.book-theme-body .book-main h6 {
+	padding: 0;
+	border: 0;
+	font-family: var(--book-serif);
+	font-weight: 600;
+	color: var(--book-ink-strong);
+	scroll-margin-top: 16px;
+}
+
+body.book-theme-body .book-main .book-body h1 {
+	margin: 1.6em 0 0.6em;
+	font-size: 2.2rem;
+	line-height: 1.15;
+}
+
+body.book-theme-body .book-main h2 {
+	margin: 2.2em 0 0.6em;
+	font-size: 1.75rem;
+	line-height: 1.25;
+}
+
+body.book-theme-body .book-main h3 {
+	margin: 1.8em 0 0.5em;
+	font-size: 1.3rem;
+	line-height: 1.3;
+}
+
+body.book-theme-body .book-main h4,
+body.book-theme-body .book-main h5,
+body.book-theme-body .book-main h6 {
+	margin: 1.4em 0 0.4em;
+	font-size: 1.05rem;
+}
+
+body.book-theme-body .book-main .section-number {
+	margin-right: 0.55em;
+	font-weight: 400;
+	color: var(--book-accent);
+}
+
+/* Drop cap on the first paragraph of the first section of a chapter. A
+   paragraph that is really an image wrapper is skipped. */
+body.book-theme-body .book-main.is-chapter .book-body > h2:first-of-type + p:not(:has(.markdown-figure))::first-letter {
+	float: left;
+	padding: 0.06em 0.1em 0 0;
+	font-size: 3.7em;
+	font-weight: 600;
+	line-height: 0.82;
+	color: var(--book-accent);
+}
+
+/* Blockquotes: a ruled panel. A one-paragraph quote (usually a rule of
+   thumb) is set in italic. */
+body.book-theme-body .book-main blockquote {
+	margin: 2rem 0;
+	padding: 1.1rem 1.5rem;
+	border: 0;
+	border-top: 1px solid var(--book-accent);
+	border-bottom: 1px solid var(--book-accent);
+	border-radius: 0;
+	background-color: var(--book-tint);
+	color: var(--book-ink);
+}
+
+body.book-theme-body .book-main blockquote > :last-child {
+	margin-bottom: 0;
+}
+
+body.book-theme-body .book-main blockquote > p:only-child {
+	font-size: 1.12em;
+	font-style: italic;
+	line-height: 1.5;
+	color: var(--book-ink-strong);
+}
+
+/* Figures: the image on the page, caption below in the sans. */
+body.book-theme-body .book-main .markdown-figure,
+body.book-theme-body .book-main .markdown-figure:hover,
+body.book-theme-body .book-main .markdown-figure:focus-within {
+	margin: 2rem auto;
+	padding: 0;
+	border: 0;
+	border-radius: 0;
+	background: transparent;
+	box-shadow: none;
+}
+
+body.book-theme-body .book-main .markdown-image-trigger img,
+body.book-theme-body .book-main .markdown-figure video {
+	border: 1px solid #E3DCCD;
+	border-radius: 0;
+	background-color: #FFFFFF;
+}
+
+body.book-theme-body .book-main .markdown-figure-caption {
+	margin-top: 10px;
+	padding: 0;
+	border: 0;
+	font-family: var(--book-sans);
+	font-size: 0.875rem;
+	line-height: 1.5;
+	color: var(--book-caption);
+}
+
+/* "Figure 40.1": --chapter-number is set on .book-main by PageView.tsx. */
+body.book-theme-body .book-main.is-chapter {
+	counter-reset: book-figure;
+}
+
+body.book-theme-body .book-main.is-chapter .markdown-figure-caption::before {
+	counter-increment: book-figure;
+	content: "Figure " var(--chapter-number) "." counter(book-figure);
+	margin-right: 0.6em;
+	font-weight: 600;
+	letter-spacing: 0.02em;
+	color: var(--book-accent);
+}
+
+/* Tables: rules above and below the header and at the foot, no stripes. */
+body.book-theme-body .book-main table.table {
+	--bs-table-bg: transparent;
+	--bs-table-color: var(--book-ink);
+	--bs-table-hover-bg: var(--book-tint);
+	--bs-table-hover-color: var(--book-ink);
+	border-top: 2px solid var(--book-ink-strong);
+	border-bottom: 2px solid var(--book-ink-strong);
+	font-size: 0.95em;
+}
+
+body.book-theme-body .book-main table.table > :not(caption) > * > * {
+	border-bottom-color: var(--book-rule);
+}
+
+body.book-theme-body .book-main table.table > thead > tr > th {
+	border-bottom: 1px solid var(--book-ink-strong);
+	font-family: var(--book-sans);
+	font-weight: 600;
+}
+
+/* Code */
+body.book-theme-body .book-main .markdown-code {
+	border-color: var(--book-rule);
+	border-radius: 2px;
+	background-color: #FCFAF5;
+}
+
+body.book-theme-body .book-main .markdown-code-header {
+	border-bottom-color: var(--book-rule);
+	background-color: #F3EEE3;
+}
+
+body.book-theme-body .book-main .markdown-code .markdown-code-body {
+	background: #FCFAF5 !important;
+}
+
+body.book-theme-body .book-main code.markdown-inline-code {
+	background-color: #F1EBDD;
+	color: #8A2A1F;
+}
+
+/* Previous / next chapter */
+
+body.book-theme-body .book-main .chapter-nav {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: space-between;
+	gap: 24px;
+	margin-top: 72px;
+	padding-top: 20px;
+	border-top: 1px solid var(--book-rule);
+}
+
+body.book-theme-body .book-main a.chapter-nav-link {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+	max-width: 48%;
+	min-height: 44px;
+	color: var(--book-ink-strong);
+	text-decoration: none;
+}
+
+body.book-theme-body .book-main a.chapter-nav-next {
+	margin-left: auto;
+	align-items: flex-end;
+	text-align: right;
+}
+
+body.book-theme-body .book-main .chapter-nav-label {
+	font-family: var(--book-sans);
+	font-size: 0.75rem;
+	letter-spacing: 0.14em;
+	text-transform: uppercase;
+	color: var(--book-muted);
+}
+
+body.book-theme-body .book-main .chapter-nav-title {
+	font-size: 1.2rem;
+}
+
+body.book-theme-body .book-main a.chapter-nav-link:hover .chapter-nav-title,
+body.book-theme-body .book-main a.chapter-nav-link:focus-visible .chapter-nav-title {
+	color: var(--book-accent);
+	text-decoration: underline;
+}
+
+/* Practice, quiz and live-session cards drawn on paper rather than grey. */
+body.book-theme-body .flashcard,
+body.book-theme-body .quiz-card,
+body.book-theme-body .quiz-results,
+body.book-theme-body .live-quiz-waiting,
+body.book-theme-body .live-quiz-select,
+body.book-theme-body .live-quiz-leaderboard,
+body.book-theme-body .practice-export-content {
+	border-color: var(--book-rule);
+	background-color: var(--book-sheet);
+}
+
+body.book-theme-body .quiz-option:not(.is-correct):not(.is-wrong) {
+	border-color: var(--book-rule);
+	background-color: var(--book-sheet);
+}
+
+body.book-theme-body .quiz-option:not(.is-correct):not(.is-wrong):hover:not(:disabled) {
+	border-color: var(--book-accent);
+	background-color: var(--book-current);
+}
+
+
+/** Right panel: this chapter's sections ****************************/
+
+.book-rail {
+	padding: 32px 20px 48px 20px;
+	font-family: var(--book-sans);
+	font-size: 0.875rem;
+	line-height: 1.45;
+}
+
+.book-toc-title {
+	margin-bottom: 12px;
+	padding-bottom: 8px;
+	border-bottom: 1px solid var(--book-rule);
+	font-size: 0.75rem;
+	font-weight: 600;
+	letter-spacing: 0.14em;
+	text-transform: uppercase;
+	color: var(--book-muted);
+}
+
+.book-toc-list {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.book-toc-list a {
+	display: flex;
+	gap: 0px;
+	padding: 2px 0;
+	color: var(--book-ink);
+	text-decoration: none;
+}
+
+.book-toc-list a:hover {
+	color: var(--book-accent);
+	text-decoration: underline;
+}
+
+.book-toc-list a.is-active {
+	color: var(--book-accent);
+	font-weight: 600;
+}
+
+.book-toc-number {
+	flex: 0 0 2.0rem;
+	color: var(--book-muted);
+}
+
+.book-toc-list a.is-active .book-toc-number {
+	color: var(--book-accent);
+}
+
+.book-toc-level-3 { padding-left: 1.2em; font-size: 0.8125rem; }
+.book-toc-level-4 { padding-left: 2.4em; font-size: 0.8125rem; }
+.book-toc-level-5 { padding-left: 3.6em; font-size: 0.8125rem; }
+.book-toc-level-6 { padding-left: 4.8em; font-size: 0.8125rem; }
+
+/* In a numbered chapter, sub-sections line up with the section titles
+   rather than with the numbers. */
+.book-toc-list.is-numbered .book-toc-level-3 { padding-left: calc(2.3rem + 8px); }
+.book-toc-list.is-numbered .book-toc-level-4 { padding-left: calc(2.3rem + 8px + 1.2em); }
+
+/* Practice and admin buttons: under the chapter title (PageView.tsx). */
+.book-actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 10px;
+	margin: 0 0 32px;
+}
+
+.book-button {
+	min-height: 44px;
+	padding: 8px 14px;
+	border: 1px solid var(--book-accent);
+	border-radius: 2px;
+	background-color: transparent;
+	color: var(--book-accent);
+	font-family: var(--book-sans);
+	font-size: 0.875rem;
+	font-weight: 600;
+	line-height: 1.3;
+	text-align: center;
+	cursor: pointer;
+}
+
+.book-button:hover,
+.book-button.is-active {
+	background-color: var(--book-accent);
+	color: #FFFFFF;
+}
+
+.book-button:focus-visible {
+	outline: 2px solid var(--book-accent);
+	outline-offset: 2px;
+}
+
+.book-button-admin {
+	border-color: var(--book-rule);
+	color: var(--book-ink);
+	font-weight: 400;
+}
+
+.book-button-admin:hover,
+.book-button-admin.is-active {
+	border-color: var(--book-ink);
+	background-color: var(--book-ink);
+	color: #FFFFFF;
+}
+
+
+/** Narrower screens ************************************************/
+
+/* Tablet / small laptop: the section list moves above the reading and
+   folds behind an "In this chapter" button. */
+@media (max-width: 1299.98px) {
+	.book-layout {
+		grid-template-columns: minmax(200px, 250px) minmax(0, 1fr);
+		grid-template-areas:
+			"contents rail"
+			"contents main";
+		column-gap: 36px;
+	}
+
+	.book-layout.no-contents {
+		grid-template-columns: minmax(0, 1fr);
+		grid-template-areas:
+			"rail"
+			"main";
+	}
+
+	.book-rail {
+		position: static;
+		max-height: none;
+		overflow: visible;
+		padding: 24px 0 0;
+	}
+
+	.book-rail .book-panel-toggle {
+		display: flex;
+	}
+
+	.book-rail .book-toc-title {
+		display: none;
+	}
+
+	.book-rail .book-toc-list {
+		padding: 12px 4px 4px;
+	}
+
+	.book-rail:not(.is-open) .book-toc-list {
+		display: none;
+	}
+
+	body.book-theme-body .book-main {
+		padding-top: 24px;
+	}
+}
+
+/* Phone: one column, with the book contents folded behind a button too. */
+@media (max-width: 999.98px) {
+	.book-page {
+		padding: 0 16px;
+	}
+
+	.book-header-inner {
+		padding: 6px 16px;
+	}
+
+	.book-layout,
+	.book-layout.no-contents {
+		grid-template-columns: minmax(0, 1fr);
+		grid-template-areas:
+			"contents"
+			"rail"
+			"main";
+	}
+
+	.book-contents {
+		position: static;
+		min-height: 0;
+		max-height: none;
+		overflow: visible;
+		padding: 16px 0 0;
+		border-right: 0;
+		background: none;
+	}
+
+	.book-contents .book-panel-toggle {
+		display: flex;
+	}
+
+	.book-contents .book-contents-body {
+		padding: 12px 4px 0;
+	}
+
+	.book-contents:not(.is-open) .book-contents-body {
+		display: none;
+	}
+
+	.book-rail {
+		padding-top: 10px;
+	}
+
+	body.book-theme-body .book-main {
+		font-size: 17px;
+	}
+
+	body.book-theme-body .book-main h1.chapter-title {
+		font-size: 2.3rem;
+	}
+
+	body.book-theme-body .book-main a.chapter-nav-link {
+		max-width: none;
+	}
+}
+
+
+/** Print ***********************************************************/
+
+@media print {
+	.book-header,
+	.book-contents,
+	.book-rail,
+	.chapter-nav {
+		display: none !important;
+	}
+
+	body.book-theme-body {
+		background-color: #FFFFFF;
+	}
+
+	.book-layout,
+	.book-layout.no-contents {
+		display: block;
+		max-width: none;
+	}
+
+	body.book-theme-body .book-main {
+		max-width: none;
+		padding: 0;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.book-contents-link,
+	.book-button {
+		transition: none;
+	}
+}

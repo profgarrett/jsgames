@@ -11,7 +11,8 @@ import PageView from './PageView';
 
 // Load the homepage for the current user
 export default function PageSectionContainer(): ReactElement {
-	const [message, setMessage] = useState('Loading pages');
+	// Errors only: while pages load, the spinner alone shows it (no banner).
+	const [message, setMessage] = useState('');
 	const [messageStyle, setMessageStyle] = useState('');
 	const [isLoading, setIsLoading] = useState(true);
 	const [sections, setSections] = useState<iSection[]>([]);

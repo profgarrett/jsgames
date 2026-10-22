@@ -1,14 +1,35 @@
 import React, { ReactElement, useEffect, useState } from 'react';
 import { Container, Nav, Navbar, Row, Col } from 'react-bootstrap';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 
 import { getUserFromBrowser } from './Authentication';
+import useBookHub from '../pages/useBookHub';
+import '../pages/book_theme.css';
+
+/*
+	Slug of the reading page at `pathname` ("/pages/course_dv/dv40-colors/index"
+	-> "course_dv/dv40-colors/index"), or '' for anything else, including the
+	/pages section picker and /pages/list, which have no single course.
+*/
+const getBookSlug = (pathname: string): string => {
+	if (!pathname.startsWith('/pages/') || pathname === '/pages/list') return '';
+	try {
+		return decodeURIComponent(pathname.slice('/pages/'.length)).replace(/\/+$/, '');
+	} catch {
+		return '';
+	}
+};
 
 /**
 	The site's single navbar, rendered once in index.jsx above <Routes>.
 
 	The Admin link appears only for the site administrator. This is cosmetic --
 	user_require_admin on every /api/admin route is the actual boundary.
+
+	On the reading pages (/pages/...) it renders as a light, book-style header
+	carrying the course's title (from its hub page, see useBookHub.ts) so it
+	matches the book layout in PageView.tsx; everywhere else it is the dark
+	Bootstrap navbar.
 
 	Note this renders for logged-out visitors too. Do not
 	wrap it in ForceLogin, or the landing page will bounce to /login.
@@ -33,6 +54,10 @@ export default function SiteHeader(): ReactElement {
 		document.location.href.substr(0, 'http://localhost'.length) === 'http://localhost'
 	);
 
+	const location = useLocation();
+	const isBookRoute = location.pathname === '/pages' || location.pathname.startsWith('/pages/');
+	const hub = useBookHub(isBookRoute ? getBookSlug(location.pathname) : '');
+
 	useEffect(() => {
 		setIsAdmin(getUserFromBrowser().isAdmin);
 	}, []);
@@ -50,6 +75,28 @@ export default function SiteHeader(): ReactElement {
 			});
 	}, [isAdmin, isLocalhost]);
 
+	const deployText = isAdmin && (isLocalhost || deployDt)
+		? (isLocalhost ? 'localhost dev mode' : `Deployed ${new Date(deployDt as string).toLocaleString()}`)
+		: null;
+
+	if (isBookRoute) {
+		return (
+			<header className='book-header'>
+				<div className='book-header-inner'>
+					{hub && hub.title
+						? <Link to={`/pages/${hub.rootSlug}`} className='book-header-brand'>{hub.title}</Link>
+						: <Link to='/' className='book-header-brand'>Excel.fun</Link>}
+					<nav className='book-header-nav' aria-label='Site'>
+						<Link to='/'>Home</Link>
+						<Link to='/live'>Live</Link>
+						{isAdmin ? <Link to='/admin'>Admin</Link> : null}
+						{deployText ? <span className='book-header-deploy'>{deployText}</span> : null}
+					</nav>
+				</div>
+			</header>
+		);
+	}
+
 	return (
 		<Container fluid style={{  }}>
 			<Row><Col>
@@ -62,12 +109,12 @@ export default function SiteHeader(): ReactElement {
 					? <Nav.Link as={Link} to='/admin'>Admin</Nav.Link>
 					: null}
 				</Nav>
-				{isAdmin && (isLocalhost || deployDt)
+				{deployText
 					? <Navbar.Text
 							className='ms-auto'
 							style={{ fontSize: '0.75rem', opacity: 0.6 }}
 						>
-							{isLocalhost ? 'localhost dev mode' : `Deployed ${new Date(deployDt as string).toLocaleString()}`}
+							{deployText}
 						</Navbar.Text>
 					: null}
 			</Container>

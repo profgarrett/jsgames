@@ -148,6 +148,37 @@ export const extractOutcomesBullets = (markdown: string): string[] => {
 	return bullets;
 };
 
+/*
+	The reverse of extractOutcomesBullets: remove a page's "**Outcomes**:"
+	block -- the marker line, any intro prose before the list, and the list
+	itself -- from its markdown. The book-style reading view (PageView.tsx)
+	shows the same bullets in a Learning Outcomes box under the chapter title,
+	so leaving them in the body would print them twice.
+
+	Indented continuation lines of a bullet are removed with it. Returns the
+	markdown unchanged when there is no Outcomes block or it has no list,
+	i.e. exactly when extractOutcomesBullets would return [].
+*/
+export const removeOutcomesBlock = (markdown: string): string => {
+	if (!markdown) return markdown;
+
+	const lines = markdown.split(/\r?\n/);
+	let start = 0;
+	while (start < lines.length && !isOutcomesHeaderLine(lines[start])) start++;
+	if (start >= lines.length) return markdown;
+
+	let i = start + 1;
+	while (i < lines.length && !BULLET_RE.test(lines[i])) {
+		if (HEADING_RE.test(lines[i])) return markdown;
+		i++;
+	}
+	if (i >= lines.length) return markdown;
+
+	while (i < lines.length && lines[i].trim() !== '' && (BULLET_RE.test(lines[i]) || /^\s+\S/.test(lines[i]))) i++;
+
+	return [...lines.slice(0, start), ...lines.slice(i)].join('\n');
+};
+
 // One resolved {{ref}}, once PageView.tsx has (tried to) fetch it.
 export interface IExamOutcomeResult {
 	// Resolved page slug -- known as soon as the ref is seen, before the

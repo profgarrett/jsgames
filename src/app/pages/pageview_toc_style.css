@@ -1,5 +1,9 @@
 /** display *************/
 
+/* The book layout -- typography, the contents and section panels, figures,
+   tables and the light header -- lives in book_theme.css, which overrides
+   the base rules here on reading pages. */
+
 
 .markdown-page {
     max-width: 1012px;
@@ -49,46 +53,6 @@
 
 .markdown-page blockquote > :last-child {
     margin-bottom: 0;
-}
-
-.markdown-page blockquote > p:first-child {
-    color: #002855;
-    font-size: 0.8rem;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-}
-
-/** toc *************/
-
-.toc {
-    padding: 10px;
-    margin: 0px 0px 30px 30px;
-    max-width: 300px;
-    float: right;
-    background-color: white;
-}
-
-.toc-block {
-    padding: 10px;  
-    border: 1px solid #a2a9b1;
-    background-color: #f8f9fa;
-    border-radius: 4px;
-}
-
-.toc-title {
-    font-weight: bold;
-    font-size: 1.1em;
-    margin-bottom: 10px;
-}
-
-.toc-list {
-    list-style: none;
-    padding-left: 0px !important;
-    margin: 0;
-}
-
-.toc-item {
-    margin: 3px 0;
 }
 
 
@@ -304,21 +268,6 @@
     .markdown-image-badge {
         transition: none;
     }
-}
-
-.toc-level-2 { padding-left: 0; }
-.toc-level-3 { padding-left: 15px; }
-.toc-level-4 { padding-left: 30px; }
-.toc-level-5 { padding-left: 45px; }
-.toc-level-6 { padding-left: 60px; }
-
-.toc-list a {
-    text-decoration: none;
-    color: #0645ad;
-}
-
-.toc-list a:hover {
-    text-decoration: underline;
 }
 
 #course-logo-container {
