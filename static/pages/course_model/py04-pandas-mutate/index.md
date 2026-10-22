@@ -319,13 +319,13 @@ Note that only Alice is a Freshman, so only she gains 5 points; everyone else lo
 
 ### A cleaner way to fill missing values
 
-`np.where(df['score'].isna(), 0, df['score'])` works, and it is worth writing once to see the pattern. But pandas has a purpose-built method:
+`np.where(df['score'].isna(), 0, df['score'])` works, but it's more verbose than necessary. Pandas has a purpose-built method:
 
 ```python
 print(df_students['score'].fillna(0).tolist())   # [85.0, 90.0, 78.0, 0.0]
 ```
 
-Same result, less to read. Reach for `np.where` when the replacement depends on a condition other than missingness.
+Reach for `np.where` when the replacement depends on a condition other than missingness.
 
 ### Negating a condition
 
