@@ -226,6 +226,10 @@ export default function AdminContainer(): ReactElement {
 					<Link to='/admin/nicknames'>
 						<Button variant='outline-info'>Nicknames</Button>
 					</Link>
+					{' '}
+					<Link to='/admin/bulkenroll'>
+						<Button variant='outline-info'>Bulk add to section</Button>
+					</Link>
 				</div>
 				<Message message={message} style={messageStyle} />
 				<Loading loading={isLoading} />

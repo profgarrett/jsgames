@@ -252,6 +252,17 @@ router.get('/pages',
 	With ?page= it is the drill-down under a page row: same filter, so those
 	rows always sum back to the page row they were opened from. Without it, it
 	is the by-user view -- who has been working, and how much.
+
+	users.nickname comes along so the table can show 'Bob Jones' rather than
+	'bj000@mix.wvu.edu' (see app_nicknames.ts). The LEFT JOIN cannot inflate
+	the counts: users.username is UNIQUE (sql01), so each pageview row matches
+	at most one user, and a pageview with no matching account is still kept.
+	Aliased as `u` so it stays distinct from the `users` table inside the
+	section filter's EXISTS subquery.
+
+	u.nickname is in the GROUP BY explicitly, as in app_quizsessions.ts, so the
+	query doesn't depend on MySQL detecting the functional dependency under
+	ONLY_FULL_GROUP_BY.
 */
 router.get('/users',
 	nocache, user_require_logged_in, user_require_admin,
@@ -260,14 +271,16 @@ router.get('/users',
 		const { where, values, filter } = build_traffic_filter(req.query);
 
 		const sql = `SELECT pageviews.username AS username,
+					u.nickname AS nickname,
 					COUNT(*) AS views,
 					COUNT(DISTINCT pageviews.page) AS pages,
 					COALESCE(SUM(pageviews.active_seconds), 0) AS active_seconds,
 					COALESCE(SUM(TIMESTAMPDIFF(SECOND, pageviews.start_datetime, pageviews.end_datetime)), 0) AS open_seconds,
 					DATE_FORMAT(MAX(pageviews.end_datetime), '%Y-%m-%dT%TZ') AS last_datetime
 				FROM pageviews
+				LEFT JOIN users AS u ON u.username = pageviews.username
 				WHERE ${where}
-				GROUP BY pageviews.username
+				GROUP BY pageviews.username, u.nickname
 				ORDER BY active_seconds DESC, username ASC
 				LIMIT ${MAX_USERS}`;
 
@@ -303,10 +316,20 @@ function shape_page_row( row: any ): any {
 	single page, so the count would be a column of 1s) and present in the
 	by-user view. Number(undefined) is NaN, so it is only converted when the
 	query actually selected it.
+
+	`nickname` is trimmed, and null when absent or blank: users.nickname is
+	nullable and a hand-edited row can hold ''. The client decides what to show.
 */
+function shape_nickname( v: any ): string | null {
+	if( typeof v !== 'string' ) return null;
+	const s = v.trim();
+	return s === '' ? null : s;
+}
+
 function shape_user_row( row: any ): any {
 	const shaped: any = {
 		username: row.username,
+		nickname: shape_nickname(row.nickname),
 		views: Number(row.views),
 		active_seconds: Number(row.active_seconds),
 		open_seconds: Number(row.open_seconds),

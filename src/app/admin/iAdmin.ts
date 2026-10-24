@@ -54,6 +54,27 @@ export interface iNickname {
 	user_nickname: string | null;
 }
 
+// One pasted line from POST /api/admin/enrollments/bulk. See
+// plan_bulk_enrollment() in app_admin.ts for what each status means.
+export interface iBulkEnrollResult {
+	line: string;
+	iduser: number | null;
+	username: string | null;
+	status: 'added' | 'already' | 'no_account' | 'duplicate';
+}
+
+// Full response from POST /api/admin/enrollments/bulk.
+export interface iBulkEnrollResponse {
+	idsection: number;
+	code: string;
+	role: string;
+	added: number;
+	already: number;
+	no_account: number;
+	duplicate: number;
+	results: iBulkEnrollResult[];
+}
+
 // Roles a user may hold in a section. Mirrors VALID_ROLES in app_admin.ts.
 export const ADMIN_ROLES = ['student', 'faculty', 'admin'];
 

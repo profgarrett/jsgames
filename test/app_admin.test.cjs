@@ -15,11 +15,15 @@ const {
 	validate_section_input,
 	validate_enrollment_input,
 	validate_user_input,
+	validate_bulk_enrollment_input,
+	bulk_candidates,
+	plan_bulk_enrollment,
 	shape_users_rows,
 	sections_available_to_user,
 	is_valid_date,
 	DEFAULT_LEVELS,
 	MIN_PASSWORD_LENGTH,
+	MAX_BULK_USERNAMES,
 } = require('../src/server/app_admin.ts');
 
 
@@ -346,5 +350,91 @@ describe('sections_available_to_user', () => {
 
 	test('returns everything when no user is selected yet', () => {
 		assert.strictEqual(sections_available_to_user(sections, null).length, 3);
+	});
+});
+
+
+describe('validate_bulk_enrollment_input', () => {
+	test('trims, lowercases, and drops blanks and repeats', () => {
+		const { error, value } = validate_bulk_enrollment_input({
+			idsection: '3',
+			usernames: ['  BJ000 ', '', 'bj000', 'ab123@mix.wvu.edu', '   '],
+		});
+		assert.strictEqual(error, null);
+		assert.strictEqual(value.idsection, 3);
+		assert.deepStrictEqual(value.usernames, ['bj000', 'ab123@mix.wvu.edu']);
+	});
+
+	test('requires a valid section', () => {
+		assert.match(validate_bulk_enrollment_input({ usernames: ['a'] }).error, /section/);
+		assert.match(validate_bulk_enrollment_input({ idsection: 0, usernames: ['a'] }).error, /section/);
+	});
+
+	test('requires at least one non-blank username', () => {
+		assert.match(validate_bulk_enrollment_input({ idsection: 1 }).error, /list/);
+		assert.match(validate_bulk_enrollment_input({ idsection: 1, usernames: ['', ' '] }).error, /at least one/);
+	});
+
+	test('rejects an oversized list', () => {
+		const usernames = Array.from({ length: MAX_BULK_USERNAMES + 1 }, (_, i) => 'u' + i);
+		assert.match(validate_bulk_enrollment_input({ idsection: 1, usernames }).error, /At most/);
+	});
+
+	test('rejects a missing body', () => {
+		assert.strictEqual(validate_bulk_enrollment_input(null).error, 'Missing request body');
+	});
+});
+
+
+describe('bulk_candidates', () => {
+	test('a bare username also tries the campus email', () => {
+		assert.deepStrictEqual(bulk_candidates('bj000', 'mix.wvu.edu'), ['bj000', 'bj000@mix.wvu.edu']);
+	});
+
+	test('a full address is only matched as given', () => {
+		assert.deepStrictEqual(bulk_candidates('bj000@mix.wvu.edu', 'mix.wvu.edu'), ['bj000@mix.wvu.edu']);
+	});
+});
+
+
+describe('plan_bulk_enrollment', () => {
+	const domain = 'mix.wvu.edu';
+	const users = [
+		{ iduser: 1, username: 'bj000@mix.wvu.edu' },
+		{ iduser: 2, username: 'ab123@mix.wvu.edu' },
+		{ iduser: 3, username: 'admin' },
+	];
+
+	test('adds matched accounts not yet in the section', () => {
+		const plan = plan_bulk_enrollment(['bj000@mix.wvu.edu', 'admin'], users, [], domain);
+		assert.deepStrictEqual(plan.map(p => p.status), ['added', 'added']);
+		assert.deepStrictEqual(plan.map(p => p.iduser), [1, 3]);
+	});
+
+	test('matches a bare username to its campus email', () => {
+		const plan = plan_bulk_enrollment(['bj000'], users, [], domain);
+		assert.strictEqual(plan[0].status, 'added');
+		assert.strictEqual(plan[0].username, 'bj000@mix.wvu.edu');
+	});
+
+	test('skips accounts already in the section', () => {
+		const plan = plan_bulk_enrollment(['ab123'], users, [2], domain);
+		assert.strictEqual(plan[0].status, 'already');
+	});
+
+	test('reports, but does not match, users who have never logged in', () => {
+		const plan = plan_bulk_enrollment(['zz999'], users, [], domain);
+		assert.deepStrictEqual(plan[0], { line: 'zz999', iduser: null, username: null, status: 'no_account' });
+	});
+
+	test('two lines for the same account add it once', () => {
+		const plan = plan_bulk_enrollment(['bj000', 'bj000@mix.wvu.edu'], users, [], domain);
+		assert.deepStrictEqual(plan.map(p => p.status), ['added', 'duplicate']);
+	});
+
+	test('keeps the pasted order', () => {
+		const plan = plan_bulk_enrollment(['zz999', 'ab123', 'bj000'], users, [2], domain);
+		assert.deepStrictEqual(plan.map(p => p.line), ['zz999', 'ab123', 'bj000']);
+		assert.deepStrictEqual(plan.map(p => p.status), ['no_account', 'already', 'added']);
 	});
 });

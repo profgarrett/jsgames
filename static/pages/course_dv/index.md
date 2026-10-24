@@ -1,4 +1,4 @@
-# Business Analytics Textbook
+# Business Data and Visualization
 
 **Nathan Garrett, PhD CPA**
 

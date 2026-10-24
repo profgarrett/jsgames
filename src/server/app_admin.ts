@@ -8,6 +8,7 @@
 		GET    /api/admin/sections      every section
 		POST   /api/admin/sections      create a section
 		POST   /api/admin/enrollments   join a user to a section
+		POST   /api/admin/enrollments/bulk   join a pasted list of usernames to a section
 		DELETE /api/admin/enrollments   remove a user from a section
 
 	Every route is behind user_require_logged_in + user_require_admin, so the
@@ -24,6 +25,9 @@
 	- Removing a section's last faculty member is allowed. It makes the section
 	  invisible to the faculty UI (see is_faculty in mysql.ts), but it stays
 	  reachable from /admin.
+	- Bulk enrollment only ever joins accounts that already exist. A student who
+	  has never logged in has no users row, and is reported back rather than
+	  created; their account appears on first Google login.
 	- All validation lives in exported pure functions so it can be unit tested
 	  without a database. See test/app_admin.test.cjs.
 */
@@ -34,6 +38,8 @@ import { run_mysql_query } from './mysql';
 import {
 	nocache, log_error, hash_password,
 	user_require_logged_in, user_require_admin } from './network';
+import { nickname_to_email } from './app_nicknames';
+import { STUDENT_EMAIL_DOMAIN } from './secret';
 
 import type { Request, Response, NextFunction } from 'express';
 
@@ -47,6 +53,13 @@ const DEFAULT_LEVELS = '?';
 
 // Minimum password length for admin-created accounts.
 const MIN_PASSWORD_LENGTH = 8;
+
+// Upper bound on one bulk-enrollment paste. Comfortably above any real class
+// list, low enough that a stray paste cannot become an unbounded IN (...).
+const MAX_BULK_USERNAMES = 2000;
+
+// Role given to everyone joined by the bulk route.
+const BULK_ROLE = 'student';
 
 
 interface IValidationResult {
@@ -155,6 +168,102 @@ function validate_enrollment_input( body: any, require_role: boolean = true ): I
 	if( !VALID_ROLES.includes(role) ) return fail('Role must be one of: ' + VALID_ROLES.join(', '));
 
 	return { error: null, value: { iduser, idsection, role } };
+}
+
+
+/**
+	Validate + normalize the body of POST /api/admin/enrollments/bulk.
+
+	`usernames` is the pasted text already split into lines by the client.
+	Each line is trimmed and lowercased (login usernames always are); blank
+	lines and exact repeats are dropped so the result lists each once.
+*/
+function validate_bulk_enrollment_input( body: any ): IValidationResult {
+	const fail = (error: string): IValidationResult => ({ error, value: null });
+
+	if( typeof body !== 'object' || body === null ) return fail('Missing request body');
+
+	const idsection = as_id(body.idsection);
+	if( idsection === null ) return fail('A valid section is required');
+
+	if( !Array.isArray(body.usernames) ) return fail('A list of usernames is required');
+
+	const seen = new Set<string>();
+	const usernames: string[] = [];
+
+	for( const raw of body.usernames ) {
+		const u = as_trimmed_string(raw).toLowerCase();
+		if( u === '' || seen.has(u) ) continue;
+		if( u.length > 255 ) return fail('Username is too long: ' + u.slice(0, 40) + '...');
+		seen.add(u);
+		usernames.push(u);
+	}
+
+	if( usernames.length === 0 ) return fail('Paste at least one username');
+	if( usernames.length > MAX_BULK_USERNAMES )
+		return fail('At most ' + MAX_BULK_USERNAMES + ' usernames at a time');
+
+	return { error: null, value: { idsection, usernames } };
+}
+
+
+/**
+	The account usernames one pasted line could refer to.
+
+	Students log in with their campus email, but a class list often carries
+	only the bare username. 'bj000' therefore also tries 'bj000@<domain>', by
+	the same rule nicknames use (nickname_to_email). The exact value is listed
+	first so it wins if both somehow exist.
+*/
+function bulk_candidates( line: string, domain: string = STUDENT_EMAIL_DOMAIN ): string[] {
+	const email = nickname_to_email(line, domain);
+	return email === '' || email === line ? [line] : [line, email];
+}
+
+
+/**
+	Decide what happens to each pasted line.
+
+	@arg lines     normalized usernames from validate_bulk_enrollment_input
+	@arg users     { iduser, username } rows matching any bulk_candidates value
+	@arg enrolled  iduser values already in the target section, in any role
+	@arg domain    STUDENT_EMAIL_DOMAIN
+
+	Each line gets exactly one status:
+		'added'       matched an account not yet in the section
+		'already'     matched an account already in the section (role untouched)
+		'no_account'  matched nothing. The student has not logged in yet, so
+		              there is nothing to join; they are left alone.
+		'duplicate'   matched the same account as an earlier line
+		              ('bj000' and 'bj000@mix.wvu.edu')
+*/
+function plan_bulk_enrollment(
+		lines: string[],
+		users: Array<any>,
+		enrolled: Array<number>,
+		domain: string = STUDENT_EMAIL_DOMAIN ): Array<any> {
+
+	const by_username = new Map<string, any>();
+	users.forEach( u => by_username.set(String(u.username).toLowerCase(), u) );
+
+	const enrolled_set = new Set(enrolled);
+	const claimed = new Set<number>();
+
+	return lines.map( line => {
+		const match = bulk_candidates(line, domain)
+			.map( c => by_username.get(c) )
+			.find( u => typeof u !== 'undefined' );
+
+		if( !match ) return { line, iduser: null, username: null, status: 'no_account' };
+
+		const found = { line, iduser: match.iduser, username: match.username };
+
+		if( claimed.has(match.iduser) ) return { ...found, status: 'duplicate' };
+		claimed.add(match.iduser);
+
+		if( enrolled_set.has(match.iduser) ) return { ...found, status: 'already' };
+		return { ...found, status: 'added' };
+	});
 }
 
 
@@ -420,6 +529,73 @@ router.post('/enrollments',
 });
 
 
+/*
+	Join a pasted list of usernames to one section, as students.
+
+	Only existing accounts are touched. Anyone already in the section (in any
+	role) is left as they are, and a line that matches no account -- a student
+	who has not logged in yet -- is reported and skipped. Running the same list
+	again later picks up the students who have logged in since.
+
+	Three queries regardless of list size (users, current memberships, one bulk
+	insert): run_mysql_query opens a fresh connection per call, so a per-line
+	loop would be one connection per student.
+*/
+router.post('/enrollments/bulk',
+	nocache, user_require_logged_in, user_require_admin,
+	async (req: Request, res: Response, next: NextFunction): Promise<any> => {
+	try {
+		const { error, value } = validate_bulk_enrollment_input(req.body);
+		if( error !== null ) return res.status(400).json({ error });
+
+		const section = await run_mysql_query(
+			'SELECT idsection, code FROM sections WHERE idsection = ? LIMIT 1', [value.idsection]);
+		if( section.length === 0 ) return res.status(404).json({ error: 'That section does not exist' });
+
+		const candidates = Array.from(new Set(
+			value.usernames.flatMap( (u: string) => bulk_candidates(u) ) ));
+
+		const users = await run_mysql_query(
+			'SELECT iduser, username FROM users WHERE username IN (?)', [candidates]);
+
+		const ids = users.map( (u: any) => u.iduser );
+		const enrolled = ids.length === 0 ? [] : (await run_mysql_query(
+			'SELECT iduser FROM users_sections WHERE idsection = ? AND iduser IN (?)',
+			[value.idsection, ids])).map( (r: any) => r.iduser );
+
+		const results = plan_bulk_enrollment(value.usernames, users, enrolled);
+		const to_add = results.filter( r => r.status === 'added' );
+
+		if( to_add.length > 0 ) {
+			// IGNORE: if someone joins between the SELECT above and this insert,
+			// the sql27 unique index makes that row a no-op instead of failing
+			// the whole batch. The user and section were both just confirmed to
+			// exist, so a foreign-key miss is not being hidden.
+			await run_mysql_query(
+				'INSERT IGNORE INTO users_sections (iduser, idsection, role) VALUES ?',
+				[to_add.map( r => [r.iduser, value.idsection, BULK_ROLE] )]);
+		}
+
+		const count = (status: string): number => results.filter( r => r.status === status ).length;
+
+		res.json({
+			idsection: value.idsection,
+			code: section[0].code,
+			role: BULK_ROLE,
+			added: count('added'),
+			already: count('already'),
+			no_account: count('no_account'),
+			duplicate: count('duplicate'),
+			results,
+		});
+
+	} catch (e) {
+		log_error(e);
+		next(e);
+	}
+});
+
+
 // Remove a user from a section.
 //
 // No last-faculty guard: the admin may strip a section's only faculty member.
@@ -461,10 +637,14 @@ export {
 	validate_section_input,
 	validate_enrollment_input,
 	validate_user_input,
+	validate_bulk_enrollment_input,
+	bulk_candidates,
+	plan_bulk_enrollment,
 	shape_users_rows,
 	sections_available_to_user,
 	is_valid_date,
 	VALID_ROLES,
 	DEFAULT_LEVELS,
 	MIN_PASSWORD_LENGTH,
+	MAX_BULK_USERNAMES,
 };

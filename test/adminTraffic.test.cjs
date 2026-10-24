@@ -24,7 +24,7 @@ const {
 	rows_from_json,
 } = require('../src/app/admin/AdminTrafficContainer.tsx');
 
-const { page_to_row, user_to_row } = require('../src/app/admin/iTraffic.ts');
+const { page_to_row, user_to_row, user_display } = require('../src/app/admin/iTraffic.ts');
 
 
 describe('format_duration', () => {
@@ -94,6 +94,7 @@ describe('row normalization', () => {
 		});
 
 		assert.strictEqual(row.key, '/pages/intro');
+		assert.strictEqual(row.display, '/pages/intro');
 		assert.strictEqual(row.breadth, 4);
 		assert.strictEqual(row.views, 10);
 	});
@@ -115,6 +116,44 @@ describe('row normalization', () => {
 		});
 
 		assert.strictEqual(row.breadth, null);
+	});
+
+	test('a user row shows the nickname but stays keyed by username', () => {
+		const row = user_to_row({
+			username: 'bj000@mix.wvu.edu', nickname: 'Bob Jones', views: 1,
+			active_seconds: 1, open_seconds: 1, last_datetime: null,
+		});
+
+		// key is the drill-down scope (?username=), so it must stay the username.
+		assert.strictEqual(row.key, 'bj000@mix.wvu.edu');
+		assert.strictEqual(row.display, 'Bob Jones');
+	});
+
+	test('a user row with no nickname shows the username', () => {
+		const row = user_to_row({
+			username: 'a@b.com', views: 1,
+			active_seconds: 1, open_seconds: 1, last_datetime: null,
+		});
+
+		assert.strictEqual(row.display, 'a@b.com');
+	});
+});
+
+
+describe('user_display', () => {
+	test('prefers the nickname, trimmed', () => {
+		assert.strictEqual(user_display('a@b.com', ' Ann Bell ', false), 'Ann Bell');
+	});
+
+	test('falls back to the username for a missing or blank nickname', () => {
+		assert.strictEqual(user_display('a@b.com', undefined, false), 'a@b.com');
+		assert.strictEqual(user_display('a@b.com', null, false), 'a@b.com');
+		assert.strictEqual(user_display('a@b.com', '', false), 'a@b.com');
+		assert.strictEqual(user_display('a@b.com', '   ', false), 'a@b.com');
+	});
+
+	test('demo mode hides the nickname', () => {
+		assert.strictEqual(user_display('a@b.com', 'Ann Bell', true), 'a@b.com');
 	});
 });
 
@@ -167,9 +206,9 @@ describe('view wiring', () => {
 
 describe('sort_rows', () => {
 	const rows = [
-		{ key: '/b', views: 10, breadth: 5, active_seconds: 100, open_seconds: 900, last_datetime: '2026-08-01T00:00:00Z' },
-		{ key: '/a', views: 2, breadth: 1, active_seconds: 400, open_seconds: 500, last_datetime: '2026-08-20T00:00:00Z' },
-		{ key: '/c', views: 5, breadth: 9, active_seconds: 250, open_seconds: 100, last_datetime: '2026-08-10T00:00:00Z' },
+		{ key: '/b', display: '/b', views: 10, breadth: 5, active_seconds: 100, open_seconds: 900, last_datetime: '2026-08-01T00:00:00Z' },
+		{ key: '/a', display: '/a', views: 2, breadth: 1, active_seconds: 400, open_seconds: 500, last_datetime: '2026-08-20T00:00:00Z' },
+		{ key: '/c', display: '/c', views: 5, breadth: 9, active_seconds: 250, open_seconds: 100, last_datetime: '2026-08-10T00:00:00Z' },
 	];
 
 	const order = (sort) => sort_rows(rows, sort).map( r => r.key );
@@ -196,11 +235,20 @@ describe('sort_rows', () => {
 
 	test('a null breadth sorts as zero rather than scrambling the order', () => {
 		const mixed = [
-			{ key: 'a', views: 1, breadth: null, active_seconds: 1, open_seconds: 1, last_datetime: null },
-			{ key: 'b', views: 1, breadth: 3, active_seconds: 1, open_seconds: 1, last_datetime: null },
+			{ key: 'a', display: 'a', views: 1, breadth: null, active_seconds: 1, open_seconds: 1, last_datetime: null },
+			{ key: 'b', display: 'b', views: 1, breadth: 3, active_seconds: 1, open_seconds: 1, last_datetime: null },
 		];
 
 		assert.deepStrictEqual(sort_rows(mixed, 'breadth').map(r => r.key), ['b', 'a']);
+	});
+
+	test('the label column sorts by the name shown, not the username', () => {
+		const users = [
+			{ key: 'zz000@mix.wvu.edu', display: 'Ann Bell', views: 1, breadth: 1, active_seconds: 1, open_seconds: 1, last_datetime: null },
+			{ key: 'aa000@mix.wvu.edu', display: 'Zoe Cole', views: 1, breadth: 1, active_seconds: 1, open_seconds: 1, last_datetime: null },
+		];
+
+		assert.deepStrictEqual(sort_rows(users, 'label').map(r => r.display), ['Ann Bell', 'Zoe Cole']);
 	});
 });
 

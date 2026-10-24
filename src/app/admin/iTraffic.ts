@@ -5,6 +5,8 @@
 // See src/server/app_traffic.ts.
 //
 
+import { DEMO_MODE } from '../configuration';
+
 // Which way round the report is read. The two views are the same data grouped
 // by opposite keys, and each one's drill-down is the other one scoped to a
 // single row.
@@ -27,9 +29,11 @@ export interface iTrafficPage {
 
 // One user's totals. `pages` (how many distinct pages they touched) is present
 // in the by-user view and absent in the drill-down under a single page, where
-// it would be a column of 1s.
+// it would be a column of 1s. `nickname` is users.nickname, trimmed, or null
+// when the account has none.
 export interface iTrafficUser {
 	username: string;
+	nickname?: string | null;
 	views: number;
 	pages?: number;
 	active_seconds: number;
@@ -55,11 +59,14 @@ export interface iTrafficFilter {
 	drifting apart.
 
 	@prop key      page path or username; identifies the row for drill-down
+	@prop display  what the first column shows: the page path, or the user's
+	               nickname falling back to their username
 	@prop breadth  distinct users (pages view) or distinct pages (users view),
 	               and null in a drill-down where the count is always 1
 */
 export interface iTrafficRow {
 	key: string;
+	display: string;
 	views: number;
 	breadth: number | null;
 	active_seconds: number;
@@ -70,6 +77,7 @@ export interface iTrafficRow {
 export function page_to_row( page: iTrafficPage ): iTrafficRow {
 	return {
 		key: page.page,
+		display: page.page,
 		views: page.views,
 		breadth: page.users,
 		active_seconds: page.active_seconds,
@@ -78,9 +86,25 @@ export function page_to_row( page: iTrafficPage ): iTrafficRow {
 	};
 }
 
+/**
+	The name to show for a user: their nickname when they have one, else the
+	username. Blank or whitespace-only nicknames count as none.
+
+	Demo mode never shows a nickname -- it is a real person's name -- and falls
+	back to the username, as the page did before nicknames were shown.
+
+	@arg demo  injectable for testing; defaults to DEMO_MODE
+*/
+export function user_display( username: string, nickname?: string | null, demo: boolean = DEMO_MODE ): string {
+	if( demo ) return username;
+	if( typeof nickname === 'string' && nickname.trim() !== '' ) return nickname.trim();
+	return username;
+}
+
 export function user_to_row( user: iTrafficUser ): iTrafficRow {
 	return {
 		key: user.username,
+		display: user_display(user.username, user.nickname),
 		views: user.views,
 		breadth: typeof user.pages === 'undefined' ? null : user.pages,
 		active_seconds: user.active_seconds,

@@ -61,14 +61,15 @@ export const VIEW_LABELS: { [key in iTrafficView]: { label: string, breadth: str
 
 	The server returns a capped, already-ordered set, so re-sorting here costs
 	nothing and saves a round trip. The label sorts ascending (a path or a
-	username reads as a name); every number sorts descending, since "which one
-	got the most" is the question being asked.
+	name reads as a name); every number sorts descending, since "which one
+	got the most" is the question being asked. The label sort uses what is
+	shown (`display`), so a nickname sorts where it appears on screen.
 */
 export function sort_rows( rows: iTrafficRow[], sort: iTrafficSort ): iTrafficRow[] {
 	const sorted = [...rows];
 
 	if( sort === 'label' ) {
-		sorted.sort( (a, b) => a.key.localeCompare(b.key) );
+		sorted.sort( (a, b) => a.display.localeCompare(b.display) );
 		return sorted;
 	}
 
@@ -158,7 +159,7 @@ export default function AdminTrafficTable( props: AdminTrafficTablePropsType ): 
 					style={{ cursor: 'pointer' }}>
 				<td style={{ wordBreak: 'break-all' }}>
 					<span className='text-muted'>{ is_open ? '▾ ' : '▸ ' }</span>
-					{ row.key }
+					{ row.display }
 				</td>
 				<td style={ NUMBER_CELL }>{ row.views }</td>
 				<td style={ NUMBER_CELL }>{ row.breadth }</td>
@@ -233,7 +234,7 @@ function Breakdown( props: { rows: iTrafficRow[], label: string } ): ReactElemen
 			<tbody>
 				{ props.rows.map( row => (
 					<tr key={ row.key }>
-						<td style={{ wordBreak: 'break-all' }}>{ row.key }</td>
+						<td style={{ wordBreak: 'break-all' }}>{ row.display }</td>
 						<td style={ NUMBER_CELL }>{ row.views }</td>
 						<td style={ NUMBER_CELL }>{ format_duration(row.active_seconds) }</td>
 						<td style={ NUMBER_CELL }>{ format_duration(average_seconds(row.active_seconds, row.views)) }</td>

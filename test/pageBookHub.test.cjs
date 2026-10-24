@@ -17,7 +17,7 @@ const {
 } = require('../src/app/pages/PageBookHub.ts');
 const { removeOutcomesBlock, extractOutcomesBullets } = require('../src/app/pages/PageExamOutcomes.ts');
 
-const DV_HUB = `# Business Analytics Textbook
+const DV_HUB = `# Business Data and Visualization
 
 **Nathan Garrett, PhD CPA**
 
@@ -98,7 +98,7 @@ describe('parseBookHub', () => {
 	const hub = parseBookHub(DV_HUB, 'course_dv/index', 'course_dv');
 
 	test('uses the hub H1 as the book title', () => {
-		assert.strictEqual(hub.title, 'Business Analytics Textbook');
+		assert.strictEqual(hub.title, 'Business Data and Visualization');
 	});
 
 	test('splits module headings into kicker and name, dropping modules with no lessons', () => {

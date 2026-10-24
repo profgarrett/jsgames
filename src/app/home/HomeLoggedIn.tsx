@@ -139,10 +139,10 @@ export default function HomeLoggedIn(): ReactElement {
 		<div style={{ marginBottom: 30 }}>
 			<div className='h5'>Course pages</div>
 			<Link to='/pages/course_dv/index'>
-				<Button variant='outline-primary' style={{ marginRight: 10 }}>Business Analytics Textbook</Button>
+				<Button variant='outline-primary' style={{ marginRight: 10 }}>Business Data and Visualization</Button>
 			</Link>
 			<Link to='/pages/course_model/index'>
-				<Button variant='outline-primary' style={{ marginRight: 10 }}>Modeling with Python Textbook</Button>
+				<Button variant='outline-primary' style={{ marginRight: 10 }}>Modeling with Python</Button>
 			</Link>
 			<Link to='/pages/course_ais/index'>
 				<Button variant='outline-primary'>AIS Textbook</Button>

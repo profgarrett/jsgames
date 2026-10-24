@@ -298,7 +298,25 @@ describe('row shaping', () => {
 		});
 
 		assert.deepStrictEqual(Object.keys(row).sort(),
-			['active_seconds', 'last_datetime', 'open_seconds', 'username', 'views']);
+			['active_seconds', 'last_datetime', 'nickname', 'open_seconds', 'username', 'views']);
+	});
+
+	test('carries the nickname, trimmed', () => {
+		const row = shape_user_row({
+			username: 'bj000@mix.wvu.edu', nickname: '  Bob Jones ', views: 1,
+			active_seconds: 0, open_seconds: 0, last_datetime: null,
+		});
+		assert.strictEqual(row.nickname, 'Bob Jones');
+	});
+
+	test('a missing, null, or blank nickname is null', () => {
+		const base = { username: 'a@b.com', views: 1, active_seconds: 0, open_seconds: 0, last_datetime: null };
+
+		// No users row matched the LEFT JOIN, or the column was never set.
+		assert.strictEqual(shape_user_row(base).nickname, null);
+		assert.strictEqual(shape_user_row({ ...base, nickname: null }).nickname, null);
+		assert.strictEqual(shape_user_row({ ...base, nickname: '' }).nickname, null);
+		assert.strictEqual(shape_user_row({ ...base, nickname: '   ' }).nickname, null);
 	});
 
 	test('carries the distinct-page count only when the query selected it', () => {
