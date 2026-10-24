@@ -19,7 +19,7 @@ set -e  # Exit on any error
 # half-populated directory.
 #
 # node_modules is shared across releases by content: it lives in
-# jsgames-shared/node_modules-<lockfile hash>/, and a release just symlinks to the
+# jsgames-shared/deps-<lockfile hash>/node_modules/, and a release just symlinks to the
 # matching one. If the lockfile hasn't changed since the last deploy that installed
 # something, the existing node_modules is reused untouched and `npm ci` -- normally the
 # slowest step in this script -- is skipped entirely. If the lockfile HAS changed,
@@ -27,7 +27,7 @@ set -e  # Exit on any error
 # release stays independently installable even after a newer one changes dependencies
 # (see rollback.sh).
 #
-# Old releases, and any node_modules-<hash> directory no kept release still points at,
+# Old releases, and any deps-<hash> directory no kept release still points at,
 # are pruned at the end of a full deploy. KEEP_RELEASES controls how many stick around,
 # which is what rollback.sh has to choose from.
 # ---------------------------------------------------------------------------------
@@ -152,7 +152,16 @@ scp -C -q package.json package-lock.json profgarrett@excel.fun:"$RELEASE_PATH/"
 # `ls jsgames-shared/` stays readable.
 # ---------------------------------------------------------------------------------
 LOCK_HASH=$(shasum -a 256 package-lock.json | cut -c1-16)
-NM_DIR="$SHARED_DIR/node_modules-$LOCK_HASH"
+
+# The shared install MUST sit in a directory literally named `node_modules`.
+# Node resolves symlinks to their real path, then finds a package's own dependencies
+# by walking up that real path looking for directories named exactly `node_modules`.
+# The old layout (jsgames-shared/node_modules-<hash>/express) failed that: express
+# could not find its sibling body-parser, and only worked by silently falling back to a
+# stale ~/excel.fun/node_modules left over from the pre-release deploy scheme.
+DEPS_DIR="$SHARED_DIR/deps-$LOCK_HASH"
+NM_DIR="$DEPS_DIR/node_modules"
+NM_LINK="../../jsgames-shared/deps-$LOCK_HASH/node_modules"
 
 echo "Lockfile hash: $LOCK_HASH"
 
@@ -160,7 +169,7 @@ echo "Lockfile hash: $LOCK_HASH"
 # non-zero and would trip `set -e` as the last statement of a chain.
 if ssh profgarrett@excel.fun "[ -d $NM_DIR ]"; then
 	echo "  Dependencies unchanged since a previous deploy -- reusing $NM_DIR, skipping npm ci."
-	ssh profgarrett@excel.fun "cd $RELEASE_PATH && ln -sfn ../../jsgames-shared/node_modules-$LOCK_HASH node_modules"
+	ssh profgarrett@excel.fun "cd $RELEASE_PATH && ln -sfn $NM_LINK node_modules"
 else
 	echo "  New or first-seen dependency set -- running npm ci (normally the slowest step here)."
 	# npm ci wipes node_modules and installs exactly what the lockfile pins, so a
@@ -170,7 +179,7 @@ else
 	# Relocate the freshly-installed tree into the shared, hash-named location and
 	# symlink it back in. This is what lets the *next* deploy skip npm ci, if its
 	# lockfile hashes the same as this one's.
-	ssh profgarrett@excel.fun "mv $RELEASE_PATH/node_modules $NM_DIR && cd $RELEASE_PATH && ln -sfn ../../jsgames-shared/node_modules-$LOCK_HASH node_modules"
+	ssh profgarrett@excel.fun "mkdir -p $DEPS_DIR && mv $RELEASE_PATH/node_modules $NM_DIR && cd $RELEASE_PATH && ln -sfn $NM_LINK node_modules"
 fi
 
 # One-time migration: deploys before this release scheme left `jsgames` as a real
@@ -233,8 +242,8 @@ ssh profgarrett@excel.fun "curl -sS -m 10 http://127.0.0.1:9000/api/version; ech
 echo "  Local build:  $(ls build/public/ | grep -E '^main\..*\.js$' | head -1)"
 
 # ---------------------------------------------------------------------------------
-# Prune old releases and any node_modules-<hash> directory no kept release still points
-# at. Runs LAST and only after the health check above, so a release that fails to come
+# Prune old releases and any deps-<hash> (or legacy node_modules-<hash>) directory no
+# kept release still points at. Runs LAST and only after the health check above, so a release that fails to come
 # up cleanly is still on disk (and still what `jsgames` points at) to inspect, rather
 # than getting swept away by its own deploy.
 # ---------------------------------------------------------------------------------
@@ -248,17 +257,21 @@ set -e
 releases_dir="$1"
 shared_dir="$2"
 
-# Build the set of node_modules-<hash> directory names still referenced by a release
-# that survived the prune above.
+# Build the set of shared directory names still referenced by a release that survived
+# the prune above. New layout links to .../deps-<hash>/node_modules (keep deps-<hash>);
+# releases from before that fix link straight to .../node_modules-<hash>.
 keep=""
 for rel in "$releases_dir"/*/; do
 	[ -L "${rel}node_modules" ] || continue
 	target=$(readlink "${rel}node_modules")
-	keep="$keep $(basename "$target")"
+	case "$target" in
+		*/node_modules) keep="$keep $(basename "$(dirname "$target")")" ;;
+		*)              keep="$keep $(basename "$target")" ;;
+	esac
 done
 
 cd "$shared_dir"
-for nm in node_modules-*; do
+for nm in deps-* node_modules-*; do
 	[ -d "$nm" ] || continue
 	case " $keep " in
 		*" $nm "*) ;;  # still referenced by a kept release

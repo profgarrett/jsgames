@@ -14,7 +14,7 @@
 
 export HOME="/home/profgarrett"
 export PM2_HOME="$HOME/.pm2"
-export NODE_BIN="$HOME/.nvm/versions/node/v24.19.0/bin"
+export NODE_BIN="$HOME/.nvm/versions/node/v24.22.1/bin"
 export PATH="$NODE_BIN:$PATH"
 
 PM2="$NODE_BIN/pm2"

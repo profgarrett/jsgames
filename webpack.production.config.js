@@ -2,7 +2,6 @@ const HTMLWebpackPlugin = require('html-webpack-plugin');
 const webpack = require('webpack');
 
 const TerserPlugin = require('terser-webpack-plugin');
-const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 
 // Local build timestamp, YYYYMMDD-HHMMSS. Embedded in the bundle filename so a
 // deployed build can be dated at a glance without opening meta.json.
@@ -64,7 +63,6 @@ module.exports = {
 		]
 	},
 	plugins: [
-		new CleanWebpackPlugin(), // wipe out all bad files.
 		new HTMLWebpackPlugin({
 			template: __dirname + '/src/app/index.html',
 			filename: 'index.html',
@@ -91,7 +89,8 @@ module.exports = {
 		filename: `[name].${BUILD_DT}.[chunkhash].js`,
 		sourceMapFilename: `[name].${BUILD_DT}.[chunkhash].js.map`,
 		publicPath: '/',
-		path:   __dirname + '/build/public'
+		path:   __dirname + '/build/public',
+		clean: true // wipe out old build files before each build
 	},
 	devtool: 'source-map',
 
