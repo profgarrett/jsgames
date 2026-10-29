@@ -1,5 +1,3 @@
-<script src="/course_model/toc.js"></script>
-
 # Natural Language Processing (NLP) with Python
 
 Natural Language Processing (NLP) teaches computers to work with text. NLP turns messy text (course comments, survey responses, reviews, emails) into numbers you can model.
@@ -19,8 +17,10 @@ Natural Language Processing (NLP) teaches computers to work with text. NLP turns
 - [Vis3](https://pudding.cool/2026/02/happy-map/)
 
 **Links**:
-- [newsgroup template](newsgroup.ipynb) 
 - [template](template.ipynb) and [datafile](sms_spam.csv)
+- [Garrett course evaluations data](garrett_evaluation_comments.xlsx) and [some analysis](garrett_evaluation_comments.ipynb)
+- [newsgroup template](newsgroup.ipynb) 
+
 
 ## Algorithm Overview
 
@@ -272,7 +272,7 @@ Vocabulary used: course, great, hard, wow ("is" is a stopword, so it is removed)
 | Course is hard  | 0.629  | 0.000 | 0.777 | 0.000 |
 | Wow             | 0.000  | 0.000 | 0.000 | 1.000 |
 
-These are the values scikit-learn's `TfidfVectorizer` produces, rounded for readability. The pattern is what's important: "course" appears in three of the four documents, so it gets a lower weight than "great" (one document) or "hard" (two documents).
+These are the values scikit-learn's `TfidfVectorizer` produces, rounded for readability. Since "course" appears in three of the four documents, so it gets a lower weight than "great" (one document) or "hard" (two documents).
 
 
 ```python

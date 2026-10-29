@@ -1,5 +1,3 @@
-<script src="/course_model/toc.js"></script>
-
 # Principal Component Analysis (PCA)
 
 PCA is a method for reducing the number of columns while retaining as much information as possible.
@@ -14,6 +12,7 @@ PCA is a method for reducing the number of columns while retaining as much infor
 
 **Links**:
 - [template census data](census.csv) and [PCA example](census_pca_example.ipynb)
+- [YouTube Video](https://www.youtube.com/watch?v=FD4DeN81ODY)
 
 ## Roadmap
 
