@@ -134,9 +134,10 @@ NGINX_HASH_AFTER=$(shasum -a 256 "$NGINX_LOCAL" | cut -c1-64)
 ssh profgarrett@excel.fun "rm -rf ~/nginx/excel.fun; rm -rf ~/nginx/; mkdir ~/nginx; mkdir ~/nginx/excel.fun"
 scp -r -C -q "$NGINX_LOCAL" profgarrett@excel.fun:~/nginx/excel.fun/
 
-# Copy pm2 watchdog script to server
+# Copy pm2 watchdog script to server. ~/cronlogs is where its crontab lines log to --
+# NOT ~/logs, which DreamHost owns and this user cannot write (see pm2-check.sh).
 scp -C -q dreamhost_config/cron/pm2-check.sh profgarrett@excel.fun:~/pm2-check.sh
-ssh profgarrett@excel.fun "chmod +x ~/pm2-check.sh"
+ssh profgarrett@excel.fun "chmod +x ~/pm2-check.sh && mkdir -p ~/cronlogs"
 
 # Copy package files into the release. Needed both to (maybe) run npm ci and to hash
 # the lockfile below. The lockfile MUST ship with package.json -- without it the server
@@ -240,6 +241,74 @@ fi
 echo "  Server reports:"
 ssh profgarrett@excel.fun "curl -sS -m 10 http://127.0.0.1:9000/api/version; echo"
 echo "  Local build:  $(ls build/public/ | grep -E '^main\..*\.js$' | head -1)"
+
+# ---------------------------------------------------------------------------------
+# Verify the pm2 watchdog.
+#
+# Nothing else exercises the cron path between reboots: deploys and reloads run pm2
+# through this ssh session's PATH, never through cron. So a broken watchdog stays
+# invisible until DreamHost reboots the VPS and the site stays down. That happened on
+# 2026-10-29: both crontab lines redirected to the read-only ~/logs, so cron never ran
+# pm2-check.sh at all.
+#
+# Warn-only, like the health check above: the new release is already live.
+# ---------------------------------------------------------------------------------
+echo ""
+echo "Verifying pm2 watchdog..."
+
+if ssh profgarrett@excel.fun bash -s <<'REMOTE_EOF'
+problems=0
+warn() { echo "  WARNING: $*"; problems=1; }
+
+# 1. Script prerequisites: pm2 binary, node executes, dump.pm2 exists.
+#    --check never starts or resurrects anything.
+if out=$(~/pm2-check.sh --check 2>&1); then
+	echo "  $out"
+else
+	warn "$out"
+fi
+
+# 2. Both crontab lines present (ignoring comments).
+lines=$(crontab -l 2>/dev/null | grep -v '^[[:space:]]*#' | grep 'pm2-check\.sh')
+echo "$lines" | grep -q '@reboot' \
+	|| warn "no @reboot pm2-check.sh line in crontab"
+echo "$lines" | grep -v '@reboot' | grep -q 'pm2-check\.sh' \
+	|| warn "no recurring (*/5) pm2-check.sh line in crontab"
+
+# 3. Every >> log target must be writable. If cron cannot open it, the shell fails the
+#    redirect and skips pm2-check.sh entirely, leaving no log behind.
+for log in $(echo "$lines" | grep -o '>>[[:space:]]*[^[:space:]]*' | sed 's/^>>[[:space:]]*//' | sort -u); do
+	log="${log/#\~/$HOME}"
+	if [ -e "$log" ]; then
+		[ -w "$log" ] || warn "cron log $log is not writable, so cron skips pm2-check.sh"
+	elif [ ! -w "$(dirname "$log")" ]; then
+		warn "cron cannot create $log ($(dirname "$log") is not writable), so it skips pm2-check.sh"
+	fi
+done
+
+# 4. DreamHost panel jobs (wrapped in /usr/bin/setlock). Any panel change rewrites the
+#    whole crontab and deletes the crontab -e lines checked above.
+if crontab -l 2>/dev/null | grep -v '^[[:space:]]*#' | grep -q 'setlock'; then
+	warn "crontab also has DreamHost panel jobs. A panel edit will erase the crontab -e lines."
+fi
+
+# 5. The watchdog's node must match the node deploys use. A mismatch means an nvm
+#    upgrade was half-applied and NODE_BIN in pm2-check.sh still names the old one.
+login_node=$(command -v node)
+watch_bin=$(grep -o 'NODE_BIN="[^"]*"' ~/pm2-check.sh | head -1 | cut -d'"' -f2)
+watch_bin="${watch_bin//\$HOME/$HOME}"
+if [ "$login_node" != "$watch_bin/node" ]; then
+	warn "deploys use $login_node but pm2-check.sh uses $watch_bin/node - update NODE_BIN"
+fi
+
+exit $problems
+REMOTE_EOF
+then
+	echo "  OK: watchdog script and crontab look right."
+else
+	echo "  pm2 may NOT come back after the next DreamHost reboot until this is fixed."
+	echo "  See the header of dreamhost_config/cron/pm2-check.sh for the crontab lines."
+fi
 
 # ---------------------------------------------------------------------------------
 # Prune old releases and any deps-<hash> (or legacy node_modules-<hash>) directory no

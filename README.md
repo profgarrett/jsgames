@@ -168,8 +168,8 @@ Install NVM and Node: https://help.dreamhost.com/hc/en-us/articles/360029083351-
 Switch to correct version of NVM (note, all version numbers need to be incremented)
 
 ```bash
-nvm install v24.19.0
-nvm alias default v24.19.0
+nvm install v24.22.1
+nvm alias default v24.22.1
 ```
 
 As of Fall 2026, Dreamhost has a new security policy that requires you to set the user.pax.flags attribute on the node, npm, and npx binaries.  You can do this by running the following command:
@@ -209,15 +209,23 @@ curl -I https://excel.fun/static/does-not-exist.png
 
 ### Cron
 
-Shared hosting on Dreamhost won't honor pm2. Add a cron job to check if the process is running, and restart it if not.   See dreamhostconfig/cron/pm2-check.sh for an example.
+DreamHost's Managed VPS has no root and no systemd, so `pm2 startup` can't be used. Instead, a cron job checks whether pm2 is running and restores it from `~/.pm2/dump.pm2` if not. See dreamhost_config/cron/pm2-check.sh. deploy.sh copies it to `~/pm2-check.sh`, creates `~/cronlogs`, and warns at the end of every deploy if the watchdog or crontab isn't set up correctly.
+
+If any cron jobs for this user exist in the DreamHost panel, delete them there **first**. Any panel change rewrites the whole crontab and erases lines added with `crontab -e`.
 
 crontab -e
 
-Add these lines to the crontab.  The first line runs the check at reboot, and the second line runs it every 5 minutes.  Adjust the paths as needed.
+Add these lines. The first runs the check at reboot, and the second runs it every 5 minutes.
 ```
-@reboot     /home/profgarrett/bin/pm2-check.sh >> /home/profgarrett/logs/pm2.log 2>&1
-*/5 * * * * /home/profgarrett/bin/pm2-check.sh >> /home/profgarrett/logs/pm2.log 2>&1
+@reboot     /home/profgarrett/pm2-check.sh --boot >> /home/profgarrett/cronlogs/pm2.log 2>&1
+*/5 * * * * /home/profgarrett/pm2-check.sh        >> /home/profgarrett/cronlogs/pm2.log 2>&1
 ```
+
+Do not log to `~/logs`. DreamHost owns that folder, and this user can't create files in it. When cron can't open the log, it skips the command entirely and leaves no trace. This is why pm2 didn't come back after the Oct 2026 reboot.
+
+To test without downtime, wait 5 minutes and check that `~/cronlogs/pm2.log` exists. It stays empty while everything is healthy. To test fully, run `pm2 kill` at a quiet time. The site should be back within 5 minutes, and the log should show `running pm2 resurrect`.
+
+After upgrading node with nvm: reinstall pm2 under the new version (`npm install pm2@latest -g`), set the pax flags, update `NODE_BIN` in pm2-check.sh, and deploy. The deploy's watchdog check warns if `NODE_BIN` doesn't match the node your shell uses.
 
 
 ## Test Plan
