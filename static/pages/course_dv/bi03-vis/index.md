@@ -1,5 +1,3 @@
-<script src="/course_dv/toc.js"></script>
-
 # PowerBI Visualizations
 
 This module covers common visualizations in PowerBI.

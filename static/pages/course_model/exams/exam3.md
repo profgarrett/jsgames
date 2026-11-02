@@ -1,34 +1,33 @@
-<script src="/course_dv/toc.js"></script>
-<script src="/course_dv/review.js"></script>
-
-
 # Exam 3 Review
 
-
-This ChatGPT custom bot can quiz you on the material.
-[TutorBot](https://chatgpt.com/g/g-69cfcaf0fb708191a7c2359ad409c84f-python-exam-3-bot)
+Exam 3 will focus on combining ML techniques with Python programming.
 
 
-Exam 3 will focus on combining newer ML with our other materials.
+**Structure**
 
-It will be 75% paper and conceptual questions and 25% a take-home coding exercise. To prepare:
+- Definitions from our excelfun textbook.
+- Multiple-choice from our excelfun textbook.
+- Short-answer questions (new) testing understanding and application of modeling techniques.
+- Open response critique. I will provide a data project and you will need to critique its approach.
 
-- Be able to *read* code and explain what it does. Explain what a block of code does, and what it is missing or doing wrong.
-- Interpret the output of code, including error messages.
-- Discuss or critique an overall analysis strategy or approach. Given a problem, explain how to use different techniques together.
+## Prior Term Examples
 
+- [Spring 2026 Exam](exam3-spring-2026.zip): Note that this exam used creation of a solution, rather than reviewing an existing solution. The exam will be more focused on critiquing an existing solution, rather than creating a new one.
 
-The test will include elements from OLS regression and/or decision trees. Be sure to refresh your memory on the various measurements of model performance, including R-squared, MSE, MAE, and confusion matrices.
+## Learning Outcomes
 
-## New content
+{{ml10-dt}}
 
-### ml08-kmeans
+{{ml11-kmeans}}
 
-### py06-pandas-group-join
+{{ml12-pca}}
 
-### ml09-pca
+{{ml15-nlp}}
 
-### py09-control-flow
+{{py06-pandas-group-join}}
 
-### py10-functions
+{{py07-pandas-reshaping}}
 
+{{py09-control-flow}}
+
+{{py10-functions}}

@@ -52,13 +52,14 @@ const convert_images_by_adding_folder_path = (markdown: string, slug: string): s
 
 /*
 	File types that live next to the markdown in static/pages rather than being
-	pages in their own right: notebook templates, datafiles, Word exercises, and
+	pages in their own right: notebook templates, datafiles, Word exercises,
+	Power BI reports (.pbix) and templates (.pbit), SQLite databases (.db), and
 	so on. Add to this list when a reading starts linking a new kind of file.
 
 	Images and video are listed too, so that a plain link to one (rather than an
 	embed) resolves as well.
 */
-export const ASSET_EXTENSIONS = /\.(ipynb|csv|tsv|xlsx?|xlsm|docx?|pptx?|potx|pdf|zip|txt|json|sql|py|r|html?|png|jpe?g|gif|svg|webp|mp4|webm|ogv)$/i;
+export const ASSET_EXTENSIONS = /\.(ipynb|csv|tsv|xlsx?|xlsm|docx?|pptx?|potx|pbix|pbit|pdf|zip|txt|json|sql|db|py|r|html?|png|jpe?g|gif|svg|webp|mp4|webm|ogv)$/i;
 
 /*
 	Search markdown for links to local files and rewrite them the same way

@@ -75,13 +75,13 @@ Each week covers Python and Machine Learning concepts.  Most modules have a deli
 
 ### Week 10 - October 19, 2026 
 
-- *DataCamp: Unsupervised learning in Python*
+*DataCamp: Unsupervised learning in Python*
 
 - [ml11](ml11-kmeans/index): K-Means Clustering
 
 ### Week 11 - October 26, 2026 
 
-- *Datacamp: Intermediate Python* 
+*Datacamp: Intermediate Python* 
 
 - [ml12](ml12-pca/index): PCA and dimensionality reduction
 - [py09](py09-control-flow/index): Control flow
@@ -91,17 +91,20 @@ Each week covers Python and Machine Learning concepts.  Most modules have a deli
 
 *Datacamp: NLP in Python*
 
+[Exam 3](exams/exam3)
+
 - [ml15-nlp](ml15-nlp/index): NLP with Python
 - Optional readings:
 	- Primer on NLP Embeddings [reading](https://huggingface.co/spaces/hesamation/primer-llm-embedding)
 
-*Exam 3*
 
 ### Week 13 - November 9, 2026 
 
-- [ml11-nn](ml11-nn/index): Neural Networks with Python
+- [ml20-nn](ml20-nn/index): Neural Networks with Python
 
 ### Week 14 - November 16, 2026 
+
+- [ml30 - Ethics](ml30-ethics/index): Ethics in data science and machine learning
 
 ### Week 15 - November 23, 2026 
 
@@ -110,7 +113,6 @@ Each week covers Python and Machine Learning concepts.  Most modules have a deli
 ### Week 16 - November 30, 2026 
 
 - [ml12 - Future topics in AI/ML](ml12-future/index): Future topics in data science and machine learning
-- [ml13 - Ethics](ml13-ethics/index): Ethics in data science and machine learning
 
 Project week - No new material
 

@@ -1,5 +1,3 @@
-<script src="/course_dv/toc.js"></script>
-
 # SQL 1 - Introduction
 
 **Outcomes**:
@@ -8,10 +6,6 @@
 - Describe advantages / disadvantages
 - Describe issues using Excel to storage large datasets
 - Describe SQL
-
-**Links**:
-- [Why use a database?](whydb2)
-- Quizlet [course_sql01](https://quizlet.com/1049048584/course_sql01-introduction-to-databases-and-sql-concepts-flash-cards/?i=2up6jq&x=1jqt)
 
 ## Introduction to Databases
 

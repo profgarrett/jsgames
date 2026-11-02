@@ -1,5 +1,3 @@
-<script src="/course_dv/toc.js"></script>
-
 # SQL 2 - Getting the right data using SELECT
 
 This module accompanies the *Introduction to SQL* DataCamp tutorial. Some content can also be found in *Intermediate SQL*.
@@ -24,7 +22,9 @@ This module accompanies the *Introduction to SQL* DataCamp tutorial. Some conten
 - [YouTube: WHERE](https://www.youtube.com/watch?v=yXFEBYirWXg)
 
 **Problem Files**:
-- [Morgantown Docks GHCN](morgantowndocks/index)
+- [Morgantown Docks Problem](docks-problem.sql)
+- [Morgantown Docks Db](docks-db.sql)
+
 
 ## Style guide
 

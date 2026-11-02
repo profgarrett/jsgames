@@ -36,6 +36,21 @@ describe('convert_asset_links_by_adding_folder_path', () => {
 		);
 	});
 
+	test('rewrites SQLite database files', () => {
+		assert.strictEqual(
+			convert('[database](chinook.db)', SLUG),
+			'[database](/static/pages/course_model/ml01-modeling-gems/chinook.db)'
+		);
+	});
+
+	test('rewrites Power BI reports and templates', () => {
+		assert.strictEqual(
+			convert('[report](sales.pbix) and [template](sales.pbit)', SLUG),
+			'[report](/static/pages/course_model/ml01-modeling-gems/sales.pbix)'
+			+ ' and [template](/static/pages/course_model/ml01-modeling-gems/sales.pbit)'
+		);
+	});
+
 	test('rewrites back-to-back links without swallowing the second', () => {
 		assert.strictEqual(
 			convert('[a](x.csv)[b](y.csv)', SLUG),

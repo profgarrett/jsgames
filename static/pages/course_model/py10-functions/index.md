@@ -28,6 +28,9 @@ I will not ask you to write a function. However, the AI will often create them f
 print(1, 2, 3, sep=", ")
 ```
 
+    1, 2, 3
+
+
 ### Define your own functions using the `def` statement
 
 
@@ -36,6 +39,9 @@ def square(x):
     return x * x
 print(square(4))
 ```
+
+    16
+
 
 ### Return values from functions, including multiple values as tuples
 
@@ -47,6 +53,9 @@ lo, hi = min_and_max([2, 8, 5])
 print(lo, hi)
 ```
 
+    2 8
+
+
 ### Use default argument values in function definitions
 
 
@@ -57,6 +66,10 @@ print(power(3))      # 9
 print(power(3, 3))   # 27
 ```
 
+    9
+    27
+
+
 ### Create short anonymous functions using the `lambda` keyword
 
 
@@ -64,6 +77,9 @@ print(power(3, 3))   # 27
 add = lambda x, y: x + y
 print(add(2, 3))
 ```
+
+    5
+
 
 ## Sample Problems and Solutions
 
@@ -76,12 +92,18 @@ print(add(2, 3))
 print(1, 2, 3, sep="-")
 ```
 
+    1-2-3
+
+
 **Problem 2:** Print your name and age using the sep keyword argument and a custom separator.
 
 
 ```python
 print("Name:", "Alice", "Age:", 30, sep=" | ")
 ```
+
+    Name: | Alice | Age: | 30
+
 
 **Problem 3:** Print two words on the same line by using the `end` keyword argument.
 
@@ -91,12 +113,18 @@ print("Hello", end=" ")
 print("World")
 ```
 
+    Hello World
+
+
 **Problem 4:** Print numbers 1 to 5 separated by commas using the `sep` keyword argument.
 
 
 ```python
 print(1, 2, 3, 4, 5, sep=", ")
 ```
+
+    1, 2, 3, 4, 5
+
 
 ### Define your own functions using the `def` statement
 
@@ -109,6 +137,9 @@ def fun():
 fun()
 ```
 
+    Python is fun!
+
+
 **Problem 2:** Write a function that returns the cube of a number. Hint: Use `x ** 3`.
 
 
@@ -117,6 +148,9 @@ def cube(x):
     return x ** 3
 print(cube(2))  # 8
 ```
+
+    8
+
 
 **Problem 3:** Write a function that greets a user by name. Hint: use print
 
@@ -127,6 +161,9 @@ def greet(name):
 greet("Bob")
 ```
 
+    Hello, Bob!
+
+
 **Problem 4:** Write a function that returns the sum of two numbers. Hint: use return
 
 
@@ -135,6 +172,9 @@ def add(a, b):
     return a + b
 print(add(3, 4))  # 7
 ```
+
+    7
+
 
 ### Return values from functions, including multiple values as tuples
 
@@ -148,6 +188,9 @@ s, p = sum_and_product(2, 5)
 print(s, p)
 ```
 
+    7 10
+
+
 **Problem 2:** Write a function that returns the first and last elements of a list. Hint: use indexing.
 
 
@@ -157,6 +200,9 @@ def ends(lst):
 first, last = ends([10, 20, 30])
 print(first, last)
 ```
+
+    10 30
+
 
 **Problem 3:** Write a function that returns the quotient and remainder of two numbers. Hint: use `//` and `%`.
 
@@ -168,6 +214,9 @@ q, r = divmod_pair(7, 3)
 print(q, r)
 ```
 
+    2 1
+
+
 **Problem 4:** Write a function that returns the length and sum of a list.
 
 
@@ -177,6 +226,9 @@ def length_and_sum(lst):
 l, s = length_and_sum([1, 2, 3, 4])
 print(l, s)
 ```
+
+    4 10
+
 
 ### Use default argument values in function definitions
 
@@ -190,6 +242,10 @@ print(power(4))    # 16
 print(power(4, 3)) # 64
 ```
 
+    16
+    64
+
+
 **Problem 2:** Write a function that greets a user, defaulting to "World".
 
 
@@ -199,6 +255,10 @@ def greet(name="World"):
 greet()
 greet("Alice")
 ```
+
+    Hello, World!
+    Hello, Alice!
+
 
 **Problem 3:** Write a function that prints a message a given number of times, defaulting to once.
 
@@ -211,6 +271,12 @@ repeat("Hi!")
 repeat("Hello!", 3)
 ```
 
+    Hi!
+    Hello!
+    Hello!
+    Hello!
+
+
 ### Create short anonymous functions using the `lambda` keyword
 
 **Problem 1:** Create a lambda that multiplies two numbers. Save the lambda to a variable and call it.
@@ -221,6 +287,9 @@ multiply = lambda x, y: x * y
 print(multiply(3, 4))
 ```
 
+    12
+
+
 **Problem 2:** Sort a list of tuples by their second part using a lambda. Hint: use the sorted function with a key argument (where the key is a lambda function).
 
 
@@ -230,6 +299,9 @@ sorted_tuples = sorted(tuples, key=lambda t: t[1])
 print(sorted_tuples)
 ```
 
+    [(3, 1), (2, 2), (1, 3)]
+
+
 **Problem 3:** Filter a list to keep only even numbers using a lambda. Hint: use list(filter(..., nums)) with the ... replaced with your lambda function.
 
 
@@ -238,3 +310,6 @@ nums = [1, 2, 3, 4, 5]
 evens = list(filter(lambda x: x % 2 == 0, nums))
 print(evens)
 ```
+
+    [2, 4]
+

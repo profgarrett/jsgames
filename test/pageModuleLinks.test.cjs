@@ -77,6 +77,9 @@ describe('resolvePageLinkSlug', () => {
 	test('returns null for a link to a datafile or other asset', () => {
 		assert.strictEqual(resolvePageLinkSlug('course_ais/excel01-input-formats/index', 'file01-input-formats.xlsx'), null);
 		assert.strictEqual(resolvePageLinkSlug('course_model/ml01-modeling-gems/index', 'template.ipynb'), null);
+		assert.strictEqual(resolvePageLinkSlug('course_dv/pbi01-intro/index', 'sales.pbix'), null);
+		assert.strictEqual(resolvePageLinkSlug('course_dv/pbi01-intro/index', 'sales.PBIT'), null);
+		assert.strictEqual(resolvePageLinkSlug('course_ais/sql01-intro/index', 'chinook.db'), null);
 	});
 
 	test('returns null for some other absolute route', () => {
