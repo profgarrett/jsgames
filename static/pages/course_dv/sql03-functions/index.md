@@ -1,5 +1,3 @@
-<script src="/course_dv/toc.js"></script>
-
 # SQL 3 - Functions
 
 There are are a variety of useful SQL functions. 
@@ -15,7 +13,8 @@ There are are a variety of useful SQL functions.
 	- Convert from an integer to a float field by multiplying by 1.0
 
 **Links**:
-- [Morgantown Docks v2](morgantowndocks2)
+- [Docks v2 - Problem](docks2-problem.sql)
+- [Docks v2 - Db](docks2-db.db)
 
 
 ## Text Functions

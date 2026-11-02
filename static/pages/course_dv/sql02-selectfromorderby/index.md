@@ -23,7 +23,7 @@ This module accompanies the *Introduction to SQL* DataCamp tutorial. Some conten
 
 **Problem Files**:
 - [Morgantown Docks Problem](docks-problem.sql)
-- [Morgantown Docks Db](docks-db.sql)
+- [Morgantown Docks Db](docks-db.db)
 
 
 ## Style guide
