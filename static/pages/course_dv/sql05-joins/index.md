@@ -1,6 +1,4 @@
-<script src="/course_dv/toc.js"></script>
-
-# SQL 5 - Joining data
+# SQL - Joining data
 
 Join together two or more tables using a key
 
@@ -20,7 +18,10 @@ Join together two or more tables using a key
 - [SQLZoo: Using Null](https://sqlzoo.net/wiki/Using_Null)
 
 **Problems**:
-- [Sakila Movie Rental](sakila)
+- [Sakila - Database](sakila-db.db)
+- [Sakila - ERD](sakila-erd.png)
+- [Sakila - Problem](sakila-problem.sql)
+
 
 ## INNER JOIN
 

@@ -1,6 +1,5 @@
 # Neural Networks
 
-
 **Outcomes**:
 - Explain the structure of a feedforward neural network, including the role of neurons, layers, weights, and biases
 - Describe the training process — forward pass, loss calculation, backpropagation, and weight updates — in plain language.
@@ -14,7 +13,8 @@
 - [Neural Network Explainer](https://mlu-explain.github.io/neural-networks/)
 - [Playground Tensorflow](https://playground.tensorflow.org/)
 - [Template](template.ipynb)
-
+- [Mnist Lesson](mnist_lesson.ipynb)
+- [Mnist Lesson (with output)](mnist_lesson_output.ipynb)
 
 ## What Is a Neural Network?
 
@@ -239,19 +239,19 @@ Compared to the simpler models from earlier in the course:
 Start with the simpler model. Use a neural network when the simpler model is not accurate enough, you have enough data, and you do not need to explain each prediction.
 
 
-## Learning Tasks
+## Exercises
 
 Go to [https://playground.tensorflow.org/](https://playground.tensorflow.org/).
 
-**Starting setup.** Open [TensorFlow Playground](https://playground.tensorflow.org/), choose **Classification**, select only \(x_1\) and \(x_2\), and remove all hidden layers. Set noise to 0, activation to **Tanh**, learning rate to **0.03**, and regularization to **None**. Turn on **Show test data**. The dots show actual classes, while the background shows the model’s prediction. A blue dot on an orange background is a misclassification.
+**Starting setup.** Open [TensorFlow Playground](https://playground.tensorflow.org/), choose **Classification**, select only \(x_1\) and \(x_2\), and remove all hidden layers. Set noise to 0, activation to **Tanh**, learning rate to **0.03**, and regularization to **None**. Turn on **Show test data**. The dots show the true classes, while the background shows the model’s prediction. A blue dot on an orange background is a misclassification.
 
 | Task | Give students this instruction | What to listen for |
 |---|---|---|
-| **1. Draw the boundary before training** | Choose the two-cluster dataset. Before pressing Play, sketch a line that would separate the colors. Train for about 200 epochs and compare the model’s boundary with yours. Pick one point near the boundary. Which direction could you move it to change its predicted class? | Students should distinguish the point’s observed class from the model’s prediction. With the two raw inputs and no hidden layer, the decision boundary is a straight line. |
-| **2. Find a problem that more training cannot solve** | Switch to the checkerboard (XOR) dataset. Keep the same model. Record training loss at about 200 and 500 epochs. Try drawing a single straight line that puts both blue regions on one side and both orange regions on the other. Explain what limits the model. | Diagonally opposite regions share a class. Moving or rotating one line will always leave part of the pattern on the wrong side. Students can explain the limitation even if their loss values differ. |
-| **3. Solve XOR two ways** | Keep the XOR data. **Model A:** Add one hidden layer with four neurons and train for 500 epochs. Hover over two neurons and sketch which regions make each one respond. **Model B:** Remove the hidden layer, turn off \(x_1\) and \(x_2\), and select only \(x_1x_2\). Train again. Explain why the product is such a useful input. | Model A can learn intermediate patterns and combine them. In Model B, the product is positive when the inputs have the same sign and negative when their signs differ. That single feature captures the relationship defining the classes. |
+| **1. Draw the boundary before training** | Choose the two-cluster dataset. Before pressing Play, sketch a line that would separate the colors. Train for about 200 epochs and compare the model’s boundary with yours. Pick one point near the boundary. Which direction could you move it to change its predicted class? | Your answer should distinguish the point’s observed class from the model’s prediction. With the two raw inputs and no hidden layer, the decision boundary is a straight line. |
+| **2. Find a problem that more training cannot solve** | Switch to the checkerboard (XOR) dataset. Keep the same model. Record training loss at about 200 and 500 epochs. Try drawing a single straight line that puts both blue regions on one side and both orange regions on the other. Explain what limits the model. | Diagonally opposite regions share a class. Moving or rotating one line will always leave part of the pattern on the wrong side. You should be able to explain the limitation even if your loss values differ from another student. |
+| **3. Solve XOR two ways** | Keep the XOR data. **Model A:** Add one hidden layer with four neurons and train for 500 epochs. Hover over two neurons and sketch which regions make each one respond. **Model B:** Remove the hidden layer, turn off \(x_1\) and \(x_2\), and select only \(x_1x_2\). Train again. Explain why the product is such a useful input. | Model A can learn intermediate patterns and combine them. In Model B, the product is positive when the inputs have the same sign and negative when their signs differ. That feature captures the relationship defining the classes. |
 | **4. Design a feature for a circular boundary** | Choose the circle dataset. Start with no hidden layers and only \(x_1\) and \(x_2\). Train and sketch the boundary. Now turn off the raw inputs. Try \(x_1^2\) alone, then add \(x_2^2\). Predict each boundary before training. Why does adding the second squared input help? | \(x_1^2\) describes horizontal distance from the center and ignores vertical distance. Together, the squared inputs let the model approximate a rule based on \(x_1^2+x_2^2\), the squared distance from the origin. |
-| **5. Decide when to stop training** | Choose the spiral dataset, use only the two raw inputs, set noise to 25 and training data to 30%, and build two hidden layers of eight neurons each. Record training and test loss at about 100, 500, and 1,000 epochs. Which checkpoint would you keep? Defend your choice using the losses and the boundary. | A falling training loss alone does not establish that predictions improved on unseen points. If training loss falls while test loss rises, students have evidence of overfitting. If both fall, they should report what their run actually shows. |
+| **5. Decide when to stop training** | Choose the spiral dataset, use only the two raw inputs, set noise to 25 and training data to 30%, and build two hidden layers of eight neurons each. Record training and test loss at about 100, 500, and 1,000 epochs. Which checkpoint would you keep? Defend your choice using the losses and the boundary. | A falling training loss alone does not establish that predictions improved on unseen points. If training loss falls while test loss rises, you have evidence of overfitting. If both fall, you should report what the run actually shows. |
 
 
 ## Further Reading
