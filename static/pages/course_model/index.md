@@ -101,10 +101,12 @@ Each week covers Python and Machine Learning concepts.  Most modules have a deli
 ### Week 13 - November 9, 2026 
 
 - [ml20-nn](ml20-nn/index): Neural Networks with Python
+- [ml21-bodym](ml21-bodym/index): Body measurement prediction with a hybrid neural network
 
 ### Week 14 - November 16, 2026 
 
 - [ml30 - Ethics](ml30-ethics/index): Ethics in data science and machine learning
+
 
 ### Week 15 - November 23, 2026 
 
