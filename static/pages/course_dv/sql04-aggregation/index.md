@@ -1,5 +1,3 @@
-<script src="/course_dv/toc.js"></script>
-
 # SQL 4 - Aggregations
 
 **Outcomes**:

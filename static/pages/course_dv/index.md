@@ -115,20 +115,21 @@ Optional Reading:
 - [sql05. SQL Joins](sql05-joins/index)
 
 
-## Module 5: Python
 
 ### Week 13 - November 9, 2026 
 
-- [Python](py00-overview/index)
+- [sql06. SQL Complex Joins](sql06-complexjoins/index)
+- [sql07. SQL Review](sql07-review/index)
 
+## Module 5: Python
 
 ### Week 14 - November 16, 2026 
 
-Continue Python
+- [Python](py00-overview/index)
 
 ### Week 15 - November 23, 2026 
 
-*Spring Break - No activities*
+*Fall Break - No activities*
 
 ### Week 16 - November 30, 2026 
 

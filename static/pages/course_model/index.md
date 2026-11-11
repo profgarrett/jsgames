@@ -110,7 +110,7 @@ Each week covers Python and Machine Learning concepts.  Most modules have a deli
 
 ### Week 15 - November 23, 2026 
 
-*Spring Break - No activities*
+*Fall Break - No activities*
 
 ### Week 16 - November 30, 2026 
 

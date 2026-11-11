@@ -4,7 +4,10 @@ secret.js
 secret.distribution.js
 log.txt
 build
+.vscode
 
+# Avoid Claude stuff
+.claude/
 
 # Mac nonsense
 .DS_Store

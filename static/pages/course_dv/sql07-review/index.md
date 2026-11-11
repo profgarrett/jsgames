@@ -1,12 +1,13 @@
 # Problem: Explore the Northwind Database
 
-This problem is an overall review for SQL1-4. 
+This problem is an overall review for SQL.
 
 ## Outcome
 
 - Practice select/from/order by
 - Practice functions
 - Practice aggregation functions
+- Practice joins
 
 ## Process
 - Download the [db file](northwind.1.2.db)  
