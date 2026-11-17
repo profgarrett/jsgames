@@ -105,7 +105,8 @@ Each week covers Python and Machine Learning concepts.  Most modules have a deli
 
 ### Week 14 - November 16, 2026 
 
-- [ml30 - Ethics](ml30-ethics/index): Ethics in data science and machine learning
+- [ml22](ml22-xgboost/index): XGBoost
+- [ml30](ml30-ethics/index): Ethics in data science and machine learning
 
 
 ### Week 15 - November 23, 2026 

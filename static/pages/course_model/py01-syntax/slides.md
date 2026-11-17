@@ -170,7 +170,7 @@ print(not passed)           # False
 
 ## Comparisons Produce Booleans
 
-This is how we generlaly use Boolean variables.
+This is how we normally use Boolean variables.
 
 ```python
 score = 85

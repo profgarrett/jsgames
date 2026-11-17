@@ -1,0 +1,1600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>XGBoost Lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Mono:wght@400;600&family=Atkinson+Hyperlegible+Next:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #002855;
+    --navy-soft: #e3eaf3;
+    --gold: #eaaa00;
+    --ink: #1b2230;
+    --ink-2: #46506a;
+    --muted: #6b7487;
+    --page: #f2f4f7;
+    --surface: #ffffff;
+    --line: #d3d9e2;
+    --grid: #e8ecf1;
+    --font: 'Atkinson Hyperlegible Next', 'Atkinson Hyperlegible', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    --mono: 'Atkinson Hyperlegible Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  }
+  * { box-sizing: border-box; }
+  html { font-size: 18px; scroll-behavior: smooth; scroll-padding-top: 64px; }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+  body { margin: 0; background: var(--page); color: var(--ink); font-family: var(--font); line-height: 1.5; }
+  a { color: var(--navy); }
+  :focus-visible { outline: 3px solid var(--navy); outline-offset: 2px; }
+
+  /* ---------- top bar ---------- */
+  .topbar {
+    position: sticky; top: 0; z-index: 20;
+    background: var(--navy); color: #fff;
+    display: flex; align-items: center; gap: 24px;
+    padding: 0 24px; height: 52px;
+  }
+  .topbar .brand { font-weight: 800; font-size: 1.05rem; white-space: nowrap; letter-spacing: -0.01em; }
+  .topbar nav { display: flex; gap: 4px; overflow-x: auto; scrollbar-width: none; }
+  .topbar nav a {
+    color: #dbe4f0; text-decoration: none; font-size: 0.85rem; white-space: nowrap;
+    padding: 6px 10px; border-radius: 6px;
+  }
+  .topbar nav a:hover { background: rgba(255,255,255,0.12); color: #fff; }
+  .topbar nav a b { color: var(--gold); margin-right: 4px; }
+  .teacher-badge { display: none; margin-left: auto; font-size: 0.8rem; background: var(--gold); color: var(--navy); font-weight: 700; padding: 3px 10px; border-radius: 999px; white-space: nowrap; }
+  body.teacher .teacher-badge { display: inline-block; }
+
+  /* ---------- intro ---------- */
+  .intro { max-width: 1280px; margin: 0 auto; padding: 40px 24px 8px; }
+  .intro h1 { font-size: 2.6rem; line-height: 1.1; margin: 0 0 10px; color: var(--navy); font-weight: 800; letter-spacing: -0.02em; }
+  .intro p { margin: 0; max-width: 64ch; color: var(--ink-2); font-size: 1.05rem; }
+  .flow { display: flex; flex-wrap: wrap; gap: 8px 28px; margin: 18px 0 0; padding: 0; list-style: none; color: var(--ink-2); font-size: 0.95rem; }
+  .flow li { display: flex; align-items: baseline; gap: 8px; }
+  .flow li strong { color: var(--ink); }
+
+  /* ---------- activity ---------- */
+  .act { max-width: 1280px; margin: 0 auto; padding: 40px 24px 24px; }
+  .act + .act { border-top: 1px solid var(--line); }
+  .act-head { display: grid; grid-template-columns: auto 1fr; gap: 18px; align-items: start; margin-bottom: 18px; }
+  .act-num { font-size: 3.6rem; line-height: 0.9; font-weight: 800; color: var(--navy); letter-spacing: -0.04em; min-width: 1.1ch; }
+  .act-head h2 { margin: 2px 0 4px; font-size: 1.7rem; line-height: 1.2; color: var(--navy); letter-spacing: -0.01em; }
+  .act-head .concept { margin: 0; max-width: 70ch; color: var(--ink-2); }
+  .act-body { display: grid; grid-template-columns: minmax(0, 1.75fr) minmax(300px, 1fr); gap: 28px; align-items: start; }
+  @media (max-width: 1000px) { .act-body { grid-template-columns: 1fr; } }
+
+  /* ---------- controls ---------- */
+  .controls { display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: center; margin-bottom: 10px; }
+  .ctl { display: flex; align-items: center; gap: 8px; font-size: 0.88rem; color: var(--ink-2); }
+  .ctl > .lbl { font-weight: 600; color: var(--ink); }
+  select, input[type=text] {
+    font: inherit; font-size: 0.9rem; color: var(--ink);
+    padding: 6px 10px; border: 1px solid var(--line); border-radius: 6px; background: var(--surface);
+  }
+  select { padding-right: 6px; cursor: pointer; }
+  input[type=range] { width: 220px; max-width: 46vw; accent-color: var(--navy); cursor: pointer; }
+  .ctl output { min-width: 3ch; font-weight: 700; color: var(--ink); font-variant-numeric: tabular-nums; }
+  .btn {
+    font: inherit; font-size: 0.88rem; font-weight: 600;
+    padding: 7px 14px; border-radius: 6px; cursor: pointer;
+    border: 1.5px solid var(--navy); background: var(--surface); color: var(--navy);
+  }
+  .btn:hover { background: var(--navy-soft); }
+  .btn.primary { background: var(--navy); color: #fff; }
+  .btn.primary:hover { background: #0b3a73; }
+  .btn.next { box-shadow: 0 0 0 3px var(--gold); }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; box-shadow: none; }
+  .btn-group { display: flex; gap: 6px; flex-wrap: wrap; max-width: 100%; }
+  .btn-group .btn { max-width: 100%; }
+  .lab, .guide { min-width: 0; }
+  .seg { display: inline-flex; border: 1.5px solid var(--navy); border-radius: 6px; overflow: hidden; }
+  .seg button {
+    font: inherit; font-size: 0.85rem; font-weight: 600; padding: 6px 12px; cursor: pointer;
+    border: 0; background: var(--surface); color: var(--navy);
+  }
+  .seg button + button { border-left: 1.5px solid var(--navy); }
+  .seg button[aria-pressed=true] { background: var(--navy); color: #fff; }
+  .chk { display: inline-flex; align-items: center; gap: 6px; font-size: 0.88rem; color: var(--ink); cursor: pointer; }
+  .chk input { width: 17px; height: 17px; accent-color: var(--navy); }
+
+  /* ---------- plots ---------- */
+  .plot-wrap { position: relative; background: var(--surface); border: 1px solid var(--line); border-radius: 4px; }
+  .plot-wrap canvas { display: block; width: 100%; }
+  .plot-title { font-size: 0.85rem; font-weight: 700; color: var(--ink); margin: 0 0 4px; }
+  .plot-sub { font-size: 0.8rem; color: var(--muted); margin: -2px 0 6px; }
+  .tip {
+    position: absolute; pointer-events: none; display: none; z-index: 5;
+    background: var(--ink); color: #fff; font-size: 0.78rem; line-height: 1.35;
+    padding: 6px 9px; border-radius: 5px; white-space: nowrap; max-width: 300px;
+  }
+  .tip b { font-weight: 700; }
+  .two-plots { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .three-plots { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+  @media (max-width: 700px) { .two-plots, .three-plots { grid-template-columns: 1fr; } }
+
+  /* ---------- readouts ---------- */
+  .status { margin: 10px 0 0; padding: 8px 12px; background: var(--navy-soft); border-radius: 4px; font-size: 0.9rem; color: var(--ink); min-height: 2.6em; }
+  .stats { display: flex; flex-wrap: wrap; gap: 6px 28px; margin: 10px 0 0; padding: 0; list-style: none; }
+  .stats li { display: flex; flex-direction: column; }
+  .stats .k { font-size: 0.75rem; color: var(--muted); }
+  .stats .v { font-size: 1.25rem; font-weight: 700; color: var(--ink); font-variant-numeric: tabular-nums; }
+  .legend-inline { display: inline-flex; gap: 14px; font-size: 0.78rem; color: var(--ink-2); align-items: center; flex-wrap: wrap; }
+  .legend-inline svg { vertical-align: -2px; }
+  .sub-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin: 16px 0 4px; flex-wrap: wrap; }
+  .sub-head .plot-title { margin: 0; }
+  .swatch { display: inline-block; width: 11px; height: 11px; border-radius: 2px; margin-right: 5px; vertical-align: -1px; }
+
+  table.data { border-collapse: collapse; font-size: 0.85rem; font-variant-numeric: tabular-nums; margin-top: 6px; width: 100%; }
+  table.data th, table.data td { padding: 6px 8px; text-align: right; border-bottom: 1px solid var(--grid); }
+  table.data th:first-child, table.data td:first-child { text-align: left; }
+  table.data thead th { font-weight: 700; color: var(--ink); border-bottom: 1.5px solid var(--line); white-space: nowrap; }
+  table.data tr.best td { background: #fff6d6; font-weight: 700; }
+  table.data td.note { color: var(--muted); font-weight: 400; text-align: left; }
+  .table-scroll { overflow-x: auto; }
+
+  /* ---------- python echo ---------- */
+  details.code { margin-top: 14px; }
+  details.code summary { cursor: pointer; font-size: 0.85rem; font-weight: 600; color: var(--ink-2); }
+  details.code pre {
+    margin: 6px 0 0; padding: 12px 14px; background: #f7f9fc; border: 1px solid var(--line); border-radius: 4px;
+    font-family: var(--mono); font-size: 0.8rem; line-height: 1.5; color: var(--navy); overflow-x: auto;
+  }
+
+  /* ---------- guide column ---------- */
+  .guide { position: relative; padding-left: 22px; }
+  .guide::before { content: ''; position: absolute; left: 5px; top: 10px; bottom: 10px; width: 2px; background: var(--line); }
+  .step { position: relative; margin: 0 0 20px; }
+  .step::before { content: ''; position: absolute; left: -22px; top: 6px; width: 12px; height: 12px; border-radius: 50%; background: var(--page); border: 2px solid var(--navy); }
+  .step h3, .step summary { margin: 0 0 6px; font-size: 1rem; color: var(--navy); font-weight: 800; }
+  .step ol, .step ul { margin: 0; padding-left: 1.2em; }
+  .step li { margin: 0 0 6px; font-size: 0.92rem; }
+  .step li::marker { color: var(--muted); font-weight: 700; }
+  .step.turn { background: var(--surface); border-left: 4px solid var(--gold); padding: 12px 14px 8px; border-radius: 0 4px 4px 0; }
+  .step.turn::before { background: var(--gold); border-color: var(--gold); left: -22px; }
+  .step.turn li { font-size: 0.95rem; }
+  details.step summary { cursor: pointer; list-style: none; }
+  details.step summary::-webkit-details-marker { display: none; }
+  details.step summary::after { content: ' (open when ready)'; font-weight: 400; color: var(--muted); font-size: 0.85rem; }
+  details.step[open] summary::after { content: ''; }
+  .teacher-notes { display: none; }
+  body.teacher .teacher-notes { display: block; }
+  .teacher-notes { background: #fff8e1; border: 1px dashed #c99400; padding: 12px 14px 6px; border-radius: 4px; }
+  .teacher-notes::before { background: #fff8e1; border-color: #c99400; }
+  .teacher-notes li { font-size: 0.86rem; }
+
+  footer { max-width: 1280px; margin: 0 auto; padding: 24px 24px 48px; color: var(--muted); font-size: 0.85rem; border-top: 1px solid var(--line); }
+  footer p { margin: 0 0 6px; max-width: 80ch; }
+
+  @media (max-width: 600px) {
+    html { font-size: 16px; }
+    .topbar { padding: 0 16px; gap: 12px; }
+    .intro, .act, footer { padding-left: 16px; padding-right: 16px; }
+    .intro h1 { font-size: 2rem; }
+    .act-num { font-size: 2.6rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <span class="brand">XGBoost Lab</span>
+  <nav aria-label="Activities">
+    <a href="#a1"><b>1</b>Watch it work</a>
+    <a href="#a2"><b>2</b>Step size</a>
+    <a href="#a3"><b>3</b>When to stop</a>
+    <a href="#a4"><b>4</b>Tune it</a>
+    <a href="#a5"><b>5</b>Forest or boosting</a>
+    <a href="#a6"><b>6</b>Yes or no</a>
+  </nav>
+  <span class="teacher-badge">Teacher notes on</span>
+</div>
+
+<header class="intro">
+  <h1>XGBoost Lab</h1>
+  <p>Six short activities on boosting with small trees. Each one runs the same way in class:</p>
+  <ol class="flow">
+    <li><strong>Demo.</strong> Watch the instructor use the tool.</li>
+    <li><strong>Your turn.</strong> Use it yourself to answer the questions.</li>
+    <li><strong>Discuss.</strong> Compare what you found.</li>
+  </ol>
+</header>
+
+<!-- ======================= 1 ======================= -->
+<section class="act" id="a1" aria-labelledby="a1-h">
+  <div class="act-head">
+    <div class="act-num" aria-hidden="true">1</div>
+    <div>
+      <h2 id="a1-h">Watch it work</h2>
+      <p class="concept">Boosting starts with one guess for every point, the average, and then repeats three steps. <strong>Errors</strong> finds how far off each prediction is. <strong>Small tree</strong> fits a tree to those errors. <strong>Add</strong> moves every prediction by a fraction of what the tree says.</p>
+    </div>
+  </div>
+  <div class="act-body">
+    <div class="lab">
+      <div class="controls">
+        <label class="ctl"><span class="lbl">Data</span>
+          <select id="a1-data">
+            <option value="wavy">Wavy line</option>
+            <option value="steps">Three levels</option>
+            <option value="mpg">Car weight and mpg</option>
+          </select>
+        </label>
+        <div class="ctl"><span class="lbl">Learning rate</span>
+          <div class="seg" id="a1-lr" role="group" aria-label="Learning rate">
+            <button data-v="1" aria-pressed="false">1</button>
+            <button data-v="0.5" aria-pressed="true">0.5</button>
+            <button data-v="0.1" aria-pressed="false">0.1</button>
+          </div>
+        </div>
+        <label class="ctl"><span class="lbl">Tree depth</span>
+          <select id="a1-depth"><option value="1" selected>1</option><option value="2">2</option><option value="3">3</option></select>
+        </label>
+      </div>
+      <div class="controls">
+        <div class="btn-group">
+          <button class="btn primary" id="a1-errors">Errors</button>
+          <button class="btn primary" id="a1-tree">Small tree</button>
+          <button class="btn primary" id="a1-add">Add</button>
+          <button class="btn" id="a1-add10">Add 10 trees</button>
+          <button class="btn" id="a1-reset">Start over</button>
+        </div>
+      </div>
+      <div class="sub-head">
+        <p class="plot-title">The data and the current prediction</p>
+        <span class="legend-inline">
+          <span><svg width="22" height="12" aria-hidden="true"><line x1="1" y1="6" x2="21" y2="6" stroke="#002855" stroke-width="3"/></svg> prediction</span>
+          <span><svg width="12" height="12" aria-hidden="true"><line x1="6" y1="1" x2="6" y2="11" stroke="#eb6834" stroke-width="2.5"/></svg> error</span>
+          <span><svg width="22" height="12" aria-hidden="true"><line x1="1" y1="6" x2="21" y2="6" stroke="#002855" stroke-width="2" stroke-dasharray="4 3"/></svg> after Add</span>
+        </span>
+      </div>
+      <div class="plot-wrap" id="a1-plot"><canvas aria-label="Scatter plot of the data with the current prediction drawn as a line"></canvas><div class="tip"></div></div>
+      <div class="sub-head">
+        <p class="plot-title">The errors (actual minus predicted)</p>
+        <span class="legend-inline">
+          <span><svg width="12" height="12" aria-hidden="true"><rect x="2" y="2" width="8" height="8" fill="#eb6834"/></svg> one point's error</span>
+          <span><svg width="22" height="12" aria-hidden="true"><line x1="1" y1="6" x2="21" y2="6" stroke="#002855" stroke-width="3"/></svg> what the small tree says</span>
+        </span>
+      </div>
+      <div class="plot-wrap" id="a1-res"><canvas aria-label="Plot of each point's error with the newest small tree drawn as steps"></canvas><div class="tip"></div></div>
+      <p class="status" id="a1-status" aria-live="polite"></p>
+      <ul class="stats">
+        <li><span class="k">Trees added</span><span class="v" id="a1-n">0</span></li>
+        <li><span class="k">Next step</span><span class="v" id="a1-next">Errors</span></li>
+        <li><span class="k">RMSE</span><span class="v" id="a1-rmse">–</span></li>
+        <li><span class="k">Largest error</span><span class="v" id="a1-max">–</span></li>
+      </ul>
+      <div class="sub-head"><p class="plot-title">RMSE after each tree</p></div>
+      <div class="plot-wrap" id="a1-hist"><canvas aria-label="Line chart of RMSE after each tree"></canvas><div class="tip"></div></div>
+      <details class="code"><summary>Same thing in Python</summary><pre id="a1-code"></pre></details>
+    </div>
+    <aside class="guide">
+      <div class="step demo">
+        <h3>Demo</h3>
+        <ol>
+          <li>The flat line is the starting prediction: the average of all the points.</li>
+          <li>Press <b>Errors</b>. Each orange line is one point's error. The lower plot shows the same errors on their own.</li>
+          <li>Press <b>Small tree</b>. The tree splits the errors into groups and predicts the average error of each group.</li>
+          <li>Press <b>Add</b>. The prediction moves by the learning rate times the tree. Repeat the three steps a few times.</li>
+        </ol>
+      </div>
+      <div class="step turn">
+        <h3>Your turn</h3>
+        <ol>
+          <li>Press <b>Start over</b> and step through three trees. Where did each tree split? Write down the RMSE after each one.</li>
+          <li>Set the learning rate to <b>1</b> and start over. After one tree, how many different values can the prediction take? How many after two trees?</li>
+          <li>Set the learning rate to <b>0.1</b>, start over, and press <b>Add 10 trees</b> three times. Compare the RMSE after 30 trees with what learning rate 1 reached after only 10.</li>
+          <li>Change the tree depth to 3. What changes about each step?</li>
+        </ol>
+      </div>
+      <details class="step discuss">
+        <summary>Discuss</summary>
+        <ul>
+          <li>Why is the second tree fit to the errors and not to the original data?</li>
+          <li>Each tree is flat between its splits. How does a set of flat trees turn into a curve?</li>
+          <li>Do the errors ever get bigger after an Add?</li>
+        </ul>
+      </details>
+      <div class="step teacher-notes">
+        <h3>Teacher notes</h3>
+        <ul>
+          <li>Each leaf predicts the average error of its points, so adding the tree moves each group toward its own average. Refitting the original data would just give the same tree again.</li>
+          <li>Trees split in different places. With depth 1, each tree adds at most one new jump, so after n trees the prediction has at most n + 1 levels. The sum of many small steps looks like a curve.</li>
+          <li>Training RMSE cannot go up when the learning rate is 1 or less: each leaf moves its points part of the way toward their average error. Whether that helps on new data is activity 3.</li>
+          <li>This page uses plain averages in the leaves (<code>reg_lambda=0</code>) to match the hand example in the lesson. XGBoost's default shrinks each leaf slightly. Activity 4 has that setting.</li>
+          <li>On Wavy line, learning rate 1 gets the RMSE to 0.53 in 10 trees. Learning rate 0.1 is still at 0.81 after 30.</li>
+          <li>Car weight and mpg is the lesson's data with one predictor. The first split lands at 2,765 lb, which is where a single tree would split too.</li>
+        </ul>
+      </div>
+    </aside>
+  </div>
+</section>
+
+<!-- ======================= 2 ======================= -->
+<section class="act" id="a2" aria-labelledby="a2-h">
+  <div class="act-head">
+    <div class="act-num" aria-hidden="true">2</div>
+    <div>
+      <h2 id="a2-h">Step size</h2>
+      <p class="concept">The <strong>learning rate</strong> is the fraction of each tree that gets added. Big steps learn quickly but also chase the noise. Small steps need more trees. Filled points are the rows the model learns from. Hollow points are <strong>validation rows</strong> it never sees.</p>
+    </div>
+  </div>
+  <div class="act-body">
+    <div class="lab">
+      <div class="controls">
+        <label class="ctl"><span class="lbl">Trees</span><input type="range" id="a2-trees" min="1" max="300" value="10"><output id="a2-trees-out">10</output></label>
+        <label class="ctl"><span class="lbl">Tree depth</span>
+          <select id="a2-depth"><option value="1">1</option><option value="2" selected>2</option><option value="3">3</option><option value="6">6</option></select>
+        </label>
+      </div>
+      <div class="two-plots">
+        <div>
+          <div class="controls" style="margin-bottom:4px">
+            <label class="ctl"><span class="swatch" style="background:#6250d6"></span><span class="lbl">Learning rate</span>
+              <select id="a2-lra"><option value="1" selected>1</option><option value="0.5">0.5</option><option value="0.3">0.3</option></select>
+            </label>
+          </div>
+          <div class="plot-wrap" id="a2-plotA"><canvas aria-label="Data and fitted line for the first learning rate"></canvas><div class="tip"></div></div>
+          <ul class="stats">
+            <li><span class="k">Training RMSE</span><span class="v" id="a2-trA">–</span></li>
+            <li><span class="k">Validation RMSE</span><span class="v" id="a2-vaA">–</span></li>
+          </ul>
+        </div>
+        <div>
+          <div class="controls" style="margin-bottom:4px">
+            <label class="ctl"><span class="swatch" style="background:#1baf7a"></span><span class="lbl">Learning rate</span>
+              <select id="a2-lrb"><option value="0.1" selected>0.1</option><option value="0.05">0.05</option><option value="0.02">0.02</option></select>
+            </label>
+          </div>
+          <div class="plot-wrap" id="a2-plotB"><canvas aria-label="Data and fitted line for the second learning rate"></canvas><div class="tip"></div></div>
+          <ul class="stats">
+            <li><span class="k">Training RMSE</span><span class="v" id="a2-trB">–</span></li>
+            <li><span class="k">Validation RMSE</span><span class="v" id="a2-vaB">–</span></li>
+          </ul>
+        </div>
+      </div>
+      <div class="sub-head">
+        <p class="plot-title">Validation RMSE by number of trees</p>
+        <span class="legend-inline">
+          <span><span class="swatch" style="background:#6250d6"></span><span id="a2-legA">learning rate 1</span></span>
+          <span><span class="swatch" style="background:#1baf7a"></span><span id="a2-legB">learning rate 0.1</span></span>
+        </span>
+      </div>
+      <div class="plot-wrap" id="a2-chart"><canvas aria-label="Line chart of validation RMSE by number of trees for the two learning rates"></canvas><div class="tip"></div></div>
+      <p class="status" id="a2-status" aria-live="polite"></p>
+      <details class="code"><summary>Same thing in Python</summary><pre id="a2-code"></pre></details>
+    </div>
+    <aside class="guide">
+      <div class="step demo">
+        <h3>Demo</h3>
+        <ol>
+          <li>Both models use the same data and the same number of trees. Only the learning rate differs.</li>
+          <li>Drag <b>Trees</b> slowly from 1 to 20. The left model snaps to the points almost at once. The right model is still catching up.</li>
+          <li>Keep dragging to 300 and watch the chart. Each line shows the error on the validation rows.</li>
+        </ol>
+      </div>
+      <div class="step turn">
+        <h3>Your turn</h3>
+        <ol>
+          <li>At 10 trees, which learning rate has the lower validation RMSE? Which is lower at 300 trees?</li>
+          <li>For each learning rate, find the number of trees where its validation RMSE is lowest. Hover over the chart to read the values.</li>
+          <li>At 300 trees, compare the two fitted lines. Which one looks more like the pattern you would draw by hand?</li>
+          <li>Change the right side to 0.02. Is 300 trees enough for it?</li>
+        </ol>
+      </div>
+      <details class="step discuss">
+        <summary>Discuss</summary>
+        <ul>
+          <li>Why does the large learning rate get worse on the validation rows while it keeps improving on the training rows?</li>
+          <li>If you cut the learning rate in half, what should you do with the number of trees?</li>
+          <li>Which would you rather pay for: more trees or more error?</li>
+        </ul>
+      </details>
+      <div class="step teacher-notes">
+        <h3>Teacher notes</h3>
+        <ul>
+          <li>With learning rate 1 each tree is added in full, so within a few trees the model starts fitting the scatter of individual training points. Its validation error bottoms out early and climbs.</li>
+          <li>With 0.1 each tree is a small nudge. The line stays smoother, the validation error bottoms out later and lower, and it climbs more slowly afterward.</li>
+          <li>Rule of thumb: learning rate and number of trees trade off. Halve one, roughly double the other.</li>
+          <li>Depth 6 makes both sides overfit much sooner: learning rate 1 is at its best after a single tree. Depth 1 lets learning rate 0.1 keep improving for well over 100 trees.</li>
+          <li>The lesson's car data shows the same pattern: with learning rate 0.3 the validation error was lowest after 7 trees, and with 0.05 it took 60.</li>
+        </ul>
+      </div>
+    </aside>
+  </div>
+</section>
+
+<!-- ======================= 3 ======================= -->
+<section class="act" id="a3" aria-labelledby="a3-h">
+  <div class="act-head">
+    <div class="act-num" aria-hidden="true">3</div>
+    <div>
+      <h2 id="a3-h">When to stop</h2>
+      <p class="concept">Training error always falls as trees are added. Validation error falls, levels off, and then rises. <strong>Early stopping</strong> watches the validation rows and stops once they have gone a set number of trees without improving.</p>
+    </div>
+  </div>
+  <div class="act-body">
+    <div class="lab">
+      <div class="controls">
+        <label class="ctl"><span class="lbl">Learning rate</span>
+          <select id="a3-lr"><option value="0.5">0.5</option><option value="0.3" selected>0.3</option><option value="0.1">0.1</option><option value="0.05">0.05</option></select>
+        </label>
+        <label class="ctl"><span class="lbl">Tree depth</span>
+          <select id="a3-depth"><option value="1">1</option><option value="2">2</option><option value="3" selected>3</option><option value="6">6</option></select>
+        </label>
+        <label class="ctl"><span class="lbl">early_stopping_rounds</span>
+          <select id="a3-pat"><option value="5">5</option><option value="10" selected>10</option><option value="20">20</option><option value="50">50</option></select>
+        </label>
+      </div>
+      <div class="controls">
+        <label class="ctl"><span class="lbl">Trees</span><input type="range" id="a3-trees" min="0" max="300" value="0"><output id="a3-trees-out">0</output></label>
+        <div class="btn-group">
+          <button class="btn primary" id="a3-play">Play</button>
+          <button class="btn" id="a3-jump">Jump to the best</button>
+        </div>
+      </div>
+      <div class="sub-head">
+        <p class="plot-title">The data and the model</p>
+        <span class="legend-inline">
+          <span><svg width="12" height="12" aria-hidden="true"><circle cx="6" cy="6" r="4.5" fill="#2a78d6"/></svg> training rows</span>
+          <span><svg width="12" height="12" aria-hidden="true"><circle cx="6" cy="6" r="4" fill="#fff" stroke="#eb6834" stroke-width="2"/></svg> validation rows</span>
+        </span>
+      </div>
+      <div class="plot-wrap" id="a3-plot"><canvas aria-label="Scatter plot of training and validation rows with the fitted line"></canvas><div class="tip"></div></div>
+      <div class="sub-head">
+        <p class="plot-title">RMSE by number of trees</p>
+        <span class="legend-inline">
+          <span><span class="swatch" style="background:#2a78d6"></span>training rows</span>
+          <span><span class="swatch" style="background:#eb6834"></span>validation rows</span>
+        </span>
+      </div>
+      <div class="plot-wrap" id="a3-chart"><canvas aria-label="Line chart of training and validation RMSE by number of trees. Click to choose a number of trees."></canvas><div class="tip"></div></div>
+      <p class="status" id="a3-status" aria-live="polite"></p>
+      <ul class="stats">
+        <li><span class="k">Training RMSE</span><span class="v" id="a3-tr">–</span></li>
+        <li><span class="k">Validation RMSE</span><span class="v" id="a3-va">–</span></li>
+        <li><span class="k">Lowest validation RMSE</span><span class="v" id="a3-best">–</span></li>
+        <li><span class="k">Early stopping keeps</span><span class="v" id="a3-stop">–</span></li>
+      </ul>
+      <details class="code"><summary>Same thing in Python</summary><pre id="a3-code"></pre></details>
+    </div>
+    <aside class="guide">
+      <div class="step demo">
+        <h3>Demo</h3>
+        <ol>
+          <li>Press <b>Play</b>. The line bends toward the data as trees are added, and both error lines fall.</li>
+          <li>Keep watching. The training line keeps falling. The validation line turns back up, and the fitted line starts to jump at single points.</li>
+          <li>The dashed line on the chart marks where early stopping would give up. The dot marks the model it keeps.</li>
+        </ol>
+      </div>
+      <div class="step turn">
+        <h3>Your turn</h3>
+        <ol>
+          <li>Predict first: at how many trees will the validation error be lowest? Press <b>Play</b>, then <b>Jump to the best</b> to check.</li>
+          <li>Drag <b>Trees</b> to 300. Describe what the fitted line is doing that it was not doing at the best point.</li>
+          <li>Set <code>early_stopping_rounds</code> to 5, then to 50. How many trees are built before stopping each time? Is the model that is kept the same?</li>
+          <li>Change the learning rate to 0.05. Where is the best point now?</li>
+        </ol>
+      </div>
+      <details class="step discuss">
+        <summary>Discuss</summary>
+        <ul>
+          <li>Why can't we use the training error to decide when to stop?</li>
+          <li>Why not use the test rows to decide?</li>
+          <li>What could go wrong if <code>early_stopping_rounds</code> is very small?</li>
+        </ul>
+      </details>
+      <div class="step teacher-notes">
+        <h3>Teacher notes</h3>
+        <ul>
+          <li>Training error can only fall, so it would say "never stop". Validation rows stand in for new data.</li>
+          <li>If the test rows chose the number of trees, the test score would be the best of many tries and would overstate how the model does on new data.</li>
+          <li>A small patience can stop at a temporary bump in a noisy validation line, before the real minimum. A large patience wastes time but finds the same model. With the settings the page opens with, 5, 10, 20 and 50 all keep the same model.</li>
+          <li><code>best_iteration</code> counts from 0, so the number of trees kept is <code>best_iteration + 1</code>.</li>
+          <li>With a smaller learning rate the low point moves to the right (52 trees at 0.05 instead of 8 at 0.3). Here it is no lower, only later.</li>
+        </ul>
+      </div>
+    </aside>
+  </div>
+</section>
+
+<!-- ======================= 4 ======================= -->
+<section class="act" id="a4" aria-labelledby="a4-h">
+  <div class="act-head">
+    <div class="act-num" aria-hidden="true">4</div>
+    <div>
+      <h2 id="a4-h">Tune it</h2>
+      <p class="concept">Choose the settings, fit the model, and read its score on the validation rows. Try to beat the single tree. The <strong>test rows</strong> are hidden. You get to check them once, after you have picked your best model.</p>
+    </div>
+  </div>
+  <div class="act-body">
+    <div class="lab">
+      <div class="controls">
+        <label class="ctl"><span class="lbl">n_estimators</span>
+          <select id="a4-n"><option>10</option><option>50</option><option selected>100</option><option>300</option><option>1000</option></select>
+        </label>
+        <label class="ctl"><span class="lbl">learning_rate</span>
+          <select id="a4-lr"><option>1</option><option selected>0.3</option><option>0.1</option><option>0.05</option><option>0.02</option></select>
+        </label>
+        <label class="ctl"><span class="lbl">max_depth</span>
+          <select id="a4-depth"><option>1</option><option>2</option><option>3</option><option>4</option><option selected>6</option></select>
+        </label>
+        <label class="ctl"><span class="lbl">reg_lambda</span>
+          <select id="a4-lambda"><option>0</option><option selected>1</option><option>10</option></select>
+        </label>
+        <label class="chk"><input type="checkbox" id="a4-es"> Early stopping (20 rounds)</label>
+      </div>
+      <div class="controls">
+        <div class="btn-group">
+          <button class="btn primary" id="a4-fit">Fit this model</button>
+          <button class="btn" id="a4-reveal" disabled>Check my best on the test rows</button>
+          <button class="btn" id="a4-clear">Clear attempts</button>
+        </div>
+      </div>
+      <div class="sub-head">
+        <p class="plot-title">The data and your latest model</p>
+        <span class="legend-inline">
+          <span><svg width="12" height="12" aria-hidden="true"><circle cx="6" cy="6" r="4.5" fill="#2a78d6"/></svg> training rows</span>
+          <span><svg width="12" height="12" aria-hidden="true"><circle cx="6" cy="6" r="4" fill="#fff" stroke="#eb6834" stroke-width="2"/></svg> validation rows</span>
+          <span id="a4-testkey" hidden><svg width="12" height="12" aria-hidden="true"><path d="M6 1 L11 10 L1 10 Z" fill="#6b7487"/></svg> test rows</span>
+        </span>
+      </div>
+      <div class="plot-wrap" id="a4-plot"><canvas aria-label="Scatter plot of training and validation rows with your latest model"></canvas><div class="tip"></div></div>
+      <p class="status" id="a4-status" aria-live="polite"></p>
+      <div class="sub-head"><p class="plot-title">Your attempts</p></div>
+      <div class="table-scroll">
+        <table class="data" id="a4-table">
+          <thead><tr><th>Model</th><th>Trees used</th><th>Training RMSE</th><th>Validation RMSE</th><th>Test RMSE</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <details class="code"><summary>Same thing in Python</summary><pre id="a4-code"></pre></details>
+    </div>
+    <aside class="guide">
+      <div class="step demo">
+        <h3>Demo</h3>
+        <ol>
+          <li>The first two rows of the table are baselines: predicting the average, and a single tree of depth 3.</li>
+          <li>Press <b>Fit this model</b> with the settings as they are. These are XGBoost's defaults. Compare its training and validation RMSE.</li>
+          <li>Change one setting and fit again. The highlighted row has the lowest validation RMSE so far.</li>
+        </ol>
+      </div>
+      <div class="step turn">
+        <h3>Your turn</h3>
+        <ol>
+          <li>Fit the defaults. Is the model overfit? How can you tell from the table?</li>
+          <li>Change one setting at a time and record what happens to the validation RMSE. Which setting matters most?</li>
+          <li>Get the lowest validation RMSE you can in ten attempts. Write down your settings.</li>
+          <li>Press <b>Check my best on the test rows</b>. Is the test RMSE higher or lower than the validation RMSE? Compare with your neighbor.</li>
+        </ol>
+      </div>
+      <details class="step discuss">
+        <summary>Discuss</summary>
+        <ul>
+          <li>Which settings did the winning models in the room have in common?</li>
+          <li>Why is the test RMSE usually a little worse than the best validation RMSE?</li>
+          <li>Why does the page only let you check the test rows once?</li>
+        </ul>
+      </details>
+      <div class="step teacher-notes">
+        <h3>Teacher notes</h3>
+        <ul>
+          <li>The defaults (100 trees, 0.3, depth 6) reach a training RMSE of 0.01 and a validation RMSE of 1.67, which is worse than the single tree's 1.32. That gap is the overfitting signal, the same as R² of 1.0 against 0.74 in the lesson.</li>
+          <li>Early stopping matters most. The same defaults with early stopping keep only 4 trees and score 1.25. The best models, at about 1.10, use depth 3 with early stopping, and the learning rate hardly matters once early stopping picks the number of trees.</li>
+          <li>A larger <code>reg_lambda</code> shrinks every leaf toward zero. It helps a little: the default model improves from 1.67 to 1.57 with <code>reg_lambda</code> = 10.</li>
+          <li>The best model scores 1.09 on the validation rows and 1.12 on the test rows, against 1.28 for the single tree. The winner was picked because it scored well on these validation rows, so part of that score is luck. The test rows had no part in the choice, so they give the honest number. Checking them repeatedly would turn them into a second validation set.</li>
+          <li>The data is a made-up curve with noise. The noise has a standard deviation of 1.0, so no model can honestly get an RMSE much below 1.0 on new rows.</li>
+        </ul>
+      </div>
+    </aside>
+  </div>
+</section>
+
+<!-- ======================= 5 ======================= -->
+<section class="act" id="a5" aria-labelledby="a5-h">
+  <div class="act-head">
+    <div class="act-num" aria-hidden="true">5</div>
+    <div>
+      <h2 id="a5-h">Forest or boosting</h2>
+      <p class="concept">Two ways to combine many trees. A <strong>random forest</strong> grows deep trees separately, each on a random sample of the rows, and averages them. <strong>Boosting</strong> grows small trees in sequence, each one on the errors left so far.</p>
+    </div>
+  </div>
+  <div class="act-body">
+    <div class="lab">
+      <div class="controls">
+        <label class="ctl"><span class="lbl">Trees</span><input type="range" id="a5-n" min="1" max="200" value="1"><output id="a5-n-out">1</output></label>
+        <label class="chk"><input type="checkbox" id="a5-show" checked> Show the newest tree</label>
+      </div>
+      <div class="three-plots">
+        <div>
+          <p class="plot-title">One deep tree</p>
+          <div class="plot-wrap" id="a5-p1"><canvas aria-label="Data with the prediction of a single deep tree"></canvas><div class="tip"></div></div>
+        </div>
+        <div>
+          <p class="plot-title"><span class="swatch" style="background:#1baf7a"></span>Random forest</p>
+          <div class="plot-wrap" id="a5-p2"><canvas aria-label="Data with the prediction of a random forest"></canvas><div class="tip"></div></div>
+        </div>
+        <div>
+          <p class="plot-title"><span class="swatch" style="background:#6250d6"></span>Boosting</p>
+          <div class="plot-wrap" id="a5-p3"><canvas aria-label="Data with the prediction of a boosted model"></canvas><div class="tip"></div></div>
+        </div>
+      </div>
+      <div class="sub-head">
+        <p class="plot-title">Validation RMSE by number of trees</p>
+        <span class="legend-inline">
+          <span><svg width="22" height="12" aria-hidden="true"><line x1="1" y1="6" x2="21" y2="6" stroke="#6b7487" stroke-width="2" stroke-dasharray="4 3"/></svg> one deep tree</span>
+          <span><span class="swatch" style="background:#1baf7a"></span>random forest</span>
+          <span><span class="swatch" style="background:#6250d6"></span>boosting</span>
+        </span>
+      </div>
+      <div class="plot-wrap" id="a5-chart"><canvas aria-label="Line chart of validation RMSE by number of trees for a random forest and boosting"></canvas><div class="tip"></div></div>
+      <p class="status" id="a5-status" aria-live="polite"></p>
+      <details class="code"><summary>Same thing in Python</summary><pre id="a5-code"></pre></details>
+    </div>
+    <aside class="guide">
+      <div class="step demo">
+        <h3>Demo</h3>
+        <ol>
+          <li>With one tree, look at each plot. The forest's first tree is deep and jagged. Boosting's first tree is a few flat steps, and only a tenth of it has been added.</li>
+          <li>Drag <b>Trees</b> to 10. The forest averages ten jagged trees and gets smoother. Boosting stacks ten small steps and gets more detailed.</li>
+          <li>Drag to 200 and read the chart.</li>
+        </ol>
+      </div>
+      <div class="step turn">
+        <h3>Your turn</h3>
+        <ol>
+          <li>At 1 tree, which model has the lowest validation RMSE? At 20 trees? At 200?</li>
+          <li>Does the forest's validation error ever turn back up as trees are added? Does boosting's?</li>
+          <li>Each model starts from a different place: the forest's first tree already follows the data, and boosting's first prediction is nearly flat. Which one improves more as trees are added?</li>
+        </ol>
+      </div>
+      <details class="step discuss">
+        <summary>Discuss</summary>
+        <ul>
+          <li>Which model could build all of its trees at the same time on different computers? Which cannot?</li>
+          <li>Which model needs early stopping?</li>
+          <li>On the lesson's car data the two scored about the same. What would make you choose one over the other?</li>
+        </ul>
+      </details>
+      <div class="step teacher-notes">
+        <h3>Teacher notes</h3>
+        <ul>
+          <li>Forest trees are independent, so they can be built in parallel and more trees never hurt: the average just settles down. Its error falls quickly and then goes flat.</li>
+          <li>Boosting's trees depend on each other, so they are built in order. Its error falls for longer, often ends below the forest, and then turns up if you keep going. It is the one that needs early stopping.</li>
+          <li>A single deep tree memorizes its training rows. Averaging many of them cancels much of that noise (lower variance). Boosting starts with a model that is too simple and removes the error step by step (lower bias).</li>
+          <li>Boosting here uses learning rate 0.1 and depth 2. The forest uses unpruned trees on bootstrap samples, with a minimum of 3 rows per leaf.</li>
+          <li>Practical answer to the last question: forests are harder to get wrong, boosting usually wins when it is tuned and the dataset is large.</li>
+        </ul>
+      </div>
+    </aside>
+  </div>
+</section>
+
+<!-- ======================= 6 ======================= -->
+<section class="act" id="a6" aria-labelledby="a6-h">
+  <div class="act-head">
+    <div class="act-num" aria-hidden="true">6</div>
+    <div>
+      <h2 id="a6-h">Yes or no</h2>
+      <p class="concept"><code>XGBClassifier</code> runs the same loop on probabilities. The shading is the predicted probability for every spot on the plot. Each tree splits on one feature, so the boundary is built out of horizontal and vertical cuts.</p>
+    </div>
+  </div>
+  <div class="act-body">
+    <div class="lab">
+      <div class="controls">
+        <label class="ctl"><span class="lbl">Data</span>
+          <select id="a6-data">
+            <option value="moons">Two crescents</option>
+            <option value="ring">Circle inside a ring</option>
+            <option value="diag">Diagonal line</option>
+            <option value="noisy">Overlapping groups</option>
+          </select>
+        </label>
+        <label class="ctl"><span class="lbl">Learning rate</span>
+          <select id="a6-lr"><option>1</option><option selected>0.3</option><option>0.1</option></select>
+        </label>
+        <label class="ctl"><span class="lbl">Tree depth</span>
+          <select id="a6-depth"><option>1</option><option selected>2</option><option>3</option><option>6</option></select>
+        </label>
+      </div>
+      <div class="controls">
+        <label class="ctl"><span class="lbl">Trees</span><input type="range" id="a6-trees" min="0" max="200" value="0"><output id="a6-trees-out">0</output></label>
+        <div class="btn-group">
+          <button class="btn primary" id="a6-add">Add a tree</button>
+          <button class="btn" id="a6-play">Play</button>
+        </div>
+        <label class="chk"><input type="checkbox" id="a6-val"> Show validation rows</label>
+      </div>
+      <div class="sub-head">
+        <p class="plot-title">Predicted probability</p>
+        <span class="legend-inline">
+          <span><svg width="12" height="12" aria-hidden="true"><circle cx="6" cy="6" r="4.5" fill="#2a78d6"/></svg> no</span>
+          <span><svg width="12" height="12" aria-hidden="true"><rect x="1.5" y="1.5" width="9" height="9" fill="#eb6834"/></svg> yes</span>
+          <span><svg width="64" height="12" aria-hidden="true"><defs><linearGradient id="pg"><stop offset="0" stop-color="#2a78d6" stop-opacity="0.55"/><stop offset="0.5" stop-color="#f4f4f2"/><stop offset="1" stop-color="#eb6834" stop-opacity="0.55"/></linearGradient></defs><rect x="0" y="1" width="64" height="10" fill="url(#pg)" stroke="#d3d9e2"/></svg> 0% to 100% yes</span>
+        </span>
+      </div>
+      <div class="plot-wrap" id="a6-plot"><canvas aria-label="Scatter plot of two classes with the predicted probability shaded behind them"></canvas><div class="tip"></div></div>
+      <p class="status" id="a6-status" aria-live="polite"></p>
+      <ul class="stats">
+        <li><span class="k">Training accuracy</span><span class="v" id="a6-tr">–</span></li>
+        <li><span class="k">Validation accuracy</span><span class="v" id="a6-va">–</span></li>
+        <li><span class="k">Points the model is unsure about (40% to 60%)</span><span class="v" id="a6-unsure">–</span></li>
+      </ul>
+      <details class="code"><summary>Same thing in Python</summary><pre id="a6-code"></pre></details>
+    </div>
+    <aside class="guide">
+      <div class="step demo">
+        <h3>Demo</h3>
+        <ol>
+          <li>With no trees, every spot has the same probability: the share of yes points in the training rows.</li>
+          <li>Press <b>Add a tree</b> a few times. Each tree cuts the plot along one feature and pushes the probability up on one side and down on the other.</li>
+          <li>Press <b>Play</b>. Hover anywhere to read the predicted probability at that spot.</li>
+        </ol>
+      </div>
+      <div class="step turn">
+        <h3>Your turn</h3>
+        <ol>
+          <li>For <b>Two crescents</b>, how many trees does it take to reach 95% training accuracy?</li>
+          <li>Pick <b>Diagonal line</b> and go to 50 trees. Look closely at the boundary between the two colors. Is it a straight line? Why not?</li>
+          <li>Pick <b>Overlapping groups</b>, turn on the validation rows, and go to 200 trees. Compare the training and validation accuracy. What are the small islands of color?</li>
+          <li>Set the tree depth to 1. Which datasets can it still learn? How many more trees does it need?</li>
+        </ol>
+      </div>
+      <details class="step discuss">
+        <summary>Discuss</summary>
+        <ul>
+          <li>Where on the plot is the model least sure? Why there?</li>
+          <li>Logistic regression draws one straight boundary. Which of these datasets would it handle better than boosting, and which worse?</li>
+          <li>If a wrong yes costs more than a wrong no, how could you use the probability instead of the yes/no prediction?</li>
+        </ul>
+      </details>
+      <div class="step teacher-notes">
+        <h3>Teacher notes</h3>
+        <ul>
+          <li>Each tree's leaf moves the log-odds, not the probability directly, which is why the shading saturates smoothly instead of jumping to 0% or 100%.</li>
+          <li>Trees can only cut parallel to an axis, so a diagonal boundary becomes a staircase. Logistic regression gets that dataset with one line. It cannot do the ring or the crescents at all.</li>
+          <li>Depth 1 trees can only add up one-feature effects, with no "x is high AND y is low". That turns out to be enough for all four datasets here. It just takes more trees: about 50 for the crescents instead of 20.</li>
+          <li>On Overlapping groups the classes really do overlap, and even a perfect model would be right only about 77% of the time. Training accuracy climbs to 100% by drawing islands around single points, while validation accuracy stays near 65%. That is the classification version of activity 3.</li>
+          <li>Two crescents reaches 95% training accuracy at 12 trees with the settings the page opens with.</li>
+          <li>Changing the cutoff from 50% ties to the threshold and ROC discussion in the Predicting Categories lesson.</li>
+        </ul>
+      </div>
+    </aside>
+  </div>
+</section>
+
+<footer>
+  <p>This page runs a small version of the boosting algorithm in your browser. It finds splits the same way XGBoost does, but XGBoost adds refinements, so the numbers here will not match Python exactly. The patterns will.</p>
+  <p>Car weight and mpg comes from the seaborn <code>mpg</code> dataset used in the lesson. All other datasets are made up.</p>
+</footer>
+
+<script>
+'use strict';
+/* weight (lb) and miles per gallon for the 392 cars in the seaborn mpg dataset */
+const MPG = [[3504,18],[3693,15],[3436,18],[3433,16],[3449,17],[4341,15],[4354,14],[4312,14],[4425,14],[3850,15],[3563,15],[3609,14],[3761,15],[3086,14],[2372,24],[2833,22],[2774,18],[2587,21],[2130,27],[1835,26],[2672,25],[2430,24],[2375,25],[2234,26],[2648,21],[4615,10],[4376,10],[4382,11],[4732,9],[2130,27],[2264,28],[2228,25],[2634,19],[3439,16],[3329,17],[3302,19],[3288,18],[4209,14],[4464,14],[4154,14],[4096,14],[4955,12],[4746,13],[5140,13],[2962,18],[2408,22],[3282,19],[3139,18],[2220,23],[2123,28],[2074,30],[2065,30],[1773,31],[1613,35],[1834,27],[1955,26],[2278,24],[2126,25],[2254,23],[2408,20],[2226,21],[4274,13],[4385,14],[4135,15],[4129,14],[3672,17],[4633,11],[4502,13],[4456,12],[4422,13],[2330,19],[3892,15],[4098,13],[4294,13],[4077,14],[2933,18],[2511,22],[2979,21],[2189,26],[2395,22],[2288,28],[2506,23],[2164,28],[2100,27],[4100,13],[3672,14],[3988,13],[4042,14],[3777,15],[4952,12],[4464,13],[4363,13],[4237,14],[4735,13],[4951,12],[3821,13],[3121,18],[3278,16],[2945,18],[3021,18],[2904,23],[1950,26],[4997,11],[4906,12],[4654,13],[4499,12],[2789,18],[2279,20],[2401,21],[2379,22],[2124,18],[2310,19],[2472,21],[2265,26],[4082,15],[4278,16],[1867,29],[2158,24],[2582,20],[2868,19],[3399,15],[2660,24],[2807,20],[3664,11],[3102,20],[2901,19],[3336,15],[1950,31],[2451,26],[1836,32],[2542,25],[3781,16],[3632,16],[3613,18],[4141,16],[4699,13],[4457,14],[4638,14],[4257,14],[2219,29],[1963,26],[2300,26],[1649,31],[2003,32],[2125,28],[2108,24],[2246,26],[2489,24],[2391,26],[2000,31],[3264,19],[3459,18],[3432,15],[3158,15],[4668,16],[4440,15],[4498,16],[4657,14],[3907,17],[3897,16],[3730,15],[3785,18],[3039,21],[3221,20],[3169,13],[2171,29],[2639,23],[2914,20],[2592,23],[2702,24],[2223,25],[2545,24],[2984,18],[1937,29],[3211,19],[2694,23],[2957,23],[2945,22],[2671,25],[1795,33],[2464,28],[2220,25],[2572,25],[2255,26],[2202,27],[4215,17.5],[4190,16],[3962,15.5],[4215,14.5],[3233,22],[3353,22],[3012,24],[3085,22.5],[2035,29],[2164,24.5],[1937,29],[1795,33],[3651,20],[3574,18],[3645,18.5],[3193,17.5],[1825,29.5],[1990,32],[2155,28],[2565,26.5],[3150,20],[3940,13],[3270,19],[2930,19],[3820,16.5],[4380,16.5],[4055,13],[3870,13],[3755,13],[2045,31.5],[2155,30],[1825,36],[2300,25.5],[1945,33.5],[3880,17.5],[4060,17],[4140,15.5],[4295,15],[3520,17.5],[3425,20.5],[3630,19],[3525,18.5],[4220,16],[4165,15.5],[4325,15.5],[4335,16],[1940,29],[2740,24.5],[2265,26],[2755,25.5],[2051,30.5],[2075,33.5],[1985,30],[2190,30.5],[2815,22],[2600,21.5],[2720,21.5],[1985,43.1],[1800,36.1],[1985,32.8],[2070,39.4],[1800,36.1],[3365,19.9],[3735,19.4],[3570,20.2],[3535,19.2],[3155,20.5],[2965,20.2],[2720,25.1],[3430,20.5],[3210,19.4],[3380,20.6],[3070,20.8],[3620,18.6],[3410,18.1],[3425,19.2],[3445,17.7],[3205,18.1],[4080,17.5],[2155,30],[2560,27.5],[2300,27.2],[2230,30.9],[2515,21.1],[2745,23.2],[2855,23.8],[2405,23.9],[2830,20.3],[3140,17],[2795,21.6],[3410,16.2],[1990,31.5],[2135,29.5],[3245,21.5],[2990,19.8],[2890,22.3],[3265,20.2],[3360,20.6],[3840,17],[3725,17.6],[3955,16.5],[3830,18.2],[4360,16.9],[4054,15.5],[3605,19.2],[3940,18.5],[1925,31.9],[1975,34.1],[1915,35.7],[2670,27.4],[3530,25.4],[3900,23],[3190,27.2],[3420,23.9],[2200,34.2],[2150,34.5],[2020,31.8],[2130,37.3],[2670,28.4],[2595,28.8],[2700,26.8],[2556,33.5],[2144,41.5],[1968,38.1],[2120,32.1],[2019,37.2],[2678,28],[2870,26.4],[3003,24.3],[3381,19.1],[2188,34.3],[2711,29.8],[2542,31.3],[2434,37],[2265,32.2],[2110,46.6],[2800,27.9],[2110,40.8],[2085,44.3],[2335,43.4],[2950,36.4],[3250,30],[1850,44.6],[2145,33.8],[1845,29.8],[2910,32.7],[2420,23.7],[2500,35],[2290,32.4],[2490,27.2],[2635,26.6],[2620,25.8],[2725,23.5],[2385,30],[1755,39.1],[1875,39],[1760,35.1],[2065,32.3],[1975,37],[2050,37.7],[1985,34.1],[2215,34.7],[2045,34.4],[2380,29.9],[2190,33],[2210,33.7],[2350,32.4],[2615,32.9],[2635,31.6],[3230,28.1],[3160,30.7],[2900,25.4],[2930,24.2],[3415,22.4],[3725,26.6],[3060,20.2],[3465,17.6],[2605,28],[2640,27],[2395,34],[2575,31],[2525,29],[2735,27],[2865,24],[1980,36],[2025,37],[1970,31],[2125,38],[2125,36],[2160,36],[2205,36],[2245,34],[1965,38],[1965,32],[1995,38],[2945,25],[3015,38],[2585,26],[2835,22],[2665,32],[2370,36],[2950,27],[2790,27],[2130,44],[2295,32],[2625,28],[2720,31]];
+
+/* =====================================================================
+   Basics
+   ===================================================================== */
+const BLUE = '#2a78d6', ORANGE = '#eb6834', GREEN = '#1baf7a', PURPLE = '#6250d6';
+const GRAY = '#a2a9b4', INK = '#1b2230', INK2 = '#46506a', MUTED = '#6b7487', GRID = '#e8ecf1', NAVY = '#002855';
+const TEACHER = new URLSearchParams(location.search).has('teacher');
+if (TEACHER) document.body.classList.add('teacher');
+const REDUCED = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+const $ = (s, el = document) => el.querySelector(s);
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const FONT = () => getComputedStyle(document.body).fontFamily;
+
+function mulberry32(seed) {
+  let a = seed >>> 0;
+  return function () {
+    a = (a + 0x6D2B79F5) >>> 0;
+    let t = a;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+function randn(r) {
+  let u = 0;
+  while (u === 0) u = r();
+  return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * r());
+}
+function fmtNum(v) {
+  if (v == null || !isFinite(v)) return '–';
+  const a = Math.abs(v);
+  if (a >= 1000) return Math.round(v).toLocaleString('en-US');
+  if (a >= 100) return String(Math.round(v));
+  if (a >= 10) return String(+v.toFixed(1));
+  return String(+v.toFixed(2));
+}
+const f2 = v => (v == null || !isFinite(v)) ? '–' : v.toFixed(2);
+const signed = v => (v >= 0 ? '+' : '−') + fmtNum(Math.abs(v));
+const pct = v => Math.round(v * 100) + '%';
+const plural = (n, w) => n + ' ' + w + (n === 1 ? '' : 's');
+
+function niceTicks(a, b, n = 5) {
+  const span = b - a;
+  if (!(span > 0)) return [a];
+  const step0 = span / n;
+  const mag = Math.pow(10, Math.floor(Math.log10(step0)));
+  const r = step0 / mag;
+  const step = (r < 1.5 ? 1 : r < 3 ? 2 : r < 7 ? 5 : 10) * mag;
+  const t = [];
+  for (let v = Math.ceil(a / step - 1e-9) * step; v <= b + step * 1e-9; v += step) t.push(+v.toPrecision(12));
+  return t;
+}
+function seg(el, onChange) {
+  el.addEventListener('click', e => {
+    const b = e.target.closest('button[data-v]');
+    if (!b) return;
+    el.querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+    onChange(b.dataset.v);
+  });
+}
+function extent(arr, pad = 0.06) {
+  let lo = Infinity, hi = -Infinity;
+  for (const v of arr) { if (v < lo) lo = v; if (v > hi) hi = v; }
+  const p = (hi - lo || 1) * pad;
+  return [lo - p, hi + p];
+}
+const mean = a => { let s = 0; for (const v of a) s += v; return s / a.length; };
+function rmse(pred, y) {
+  let s = 0;
+  for (let i = 0; i < y.length; i++) { const d = y[i] - pred[i]; s += d * d; }
+  return Math.sqrt(s / y.length);
+}
+
+/* =====================================================================
+   Plot: a canvas with axes. P.draw(ctx, P) paints the marks.
+   ===================================================================== */
+function makePlot(wrap, o = {}) {
+  const canvas = $('canvas', wrap), tipEl = $('.tip', wrap), ctx = canvas.getContext('2d');
+  const P = { canvas, ctx, o, x0: 0, x1: 1, y0: 0, y1: 1, hover: null };
+  const m = Object.assign({ l: 50, r: 14, t: 12, b: o.xl ? 40 : 26 }, o.m || {});
+  P.domain = (x0, x1, y0, y1) => { P.x0 = x0; P.x1 = x1; P.y0 = y0; P.y1 = y1; };
+  P.sx = v => P.px0 + (v - P.x0) / (P.x1 - P.x0) * (P.px1 - P.px0);
+  P.sy = v => P.py1 - (v - P.y0) / (P.y1 - P.y0) * (P.py1 - P.py0);
+  P.ix = px => P.x0 + (px - P.px0) / (P.px1 - P.px0) * (P.x1 - P.x0);
+  P.iy = py => P.y0 + (P.py1 - py) / (P.py1 - P.py0) * (P.y1 - P.y0);
+  P.render = () => {
+    const w = wrap.clientWidth;
+    if (!w) return;
+    const h = o.h || Math.round(clamp(w * (o.aspect || 0.5), 150, 460));
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = Math.round(w * dpr); canvas.height = Math.round(h * dpr);
+    canvas.style.height = h + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, w, h);
+    P.W = w; P.H = h; P.px0 = m.l; P.px1 = w - m.r; P.py0 = m.t; P.py1 = h - m.b;
+    if (P.before) P.before(ctx, P);
+    const fx = o.xFmt || fmtNum, fy = o.yFmt || fmtNum;
+    ctx.font = `12px ${FONT()}`; ctx.lineWidth = 1;
+    ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+    let xt = o.xTicks ? o.xTicks(P) : niceTicks(P.x0, P.x1, w < 380 ? 4 : 6);
+    if (o.xInt) xt = xt.filter(v => Number.isInteger(v));
+    for (const v of xt) {
+      const x = Math.round(P.sx(v)) + 0.5;
+      if (x < P.px0 - 1 || x > P.px1 + 1) continue;
+      if (!P.before) { ctx.strokeStyle = GRID; ctx.beginPath(); ctx.moveTo(x, P.py0); ctx.lineTo(x, P.py1); ctx.stroke(); }
+      ctx.fillStyle = MUTED; ctx.fillText(fx(v), x, P.py1 + 6);
+    }
+    ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+    for (const v of niceTicks(P.y0, P.y1, h < 200 ? 3 : 5)) {
+      const y = Math.round(P.sy(v)) + 0.5;
+      if (y < P.py0 - 1 || y > P.py1 + 1) continue;
+      if (!P.before) { ctx.strokeStyle = GRID; ctx.beginPath(); ctx.moveTo(P.px0, y); ctx.lineTo(P.px1, y); ctx.stroke(); }
+      ctx.fillStyle = MUTED; ctx.fillText(fy(v), P.px0 - 7, y);
+    }
+    ctx.strokeStyle = '#c3cad5'; ctx.beginPath();
+    ctx.moveTo(P.px0 + 0.5, P.py0); ctx.lineTo(P.px0 + 0.5, P.py1 + 0.5); ctx.lineTo(P.px1, P.py1 + 0.5); ctx.stroke();
+    ctx.fillStyle = INK2; ctx.font = `600 12px ${FONT()}`;
+    if (o.xl) { ctx.textAlign = 'center'; ctx.textBaseline = 'bottom'; ctx.fillText(typeof o.xl === 'function' ? o.xl() : o.xl, (P.px0 + P.px1) / 2, h - 4); }
+    if (o.yl) {
+      ctx.save(); ctx.translate(13, (P.py0 + P.py1) / 2); ctx.rotate(-Math.PI / 2);
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(typeof o.yl === 'function' ? o.yl() : o.yl, 0, 0); ctx.restore();
+    }
+    ctx.save(); ctx.beginPath(); ctx.rect(P.px0 - 6, P.py0 - 6, P.px1 - P.px0 + 14, P.py1 - P.py0 + 12); ctx.clip();
+    if (P.draw) P.draw(ctx, P);
+    ctx.restore();
+  };
+  P.pos = e => { const r = canvas.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top]; };
+  P.tip = (mx, my, html) => {
+    if (!html) { tipEl.style.display = 'none'; return; }
+    tipEl.innerHTML = html; tipEl.style.display = 'block';
+    const tw = tipEl.offsetWidth, th = tipEl.offsetHeight;
+    tipEl.style.left = clamp(mx + 14, 4, P.W - tw - 4) + 'px';
+    tipEl.style.top = clamp(my - th - 10, 4, P.H - th - 4) + 'px';
+  };
+  if (window.ResizeObserver) new ResizeObserver(() => P.render()).observe(wrap);
+  else window.addEventListener('resize', P.render);
+  return P;
+}
+
+/* marks */
+function dot(c, x, y, color, r = 4.2) {
+  c.beginPath(); c.arc(x, y, r, 0, 2 * Math.PI); c.fillStyle = color; c.fill();
+  c.lineWidth = 1.2; c.strokeStyle = '#fff'; c.stroke();
+}
+function ring(c, x, y, color, r = 3.8) {
+  c.beginPath(); c.arc(x, y, r, 0, 2 * Math.PI); c.fillStyle = '#fff'; c.fill();
+  c.lineWidth = 1.8; c.strokeStyle = color; c.stroke();
+}
+function square(c, x, y, color, s = 7.4, hollow = false) {
+  c.beginPath(); c.rect(x - s / 2, y - s / 2, s, s);
+  if (hollow) { c.fillStyle = '#fff'; c.fill(); c.lineWidth = 1.8; c.strokeStyle = color; c.stroke(); }
+  else { c.fillStyle = color; c.fill(); c.lineWidth = 1.2; c.strokeStyle = '#fff'; c.stroke(); }
+}
+function tri(c, x, y, color, s = 5) {
+  c.beginPath(); c.moveTo(x, y - s); c.lineTo(x + s, y + s * 0.8); c.lineTo(x - s, y + s * 0.8); c.closePath();
+  c.fillStyle = color; c.fill(); c.lineWidth = 1; c.strokeStyle = '#fff'; c.stroke();
+}
+/* a model's prediction as a line across the plot; fn(x) returns y */
+function curve(c, P, fn, color, width = 2.6, dash = null) {
+  const n = Math.max(200, Math.round(P.px1 - P.px0));
+  c.beginPath();
+  for (let i = 0; i <= n; i++) {
+    const xv = P.x0 + (P.x1 - P.x0) * i / n;
+    const px = P.sx(xv), py = P.sy(fn(xv));
+    if (i === 0) c.moveTo(px, py); else c.lineTo(px, py);
+  }
+  c.lineWidth = width; c.strokeStyle = color; c.lineJoin = 'round';
+  c.setLineDash(dash || []); c.stroke(); c.setLineDash([]);
+}
+/* a series by number of trees: vals[k] is the value with (k + from) trees */
+function series(c, P, vals, color, o = {}) {
+  const from = o.from || 0;
+  c.beginPath();
+  vals.forEach((v, k) => { const px = P.sx(k + from), py = P.sy(v); if (k === 0) c.moveTo(px, py); else c.lineTo(px, py); });
+  c.lineWidth = o.width || 2; c.strokeStyle = color; c.lineJoin = 'round';
+  c.setLineDash(o.dash || []); c.stroke(); c.setLineDash([]);
+}
+function vline(c, P, xv, color, dash = [5, 4], width = 1.5) {
+  const x = Math.round(P.sx(xv)) + 0.5;
+  c.beginPath(); c.moveTo(x, P.py0); c.lineTo(x, P.py1);
+  c.lineWidth = width; c.strokeStyle = color; c.setLineDash(dash); c.stroke(); c.setLineDash([]);
+}
+function tag(c, P, x, y, text, o = {}) {
+  c.font = `600 12px ${FONT()}`;
+  const w = c.measureText(text).width + 10;
+  let bx = o.left ? x - w - 8 : x + 8;
+  bx = clamp(bx, P.px0 + 2, P.px1 - w - 2);
+  const by = clamp(y - (o.below ? -8 : 28), P.py0 + 2, P.py1 - 22);
+  c.fillStyle = 'rgba(255,255,255,0.92)'; c.fillRect(bx, by, w, 20);
+  c.fillStyle = o.color || INK; c.textAlign = 'left'; c.textBaseline = 'middle'; c.fillText(text, bx + 5, by + 10.5);
+}
+function argmin(a, from = 0) { let b = from; for (let i = from; i < a.length; i++) if (a[i] < a[b] - 1e-12) b = i; return b; }
+/* hover on a by-trees chart: calls show(k) with the nearest whole number of trees */
+function hoverTrees(P, lo, hi, show) {
+  P.canvas.addEventListener('pointermove', e => {
+    const [mx, my] = P.pos(e);
+    if (mx < P.px0 - 4 || mx > P.px1 + 4) { P.hover = null; P.tip(0, 0, null); P.render(); return; }
+    const k = clamp(Math.round(P.ix(mx)), lo(), hi());
+    P.hover = k; P.render(); P.tip(P.sx(k), my, show(k));
+  });
+  P.canvas.addEventListener('pointerleave', () => { P.hover = null; P.tip(0, 0, null); P.render(); });
+}
+/* hover on a scatter: pts() returns [{px, py, html}] */
+function hoverPoints(P, pts, fallback) {
+  P.canvas.addEventListener('pointermove', e => {
+    const [mx, my] = P.pos(e);
+    let best = null, bd = 13 * 13;
+    for (const p of pts()) { const d = (p.px - mx) ** 2 + (p.py - my) ** 2; if (d < bd) { bd = d; best = p; } }
+    if (best) P.tip(mx, my, best.html);
+    else if (fallback && mx >= P.px0 && mx <= P.px1 && my >= P.py0 && my <= P.py1) P.tip(mx, my, fallback(P.ix(mx), P.iy(my)));
+    else P.tip(0, 0, null);
+  });
+  P.canvas.addEventListener('pointerleave', () => P.tip(0, 0, null));
+}
+
+/* =====================================================================
+   Trees and boosting
+   A tree is fit to an error r and a weight h for each row, the way XGBoost does it:
+   a leaf predicts sum(r) / (sum(h) + lambda), and the best split is the one with the
+   largest gain. For a number outcome r is the residual and h is 1, so with lambda = 0
+   a leaf is simply the average residual of its rows.
+   ===================================================================== */
+function growTree(X, r, h, rows, depth, o) {
+  let G = 0, H = 0;
+  for (const i of rows) { G += r[i]; H += h[i]; }
+  const leaf = { leaf: true, w: G / (H + o.lambda || 1e-12), n: rows.length };
+  if (depth >= o.depth || rows.length < 2) return leaf;
+  const base = G * G / (H + o.lambda || 1e-12);
+  let best = null;
+  for (let f = 0; f < X[0].length; f++) {
+    const s = rows.slice().sort((a, b) => X[a][f] - X[b][f]);
+    let GL = 0, HL = 0;
+    for (let k = 0; k < s.length - 1; k++) {
+      GL += r[s[k]]; HL += h[s[k]];
+      if (X[s[k]][f] === X[s[k + 1]][f]) continue;
+      const GR = G - GL, HR = H - HL;
+      if (HL < o.minChild || HR < o.minChild) continue;
+      const gain = GL * GL / (HL + o.lambda || 1e-12) + GR * GR / (HR + o.lambda || 1e-12) - base;
+      if (gain > 1e-9 && (!best || gain > best.gain)) best = { gain, f, k, s, thr: (X[s[k]][f] + X[s[k + 1]][f]) / 2 };
+    }
+  }
+  if (!best) return leaf;
+  return {
+    f: best.f, thr: best.thr, gain: best.gain, n: rows.length,
+    left: growTree(X, r, h, best.s.slice(0, best.k + 1), depth + 1, o),
+    right: growTree(X, r, h, best.s.slice(best.k + 1), depth + 1, o)
+  };
+}
+function treeOut(t, x) { while (!t.leaf) t = x[t.f] <= t.thr ? t.left : t.right; return t.w; }
+function treeLeaves(t, lo = -Infinity, hi = Infinity, out = []) {   // for one-feature trees
+  if (t.leaf) out.push({ lo, hi, w: t.w, n: t.n });
+  else { treeLeaves(t.left, lo, Math.min(hi, t.thr), out); treeLeaves(t.right, Math.max(lo, t.thr), hi, out); }
+  return out;
+}
+function treeSplits(t, out = []) { if (!t.leaf) { out.push(t.thr); treeSplits(t.left, out); treeSplits(t.right, out); } return out; }
+
+/* Boosting for a number outcome. sets = extra {X, y} to score after every tree. */
+function boost(X, y, o, sets = []) {
+  const N = y.length, base = mean(y), rows = [...Array(N).keys()];
+  const pred = new Float64Array(N).fill(base), r = new Float64Array(N), h = new Float64Array(N).fill(1);
+  const ev = sets.map(s => ({ s, pred: new Float64Array(s.y.length).fill(base), hist: [] }));
+  ev.forEach(e => e.hist.push(rmse(e.pred, e.s.y)));
+  const m = { base, lr: o.lr, trees: [], train: [rmse(pred, y)], sets: ev.map(e => e.hist), best: 0, stopped: null };
+  const T = { depth: o.depth, lambda: o.lambda == null ? 1 : o.lambda, minChild: o.minChild == null ? 1 : o.minChild };
+  for (let t = 0; t < o.n; t++) {
+    for (let i = 0; i < N; i++) r[i] = y[i] - pred[i];
+    const tree = growTree(X, r, h, rows, 0, T);
+    m.trees.push(tree);
+    for (let i = 0; i < N; i++) pred[i] += o.lr * treeOut(tree, X[i]);
+    m.train.push(rmse(pred, y));
+    ev.forEach(e => { for (let i = 0; i < e.s.y.length; i++) e.pred[i] += o.lr * treeOut(tree, e.s.X[i]); e.hist.push(rmse(e.pred, e.s.y)); });
+    if (ev.length) {
+      const v = ev[0].hist;
+      if (v[t + 1] < v[m.best] - 1e-12) m.best = t + 1;
+      else if (o.patience && t + 1 - m.best >= o.patience) { m.stopped = t + 1; break; }
+    }
+  }
+  return m;
+}
+function boostPredict(m, x, n) {
+  const k = n == null ? m.trees.length : Math.min(n, m.trees.length);
+  let s = m.base;
+  for (let i = 0; i < k; i++) s += m.lr * treeOut(m.trees[i], x);
+  return s;
+}
+/* where early stopping would stop, read from a validation history that was run to the end */
+function earlyStop(hist, patience) {
+  let best = 0;
+  for (let t = 1; t < hist.length; t++) {
+    if (hist[t] < hist[best] - 1e-12) best = t;
+    else if (t - best >= patience) return { keep: best, stop: t };
+  }
+  return { keep: best, stop: null };
+}
+/* An ordinary regression tree (each leaf is the average of its rows) */
+function cart(X, y, rows, maxDepth, minLeaf) {
+  return growTree(X, y, new Float64Array(y.length).fill(1), rows, 0, { depth: maxDepth, lambda: 0, minChild: minLeaf });
+}
+
+/* =====================================================================
+   Datasets
+   ===================================================================== */
+function make1D(kind, seed) {
+  const r = mulberry32(seed);
+  if (kind === 'mpg') return { x: MPG.map(p => p[0]), y: MPG.map(p => p[1]), xl: 'Weight (lb)', yl: 'Miles per gallon', unit: ' mpg', at: v => `a weight of ${fmtNum(v)} lb` };
+  const n = kind === 'wavy' || kind === 'steps' ? 70 : kind === 'mystery' ? 210 : 150;
+  const sd = kind === 'wavy' ? 0.55 : kind === 'steps' ? 0.5 : 1.0;
+  const f = kind === 'wavy' ? x => 5 + 2.2 * Math.sin(0.9 * x) + 0.35 * x
+    : kind === 'steps' ? x => (x < 3.3 ? 3 : x < 6.6 ? 7 : 5)
+    : kind === 'mystery' ? x => 5 + 2.6 * Math.sin(1.1 * x) + (x > 6.5 ? 2.5 : 0) - 0.15 * x
+    : x => 6 + 2.5 * Math.sin(0.8 * x) + 0.25 * x;
+  const x = [], y = [];
+  for (let i = 0; i < n; i++) { const xv = +(r() * 10).toFixed(3); x.push(xv); y.push(f(xv) + sd * randn(r)); }
+  return { x, y, f, sd, xl: 'Feature', yl: 'Outcome', unit: '', at: v => `feature = ${fmtNum(v)}` };
+}
+/* split a 1-D dataset into parts by share, e.g. [0.6, 0.4] */
+function split(d, shares, seed) {
+  const r = mulberry32(seed), idx = d.x.map((_, i) => i);
+  for (let i = idx.length - 1; i > 0; i--) { const j = Math.floor(r() * (i + 1)); [idx[i], idx[j]] = [idx[j], idx[i]]; }
+  const out = []; let at = 0;
+  shares.forEach((s, k) => {
+    const n = k === shares.length - 1 ? idx.length - at : Math.round(idx.length * s);
+    const part = idx.slice(at, at + n); at += n;
+    out.push({ X: part.map(i => [d.x[i]]), x: part.map(i => d.x[i]), y: part.map(i => d.y[i]) });
+  });
+  return out;
+}
+function make2D(kind, seed) {
+  const r = mulberry32(seed), X = [], y = [], n = 240;
+  for (let i = 0; i < n; i++) {
+    let a, b, c;
+    if (kind === 'moons') {
+      c = i % 2; const t = Math.PI * r();
+      a = c ? 1 - Math.cos(t) : Math.cos(t); b = c ? 0.5 - Math.sin(t) : Math.sin(t);
+      a = (a - 0.5) * 1.5 + 0.17 * randn(r); b = (b - 0.25) * 1.9 + 0.17 * randn(r);
+    } else if (kind === 'ring') {
+      c = i % 2; const t = 2 * Math.PI * r(), rad = c ? 0.75 * Math.sqrt(r()) : 1.45 + 0.5 * r();
+      a = rad * Math.cos(t) + 0.08 * randn(r); b = rad * Math.sin(t) + 0.08 * randn(r);
+    } else if (kind === 'diag') {
+      a = -2 + 4 * r(); b = -2 + 4 * r(); c = b + 0.15 * randn(r) > a ? 1 : 0;
+    } else {
+      c = i % 2; a = (c ? 0.6 : -0.6) + 0.95 * randn(r); b = (c ? 0.35 : -0.35) + 0.95 * randn(r);
+    }
+    X.push([+a.toFixed(3), +b.toFixed(3)]); y.push(c);
+  }
+  const idx = X.map((_, i) => i);
+  for (let i = idx.length - 1; i > 0; i--) { const j = Math.floor(r() * (i + 1)); [idx[i], idx[j]] = [idx[j], idx[i]]; }
+  const cut = Math.round(n * 0.7);
+  const pick = part => ({ X: part.map(i => X[i]), y: part.map(i => y[i]) });
+  return { tr: pick(idx.slice(0, cut)), va: pick(idx.slice(cut)) };
+}
+
+/* =====================================================================
+   1. Watch it work
+   ===================================================================== */
+(function () {
+  const ui = { data: $('#a1-data'), lr: $('#a1-lr'), depth: $('#a1-depth'), bErr: $('#a1-errors'), bTree: $('#a1-tree'), bAdd: $('#a1-add'),
+    b10: $('#a1-add10'), bReset: $('#a1-reset'), status: $('#a1-status'), n: $('#a1-n'), next: $('#a1-next'), rmse: $('#a1-rmse'), max: $('#a1-max'), code: $('#a1-code') };
+  let d, X, rows, ones, base, pred, trees, stage, cur, showErr, hist, lr = 0.5, depth = 1, M = 1;
+  const P = makePlot($('#a1-plot'), { aspect: 0.44, xl: () => d.xl, yl: () => d.yl });
+  const R = makePlot($('#a1-res'), { aspect: 0.3, xl: () => d.xl, yl: 'Error' });
+  const Hc = makePlot($('#a1-hist'), { h: 170, xl: 'Trees added', yl: 'RMSE', xInt: true });
+  const at = (x, extra) => { let s = base; for (const t of trees) s += t.lr * treeOut(t.tree, [x]); return extra ? s + lr * treeOut(extra, [x]) : s; };
+  const nowRmse = () => rmse(pred, d.y);
+
+  function reset() {
+    d = make1D(ui.data.value, 11);
+    X = d.x.map(v => [v]); rows = X.map((_, i) => i); ones = new Float64Array(X.length).fill(1);
+    base = mean(d.y); pred = d.y.map(() => base); trees = []; stage = 'errors'; cur = null; showErr = false;
+    hist = [nowRmse()];
+    const [xa, xb] = extent(d.x, 0.03), [ya, yb] = extent(d.y, 0.08);
+    P.domain(xa, xb, ya, yb);
+    M = Math.max(...d.y.map(v => Math.abs(v - base))) * 1.1;
+    R.domain(xa, xb, -M, M);
+    refresh(`Every point starts with the same prediction: the average, ${fmtNum(base)}${d.unit}. Press Errors to see how far off that is for each point.`);
+  }
+  function doErrors() {
+    showErr = true; stage = 'tree';
+    refresh(`Each orange line is one point's error: actual minus predicted. The RMSE is ${f2(nowRmse())}. Press Small tree to fit a tree to these errors.`);
+  }
+  function fitTree() { return growTree(X, d.y.map((v, i) => v - pred[i]), ones, rows, 0, { depth, lambda: 0, minChild: 1 }); }
+  function doTree() {
+    if (stage === 'errors') showErr = true;
+    cur = fitTree(); stage = 'add';
+    const k = trees.length + 1, lv = treeLeaves(cur);
+    let msg;
+    if (cur.leaf) msg = `Tree ${k} found no split that helps.`;
+    else if (lv.length === 2) msg = `Tree ${k} splits at ${d.at(cur.thr)}. Points to the left are off by ${signed(lv[0].w)} on average, and points to the right by ${signed(lv[1].w)}.`;
+    else msg = `Tree ${k} has ${lv.length} leaves. Each flat step is the average error of the points above or below it.`;
+    refresh(msg + ` Press Add to move the prediction by ${lr} × the tree.`);
+  }
+  function apply() {
+    for (let i = 0; i < pred.length; i++) pred[i] += lr * treeOut(cur, X[i]);
+    trees.push({ tree: cur, lr }); cur = null; hist.push(nowRmse());
+  }
+  function doAdd() {
+    if (stage !== 'add') { showErr = true; cur = fitTree(); }
+    const before = nowRmse();
+    apply(); stage = 'errors'; showErr = false;
+    refresh(`Added ${lr} × tree ${trees.length}. The RMSE went from ${f2(before)} to ${f2(nowRmse())}. Press Errors to find what is still wrong.`);
+  }
+  function add10() {
+    const before = nowRmse();
+    for (let k = 0; k < 10; k++) { if (!cur) cur = fitTree(); apply(); }
+    stage = 'errors'; showErr = false;
+    refresh(`Added 10 trees, for ${trees.length} in all. The RMSE went from ${f2(before)} to ${f2(nowRmse())}.`);
+  }
+  function refresh(msg) {
+    if (msg) ui.status.textContent = msg;
+    ui.n.textContent = trees.length;
+    ui.next.textContent = stage === 'errors' ? 'Errors' : stage === 'tree' ? 'Small tree' : 'Add';
+    ui.rmse.textContent = f2(nowRmse());
+    ui.max.textContent = f2(Math.max(...d.y.map((v, i) => Math.abs(v - pred[i]))));
+    ui.bErr.classList.toggle('next', stage === 'errors');
+    ui.bTree.classList.toggle('next', stage === 'tree');
+    ui.bAdd.classList.toggle('next', stage === 'add');
+    ui.bErr.disabled = stage !== 'errors';
+    ui.code.textContent =
+`model = XGBRegressor(n_estimators=${Math.max(trees.length, 1)}, learning_rate=${lr},
+                     max_depth=${depth}, reg_lambda=0)
+model.fit(X, y)
+model.predict(X)      # the dark line`;
+    Hc.domain(0, Math.max(10, trees.length), 0, hist[0] * 1.08);
+    P.render(); R.render(); Hc.render();
+  }
+  P.draw = (c, p) => {
+    if (showErr) {
+      c.lineWidth = d.x.length > 150 ? 1.2 : 2; c.strokeStyle = ORANGE; c.beginPath();
+      d.x.forEach((x, i) => { c.moveTo(p.sx(x), p.sy(pred[i])); c.lineTo(p.sx(x), p.sy(d.y[i])); });
+      c.stroke();
+    }
+    const r = d.x.length > 150 ? 3 : 4.2;
+    d.x.forEach((x, i) => dot(c, p.sx(x), p.sy(d.y[i]), GRAY, r));
+    if (cur) curve(c, p, x => at(x, cur), NAVY, 2, [6, 4]);
+    curve(c, p, x => at(x), NAVY, 3);
+  };
+  R.draw = (c, p) => {
+    c.strokeStyle = '#8a94a0'; c.lineWidth = 1.2; c.setLineDash([4, 4]);
+    c.beginPath(); c.moveTo(p.px0, p.sy(0)); c.lineTo(p.px1, p.sy(0)); c.stroke(); c.setLineDash([]);
+    if (cur) treeSplits(cur).forEach(t => vline(c, p, t, '#8a94a0', [2, 3], 1));
+    const s = d.x.length > 150 ? 5 : 7.4;
+    d.x.forEach((x, i) => square(c, p.sx(x), p.sy(d.y[i] - pred[i]), showErr ? ORANGE : '#c9ced6', s));
+    if (cur) {
+      if (lr < 1) curve(c, p, x => lr * treeOut(cur, [x]), NAVY, 2, [6, 4]);
+      curve(c, p, x => treeOut(cur, [x]), NAVY, 3);
+    }
+  };
+  Hc.draw = (c, p) => {
+    series(c, p, hist, NAVY, { width: 2 });
+    if (hist.length <= 41) hist.forEach((v, k) => dot(c, p.sx(k), p.sy(v), NAVY, 3.6));
+    if (p.hover != null && p.hover < hist.length) dot(c, p.sx(p.hover), p.sy(hist[p.hover]), ORANGE, 5);
+  };
+  hoverTrees(Hc, () => 0, () => hist.length - 1, k => `<b>${plural(k, 'tree')}</b><br>RMSE ${f2(hist[k])}`);
+  const tipRow = i => `${d.xl}: <b>${fmtNum(d.x[i])}</b><br>Actual: <b>${fmtNum(d.y[i])}</b><br>Predicted: <b>${fmtNum(pred[i])}</b><br>Error: <b>${signed(d.y[i] - pred[i])}</b>`;
+  hoverPoints(P, () => d.x.map((x, i) => ({ px: P.sx(x), py: P.sy(d.y[i]), html: tipRow(i) })));
+  hoverPoints(R, () => d.x.map((x, i) => ({ px: R.sx(x), py: R.sy(d.y[i] - pred[i]), html: tipRow(i) })));
+
+  ui.bErr.onclick = () => { if (stage === 'errors') doErrors(); };
+  ui.bTree.onclick = () => { if (stage !== 'add') doTree(); };
+  ui.bAdd.onclick = doAdd;
+  ui.b10.onclick = add10;
+  ui.bReset.onclick = reset;
+  ui.data.onchange = reset;
+  ui.depth.onchange = () => { depth = +ui.depth.value; if (cur) { cur = null; stage = 'tree'; } refresh(`Each new tree may now have up to ${Math.pow(2, depth)} leaves. Trees already added are kept.`); };
+  seg(ui.lr, v => { lr = +v; refresh(`The learning rate is now ${lr}: each Add moves the prediction by ${lr} × the tree. Trees already added are kept.`); });
+  reset();
+})();
+
+/* =====================================================================
+   2. Step size
+   ===================================================================== */
+(function () {
+  const ui = { trees: $('#a2-trees'), out: $('#a2-trees-out'), depth: $('#a2-depth'), lra: $('#a2-lra'), lrb: $('#a2-lrb'), status: $('#a2-status'), code: $('#a2-code') };
+  const d = make1D('noisy', 5), [tr, va] = split(d, [0.6, 0.4], 9);
+  const NMAX = 300;
+  let A, B, n = 10;
+  const [xa, xb] = extent(d.x, 0.03), [ya, yb] = extent(d.y, 0.06);
+  const mk = id => { const p = makePlot($(id), { aspect: 0.66, xl: 'Feature', yl: 'Outcome' }); p.domain(xa, xb, ya, yb); return p; };
+  const PA = mk('#a2-plotA'), PB = mk('#a2-plotB');
+  const C = makePlot($('#a2-chart'), { h: 210, xl: 'Trees', yl: 'Validation RMSE', xInt: true });
+  const drawData = (c, p) => {
+    tr.x.forEach((x, i) => dot(c, p.sx(x), p.sy(tr.y[i]), BLUE, 3.6));
+    va.x.forEach((x, i) => ring(c, p.sx(x), p.sy(va.y[i]), ORANGE, 3.3));
+  };
+  PA.draw = (c, p) => { drawData(c, p); curve(c, p, x => boostPredict(A, [x], n), PURPLE, 3); };
+  PB.draw = (c, p) => { drawData(c, p); curve(c, p, x => boostPredict(B, [x], n), GREEN, 3); };
+  C.draw = (c, p) => {
+    vline(c, p, n, '#8a94a0', [], 1);
+    series(c, p, A.sets[0], PURPLE, { width: 2.2 }); series(c, p, B.sets[0], GREEN, { width: 2.2 });
+    const ka = argmin(A.sets[0]), kb = argmin(B.sets[0]);
+    dot(c, p.sx(ka), p.sy(A.sets[0][ka]), PURPLE, 4.5); dot(c, p.sx(kb), p.sy(B.sets[0][kb]), GREEN, 4.5);
+    const k = p.hover == null ? n : p.hover;
+    dot(c, p.sx(k), p.sy(A.sets[0][k]), PURPLE, 3.6); dot(c, p.sx(k), p.sy(B.sets[0][k]), GREEN, 3.6);
+  };
+  hoverTrees(C, () => 0, () => NMAX, k => `<b>${plural(k, 'tree')}</b><br>Learning rate ${A.lr}: ${f2(A.sets[0][k])}<br>Learning rate ${B.lr}: ${f2(B.sets[0][k])}`);
+  C.canvas.addEventListener('click', e => { const [mx] = C.pos(e); ui.trees.value = clamp(Math.round(C.ix(mx)), 1, NMAX); show(); });
+  C.canvas.style.cursor = 'pointer';
+  const tip = (p, m) => hoverPoints(p, () => tr.x.map((x, i) => ({ px: p.sx(x), py: p.sy(tr.y[i]), html: `Training row<br>Actual: <b>${f2(tr.y[i])}</b><br>Predicted: <b>${f2(boostPredict(m(), [x], n))}</b>` }))
+    .concat(va.x.map((x, i) => ({ px: p.sx(x), py: p.sy(va.y[i]), html: `Validation row<br>Actual: <b>${f2(va.y[i])}</b><br>Predicted: <b>${f2(boostPredict(m(), [x], n))}</b>` }))));
+  tip(PA, () => A); tip(PB, () => B);
+  function fit() {
+    const o = lr => ({ n: NMAX, lr, depth: +ui.depth.value, lambda: 1 });
+    A = boost(tr.X, tr.y, o(+ui.lra.value), [va]); B = boost(tr.X, tr.y, o(+ui.lrb.value), [va]);
+    $('#a2-legA').textContent = 'learning rate ' + A.lr; $('#a2-legB').textContent = 'learning rate ' + B.lr;
+    const all = A.sets[0].concat(B.sets[0]);
+    C.domain(0, NMAX, Math.min(...all) * 0.85, Math.max(...all) * 1.04);
+    show();
+  }
+  function show() {
+    n = +ui.trees.value; ui.out.textContent = n;
+    $('#a2-trA').textContent = f2(A.train[n]); $('#a2-vaA').textContent = f2(A.sets[0][n]);
+    $('#a2-trB').textContent = f2(B.train[n]); $('#a2-vaB').textContent = f2(B.sets[0][n]);
+    const ka = argmin(A.sets[0]), kb = argmin(B.sets[0]);
+    const lead = Math.abs(A.sets[0][n] - B.sets[0][n]) < 0.005 ? 'the two are tied' : `learning rate ${A.sets[0][n] < B.sets[0][n] ? A.lr : B.lr} is ahead`;
+    ui.status.textContent = `With ${plural(n, 'tree')}, ${lead} on the validation rows (${f2(A.sets[0][n])} against ${f2(B.sets[0][n])}). The large dots mark each one's lowest point: ${f2(A.sets[0][ka])} with ${plural(ka, 'tree')} for learning rate ${A.lr}, and ${f2(B.sets[0][kb])} with ${kb} for learning rate ${B.lr}.`;
+    ui.code.textContent =
+`fast = XGBRegressor(n_estimators=${n}, learning_rate=${A.lr}, max_depth=${ui.depth.value})
+slow = XGBRegressor(n_estimators=${n}, learning_rate=${B.lr}, max_depth=${ui.depth.value})
+fast.fit(X_fit, y_fit)
+slow.fit(X_fit, y_fit)`;
+    PA.render(); PB.render(); C.render();
+  }
+  ui.trees.oninput = show;
+  ui.depth.onchange = ui.lra.onchange = ui.lrb.onchange = fit;
+  fit();
+})();
+
+/* =====================================================================
+   3. When to stop
+   ===================================================================== */
+(function () {
+  const ui = { lr: $('#a3-lr'), depth: $('#a3-depth'), pat: $('#a3-pat'), trees: $('#a3-trees'), out: $('#a3-trees-out'), play: $('#a3-play'), jump: $('#a3-jump'),
+    status: $('#a3-status'), code: $('#a3-code') };
+  const d = make1D('noisy', 21), [tr, va] = split(d, [0.6, 0.4], 4);
+  const NMAX = 300;
+  let m, n = 0, es, timer = null;
+  const [xa, xb] = extent(d.x, 0.03), [ya, yb] = extent(d.y, 0.06);
+  const P = makePlot($('#a3-plot'), { aspect: 0.42, xl: 'Feature', yl: 'Outcome' }); P.domain(xa, xb, ya, yb);
+  const C = makePlot($('#a3-chart'), { h: 230, xl: 'Trees', yl: 'RMSE', xInt: true });
+  P.draw = (c, p) => {
+    tr.x.forEach((x, i) => dot(c, p.sx(x), p.sy(tr.y[i]), BLUE));
+    va.x.forEach((x, i) => ring(c, p.sx(x), p.sy(va.y[i]), ORANGE));
+    curve(c, p, x => boostPredict(m, [x], n), NAVY, 3);
+  };
+  C.draw = (c, p) => {
+    if (es.stop != null) { vline(c, p, es.stop, MUTED); tag(c, p, p.sx(es.stop), p.py0 + 30, `stops at ${es.stop}`, { color: INK2 }); }
+    vline(c, p, n, '#8a94a0', [], 1);
+    series(c, p, m.train, BLUE, { width: 2.2 }); series(c, p, m.sets[0], ORANGE, { width: 2.2 });
+    dot(c, p.sx(es.keep), p.sy(m.sets[0][es.keep]), ORANGE, 5.5);
+    tag(c, p, p.sx(es.keep), p.sy(m.sets[0][es.keep]), `keeps ${plural(es.keep, 'tree')}`, { below: true });
+    const k = p.hover == null ? n : p.hover;
+    dot(c, p.sx(k), p.sy(m.train[k]), BLUE, 3.6); dot(c, p.sx(k), p.sy(m.sets[0][k]), ORANGE, 3.6);
+  };
+  hoverTrees(C, () => 0, () => NMAX, k => `<b>${plural(k, 'tree')}</b><br>Training RMSE ${f2(m.train[k])}<br>Validation RMSE ${f2(m.sets[0][k])}`);
+  C.canvas.addEventListener('click', e => { const [mx] = C.pos(e); stop(); setN(clamp(Math.round(C.ix(mx)), 0, NMAX)); });
+  C.canvas.style.cursor = 'pointer';
+  hoverPoints(P, () => tr.x.map((x, i) => ({ px: P.sx(x), py: P.sy(tr.y[i]), html: `Training row<br>Actual: <b>${f2(tr.y[i])}</b><br>Predicted: <b>${f2(boostPredict(m, [x], n))}</b>` }))
+    .concat(va.x.map((x, i) => ({ px: P.sx(x), py: P.sy(va.y[i]), html: `Validation row<br>Actual: <b>${f2(va.y[i])}</b><br>Predicted: <b>${f2(boostPredict(m, [x], n))}</b>` }))));
+  function fit() {
+    m = boost(tr.X, tr.y, { n: NMAX, lr: +ui.lr.value, depth: +ui.depth.value, lambda: 1 }, [va]);
+    C.domain(0, NMAX, 0, Math.max(m.train[0], m.sets[0][0]) * 1.05);
+    show();
+  }
+  function show() {
+    es = earlyStop(m.sets[0], +ui.pat.value);
+    ui.out.textContent = n; ui.trees.value = n;
+    $('#a3-tr').textContent = f2(m.train[n]); $('#a3-va').textContent = f2(m.sets[0][n]);
+    const v = m.sets[0], kb = argmin(v);
+    $('#a3-best').textContent = `${f2(v[kb])} at ${kb}`;
+    $('#a3-stop').textContent = plural(es.keep, 'tree');
+    let msg = n === 0 ? `With no trees the model predicts the average for every row. Press Play.`
+      : n < es.keep ? `${plural(n, 'tree')}: both errors are still falling, so the model is still learning the pattern.`
+      : n === es.keep ? `${plural(n, 'tree')}: this is the lowest the validation error gets under early stopping. More trees will only help on the training rows.`
+      : `${plural(n, 'tree')}: the training error is down to ${f2(m.train[n])}, but the validation error is ${f2(v[n])}, up from ${f2(v[es.keep])} at ${es.keep} trees. The extra trees are fitting noise.`;
+    msg += es.stop != null ? ` With early_stopping_rounds = ${ui.pat.value}, training stops after ${es.stop} trees and keeps the first ${es.keep}.`
+      : ` With early_stopping_rounds = ${ui.pat.value}, training never stops early in ${NMAX} trees. It keeps the best ${es.keep}.`;
+    if (es.keep !== kb) msg += ` It stopped too soon: the true low point is at ${kb} trees (${f2(v[kb])}).`;
+    ui.status.textContent = msg;
+    ui.code.textContent =
+`model = XGBRegressor(n_estimators=${NMAX}, learning_rate=${ui.lr.value}, max_depth=${ui.depth.value},
+                     early_stopping_rounds=${ui.pat.value})
+model.fit(X_fit, y_fit, eval_set=[(X_val, y_val)], verbose=False)
+model.best_iteration + 1      # ${es.keep} trees kept`;
+    P.render(); C.render();
+  }
+  function setN(v) { n = v; show(); }
+  function stop() { if (timer) { clearInterval(timer); timer = null; } ui.play.textContent = 'Play'; }
+  ui.play.onclick = () => {
+    if (timer) { stop(); return; }
+    if (REDUCED) { setN(es.stop == null ? NMAX : es.stop); return; }
+    if (n >= NMAX) setN(0);
+    ui.play.textContent = 'Pause';
+    timer = setInterval(() => { if (n >= NMAX) { stop(); return; } setN(Math.min(NMAX, n + (n < 40 ? 1 : n < 120 ? 2 : 5))); }, 50);
+  };
+  ui.jump.onclick = () => { stop(); setN(es.keep); };
+  ui.trees.oninput = () => { stop(); setN(+ui.trees.value); };
+  ui.pat.onchange = show;
+  ui.lr.onchange = ui.depth.onchange = () => { stop(); n = 0; fit(); };
+  fit();
+})();
+
+/* =====================================================================
+   4. Tune it
+   ===================================================================== */
+(function () {
+  const ui = { n: $('#a4-n'), lr: $('#a4-lr'), depth: $('#a4-depth'), lambda: $('#a4-lambda'), es: $('#a4-es'), fit: $('#a4-fit'), reveal: $('#a4-reveal'), clear: $('#a4-clear'),
+    status: $('#a4-status'), body: $('#a4-table tbody'), code: $('#a4-code'), testkey: $('#a4-testkey') };
+  const d = make1D('mystery', 45), [tr, va, te] = split(d, [0.43, 0.285, 0.285], 2);
+  const rowsAll = tr.y.map((_, i) => i);
+  const avg = mean(tr.y), single = cart(tr.X, tr.y, rowsAll, 3, 5);
+  const score = (fn, s) => rmse(s.X.map(fn), s.y);
+  const baselines = [
+    { name: 'Predict the average', used: '–', fn: () => avg },
+    { name: 'Single tree, depth 3', used: '1', fn: x => treeOut(single, x) }
+  ].map(b => Object.assign(b, { tr: score(b.fn, tr), va: score(b.fn, va), te: score(b.fn, te), base: true }));
+  let tries = [], revealed = false, latest = null;
+  const [xa, xb] = extent(d.x, 0.03), [ya, yb] = extent(d.y, 0.06);
+  const P = makePlot($('#a4-plot'), { aspect: 0.42, xl: 'Feature', yl: 'Outcome' }); P.domain(xa, xb, ya, yb);
+  P.draw = (c, p) => {
+    tr.x.forEach((x, i) => dot(c, p.sx(x), p.sy(tr.y[i]), BLUE));
+    va.x.forEach((x, i) => ring(c, p.sx(x), p.sy(va.y[i]), ORANGE));
+    if (revealed) te.x.forEach((x, i) => tri(c, p.sx(x), p.sy(te.y[i]), MUTED));
+    if (latest) curve(c, p, latest.fn1, NAVY, 3);
+    else curve(c, p, x => treeOut(single, [x]), '#8a94a0', 2, [6, 4]);
+  };
+  const best = () => tries.reduce((b, t) => (!b || t.va < b.va - 1e-12 ? t : b), null);
+  function table() {
+    const b = best();
+    const row = (t, i) => `<tr class="${t === b ? 'best' : ''}"><td>${t.base ? t.name : (i + 1) + '. ' + t.name}</td><td>${t.used}</td><td>${f2(t.tr)}</td><td>${f2(t.va)}</td><td>${revealed && (t.base || t === b) ? f2(t.te) : (revealed ? '' : 'hidden')}</td></tr>`;
+    ui.body.innerHTML = baselines.map(row).join('') + tries.map(row).join('') +
+      (tries.length ? '' : '<tr><td class="note" colspan="5">Your models will be listed here.</td></tr>');
+    ui.reveal.disabled = revealed || tries.length < 3;
+    ui.reveal.textContent = tries.length < 3 && !revealed ? `Check my best on the test rows (after ${3 - tries.length} more)` : 'Check my best on the test rows';
+    ui.fit.disabled = revealed;
+    ui.testkey.hidden = !revealed;
+    const s = b || { n: ui.n.value, lr: ui.lr.value, depth: ui.depth.value, lambda: ui.lambda.value, es: ui.es.checked };
+    ui.code.textContent =
+`model = XGBRegressor(n_estimators=${s.n}, learning_rate=${s.lr}, max_depth=${s.depth},
+                     reg_lambda=${s.lambda}${s.es ? ', early_stopping_rounds=20' : ''})
+model.fit(X_fit, y_fit, eval_set=[(X_val, y_val)], verbose=False)
+${b ? '# your best model so far' : '# the settings shown above'}`;
+    P.render();
+  }
+  ui.fit.onclick = () => {
+    const s = { n: +ui.n.value, lr: +ui.lr.value, depth: +ui.depth.value, lambda: +ui.lambda.value, es: ui.es.checked };
+    const m = boost(tr.X, tr.y, { n: s.n, lr: s.lr, depth: s.depth, lambda: s.lambda, patience: s.es ? 20 : 0 }, [va]);
+    const k = s.es ? m.best : m.trees.length;
+    const fn = x => boostPredict(m, x, k);
+    const t = Object.assign(s, { name: `${s.n} trees, rate ${s.lr}, depth ${s.depth}, lambda ${s.lambda}${s.es ? ', early stop' : ''}`,
+      used: s.es ? `${k} of ${s.n}` : String(k), tr: m.train[k], va: m.sets[0][k], te: score(fn, te), fn, fn1: x => fn([x]) });
+    tries.push(t); latest = t;
+    const tree = baselines[1], b = best();
+    let msg = `Model ${tries.length}: training RMSE ${f2(t.tr)}, validation RMSE ${f2(t.va)}. `;
+    if (t.va > baselines[0].va) msg += `That is worse than predicting the average. `;
+    else if (t.va > tree.va) msg += `The single tree (${f2(tree.va)}) is still ahead. `;
+    else msg += `That beats the single tree (${f2(tree.va)}). `;
+    if (t.va - t.tr > 0.35 * t.va) msg += `The training error is far below the validation error, so this model has memorized some of the training rows. Try smaller trees, a smaller learning rate, or early stopping.`;
+    else if (t.tr > 1.25 && t.va > tree.va) msg += `Both errors are high, so the model has not learned the pattern yet. Try more trees or a larger learning rate.`;
+    else if (t === b) msg += `This is your best so far.`;
+    else msg += `Your best so far is model ${tries.indexOf(b) + 1} (${f2(b.va)}).`;
+    ui.status.textContent = msg; table();
+  };
+  ui.reveal.onclick = () => {
+    const b = best(); revealed = true; latest = b;
+    ui.status.textContent = `Your best model (number ${tries.indexOf(b) + 1}) scored ${f2(b.va)} on the validation rows and ${f2(b.te)} on the test rows. The single tree scores ${f2(baselines[1].te)} on the test rows. The test rows are the gray triangles. Press Clear attempts to start again.`;
+    table();
+  };
+  ui.clear.onclick = () => {
+    tries = []; revealed = false; latest = null;
+    ui.status.textContent = `The dashed line is the single tree of depth 3. Its validation RMSE is ${f2(baselines[1].va)}. Choose settings and press Fit this model.`;
+    table();
+  };
+  hoverPoints(P, () => tr.x.map((x, i) => ({ px: P.sx(x), py: P.sy(tr.y[i]), html: `Training row<br>Actual: <b>${f2(tr.y[i])}</b>` + (latest ? `<br>Predicted: <b>${f2(latest.fn1(x))}</b>` : '') }))
+    .concat(va.x.map((x, i) => ({ px: P.sx(x), py: P.sy(va.y[i]), html: `Validation row<br>Actual: <b>${f2(va.y[i])}</b>` + (latest ? `<br>Predicted: <b>${f2(latest.fn1(x))}</b>` : '') }))));
+  ui.clear.onclick();
+})();
+
+/* =====================================================================
+   5. Forest or boosting
+   ===================================================================== */
+(function () {
+  const ui = { n: $('#a5-n'), out: $('#a5-n-out'), show: $('#a5-show'), status: $('#a5-status'), code: $('#a5-code') };
+  const d = make1D('noisy', 5), [tr, va] = split(d, [0.6, 0.4], 9);
+  const NMAX = 200, N = tr.y.length, rowsAll = tr.y.map((_, i) => i);
+  const deep = cart(tr.X, tr.y, rowsAll, 14, 1), deepVa = rmse(va.X.map(x => treeOut(deep, x)), va.y);
+  const r = mulberry32(77), forest = [];
+  for (let t = 0; t < NMAX; t++) {
+    const boot = []; for (let i = 0; i < N; i++) boot.push(Math.floor(r() * N));
+    forest.push(cart(tr.X, tr.y, boot, 14, 3));
+  }
+  const forestAt = (x, n) => { let s = 0; for (let i = 0; i < n; i++) s += treeOut(forest[i], x); return s / n; };
+  const fVa = [null], sum = new Float64Array(va.y.length);
+  for (let t = 0; t < NMAX; t++) { va.X.forEach((x, i) => { sum[i] += treeOut(forest[t], x); }); fVa.push(rmse(Array.from(sum, s => s / (t + 1)), va.y)); }
+  const B = boost(tr.X, tr.y, { n: NMAX, lr: 0.1, depth: 2, lambda: 1 }, [va]);
+  let n = 1;
+  const [xa, xb] = extent(d.x, 0.03), [ya, yb] = extent(d.y, 0.06);
+  const mk = id => { const p = makePlot($(id), { aspect: 0.8, m: { l: 34, r: 8, t: 10, b: 26 } }); p.domain(xa, xb, ya, yb); return p; };
+  const P1 = mk('#a5-p1'), P2 = mk('#a5-p2'), P3 = mk('#a5-p3');
+  const C = makePlot($('#a5-chart'), { h: 210, xl: 'Trees', yl: 'Validation RMSE', xInt: true });
+  const all = fVa.slice(1).concat(B.sets[0].slice(1), [deepVa]);
+  C.domain(0, NMAX, Math.min(...all) * 0.85, Math.max(...all) * 1.04);
+  const data = (c, p) => {
+    tr.x.forEach((x, i) => dot(c, p.sx(x), p.sy(tr.y[i]), BLUE, 3));
+    va.x.forEach((x, i) => ring(c, p.sx(x), p.sy(va.y[i]), ORANGE, 2.8));
+  };
+  P1.draw = (c, p) => { data(c, p); curve(c, p, x => treeOut(deep, [x]), NAVY, 2.4); };
+  P2.draw = (c, p) => { data(c, p); if (ui.show.checked) curve(c, p, x => treeOut(forest[n - 1], [x]), '#7d8796', 1.2); curve(c, p, x => forestAt([x], n), GREEN, 3); };
+  P3.draw = (c, p) => { data(c, p); if (ui.show.checked) curve(c, p, x => B.base + treeOut(B.trees[n - 1], [x]), '#7d8796', 1.2); curve(c, p, x => boostPredict(B, [x], n), PURPLE, 3); };
+  C.draw = (c, p) => {
+    c.strokeStyle = MUTED; c.lineWidth = 2; c.setLineDash([5, 4]); c.beginPath(); c.moveTo(p.px0, p.sy(deepVa)); c.lineTo(p.px1, p.sy(deepVa)); c.stroke(); c.setLineDash([]);
+    vline(c, p, n, '#8a94a0', [], 1);
+    series(c, p, fVa.slice(1), GREEN, { width: 2.2, from: 1 }); series(c, p, B.sets[0].slice(1), PURPLE, { width: 2.2, from: 1 });
+    const k = p.hover == null ? n : Math.max(1, p.hover);
+    dot(c, p.sx(k), p.sy(fVa[k]), GREEN, 4); dot(c, p.sx(k), p.sy(B.sets[0][k]), PURPLE, 4);
+  };
+  hoverTrees(C, () => 1, () => NMAX, k => `<b>${plural(k, 'tree')}</b><br>Random forest: ${f2(fVa[k])}<br>Boosting: ${f2(B.sets[0][k])}<br>One deep tree: ${f2(deepVa)}`);
+  C.canvas.addEventListener('click', e => { const [mx] = C.pos(e); ui.n.value = clamp(Math.round(C.ix(mx)), 1, NMAX); show(); });
+  C.canvas.style.cursor = 'pointer';
+  function show() {
+    n = +ui.n.value; ui.out.textContent = n;
+    const f = fVa[n], b = B.sets[0][n], kb = argmin(B.sets[0], 1);
+    const order = [['the single deep tree', deepVa], ['the random forest', f], ['boosting', b]].sort((p, q) => p[1] - q[1]);
+    ui.status.textContent = `With ${plural(n, 'tree')}: one deep tree ${f2(deepVa)}, random forest ${f2(f)}, boosting ${f2(b)} on the validation rows. ${order[0][0][0].toUpperCase() + order[0][0].slice(1)} is ahead. Boosting is at its best with ${kb} trees (${f2(B.sets[0][kb])}).`;
+    ui.code.textContent =
+`one    = DecisionTreeRegressor()                      # grown until every leaf is pure
+forest = RandomForestRegressor(n_estimators=${n}, min_samples_leaf=3)
+boost  = XGBRegressor(n_estimators=${n}, learning_rate=0.1, max_depth=2)`;
+    P1.render(); P2.render(); P3.render(); C.render();
+  }
+  ui.n.oninput = show; ui.show.onchange = show;
+  show();
+})();
+
+/* =====================================================================
+   6. Yes or no
+   ===================================================================== */
+(function () {
+  const ui = { data: $('#a6-data'), lr: $('#a6-lr'), depth: $('#a6-depth'), trees: $('#a6-trees'), out: $('#a6-trees-out'), add: $('#a6-add'), play: $('#a6-play'),
+    val: $('#a6-val'), status: $('#a6-status'), code: $('#a6-code') };
+  const NMAX = 200, GX = 64, GY = 46, sig = z => 1 / (1 + Math.exp(-z));
+  let D, m, n = 0, accTr, accVa, grid = { n: 0, F: null }, timer = null;
+  const P = makePlot($('#a6-plot'), { aspect: 0.62, xl: 'Feature 1', yl: 'Feature 2' });
+  function fit() {
+    const X = D.tr.X, y = D.tr.y, N = y.length, rows = y.map((_, i) => i);
+    const p0 = clamp(mean(y), 0.02, 0.98), base = Math.log(p0 / (1 - p0)), lr = +ui.lr.value;
+    const F = new Float64Array(N).fill(base), Fv = new Float64Array(D.va.y.length).fill(base), r = new Float64Array(N), h = new Float64Array(N);
+    const acc = (Fx, yy) => { let k = 0; for (let i = 0; i < yy.length; i++) if ((Fx[i] > 0 ? 1 : 0) === yy[i]) k++; return k / yy.length; };
+    m = { base, lr, trees: [] }; accTr = [acc(F, y)]; accVa = [acc(Fv, D.va.y)];
+    const T = { depth: +ui.depth.value, lambda: 1, minChild: 0 };
+    for (let t = 0; t < NMAX; t++) {
+      for (let i = 0; i < N; i++) { const p = sig(F[i]); r[i] = y[i] - p; h[i] = Math.max(p * (1 - p), 1e-6); }
+      const tree = growTree(X, r, h, rows, 0, T);
+      m.trees.push(tree);
+      for (let i = 0; i < N; i++) F[i] += lr * treeOut(tree, X[i]);
+      D.va.X.forEach((x, i) => { Fv[i] += lr * treeOut(tree, x); });
+      accTr.push(acc(F, y)); accVa.push(acc(Fv, D.va.y));
+    }
+    grid = { n: 0, F: null };
+  }
+  const margin = (x, k) => { let s = m.base; for (let i = 0; i < k; i++) s += m.lr * treeOut(m.trees[i], x); return s; };
+  function gridF(p) {
+    if (!grid.F || grid.n > n) { grid.F = new Float64Array(GX * GY).fill(m.base); grid.n = 0; }
+    for (let t = grid.n; t < n; t++) {
+      const tree = m.trees[t];
+      for (let j = 0; j < GY; j++) for (let i = 0; i < GX; i++)
+        grid.F[j * GX + i] += m.lr * treeOut(tree, [p.x0 + (i + 0.5) / GX * (p.x1 - p.x0), p.y1 - (j + 0.5) / GY * (p.y1 - p.y0)]);
+    }
+    grid.n = n; return grid.F;
+  }
+  const shade = pr => {   // blue for no, neutral at 50%, orange for yes
+    const a = Math.abs(pr - 0.5) * 2 * 0.55, hue = pr < 0.5 ? [42, 120, 214] : [235, 104, 52], neu = [246, 246, 244];
+    return `rgb(${neu.map((v, i) => Math.round(v + (hue[i] - v) * a)).join(',')})`;
+  };
+  P.before = (c, p) => {
+    const F = gridF(p), cw = (p.px1 - p.px0) / GX, ch = (p.py1 - p.py0) / GY;
+    for (let j = 0; j < GY; j++) for (let i = 0; i < GX; i++) {
+      c.fillStyle = shade(sig(F[j * GX + i]));
+      c.fillRect(p.px0 + i * cw, p.py0 + j * ch, cw + 0.6, ch + 0.6);
+    }
+  };
+  P.draw = (c, p) => {
+    D.tr.X.forEach((x, i) => D.tr.y[i] ? square(c, p.sx(x[0]), p.sy(x[1]), ORANGE, 7.2) : dot(c, p.sx(x[0]), p.sy(x[1]), BLUE, 4));
+    if (ui.val.checked) D.va.X.forEach((x, i) => D.va.y[i] ? square(c, p.sx(x[0]), p.sy(x[1]), ORANGE, 7, true) : ring(c, p.sx(x[0]), p.sy(x[1]), BLUE, 3.8));
+  };
+  hoverPoints(P, () => {
+    const pts = D.tr.X.map((x, i) => ({ px: P.sx(x[0]), py: P.sy(x[1]), html: `Training row, actual <b>${D.tr.y[i] ? 'yes' : 'no'}</b><br>Predicted: <b>${pct(sig(margin(x, n)))} yes</b>` }));
+    return ui.val.checked ? pts.concat(D.va.X.map((x, i) => ({ px: P.sx(x[0]), py: P.sy(x[1]), html: `Validation row, actual <b>${D.va.y[i] ? 'yes' : 'no'}</b><br>Predicted: <b>${pct(sig(margin(x, n)))} yes</b>` }))) : pts;
+  }, (x, y) => `At this spot: <b>${pct(sig(margin([x, y], n)))} yes</b>`);
+  function show() {
+    ui.out.textContent = n; ui.trees.value = n;
+    $('#a6-tr').textContent = pct(accTr[n]); $('#a6-va').textContent = pct(accVa[n]);
+    const allX = D.tr.X.concat(D.va.X);
+    $('#a6-unsure').textContent = allX.filter(x => { const p = sig(margin(x, n)); return p >= 0.4 && p <= 0.6; }).length + ' of ' + allX.length;
+    const kb = accVa.indexOf(Math.max(...accVa));
+    ui.status.textContent = n === 0
+      ? `With no trees, every spot gets the same probability: ${pct(sig(m.base))} yes, the share of yes points in the training rows. Press Add a tree.`
+      : `${plural(n, 'tree')}: ${pct(accTr[n])} of the training rows and ${pct(accVa[n])} of the validation rows are on the right side of 50%. Validation accuracy first reaches its highest value (${pct(accVa[kb])}) at ${plural(kb, 'tree')}.`;
+    ui.code.textContent =
+`clf = XGBClassifier(n_estimators=${Math.max(n, 1)}, learning_rate=${ui.lr.value}, max_depth=${ui.depth.value})
+clf.fit(X_fit, y_fit)
+clf.predict_proba(X_val)[:, 1]      # the shading: probability of yes`;
+    P.render();
+  }
+  function load() {
+    D = make2D(ui.data.value, 3);
+    const all = D.tr.X.concat(D.va.X), [xa, xb] = extent(all.map(x => x[0]), 0.07), [ya, yb] = extent(all.map(x => x[1]), 0.07);
+    P.domain(xa, xb, ya, yb); n = 0; fit(); show();
+  }
+  function stop() { if (timer) { clearInterval(timer); timer = null; } ui.play.textContent = 'Play'; }
+  ui.add.onclick = () => { stop(); if (n < NMAX) { n++; show(); } };
+  ui.play.onclick = () => {
+    if (timer) { stop(); return; }
+    if (REDUCED) { n = NMAX; show(); return; }
+    if (n >= NMAX) n = 0;
+    ui.play.textContent = 'Pause';
+    timer = setInterval(() => { if (n >= NMAX) { stop(); return; } n = Math.min(NMAX, n + (n < 30 ? 1 : n < 100 ? 2 : 4)); show(); }, 60);
+  };
+  ui.trees.oninput = () => { stop(); n = +ui.trees.value; show(); };
+  ui.val.onchange = show;
+  ui.data.onchange = () => { stop(); load(); };
+  ui.lr.onchange = ui.depth.onchange = () => { stop(); n = Math.min(n, NMAX); fit(); show(); };
+  load();
+})();
+</script>
+</body>
+</html>

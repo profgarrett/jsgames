@@ -1,0 +1,199 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="944" viewBox="0 0 1000 944" role="img" aria-labelledby="t d" xmlns:c2pa="http://c2pa.org/manifest">
+<title id="t">XGBoost roadmap</title>
+<desc id="d">Eight stages from loading data to reading the fitted model, with the variable passed between each stage, the target y skipping encoding, the test rows held back until scoring, validation rows held back from the training rows so the model can check itself, optional simpler models for comparison, and a panel showing how .fit() adds one small tree at a time, each fitted to the errors left by the trees before it.</desc>
+<defs>
+<marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#334155"/></marker>
+<marker id="ahgold" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#d4a017"/></marker>
+<marker id="ahteal" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#0f766e"/></marker>
+</defs>
+<rect width="1000" height="944" fill="#ffffff"/>
+<text x="24" y="38" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="22" fill="#1f2933" font-weight="bold" text-anchor="start">XGBoost roadmap: how the code blocks connect</text>
+<text x="24" y="62" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="14" fill="#5b6672" text-anchor="start">Each box is a stage in the code. The label on each arrow is the variable handed to the next stage.</text>
+<rect x="118" y="82" width="476" height="74" rx="9" fill="#ffffff" stroke="#9aa5b1" stroke-width="1.4"/>
+<circle cx="150" cy="119.0" r="18" fill="#002855"/>
+<text x="150" y="124.5" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="16" fill="#ffffff" font-weight="bold" text-anchor="middle" >A</text>
+<text x="182" y="108" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="17" font-weight="bold" fill="#1f2933">Load the data</text>
+<text x="182" y="129" font-size="13.5" text-anchor="start" xml:space="preserve"><tspan font-family="Menlo, Consolas, 'DejaVu Sans Mono', 'Courier New', monospace" fill="#0f3d66">df = sns.load_dataset(...)</tspan><tspan font-family="Helvetica Neue, Helvetica, Arial, sans-serif" fill="#5b6672">  or  </tspan><tspan font-family="Menlo, Consolas, 'DejaVu Sans Mono', 'Courier New', monospace" fill="#0f3d66">pd.read_csv(...)</tspan></text>
+<text x="182" y="147" font-size="13.5" text-anchor="start" xml:space="preserve"><tspan font-family="Helvetica Neue, Helvetica, Arial, sans-serif" fill="#5b6672">One row per item (car, diamond, house…)</tspan></text>
+<rect x="118" y="184" width="476" height="74" rx="9" fill="#ffffff" stroke="#9aa5b1" stroke-width="1.4"/>
+<circle cx="150" cy="221.0" r="18" fill="#002855"/>
+<text x="150" y="226.5" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="16" fill="#ffffff" font-weight="bold" text-anchor="middle" >B</text>
+<text x="182" y="210" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="17" font-weight="bold" fill="#1f2933">Pick the target and the predictors</text>
+<text x="182" y="231" font-size="13.5" text-anchor="start" xml:space="preserve"><tspan font-family="Menlo, Consolas, 'DejaVu Sans Mono', 'Courier New', monospace" fill="#0f3d66">y = df[target]</tspan><tspan font-family="Helvetica Neue, Helvetica, Arial, sans-serif" fill="#5b6672"> (the column to predict)</tspan></text>
+<text x="182" y="249" font-size="13.5" text-anchor="start" xml:space="preserve"><tspan font-family="Menlo, Consolas, 'DejaVu Sans Mono', 'Courier New', monospace" fill="#0f3d66">X = df[numeric_features + categorical_features]</tspan></text>
+<rect x="118" y="286" width="476" height="74" rx="9" fill="#ffffff" stroke="#9aa5b1" stroke-width="1.4"/>
+<circle cx="150" cy="323.0" r="18" fill="#002855"/>
+<text x="150" y="328.5" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="16" fill="#ffffff" font-weight="bold" text-anchor="middle" >C</text>
+<text x="182" y="312" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="17" font-weight="bold" fill="#1f2933">One-hot encode the text columns</text>
+<text x="182" y="333" font-size="13.5" text-anchor="start" xml:space="preserve"><tspan font-family="Menlo, Consolas, 'DejaVu Sans Mono', 'Courier New', monospace" fill="#0f3d66">X_encoded = pd.get_dummies(X, columns=...)</tspan></text>
+<text x="182" y="351" font-size="13.5" text-anchor="start" xml:space="preserve"><tspan font-family="Helvetica Neue, Helvetica, Arial, sans-serif" fill="#5b6672">Text becomes 1/0 columns. Trees do not need scaling.</tspan></text>
+<rect x="118" y="388" width="476" height="74" rx="9" fill="#ffffff" stroke="#9aa5b1" stroke-width="1.4"/>
+<circle cx="150" cy="425.0" r="18" fill="#002855"/>
+<text x="150" y="430.5" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="16" fill="#ffffff" font-weight="bold" text-anchor="middle" >D</text>
+<text x="182" y="414" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="17" font-weight="bold" fill="#1f2933">Split into training and test rows</text>
+<text x="182" y="435" font-size="13.5" text-anchor="start" xml:space="preserve"><tspan font-family="Menlo, Consolas, 'DejaVu Sans Mono', 'Courier New', monospace" fill="#0f3d66">X_train, X_test, y_train, y_test =</tspan></text>
+<text x="182" y="453" font-size="13.5" text-anchor="start" xml:space="preserve"><tspan font-family="Menlo, Consolas, 'DejaVu Sans Mono', 'Courier New', monospace" fill="#0f3d66">  train_test_split(X_encoded, y, test_size=0.25)</tspan></text>
+<rect x="118" y="490" width="476" height="92" rx="9" fill="#ffffff" stroke="#9aa5b1" stroke-width="1.4"/>
+<circle cx="150" cy="536.0" r="18" fill="#002855"/>
+<text x="150" y="541.5" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="16" fill="#ffffff" font-weight="bold" text-anchor="middle" >E</text>
+<text x="182" y="516" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="17" font-weight="bold" fill="#1f2933">Hold back validation rows</text>
+<text x="182" y="537" font-size="13.5" text-anchor="start" xml:space="preserve"><tspan font-family="Menlo, Consolas, 'DejaVu Sans Mono', 'Courier New', monospace" fill="#0f3d66">X_fit, X_val, y_fit, y_val =</tspan></text>
+<text x="182" y="555" font-size="13" text-anchor="start" xml:space="preserve"><tspan font-family="Menlo, Consolas, 'DejaVu Sans Mono', 'Courier New', monospace" fill="#0f3d66">  train_test_split(X_train, y_train, test_size=0.2)</tspan></text>
+<text x="182" y="573" font-size="13" text-anchor="start" xml:space="preserve"><tspan font-family="Helvetica Neue, Helvetica, Arial, sans-serif" fill="#5b6672">The model learns from </tspan><tspan font-family="Menlo, Consolas, 'DejaVu Sans Mono', 'Courier New', monospace" fill="#0f3d66">X_fit</tspan><tspan font-family="Helvetica Neue, Helvetica, Arial, sans-serif" fill="#5b6672"> and checks itself on </tspan><tspan font-family="Menlo, Consolas, 'DejaVu Sans Mono', 'Courier New', monospace" fill="#0f3d66">X_val</tspan></text>
+<rect x="118" y="610" width="476" height="92" rx="9" fill="#ffffff" stroke="#9aa5b1" stroke-width="1.4"/>
+<circle cx="150" cy="656.0" r="18" fill="#002855"/>
+<text x="150" y="661.5" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="16" fill="#ffffff" font-weight="bold" text-anchor="middle" >F</text>
+<text x="182" y="636" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="17" font-weight="bold" fill="#1f2933">Fit XGBoost, one small tree at a time</text>
+<text x="182" y="657" font-size="13" text-anchor="start" xml:space="preserve"><tspan font-family="Menlo, Consolas, 'DejaVu Sans Mono', 'Courier New', monospace" fill="#0f3d66">model = XGBRegressor(early_stopping_rounds=20, ...)</tspan></text>
+<text x="182" y="675" font-size="13" text-anchor="start" xml:space="preserve"><tspan font-family="Menlo, Consolas, 'DejaVu Sans Mono', 'Courier New', monospace" fill="#0f3d66">model.fit(X_fit, y_fit, eval_set=[(X_val, y_val)])</tspan></text>
+<text x="182" y="693" font-size="13.5" text-anchor="start" xml:space="preserve"><tspan font-family="Helvetica Neue, Helvetica, Arial, sans-serif" fill="#5b6672">Predicting a category? Use </tspan><tspan font-family="Menlo, Consolas, 'DejaVu Sans Mono', 'Courier New', monospace" fill="#0f3d66">XGBClassifier</tspan></text>
+<rect x="118" y="730" width="476" height="92" rx="9" fill="#ffffff" stroke="#9aa5b1" stroke-width="1.4"/>
+<circle cx="150" cy="776.0" r="18" fill="#002855"/>
+<text x="150" y="781.5" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="16" fill="#ffffff" font-weight="bold" text-anchor="middle" >G</text>
+<text x="182" y="756" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="17" font-weight="bold" fill="#1f2933">Predict and score on the test rows</text>
+<text x="182" y="777" font-size="13.5" text-anchor="start" xml:space="preserve"><tspan font-family="Menlo, Consolas, 'DejaVu Sans Mono', 'Courier New', monospace" fill="#0f3d66">y_pred = model.predict(X_test)</tspan></text>
+<text x="182" y="795" font-size="13" text-anchor="start" xml:space="preserve"><tspan font-family="Helvetica Neue, Helvetica, Arial, sans-serif" fill="#5b6672">Numbers: MAE, RMSE, R². Categories: accuracy, confusion matrix</tspan></text>
+<text x="182" y="813" font-size="13" text-anchor="start" xml:space="preserve"><tspan font-family="Helvetica Neue, Helvetica, Arial, sans-serif" fill="#5b6672">Score </tspan><tspan font-family="Menlo, Consolas, 'DejaVu Sans Mono', 'Courier New', monospace" fill="#0f3d66">X_train</tspan><tspan font-family="Helvetica Neue, Helvetica, Arial, sans-serif" fill="#5b6672"> too: much better there means overfitting</tspan></text>
+<rect x="118" y="850" width="476" height="74" rx="9" fill="#ffffff" stroke="#9aa5b1" stroke-width="1.4"/>
+<circle cx="150" cy="887.0" r="18" fill="#002855"/>
+<text x="150" y="892.5" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="16" fill="#ffffff" font-weight="bold" text-anchor="middle" >H</text>
+<text x="182" y="876" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="17" font-weight="bold" fill="#1f2933">Read the model</text>
+<text x="182" y="897" font-size="13.5" text-anchor="start" xml:space="preserve"><tspan font-family="Menlo, Consolas, 'DejaVu Sans Mono', 'Courier New', monospace" fill="#0f3d66">model.feature_importances_</tspan><tspan font-family="Helvetica Neue, Helvetica, Arial, sans-serif" fill="#5b6672"> (which columns mattered)</tspan></text>
+<text x="182" y="915" font-size="13.5" text-anchor="start" xml:space="preserve"><tspan font-family="Menlo, Consolas, 'DejaVu Sans Mono', 'Courier New', monospace" fill="#0f3d66">model.best_iteration + 1</tspan><tspan font-family="Helvetica Neue, Helvetica, Arial, sans-serif" fill="#5b6672"> (how many trees were kept)</tspan></text>
+<line x1="356.0" y1="156" x2="356.0" y2="183" stroke="#334155" stroke-width="2" marker-end="url(#ah)"/>
+<text x="370.0" y="175" font-size="13.5" text-anchor="start" xml:space="preserve"><tspan font-family="Menlo, Consolas, 'DejaVu Sans Mono', 'Courier New', monospace" font-weight="bold" fill="#8a5a00">df</tspan></text>
+<line x1="356.0" y1="258" x2="356.0" y2="285" stroke="#334155" stroke-width="2" marker-end="url(#ah)"/>
+<text x="370.0" y="277" font-size="13.5" text-anchor="start" xml:space="preserve"><tspan font-family="Menlo, Consolas, 'DejaVu Sans Mono', 'Courier New', monospace" font-weight="bold" fill="#8a5a00">X</tspan></text>
+<line x1="356.0" y1="360" x2="356.0" y2="387" stroke="#334155" stroke-width="2" marker-end="url(#ah)"/>
+<text x="370.0" y="379" font-size="13.5" text-anchor="start" xml:space="preserve"><tspan font-family="Menlo, Consolas, 'DejaVu Sans Mono', 'Courier New', monospace" font-weight="bold" fill="#8a5a00">X_encoded</tspan></text>
+<line x1="356.0" y1="462" x2="356.0" y2="489" stroke="#334155" stroke-width="2" marker-end="url(#ah)"/>
+<text x="370.0" y="481" font-size="13.5" text-anchor="start" xml:space="preserve"><tspan font-family="Menlo, Consolas, 'DejaVu Sans Mono', 'Courier New', monospace" font-weight="bold" fill="#8a5a00">X_train, y_train</tspan><tspan font-family="Helvetica Neue, Helvetica, Arial, sans-serif" fill="#5b6672"> (training rows)</tspan></text>
+<line x1="356.0" y1="582" x2="356.0" y2="609" stroke="#334155" stroke-width="2" marker-end="url(#ah)"/>
+<text x="370.0" y="601" font-size="13.5" text-anchor="start" xml:space="preserve"><tspan font-family="Menlo, Consolas, 'DejaVu Sans Mono', 'Courier New', monospace" font-weight="bold" fill="#8a5a00">X_fit, y_fit</tspan><tspan font-family="Helvetica Neue, Helvetica, Arial, sans-serif" fill="#5b6672"> and </tspan><tspan font-family="Menlo, Consolas, 'DejaVu Sans Mono', 'Courier New', monospace" font-weight="bold" fill="#8a5a00">X_val, y_val</tspan></text>
+<line x1="356.0" y1="702" x2="356.0" y2="729" stroke="#334155" stroke-width="2" marker-end="url(#ah)"/>
+<text x="370.0" y="721" font-size="13.5" text-anchor="start" xml:space="preserve"><tspan font-family="Menlo, Consolas, 'DejaVu Sans Mono', 'Courier New', monospace" font-weight="bold" fill="#8a5a00">model</tspan><tspan font-family="Helvetica Neue, Helvetica, Arial, sans-serif" fill="#5b6672"> (now fitted)</tspan></text>
+<line x1="356.0" y1="822" x2="356.0" y2="849" stroke="#334155" stroke-width="2" marker-end="url(#ah)"/>
+<text x="370.0" y="841" font-size="13.5" text-anchor="start" xml:space="preserve"><tspan font-family="Menlo, Consolas, 'DejaVu Sans Mono', 'Courier New', monospace" font-weight="bold" fill="#8a5a00">model</tspan></text>
+<circle cx="118" cy="228" r="3.5" fill="#d4a017"/>
+<path d="M118,228 H82 V412 H117" fill="none" stroke="#d4a017" stroke-width="2.4" marker-end="url(#ahgold)"/>
+<text x="75" y="320.0" font-size="13" text-anchor="middle" transform="rotate(-90 75 320.0)"><tspan font-family="Menlo, Consolas, 'DejaVu Sans Mono', 'Courier New', monospace" font-weight="bold" fill="#8a5a00">y</tspan><tspan font-family="Helvetica Neue, Helvetica, Arial, sans-serif" fill="#8a5a00"> skips encoding</tspan></text>
+<circle cx="118" cy="440" r="3.5" fill="#0f766e"/>
+<path d="M118,440 H82 V776.0 H117" fill="none" stroke="#0f766e" stroke-width="2.4" marker-end="url(#ahteal)"/>
+<text x="75" y="608.0" font-size="13" text-anchor="middle" transform="rotate(-90 75 608.0)"><tspan font-family="Menlo, Consolas, 'DejaVu Sans Mono', 'Courier New', monospace" font-weight="bold" fill="#0f766e">X_test, y_test</tspan><tspan font-family="Helvetica Neue, Helvetica, Arial, sans-serif" fill="#0f766e"> held back until the end</tspan></text>
+<rect x="636" y="82" width="346" height="114" rx="9" fill="#f8f9fa" stroke="#9aa5b1" stroke-width="1.4" stroke-dasharray="6 4"/>
+<text x="652" y="106" font-size="15" text-anchor="start" xml:space="preserve"><tspan font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-weight="bold" fill="#1f2933">Side trip: simpler models</tspan><tspan font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-style="italic" font-weight="normal" fill="#5b6672"> (optional)</tspan></text>
+<text x="652" y="128" font-size="12.5" text-anchor="start" xml:space="preserve"><tspan font-family="Menlo, Consolas, 'DejaVu Sans Mono', 'Courier New', monospace" fill="#0f3d66">DecisionTreeRegressor(max_depth=3)</tspan><tspan font-family="Helvetica Neue, Helvetica, Arial, sans-serif" fill="#5b6672">: one tree</tspan></text>
+<text x="652" y="146" font-size="12.5" text-anchor="start" xml:space="preserve"><tspan font-family="Menlo, Consolas, 'DejaVu Sans Mono', 'Courier New', monospace" fill="#0f3d66">RandomForestRegressor(n_estimators=300)</tspan><tspan font-family="Helvetica Neue, Helvetica, Arial, sans-serif" fill="#5b6672">:</tspan></text>
+<text x="652" y="164" font-size="12.5" text-anchor="start" xml:space="preserve"><tspan font-family="Helvetica Neue, Helvetica, Arial, sans-serif" fill="#5b6672">many trees built separately, then averaged</tspan></text>
+<text x="652" y="182" font-size="12.5" text-anchor="start" xml:space="preserve"><tspan font-family="Helvetica Neue, Helvetica, Arial, sans-serif" fill="#5b6672">Same rows. Compare their test scores with XGBoost's.</tspan></text>
+<line x1="594" y1="190" x2="636" y2="190" stroke="#9aa5b1" stroke-width="2" stroke-dasharray="2 4" stroke-linecap="round"/>
+<circle cx="636" cy="190" r="3.5" fill="#9aa5b1"/>
+<rect x="636" y="214" width="346" height="661" rx="12" fill="#f4f7fb" stroke="#c3cfdd" stroke-width="1.4"/>
+<text x="654" y="244" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="17" fill="#1f2933" font-weight="bold" text-anchor="start" >What .fit() does inside XGBoost</text>
+<text x="654" y="264" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="12.5" fill="#5b6672" font-weight="normal" text-anchor="start" >It adds small trees one at a time. Each new</text>
+<text x="654" y="280" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="12.5" fill="#5b6672" font-weight="normal" text-anchor="start" >tree corrects the errors that are left.</text>
+<line x1="594" y1="656.0" x2="636" y2="656.0" stroke="#c3cfdd" stroke-width="2" stroke-dasharray="2 4" stroke-linecap="round"/>
+<circle cx="636" cy="656.0" r="3.5" fill="#c3cfdd"/>
+<rect x="668" y="292" width="150" height="70" rx="7" fill="#ffffff" stroke="#c3cfdd" stroke-width="1.2"/>
+<rect x="672" y="296" width="142" height="62" fill="none" stroke="#d6dde6" stroke-width="1"/>
+<line x1="675" y1="327.1" x2="811" y2="327.1" stroke="#334155" stroke-width="2.2"/>
+<circle cx="685.4" cy="306.8" r="3.6" fill="#0072B2" stroke="#fff" stroke-width="1"/>
+<circle cx="699.5" cy="312.6" r="3.6" fill="#0072B2" stroke="#fff" stroke-width="1"/>
+<circle cx="712.3" cy="322.2" r="3.6" fill="#0072B2" stroke="#fff" stroke-width="1"/>
+<circle cx="726.4" cy="319.3" r="3.6" fill="#0072B2" stroke="#fff" stroke-width="1"/>
+<circle cx="740.4" cy="329.9" r="3.6" fill="#0072B2" stroke="#fff" stroke-width="1"/>
+<circle cx="754.5" cy="333.2" r="3.6" fill="#0072B2" stroke="#fff" stroke-width="1"/>
+<circle cx="768.6" cy="336.6" r="3.6" fill="#0072B2" stroke="#fff" stroke-width="1"/>
+<circle cx="784.0" cy="340.9" r="3.6" fill="#0072B2" stroke="#fff" stroke-width="1"/>
+<circle cx="799.3" cy="341.9" r="3.6" fill="#0072B2" stroke="#fff" stroke-width="1"/>
+<text x="832" y="310" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="15" fill="#1f2933" font-weight="bold" text-anchor="start" >Start</text>
+<text x="832" y="328.0" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="13" fill="#1f2933" font-weight="normal" text-anchor="start" >Predict the average</text>
+<text x="832" y="344.5" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="13" fill="#1f2933" font-weight="normal" text-anchor="start" >for every row</text>
+<line x1="743.0" y1="362" x2="743.0" y2="381" stroke="#334155" stroke-width="2" marker-end="url(#ah)"/>
+<rect x="668" y="382" width="150" height="70" rx="7" fill="#ffffff" stroke="#c3cfdd" stroke-width="1.2"/>
+<rect x="672" y="386" width="142" height="62" fill="none" stroke="#d6dde6" stroke-width="1"/>
+<line x1="685.4" y1="417.1" x2="685.4" y2="396.8" stroke="#E69F00" stroke-width="2.4"/>
+<line x1="699.5" y1="417.1" x2="699.5" y2="402.6" stroke="#E69F00" stroke-width="2.4"/>
+<line x1="712.3" y1="417.1" x2="712.3" y2="412.2" stroke="#E69F00" stroke-width="2.4"/>
+<line x1="726.4" y1="417.1" x2="726.4" y2="409.3" stroke="#E69F00" stroke-width="2.4"/>
+<line x1="740.4" y1="417.1" x2="740.4" y2="419.9" stroke="#E69F00" stroke-width="2.4"/>
+<line x1="754.5" y1="417.1" x2="754.5" y2="423.2" stroke="#E69F00" stroke-width="2.4"/>
+<line x1="768.6" y1="417.1" x2="768.6" y2="426.6" stroke="#E69F00" stroke-width="2.4"/>
+<line x1="784.0" y1="417.1" x2="784.0" y2="430.9" stroke="#E69F00" stroke-width="2.4"/>
+<line x1="799.3" y1="417.1" x2="799.3" y2="431.9" stroke="#E69F00" stroke-width="2.4"/>
+<line x1="675" y1="417.1" x2="811" y2="417.1" stroke="#334155" stroke-width="2.2"/>
+<circle cx="685.4" cy="396.8" r="3.6" fill="#0072B2" stroke="#fff" stroke-width="1"/>
+<circle cx="699.5" cy="402.6" r="3.6" fill="#0072B2" stroke="#fff" stroke-width="1"/>
+<circle cx="712.3" cy="412.2" r="3.6" fill="#0072B2" stroke="#fff" stroke-width="1"/>
+<circle cx="726.4" cy="409.3" r="3.6" fill="#0072B2" stroke="#fff" stroke-width="1"/>
+<circle cx="740.4" cy="419.9" r="3.6" fill="#0072B2" stroke="#fff" stroke-width="1"/>
+<circle cx="754.5" cy="423.2" r="3.6" fill="#0072B2" stroke="#fff" stroke-width="1"/>
+<circle cx="768.6" cy="426.6" r="3.6" fill="#0072B2" stroke="#fff" stroke-width="1"/>
+<circle cx="784.0" cy="430.9" r="3.6" fill="#0072B2" stroke="#fff" stroke-width="1"/>
+<circle cx="799.3" cy="431.9" r="3.6" fill="#0072B2" stroke="#fff" stroke-width="1"/>
+<text x="832" y="400" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="15" fill="#1f2933" font-weight="bold" text-anchor="start" >Errors</text>
+<text x="832" y="418.0" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="13" fill="#1f2933" font-weight="normal" text-anchor="start" >actual − predicted,</text>
+<text x="832" y="434.5" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="13" fill="#1f2933" font-weight="normal" text-anchor="start" >for each row</text>
+<line x1="743.0" y1="452" x2="743.0" y2="471" stroke="#334155" stroke-width="2" marker-end="url(#ah)"/>
+<rect x="668" y="472" width="150" height="70" rx="7" fill="#ffffff" stroke="#c3cfdd" stroke-width="1.2"/>
+<rect x="672" y="476" width="142" height="62" fill="none" stroke="#d6dde6" stroke-width="1"/>
+<line x1="675" y1="507.0" x2="811" y2="507.0" stroke="#8a94a0" stroke-width="1.2" stroke-dasharray="3 3"/>
+<line x1="733.4" y1="476" x2="733.4" y2="538" stroke="#334155" stroke-width="1.4"/>
+<rect x="681.8" y="483.2" width="7.2" height="7.2" fill="#E69F00" stroke="#fff" stroke-width="1"/>
+<rect x="695.9" y="488.9" width="7.2" height="7.2" fill="#E69F00" stroke="#fff" stroke-width="1"/>
+<rect x="708.6999999999999" y="498.5" width="7.2" height="7.2" fill="#E69F00" stroke="#fff" stroke-width="1"/>
+<rect x="722.8" y="495.7" width="7.2" height="7.2" fill="#E69F00" stroke="#fff" stroke-width="1"/>
+<rect x="736.8" y="506.2" width="7.2" height="7.2" fill="#E69F00" stroke="#fff" stroke-width="1"/>
+<rect x="750.9" y="509.6" width="7.2" height="7.2" fill="#E69F00" stroke="#fff" stroke-width="1"/>
+<rect x="765.0" y="512.9" width="7.2" height="7.2" fill="#E69F00" stroke="#fff" stroke-width="1"/>
+<rect x="780.4" y="517.3" width="7.2" height="7.2" fill="#E69F00" stroke="#fff" stroke-width="1"/>
+<rect x="795.6999999999999" y="518.1999999999999" width="7.2" height="7.2" fill="#E69F00" stroke="#fff" stroke-width="1"/>
+<path d="M675,495.2 H733.4 V516.5 H811" fill="none" stroke="#002855" stroke-width="2.4"/>
+<text x="832" y="490" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="15" fill="#1f2933" font-weight="bold" text-anchor="start" >Small tree</text>
+<text x="832" y="508.0" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="13" fill="#1f2933" font-weight="normal" text-anchor="start" >Fit a tree that</text>
+<text x="832" y="524.5" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="13" fill="#1f2933" font-weight="normal" text-anchor="start" >predicts the errors</text>
+<line x1="743.0" y1="542" x2="743.0" y2="561" stroke="#334155" stroke-width="2" marker-end="url(#ah)"/>
+<rect x="668" y="562" width="150" height="70" rx="7" fill="#ffffff" stroke="#c3cfdd" stroke-width="1.2"/>
+<rect x="672" y="566" width="142" height="62" fill="none" stroke="#d6dde6" stroke-width="1"/>
+<line x1="675" y1="597.1" x2="811" y2="597.1" stroke="#8a94a0" stroke-width="1.2" stroke-dasharray="3 3"/>
+<path d="M675,591.1 H733.4 V601.8 H811" fill="none" stroke="#334155" stroke-width="2.2"/>
+<circle cx="685.4" cy="576.8" r="3.6" fill="#0072B2" stroke="#fff" stroke-width="1"/>
+<circle cx="699.5" cy="582.6" r="3.6" fill="#0072B2" stroke="#fff" stroke-width="1"/>
+<circle cx="712.3" cy="592.2" r="3.6" fill="#0072B2" stroke="#fff" stroke-width="1"/>
+<circle cx="726.4" cy="589.3" r="3.6" fill="#0072B2" stroke="#fff" stroke-width="1"/>
+<circle cx="740.4" cy="599.9" r="3.6" fill="#0072B2" stroke="#fff" stroke-width="1"/>
+<circle cx="754.5" cy="603.2" r="3.6" fill="#0072B2" stroke="#fff" stroke-width="1"/>
+<circle cx="768.6" cy="606.6" r="3.6" fill="#0072B2" stroke="#fff" stroke-width="1"/>
+<circle cx="784.0" cy="610.9" r="3.6" fill="#0072B2" stroke="#fff" stroke-width="1"/>
+<circle cx="799.3" cy="611.9" r="3.6" fill="#0072B2" stroke="#fff" stroke-width="1"/>
+<text x="832" y="580" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="15" fill="#1f2933" font-weight="bold" text-anchor="start" >Add a fraction</text>
+<text x="832" y="598.0" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="13" fill="#1f2933" font-weight="normal" text-anchor="start" >Nudge each prediction:</text>
+<text x="832" y="614.5" font-size="12.5" text-anchor="start" xml:space="preserve"><tspan font-family="Menlo, Consolas, 'DejaVu Sans Mono', 'Courier New', monospace" fill="#0f3d66">learning_rate</tspan><tspan font-family="Helvetica Neue, Helvetica, Arial, sans-serif" fill="#5b6672"> × tree</tspan></text>
+<line x1="743.0" y1="632" x2="743.0" y2="657" stroke="#334155" stroke-width="2" marker-end="url(#ah)"/>
+<rect x="668" y="658" width="268" height="30" rx="15" fill="#ffffff" stroke="#334155" stroke-width="1.6"/>
+<text x="802" y="678" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="13.5" fill="#1f2933" font-weight="bold" text-anchor="middle" >More trees to add?</text>
+<path d="M668,673 H652 V417.0 H667" fill="none" stroke="#334155" stroke-width="2" marker-end="url(#ah)"/>
+<text x="646" y="475.0" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="12.5" fill="#1f2933" font-weight="bold" text-anchor="middle" transform="rotate(-90 646 475.0)">yes: next tree</text>
+<line x1="743.0" y1="688" x2="743.0" y2="713" stroke="#334155" stroke-width="2" marker-end="url(#ah)"/>
+<text x="751.0" y="704" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="12.5" fill="#1f2933" font-weight="bold" text-anchor="start" >no: stop</text>
+<rect x="668" y="714" width="150" height="70" rx="7" fill="#ffffff" stroke="#002855" stroke-width="1.6"/>
+<rect x="672" y="718" width="142" height="62" fill="none" stroke="#d6dde6" stroke-width="1"/>
+<path d="M675,731.7 H705.9 V742.8 H733.4 V753.8 H761.6 V760.5 H791.6 V763.9 H811" fill="none" stroke="#334155" stroke-width="2.2"/>
+<circle cx="685.4" cy="728.8" r="3.6" fill="#0072B2" stroke="#fff" stroke-width="1"/>
+<circle cx="699.5" cy="734.6" r="3.6" fill="#0072B2" stroke="#fff" stroke-width="1"/>
+<circle cx="712.3" cy="744.2" r="3.6" fill="#0072B2" stroke="#fff" stroke-width="1"/>
+<circle cx="726.4" cy="741.3" r="3.6" fill="#0072B2" stroke="#fff" stroke-width="1"/>
+<circle cx="740.4" cy="751.9" r="3.6" fill="#0072B2" stroke="#fff" stroke-width="1"/>
+<circle cx="754.5" cy="755.2" r="3.6" fill="#0072B2" stroke="#fff" stroke-width="1"/>
+<circle cx="768.6" cy="758.6" r="3.6" fill="#0072B2" stroke="#fff" stroke-width="1"/>
+<circle cx="784.0" cy="762.9" r="3.6" fill="#0072B2" stroke="#fff" stroke-width="1"/>
+<circle cx="799.3" cy="763.9" r="3.6" fill="#0072B2" stroke="#fff" stroke-width="1"/>
+<text x="832" y="732" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="15" fill="#1f2933" font-weight="bold" text-anchor="start" >Done</text>
+<text x="832" y="750.0" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="13" fill="#1f2933" font-weight="normal" text-anchor="start" >Prediction = start +</text>
+<text x="832" y="766.5" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="13" fill="#1f2933" font-weight="normal" text-anchor="start" >all of the small</text>
+<text x="832" y="783.0" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="13" fill="#1f2933" font-weight="normal" text-anchor="start" >corrections added up</text>
+<text x="654" y="808" font-size="12.5" text-anchor="start" xml:space="preserve"><tspan font-family="Helvetica Neue, Helvetica, Arial, sans-serif" fill="#5b6672">Stops after </tspan><tspan font-family="Menlo, Consolas, 'DejaVu Sans Mono', 'Courier New', monospace" fill="#0f3d66">n_estimators</tspan><tspan font-family="Helvetica Neue, Helvetica, Arial, sans-serif" fill="#5b6672"> trees, or sooner when</tspan></text>
+<text x="654" y="825" font-size="12.5" text-anchor="start" xml:space="preserve"><tspan font-family="Helvetica Neue, Helvetica, Arial, sans-serif" fill="#5b6672">the validation rows stop improving.</tspan></text>
+<text x="654" y="842" font-size="12.5" text-anchor="start" xml:space="preserve"><tspan font-family="Helvetica Neue, Helvetica, Arial, sans-serif" fill="#5b6672">A smaller </tspan><tspan font-family="Menlo, Consolas, 'DejaVu Sans Mono', 'Courier New', monospace" fill="#0f3d66">learning_rate</tspan><tspan font-family="Helvetica Neue, Helvetica, Arial, sans-serif" fill="#5b6672">: smaller steps, more trees.</tspan></text>
+<text x="654" y="859" font-size="12.5" text-anchor="start" xml:space="preserve"><tspan font-family="Menlo, Consolas, 'DejaVu Sans Mono', 'Courier New', monospace" fill="#0f3d66">max_depth</tspan><tspan font-family="Helvetica Neue, Helvetica, Arial, sans-serif" fill="#5b6672"> sets the size of each tree.</tspan></text>
+<metadata><c2pa:manifest>AAAWgmp1bWIAAAAeanVtZGMycGEAEQAQgAAAqgA4m3EDYzJwYQAAABZcanVtYgAAAEdqdW1kYzJtYQARABCAAACqADibcQN1cm46YzJwYToyYmMwYmQ5ZS1jZmUxLTRmMDYtOWJlMi01NmIxZTE2YTIyZmYAAAADl2p1bWIAAAApanVtZGMyYXMAEQAQgAAAqgA4m3EDYzJwYS5hc3NlcnRpb25zAAAAALxqdW1iAAAARGp1bWRjYm9yABEAEIAAAKoAOJtxE2MycGEuaW5ncmVkaWVudC52MwAAAAAYYzJzaE8FzY3ggTKoGtdbbDLbaGIAAABwY2JvcqNpZGM6Zm9ybWF0bWltYWdlL3N2Zyt4bWxqaW5zdGFuY2VJRHgseG1wOmlpZDoyMWIxMTFkNS0wYmE3LTRlY2MtYWQ3Mi0xMDYwZmQ0YjIwZTVscmVsYXRpb25zaGlwaHBhcmVudE9mAAAB4mp1bWIAAABBanVtZGNib3IAEQAQgAAAqgA4m3ETYzJwYS5hY3Rpb25zLnYyAAAAABhjMnNoYeNvj3THZhGTwwUpC6ujewAAAZljYm9yomdhY3Rpb25zgqJmYWN0aW9ua2MycGEub3BlbmVkanBhcmFtZXRlcnOha2luZ3JlZGllbnRzgaJjdXJseC1zZWxmI2p1bWJmPWMycGEuYXNzZXJ0aW9ucy9jMnBhLmluZ3JlZGllbnQudjNkaGFzaFggZ/nE21frH1wGieVdSsPxsgPxltcJRA8F2xGoHgv8C2CkZmFjdGlvbngdY29tLmFudGhyb3BpYy5jbGF1ZGUucHJvdmlkZWRqcGFyYW1ldGVyc6F4H2NvbS5hbnRocm9waWMub3JpZ2luLWNvbmZpZGVuY2VndW5rbm93bmtkZXNjcmlwdGlvbnhmQ2xhdWRlIHByb3ZpZGVkIHRoaXMgZmlsZSBhdCB0aGUgcmVxdWVzdCBvZiBhIHVzZXIgYW5kIG1heSBoYXZlIGNyZWF0ZWQgb3IgbW9kaWZpZWQgdGhlIGZpbGUgY29udGVudHMubXNvZnR3YXJlQWdlbnShZG5hbWVmQ2xhdWRlcmFsbEFjdGlvbnNJbmNsdWRlZPUAAADIanVtYgAAAEBqdW1kY2JvcgARABCAAACqADibcRNjMnBhLmhhc2guZGF0YQAAAAAYYzJzaPVWfsQ49ZYZ6IU59G/FY1wAAACAY2JvcqVjYWxnZnNoYTI1NmNwYWRMAAAAAAAAAAAAAAAAZGhhc2hYIKPzhyHM+qIHK5Wm9k3DmJfdGrnnMW2WAWTxneIBoPuTZG5hbWVuanVtYmYgbWFuaWZlc3RqZXhjbHVzaW9uc4GiZXN0YXJ0GXPZZmxlbmd0aBkeBAAAAj5qdW1iAAAAJ2p1bWRjMmNsABEAEIAAAKoAOJtxA2MycGEuY2xhaW0udjIAAAACD2Nib3KlY2FsZ2ZzaGEyNTZpc2lnbmF0dXJleE1zZWxmI2p1bWJmPS9jMnBhL3VybjpjMnBhOjJiYzBiZDllLWNmZTEtNGYwNi05YmUyLTU2YjFlMTZhMjJmZi9jMnBhLnNpZ25hdHVyZWppbnN0YW5jZUlEeCx4bXA6aWlkOjQ3OTJhZjg0LTJkZGUtNGQ0Zi1hNWY2LTNlNWZiZTAyOWJjNnJjcmVhdGVkX2Fzc2VydGlvbnODomN1cmx4LXNlbGYjanVtYmY9YzJwYS5hc3NlcnRpb25zL2MycGEuaW5ncmVkaWVudC52M2RoYXNoWCBn+cTbV+sfXAaJ5V1Kw/GyA/GW1wlEDwXbEageC/wLYKJjdXJseCpzZWxmI2p1bWJmPWMycGEuYXNzZXJ0aW9ucy9jMnBhLmFjdGlvbnMudjJkaGFzaFggsJuIgDhXKRhBKe2QWQ0XHx7tusjJ60P3+C0hH87/zDuiY3VybHgpc2VsZiNqdW1iZj1jMnBhLmFzc2VydGlvbnMvYzJwYS5oYXNoLmRhdGFkaGFzaFggWzdjONdcuiGIhOWQlZ3Ve0ZFGDVqxYVBNAWlaDYwzaR0Y2xhaW1fZ2VuZXJhdG9yX2luZm+jZG5hbWVvQW50aHJvcGljIEZpbGVzZ3ZlcnNpb25lMS4wLjBrc3BlY1ZlcnNpb25lMi40LjAAABA4anVtYgAAAChqdW1kYzJjcwARABCAAACqADibcQNjMnBhLnNpZ25hdHVyZQAAABAIY2JvctKEWQISogEmGCFZAgowggIGMIIBjaADAgECAhRA5aAK7sI50L64g/oGQgU9Z1UTADAKBggqhkjOPQQDAzBJMRcwFQYDVQQKEw5BbnRocm9waWMsIFBCQzEuMCwGA1UEAxMlQW50aHJvcGljIENvbnRlbnQgQ3JlZGVudGlhbHMgUm9vdCBDQTAeFw0yNjA4MDcxODQzNTZaFw0yODA4MDYxOTQzNTZaMEQxFzAVBgNVBAoTDkFudGhyb3BpYywgUEJDMSkwJwYDVQQDEyBBbnRocm9waWMgQ2xhdWRlIENvbnRlbnQgU2lnbmluZzBZMBMGByqGSM49AgEGCCqGSM49AwEHA0IABJh6CmvLUBgFFNU0vUKlOVtE6djd17L5SuwX0LemFisBM3dkd/3cyjxFA3Qo5S46fX0/ihY0VZ7mfb9KF703t5OjWDBWMA4GA1UdDwEB/wQEAwIHgDAVBgNVHSUEDjAMBgorBgEEAYPoXgIBMAwGA1UdEwEB/wQCMAAwHwYDVR0jBBgwFoAUzlHiBIFOZFsj+OPEz5o+nMHXXMIwCgYIKoZIzj0EAwMDZwAwZAIwMXMdFJ4BetLLVY7ORuE9noqbbAZOZn/aArXyTwFAZfKrPzxF2vPoJNf1+UCdg1XGAjBwX1zd9WGqYkqmL5SFqw1QySjr1zJfpJM9+1rdDwSPLMOPOjKuiXjoU/pUUeG9RwmhY3BhZFkNngAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPZYQKes2ciJrl/MW9w6C8dvvkcKj6lRLkPKWTIKWaEPTbai/YbP0nBDEPZZd5+hkJFlYbNO0hAJ3hH5WoTJangt+gY=</c2pa:manifest></metadata></svg>

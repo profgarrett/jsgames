@@ -9,8 +9,8 @@
 
 
 **Problems**:
-- [Morgantown Docks3](morgantowndocks3)
-- [Northwind Comprehensive Review](northwind) 
+- [Problem DB](docks3_db.db)
+- [Problem SQL](docks3_problem.sql)
 
 ## Aggregation Functions
 

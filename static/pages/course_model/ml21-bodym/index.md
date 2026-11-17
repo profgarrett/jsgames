@@ -20,7 +20,7 @@ You have seen part of this data before: the height, weight, and measurement tabl
 - Explain each line of code you prompted an AI assistant to write
 
 **Links**:
-- [Data: bodym_data.zip](bodym_data.zip) (download before Session 1)
+- [Data: bodym_data.zip](https://www.dropbox.com/scl/fo/1km6ljn7d08uyqp4ixmog/AP0Ysf9FpehIrn8L-P0bauI?rlkey=gwpzdh4yln6lsv3dlwba7avcq&dl=0) (download before Session 1)
 - [Template](template.ipynb)
 - [BodyM on the AWS Registry of Open Data](https://registry.opendata.aws/bodym/)
 - [The research paper behind the dataset](https://arxiv.org/abs/2210.05667) (Ruiz et al., 2022)

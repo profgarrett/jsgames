@@ -1,5 +1,3 @@
-<script src="/course_dv/toc.js"></script>
-
 # Python Overview
 
 This module introduces you to Python programming. You will know how to write some basic code, as well as use Copilot.
@@ -52,11 +50,9 @@ My notes on these topics are available below. They are more comprehensive than w
 
 **Instructor Notes**:
 
-- [Setup your computer](/course_dv/py00-setup/)
-- [Basic types and syntax](https://profgarrett.github.io/course_model/py01-syntax/)
-- [Data structures](https://profgarrett.github.io/course_model/py02-data-structures/)
-- [Pandas Tables 1](https://profgarrett.github.io/course_model/py03-pandas-load-filter/)
-- [Pandas Tables 2](https://profgarrett.github.io/course_model/py04-pandas-mutate/)
+- [Setup your computer](/pages/course_model/py00-setup/index)
+- [Basic types and syntax](/pages/course_model/py01-syntax/index)
+- [Data structures](/pages/course_model/py02-data-structures/index)
 
 ## Expectations
 
