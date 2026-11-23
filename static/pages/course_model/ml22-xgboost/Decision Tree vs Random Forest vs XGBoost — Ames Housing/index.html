@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Decision Tree vs Random Forest vs XGBoost — Ames Housing</title>
+<style>
+:root{
+  color-scheme: light;
+  --bg:#f6f5f2; --surface:#fcfcfb; --surface-2:#f0efeb; --border:#e2e0da;
+  --text:#0b0b0b; --text-2:#52514e; --muted:#8a8984; --grid:#ebe9e4;
+  --dt:#2a78d6; --rf:#eb6834; --xgb:#1baf7a;
+  --accent:#2a78d6; --bad:#c43c3b; --good:#0f7a0f;
+  --s100:#cde2fb;--s200:#9ec5f4;--s300:#6da7ec;--s400:#3987e5;--s500:#256abf;--s600:#184f95;--s700:#0d366b;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    color-scheme: dark;
+    --bg:#121211; --surface:#1a1a19; --surface-2:#232321; --border:#33332f;
+    --text:#f0efec; --text-2:#c3c2b7; --muted:#8f8e86; --grid:#2c2c29;
+    --dt:#3987e5; --rf:#d95926; --xgb:#199e70; --accent:#3987e5; --bad:#e66767; --good:#3fbf3f;
+  }
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,sans-serif}
+.wrap{max-width:1180px;margin:0 auto;padding:0 20px 80px}
+header{padding:44px 0 18px}
+h1{font-size:30px;line-height:1.2;margin:0 0 10px;letter-spacing:-.01em}
+h2{font-size:22px;margin:0 0 6px;letter-spacing:-.01em}
+h3{font-size:16px;margin:18px 0 6px}
+p{margin:6px 0 10px;color:var(--text-2)}
+.lead{font-size:17px;max-width:820px}
+nav.toc{position:sticky;top:0;z-index:5;background:color-mix(in srgb,var(--bg) 92%,transparent);backdrop-filter:blur(6px);border-bottom:1px solid var(--border);margin:0 -20px;padding:8px 20px;display:flex;gap:6px;flex-wrap:wrap}
+nav.toc a{font-size:13px;color:var(--text-2);text-decoration:none;padding:4px 10px;border-radius:99px;border:1px solid var(--border);background:var(--surface)}
+nav.toc a:hover{color:var(--text);border-color:var(--muted)}
+section{padding:34px 0 8px;scroll-margin-top:50px}
+.step{display:inline-block;font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--accent);margin-bottom:4px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px 18px 14px;margin:14px 0}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+@media (max-width:860px){.grid2,.grid3,.grid4{grid-template-columns:1fr}}
+.grid2>.card,.grid3>.card{margin:0}
+.ctitle{font-weight:600;font-size:14px;margin:0 0 2px}
+.csub{font-size:13px;color:var(--muted);margin:0 0 10px}
+.chart{position:relative;height:300px}
+.chart.tall{height:420px}.chart.xtall{height:640px}.chart.short{height:240px}
+.why{border-left:3px solid var(--accent);background:var(--surface-2);padding:10px 14px;border-radius:0 8px 8px 0;margin:12px 0;color:var(--text-2);font-size:14px}
+.why b{color:var(--text)}
+.key{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--text-2);margin-right:14px}
+.sw{width:10px;height:10px;border-radius:3px;display:inline-block}
+.tile{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px}
+.tile .lbl{font-size:13px;color:var(--text-2);display:flex;align-items:center;gap:6px}
+.tile .val{font-size:28px;font-weight:650;letter-spacing:-.02em;margin-top:2px}
+.tile .sub{font-size:12px;color:var(--muted)}
+table{border-collapse:collapse;width:100%;font-size:13.5px}
+th,td{padding:7px 9px;border-bottom:1px solid var(--border);text-align:right;white-space:nowrap}
+th{font-weight:600;color:var(--text-2);font-size:12.5px}
+th:first-child,td:first-child{text-align:left}
+td.win{font-weight:700}
+.tablewrap{overflow-x:auto}
+.seg{display:inline-flex;border:1px solid var(--border);border-radius:8px;overflow:hidden;background:var(--surface)}
+.seg button{border:0;background:transparent;color:var(--text-2);padding:6px 12px;font:inherit;font-size:13px;cursor:pointer;border-right:1px solid var(--border)}
+.seg button:last-child{border-right:0}
+.seg button.on{background:var(--text);color:var(--surface)}
+.row{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin:6px 0 12px}
+.ctl{display:flex;flex-direction:column;gap:2px;min-width:180px;flex:1}
+.ctl label{font-size:13px;font-weight:600;display:flex;justify-content:space-between}
+.ctl label span{font-weight:700;color:var(--accent);font-variant-numeric:tabular-nums}
+.ctl small{font-size:12px;color:var(--muted);line-height:1.35}
+input[type=range]{width:100%;accent-color:var(--accent)}
+.tabs{display:flex;gap:8px;margin:10px 0}
+.tabs button{border:1px solid var(--border);background:var(--surface);color:var(--text);padding:9px 16px;border-radius:10px;font:inherit;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:8px}
+.tabs button.on{border-color:var(--text);box-shadow:inset 0 0 0 1px var(--text)}
+.diag{padding:12px 14px;border-radius:10px;font-size:14px;margin:10px 0;border:1px solid var(--border);background:var(--surface-2)}
+.diag b{font-size:15px}
+.heat{display:grid;gap:2px;font-size:12px}
+.heat div{padding:7px 2px;text-align:center;border-radius:4px;font-variant-numeric:tabular-nums}
+.heat .cell{cursor:pointer;outline-offset:-2px}
+.heat .cell:hover{outline:2px solid var(--text)}
+.heat .cell.sel{outline:2px solid var(--text);font-weight:700}
+.heat .hd{color:var(--muted);font-weight:600}
+.ramp{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);margin-top:8px}
+.ramp i{display:inline-block;width:120px;height:8px;border-radius:4px;background:linear-gradient(90deg,var(--s100),var(--s400),var(--s700))}
+tr.pick{cursor:pointer}tr.pick:hover td{background:var(--surface-2)}tr.pick.on td{background:var(--surface-2);font-weight:600}
+.reason{margin:6px 0;padding-left:18px}.reason li{margin:4px 0;color:var(--text-2);font-size:14px}
+.kv{display:grid;grid-template-columns:repeat(4,1fr);gap:6px 14px;font-size:13px;margin:8px 0}
+.kv div span{color:var(--muted);display:block;font-size:11.5px}
+.pill{display:inline-block;font-size:11.5px;padding:1px 8px;border-radius:99px;border:1px solid var(--border);color:var(--text-2)}
+.bar3{display:flex;height:34px;border-radius:8px;overflow:hidden;gap:2px;margin:8px 0}
+.bar3 div{display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;color:#fff}
+code{background:var(--surface-2);padding:1px 5px;border-radius:4px;font-size:13px}
+.formula{font-family:ui-monospace,Menlo,monospace;font-size:13px;background:var(--surface-2);padding:6px 10px;border-radius:6px;display:inline-block;margin:4px 0;color:var(--text)}
+#treesvg text{font-size:15px;fill:var(--text)}
+#treesvg .sub{fill:var(--muted);font-size:12.5px}
+.loading{padding:60px;text-align:center;color:var(--muted)}
+footer{color:var(--muted);font-size:12.5px;margin-top:40px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div class="step">Machine learning, explained</div>
+  <h1>Decision Tree vs Random Forest vs XGBoost<br>on the Ames, Iowa housing data</h1>
+  <p class="lead">We predict the sale price of 2,930 homes sold in Ames, Iowa (2006–2010) from 80 descriptive features, using three tree-based models of increasing sophistication. Each step below explains <b>what</b> we did and <b>why</b>, and every chart is live: change the settings and watch the models get better or worse.</p>
+  <div><span class="key"><i class="sw" style="background:var(--dt)"></i>Decision Tree</span><span class="key"><i class="sw" style="background:var(--rf)"></i>Random Forest</span><span class="key"><i class="sw" style="background:var(--xgb)"></i>XGBoost</span><span class="key">Colours are the same in every chart.</span></div>
+</header>
+<nav class="toc">
+  <a href="#results">Results</a><a href="#data">1 · Data</a><a href="#split">2 · Splits</a><a href="#metrics">3 · Metrics</a><a href="#intuition">4 · How they think</a><a href="#playground">5 · Playground</a><a href="#compare">6 · Head-to-head</a><a href="#fail">7 · Why models fail</a><a href="#takeaways">Takeaways</a>
+</nav>
+<div id="app"><div class="loading">Loading model results…</div></div>
+<footer>Data: Dean De Cock, “Ames, Iowa: Alternative to the Boston Housing Data” (Journal of Statistics Education, 2011). Models trained with scikit-learn and XGBoost; every number on this page comes from those runs (random seed 42).</footer>
+</div>
+<script src="chart.umd.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

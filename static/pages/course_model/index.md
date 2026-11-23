@@ -115,8 +115,6 @@ Each week covers Python and Machine Learning concepts.  Most modules have a deli
 
 ### Week 16 - November 30, 2026 
 
-- [ml12 - Future topics in AI/ML](ml12-future/index): Future topics in data science and machine learning
-
 Project week - No new material
 
 *Project*
